@@ -33,6 +33,7 @@ from run_mgt_surface_membrane_tangent import (
     _source_or_fallback_thickness,
     _thickness_policy,
     _triangulate,
+    _triangle_membrane_stiffness,
 )
 from run_mgt_surface_shell_bending_tangent import _triangle_shell_bending_stiffness
 from run_story_model_reanalysis import build_mgt_reanalysis_provenance
@@ -61,6 +62,7 @@ def _assemble_surface_shell_6dof(
     conn_idx: np.ndarray,
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
+    include_membrane: bool = False,
 ) -> tuple[Any, np.ndarray, dict[str, Any], list[list[int]]]:
     n_dof = int(node_xyz.shape[0]) * DOF_PER_NODE
     rows: list[int] = []
@@ -70,6 +72,7 @@ def _assemble_surface_shell_6dof(
     surface_indices = np.where(np.asarray(elem_type_code, dtype=np.int32) == 2)[0]
     surface_conns: list[list[int]] = []
     tri_count = 0
+    membrane_tri_count = 0
     skipped_degenerate = 0
     total_area = 0.0
     covered_material = 0
@@ -124,6 +127,22 @@ def _assemble_surface_shell_6dof(
                     rows.append(gi)
                     cols.append(gj)
                     vals.append(float(ke[a, b]))
+            if include_membrane:
+                membrane_result = _triangle_membrane_stiffness(
+                    points=points,
+                    e_n_per_m2=e_n_per_m2,
+                    poisson=poisson,
+                    thickness_m=thickness,
+                )
+                if membrane_result is not None:
+                    ke_mem, _mem_area = membrane_result
+                    trans_dofs = tuple(_node_dofs(node)[comp] for node in tri for comp in range(3))
+                    for a, gi in enumerate(trans_dofs):
+                        for b, gj in enumerate(trans_dofs):
+                            rows.append(gi)
+                            cols.append(gj)
+                            vals.append(float(ke_mem[a, b]))
+                    membrane_tri_count += 1
     stiffness = coo_matrix((vals, (rows, cols)), shape=(n_dof, n_dof)).tocsr()
     material_coverage_pct = 100.0 * float(covered_material) / max(float(surface_indices.size), 1.0)
     source_thickness_coverage_pct = 100.0 * float(covered_source_thickness) / max(float(surface_indices.size), 1.0)
@@ -132,6 +151,13 @@ def _assemble_surface_shell_6dof(
         "surface_quad_count": int(sum(1 for conn in surface_conns if len(conn) == 4)),
         "surface_tri_count": int(sum(1 for conn in surface_conns if len(conn) == 3)),
         "assembled_triangle_count": tri_count,
+        "assembled_membrane_triangle_count": int(membrane_tri_count),
+        "include_membrane": bool(include_membrane),
+        "shell_tangent_model": (
+            "mindlin_cst_bending_drilling_plus_cst_membrane"
+            if include_membrane
+            else "mindlin_cst_bending_drilling_only"
+        ),
         "skipped_degenerate_triangle_count": skipped_degenerate,
         "surface_node_count": len({node for conn in surface_conns for node in conn}),
         "surface_material_coverage_pct": material_coverage_pct,

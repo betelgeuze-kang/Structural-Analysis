@@ -1,6 +1,6 @@
 {
   "schema_version": "rh-signed-closure-packet-template.v1",
-  "generated_at": "2026-05-31T09:13:48.841035+00:00",
+  "generated_at": "2026-06-05T13:35:54.548409+00:00",
   "status": "template_only",
   "claim": "Not a signed closure packet; attach completed packet to RH closure_evidence_path.",
   "open_count": 0,

@@ -90,3 +90,50 @@ def test_wind_result_comparison_status_is_wind_ingest() -> None:
         "pass_model_derived_wind_ingest",
     }
     assert report["load_case_track"] == "wind"
+
+
+def test_wind_extract_angle_sweep_envelope_eight_directions() -> None:
+    sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
+    from extract_midas_wind_same_mesh_result import (  # noqa: E402
+        extract_midas_wind_same_mesh_result,
+    )
+
+    mgt = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
+    roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    payload = extract_midas_wind_same_mesh_result(mgt_path=mgt, roundtrip_json=roundtrip)
+    wd = payload["wind_directional"]
+    sweep = wd.get("angle_sweep") or []
+    assert len(sweep) == 8
+    angles = [float(row["angle_deg"]) for row in sweep]
+    assert angles == [0.0, 22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5]
+    zero_row = sweep[0]
+    ninety_row = sweep[4]
+    assert abs(float(zero_row["base_shear_theta_kN"]) - float(wd["base_shear_x_kN"])) < 1.0e-6
+    assert abs(float(ninety_row["base_shear_theta_kN"]) - float(wd["base_shear_y_kN"])) < 1.0e-6
+    peak = max(sweep, key=lambda r: abs(float(r["base_shear_theta_kN"])))
+    assert float(wd.get("envelope_max_base_shear_kN") or 0.0) == float(peak["base_shear_theta_kN"])
+    assert float(wd.get("governing_angle_deg") or -1.0) == float(peak["angle_deg"])
+    assert abs(float(wd.get("envelope_max_base_shear_kN") or 0.0)) >= max(
+        abs(float(wd["base_shear_x_kN"])),
+        abs(float(wd["base_shear_y_kN"])),
+    )
+
+
+def test_wind_extract_custom_angle_sweep() -> None:
+    sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
+    from extract_midas_wind_same_mesh_result import (  # noqa: E402
+        extract_midas_wind_same_mesh_result,
+    )
+
+    mgt = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt"
+    roundtrip = REPO_ROOT / "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    payload = extract_midas_wind_same_mesh_result(
+        mgt_path=mgt,
+        roundtrip_json=roundtrip,
+        angle_sweep_deg=(0.0, 30.0, 60.0, 90.0),
+    )
+    sweep = payload["wind_directional"]["angle_sweep"]
+    assert [float(r["angle_deg"]) for r in sweep] == [0.0, 30.0, 60.0, 90.0]
+    sweep_keys = list(sweep[0].keys())
+    for required in {"angle_deg", "base_shear_theta_kN", "drift_theta_pct", "cos_theta", "sin_theta"}:
+        assert required in sweep_keys

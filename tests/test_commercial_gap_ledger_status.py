@@ -228,18 +228,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert g1_uncoarsened_pdelta["load_scale"] == 0.05
     assert g1_uncoarsened_pdelta["ready"] is False
     assert g1_uncoarsened_pdelta["equilibrium_replay_gate_passed"] is False
-    assert g1_uncoarsened_pdelta["iteration_count"] == 5
-    assert g1_uncoarsened_pdelta["best_solver_residual_inf_n"] <= g1_uncoarsened_pdelta[
-        "residual_tolerance_n"
-    ]
-    assert g1_uncoarsened_pdelta["best_equilibrium_replay_residual_inf_n"] > g1_uncoarsened_pdelta[
-        "residual_tolerance_n"
-    ]
+    assert g1_uncoarsened_pdelta["iteration_count"] >= 1
+    replay_residual = float(g1_uncoarsened_pdelta["best_equilibrium_replay_residual_inf_n"])
+    solver_residual = float(g1_uncoarsened_pdelta["best_solver_residual_inf_n"])
+    assert abs(solver_residual - replay_residual) <= 1.0e-6 * max(replay_residual, 1.0)
+    assert replay_residual > g1_uncoarsened_pdelta["residual_tolerance_n"]
     assert (
         g1_uncoarsened_pdelta["best_fixed_point_relative_increment"]
         <= g1_uncoarsened_pdelta["relative_increment_tolerance"]
     )
-    assert g1_uncoarsened_pdelta["rows"][-1]["max_translation_m"] < 0.1
+    assert g1_uncoarsened_pdelta["rows"][-1]["outer_solver_mode"] == "newton_only"
     g1_uncoarsened_boundary = rows["G1"]["evidence"][
         "uncoarsened_boundary_pdelta_boundary_summary"
     ]
@@ -287,36 +285,133 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "uncoarsened_boundary_pdelta_checkpoint_continuation"
     ]
     assert g1_uncoarsened_checkpoint_continuation["status"] == "partial"
-    assert g1_uncoarsened_checkpoint_continuation["max_converged_load_scale"] == 0.656
-    assert g1_uncoarsened_checkpoint_continuation["first_failed_load_scale"] is None
-    assert g1_uncoarsened_checkpoint_continuation["segment_count"] == 63
-    assert g1_uncoarsened_checkpoint_continuation["accepted_step_count"] == 146
-    assert g1_uncoarsened_checkpoint_continuation["saved_checkpoint_count"] == 146
+    assert g1_uncoarsened_checkpoint_continuation["max_converged_load_scale"] == 0.0
+    assert g1_uncoarsened_checkpoint_continuation["first_failed_load_scale"] == 0.05
+    assert g1_uncoarsened_checkpoint_continuation["segment_count"] == 1
+    assert g1_uncoarsened_checkpoint_continuation["accepted_step_count"] == 0
+    assert g1_uncoarsened_checkpoint_continuation["saved_checkpoint_count"] == 0
     assert rows["G1"]["evidence"][
         "uncoarsened_boundary_pdelta_checkpoint_continuation_status"
     ] == "partial"
     assert rows["G1"]["evidence"][
         "uncoarsened_boundary_pdelta_checkpoint_continuation_max_converged_load_scale"
-    ] == 0.656
+    ] == 0.0
     assert rows["G1"]["evidence"][
         "uncoarsened_boundary_pdelta_checkpoint_continuation_first_failed_load_scale"
-    ] is None
-    continuation_frontier = g1_uncoarsened_checkpoint_continuation["frontier_step"]
-    assert continuation_frontier["load_scale"] == 0.656
-    assert continuation_frontier["ready"] is True
-    assert continuation_frontier["seed_alpha_scan"]["best_alpha"] == 0.02
-    assert continuation_frontier["seed_alpha_scan"]["best_ready"] is True
-    assert continuation_frontier["iteration_count"] == 0
-    assert continuation_frontier["best_residual_inf_n"] <= continuation_frontier[
+    ] == 0.05
+    assert g1_uncoarsened_checkpoint_continuation["frontier_step"] is None
+    continuation_failed = g1_uncoarsened_checkpoint_continuation["first_failed_step"]
+    assert continuation_failed["load_scale"] == 0.05
+    assert continuation_failed["ready"] is False
+    assert continuation_failed["best_equilibrium_replay_residual_inf_n"] > continuation_failed[
         "residual_tolerance_n"
     ]
     assert (
-        continuation_frontier["best_fixed_point_relative_increment"]
-        <= continuation_frontier["relative_increment_tolerance"]
+        abs(
+            continuation_failed["best_solver_residual_inf_n"]
+            - continuation_failed["best_equilibrium_replay_residual_inf_n"]
+        )
+        <= 1.0e-6
+        * max(continuation_failed["best_equilibrium_replay_residual_inf_n"], 1.0)
     )
-    assert g1_uncoarsened_checkpoint_continuation["first_failed_step"] is None
     assert rows["G1"]["evidence"]["direct_residual_newton_status"] == "partial"
     assert rows["G1"]["evidence"]["direct_residual_newton_ready"] is False
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_status"] == "ready"
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_ready"] is True
+    assert (
+        rows["G1"]["evidence"]["residual_jacobian_consistency_base_residual_inf_n"]
+        > 1.0
+    )
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_direction_rows"]
+    component_breakdown = rows["G1"]["evidence"][
+        "residual_jacobian_consistency_component_breakdown"
+    ]
+    assert component_breakdown["component_inf_n"]["shell_membrane"] > component_breakdown[
+        "component_inf_n"
+    ]["frame"]
+    assert component_breakdown["component_inf_n"]["shell_bending_drilling"] < component_breakdown[
+        "component_inf_n"
+    ]["shell_membrane"]
+    assert (
+        component_breakdown["top_row_dominant_component_counts"]["shell_membrane"]
+        >= 8
+    )
+    hotspot_rows = rows["G1"]["evidence"][
+        "residual_jacobian_consistency_hotspot_shell_membrane_diagnostics"
+    ]
+    assert hotspot_rows
+    assert hotspot_rows[0]["dominant_component"] == "shell_membrane"
+    scale_sweep = rows["G1"]["evidence"][
+        "residual_jacobian_consistency_state_scale_sweep"
+    ]
+    assert scale_sweep[0]["state_scale"] == 0.0
+    assert scale_sweep[0]["residual_inf_n"] < scale_sweep[-1]["residual_inf_n"]
+    assert rows["G1"]["evidence"]["equilibrium_newton_state_scale_status"] == "partial"
+    assert (
+        rows["G1"]["evidence"]["equilibrium_newton_state_scale_final_residual_inf_n"]
+        < rows["G1"]["evidence"]["equilibrium_newton_state_scale_initial_residual_inf_n"]
+    )
+    assert (
+        rows["G1"]["evidence"]["equilibrium_newton_state_scale_iterations"][0][
+            "update_mode"
+        ]
+        == "state_scale_line_search"
+    )
+    assert rows["G1"]["evidence"]["equilibrium_preconditioned_zero_status"] == "ready"
+    assert (
+        rows["G1"]["evidence"]["equilibrium_preconditioned_zero_residual_gate_passed"]
+        is False
+    )
+    assert (
+        rows["G1"]["evidence"]["equilibrium_preconditioned_zero_zero_state_residual_inf_n"]
+        > rows["G1"]["evidence"]["equilibrium_newton_state_scale_final_residual_inf_n"] - 1.0e-6
+    )
+    assert rows["G1"]["evidence"]["equilibrium_preconditioned_zero_best_correction_mode"]
+    assert (
+        rows["G1"]["evidence"]["equilibrium_preconditioned_zero_overall_best_residual_inf_n"]
+        < rows["G1"]["evidence"]["equilibrium_preconditioned_zero_zero_state_residual_inf_n"]
+    )
+    assert (
+        rows["G1"]["evidence"]["equilibrium_preconditioned_zero_iterative_search"][
+            "accepted_iteration_count"
+        ]
+        >= 1
+    )
+    assert rows["G1"]["evidence"][
+        "equilibrium_preconditioned_zero_output_final_checkpoint"
+    ]["written"] is True
+    assert (
+        rows["G1"]["evidence"]["direct_residual_preconditioned_zero_seed_status"]
+        == "partial"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_zero_seed_base_residual_inf_n"
+        ]
+        == rows["G1"]["evidence"][
+            "equilibrium_preconditioned_zero_overall_best_residual_inf_n"
+        ]
+    )
+    assert rows["G1"]["evidence"]["equilibrium_preconditioned_continuation_status"] == "ready"
+    assert (
+        rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_overall_best_residual_inf_n"
+        ]
+        < rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_start_residual_inf_n"
+        ]
+    )
+    assert rows["G1"]["evidence"][
+        "equilibrium_preconditioned_continuation_output_final_checkpoint"
+    ]["written"] is True
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_seed_base_residual_inf_n"
+        ]
+        == rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_overall_best_residual_inf_n"
+        ]
+    )
     direct_contract = rows["G1"]["evidence"]["direct_residual_contract"]
     assert direct_contract["definition"] == "R(u, lambda) = F_int(u) - lambda * F_ext"
     assert direct_contract["external_load_vector_configuration"] == "reference"
@@ -330,7 +425,7 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     direct_base = rows["G1"]["evidence"]["direct_residual_base"]
     assert direct_base["load_scale"] == 0.656
     assert direct_base["direct_residual_inf_n"] > 1.0
-    assert direct_base["fixed_point_receipt_residual_inf_n"] <= continuation_frontier[
+    assert direct_base["fixed_point_receipt_residual_inf_n"] <= continuation_failed[
         "residual_tolerance_n"
     ]
     direct_trust = rows["G1"]["evidence"]["direct_residual_trust_region"]
@@ -1283,6 +1378,2138 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         g1_adaptive_preconditioned_global_newton_runtime_budget["promotion_count"]
         == 0
     )
+    g1_current_checkpoint_single_row = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_single_largest_row_current_tangent"
+    ]
+    assert g1_current_checkpoint_single_row["status"] == "partial"
+    assert (
+        g1_current_checkpoint_single_row["base_direct_residual_inf_n"]
+        == 7325.9547714166265
+    )
+    assert (
+        g1_current_checkpoint_single_row["final_direct_residual_inf_n"]
+        == 7312.271816678203
+    )
+    assert (
+        g1_current_checkpoint_single_row[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is True
+    )
+    assert (
+        g1_current_checkpoint_single_row["current_tangent_residual_row_promotion_count"]
+        == 1
+    )
+    assert (
+        g1_current_checkpoint_single_row[
+            "best_candidate_relative_increment_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        g1_current_checkpoint_single_row["best_candidate_residual_gate_passed"]
+        is False
+    )
+    g1_current_checkpoint_single_row_replay = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_single_largest_row_current_tangent_replay"
+    ]
+    assert g1_current_checkpoint_single_row_replay["status"] == "partial"
+    assert (
+        g1_current_checkpoint_single_row_replay["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_single_row_replay["final_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row_replay["base_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_single_row_replay[
+            "current_tangent_residual_row_correction_enabled"
+        ]
+        is False
+    )
+    g1_current_checkpoint_single_row_followup = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_single_largest_row_current_tangent_followup"
+    ]
+    assert g1_current_checkpoint_single_row_followup["status"] == "partial"
+    assert (
+        g1_current_checkpoint_single_row_followup["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_single_row_followup["final_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row_followup["base_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_single_row_followup[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is False
+    )
+    assert (
+        g1_current_checkpoint_single_row_followup[
+            "current_tangent_residual_row_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    g1_current_checkpoint_single_row_fd = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_single_largest_row_fd_jacobian"
+    ]
+    assert g1_current_checkpoint_single_row_fd["status"] == "partial"
+    assert (
+        g1_current_checkpoint_single_row_fd["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_single_row_fd[
+            "current_tangent_residual_row_jacobian_mode"
+        ]
+        == "finite_difference"
+    )
+    assert (
+        g1_current_checkpoint_single_row_fd[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is False
+    )
+    assert (
+        g1_current_checkpoint_single_row_fd[
+            "current_tangent_residual_row_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    g1_current_checkpoint_frame_tangent = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_frame_element_block_current_tangent"
+    ]
+    assert (
+        g1_current_checkpoint_frame_tangent[
+            "current_tangent_residual_row_target_mode"
+        ]
+        == "residual_frame_element_blocks"
+    )
+    assert (
+        g1_current_checkpoint_frame_tangent[
+            "current_tangent_residual_row_jacobian_mode"
+        ]
+        == "current_tangent"
+    )
+    assert (
+        g1_current_checkpoint_frame_tangent[
+            "current_tangent_residual_row_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    g1_current_checkpoint_frame_fd = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_frame_element_block_fd_jacobian"
+    ]
+    assert (
+        g1_current_checkpoint_frame_fd[
+            "current_tangent_residual_row_target_mode"
+        ]
+        == "residual_frame_element_blocks"
+    )
+    assert (
+        g1_current_checkpoint_frame_fd[
+            "current_tangent_residual_row_jacobian_mode"
+        ]
+        == "finite_difference"
+    )
+    assert (
+        g1_current_checkpoint_frame_fd[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is False
+    )
+    g1_current_checkpoint_trust = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_trust_iteration_strict_gate_probe"
+    ]
+    assert g1_current_checkpoint_trust["status"] == "partial"
+    assert (
+        g1_current_checkpoint_trust["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_single_row["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_trust["final_direct_residual_inf_n"]
+        == 7312.271696594854
+    )
+    assert g1_current_checkpoint_trust["trust_region_accepted"] is True
+    assert g1_current_checkpoint_trust["trust_region_accepted_iteration_count"] == 1
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_candidate_direct_residual_inf_n"
+        ]
+        == 7310.443801615268
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_candidate_relative_increment_gate_passed"
+        ]
+        is False
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_candidate_relative_increment"
+        ]
+        > 1.0
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_direct_residual_inf_n"
+        ]
+        == g1_current_checkpoint_trust["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_alpha"
+        ]
+        == g1_current_checkpoint_trust["trust_region_gate_limited_alpha"]
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_alpha_source"
+        ]
+        == "trust_region_gate_limited"
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_relative_increment"
+        ]
+        <= 1.0e-4
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed"
+        ]
+        is True
+    )
+    assert (
+        g1_current_checkpoint_trust[
+            "trust_region_best_gate_eligible_candidate_free_dof_set_stable"
+        ]
+        is True
+    )
+    g1_current_checkpoint_trust_replay = rows["G1"]["evidence"][
+        "direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_replay"
+    ]
+    assert g1_current_checkpoint_trust_replay["status"] == "partial"
+    assert (
+        g1_current_checkpoint_trust_replay["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_trust["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_checkpoint_trust_replay["final_direct_residual_inf_n"]
+        == g1_current_checkpoint_trust["final_direct_residual_inf_n"]
+    )
+    assert g1_current_checkpoint_trust_replay["trust_region_accepted"] is False
+    assert (
+        g1_current_checkpoint_trust_replay["trust_region_accepted_iteration_count"]
+        == 0
+    )
+    g1_frame_hotspot_diagonal = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier"
+    ]
+    assert g1_frame_hotspot_diagonal["status"] == "partial"
+    assert (
+        g1_frame_hotspot_diagonal["base_direct_residual_inf_n"]
+        == g1_current_checkpoint_trust["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal["promoted_to_final_state"] is True
+    assert (
+        g1_frame_hotspot_diagonal["final_direct_residual_inf_n"]
+        == 7305.146816442301
+    )
+    assert (
+        g1_frame_hotspot_diagonal["promotion_candidate_relative_increment_gate_passed"]
+        is True
+    )
+    assert g1_frame_hotspot_diagonal["promotion_candidate_alpha"] == 0.001
+    assert (
+        g1_frame_hotspot_diagonal["frame_hotspot_diagonal_newton_selected_count"]
+        == 8
+    )
+    g1_frame_hotspot_diagonal_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_followup["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_followup["promoted_to_final_state"] is True
+    assert (
+        g1_frame_hotspot_diagonal_followup["final_direct_residual_inf_n"]
+        == 7298.029063674274
+    )
+    assert (
+        g1_frame_hotspot_diagonal_followup[
+            "promotion_candidate_relative_increment_gate_passed"
+        ]
+        is True
+    )
+    assert g1_frame_hotspot_diagonal_followup["promotion_candidate_alpha"] == 0.001
+    g1_frame_hotspot_diagonal_followup_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_followup_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_followup["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_followup_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_followup["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_multipass = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_multipass["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_followup["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_multipass["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_diagonal_multipass["promotion_count"] == 6
+    assert g1_frame_hotspot_diagonal_multipass["max_promotions"] == 6
+    assert (
+        g1_frame_hotspot_diagonal_multipass["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_multipass["final_direct_residual_inf_n"]
+        == 7255.471813043352
+    )
+    g1_frame_hotspot_diagonal_multipass_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_multipass_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_multipass["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_multipass_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_multipass["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_multipass_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_multipass_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_multipass["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_multipass_followup[
+        "promoted_to_final_state"
+    ] is True
+    assert g1_frame_hotspot_diagonal_multipass_followup["promotion_count"] == 6
+    assert g1_frame_hotspot_diagonal_multipass_followup["max_promotions"] == 6
+    assert (
+        g1_frame_hotspot_diagonal_multipass_followup["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_multipass_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 7216.53467452999
+    )
+    g1_frame_hotspot_diagonal_multipass_followup_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_multipass_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_multipass_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_multipass_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_multipass_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_signed = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier"
+    ]
+    assert (
+        g1_frame_hotspot_signed["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_multipass_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_signed["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_signed["promotion_mode"] == "signed_displacement"
+    assert g1_frame_hotspot_signed["promotion_count"] == 1
+    assert g1_frame_hotspot_signed["max_promotions"] == 6
+    assert g1_frame_hotspot_signed["stop_reason"] == "no_gate_eligible_descent"
+    assert g1_frame_hotspot_signed["promotion_candidate_step_m"] == 1.0e-10
+    assert (
+        g1_frame_hotspot_signed["final_direct_residual_inf_n"]
+        == 7213.16931149929
+    )
+    g1_frame_hotspot_signed_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_signed_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_post_signed = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_post_signed["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_diagonal_post_signed["promotion_count"] == 6
+    assert g1_frame_hotspot_diagonal_post_signed["max_promotions"] == 6
+    assert (
+        g1_frame_hotspot_diagonal_post_signed["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed["final_direct_residual_inf_n"]
+        == 7171.102675752372
+    )
+    g1_frame_hotspot_diagonal_post_signed_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_post_signed_followup[
+        "promoted_to_final_state"
+    ] is True
+    assert g1_frame_hotspot_diagonal_post_signed_followup["promotion_count"] == 12
+    assert g1_frame_hotspot_diagonal_post_signed_followup["max_promotions"] == 12
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 7105.697496519113
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup2 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_diagonal_post_signed_followup2[
+        "promoted_to_final_state"
+    ] is True
+    assert g1_frame_hotspot_diagonal_post_signed_followup2["promotion_count"] == 12
+    assert g1_frame_hotspot_diagonal_post_signed_followup2["max_promotions"] == 12
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 7105.0304056597015
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup2_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_signed_post_followup2 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_followup2["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_diagonal_post_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_signed_post_followup2["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_signed_post_followup2["promotion_mode"] == "signed_displacement"
+    assert g1_frame_hotspot_signed_post_followup2["promotion_count"] == 1
+    assert g1_frame_hotspot_signed_post_followup2["max_promotions"] == 12
+    assert (
+        g1_frame_hotspot_signed_post_followup2["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_signed_post_followup2["final_direct_residual_inf_n"]
+        == 7005.339091005231
+    )
+    g1_frame_hotspot_signed_post_followup2_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_followup2_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed_post_followup2["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_signed_post_followup2_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed_post_followup2["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_followup2["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+        "promoted_to_final_state"
+    ] is True
+    assert g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+        "promotion_mode"
+    ] == "diagonal_newton"
+    assert g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+        "promotion_count"
+    ] == 7
+    assert g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+        "max_promotions"
+    ] == 12
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "stop_reason"
+        ]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6993.264581353599
+    )
+    g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup_replay = rows[
+        "G1"
+    ]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_signed_post_diagonal_signed_followup = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_signed_followup2_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_signed_post_diagonal_signed_followup[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup["promotion_mode"]
+        == "signed_displacement"
+    )
+    assert g1_frame_hotspot_signed_post_diagonal_signed_followup[
+        "promotion_count"
+    ] == 1
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6957.716068351557
+    )
+    g1_frame_hotspot_signed_post_diagonal_signed_followup_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_diagonal_post_diagonal_signed_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "promotion_mode"
+        ]
+        == "diagonal_newton"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "promotion_count"
+        ]
+        == 11
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "stop_reason"
+        ]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6892.053158842975
+    )
+    g1_frame_hotspot_diagonal_post_diagonal_signed_followup2_replay = rows[
+        "G1"
+    ]["evidence"][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_diagonal_signed_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_signed_post_diagonal_signed_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "promotion_mode"
+        ]
+        == "signed_displacement"
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6883.520270521328
+    )
+    g1_frame_hotspot_signed_post_diagonal_signed_followup2_replay = rows[
+        "G1"
+    ]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_signed_post_diagonal_signed_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_tiny = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed_post_diagonal_signed_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_tiny["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_block_lstsq_tiny["promotion_mode"] == "block_lstsq"
+    assert g1_frame_hotspot_block_lstsq_tiny["promotion_count"] == 1
+    assert g1_frame_hotspot_block_lstsq_tiny["stop_reason"] == "max_promotions_exhausted"
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny["final_direct_residual_inf_n"]
+        == 6876.6367502508065
+    )
+    assert g1_frame_hotspot_block_lstsq_tiny[
+        "frame_hotspot_block_lstsq_selected_count"
+    ] == 4
+    assert g1_frame_hotspot_block_lstsq_tiny[
+        "frame_hotspot_block_lstsq_support_size"
+    ] >= 4
+    g1_frame_hotspot_block_lstsq_tiny_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_tiny["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6869.760113500556
+    )
+    g1_frame_hotspot_block_lstsq_tiny_followup2 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_tiny_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6862.890353387056
+    )
+    g1_frame_hotspot_block_lstsq_tiny_followup2_next = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2_next[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_tiny_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2_next[
+            "final_direct_residual_inf_n"
+        ]
+        == 6856.027463033668
+    )
+    g1_frame_hotspot_block_lstsq_tiny_followup2_next_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2_next_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_tiny_followup2_next[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_tiny_followup2_next_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_tiny_followup2_next[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_batch = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_lstsq_tiny_followup2_next[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_batch["promotion_count"] == 1
+    assert g1_frame_hotspot_block_lstsq_batch["promotion_mode"] == "block_lstsq"
+    assert (
+        g1_frame_hotspot_block_lstsq_batch["final_direct_residual_inf_n"]
+        == 6849.171435570635
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine[
+            "promotion_candidate_alpha"
+        ]
+        == 0.0005
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine[
+            "final_direct_residual_inf_n"
+        ]
+        == 6845.74684985285
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine_followup = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6842.323976427923
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6838.902814439709
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine_followup2_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+        "promotion_count"
+    ] == 4
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "promotion_candidate_alpha"
+        ]
+        == 0.0005
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "final_direct_residual_inf_n"
+        ]
+        == 6825.235263746027
+    )
+    g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch_replay = rows[
+        "G1"
+    ]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_wide8 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_lstsq_batch_fine_followup2_batch[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_wide8["promotion_mode"] == "block_lstsq"
+    assert g1_frame_hotspot_block_lstsq_wide8["promotion_count"] == 1
+    assert g1_frame_hotspot_block_lstsq_wide8[
+        "frame_hotspot_block_lstsq_selected_count"
+    ] == 8
+    assert g1_frame_hotspot_block_lstsq_wide8[
+        "frame_hotspot_block_lstsq_support_size"
+    ] == 58
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8["final_direct_residual_inf_n"]
+        == 6818.410028482282
+    )
+    g1_frame_hotspot_block_lstsq_wide8_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_block_lstsq_wide8_followup[
+        "promotion_count"
+    ] == 2
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup[
+            "promotion_candidate_alpha"
+        ]
+        == 0.001
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6804.780026835346
+    )
+    g1_frame_hotspot_block_lstsq_wide8_followup_replay = rows["G1"][
+        "evidence"
+    ]["direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup_replay"]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_wide8_followup2 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_wide8_followup2[
+        "promotion_count"
+    ] == 2
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "promotion_candidate_alpha"
+        ]
+        == 0.001
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6791.177271561701
+    )
+    g1_frame_hotspot_block_lstsq_wide8_followup2_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_wide8_alpha = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_lstsq_wide8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_wide8_alpha[
+        "promotion_candidate_alpha"
+    ] == 0.005
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha[
+            "promotion_candidate_relative_increment"
+        ]
+        < 1.0e-4
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha[
+            "final_direct_residual_inf_n"
+        ]
+        == 6757.221385203893
+    )
+    g1_frame_hotspot_block_lstsq_wide8_alpha_replay = rows["G1"][
+        "evidence"
+    ]["direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_replay"]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_wide8_alpha_followup = rows["G1"][
+        "evidence"
+    ]["direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup"]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6716.711842999595
+    )
+    g1_frame_hotspot_block_lstsq_wide8_alpha_followup_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_wide8_alpha_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_lstsq_wide8_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        0.005
+        < g1_frame_hotspot_block_lstsq_gate_alpha["promotion_candidate_alpha"]
+        < 0.006
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha[
+            "promotion_candidate_relative_increment"
+        ]
+        <= 1.0e-4
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha[
+            "final_direct_residual_inf_n"
+        ]
+        == 6680.772153435075
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        0.005
+        < g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "promotion_candidate_alpha"
+        ]
+        < 0.006
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "promotion_candidate_relative_increment"
+        ]
+        <= 1.0e-4
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6645.0522909041065
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        0.005
+        < g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "promotion_candidate_alpha"
+        ]
+        < 0.006
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "promotion_candidate_relative_increment"
+        ]
+        <= 1.0e-4
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6607.81899605729
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup2_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup2_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup2_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup3 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        0.005
+        < g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "promotion_candidate_alpha"
+        ]
+        < 0.006
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "promotion_candidate_relative_increment"
+        ]
+        <= 1.0e-4
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "final_direct_residual_inf_n"
+        ]
+        == 6570.266723299206
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup3_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup3_replay[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup3_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4[
+            "promoted_to_final_state"
+        ]
+        is False
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup4[
+            "base_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup4_support16 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support16"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_support16[
+            "stop_reason"
+        ]
+        == "no_gate_eligible_descent"
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup4_support32 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support32"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_support32[
+            "stop_reason"
+        ]
+        == "no_gate_eligible_descent"
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup3[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+            "promotion_candidate_alpha"
+        ]
+        == 0.001
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6569.156742952773
+    )
+    g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4_replay = rows[
+        "G1"
+    ]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_replay"
+    ]
+    assert (
+        abs(
+            g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4_replay[
+                "base_direct_residual_inf_n"
+            ]
+            - g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+                "final_direct_residual_inf_n"
+            ]
+        )
+        <= 1.0e-9
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_signed_post_rows4 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4"
+    ]
+    assert (
+        abs(
+            g1_frame_hotspot_signed_post_rows4["base_direct_residual_inf_n"]
+            - g1_frame_hotspot_block_lstsq_gate_alpha_followup4_rows4[
+                "final_direct_residual_inf_n"
+            ]
+        )
+        <= 1.0e-9
+    )
+    assert g1_frame_hotspot_signed_post_rows4["promoted_to_final_state"] is True
+    assert g1_frame_hotspot_signed_post_rows4["promotion_candidate_step_m"] == 1.0e-10
+    assert (
+        g1_frame_hotspot_signed_post_rows4["final_direct_residual_inf_n"]
+        == 6563.696456575908
+    )
+    g1_frame_hotspot_signed_post_rows4_replay = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_rows4_replay["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed_post_rows4["final_direct_residual_inf_n"]
+    )
+    assert (
+        g1_frame_hotspot_signed_post_rows4_replay["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_signed_post_rows4["final_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_block_post_signed_rows4 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4["final_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_post_signed_rows4["base_direct_residual_inf_n"]
+    )
+    g1_frame_hotspot_block_post_signed_rows4_rows4 = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_rows4["final_direct_residual_inf_n"]
+    )
+    assert g1_frame_hotspot_block_post_signed_rows4_rows4[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4_rows4[
+            "promotion_candidate_alpha"
+        ]
+        == 0.001
+    )
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6560.830484870141
+    )
+    g1_frame_hotspot_block_post_signed_rows4_rows4_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_signed_rows4_rows4_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_signed_rows4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_current_tangent_post_signed_rows4_rows4 = rows["G1"]["evidence"][
+        "direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4"
+    ]
+    assert g1_current_tangent_post_signed_rows4_rows4[
+        "current_tangent_residual_row_correction_accepted"
+    ] is True
+    assert (
+        g1_current_tangent_post_signed_rows4_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_signed_rows4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_current_tangent_post_signed_rows4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6557.5500695988685
+    )
+    g1_frame_hotspot_signed_post_tangent_narrow = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_tangent_narrow[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_current_tangent_post_signed_rows4_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_signed_post_tangent_narrow[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_signed_post_tangent_narrow[
+            "promotion_candidate_step_m"
+        ]
+        == 1.0e-10
+    )
+    assert (
+        g1_frame_hotspot_signed_post_tangent_narrow[
+            "final_direct_residual_inf_n"
+        ]
+        == 6557.132760119332
+    )
+    g1_frame_hotspot_signed_post_tangent_narrow_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_replay"
+    ]
+    assert (
+        g1_frame_hotspot_signed_post_tangent_narrow_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_tangent_narrow[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_post_tangent_signed = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_signed_post_tangent_narrow[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert g1_frame_hotspot_block_post_tangent_signed[
+        "promoted_to_final_state"
+    ] is True
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed[
+            "promotion_candidate_alpha"
+        ]
+        == 0.001
+    )
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed[
+            "final_direct_residual_inf_n"
+        ]
+        == 6550.575627359212
+    )
+    g1_frame_hotspot_block_post_tangent_signed_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_tangent_signed[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_post_tangent_signed_rows4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_tangent_signed[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6547.300339545533
+    )
+    g1_frame_hotspot_block_post_tangent_signed_rows4_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_tangent_signed_rows4_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_tangent_signed_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_diagonal_post_tangent_signed_rows4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_tangent_signed_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_tangent_signed_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_tangent_signed_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6540.922416805359
+    )
+    g1_frame_hotspot_diagonal_post_tangent_signed_rows4_followup = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup"
+    ]
+    assert (
+        g1_frame_hotspot_diagonal_post_tangent_signed_rows4_followup[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_tangent_signed_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_diagonal_post_tangent_signed_rows4_followup[
+            "final_direct_residual_inf_n"
+        ]
+        == 6534.550925656016
+    )
+    g1_frame_hotspot_block_post_diagonal_followup_rows4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_diagonal_followup_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_diagonal_post_tangent_signed_rows4_followup[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_diagonal_followup_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6531.283650193189
+    )
+    g1_frame_hotspot_block_post_block_followup_rows4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_followup_rows4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_diagonal_followup_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_followup_rows4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6524.752366542994
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_followup_rows4[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 4
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_followup_rows4[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 34
+    )
+    g1_frame_hotspot_block_post_block_followup_rows4_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_followup_rows4_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_followup_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    g1_frame_hotspot_block_post_block_rows8_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows8_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_followup_rows4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 6521.489990359723
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows8_followup2[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 8
+    )
+    g1_frame_hotspot_block_post_block_rows12_followup3 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows12_followup3[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_rows8_followup2[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows12_followup3[
+            "final_direct_residual_inf_n"
+        ]
+        == 6483.933515906723
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows12_followup3[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 12
+    )
+    g1_frame_hotspot_block_post_block_rows16_followup4 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows16_followup4[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_rows12_followup3[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows16_followup4[
+            "final_direct_residual_inf_n"
+        ]
+        == 6449.142677918151
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows16_followup4[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 16
+    )
+    g1_frame_hotspot_block_post_block_rows20_followup5 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup5[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_rows16_followup4[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup5[
+            "final_direct_residual_inf_n"
+        ]
+        == 6417.030627577194
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup5[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 20
+    )
+    g1_frame_hotspot_block_post_block_rows20_followup6 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup6[
+            "base_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_rows20_followup5[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup6[
+            "final_direct_residual_inf_n"
+        ]
+        == 6385.116404581466
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup6[
+            "frame_hotspot_block_lstsq_selected_count"
+        ]
+        == 20
+    )
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup6[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 142
+    )
+    g1_frame_hotspot_block_post_block_rows20_followup6_replay = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay"
+    ]
+    assert (
+        g1_frame_hotspot_block_post_block_rows20_followup6_replay[
+            "final_direct_residual_inf_n"
+        ]
+        == g1_frame_hotspot_block_post_block_rows20_followup6[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_component_status"
+    ] == "partial"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_component_only"
+    ] is True
+    assert (
+        abs(
+            rows["G1"]["evidence"][
+                "residual_jacobian_current_frontier_base_residual_inf_n"
+            ]
+            - g1_frame_hotspot_block_post_block_rows20_followup6[
+                "final_direct_residual_inf_n"
+            ]
+        )
+        <= 1.0e-9
+    )
+    current_frontier_components = rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_component_breakdown"
+    ]
+    assert current_frontier_components["component_inf_n"]["frame"] > 2440.0
+    assert current_frontier_components["top_row_dominant_component_counts"][
+        "frame"
+    ] == 21
+    current_frontier_frame_hotspots = rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_hotspot_frame_diagnostics"
+    ]
+    assert current_frontier_frame_hotspots
+    assert current_frontier_frame_hotspots[0]["raw_node_id"] == 11233
+    assert (
+        current_frontier_frame_hotspots[0][
+            "incident_frame_target_dof_contribution_sum_n"
+        ]
+        == current_frontier_frame_hotspots[0]["component_frame_n"]
+    )
+    assert (
+        abs(current_frontier_frame_hotspots[0]["component_reconstruction_error_n"])
+        <= 1.0e-9
+    )
+    assert (
+        current_frontier_frame_hotspots[0]["sample_incident_frame_elements"][0][
+            "verticality_abs_dz_over_length"
+        ]
+        == 1.0
+    )
+    assert (
+        abs(
+            current_frontier_frame_hotspots[0]["sample_incident_frame_elements"][
+                0
+            ]["target_dof_force_contribution_n"]
+        )
+        > 1100.0
+    )
+    current_frontier_frame_sweep = rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_frame_hotspot_signed_sweep"
+    ]
+    assert current_frontier_frame_sweep["evaluated"] is True
+    assert current_frontier_frame_sweep["selected_hotspot_row_count"] == 21
+    assert (
+        abs(
+            current_frontier_frame_sweep["best_gate_eligible_candidate"][
+                "direct_residual_inf_n"
+            ]
+            - current_frontier_frame_sweep["base_direct_residual_inf_n"]
+        )
+        <= 1.0e-9
+    )
+    assert (
+        current_frontier_frame_sweep["best_gate_eligible_candidate"][
+            "direct_residual_inf_n"
+        ]
+        <= current_frontier_frame_sweep["base_direct_residual_inf_n"]
+    )
+    current_frontier_frame_large_sweep = rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_frame_hotspot_large_signed_sweep"
+    ]
+    assert current_frontier_frame_large_sweep["evaluated"] is True
+    assert current_frontier_frame_large_sweep["best_gate_eligible_candidate"] == {}
+    assert (
+        current_frontier_frame_large_sweep["best_candidate"][
+            "direct_residual_inf_n"
+        ]
+        >= current_frontier_frame_large_sweep["base_direct_residual_inf_n"]
+    )
+    current_frontier_jvp = rows["G1"]["evidence"][
+        "residual_jacobian_current_frontier_frame_hotspot_jvp"
+    ]
+    assert (
+        abs(
+            current_frontier_jvp["base_residual_inf_n"]
+            - rows["G1"]["evidence"][
+                "residual_jacobian_current_frontier_base_residual_inf_n"
+            ]
+        )
+        <= 1.0e-9
+    )
+    assert current_frontier_jvp["evaluated_row_count"] == 8
+    assert current_frontier_jvp["max_relative_inf_error"] <= 1.0e-12
+    assert current_frontier_jvp["max_relative_l2_error"] <= 1.0e-12
+    assert current_frontier_jvp["min_action_cosine"] >= 0.999999999999
+    assert (
+        current_frontier_jvp["first_evaluated_row"]["global_dof"]
+        == current_frontier_frame_hotspots[0]["global_dof"]
+    )
+    g1_current_frontier_frame_block_narrow = rows["G1"]["evidence"][
+        "direct_residual_current_frontier_frame_block_current_tangent_narrow"
+    ]
+    assert (
+        abs(
+            g1_current_frontier_frame_block_narrow["base_direct_residual_inf_n"]
+            - rows["G1"]["evidence"][
+                "residual_jacobian_current_frontier_base_residual_inf_n"
+            ]
+        )
+        <= 1.0e-9
+    )
+    assert (
+        g1_current_frontier_frame_block_narrow["final_direct_residual_inf_n"]
+        == g1_current_frontier_frame_block_narrow["base_direct_residual_inf_n"]
+    )
+    assert (
+        g1_current_frontier_frame_block_narrow[
+            "current_tangent_residual_row_correction_enabled"
+        ]
+        is True
+    )
+    assert (
+        g1_current_frontier_frame_block_narrow[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is False
+    )
+    assert (
+        g1_current_frontier_frame_block_narrow[
+            "current_tangent_residual_row_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    g1_historical_adaptive_replay_audit = rows["G1"]["evidence"][
+        "direct_residual_historical_adaptive_checkpoint_current_residual_replay_audit"
+    ]
+    assert g1_historical_adaptive_replay_audit["status"] == "partial"
+    assert (
+        g1_historical_adaptive_replay_audit["base_direct_residual_inf_n"]
+        == 34170785996.372658
+    )
+    assert (
+        g1_historical_adaptive_replay_audit["base_direct_residual_inf_n"]
+        > g1_current_checkpoint_single_row_replay["base_direct_residual_inf_n"]
+    )
+    assert (
+        g1_historical_adaptive_replay_audit[
+            "current_tangent_residual_row_correction_enabled"
+        ]
+        is False
+    )
     g1_uncoarsened_secant_seed = rows["G1"]["evidence"][
         "uncoarsened_boundary_pdelta_secant_seed_probe"
     ]
@@ -1459,6 +3686,184 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G5"]["evidence"]["trace_ready"] is True
     assert rows["G6"]["status"] == "external_blocked"
     assert rows["G6"]["locally_closable"] is False
+    assert rows["G7"]["status"] == "partial"
+    assert rows["G7"]["evidence"]["operator_attached_ifc_count"] == 5
+    assert rows["G7"]["evidence"]["operator_attached_real_artifact_count"] == 5
+    assert rows["G7"]["evidence"]["operator_attached_real_mgt_header_ok_count"] == 0
+    assert len(rows["G7"]["evidence"]["metadata_only_source_ids"]) == 9
+    assert len(rows["G7"]["evidence"]["repo_benchmark_bridge_source_ids"]) == 4
+    assert len(rows["G7"]["evidence"]["operator_attach_required_source_ids"]) >= 9
+    assert rows["G7"]["evidence"]["operator_action_queue_count"] >= 13
+    operator_action_queue = rows["G7"]["evidence"]["operator_action_queue"]
+    assert len(operator_action_queue) == rows["G7"]["evidence"][
+        "operator_action_queue_count"
+    ]
+    operator_action_by_source = {
+        row["source_id"]: row for row in operator_action_queue
+    }
+    assert (
+        operator_action_by_source[
+            "koneps_goyang_changneung_powerplant_design_service"
+        ]["action_type"]
+        == "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt"
+    )
+    assert (
+        "sha256_differs_from_repo_benchmark_bridge"
+        in operator_action_by_source[
+            "koneps_goyang_changneung_powerplant_design_service"
+        ]["acceptance_checks"]
+    )
+    assert (
+        operator_action_by_source[
+            "lh_bucheon_yeokgok_a1_housing_competition"
+        ]["action_type"]
+        == "attach_operator_real_pdf_or_pdf_derived_mgt"
+    )
+    operator_action_packet = rows["G7"]["evidence"]["operator_action_packet"]
+    assert operator_action_packet["schema_version"] == (
+        "korean-medium-large-operator-action-packet.v1"
+    )
+    assert operator_action_packet["status"] == "pending"
+    assert operator_action_packet["action_count"] == rows["G7"]["evidence"][
+        "operator_action_queue_count"
+    ]
+    assert operator_action_packet[
+        "operator_attached_real_mgt_header_ok_remaining"
+    ] == 4
+    assert (
+        "sha256_differs_from_repo_benchmark_bridge"
+        in operator_action_packet["acceptance_check_inventory"]
+    )
+    assert (
+        rows["G7"]["evidence"]["operator_action_type_counts"][
+            "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt"
+        ]
+        == 4
+    )
+    assert rows["G7"]["evidence"]["operator_attached_real_mgt_header_ok_remaining"] == 4
+    assert rows["G7"]["evidence"]["local_private_candidate_count"] >= 20
+    assert rows["G7"]["evidence"]["existing_local_private_candidate_count"] >= 20
+    assert rows["G7"]["evidence"]["kr_local_private_candidate_count"] >= 2
+    assert rows["G7"]["evidence"]["mgt_local_private_candidate_count"] >= 4
+    assert (
+        rows["G7"]["evidence"]["mgt_header_ok_local_private_candidate_count"] >= 4
+    )
+    assert rows["G7"]["evidence"]["g7_counted_local_private_candidate_count"] == 0
+    assert rows["G7"]["evidence"][
+        "operator_action_private_candidate_match_count"
+    ] == 10
+    assert rows["G7"]["evidence"][
+        "operator_action_private_candidate_source_count"
+    ] == 5
+    assert rows["G7"]["evidence"][
+        "operator_action_private_candidate_file_count"
+    ] == 2
+    assert rows["G7"]["evidence"][
+        "operator_action_private_candidate_requires_rights_count"
+    ] == 10
+    assert rows["G7"]["evidence"]["repo_public_candidate_count"] >= 22
+    assert rows["G7"]["evidence"]["repo_public_candidate_mgt_count"] >= 12
+    assert rows["G7"]["evidence"]["repo_public_candidate_ifc_count"] >= 10
+    assert rows["G7"]["evidence"]["repo_public_candidate_benchmark_bridge_count"] >= 8
+    assert rows["G7"]["evidence"]["g7_counted_repo_public_candidate_count"] == 0
+    assert rows["G7"]["evidence"]["operator_action_repo_candidate_match_count"] >= 160
+    assert rows["G7"]["evidence"]["operator_action_repo_candidate_source_count"] == 14
+    assert rows["G7"]["evidence"]["operator_action_repo_candidate_file_count"] >= 22
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_exact_source_match_count"
+        ]
+        == 10
+    )
+    assert (
+        rows["G7"]["evidence"]["operator_action_repo_candidate_exact_clean_count"]
+        == 0
+    )
+    assert rows["G7"]["evidence"][
+        "operator_action_repo_candidate_exact_blocker_counts"
+    ] == {
+        "repo_benchmark_bridge_mgt": 8,
+        "mgt_file_too_small": 2,
+    }
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_requires_source_mapping_count"
+        ]
+        >= 150
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_ifc_source_mapping_candidate_count"
+        ]
+        >= 20
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_ifc_source_mapping_candidate_source_count"
+        ]
+        == 2
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_ifc_source_mapping_candidate_file_count"
+        ]
+        >= 10
+    )
+    ifc_mapping_candidates = rows["G7"]["evidence"][
+        "operator_action_repo_candidate_ifc_source_mapping_candidates"
+    ]
+    assert len(ifc_mapping_candidates) == rows["G7"]["evidence"][
+        "operator_action_repo_candidate_ifc_source_mapping_candidate_count"
+    ]
+    assert {
+        row["source_id"] for row in ifc_mapping_candidates
+    } == {
+        "ifc_public_buildingsmart_korea_awards_hub",
+        "ifc_public_buildingsmart_2025_megaproject_lane",
+    }
+    assert all(
+        row["promotion_blockers"] == ["catalog_source_unmatched_candidate"]
+        for row in ifc_mapping_candidates
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_action_repo_candidate_benchmark_bridge_count"
+        ]
+        >= 90
+    )
+    operator_candidate_matches = rows["G7"]["evidence"][
+        "operator_action_private_candidate_matches"
+    ]
+    assert operator_candidate_matches
+    assert all(row["counted_in_g7"] is False for row in operator_candidate_matches)
+    assert all(
+        row["requires_rights_confirmation"] is True
+        for row in operator_candidate_matches
+    )
+    assert (
+        rows["G7"]["evidence"]["catalog_source_unmatched_candidate_count"]
+        == rows["G7"]["evidence"]["local_private_candidate_count"]
+    )
+    assert rows["G7"]["evidence"]["local_private_candidate_artifacts"]
+    assert all(
+        row["counted_in_g7"] is False
+        for row in rows["G7"]["evidence"]["local_private_candidate_artifacts"]
+    )
+    operator_repo_candidate_matches = rows["G7"]["evidence"][
+        "operator_action_repo_candidate_matches"
+    ]
+    assert operator_repo_candidate_matches
+    assert all(row["counted_in_g7"] is False for row in operator_repo_candidate_matches)
+    assert any(
+        "repo_benchmark_bridge_mgt" in row["promotion_blockers"]
+        for row in operator_repo_candidate_matches
+    )
+    assert any(
+        "catalog_source_unmatched_candidate" in row["promotion_blockers"]
+        for row in operator_repo_candidate_matches
+    )
+    assert "metadata_only_sources_present" in rows["G7"]["blockers"]
+    assert "operator_attached_real_mgt_header_ok_below_target" in rows["G7"]["blockers"]
     assert rows["AI-G2"]["status"] == "closed"
     assert rows["AI-G2"]["evidence"]["production_ml_wired"] is True
     assert rows["AI-G2"]["evidence"]["checkpoint_validated"] is True

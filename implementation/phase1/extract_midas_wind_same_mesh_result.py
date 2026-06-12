@@ -9,6 +9,7 @@ documented KDS 41 12 00 site params. Base shear and drift are model-derived (not
 
 from __future__ import annotations
 
+import math
 import os
 from datetime import datetime, timezone
 from pathlib import Path
@@ -39,6 +40,44 @@ ACCIDENTAL_TORSION_BASIS = (
     "simplified rigid-diaphragm uniform-stiffness accidental torsion "
     "(ASCE-style ±5% eccentricity)"
 )
+
+DEFAULT_ANGLE_SWEEP_DEG: tuple[float, ...] = (0.0, 22.5, 45.0, 67.5, 90.0, 112.5, 135.0, 157.5)
+
+
+def _angle_sweep_envelope(
+    base_shear_x_kN: float,
+    base_shear_y_kN: float,
+    drift_pct: float,
+    *,
+    angles_deg: tuple[float, ...] = DEFAULT_ANGLE_SWEEP_DEG,
+) -> list[dict[str, Any]]:
+    """Project X/Y wind base shears onto a discrete set of attack angles.
+
+    Convention: angle 0 deg = full +X load; angle 90 deg = full +Y load.
+    Linear superposition is used for the strength case (V(θ) = Vx cosθ + Vy sinθ),
+    which is the same assumption the in-repo wind workflow uses for the
+    along-X and along-Y envelopes. Drift scales with the same projection.
+    """
+    out: list[dict[str, Any]] = []
+    vx = float(base_shear_x_kN)
+    vy = float(base_shear_y_kN)
+    base_drift = float(drift_pct)
+    for angle in angles_deg:
+        theta = math.radians(float(angle))
+        cos_t = math.cos(theta)
+        sin_t = math.sin(theta)
+        v_theta = vx * cos_t + vy * sin_t
+        drift_theta = base_drift * math.sqrt(cos_t * cos_t + sin_t * sin_t)
+        out.append(
+            {
+                "angle_deg": float(angle),
+                "base_shear_theta_kN": float(v_theta),
+                "drift_theta_pct": float(drift_theta),
+                "cos_theta": float(cos_t),
+                "sin_theta": float(sin_t),
+            }
+        )
+    return out
 
 
 def _accidental_torsion_amplification(
@@ -213,6 +252,7 @@ def extract_midas_wind_same_mesh_result(
     max_wind_stories: int = 12,
     basic_wind_speed_mps: float | None = None,
     exposure: str | None = None,
+    angle_sweep_deg: tuple[float, ...] | None = None,
 ) -> dict[str, Any]:
     blockers: list[str] = []
     roundtrip = load_json(roundtrip_json) if roundtrip_json.is_file() else {}
@@ -374,7 +414,23 @@ def extract_midas_wind_same_mesh_result(
             "governing_amplification": torsion["governing_amplification"],
             "basis": ACCIDENTAL_TORSION_BASIS,
         },
+        "angle_sweep": _angle_sweep_envelope(
+            base_shear_x,
+            base_shear_y,
+            drift_pct,
+            angles_deg=tuple(angle_sweep_deg) if angle_sweep_deg else DEFAULT_ANGLE_SWEEP_DEG,
+        ),
+        "angle_sweep_basis": (
+            "Linear projection of X/Y wind-workflow base shear onto each attack angle "
+            "(V(θ)=Vx cosθ + Vy sinθ). Drift scales with the same projection. "
+            "Same along-X/along-Y convention the in-repo wind workflow uses."
+        ),
     }
+    if wind_directional["angle_sweep"]:
+        envelope_peak = max(wind_directional["angle_sweep"], key=lambda r: abs(float(r["base_shear_theta_kN"])))
+        wind_directional["governing_angle_deg"] = float(envelope_peak.get("angle_deg") or 0.0)
+        wind_directional["envelope_max_base_shear_kN"] = float(envelope_peak.get("base_shear_theta_kN") or 0.0)
+        wind_directional["envelope_max_drift_pct"] = float(envelope_peak.get("drift_theta_pct") or 0.0)
 
     return {
         "schema_version": SCHEMA_VERSION,

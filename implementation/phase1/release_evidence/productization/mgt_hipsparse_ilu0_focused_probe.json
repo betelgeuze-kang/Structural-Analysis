@@ -1,0 +1,54 @@
+{
+  "schema_version": "mgt-hipsparse-ilu0-focused-probe.v1",
+  "generated_at": "2026-06-05T15:11:00Z",
+  "rows": [
+    {
+      "backend": "hipsparse_ilu0_bicgstab",
+      "available": true,
+      "converged": false,
+      "solver": "bicgstab",
+      "preconditioner": "csrilu02_ilu0",
+      "max_iterations": 3000,
+      "residual_inf_n": 1.502116910094704e+73,
+      "relative_residual_inf": 4.625630808035844e+71,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "device_residency_ratio": 1.0,
+      "cpu_solver_fallback_detected": false,
+      "solver_path_kind": "production_hipsparse_ilu0_bicgstab_probe",
+      "preconditioner_family": "prebuilt_rocm_library_ilu0",
+      "dependency_boundary": "no_new_solver_dependency_prebuilt_hip_runtime_and_hipsparse",
+      "build": {
+        "available": true,
+        "binary": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hipsparse_ilu_bicgstab_solve",
+        "source": "/home/betelgeuze/건축구조분석/implementation/phase1/hipsparse_ilu_bicgstab_solve.cpp",
+        "rebuilt": true,
+        "dependency_boundary": "prebuilt_hip_runtime_and_hipsparse_only"
+      },
+      "solve_seconds": 7.183515052000075,
+      "full_csr_residual_replayed_in_python": true,
+      "hipsparse_stats": {
+        "status": "ok",
+        "backend": "hipsparse_ilu0_bicgstab",
+        "solver": "bicgstab",
+        "preconditioner": "csrilu02_ilu0",
+        "n": 33932,
+        "nnz": 823815,
+        "max_iterations": 3000,
+        "iteration_count": 3000,
+        "residual_inf_n": 1.502116910092376e+73,
+        "rhs_inf_n": 32.47377433333335,
+        "solve_seconds": 7.092099935,
+        "device_residency_ratio": 1.0,
+        "host_copy_bytes": 1628736,
+        "cpu_solver_fallback_detected": false,
+        "zero_pivot_detected": false,
+        "error": ""
+      },
+      "breakdown": "hipsparse_ilu0_replayed_residual_gate_not_met",
+      "claim_boundary": "hipSPARSE ILU(0)-BiCGStab uses prebuilt AMD ROCm libraries only. Closure is granted only when the returned solution passes the full assembled CSR residual replay in Python.",
+      "system": "surface_shell"
+    }
+  ],
+  "conclusion": "surface_shell_hipsparse_ilu0_bicgstab_focused_probe"
+}

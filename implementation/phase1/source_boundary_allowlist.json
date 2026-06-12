@@ -95,6 +95,16 @@
       "path": "implementation/phase1/open_data/wind/tpu/probes/case_919.mat",
       "classification": "external_restore",
       "rationale": "TPU/HFFB interference raw probe mirror retained for wind benchmark normalization."
+    },
+    {
+      "path": ".betelgeuze/trace.jsonl",
+      "classification": "source_required",
+      "rationale": "Local opencode runtime trace log retained for reproducible session auditing; size scales with usage and is not a release artifact."
+    },
+    {
+      "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+      "classification": "source_required",
+      "rationale": "Benchmark-bridge MGT roundtrip NPZ payload retained for solver/calibration reproducibility; large only because the source bridge is intentionally MGT-parity."
     }
   ]
 }

@@ -1,0 +1,71 @@
+# Betelgeuze Project Quality Contract
+# Edit this file to teach the harness what 'good code' means for this project.
+
+project:
+  name: 건축구조분석
+  purpose: "Evidence-backed structural analysis and structural-analysis AI productization workspace. The current task is to close documented commercial solver and AI-engine readiness gaps without overstating unsupported, proxy, benchmark-bridge, or externally blocked evidence."
+  primary_stack:
+    - javascript/typescript
+    - python
+    - react
+    - typescript
+
+definition_of_done:
+  required:
+    - "Change stays within the user goal and recorded intent."
+    - "Verification evidence or an explicit verification gap is recorded."
+    - "Public API, auth, data, or UX contract changes are called out."
+
+quality_gates:
+  test_commands:
+    - "npm run build"
+    - "pytest"
+    - "python -m compileall ."
+  fallback_checks:
+    - "affected files syntax/type check"
+    - "diff risk review"
+    - "manual smoke plan if automated tests are missing"
+
+architecture:
+  prefer:
+    - "small, reversible changes"
+    - "explicit error handling"
+    - "clear boundaries between UI, domain, and side effects"
+  avoid:
+    - "global mutable state without a strong reason"
+    - "silent catch blocks"
+    - "broad refactors when a narrow fix works"
+
+protected_areas:
+  - path: "implementation/phase1/release_evidence/productization"
+    reason: "productization receipts are the authoritative evidence ledger for readiness claims"
+    requires:
+      - "focused verification"
+      - "status reporter or validation refresh when receipt semantics change"
+  - path: "docs/commercial-structural-solver-product-gap-ledger.md"
+    reason: "commercial solver gap boundary and claim wording"
+    requires:
+      - "claim-boundary review"
+      - "ledger/status evidence cross-check"
+  - path: "docs/structural-analysis-ai-engine-gap-ledger.md"
+    reason: "AI-engine gap boundary and claim wording"
+    requires:
+      - "claim-boundary review"
+      - "ledger/status evidence cross-check"
+  - path: ".betelgeuze"
+    reason: "harness task state, verification records, trace, and intent contract"
+    requires:
+      - "focused verification"
+      - "valid JSON/JSONL/YAML shape when edited"
+
+product_constraints:
+  must_preserve:
+    - "Do not claim full commercial closure while any G1-G10 or AI-G1-AI-G10 row remains partial, open, or external-blocked."
+    - "Do not treat benchmark-bridge MGT/PDF/IFC evidence as operator-attached real project evidence."
+    - "Do not replace solver residual/equilibrium gates with visualization, surrogate, or documentation-only evidence."
+    - "Keep unsupported/proxy/fallback states visible in receipts, ledgers, and user-facing claim boundaries."
+  non_goals:
+    - "No engineer-of-record replacement or legal/authority approval automation."
+    - "No public release, commit, push, destructive cleanup, or external submission without explicit user request."
+    - "No claim that external V&V, real competition originals, or operator-attached corpus gates are closed without matching receipts."
+    - "No broad refactor unrelated to the documented gap closure path."

@@ -1,0 +1,495 @@
+{
+  "schema_version": "mgt-equilibrium-ilu-gmres-diagnostic-probe.v1",
+  "generated_at": "2026-06-10T12:50:23.870899+00:00",
+  "status": "ready",
+  "load_scale": 0.05,
+  "warm_start_meta": {
+    "linear_warm_start": true,
+    "solver_residual_inf_n": 7.496481522206722e-07,
+    "rhs_inf_n": 661.2910910677012,
+    "regularization": 433.7386644477127,
+    "max_translation_m": 0.06369550195132227,
+    "frame_stiffness_nnz": 291132,
+    "shell_stiffness_nnz": 1901664,
+    "frame_total_gravity_n": 129592198.79379755,
+    "surface_total_area_m2": 11404.192103423085
+  },
+  "equilibrium_state": {
+    "residual_inf_n": 27.627201931599906,
+    "free_dof_count": 51993,
+    "tangent_meta": {
+      "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+      "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+      "frame_equilibrium_stiffness_nnz": 0,
+      "shell_stiffness_nnz": 1901664,
+      "spring_stiffness_nnz": 40608,
+      "coupled_stiffness_nnz": 1141187,
+      "frame_equilibrium_meta": {
+        "frame_internal_force_model": "corotational_force_based_6dof",
+        "real_section_material_element_count": 5485,
+        "geometric_element_count": 1946,
+        "min_chord_length_m": 0.31923032437409377,
+        "max_chord_length_ratio": 1.0,
+        "element_count": 5564
+      },
+      "shell_meta": {
+        "shell_internal_force_model": "linear_force_consistent_reference_geometry",
+        "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+        "shell_stiffness_nnz": 1901664,
+        "shell_meta": {
+          "surface_element_count": 7152,
+          "surface_quad_count": 6968,
+          "surface_tri_count": 184,
+          "assembled_triangle_count": 14120,
+          "skipped_degenerate_triangle_count": 0,
+          "surface_node_count": 7894,
+          "surface_material_coverage_pct": 96.33668903803132,
+          "unique_surface_material_count": 20,
+          "unique_surface_section_count": 15,
+          "surface_total_area_m2": 11404.192103423085,
+          "surface_stiffness_nnz": 1901664,
+          "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+          "source_plate_thickness_coverage_count": 7152,
+          "source_plate_thickness_coverage_pct": 100.0,
+          "source_thickness_table_count": 25,
+          "thickness_min_m": 0.140625,
+          "thickness_max_m": 0.85
+        }
+      },
+      "stiffness_unit_audit": {
+        "per_component": {
+          "frame": {
+            "free_diag_count": 51993,
+            "nonzero_diag_count": 12882,
+            "diag_abs_min": 2172.9583362166586,
+            "diag_abs_max": 263291938026322.7,
+            "diag_abs_mean": 156315363763.26364,
+            "diag_abs_median": 82837515.0898557,
+            "unit": "N_per_m_or_Nm_per_rad"
+          },
+          "shell": {
+            "free_diag_count": 51993,
+            "nonzero_diag_count": 34352,
+            "diag_abs_min": 1.883387956495986e-29,
+            "diag_abs_max": 329678048360.4061,
+            "diag_abs_mean": 6931131964.7903595,
+            "diag_abs_median": 622791643.7393872,
+            "unit": "N_per_m_or_Nm_per_rad"
+          },
+          "spring": {
+            "free_diag_count": 51993,
+            "nonzero_diag_count": 20304,
+            "diag_abs_min": 1.0,
+            "diag_abs_max": 1000000000.0,
+            "diag_abs_mean": 166700000.5,
+            "diag_abs_median": 50000.5,
+            "unit": "N_per_m_or_Nm_per_rad"
+          }
+        },
+        "cross_component_diag_max_ratio": 1.397969744460792e+43,
+        "unit_consistency_warning": true,
+        "imbalance_ratio_threshold": 100000000.0,
+        "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+      },
+      "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs",
+      "use_force_based_frame": true,
+      "shell_internal_force_model": "linear_force_consistent_reference_geometry",
+      "stress_corrected_element_count": 0,
+      "active_dof_count": 54377,
+      "free_dof_count": 51993,
+      "frozen_external_load": true
+    },
+    "stiffness_unit_audit": {
+      "per_component": {
+        "frame": {
+          "free_diag_count": 51993,
+          "nonzero_diag_count": 12882,
+          "diag_abs_min": 2172.9583362166586,
+          "diag_abs_max": 263291938026322.7,
+          "diag_abs_mean": 156315363763.26364,
+          "diag_abs_median": 82837515.0898557,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "shell": {
+          "free_diag_count": 51993,
+          "nonzero_diag_count": 34352,
+          "diag_abs_min": 1.883387956495986e-29,
+          "diag_abs_max": 329678048360.4061,
+          "diag_abs_mean": 6931131964.7903595,
+          "diag_abs_median": 622791643.7393872,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "spring": {
+          "free_diag_count": 51993,
+          "nonzero_diag_count": 20304,
+          "diag_abs_min": 1.0,
+          "diag_abs_max": 1000000000.0,
+          "diag_abs_mean": 166700000.5,
+          "diag_abs_median": 50000.5,
+          "unit": "N_per_m_or_Nm_per_rad"
+        }
+      },
+      "cross_component_diag_max_ratio": 1.397969744460792e+43,
+      "unit_consistency_warning": true,
+      "imbalance_ratio_threshold": 100000000.0,
+      "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+    }
+  },
+  "matrix_diagnostics": {
+    "shape": [
+      51993,
+      51993
+    ],
+    "nnz": 938561,
+    "diag_abs_min": 1.0,
+    "diag_abs_max": 263292938026322.7,
+    "diag_abs_mean": 43373866444.77127,
+    "zero_diag_count": 0,
+    "symmetry_max_abs_diff": 0.015625
+  },
+  "explicit_attempts": [
+    {
+      "label": "default_block_jacobi",
+      "drop_tol": 1e-05,
+      "fill_factor": 40.0,
+      "restart": 80,
+      "max_iterations": 800,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": true,
+      "equilibrate": false,
+      "equilibration": {
+        "applied": false
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.47512743699917337,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.4776007180007582,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    },
+    {
+      "label": "ilu_only_loose_drop",
+      "drop_tol": 0.0001,
+      "fill_factor": 30.0,
+      "restart": 80,
+      "max_iterations": 800,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": false,
+      "equilibrate": false,
+      "equilibration": {
+        "applied": false
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.47119383700010076,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.47476187299980666,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    },
+    {
+      "label": "ilu_only_tight_drop",
+      "drop_tol": 1e-06,
+      "fill_factor": 60.0,
+      "restart": 100,
+      "max_iterations": 1200,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": false,
+      "equilibrate": false,
+      "equilibration": {
+        "applied": false
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.48134727999968163,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.48491858700072044,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    },
+    {
+      "label": "block_jacobi_high_fill",
+      "drop_tol": 1e-06,
+      "fill_factor": 80.0,
+      "restart": 100,
+      "max_iterations": 1200,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": true,
+      "equilibrate": false,
+      "equilibration": {
+        "applied": false
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.4821254649996263,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.48568742299903533,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    },
+    {
+      "label": "equilibrated_block_jacobi",
+      "drop_tol": 0.0001,
+      "fill_factor": 40.0,
+      "restart": 80,
+      "max_iterations": 800,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": true,
+      "equilibrate": true,
+      "equilibration": {
+        "equilibration": "symmetric_sqrt_diagonal",
+        "applied": true,
+        "diag_floor": 1.0,
+        "diag_cap_percentile": 99.5,
+        "diag_cap": 202225427257.86676,
+        "diag_abs_min": 1.0,
+        "diag_abs_max": 263292938026322.7,
+        "diag_abs_mean": 43373866444.77127,
+        "scaled_diag_abs_max": 1301.9774100444151
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.4638090549997287,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.47779804399942805,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    },
+    {
+      "label": "equilibrated_ilu_only",
+      "drop_tol": 0.0001,
+      "fill_factor": 60.0,
+      "restart": 80,
+      "max_iterations": 800,
+      "tolerance_abs": 1e-06,
+      "tolerance_rel": 0.0001,
+      "threshold_n": 0.002762720193159991,
+      "rhs_inf_n": 27.627201931599906,
+      "rhs_l2_n": 60.70582780152481,
+      "use_block_jacobi": false,
+      "equilibrate": true,
+      "equilibration": {
+        "equilibration": "symmetric_sqrt_diagonal",
+        "applied": true,
+        "diag_floor": 1.0,
+        "diag_cap_percentile": 99.5,
+        "diag_cap": 202225427257.86676,
+        "diag_abs_min": 1.0,
+        "diag_abs_max": 263292938026322.7,
+        "diag_abs_mean": 43373866444.77127,
+        "scaled_diag_abs_max": 1301.9774100444151
+      },
+      "ilu_factorization_ok": false,
+      "ilu_factorization_seconds": 0.46181934899868793,
+      "gmres_info": null,
+      "gmres_info_class": null,
+      "residual_inf_n": null,
+      "residual_rel_inf": null,
+      "residual_rel_l2": null,
+      "converged": false,
+      "breakdown_category": "ilu_factorization_failed",
+      "solve_seconds": 0.47529700100130867,
+      "error_excerpt": "RuntimeError('Factor is exactly singular')"
+    }
+  ],
+  "wrapper_attempts": [
+    {
+      "label": "solve_block_jacobi_gmres_wrapper",
+      "backend": "cpu_block_jacobi_gmres",
+      "preconditioner": "node_block_jacobi_equilibrated",
+      "converged": false,
+      "gmres_info": 800,
+      "residual_inf_n": 1.9098932901920055e+133,
+      "breakdown": null,
+      "error_excerpt": null,
+      "solve_seconds": 9051.944751517,
+      "equilibration": {
+        "equilibration": "symmetric_sqrt_diagonal",
+        "applied": true,
+        "diag_floor": 1.0,
+        "diag_cap_percentile": 99.5,
+        "diag_cap": 202225427257.86676,
+        "diag_abs_min": 1.0,
+        "diag_abs_max": 263292938026322.7,
+        "diag_abs_mean": 43373866444.77127,
+        "scaled_diag_abs_max": 1301.9774100444151
+      },
+      "breakdown_category": "gmres_residual_above_threshold"
+    },
+    {
+      "label": "solve_cpu_ilu_gmres_wrapper",
+      "backend": "cpu_ilu_gmres",
+      "preconditioner": null,
+      "converged": false,
+      "gmres_info": null,
+      "residual_inf_n": null,
+      "breakdown": "cpu_ilu_factorization_failed",
+      "error_excerpt": "RuntimeError('Factor is exactly singular')",
+      "solve_seconds": 0.6987246179996873,
+      "breakdown_category": "cpu_ilu_factorization_failed"
+    },
+    {
+      "label": "solve_host_ilu_device_gmres_wrapper",
+      "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "preconditioner": "equilibrated_scipy_spilu_host",
+      "converged": false,
+      "gmres_info": null,
+      "residual_inf_n": null,
+      "breakdown": "host_ilu_factorization_failed",
+      "error_excerpt": "RuntimeError('Factor is exactly singular')",
+      "solve_seconds": 0.5240724920004141,
+      "device": "cuda:0",
+      "breakdown_category": "host_ilu_factorization_failed"
+    }
+  ],
+  "fallback_solver": {
+    "label": "regularized_spsolve_refined",
+    "regularization": 0.04337386644477127,
+    "residual_inf_n": 22.490355001520278,
+    "residual_rel_inf": 0.8140656103069157,
+    "breakdown_category": "fallback_not_ilu_gmres"
+  },
+  "summary": {
+    "primary_breakdown": "ilu_factorization_failed",
+    "ilu_factorization_failure_count": 6,
+    "gmres_maxiter_failure_count": 0,
+    "gmres_threshold_failure_count": 0,
+    "explicit_converged_count": 0,
+    "breakdown_category_counts": {
+      "ilu_factorization_failed": 6
+    },
+    "best_explicit_label": "default_block_jacobi",
+    "best_explicit_residual_inf_n": null,
+    "best_explicit_breakdown_category": "ilu_factorization_failed",
+    "fallback_residual_inf_n": 22.490355001520278,
+    "newton_rhs_inf_n": 27.627201931599906
+  },
+  "frame_select_meta": {
+    "raw_line_element_count": 5576,
+    "line_elements_solved": 5564,
+    "skipped_short_or_degenerate_line_count": 12,
+    "line_node_count": 2491,
+    "beam_end_offset_applied_element_count": 708,
+    "beam_end_offset_max_abs_m": 0.523,
+    "frame_local_axis_angle_array_present": true,
+    "frame_local_axis_nonzero_angle_count": 150,
+    "frame_local_axis_max_abs_angle_deg": 270.0
+  },
+  "support_meta": {
+    "support_constraint_row_count": 8,
+    "authored_support_node_count": 2133,
+    "mapped_support_node_count": 2133,
+    "missing_support_node_count": 0,
+    "authored_support_restrained_dof_count": 7707,
+    "restraint_code_counts": {
+      "111000": 1,
+      "111111": 7
+    },
+    "restrained_dof_counts": {
+      "Dx": 2133,
+      "Dy": 2133,
+      "Dz": 2133,
+      "Rx": 436,
+      "Ry": 436,
+      "Rz": 436
+    },
+    "missing_support_node_ids_head": []
+  },
+  "spring_meta": {
+    "elastic_link_row_count": 1692,
+    "elastic_link_rows_skipped": 0,
+    "distinct_elastic_link_node_count": 3384,
+    "mapped_elastic_link_node_count": 3384,
+    "missing_elastic_link_node_count": 0,
+    "finite_spring_component_count": 10152,
+    "finite_spring_dof_counts": {
+      "SDx": 1692,
+      "SDy": 1692,
+      "SDz": 1692,
+      "SRx": 1692,
+      "SRy": 1692,
+      "SRz": 1692
+    },
+    "elastic_link_type_counts": {
+      "GEN": 1692
+    },
+    "stiffness_abs_min_nonzero_n_per_m_or_nm_per_rad": 1.0,
+    "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0
+  },
+  "equilibrium_step_meta": {
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "frozen_load_scale": 0.05,
+    "reference_f_ext_inf_n": 661.2910910677012,
+    "free_dof_count": 51993
+  },
+  "parser_report_contract_pass": true,
+  "parser_run": {
+    "command": [
+      "/usr/bin/python3",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/parse_midas_mgt_to_json_npz.py",
+      "--mgt",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+      "--json-out",
+      "/tmp/mgt-ilu-gmres-diagnostic-1p0t7p92/mgt_uncoarsened.roundtrip.json",
+      "--npz-out",
+      "/tmp/mgt-ilu-gmres-diagnostic-1p0t7p92/mgt_uncoarsened.roundtrip.npz",
+      "--report-out",
+      "/tmp/mgt-ilu-gmres-diagnostic-1p0t7p92/mgt_uncoarsened.report.json",
+      "--no-resolve-rigid-links",
+      "--no-drop-unreferenced-nodes",
+      "--no-strict-unknown-sections",
+      "--max-element-skip-ratio",
+      "0.20",
+      "--max-element-skip-count",
+      "10000"
+    ],
+    "return_code": 0,
+    "stdout_excerpt": "Wrote MIDAS MGT conversion report: /tmp/mgt-ilu-gmres-diagnostic-1p0t7p92/mgt_uncoarsened.report.json\n",
+    "stderr_excerpt": "{\"contract_pass\": true, \"event\": \"mgt_parser.completed\", \"reason_code\": \"PASS\"}\n"
+  },
+  "runtime_metrics": {
+    "total_seconds": 9087.768324219
+  },
+  "claim_boundary": "Diagnostic-only receipt for equilibrium tangent ILU-GMRES at lambda=0.05 warm-start. Classifies ILU factorization failure vs GMRES maxiter vs residual-above-threshold."
+}

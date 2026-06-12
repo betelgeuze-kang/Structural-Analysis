@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-global-fea-readiness-gate.v1",
-  "generated_at": "2026-05-31T09:13:03.943675+00:00",
+  "generated_at": "2026-06-05T13:34:28.939599+00:00",
   "status": "ready",
   "claim": "Roundtrip/NPZ/parse preflight only; does not run global FEA on full MGT mesh.",
   "native_solve_status": "not_wired",
@@ -12,21 +12,21 @@
   "metrics": {
     "element_count": 12728,
     "node_count": 13047,
-    "npz_bytes": 354229,
+    "npz_bytes": 354984,
     "parse_contract_pass": true,
     "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
   },
   "assembly_fingerprint": {
     "schema_version": "mgt-roundtrip-assembly-fingerprint.v1",
-    "generated_at": "2026-05-31T09:13:03.937041+00:00",
+    "generated_at": "2026-06-05T13:34:28.932934+00:00",
     "status": "ready",
-    "fingerprint_sha256": "f6983a27d20156e4ddc3f29c5357cc4a286f79f0a96a491f6d26689a10418f51",
+    "fingerprint_sha256": "2bfec1e76c92427f158c4d0bf91f76a842d4fd4c5ed14a9ad88fe7e11b986744",
     "metrics": {
       "element_count": 12728,
       "node_count": 13047,
       "section_count": 183,
       "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
-      "npz_bytes": 354229
+      "npz_bytes": 354984
     },
     "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
     "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",

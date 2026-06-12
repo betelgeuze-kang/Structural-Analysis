@@ -1,0 +1,3239 @@
+{
+  "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+  "generated_at": "2026-06-12T18:25:55.644433+00:00",
+  "status": "partial",
+  "residual_jacobian_consistency_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_probe_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 104,
+    "accepted_residual_history_count": 104,
+    "residual_inf_n": 6385.116404581466,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 7.2199044927738195e-06
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 6385.116404581466,
+  "base_relative_residual_inf": 0.7359398368432672,
+  "rhs_inf_n": 8676.13911480824,
+  "free_dof_count": 58998,
+  "residual_component_breakdown": {
+    "component_inf_n": {
+      "frame": 2447.8917410247386,
+      "spring": 0.8387057679917196,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 2343.8725411568835,
+      "shell_membrane": 2614.446934801875
+    },
+    "top_rows": [
+      {
+        "free_row": 54218,
+        "global_dof": 67304,
+        "node_index": 11217,
+        "dof": "uz",
+        "residual_n": 6385.116404581466,
+        "external_load_n": -4173.851848025999,
+        "component_values_n": {
+          "frame": 2211.264556555467,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2211.264556555467,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 5870,
+        "global_dof": 6926,
+        "node_index": 1154,
+        "dof": "uz",
+        "residual_n": 6384.076882090141,
+        "external_load_n": -8676.13911480824,
+        "component_values_n": {
+          "frame": -2255.8052487116365,
+          "spring": 0.0006381089331409534,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -36.25762211539637,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -2292.0622327180995,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 5864,
+        "global_dof": 6920,
+        "node_index": 1153,
+        "dof": "uz",
+        "residual_n": 6382.694113125435,
+        "external_load_n": -8292.745422450198,
+        "component_values_n": {
+          "frame": -1867.0193106705979,
+          "spring": 0.0005989959273110901,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -43.032597650092086,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -1910.0513093247628,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 422,
+        "global_dof": 518,
+        "node_index": 86,
+        "dof": "uz",
+        "residual_n": 6379.252607287119,
+        "external_load_n": -8109.798360708659,
+        "component_values_n": {
+          "frame": -1700.2118621552363,
+          "spring": 0.0007702897821878292,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -30.334661556086413,
+          "shell_membrane": -7.105427357601002e-15
+        },
+        "internal_sum_n": -1730.5457534215404,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 56528,
+        "global_dof": 72722,
+        "node_index": 12120,
+        "dof": "uz",
+        "residual_n": 6375.2679661613965,
+        "external_load_n": -4118.9327447625,
+        "component_values_n": {
+          "frame": 2256.335221398897,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2256.335221398897,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 428,
+        "global_dof": 524,
+        "node_index": 87,
+        "dof": "uz",
+        "residual_n": 6375.0623672005,
+        "external_load_n": -8550.816102481398,
+        "component_values_n": {
+          "frame": -2140.516578208084,
+          "spring": 0.00055560373107106,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -35.23771267654465,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -2175.7537352808977,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 56534,
+        "global_dof": 72728,
+        "node_index": 12121,
+        "dof": "uz",
+        "residual_n": 6366.508515004884,
+        "external_load_n": -4118.9327447625,
+        "component_values_n": {
+          "frame": 2247.5757702423844,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2247.5757702423844,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 54206,
+        "global_dof": 67292,
+        "node_index": 11215,
+        "dof": "uz",
+        "residual_n": 6364.681594029134,
+        "external_load_n": -4118.9327447625,
+        "component_values_n": {
+          "frame": 2245.7488492666344,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2245.7488492666344,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 416,
+        "global_dof": 512,
+        "node_index": 85,
+        "dof": "uz",
+        "residual_n": 6364.013991627936,
+        "external_load_n": -6897.62858288701,
+        "component_values_n": {
+          "frame": -496.8467233204019,
+          "spring": 0.0008267730521246317,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -36.76869471172503,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -533.6145912590748,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 54212,
+        "global_dof": 67298,
+        "node_index": 11216,
+        "dof": "uz",
+        "residual_n": 6360.2583468664525,
+        "external_load_n": -4118.9327447625,
+        "component_values_n": {
+          "frame": 2241.325602103952,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2241.325602103952,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 54188,
+        "global_dof": 67274,
+        "node_index": 11212,
+        "dof": "uz",
+        "residual_n": 6154.931707607237,
+        "external_load_n": -3707.0399665824984,
+        "component_values_n": {
+          "frame": 2447.8917410247386,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2447.8917410247386,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 10568,
+        "global_dof": 13184,
+        "node_index": 2197,
+        "dof": "uz",
+        "residual_n": 5886.372194347398,
+        "external_load_n": -3230.063830907181,
+        "component_values_n": {
+          "frame": 10.050794414132007,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 31.81063422421023,
+          "shell_membrane": 2614.446934801875
+        },
+        "internal_sum_n": 2656.3083634402174,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 8864,
+        "global_dof": 10226,
+        "node_index": 1704,
+        "dof": "uz",
+        "residual_n": 5565.797646057914,
+        "external_load_n": -4000.4046034858848,
+        "component_values_n": {
+          "frame": 379.4473088666366,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 1185.9457337053923,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 1565.393042572029,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10418,
+        "global_dof": 13034,
+        "node_index": 2172,
+        "dof": "uz",
+        "residual_n": 5468.104708921197,
+        "external_load_n": -3153.1987846554102,
+        "component_values_n": {
+          "frame": 900.3561136436575,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 1414.5498106221296,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 2314.9059242657872,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 386,
+        "global_dof": 482,
+        "node_index": 80,
+        "dof": "uz",
+        "residual_n": 5442.339909934925,
+        "external_load_n": -5304.7622385637715,
+        "component_values_n": {
+          "frame": 154.58512247406316,
+          "spring": 0.0005851571766468946,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -17.00803626008632,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 137.57767137115349,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 398,
+        "global_dof": 494,
+        "node_index": 82,
+        "dof": "uz",
+        "residual_n": 5354.47871561365,
+        "external_load_n": -5996.963253492609,
+        "component_values_n": {
+          "frame": -621.209764380008,
+          "spring": 0.0010285400393239535,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -21.275802038990417,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -642.484537878959,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 10544,
+        "global_dof": 13160,
+        "node_index": 2193,
+        "dof": "uz",
+        "residual_n": 4885.186610541471,
+        "external_load_n": -2832.1008491691764,
+        "component_values_n": {
+          "frame": 1077.513893058137,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 34.87583767660684,
+          "shell_membrane": 940.6960306375506
+        },
+        "internal_sum_n": 2053.0857613722947,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 392,
+        "global_dof": 488,
+        "node_index": 81,
+        "dof": "uz",
+        "residual_n": 4814.542493913676,
+        "external_load_n": -5394.250622899691,
+        "component_values_n": {
+          "frame": -535.4128319584148,
+          "spring": 0.0005529522285085326,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -44.29584997982851,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -579.7081289860148,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 380,
+        "global_dof": 476,
+        "node_index": 79,
+        "dof": "uz",
+        "residual_n": 4753.441770569449,
+        "external_load_n": -4266.004051245534,
+        "component_values_n": {
+          "frame": 490.6715998665503,
+          "spring": 0.0004696378493143901,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -3.2343501804850057,
+          "shell_membrane": 3.552713678800501e-15
+        },
+        "internal_sum_n": 487.4377193239146,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 5876,
+        "global_dof": 6932,
+        "node_index": 1155,
+        "dof": "uz",
+        "residual_n": 4687.577376297115,
+        "external_load_n": -3347.6280610218055,
+        "component_values_n": {
+          "frame": 1394.8718634301742,
+          "spring": 0.00048029439846906886,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -54.923028449263825,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 1339.949315275309,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 54170,
+        "global_dof": 67256,
+        "node_index": 11209,
+        "dof": "uz",
+        "residual_n": 4544.201367892219,
+        "external_load_n": -2636.1169566480003,
+        "component_values_n": {
+          "frame": 1908.0844112442196,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 1908.0844112442196,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 5858,
+        "global_dof": 6914,
+        "node_index": 1152,
+        "dof": "uz",
+        "residual_n": 4536.106908761639,
+        "external_load_n": -5546.710634404085,
+        "component_values_n": {
+          "frame": -969.9450718783793,
+          "spring": 0.0008820469947952737,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -40.659535811061474,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -1010.603725642446,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 56516,
+        "global_dof": 72710,
+        "node_index": 12118,
+        "dof": "uz",
+        "residual_n": 4533.58286883123,
+        "external_load_n": -2636.1169566480003,
+        "component_values_n": {
+          "frame": 1897.4659121832299,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 1897.4659121832299,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 54176,
+        "global_dof": 67262,
+        "node_index": 11210,
+        "dof": "uz",
+        "residual_n": 4529.713710094784,
+        "external_load_n": -2636.1169566480003,
+        "component_values_n": {
+          "frame": 1893.5967534467836,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 1893.5967534467836,
+        "dominant_component": "frame"
+      }
+    ],
+    "top_row_dominant_component_counts": {
+      "frame": 21,
+      "shell_membrane": 1,
+      "shell_bending_drilling": 2
+    }
+  },
+  "residual_hotspot_shell_membrane_diagnostics": [
+    {
+      "free_row": 54218,
+      "global_dof": 67304,
+      "node_index": 11217,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6385.116404581466,
+      "node_xyz_m": [
+        133.552,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -3.8706544630513044e-10,
+        -1.4594719918107849e-10,
+        5.9333082349871894e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 5870,
+      "global_dof": 6926,
+      "node_index": 1154,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6384.076882090141,
+      "node_xyz_m": [
+        134.619615384615,
+        185.462538461538,
+        0.0
+      ],
+      "node_translation_m": [
+        -2.8145746068592858e-11,
+        -1.791227723021451e-11,
+        5.689270558270534e-09
+      ],
+      "incident_surface_element_count": 4,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 4.210465253525623e-11,
+      "max_relative_normal_displacement_m": 8.876508932734925e-09,
+      "sample_incident_elements": [
+        {
+          "elem_index": 3094,
+          "elem_id": 21318,
+          "conn": [
+            1181,
+            1154,
+            1155,
+            1179
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1181,
+                1154,
+                1155
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.811949613356292e-11,
+              "max_relative_normal_displacement_m": 8.876508932734925e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3115,
+          "elem_id": 21339,
+          "conn": [
+            1183,
+            1153,
+            1154,
+            1181
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1183,
+                1153,
+                1154
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 4.210465253525622e-11,
+              "max_relative_normal_displacement_m": 4.136694864621579e-10,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1183,
+                1154,
+                1181
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.8119496133562915e-11,
+              "max_relative_normal_displacement_m": 8.876508932734925e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3158,
+          "elem_id": 21382,
+          "conn": [
+            1153,
+            1225,
+            1224,
+            1154
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1153,
+                1224,
+                1154
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 4.210465253525623e-11,
+              "max_relative_normal_displacement_m": 3.5746942826085383e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3164,
+          "elem_id": 21388,
+          "conn": [
+            1154,
+            1224,
+            1223,
+            1155
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1154,
+                1224,
+                1223
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.826270024904018e-11,
+              "max_relative_normal_displacement_m": 6.115392780675363e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1154,
+                1223,
+                1155
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.486199937264046e-11,
+              "max_relative_normal_displacement_m": 6.115392780675363e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "free_row": 5864,
+      "global_dof": 6920,
+      "node_index": 1153,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6382.694113125435,
+      "node_xyz_m": [
+        134.538769230769,
+        184.533923076923,
+        0.0
+      ],
+      "node_translation_m": [
+        1.2509133928638746e-11,
+        -2.886592947617137e-11,
+        5.275601071808376e-09
+      ],
+      "incident_surface_element_count": 4,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 8.171238339276835e-11,
+      "max_relative_normal_displacement_m": 1.247707596591077e-08,
+      "sample_incident_elements": [
+        {
+          "elem_index": 3115,
+          "elem_id": 21339,
+          "conn": [
+            1183,
+            1153,
+            1154,
+            1181
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1183,
+                1153,
+                1154
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 4.210465253525622e-11,
+              "max_relative_normal_displacement_m": 4.136694864621579e-10,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3122,
+          "elem_id": 21346,
+          "conn": [
+            1185,
+            1152,
+            1153,
+            1183
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1185,
+                1152,
+                1153
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 8.171238339276835e-11,
+              "max_relative_normal_displacement_m": 1.0551029698123426e-08,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1185,
+                1153,
+                1183
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.736350008460119e-11,
+              "max_relative_normal_displacement_m": 1.0551029698123426e-08,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3158,
+          "elem_id": 21382,
+          "conn": [
+            1153,
+            1225,
+            1224,
+            1154
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1153,
+                1225,
+                1224
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 3.682758526093546e-11,
+              "max_relative_normal_displacement_m": 1.247707596591077e-08,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1153,
+                1224,
+                1154
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 4.210465253525623e-11,
+              "max_relative_normal_displacement_m": 3.988363769070696e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3160,
+          "elem_id": 21384,
+          "conn": [
+            1152,
+            1227,
+            1225,
+            1153
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1152,
+                1225,
+                1153
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 8.171238339276835e-11,
+              "max_relative_normal_displacement_m": 1.247707596591077e-08,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "free_row": 422,
+      "global_dof": 518,
+      "node_index": 86,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6379.252607287119,
+      "node_xyz_m": [
+        134.478,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        -7.502994647218288e-11,
+        4.48573724616138e-11,
+        6.755324867327124e-09
+      ],
+      "incident_surface_element_count": 4,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+      "max_relative_normal_displacement_m": 6.331447334830754e-09,
+      "sample_incident_elements": [
+        {
+          "elem_index": 2279,
+          "elem_id": 20379,
+          "conn": [
+            86,
+            87,
+            110,
+            108
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                86,
+                87,
+                110
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 8.944970971534695e-11,
+              "max_relative_normal_displacement_m": 6.331447334830754e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                86,
+                110,
+                108
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.0570960832804331e-10,
+              "max_relative_normal_displacement_m": 6.331447334830754e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 2313,
+          "elem_id": 20413,
+          "conn": [
+            85,
+            86,
+            108,
+            106
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                85,
+                86,
+                108
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+              "max_relative_normal_displacement_m": 4.844291279062801e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3517,
+          "elem_id": 21792,
+          "conn": [
+            1523,
+            1525,
+            86,
+            85
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1523,
+                1525,
+                86
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 9.749730833150394e-11,
+              "max_relative_normal_displacement_m": 1.8110223242274453e-09,
+              "normal": [
+                -0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1523,
+                86,
+                85
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+              "max_relative_normal_displacement_m": 1.8110223242274453e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3524,
+          "elem_id": 21799,
+          "conn": [
+            1525,
+            1527,
+            87,
+            86
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1525,
+                87,
+                86
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 9.749730833150392e-11,
+              "max_relative_normal_displacement_m": 1.7703409868691197e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "free_row": 56528,
+      "global_dof": 72722,
+      "node_index": 12120,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6375.2679661613965,
+      "node_xyz_m": [
+        134.538769230769,
+        184.533923076923,
+        3.625
+      ],
+      "node_translation_m": [
+        4.4104850191950764e-10,
+        -9.629432629719313e-10,
+        6.167972494494815e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 428,
+      "global_dof": 524,
+      "node_index": 87,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6375.0623672005,
+      "node_xyz_m": [
+        133.552,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        -1.6735222132853323e-11,
+        -4.8805745637338314e-12,
+        4.984983880458004e-09
+      ],
+      "incident_surface_element_count": 4,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 7.662987837713635e-11,
+      "max_relative_normal_displacement_m": 8.101788321699875e-09,
+      "sample_incident_elements": [
+        {
+          "elem_index": 2279,
+          "elem_id": 20379,
+          "conn": [
+            86,
+            87,
+            110,
+            108
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                86,
+                87,
+                110
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 7.662987837713633e-11,
+              "max_relative_normal_displacement_m": 8.101788321699875e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 2298,
+          "elem_id": 20398,
+          "conn": [
+            87,
+            88,
+            111,
+            110
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                87,
+                88,
+                111
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.8733128527731872e-11,
+              "max_relative_normal_displacement_m": 5.993902614026491e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                87,
+                111,
+                110
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.9937221684326937e-11,
+              "max_relative_normal_displacement_m": 8.101788321699875e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3515,
+          "elem_id": 21790,
+          "conn": [
+            1527,
+            1528,
+            88,
+            87
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1527,
+                88,
+                87
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.9919083611175086e-11,
+              "max_relative_normal_displacement_m": 3.4088841270166465e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3524,
+          "elem_id": 21799,
+          "conn": [
+            1525,
+            1527,
+            87,
+            86
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1525,
+                1527,
+                87
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 2.3908416357809473e-11,
+              "max_relative_normal_displacement_m": 3.4088841270166465e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1525,
+                87,
+                86
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 7.662987837713635e-11,
+              "max_relative_normal_displacement_m": 1.8904494139583147e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "free_row": 56534,
+      "global_dof": 72728,
+      "node_index": 12121,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6366.508515004884,
+      "node_xyz_m": [
+        134.619615384615,
+        185.462538461538,
+        3.625
+      ],
+      "node_translation_m": [
+        -1.0649803556895442e-09,
+        -6.481742793903116e-10,
+        6.170133354617943e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 54206,
+      "global_dof": 67292,
+      "node_index": 11215,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6364.681594029134,
+      "node_xyz_m": [
+        135.404,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        2.1813014614892003e-09,
+        8.16694386451322e-10,
+        6.44244550550522e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 416,
+      "global_dof": 512,
+      "node_index": 85,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6364.013991627936,
+      "node_xyz_m": [
+        135.404,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        1.0755504786376825e-10,
+        3.2746245195858365e-11,
+        7.224691467112481e-09
+      ],
+      "incident_surface_element_count": 4,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+      "max_relative_normal_displacement_m": 7.053016022478698e-09,
+      "sample_incident_elements": [
+        {
+          "elem_index": 2300,
+          "elem_id": 20400,
+          "conn": [
+            84,
+            85,
+            106,
+            104
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                84,
+                85,
+                106
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.5382325609957154e-10,
+              "max_relative_normal_displacement_m": 7.053016022478698e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 2313,
+          "elem_id": 20413,
+          "conn": [
+            85,
+            86,
+            108,
+            106
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                85,
+                86,
+                108
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+              "max_relative_normal_displacement_m": 4.3749246792774435e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                85,
+                108,
+                106
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.2476147682786675e-10,
+              "max_relative_normal_displacement_m": 7.053016022478698e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3517,
+          "elem_id": 21792,
+          "conn": [
+            1523,
+            1525,
+            86,
+            85
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1523,
+                86,
+                85
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.8298622778861428e-10,
+              "max_relative_normal_displacement_m": 1.3416557244420877e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 3537,
+          "elem_id": 21812,
+          "conn": [
+            1522,
+            1523,
+            85,
+            84
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                1522,
+                1523,
+                85
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.3073513477906807e-10,
+              "max_relative_normal_displacement_m": 1.939465178680895e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                1522,
+                85,
+                84
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.5382325609957154e-10,
+              "max_relative_normal_displacement_m": 1.939465178680895e-09,
+              "normal": [
+                0.0,
+                0.0,
+                -1.0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "free_row": 54212,
+      "global_dof": 67298,
+      "node_index": 11216,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6360.2583468664525,
+      "node_xyz_m": [
+        134.478,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -2.563037208927392e-09,
+        1.8039540484489282e-09,
+        6.460274845895182e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 54188,
+      "global_dof": 67274,
+      "node_index": 11212,
+      "dof": "uz",
+      "dominant_component": "frame",
+      "residual_n": 6154.931707607237,
+      "node_xyz_m": [
+        138.182,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -1.584947866660561e-09,
+        -9.060145042210452e-10,
+        7.634233556281727e-08
+      ],
+      "incident_surface_element_count": 0,
+      "max_global_dof_membrane_participation": 0.0,
+      "max_global_dof_normal_participation": 0.0,
+      "max_relative_membrane_displacement_m": 0.0,
+      "max_relative_normal_displacement_m": 0.0,
+      "sample_incident_elements": []
+    },
+    {
+      "free_row": 10568,
+      "global_dof": 13184,
+      "node_index": 2197,
+      "dof": "uz",
+      "dominant_component": "shell_membrane",
+      "residual_n": 5886.372194347398,
+      "node_xyz_m": [
+        110.564,
+        162.476,
+        -0.0
+      ],
+      "node_translation_m": [
+        -1.198843588977244e-10,
+        -9.206002065862502e-10,
+        1.067658302030347e-08
+      ],
+      "incident_surface_element_count": 6,
+      "max_global_dof_membrane_participation": 1.0,
+      "max_global_dof_normal_participation": 1.0,
+      "max_relative_membrane_displacement_m": 1.1166628395933488e-08,
+      "max_relative_normal_displacement_m": 1.0811676214307444e-08,
+      "sample_incident_elements": [
+        {
+          "elem_index": 1692,
+          "elem_id": 12255,
+          "conn": [
+            2197,
+            3017,
+            4133,
+            2691
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                2197,
+                3017,
+                4133
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.097065161941928e-08,
+              "max_relative_normal_displacement_m": 4.276136428242136e-11,
+              "normal": [
+                0.9961644378253854,
+                -0.0875009303495327,
+                0.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                2197,
+                4133,
+                2691
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.1166628395933488e-08,
+              "max_relative_normal_displacement_m": 4.276136428242136e-11,
+              "normal": [
+                0.9961644378253854,
+                -0.0875009303495327,
+                0.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 1701,
+          "elem_id": 12264,
+          "conn": [
+            4136,
+            3017,
+            2197,
+            2692
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                4136,
+                3017,
+                2197
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.097064405868808e-08,
+              "max_relative_normal_displacement_m": 4.042968588054396e-11,
+              "normal": [
+                0.9963595908860438,
+                -0.08525001847152486,
+                0.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                4136,
+                2197,
+                2692
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.1142197095600732e-08,
+              "max_relative_normal_displacement_m": 4.249426698432693e-11,
+              "normal": [
+                0.9963595908860438,
+                -0.08525001847152486,
+                0.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 5767,
+          "elem_id": 25826,
+          "conn": [
+            2195,
+            2197,
+            2175,
+            2169
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                2195,
+                2197,
+                2175
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 9.298271847603356e-10,
+              "max_relative_normal_displacement_m": 6.519904278401071e-09,
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 5768,
+          "elem_id": 25827,
+          "conn": [
+            2197,
+            2196,
+            2217,
+            2216
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                2197,
+                2196,
+                2217
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 1.1545602237488214e-09,
+              "max_relative_normal_displacement_m": 1.0811676214307444e-08,
+              "normal": [
+                -0.0,
+                0.0,
+                1.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                2197,
+                2217,
+                2216
+              ],
+              "global_dof_membrane_participation": 0.0,
+              "global_dof_normal_participation": 1.0,
+              "max_relative_membrane_displacement_m": 9.507024227722791e-10,
+              "max_relative_normal_displacement_m": 1.0811676214307444e-08,
+              "normal": [
+                0.0,
+                0.0,
+                1.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 8058,
+          "elem_id": 28403,
+          "conn": [
+            2691,
+            9346,
+            9347,
+            2197
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                2691,
+                9347,
+                2197
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.1166628395933488e-08,
+              "max_relative_normal_displacement_m": 4.021427120226987e-11,
+              "normal": [
+                0.9961644378253854,
+                -0.0875009303495327,
+                0.0
+              ]
+            }
+          ]
+        },
+        {
+          "elem_index": 8067,
+          "elem_id": 28412,
+          "conn": [
+            2197,
+            9347,
+            9354,
+            2692
+          ],
+          "triangles": [
+            {
+              "tri_nodes": [
+                2197,
+                9347,
+                9354
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.1084715648971513e-08,
+              "max_relative_normal_displacement_m": 4.6900412994138443e-11,
+              "normal": [
+                0.9963595908860438,
+                -0.08525001847152486,
+                0.0
+              ]
+            },
+            {
+              "tri_nodes": [
+                2197,
+                9354,
+                2692
+              ],
+              "global_dof_membrane_participation": 1.0,
+              "global_dof_normal_participation": 0.0,
+              "max_relative_membrane_displacement_m": 1.1142197095600732e-08,
+              "max_relative_normal_displacement_m": 4.6900412994138443e-11,
+              "normal": [
+                0.9963595908860438,
+                -0.08525001847152486,
+                0.0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "residual_hotspot_frame_diagnostics": [
+    {
+      "free_row": 54218,
+      "global_dof": 67304,
+      "node_index": 11217,
+      "raw_node_id": 11233,
+      "dof": "uz",
+      "residual_n": 6385.116404581466,
+      "external_load_n": -4173.851848025999,
+      "component_frame_n": 2211.264556555467,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2211.264556555467,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        133.552,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -3.8706544630513044e-10,
+        -1.4594719918107849e-10,
+        5.9333082349871894e-08
+      ],
+      "max_abs_sample_contribution_n": 1105.6322782777336,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6131,
+          "end": "j",
+          "other_node_index": 87,
+          "section_id": 1086,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 144933.20555730865,
+          "target_dof_force_contribution_n": 1105.6322782777336
+        },
+        {
+          "elem_id": 6132,
+          "end": "i",
+          "other_node_index": 87,
+          "section_id": 1086,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 149107.05740533464,
+          "target_dof_force_contribution_n": 1105.6322782777336
+        }
+      ]
+    },
+    {
+      "free_row": 5870,
+      "global_dof": 6926,
+      "node_index": 1154,
+      "raw_node_id": 1155,
+      "dof": "uz",
+      "residual_n": 6384.076882090141,
+      "external_load_n": -8676.13911480824,
+      "component_frame_n": -2255.8052487116365,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -2255.8052487116365,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.619615384615,
+        185.462538461538,
+        0.0
+      ],
+      "node_translation_m": [
+        -2.8145746068592858e-11,
+        -1.791227723021451e-11,
+        5.689270558270534e-09
+      ],
+      "max_abs_sample_contribution_n": 1123.7878851211922,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 27455,
+          "end": "i",
+          "other_node_index": 12121,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 35011.853995433376,
+          "target_dof_force_contribution_n": -1123.7878851211922
+        },
+        {
+          "elem_id": 27456,
+          "end": "j",
+          "other_node_index": 12121,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 39130.78674019587,
+          "target_dof_force_contribution_n": -1123.7878851211922
+        },
+        {
+          "elem_id": 27453,
+          "end": "i",
+          "other_node_index": 1224,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0876063937028657,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 512.0714557944183
+        },
+        {
+          "elem_id": 27454,
+          "end": "j",
+          "other_node_index": 1224,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0876063937028657,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 512.071455794418
+        },
+        {
+          "elem_id": 27449,
+          "end": "i",
+          "other_node_index": 1155,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.932128013277879,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -410.9736178998031
+        },
+        {
+          "elem_id": 27450,
+          "end": "j",
+          "other_node_index": 1155,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.932128013277879,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -410.973617899803
+        },
+        {
+          "elem_id": 27452,
+          "end": "j",
+          "other_node_index": 1181,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0582648888008006,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -199.3137567872957
+        },
+        {
+          "elem_id": 27451,
+          "end": "i",
+          "other_node_index": 1181,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0582648888008006,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -199.31375678729526
+        },
+        {
+          "elem_id": 27442,
+          "end": "i",
+          "other_node_index": 1153,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132768016,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 94.10117965805442
+        },
+        {
+          "elem_id": 27441,
+          "end": "j",
+          "other_node_index": 1153,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132768016,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 94.10117965805424
+        }
+      ]
+    },
+    {
+      "free_row": 5864,
+      "global_dof": 6920,
+      "node_index": 1153,
+      "raw_node_id": 1154,
+      "dof": "uz",
+      "residual_n": 6382.694113125435,
+      "external_load_n": -8292.745422450198,
+      "component_frame_n": -1867.0193106705979,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -1867.0193106705979,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.538769230769,
+        184.533923076923,
+        0.0
+      ],
+      "node_translation_m": [
+        1.2509133928638746e-11,
+        -2.886592947617137e-11,
+        5.275601071808376e-09
+      ],
+      "max_abs_sample_contribution_n": 1128.1676106994485,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 27447,
+          "end": "i",
+          "other_node_index": 12120,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 26773.988505908375,
+          "target_dof_force_contribution_n": -1128.1676106994485
+        },
+        {
+          "elem_id": 27448,
+          "end": "j",
+          "other_node_index": 12120,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 30892.921250670875,
+          "target_dof_force_contribution_n": -1128.1676106994485
+        },
+        {
+          "elem_id": 27443,
+          "end": "i",
+          "other_node_index": 1183,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0630239510822792,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 552.570066260358
+        },
+        {
+          "elem_id": 27444,
+          "end": "j",
+          "other_node_index": 1183,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0630239510822792,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 552.5700662603576
+        },
+        {
+          "elem_id": 27433,
+          "end": "j",
+          "other_node_index": 1152,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132767992,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -148.97861317823816
+        },
+        {
+          "elem_id": 27434,
+          "end": "i",
+          "other_node_index": 1152,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132767992,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -148.97861317823816
+        },
+        {
+          "elem_id": 27446,
+          "end": "j",
+          "other_node_index": 1225,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0810037444624867,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -114.83231805991599
+        },
+        {
+          "elem_id": 27445,
+          "end": "i",
+          "other_node_index": 1225,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0810037444624867,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -114.83231805991575
+        },
+        {
+          "elem_id": 27442,
+          "end": "j",
+          "other_node_index": 1154,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132768016,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -94.10117965805442
+        },
+        {
+          "elem_id": 27441,
+          "end": "i",
+          "other_node_index": 1154,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9321280132768016,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -94.10117965805424
+        }
+      ]
+    },
+    {
+      "free_row": 422,
+      "global_dof": 518,
+      "node_index": 86,
+      "raw_node_id": 87,
+      "dof": "uz",
+      "residual_n": 6379.252607287119,
+      "external_load_n": -8109.798360708659,
+      "component_frame_n": -1700.2118621552363,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -1700.2118621552363,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.478,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        -7.502994647218288e-11,
+        4.48573724616138e-11,
+        6.755324867327124e-09
+      ],
+      "max_abs_sample_contribution_n": 1120.662801051976,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6123,
+          "end": "i",
+          "other_node_index": 11216,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 136695.3400677837,
+          "target_dof_force_contribution_n": -1120.662801051976
+        },
+        {
+          "elem_id": 6124,
+          "end": "j",
+          "other_node_index": 11216,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 140814.27281254617,
+          "target_dof_force_contribution_n": -1120.662801051976
+        },
+        {
+          "elem_id": 6122,
+          "end": "j",
+          "other_node_index": 1525,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.912819611550856,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -765.4019193280291
+        },
+        {
+          "elem_id": 6121,
+          "end": "i",
+          "other_node_index": 1525,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.912819611550856,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -765.4019193280287
+        },
+        {
+          "elem_id": 6117,
+          "end": "i",
+          "other_node_index": 87,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 560.4172361303715
+        },
+        {
+          "elem_id": 6118,
+          "end": "j",
+          "other_node_index": 87,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 560.4172361303714
+        },
+        {
+          "elem_id": 6120,
+          "end": "j",
+          "other_node_index": 108,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0802991263226356,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 371.48128816914146
+        },
+        {
+          "elem_id": 6119,
+          "end": "i",
+          "other_node_index": 108,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0802991263226356,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 371.48128816914135
+        },
+        {
+          "elem_id": 6017,
+          "end": "j",
+          "other_node_index": 85,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 104.06026500287393
+        },
+        {
+          "elem_id": 6018,
+          "end": "i",
+          "other_node_index": 85,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 104.06026500287393
+        }
+      ]
+    },
+    {
+      "free_row": 56528,
+      "global_dof": 72722,
+      "node_index": 12120,
+      "raw_node_id": 12136,
+      "dof": "uz",
+      "residual_n": 6375.2679661613965,
+      "external_load_n": -4118.9327447625,
+      "component_frame_n": 2256.335221398897,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2256.335221398897,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.538769230769,
+        184.533923076923,
+        3.625
+      ],
+      "node_translation_m": [
+        4.4104850191950764e-10,
+        -9.629432629719313e-10,
+        6.167972494494815e-08
+      ],
+      "max_abs_sample_contribution_n": 1128.1676106994485,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 27447,
+          "end": "j",
+          "other_node_index": 1153,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 26773.988505908375,
+          "target_dof_force_contribution_n": 1128.1676106994485
+        },
+        {
+          "elem_id": 27448,
+          "end": "i",
+          "other_node_index": 1153,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 30892.921250670875,
+          "target_dof_force_contribution_n": 1128.1676106994485
+        }
+      ]
+    },
+    {
+      "free_row": 428,
+      "global_dof": 524,
+      "node_index": 87,
+      "raw_node_id": 88,
+      "dof": "uz",
+      "residual_n": 6375.0623672005,
+      "external_load_n": -8550.816102481398,
+      "component_frame_n": -2140.516578208084,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -2140.516578208084,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        133.552,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        -1.6735222132853323e-11,
+        -4.8805745637338314e-12,
+        4.984983880458004e-09
+      ],
+      "max_abs_sample_contribution_n": 1105.6322782777336,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6131,
+          "end": "i",
+          "other_node_index": 11217,
+          "section_id": 1086,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 144933.20555730865,
+          "target_dof_force_contribution_n": -1105.6322782777336
+        },
+        {
+          "elem_id": 6132,
+          "end": "j",
+          "other_node_index": 11217,
+          "section_id": 1086,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 149107.05740533464,
+          "target_dof_force_contribution_n": -1105.6322782777336
+        },
+        {
+          "elem_id": 6117,
+          "end": "j",
+          "other_node_index": 86,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -560.4172361303715
+        },
+        {
+          "elem_id": 6118,
+          "end": "i",
+          "other_node_index": 86,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -560.4172361303714
+        },
+        {
+          "elem_id": 6129,
+          "end": "i",
+          "other_node_index": 1527,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9016365677112423,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 287.35356706306834
+        },
+        {
+          "elem_id": 6130,
+          "end": "j",
+          "other_node_index": 1527,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9016365677112423,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 287.35356706306817
+        },
+        {
+          "elem_id": 6126,
+          "end": "j",
+          "other_node_index": 88,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 254.43568702613973
+        },
+        {
+          "elem_id": 6125,
+          "end": "i",
+          "other_node_index": 88,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 254.4356870261396
+        },
+        {
+          "elem_id": 6127,
+          "end": "i",
+          "other_node_index": 110,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0979082074272843,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 54.001971214855246
+        },
+        {
+          "elem_id": 6128,
+          "end": "j",
+          "other_node_index": 110,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0979082074272843,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 54.001971214855196
+        }
+      ]
+    },
+    {
+      "free_row": 56534,
+      "global_dof": 72728,
+      "node_index": 12121,
+      "raw_node_id": 12137,
+      "dof": "uz",
+      "residual_n": 6366.508515004884,
+      "external_load_n": -4118.9327447625,
+      "component_frame_n": 2247.5757702423844,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2247.5757702423844,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.619615384615,
+        185.462538461538,
+        3.625
+      ],
+      "node_translation_m": [
+        -1.0649803556895442e-09,
+        -6.481742793903116e-10,
+        6.170133354617943e-08
+      ],
+      "max_abs_sample_contribution_n": 1123.7878851211922,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 27455,
+          "end": "j",
+          "other_node_index": 1154,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 35011.853995433376,
+          "target_dof_force_contribution_n": 1123.7878851211922
+        },
+        {
+          "elem_id": 27456,
+          "end": "i",
+          "other_node_index": 1154,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 39130.78674019587,
+          "target_dof_force_contribution_n": 1123.7878851211922
+        }
+      ]
+    },
+    {
+      "free_row": 54206,
+      "global_dof": 67292,
+      "node_index": 11215,
+      "raw_node_id": 11231,
+      "dof": "uz",
+      "residual_n": 6364.681594029134,
+      "external_load_n": -4118.9327447625,
+      "component_frame_n": 2245.7488492666344,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2245.7488492666344,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        135.404,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        2.1813014614892003e-09,
+        8.16694386451322e-10,
+        6.44244550550522e-08
+      ],
+      "max_abs_sample_contribution_n": 1122.8744246333172,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6115,
+          "end": "j",
+          "other_node_index": 85,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 128457.4745782587,
+          "target_dof_force_contribution_n": 1122.8744246333172
+        },
+        {
+          "elem_id": 6116,
+          "end": "i",
+          "other_node_index": 85,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 132576.40732302118,
+          "target_dof_force_contribution_n": 1122.8744246333172
+        }
+      ]
+    },
+    {
+      "free_row": 416,
+      "global_dof": 512,
+      "node_index": 85,
+      "raw_node_id": 86,
+      "dof": "uz",
+      "residual_n": 6364.013991627936,
+      "external_load_n": -6897.62858288701,
+      "component_frame_n": -496.8467233204019,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -496.8467233204019,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        135.404,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        1.0755504786376825e-10,
+        3.2746245195858365e-11,
+        7.224691467112481e-09
+      ],
+      "max_abs_sample_contribution_n": 1122.8744246333172,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6115,
+          "end": "i",
+          "other_node_index": 11215,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 128457.4745782587,
+          "target_dof_force_contribution_n": -1122.8744246333172
+        },
+        {
+          "elem_id": 6116,
+          "end": "j",
+          "other_node_index": 11215,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 132576.40732302118,
+          "target_dof_force_contribution_n": -1122.8744246333172
+        },
+        {
+          "elem_id": 6045,
+          "end": "i",
+          "other_node_index": 1523,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8946864583902108,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 553.301726487632
+        },
+        {
+          "elem_id": 6046,
+          "end": "j",
+          "other_node_index": 1523,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8946864583902108,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 553.3017264876318
+        },
+        {
+          "elem_id": 6043,
+          "end": "i",
+          "other_node_index": 106,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0735496817624708,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 325.27160541279295
+        },
+        {
+          "elem_id": 6044,
+          "end": "j",
+          "other_node_index": 106,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0735496817624708,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 325.27160541279295
+        },
+        {
+          "elem_id": 6017,
+          "end": "i",
+          "other_node_index": 86,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -104.06026500287393
+        },
+        {
+          "elem_id": 6018,
+          "end": "j",
+          "other_node_index": 86,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -104.06026500287393
+        },
+        {
+          "elem_id": 5881,
+          "end": "j",
+          "other_node_index": 84,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 99.93799607556537
+        },
+        {
+          "elem_id": 5882,
+          "end": "i",
+          "other_node_index": 84,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 99.93799607556537
+        }
+      ]
+    },
+    {
+      "free_row": 54212,
+      "global_dof": 67298,
+      "node_index": 11216,
+      "raw_node_id": 11232,
+      "dof": "uz",
+      "residual_n": 6360.2583468664525,
+      "external_load_n": -4118.9327447625,
+      "component_frame_n": 2241.325602103952,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2241.325602103952,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        134.478,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -2.563037208927392e-09,
+        1.8039540484489282e-09,
+        6.460274845895182e-08
+      ],
+      "max_abs_sample_contribution_n": 1120.662801051976,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 6123,
+          "end": "j",
+          "other_node_index": 86,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 136695.3400677837,
+          "target_dof_force_contribution_n": 1120.662801051976
+        },
+        {
+          "elem_id": 6124,
+          "end": "i",
+          "other_node_index": 86,
+          "section_id": 1087,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 140814.27281254617,
+          "target_dof_force_contribution_n": 1120.662801051976
+        }
+      ]
+    },
+    {
+      "free_row": 54188,
+      "global_dof": 67274,
+      "node_index": 11212,
+      "raw_node_id": 11228,
+      "dof": "uz",
+      "residual_n": 6154.931707607237,
+      "external_load_n": -3707.0399665824984,
+      "component_frame_n": 2447.8917410247386,
+      "incident_frame_element_count": 2,
+      "incident_frame_target_dof_contribution_sum_n": 2447.8917410247386,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        138.182,
+        193.95,
+        3.625
+      ],
+      "node_translation_m": [
+        -1.584947866660561e-09,
+        -9.060145042210452e-10,
+        7.634233556281727e-08
+      ],
+      "max_abs_sample_contribution_n": 1722.679244472422,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 5849,
+          "end": "i",
+          "other_node_index": 82,
+          "section_id": 1075,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625000689655107,
+          "verticality_abs_dz_over_length": 0.9999998097503515,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 112695.66950872609,
+          "target_dof_force_contribution_n": 1722.679244472422
+        },
+        {
+          "elem_id": 5848,
+          "end": "j",
+          "other_node_index": 82,
+          "section_id": 1072,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 110498.9268185017,
+          "target_dof_force_contribution_n": 725.2124965523168
+        }
+      ]
+    },
+    {
+      "free_row": 386,
+      "global_dof": 482,
+      "node_index": 80,
+      "raw_node_id": 81,
+      "dof": "uz",
+      "residual_n": 5442.339909934925,
+      "external_load_n": -5304.7622385637715,
+      "component_frame_n": 154.58512247406316,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": 154.58512247406316,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        140.034,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        1.3708026137516061e-11,
+        1.8542305840001378e-10,
+        5.145633040667938e-09
+      ],
+      "max_abs_sample_contribution_n": 946.8144734724116,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 5677,
+          "end": "i",
+          "other_node_index": 11210,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -231.0,
+          "axial_force_n": 99954.45638400456,
+          "target_dof_force_contribution_n": -946.8144734724116
+        },
+        {
+          "elem_id": 5679,
+          "end": "j",
+          "other_node_index": 11210,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 102590.57334065255,
+          "target_dof_force_contribution_n": -946.7822799743722
+        },
+        {
+          "elem_id": 5486,
+          "end": "j",
+          "other_node_index": 79,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 413.4868527402218
+        },
+        {
+          "elem_id": 5530,
+          "end": "i",
+          "other_node_index": 1514,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8437601398892384,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 408.609834879261
+        },
+        {
+          "elem_id": 5650,
+          "end": "j",
+          "other_node_index": 1514,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8474235131867678,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 402.5713109923865
+        },
+        {
+          "elem_id": 5529,
+          "end": "j",
+          "other_node_index": 96,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8557352199529309,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 393.6971767405844
+        },
+        {
+          "elem_id": 5528,
+          "end": "i",
+          "other_node_index": 96,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8557352199529309,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 391.95883054334814
+        },
+        {
+          "elem_id": 5490,
+          "end": "i",
+          "other_node_index": 79,
+          "section_id": 1056,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 182.07452793221051
+        },
+        {
+          "elem_id": 5527,
+          "end": "j",
+          "other_node_index": 81,
+          "section_id": 1061,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -93.391288215043
+        },
+        {
+          "elem_id": 5526,
+          "end": "i",
+          "other_node_index": 81,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -50.8253696921223
+        }
+      ]
+    },
+    {
+      "free_row": 398,
+      "global_dof": 494,
+      "node_index": 82,
+      "raw_node_id": 83,
+      "dof": "uz",
+      "residual_n": 5354.47871561365,
+      "external_load_n": -5996.963253492609,
+      "component_frame_n": -621.209764380008,
+      "incident_frame_element_count": 10,
+      "incident_frame_target_dof_contribution_sum_n": -621.209764380008,
+      "component_reconstruction_error_n": 0.0,
+      "node_xyz_m": [
+        138.182,
+        193.95,
+        0.0
+      ],
+      "node_translation_m": [
+        2.0273413595708992e-11,
+        -6.905258673053595e-10,
+        8.934763767890385e-09
+      ],
+      "max_abs_sample_contribution_n": 1722.679244472422,
+      "sample_incident_frame_elements": [
+        {
+          "elem_id": 5849,
+          "end": "j",
+          "other_node_index": 11212,
+          "section_id": 1075,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625000689655107,
+          "verticality_abs_dz_over_length": 0.9999998097503515,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 112695.66950872609,
+          "target_dof_force_contribution_n": -1722.679244472422
+        },
+        {
+          "elem_id": 5847,
+          "end": "j",
+          "other_node_index": 1519,
+          "section_id": 1072,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8381104498736683,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 932.0335927588844
+        },
+        {
+          "elem_id": 5848,
+          "end": "i",
+          "other_node_index": 11212,
+          "section_id": 1072,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 3.625,
+          "verticality_abs_dz_over_length": 1.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 110498.9268185017,
+          "target_dof_force_contribution_n": -725.2124965523168
+        },
+        {
+          "elem_id": 5844,
+          "end": "i",
+          "other_node_index": 100,
+          "section_id": 1075,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.0944178694849698,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 572.6213558778935
+        },
+        {
+          "elem_id": 5680,
+          "end": "j",
+          "other_node_index": 81,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9260000000000161,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 142.88792114598044
+        },
+        {
+          "elem_id": 5762,
+          "end": "i",
+          "other_node_index": 81,
+          "section_id": 1053,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9290021528500372,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 90.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 141.46998610047865
+        },
+        {
+          "elem_id": 5846,
+          "end": "i",
+          "other_node_index": 1519,
+          "section_id": 1071,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.8360627915017211,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -265.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 94.88569263470323
+        },
+        {
+          "elem_id": 5818,
+          "end": "i",
+          "other_node_index": 83,
+          "section_id": 1056,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9210005428879974,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": 77.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -71.4048821101872
+        },
+        {
+          "elem_id": 5845,
+          "end": "j",
+          "other_node_index": 100,
+          "section_id": 1071,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 1.09128140639979,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -85.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": 15.3797574211184
+        },
+        {
+          "elem_id": 5819,
+          "end": "j",
+          "other_node_index": 83,
+          "section_id": 1068,
+          "material_id": 1,
+          "used_real_props": true,
+          "length_m": 0.9259999999999877,
+          "verticality_abs_dz_over_length": 0.0,
+          "local_axis_angle_deg": -270.0,
+          "axial_force_n": 0.0,
+          "target_dof_force_contribution_n": -1.191447184140797
+        }
+      ]
+    }
+  ],
+  "residual_hotspot_signed_displacement_sweep": {
+    "enabled": true,
+    "evaluated": true,
+    "direction": "negative_residual_sign_on_frame_translation_hotspots",
+    "selected_hotspot_row_count": 21,
+    "selected_global_dofs": [
+      476,
+      482,
+      488,
+      494,
+      512,
+      518,
+      524,
+      6914,
+      6920,
+      6926,
+      6932,
+      13160,
+      67256,
+      67262,
+      67274,
+      67292,
+      67298,
+      67304,
+      72710,
+      72722,
+      72728
+    ],
+    "base_direct_residual_inf_n": 6385.116404581466,
+    "base_relative_residual_inf": 0.7359398368432672,
+    "relative_increment_tolerance": 0.0001,
+    "residual_tolerance_n": 0.001,
+    "candidate_rows": [
+      {
+        "step_m": 3e-09,
+        "free_dof_set_stable": true,
+        "direct_residual_inf_n": 6385.116404581466,
+        "direct_relative_residual_inf": 0.7359398368432672,
+        "improvement_inf_n": 0.0,
+        "relative_improvement": 0.0,
+        "relative_increment": 0.0004155179619069217,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": false
+      },
+      {
+        "step_m": 1e-08,
+        "free_dof_set_stable": true,
+        "direct_residual_inf_n": 6914.66471699326,
+        "direct_relative_residual_inf": 0.7969748554620875,
+        "improvement_inf_n": -529.5483124117945,
+        "relative_improvement": -0.08293479380138342,
+        "relative_increment": 0.0013850598730230724,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": false
+      },
+      {
+        "step_m": 3e-08,
+        "free_dof_set_stable": true,
+        "direct_residual_inf_n": 27453.809457470557,
+        "direct_relative_residual_inf": 3.1642887572668132,
+        "improvement_inf_n": -21068.69305288909,
+        "relative_improvement": -3.2996568453743187,
+        "relative_increment": 0.004155179619069217,
+        "residual_gate_passed": false,
+        "relative_increment_gate_passed": false
+      }
+    ],
+    "best_candidate": {
+      "step_m": 3e-09,
+      "free_dof_set_stable": true,
+      "direct_residual_inf_n": 6385.116404581466,
+      "direct_relative_residual_inf": 0.7359398368432672,
+      "improvement_inf_n": 0.0,
+      "relative_improvement": 0.0,
+      "relative_increment": 0.0004155179619069217,
+      "residual_gate_passed": false,
+      "relative_increment_gate_passed": false
+    },
+    "best_gate_eligible_candidate": {}
+  },
+  "residual_hotspot_tangent_fd_jvp_rows": [],
+  "residual_hotspot_diagonal_newton_sweep": {
+    "enabled": false
+  },
+  "fd_step": 1e-06,
+  "relative_error_threshold": 0.25,
+  "cosine_threshold": 0.8,
+  "direction_rows": [],
+  "state_scale_sweep": [],
+  "component_only": true,
+  "base_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs",
+    "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "stiffness_unit_audit": {
+      "per_component": {
+        "frame": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 12882,
+          "diag_abs_min": 2172.9583362166586,
+          "diag_abs_max": 263291938026322.7,
+          "diag_abs_mean": 156315359184.00784,
+          "diag_abs_median": 82837515.0898557,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "shell": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 44988,
+          "diag_abs_min": 411.94743221423107,
+          "diag_abs_max": 936561378488.6742,
+          "diag_abs_mean": 22775105512.83593,
+          "diag_abs_median": 6701456070.4574375,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "spring": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 20304,
+          "diag_abs_min": 1.0,
+          "diag_abs_max": 1000000000.0,
+          "diag_abs_mean": 166700000.5,
+          "diag_abs_median": 50000.5,
+          "unit": "N_per_m_or_Nm_per_rad"
+        }
+      },
+      "cross_component_diag_max_ratio": 263291938026322.7,
+      "unit_consistency_warning": true,
+      "imbalance_ratio_threshold": 100000000.0,
+      "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+    }
+  },
+  "runtime_metrics": {
+    "setup_and_reference_seconds": 16.445559168998443,
+    "base_assembly_seconds": 18.17801340599908,
+    "total_seconds": 89.92888533799851
+  },
+  "claim_boundary": "Full-model diagnostic comparing assembled tangent K*d against finite-difference physical residual action dR/du*d. This is not a nonlinear equilibrium closure.",
+  "blockers": [
+    "component_only_diagnostic_not_consistency_closure"
+  ]
+}

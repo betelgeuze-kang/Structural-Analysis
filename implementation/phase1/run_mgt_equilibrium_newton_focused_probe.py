@@ -36,6 +36,9 @@ def run_mgt_equilibrium_newton_focused_probe(
     max_newton_iterations: int = 8,
     residual_tolerance_n: float = 5.0e-4,
     prefer_host_ilu: bool = True,
+    allow_negative_alphas: bool = False,
+    linear_solver_profile: str = "production",
+    state_scale_line_search_values: tuple[float, ...] = (),
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -52,6 +55,9 @@ def run_mgt_equilibrium_newton_focused_probe(
         max_newton_iterations=max_newton_iterations,
         residual_tolerance_n=residual_tolerance_n,
         prefer_host_ilu=prefer_host_ilu,
+        allow_negative_alphas=bool(allow_negative_alphas),
+        linear_solver_profile=str(linear_solver_profile or "production"),
+        state_scale_line_search_values=state_scale_line_search_values,
     )
     payload = {
         "schema_version": SCHEMA_VERSION,
@@ -64,6 +70,11 @@ def run_mgt_equilibrium_newton_focused_probe(
         "initial_residual_inf_n": newton.get("initial_residual_inf_n"),
         "final_residual_inf_n": newton.get("final_residual_inf_n"),
         "accepted_newton_iteration_count": newton.get("accepted_newton_iteration_count"),
+        "allow_negative_alphas": bool(allow_negative_alphas),
+        "linear_solver_profile": str(linear_solver_profile or "production"),
+        "state_scale_line_search_values": [
+            float(value) for value in state_scale_line_search_values
+        ],
         "residual_tolerance_n": float(residual_tolerance_n),
         "newton_iterations": newton.get("iterations"),
         "runtime_metrics": {"total_seconds": time.perf_counter() - started},
@@ -88,12 +99,43 @@ def main() -> int:
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--max-newton-iterations", type=int, default=8)
+    parser.add_argument(
+        "--allow-negative-alphas",
+        action="store_true",
+        help="Opt in to signed alpha search for residual-descent globalization.",
+    )
+    parser.add_argument(
+        "--linear-solver-profile",
+        choices=("production", "regularized_direct", "block_jacobi_gmres"),
+        default="production",
+        help=(
+            "Use production iterative attempts, bypass them for a focused "
+            "regularized-direct diagnostic, or use a block-Jacobi GMRES-only "
+            "diagnostic profile."
+        ),
+    )
+    parser.add_argument(
+        "--state-scale-line-search-values",
+        default="",
+        help=(
+            "Comma-separated state scales evaluated before Newton correction. "
+            "Useful for diagnosing/rescuing incompatible checkpoint states."
+        ),
+    )
     args = parser.parse_args()
+    state_scale_line_search_values = tuple(
+        float(value.strip())
+        for value in str(args.state_scale_line_search_values).split(",")
+        if value.strip()
+    )
     payload = run_mgt_equilibrium_newton_focused_probe(
         mgt_path=args.mgt_path,
         checkpoint_npz=args.checkpoint_npz,
         output_json=args.output_json,
         max_newton_iterations=args.max_newton_iterations,
+        allow_negative_alphas=bool(args.allow_negative_alphas),
+        linear_solver_profile=str(args.linear_solver_profile),
+        state_scale_line_search_values=state_scale_line_search_values,
     )
     print(
         "equilibrium-newton-focused:",

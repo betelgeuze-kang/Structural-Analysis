@@ -94,8 +94,29 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
     correction = correction if isinstance(correction, dict) else {}
     global_krylov = payload.get("matrix_free_global_krylov")
     global_krylov = global_krylov if isinstance(global_krylov, dict) else {}
+    trust = payload.get("trust_region_line_search")
+    trust = trust if isinstance(trust, dict) else {}
+    hotspot_diagonal = payload.get("frame_hotspot_diagonal_newton_sweep")
+    hotspot_diagonal = hotspot_diagonal if isinstance(hotspot_diagonal, dict) else {}
+    hotspot_block = payload.get("frame_hotspot_block_lstsq_sweep")
+    hotspot_block = hotspot_block if isinstance(hotspot_block, dict) else {}
+    promotion_candidate = payload.get("promotion_candidate")
+    promotion_candidate = promotion_candidate if isinstance(promotion_candidate, dict) else {}
     best_candidate = correction.get("best_candidate")
     best_candidate = best_candidate if isinstance(best_candidate, dict) else {}
+    trust_best_candidate = trust.get("best_candidate")
+    trust_best_candidate = (
+        trust_best_candidate if isinstance(trust_best_candidate, dict) else {}
+    )
+    trust_iterations = trust.get("iterations")
+    trust_iterations = trust_iterations if isinstance(trust_iterations, list) else []
+    trust_last_iteration = (
+        trust_iterations[-1] if trust_iterations and isinstance(trust_iterations[-1], dict) else {}
+    )
+    trust_gate_candidate = trust_last_iteration.get("best_gate_eligible_candidate")
+    trust_gate_candidate = (
+        trust_gate_candidate if isinstance(trust_gate_candidate, dict) else {}
+    )
     global_best_candidate = global_krylov.get("best_candidate")
     global_best_candidate = (
         global_best_candidate if isinstance(global_best_candidate, dict) else {}
@@ -112,6 +133,75 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "ready": payload.get("direct_residual_newton_ready"),
         "base_direct_residual_inf_n": _float_or_none(base.get("direct_residual_inf_n")),
         "final_direct_residual_inf_n": _float_or_none(final.get("direct_residual_inf_n")),
+        "promoted_to_final_state": payload.get("promoted_to_final_state"),
+        "promotion_mode": payload.get("promotion_mode"),
+        "promotion_count": payload.get("promotion_count"),
+        "max_promotions": payload.get("max_promotions"),
+        "stop_reason": payload.get("stop_reason"),
+        "promotion_candidate_direct_residual_inf_n": _float_or_none(
+            promotion_candidate.get("direct_residual_inf_n")
+        ),
+        "promotion_candidate_alpha": _float_or_none(promotion_candidate.get("alpha")),
+        "promotion_candidate_step_m": _float_or_none(
+            promotion_candidate.get("step_m")
+        ),
+        "promotion_candidate_relative_increment": _float_or_none(
+            promotion_candidate.get("relative_increment")
+        ),
+        "promotion_candidate_relative_increment_gate_passed": (
+            promotion_candidate.get("relative_increment_gate_passed")
+        ),
+        "frame_hotspot_diagonal_newton_selected_count": hotspot_diagonal.get(
+            "selected_hotspot_row_count"
+        ),
+        "frame_hotspot_diagonal_newton_correction_inf_m": _float_or_none(
+            hotspot_diagonal.get("correction_inf_m")
+        ),
+        "frame_hotspot_block_lstsq_selected_count": hotspot_block.get(
+            "selected_hotspot_row_count"
+        ),
+        "frame_hotspot_block_lstsq_support_size": hotspot_block.get("support_size"),
+        "frame_hotspot_block_lstsq_correction_inf_m": _float_or_none(
+            hotspot_block.get("correction_inf_m")
+        ),
+        "trust_region_accepted": trust.get("accepted"),
+        "trust_region_accepted_iteration_count": trust.get("accepted_iteration_count"),
+        "trust_region_best_candidate_direct_residual_inf_n": _float_or_none(
+            trust_best_candidate.get("direct_residual_inf_n")
+        ),
+        "trust_region_best_candidate_relative_increment": _float_or_none(
+            trust_best_candidate.get("relative_increment")
+        ),
+        "trust_region_best_candidate_residual_gate_passed": (
+            trust_best_candidate.get("residual_gate_passed")
+        ),
+        "trust_region_best_candidate_relative_increment_gate_passed": (
+            trust_best_candidate.get("relative_increment_gate_passed")
+        ),
+        "trust_region_gate_limited_alpha": _float_or_none(
+            trust_last_iteration.get("gate_limited_alpha")
+        ),
+        "trust_region_best_gate_eligible_candidate_direct_residual_inf_n": (
+            _float_or_none(trust_gate_candidate.get("direct_residual_inf_n"))
+        ),
+        "trust_region_best_gate_eligible_candidate_alpha": _float_or_none(
+            trust_gate_candidate.get("alpha")
+        ),
+        "trust_region_best_gate_eligible_candidate_alpha_source": (
+            trust_gate_candidate.get("alpha_source")
+        ),
+        "trust_region_best_gate_eligible_candidate_relative_increment": _float_or_none(
+            trust_gate_candidate.get("relative_increment")
+        ),
+        "trust_region_best_gate_eligible_candidate_residual_gate_passed": (
+            trust_gate_candidate.get("residual_gate_passed")
+        ),
+        "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed": (
+            trust_gate_candidate.get("relative_increment_gate_passed")
+        ),
+        "trust_region_best_gate_eligible_candidate_free_dof_set_stable": (
+            trust_gate_candidate.get("free_dof_set_stable")
+        ),
         "current_tangent_residual_row_correction_enabled": correction.get("enabled"),
         "current_tangent_residual_row_correction_accepted": correction.get("accepted"),
         "current_tangent_residual_row_promotion_count": correction.get("promotion_count"),
@@ -197,6 +287,47 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         ),
         "output_final_checkpoint_path": output_checkpoint.get("path"),
         "blockers": payload.get("blockers"),
+    }
+
+
+def _hotspot_jvp_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    rows = payload.get("residual_hotspot_tangent_fd_jvp_rows")
+    rows = rows if isinstance(rows, list) else []
+    evaluated = [
+        row for row in rows if isinstance(row, dict) and bool(row.get("evaluated"))
+    ]
+    return {
+        "schema_version": payload.get("schema_version"),
+        "status": payload.get("status"),
+        "base_residual_inf_n": _float_or_none(payload.get("base_residual_inf_n")),
+        "fd_step": _float_or_none(payload.get("fd_step")),
+        "evaluated_row_count": int(len(evaluated)),
+        "max_relative_inf_error": max(
+            (
+                _float_or_none(row.get("relative_inf_error")) or 0.0
+                for row in evaluated
+            ),
+            default=None,
+        ),
+        "max_relative_l2_error": max(
+            (
+                _float_or_none(row.get("relative_l2_error")) or 0.0
+                for row in evaluated
+            ),
+            default=None,
+        ),
+        "min_action_cosine": min(
+            (_float_or_none(row.get("action_cosine")) or 0.0 for row in evaluated),
+            default=None,
+        ),
+        "max_selected_row_relative_error": max(
+            (
+                _float_or_none(row.get("selected_row_relative_error")) or 0.0
+                for row in evaluated
+            ),
+            default=None,
+        ),
+        "first_evaluated_row": evaluated[0] if evaluated else {},
     }
 
 
@@ -926,6 +1057,39 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_focused = _load(
         productization / "mgt_equilibrium_newton_focused_probe.json"
     )
+    equilibrium_newton_state_scale = _load(
+        productization / "mgt_equilibrium_newton_focused_state_scale_probe.json"
+    )
+    residual_jacobian_consistency = _load(
+        productization / "mgt_residual_jacobian_consistency_probe.json"
+    )
+    residual_jacobian_current_frontier_component = _load(
+        productization / "mgt_residual_jacobian_current_frontier_component_probe.json"
+    )
+    residual_jacobian_current_frontier_frame_hotspot_sweep = _load(
+        productization
+        / "mgt_residual_jacobian_current_frontier_frame_hotspot_sweep_probe.json"
+    )
+    residual_jacobian_current_frontier_frame_hotspot_large_sweep = _load(
+        productization
+        / "mgt_residual_jacobian_current_frontier_frame_hotspot_large_sweep_probe.json"
+    )
+    residual_jacobian_current_frontier_frame_hotspot_jvp = _load(
+        productization
+        / "mgt_residual_jacobian_current_frontier_frame_hotspot_jvp_probe.json"
+    )
+    preconditioned_zero = _load(
+        productization / "mgt_equilibrium_preconditioned_zero_probe.json"
+    )
+    preconditioned_continuation = _load(
+        productization / "mgt_equilibrium_preconditioned_continuation_probe.json"
+    )
+    direct_residual_preconditioned_zero_seed = _load(
+        productization / "mgt_direct_residual_preconditioned_zero_seed_base.json"
+    )
+    direct_residual_preconditioned_continuation_seed = _load(
+        productization / "mgt_direct_residual_preconditioned_continuation_seed_base.json"
+    )
     pdelta_frontier_diagnostic = _pdelta_frontier_diagnostic(pdelta_continuation)
     pdelta_residual_jacobian_summary = _pdelta_residual_jacobian_summary(pdelta_continuation)
     surface_membrane = _load(productization / "mgt_surface_membrane_tangent.json")
@@ -1171,6 +1335,377 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     direct_residual_adaptive_preconditioned_global_newton_runtime_budget = _load(
         productization
         / "mgt_direct_residual_adaptive_preconditioned_global_newton_runtime_budget_smoke.json"
+    )
+    direct_residual_current_checkpoint_single_largest_row_current_tangent = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_single_largest_row_current_tangent.json"
+    )
+    direct_residual_current_checkpoint_single_largest_row_current_tangent_replay = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_single_largest_row_current_tangent_replay.json"
+    )
+    direct_residual_current_checkpoint_single_largest_row_current_tangent_followup = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_single_largest_row_current_tangent_followup.json"
+    )
+    direct_residual_current_checkpoint_single_largest_row_fd_jacobian = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_single_largest_row_fd_jacobian.json"
+    )
+    direct_residual_current_checkpoint_frame_element_block_current_tangent = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_frame_element_block_current_tangent.json"
+    )
+    direct_residual_current_checkpoint_frame_element_block_fd_jacobian = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_frame_element_block_fd_jacobian.json"
+    )
+    direct_residual_current_checkpoint_trust_iteration_strict_gate_probe = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_trust_iteration_strict_gate_probe.json"
+    )
+    direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_replay = _load(
+        productization
+        / "mgt_direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier = _load(
+        productization / "mgt_frame_hotspot_diagonal_newton_current_frontier_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_replay = _load(
+        productization / "mgt_frame_hotspot_diagonal_newton_current_frontier_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup = _load(
+        productization / "mgt_frame_hotspot_diagonal_newton_current_frontier_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass = _load(
+        productization / "mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier = _load(
+        productization / "mgt_frame_hotspot_signed_displacement_current_frontier_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support16 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support16_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support32 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support32_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_rows4_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_probe_replay.json"
+    )
+    direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4 = _load(
+        productization
+        / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_probe.json"
+    )
+    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_replay = _load(
+        productization
+        / "mgt_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup = _load(
+        productization
+        / "mgt_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_probe_replay.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_probe_replay.json"
+    )
+    direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
+        productization
+        / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
+    )
+    direct_residual_current_frontier_frame_block_fd16_residual_weighted = _load(
+        productization
+        / "mgt_direct_residual_current_frontier_frame_block_fd16_residual_weighted_probe.json"
+    )
+    direct_residual_historical_adaptive_checkpoint_current_residual_replay_audit = _load(
+        productization
+        / "mgt_direct_residual_historical_adaptive_checkpoint_current_residual_replay_audit.json"
     )
     story_eccentricity_load = _load(productization / "mgt_story_eccentricity_load_receipt.json")
     coupled_story_eccentricity = _load(productization / "mgt_coupled_frame_shell_story_eccentricity_equilibrium.json")
@@ -1461,6 +1996,83 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_current_tangent_residual_row_correction": direct_residual_newton.get(
                     "current_tangent_residual_row_correction"
                 ),
+                "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
+                    "status"
+                ),
+                "residual_jacobian_consistency_ready": residual_jacobian_consistency.get(
+                    "residual_jacobian_consistency_ready"
+                ),
+                "residual_jacobian_consistency_base_residual_inf_n": (
+                    residual_jacobian_consistency.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_consistency_base_relative_residual_inf": (
+                    residual_jacobian_consistency.get("base_relative_residual_inf")
+                ),
+                "residual_jacobian_consistency_direction_rows": (
+                    residual_jacobian_consistency.get("direction_rows")
+                ),
+                "residual_jacobian_consistency_component_breakdown": (
+                    residual_jacobian_consistency.get("residual_component_breakdown")
+                ),
+                "residual_jacobian_consistency_hotspot_shell_membrane_diagnostics": (
+                    residual_jacobian_consistency.get(
+                        "residual_hotspot_shell_membrane_diagnostics"
+                    )
+                ),
+                "residual_jacobian_consistency_hotspot_frame_diagnostics": (
+                    residual_jacobian_consistency.get("residual_hotspot_frame_diagnostics")
+                ),
+                "residual_jacobian_consistency_state_scale_sweep": (
+                    residual_jacobian_consistency.get("state_scale_sweep")
+                ),
+                "residual_jacobian_consistency_blockers": residual_jacobian_consistency.get(
+                    "blockers"
+                ),
+                "residual_jacobian_current_frontier_component_status": (
+                    residual_jacobian_current_frontier_component.get("status")
+                ),
+                "residual_jacobian_current_frontier_component_only": (
+                    residual_jacobian_current_frontier_component.get("component_only")
+                ),
+                "residual_jacobian_current_frontier_base_residual_inf_n": (
+                    residual_jacobian_current_frontier_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_current_frontier_base_relative_residual_inf": (
+                    residual_jacobian_current_frontier_component.get(
+                        "base_relative_residual_inf"
+                    )
+                ),
+                "residual_jacobian_current_frontier_component_breakdown": (
+                    residual_jacobian_current_frontier_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "residual_jacobian_current_frontier_hotspot_shell_membrane_diagnostics": (
+                    residual_jacobian_current_frontier_component.get(
+                        "residual_hotspot_shell_membrane_diagnostics"
+                    )
+                ),
+                "residual_jacobian_current_frontier_hotspot_frame_diagnostics": (
+                    residual_jacobian_current_frontier_component.get(
+                        "residual_hotspot_frame_diagnostics"
+                    )
+                ),
+                "residual_jacobian_current_frontier_frame_hotspot_signed_sweep": (
+                    residual_jacobian_current_frontier_frame_hotspot_sweep.get(
+                        "residual_hotspot_signed_displacement_sweep"
+                    )
+                ),
+                "residual_jacobian_current_frontier_frame_hotspot_large_signed_sweep": (
+                    residual_jacobian_current_frontier_frame_hotspot_large_sweep.get(
+                        "residual_hotspot_signed_displacement_sweep"
+                    )
+                ),
+                "residual_jacobian_current_frontier_frame_hotspot_jvp": _hotspot_jvp_summary(
+                    residual_jacobian_current_frontier_frame_hotspot_jvp
+                ),
+                "residual_jacobian_current_frontier_component_blockers": (
+                    residual_jacobian_current_frontier_component.get("blockers")
+                ),
                 "direct_residual_row_element_block_target_smoke": _direct_residual_probe_summary(
                     direct_residual_row_element_block_target
                 ),
@@ -1547,6 +2159,288 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_adaptive_preconditioned_global_newton_runtime_budget_smoke": _adaptive_preconditioned_global_newton_summary(
                     direct_residual_adaptive_preconditioned_global_newton_runtime_budget
+                ),
+                "direct_residual_current_checkpoint_single_largest_row_current_tangent": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_single_largest_row_current_tangent
+                ),
+                "direct_residual_current_checkpoint_single_largest_row_current_tangent_replay": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_single_largest_row_current_tangent_replay
+                ),
+                "direct_residual_current_checkpoint_single_largest_row_current_tangent_followup": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_single_largest_row_current_tangent_followup
+                ),
+                "direct_residual_current_checkpoint_single_largest_row_fd_jacobian": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_single_largest_row_fd_jacobian
+                ),
+                "direct_residual_current_checkpoint_frame_element_block_current_tangent": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_frame_element_block_current_tangent
+                ),
+                "direct_residual_current_checkpoint_frame_element_block_fd_jacobian": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_frame_element_block_fd_jacobian
+                ),
+                "direct_residual_current_checkpoint_trust_iteration_strict_gate_probe": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_trust_iteration_strict_gate_probe
+                ),
+                "direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_replay": _direct_residual_probe_summary(
+                    direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_followup_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_replay
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_replay
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support16": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support16
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support32": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_support32
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_replay
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_rows4_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_replay
+                ),
+                "direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4": _direct_residual_probe_summary(
+                    direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow
+                ),
+                "direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_replay
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4
+                ),
+                "direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay
+                ),
+                "direct_residual_current_frontier_frame_block_current_tangent_narrow": _direct_residual_probe_summary(
+                    direct_residual_current_frontier_frame_block_current_tangent_narrow
+                ),
+                "direct_residual_current_frontier_frame_block_fd16_residual_weighted": _direct_residual_probe_summary(
+                    direct_residual_current_frontier_frame_block_fd16_residual_weighted
+                ),
+                "direct_residual_historical_adaptive_checkpoint_current_residual_replay_audit": _direct_residual_probe_summary(
+                    direct_residual_historical_adaptive_checkpoint_current_residual_replay_audit
                 ),
                 "direct_residual_newton_blockers": direct_residual_newton.get("blockers"),
                 "coarsened_authored_support_pdelta_status": coarsened_authored_support_pdelta.get(
@@ -1650,6 +2544,89 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                     "equilibrium_replay_residual_inf_only_no_solver_receipt_accept"
                 ),
                 "equilibrium_newton_focused_blockers": equilibrium_newton_focused.get("blockers"),
+                "equilibrium_newton_state_scale_status": equilibrium_newton_state_scale.get(
+                    "status"
+                ),
+                "equilibrium_newton_state_scale_initial_residual_inf_n": (
+                    equilibrium_newton_state_scale.get("initial_residual_inf_n")
+                ),
+                "equilibrium_newton_state_scale_final_residual_inf_n": (
+                    equilibrium_newton_state_scale.get("final_residual_inf_n")
+                ),
+                "equilibrium_newton_state_scale_iterations": (
+                    equilibrium_newton_state_scale.get("newton_iterations")
+                ),
+                "equilibrium_newton_state_scale_blockers": equilibrium_newton_state_scale.get(
+                    "blockers"
+                ),
+                "equilibrium_preconditioned_zero_status": preconditioned_zero.get(
+                    "status"
+                ),
+                "equilibrium_preconditioned_zero_residual_gate_passed": (
+                    preconditioned_zero.get("residual_gate_passed")
+                ),
+                "equilibrium_preconditioned_zero_zero_state_residual_inf_n": (
+                    preconditioned_zero.get("zero_state_residual_inf_n")
+                ),
+                "equilibrium_preconditioned_zero_best_residual_inf_n": (
+                    preconditioned_zero.get("best_residual_inf_n")
+                ),
+                "equilibrium_preconditioned_zero_overall_best_residual_inf_n": (
+                    preconditioned_zero.get("overall_best_residual_inf_n")
+                ),
+                "equilibrium_preconditioned_zero_best_correction_mode": (
+                    preconditioned_zero.get("best_correction_mode")
+                ),
+                "equilibrium_preconditioned_zero_best_relative_improvement": (
+                    preconditioned_zero.get("best_relative_improvement")
+                ),
+                "equilibrium_preconditioned_zero_iterative_search": (
+                    preconditioned_zero.get("iterative_search")
+                ),
+                "equilibrium_preconditioned_zero_output_final_checkpoint": (
+                    preconditioned_zero.get("output_final_checkpoint")
+                ),
+                "equilibrium_preconditioned_zero_blockers": preconditioned_zero.get(
+                    "blockers"
+                ),
+                "direct_residual_preconditioned_zero_seed_status": (
+                    direct_residual_preconditioned_zero_seed.get("status")
+                ),
+                "direct_residual_preconditioned_zero_seed_base_residual_inf_n": (
+                    _get(
+                        direct_residual_preconditioned_zero_seed,
+                        "base_direct_residual",
+                        "direct_residual_inf_n",
+                    )
+                ),
+                "direct_residual_preconditioned_zero_seed_blockers": (
+                    direct_residual_preconditioned_zero_seed.get("blockers")
+                ),
+                "equilibrium_preconditioned_continuation_status": (
+                    preconditioned_continuation.get("status")
+                ),
+                "equilibrium_preconditioned_continuation_start_residual_inf_n": (
+                    preconditioned_continuation.get("start_state_residual_inf_n")
+                ),
+                "equilibrium_preconditioned_continuation_overall_best_residual_inf_n": (
+                    preconditioned_continuation.get("overall_best_residual_inf_n")
+                ),
+                "equilibrium_preconditioned_continuation_iterative_search": (
+                    preconditioned_continuation.get("iterative_search")
+                ),
+                "equilibrium_preconditioned_continuation_output_final_checkpoint": (
+                    preconditioned_continuation.get("output_final_checkpoint")
+                ),
+                "direct_residual_preconditioned_continuation_seed_status": (
+                    direct_residual_preconditioned_continuation_seed.get("status")
+                ),
+                "direct_residual_preconditioned_continuation_seed_base_residual_inf_n": (
+                    _get(
+                        direct_residual_preconditioned_continuation_seed,
+                        "base_direct_residual",
+                        "direct_residual_inf_n",
+                    )
+                ),
                 "full_load_nonlinear_newton_ready": pdelta_continuation.get(
                     "full_load_nonlinear_newton_ready"
                 ),
@@ -2238,7 +3215,175 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "medium_large_source_count": ingest_summary.get("medium_large_source_count"),
                 "attached_count": ingest_summary.get("attached_count"),
                 "metadata_only_count": metadata_only,
+                "mgt_attached_count": ingest_summary.get("mgt_attached_count"),
                 "mgt_header_ok_count": ingest_summary.get("mgt_header_ok_count"),
+                "operator_attached_mgt_header_ok_count": ingest_summary.get(
+                    "operator_attached_mgt_header_ok_count"
+                ),
+                "repo_benchmark_bridge_mgt_header_ok_count": ingest_summary.get(
+                    "repo_benchmark_bridge_mgt_header_ok_count"
+                ),
+                "placeholder_mgt_count": ingest_summary.get("placeholder_mgt_count"),
+                "ifc_attached_count": ingest_summary.get("ifc_attached_count"),
+                "operator_attached_ifc_count": ingest_summary.get("operator_attached_ifc_count"),
+                "curated_local_ifc_attached_count": ingest_summary.get(
+                    "curated_local_ifc_attached_count"
+                ),
+                "curated_local_ifc_missing_count": ingest_summary.get(
+                    "curated_local_ifc_missing_count"
+                ),
+                "pdf_derived_attached_count": ingest_summary.get("pdf_derived_attached_count"),
+                "operator_attached_pdf_derived_count": ingest_summary.get(
+                    "operator_attached_pdf_derived_count"
+                ),
+                "operator_attached_real_artifact_count": ingest_summary.get(
+                    "operator_attached_real_artifact_count"
+                ),
+                "metadata_only_source_ids": ingest_summary.get("metadata_only_source_ids"),
+                "repo_benchmark_bridge_source_ids": ingest_summary.get(
+                    "repo_benchmark_bridge_source_ids"
+                ),
+                "operator_attach_required_source_ids": ingest_summary.get(
+                    "operator_attach_required_source_ids"
+                ),
+                "operator_action_queue_count": ingest_summary.get(
+                    "operator_action_queue_count"
+                ),
+                "operator_action_queue_source_ids": ingest_summary.get(
+                    "operator_action_queue_source_ids"
+                ),
+                "operator_action_type_counts": ingest_summary.get(
+                    "operator_action_type_counts"
+                ),
+                "operator_action_queue": korea.get("operator_action_queue"),
+                "operator_action_packet": korea.get("operator_action_packet"),
+                "operator_attached_real_mgt_header_ok_target": ingest_summary.get(
+                    "operator_attached_real_mgt_header_ok_target"
+                ),
+                "operator_attached_real_mgt_header_ok_remaining": ingest_summary.get(
+                    "operator_attached_real_mgt_header_ok_remaining"
+                ),
+                "local_private_candidate_count": ingest_summary.get(
+                    "local_private_candidate_count"
+                ),
+                "existing_local_private_candidate_count": ingest_summary.get(
+                    "existing_local_private_candidate_count"
+                ),
+                "kr_local_private_candidate_count": ingest_summary.get(
+                    "kr_local_private_candidate_count"
+                ),
+                "mgt_local_private_candidate_count": ingest_summary.get(
+                    "mgt_local_private_candidate_count"
+                ),
+                "mgt_header_ok_local_private_candidate_count": ingest_summary.get(
+                    "mgt_header_ok_local_private_candidate_count"
+                ),
+                "g7_counted_local_private_candidate_count": ingest_summary.get(
+                    "g7_counted_local_private_candidate_count"
+                ),
+                "raw_redistribution_blocked_candidate_count": ingest_summary.get(
+                    "raw_redistribution_blocked_candidate_count"
+                ),
+                "non_kr_candidate_count": ingest_summary.get("non_kr_candidate_count"),
+                "catalog_source_unmatched_candidate_count": ingest_summary.get(
+                    "catalog_source_unmatched_candidate_count"
+                ),
+                "operator_action_private_candidate_match_count": ingest_summary.get(
+                    "operator_action_private_candidate_match_count"
+                ),
+                "operator_action_private_candidate_source_count": ingest_summary.get(
+                    "operator_action_private_candidate_source_count"
+                ),
+                "operator_action_private_candidate_file_count": ingest_summary.get(
+                    "operator_action_private_candidate_file_count"
+                ),
+                "operator_action_private_candidate_requires_rights_count": (
+                    ingest_summary.get(
+                        "operator_action_private_candidate_requires_rights_count"
+                    )
+                ),
+                "repo_public_candidate_count": ingest_summary.get(
+                    "repo_public_candidate_count"
+                ),
+                "repo_public_candidate_mgt_count": ingest_summary.get(
+                    "repo_public_candidate_mgt_count"
+                ),
+                "repo_public_candidate_ifc_count": ingest_summary.get(
+                    "repo_public_candidate_ifc_count"
+                ),
+                "repo_public_candidate_benchmark_bridge_count": ingest_summary.get(
+                    "repo_public_candidate_benchmark_bridge_count"
+                ),
+                "g7_counted_repo_public_candidate_count": ingest_summary.get(
+                    "g7_counted_repo_public_candidate_count"
+                ),
+                "operator_action_repo_candidate_match_count": ingest_summary.get(
+                    "operator_action_repo_candidate_match_count"
+                ),
+                "operator_action_repo_candidate_source_count": ingest_summary.get(
+                    "operator_action_repo_candidate_source_count"
+                ),
+                "operator_action_repo_candidate_file_count": ingest_summary.get(
+                    "operator_action_repo_candidate_file_count"
+                ),
+                "operator_action_repo_candidate_exact_source_match_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_exact_source_match_count"
+                    )
+                ),
+                "operator_action_repo_candidate_exact_clean_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_exact_clean_count"
+                    )
+                ),
+                "operator_action_repo_candidate_exact_blocker_counts": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_exact_blocker_counts"
+                    )
+                ),
+                "operator_action_repo_candidate_requires_source_mapping_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_requires_source_mapping_count"
+                    )
+                ),
+                "operator_action_repo_candidate_ifc_source_mapping_candidate_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_ifc_source_mapping_candidate_count"
+                    )
+                ),
+                "operator_action_repo_candidate_ifc_source_mapping_candidate_source_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_ifc_source_mapping_candidate_source_count"
+                    )
+                ),
+                "operator_action_repo_candidate_ifc_source_mapping_candidate_file_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_ifc_source_mapping_candidate_file_count"
+                    )
+                ),
+                "operator_action_repo_candidate_benchmark_bridge_count": (
+                    ingest_summary.get(
+                        "operator_action_repo_candidate_benchmark_bridge_count"
+                    )
+                ),
+                "local_private_candidate_artifacts": korea.get(
+                    "local_private_candidate_artifacts"
+                ),
+                "operator_action_private_candidate_matches": korea.get(
+                    "operator_action_private_candidate_matches"
+                ),
+                "repo_public_candidate_artifacts": korea.get(
+                    "repo_public_candidate_artifacts"
+                ),
+                "operator_action_repo_candidate_matches": korea.get(
+                    "operator_action_repo_candidate_matches"
+                ),
+                "operator_action_repo_candidate_ifc_source_mapping_candidates": (
+                    korea.get(
+                        "operator_action_repo_candidate_ifc_source_mapping_candidates"
+                    )
+                ),
+                "operator_action_queue": korea.get("operator_action_queue"),
                 "repo_benchmark_bridge_count": bridge_count,
                 "operator_attached_real_mgt_header_ok_count": real_mgt_ok,
             },

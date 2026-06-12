@@ -1,0 +1,22 @@
+{
+  "generated_at": "2026-06-06T03:59:43.940967+00:00",
+  "purpose": "Execution/run history for ROCm sparse probe attempts. Solver closure evidence stays in mgt_rocm_sparse_solver_probe.json.",
+  "runs": [
+    {
+      "command": "timeout 420s python3 scripts/run_mgt_rocm_sparse_solver_probe.py",
+      "completed": false,
+      "exit_code": 124,
+      "notes": [
+        "SAAMG candidates were moved behind MGT_ROCALUTION_ENABLE_SAAMG_SWEEP=1 after a prior GPU memory fault.",
+        "The rerun reached ROCm execution but did not complete within the official 420s timeout.",
+        "The orphaned Python and rocALUTION child processes were terminated before restoration."
+      ],
+      "outcome": "timeout_after_saamg_default_disabled",
+      "receipt_rewritten": false,
+      "receipt_status_after_run": "partial",
+      "recorded_at": "2026-06-06T03:59:43.940942+00:00",
+      "source_receipt": "implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json"
+    }
+  ],
+  "schema_version": "mgt-rocm-probe-run-history.v1"
+}

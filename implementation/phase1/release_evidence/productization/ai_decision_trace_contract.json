@@ -1,0 +1,17 @@
+{
+  "schema_version": "ai-decision-trace-contract.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "contract_ready",
+  "minimum_fields": [
+    "input_hash",
+    "model_or_policy_version",
+    "action_id",
+    "state_hash",
+    "reward_components",
+    "constraint_vector",
+    "solver_replay_artifact",
+    "code_check_artifact",
+    "rejected_alternative_ids",
+    "human_decision"
+  ]
+}

@@ -1,0 +1,3225 @@
+{
+  "schema_version": "mgt-rocm-sparse-solver-probe.v1",
+  "generated_at": "2026-06-05T15:38:10.498568+00:00",
+  "status": "partial",
+  "label": "surface_shell_bending_rocm_multilevel_projected_fgmres_focused_probe",
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "torch_rocm": {
+    "torch_import_ok": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_name": "AMD Radeon RX 6900 XT"
+  },
+  "matrix_shape": [
+    33932,
+    33932
+  ],
+  "matrix_nnz": 823815,
+  "mesh_fingerprint": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "combined_component_count": 3,
+    "combined_base_node_count": 404,
+    "restrained_dof_count": 2424,
+    "free_dof_count": 33932
+  },
+  "cpu_reference": {
+    "backend": "scipy_sparse_spsolve_cpu",
+    "residual_inf_n": 4.256728516338626e-07,
+    "relative_residual_inf": 1.310820378513631e-08,
+    "rhs_inf_n": 32.47377433333335,
+    "solve_seconds": 0.4212296799996693
+  },
+  "gate": {
+    "tolerance_abs": 0.001,
+    "tolerance_rel": 5e-08
+  },
+  "best_residual_inf_n": 22.769081918072025,
+  "best_converged": false,
+  "best_row": {
+    "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+    "device": "cuda:0",
+    "converged": false,
+    "aggregate_count": 512,
+    "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+    "level_count": 4,
+    "levels": [
+      {
+        "level": 0,
+        "size": 33932,
+        "nnz": 823815,
+        "projector_columns": 2407
+      },
+      {
+        "level": 1,
+        "size": 2407,
+        "nnz": 120115,
+        "projector_columns": 602
+      },
+      {
+        "level": 2,
+        "size": 602,
+        "nnz": 20186,
+        "projector_columns": 151
+      },
+      {
+        "level": 3,
+        "size": 151,
+        "nnz": 7242,
+        "projector_columns": null
+      }
+    ],
+    "pre_smooth_steps": 1,
+    "post_smooth_steps": 1,
+    "smoother_weight": 0.05,
+    "coarse_regularization_factor": 1e-08,
+    "krylov_method": "fgmres",
+    "restart_dimension": 32,
+    "restart_cycles": 3,
+    "iteration_count": 96,
+    "max_iterations": 96,
+    "initial_residual_inf_n": 32.47377433333335,
+    "residual_inf_n": 22.769081918072025,
+    "best_residual_inf_n": 22.769081918072025,
+    "relative_residual_inf": 0.7011529268003888,
+    "rhs_inf_n": 32.47377433333335,
+    "threshold_n": 0.001,
+    "residual_history_head": [
+      32.47377433333335,
+      32.56013762661483,
+      32.47624732831271,
+      28.797462206095847,
+      27.710739755050792,
+      27.35716202274462,
+      28.06028455039535,
+      28.724121738385268
+    ],
+    "residual_history_tail": [
+      26.63724021740253,
+      26.836987044814123,
+      27.171659261533257,
+      27.1820819462804,
+      27.123293139581673,
+      27.16189770831732,
+      27.169523669243883,
+      27.221004132064444
+    ],
+    "solve_seconds": 1.4676226629999292,
+    "device_residency_ratio": 1.0,
+    "vcycle_count": 96,
+    "host_dense_solve_fallback_count": 0,
+    "host_copy_bytes": 678563532,
+    "hip_kernel_invocation_count": 2688,
+    "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+    "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+    "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+  },
+  "rows": [
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 64,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 315
+        },
+        {
+          "level": 1,
+          "size": 315,
+          "nnz": 20263,
+          "projector_columns": 79
+        },
+        {
+          "level": 2,
+          "size": 79,
+          "nnz": 2228,
+          "projector_columns": 20
+        },
+        {
+          "level": 3,
+          "size": 20,
+          "nnz": 256,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.2,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 28.315486058461843,
+      "best_residual_inf_n": 28.315486058461843,
+      "relative_residual_inf": 0.8719493388052786,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        30.950820728376303,
+        28.839249721106118,
+        29.72038984504881,
+        30.72358148572258,
+        30.049258305587284,
+        29.063387635273052,
+        29.52743727296461
+      ],
+      "residual_history_tail": [
+        33.712858974388084,
+        33.31733225660117,
+        34.630082100636265,
+        35.27548370797964,
+        34.824399688682675,
+        35.24986901207162,
+        35.5186823609788,
+        35.13972604855262
+      ],
+      "solve_seconds": 0.716235104999214,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 96840388,
+      "hip_kernel_invocation_count": 896,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 41689,
+          "projector_columns": 156
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5893,
+          "projector_columns": 39
+        },
+        {
+          "level": 3,
+          "size": 39,
+          "nnz": 877,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.2,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 29.248423825493255,
+      "best_residual_inf_n": 29.248423825493255,
+      "relative_residual_inf": 0.9006782989025894,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        30.658956080476514,
+        30.986769499242605,
+        32.99930828106819,
+        33.49341821770361,
+        32.55695154018031,
+        32.529227162251395,
+        31.838298854562126
+      ],
+      "residual_history_tail": [
+        30.455844904315722,
+        30.353990062758978,
+        29.8437184974962,
+        29.654386712679745,
+        29.248423825493255,
+        29.39414290160265,
+        29.338668067541715,
+        29.50979464816738
+      ],
+      "solve_seconds": 0.4538372429997253,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181388580,
+      "hip_kernel_invocation_count": 896,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 41689,
+          "projector_columns": 156
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5893,
+          "projector_columns": 39
+        },
+        {
+          "level": 3,
+          "size": 39,
+          "nnz": 877,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.1,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 20,
+      "restart_cycles": 2,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 29.456735857635223,
+      "best_residual_inf_n": 29.456735857635223,
+      "relative_residual_inf": 0.9070930762550373,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.73232917659697,
+        31.168094636294477,
+        30.99795482385095,
+        33.20174154030683,
+        33.42655088281765,
+        33.22523525372484,
+        32.834994907156535
+      ],
+      "residual_history_tail": [
+        30.177043917803584,
+        29.913793490700105,
+        29.725847691989205,
+        29.65497392472908,
+        29.456735857635223,
+        29.47983825515066,
+        29.66839970244877,
+        29.602665272332533
+      ],
+      "solve_seconds": 0.5197584720008308,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 40,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181388580,
+      "hip_kernel_invocation_count": 1120,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 72703,
+          "projector_columns": 307
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11823,
+          "projector_columns": 77
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2535,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.1,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 20,
+      "restart_cycles": 2,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.95612546045043,
+      "best_residual_inf_n": 24.95612546045043,
+      "relative_residual_inf": 0.7685009202898142,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.65506807079961,
+        31.484246239185048,
+        28.942843722633665,
+        28.86148625240827,
+        29.617438946584684,
+        28.845808788829107,
+        28.422814001540694
+      ],
+      "residual_history_tail": [
+        25.197893420273534,
+        25.67520429072206,
+        25.911997191123344,
+        25.34975928122365,
+        24.95612546045043,
+        25.616468483619684,
+        25.59212790881109,
+        25.159822590428547
+      ],
+      "solve_seconds": 0.6419042160014214,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 40,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347690328,
+      "hip_kernel_invocation_count": 1120,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 72703,
+          "projector_columns": 307
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11823,
+          "projector_columns": 77
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2535,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.169372721220324,
+      "best_residual_inf_n": 24.169372721220324,
+      "relative_residual_inf": 0.7442735936121595,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.587071966321616,
+        32.56899043846658,
+        30.07048527711908,
+        28.81845484101472,
+        29.178500789313116,
+        29.348627517292094,
+        28.98334238907378
+      ],
+      "residual_history_tail": [
+        28.31320094819187,
+        28.43410285635823,
+        28.309239952773634,
+        27.95839657266375,
+        27.780605473431216,
+        28.249189344798083,
+        28.492375364095214,
+        28.07086499783704
+      ],
+      "solve_seconds": 1.5555943899998965,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347690328,
+      "hip_kernel_invocation_count": 2688,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 120115,
+          "projector_columns": 602
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 20186,
+          "projector_columns": 151
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 7242,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.769081918072025,
+      "best_residual_inf_n": 22.769081918072025,
+      "relative_residual_inf": 0.7011529268003888,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.56013762661483,
+        32.47624732831271,
+        28.797462206095847,
+        27.710739755050792,
+        27.35716202274462,
+        28.06028455039535,
+        28.724121738385268
+      ],
+      "residual_history_tail": [
+        26.63724021740253,
+        26.836987044814123,
+        27.171659261533257,
+        27.1820819462804,
+        27.123293139581673,
+        27.16189770831732,
+        27.169523669243883,
+        27.221004132064444
+      ],
+      "solve_seconds": 1.4676226629999292,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678563532,
+      "hip_kernel_invocation_count": 2688,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 120115,
+          "projector_columns": 602
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 20186,
+          "projector_columns": 151
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 7242,
+          "projector_columns": 38
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 990,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 23.606362329685705,
+      "best_residual_inf_n": 23.606362329685705,
+      "relative_residual_inf": 0.7269362066562889,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.46404905407006,
+        32.715439435064496,
+        29.92237300609293,
+        28.04796148550928,
+        27.44712215989512,
+        27.678666401968183,
+        28.18795550944002
+      ],
+      "residual_history_tail": [
+        25.7037315413394,
+        25.446496427243776,
+        24.73585504751563,
+        24.477113873869055,
+        24.25545444185568,
+        23.937142393495943,
+        23.631595292595243,
+        23.606362329685705
+      ],
+      "solve_seconds": 1.4150684479991469,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678453036,
+      "hip_kernel_invocation_count": 3360,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 768,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 3578
+        },
+        {
+          "level": 1,
+          "size": 3578,
+          "nnz": 158014,
+          "projector_columns": 895
+        },
+        {
+          "level": 2,
+          "size": 895,
+          "nnz": 28249,
+          "projector_columns": 224
+        },
+        {
+          "level": 3,
+          "size": 224,
+          "nnz": 9527,
+          "projector_columns": 56
+        },
+        {
+          "level": 4,
+          "size": 56,
+          "nnz": 1556,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 0,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.025294381406702,
+      "best_residual_inf_n": 26.025294381406702,
+      "relative_residual_inf": 0.8014249934197677,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.51704653483573,
+        32.73772627089692,
+        29.97490377408299,
+        27.555132670596425,
+        26.295873198192005,
+        26.59793279926348,
+        27.026514546300668
+      ],
+      "residual_history_tail": [
+        28.90653901848766,
+        29.130142132365577,
+        29.03407288988415,
+        29.34081246055358,
+        29.165603224556808,
+        29.654983795214484,
+        29.91907201037857,
+        29.496371555608782
+      ],
+      "solve_seconds": 1.1180122309997387,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 1011915556,
+      "hip_kernel_invocation_count": 1440,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 369392,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212837,
+          "projector_columns": 307,
+          "projector_nnz": 74548,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.75141369333487,
+      "best_residual_inf_n": 24.75141369333487,
+      "relative_residual_inf": 0.7621970097860873,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.41303245265984,
+        31.950377950590255,
+        29.915741408206955,
+        28.602850813616776,
+        28.099375652911036,
+        28.737211344583393,
+        27.908289414097524
+      ],
+      "residual_history_tail": [
+        27.601329601351864,
+        27.359224690154804,
+        26.36975640650538,
+        26.052413081854514,
+        26.02861687435058,
+        25.45962554973413,
+        25.11459359537182,
+        24.75141369333487
+      ],
+      "solve_seconds": 1.1844759650011838,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355329132,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 369392,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212837,
+          "projector_columns": 307,
+          "projector_nnz": 74548,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.05,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.298022542458124,
+      "best_residual_inf_n": 25.298022542458124,
+      "relative_residual_inf": 0.7790293263352042,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.43652638276985,
+        32.09681481847513,
+        30.257609366096574,
+        29.039560891968016,
+        28.26015331013241,
+        28.750243500208484,
+        27.918330073520014
+      ],
+      "residual_history_tail": [
+        27.829774651852997,
+        27.174724861853655,
+        26.48378229886159,
+        26.55690406722456,
+        26.845006854490748,
+        26.092787263070736,
+        25.628019785145582,
+        25.298022542458124
+      ],
+      "solve_seconds": 0.8763569239999924,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355329132,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.324310976328043,
+      "best_residual_inf_n": 24.324310976328043,
+      "relative_residual_inf": 0.7490447746124745,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        33.0640402480153,
+        30.93406193292241,
+        28.72821318090427,
+        27.525118805012205,
+        27.00336748333812,
+        27.711861395037918,
+        28.189713423318814
+      ],
+      "residual_history_tail": [
+        26.91338765036194,
+        26.871747669562318,
+        26.65146492619111,
+        26.002504006355714,
+        25.330219347378467,
+        24.896663688035677,
+        24.324310976328043,
+        24.33429509720904
+      ],
+      "solve_seconds": 1.2943172350005625,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692971824,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.05,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.70482112844354,
+      "best_residual_inf_n": 24.70482112844354,
+      "relative_residual_inf": 0.7607622346221944,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.965892865327746,
+        31.198609905692905,
+        29.28020862242518,
+        28.07348894724179,
+        27.22355308606919,
+        27.419784452280382,
+        27.989862957115133
+      ],
+      "residual_history_tail": [
+        27.05702646958438,
+        27.029920675757733,
+        26.836589580038936,
+        26.22144307972663,
+        25.64804658316227,
+        25.347998443492873,
+        24.953329235497936,
+        24.70482112844354
+      ],
+      "solve_seconds": 1.2516738140002417,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692971824,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": 38,
+          "projector_nnz": 4639,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 1160,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.203343712207634,
+      "best_residual_inf_n": 25.203343712207634,
+      "relative_residual_inf": 0.7761137788759331,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.5550682311589,
+        33.391634650292175,
+        29.750898725510808,
+        28.303487388786323,
+        27.358642049727067,
+        27.15788966653924,
+        27.800575876064148
+      ],
+      "residual_history_tail": [
+        27.196864959205094,
+        27.515866645135972,
+        27.922732982585934,
+        27.617132631399674,
+        27.019363556817947,
+        26.733724808205025,
+        26.574161761105884,
+        26.170103469662763
+      ],
+      "solve_seconds": 1.2606841679989884,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692917224,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623,
+          "projector_nnz": 56207,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 42133,
+          "projector_columns": 156,
+          "projector_nnz": 623,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5806,
+          "projector_columns": 39,
+          "projector_nnz": 156,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 39,
+          "nnz": 925,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 30.725766876056596,
+      "best_residual_inf_n": 30.725766876056596,
+      "relative_residual_inf": 0.9461717187742332,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.34130489954311,
+        31.80803040327081,
+        30.725766876056596,
+        32.78674977457794,
+        34.052556878705296,
+        34.344240849183876,
+        34.964666516943616
+      ],
+      "residual_history_tail": [
+        34.17474913804016,
+        34.08973273536549,
+        34.437397148788015,
+        34.3103167446372,
+        34.73578899304309,
+        35.140484993543836,
+        35.00934332683412,
+        34.82409354974307
+      ],
+      "solve_seconds": 1.045435861000442,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181660740,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 56076,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 73727,
+          "projector_columns": 307,
+          "projector_nnz": 1225,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11232,
+          "projector_columns": 77,
+          "projector_nnz": 307,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2665,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.672563704271276,
+      "best_residual_inf_n": 26.672563704271276,
+      "relative_residual_inf": 0.8213570566354738,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.50782521658518,
+        32.13452960069849,
+        30.399438579084837,
+        29.03881015216042,
+        29.34503456526652,
+        30.027983045178843,
+        29.49998292738774
+      ],
+      "residual_history_tail": [
+        27.410387679448373,
+        27.5262444447311,
+        26.98193049975195,
+        26.672563704271276,
+        26.97531404729875,
+        27.322621906653097,
+        27.229138802615587,
+        26.760455001770953
+      ],
+      "solve_seconds": 0.8843257190001168,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347962812,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 55748,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 121507,
+          "projector_columns": 602,
+          "projector_nnz": 2407,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 19742,
+          "projector_columns": 151,
+          "projector_nnz": 602,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 6973,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.25603853096381,
+      "best_residual_inf_n": 24.25603853096381,
+      "relative_residual_inf": 0.7469423874780615,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.768285103161844,
+        32.15033793895589,
+        28.8665499084004,
+        28.04146863352193,
+        27.305364104546463,
+        27.27903608530608,
+        28.002553974646137
+      ],
+      "residual_history_tail": [
+        26.39396207451852,
+        26.15425749398961,
+        26.3285589408675,
+        25.990689550624726,
+        25.183942873850533,
+        24.64507262392156,
+        24.41744427146735,
+        24.25603853096381
+      ],
+      "solve_seconds": 1.0771417030009616,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678833472,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 56076,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 73727,
+          "projector_columns": 307,
+          "projector_nnz": 1225,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11232,
+          "projector_columns": 77,
+          "projector_nnz": 307,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2665,
+          "projector_columns": 20,
+          "projector_nnz": 77,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 4,
+          "size": 20,
+          "nnz": 262,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.423669632729325,
+      "best_residual_inf_n": 26.423669632729325,
+      "relative_residual_inf": 0.8136925927210815,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.4802103986998,
+        32.366675853428944,
+        31.350412630073155,
+        29.927828101437715,
+        28.83274194394716,
+        29.26450263546258,
+        30.142899220925905
+      ],
+      "residual_history_tail": [
+        27.24237194201967,
+        26.915328406445216,
+        26.423669632729325,
+        26.58052014446316,
+        27.020624442272265,
+        27.285657465049592,
+        27.02289887180452,
+        26.485524323060325
+      ],
+      "solve_seconds": 0.868815492000067,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347935364,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 55748,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 121507,
+          "projector_columns": 602,
+          "projector_nnz": 2407,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 19742,
+          "projector_columns": 151,
+          "projector_nnz": 602,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 6973,
+          "projector_columns": 38,
+          "projector_nnz": 151,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 994,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.620184102139827,
+      "best_residual_inf_n": 25.620184102139827,
+      "relative_residual_inf": 0.7889499951301158,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.69361768163195,
+        32.67224006186697,
+        30.079996318825486,
+        28.361348056713727,
+        27.980348644054736,
+        27.407368520268236,
+        27.264903846357548
+      ],
+      "residual_history_tail": [
+        26.399808018430612,
+        26.34106107505431,
+        26.811354193117264,
+        26.650255718311957,
+        25.900011027674907,
+        25.620184102139827,
+        25.737844686658022,
+        25.715957392360277
+      ],
+      "solve_seconds": 1.0513080719993013,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678723024,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 373030,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212867,
+          "projector_columns": 307,
+          "projector_nnz": 74293,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.069199216663534,
+      "best_residual_inf_n": 25.069199216663534,
+      "relative_residual_inf": 0.7719829225680969,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.3990113562351,
+        31.883707864681966,
+        29.846752712684477,
+        28.613469090204863,
+        27.964923788383004,
+        28.696585156507986,
+        27.86446305422174
+      ],
+      "residual_history_tail": [
+        27.36952224774538,
+        27.62200070765253,
+        26.65451920542745,
+        25.780554330888034,
+        26.066868953052733,
+        25.983684600321425,
+        25.15949120720488,
+        25.069199216663534
+      ],
+      "solve_seconds": 0.9791913499993825,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355370088,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    }
+  ],
+  "claim_boundary": "Focused no-new-dependency ROCm torch recursive V-cycle FGMRES using distributed structural-node DOF orthogonal projection as the first-level near-nullspace. This is not closure unless full assembled CSR residual replay meets the G9 gate.",
+  "latest_sensitivity_rows": [
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 72703,
+          "projector_columns": 307
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11823,
+          "projector_columns": 77
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2535,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.169372721220324,
+      "best_residual_inf_n": 24.169372721220324,
+      "relative_residual_inf": 0.7442735936121595,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.587071966321616,
+        32.56899043846658,
+        30.07048527711908,
+        28.81845484101472,
+        29.178500789313116,
+        29.348627517292094,
+        28.98334238907378
+      ],
+      "residual_history_tail": [
+        28.31320094819187,
+        28.43410285635823,
+        28.309239952773634,
+        27.95839657266375,
+        27.780605473431216,
+        28.249189344798083,
+        28.492375364095214,
+        28.07086499783704
+      ],
+      "solve_seconds": 1.5555943899998965,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347690328,
+      "hip_kernel_invocation_count": 2688,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 120115,
+          "projector_columns": 602
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 20186,
+          "projector_columns": 151
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 7242,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.769081918072025,
+      "best_residual_inf_n": 22.769081918072025,
+      "relative_residual_inf": 0.7011529268003888,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.56013762661483,
+        32.47624732831271,
+        28.797462206095847,
+        27.710739755050792,
+        27.35716202274462,
+        28.06028455039535,
+        28.724121738385268
+      ],
+      "residual_history_tail": [
+        26.63724021740253,
+        26.836987044814123,
+        27.171659261533257,
+        27.1820819462804,
+        27.123293139581673,
+        27.16189770831732,
+        27.169523669243883,
+        27.221004132064444
+      ],
+      "solve_seconds": 1.4676226629999292,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678563532,
+      "hip_kernel_invocation_count": 2688,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 120115,
+          "projector_columns": 602
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 20186,
+          "projector_columns": 151
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 7242,
+          "projector_columns": 38
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 990,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 23.606362329685705,
+      "best_residual_inf_n": 23.606362329685705,
+      "relative_residual_inf": 0.7269362066562889,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.46404905407006,
+        32.715439435064496,
+        29.92237300609293,
+        28.04796148550928,
+        27.44712215989512,
+        27.678666401968183,
+        28.18795550944002
+      ],
+      "residual_history_tail": [
+        25.7037315413394,
+        25.446496427243776,
+        24.73585504751563,
+        24.477113873869055,
+        24.25545444185568,
+        23.937142393495943,
+        23.631595292595243,
+        23.606362329685705
+      ],
+      "solve_seconds": 1.4150684479991469,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678453036,
+      "hip_kernel_invocation_count": 3360,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 768,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 3578
+        },
+        {
+          "level": 1,
+          "size": 3578,
+          "nnz": 158014,
+          "projector_columns": 895
+        },
+        {
+          "level": 2,
+          "size": 895,
+          "nnz": 28249,
+          "projector_columns": 224
+        },
+        {
+          "level": 3,
+          "size": 224,
+          "nnz": 9527,
+          "projector_columns": 56
+        },
+        {
+          "level": 4,
+          "size": 56,
+          "nnz": 1556,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 0,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.025294381406702,
+      "best_residual_inf_n": 26.025294381406702,
+      "relative_residual_inf": 0.8014249934197677,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.51704653483573,
+        32.73772627089692,
+        29.97490377408299,
+        27.555132670596425,
+        26.295873198192005,
+        26.59793279926348,
+        27.026514546300668
+      ],
+      "residual_history_tail": [
+        28.90653901848766,
+        29.130142132365577,
+        29.03407288988415,
+        29.34081246055358,
+        29.165603224556808,
+        29.654983795214484,
+        29.91907201037857,
+        29.496371555608782
+      ],
+      "solve_seconds": 1.1180122309997387,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 1011915556,
+      "hip_kernel_invocation_count": 1440,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    }
+  ],
+  "latest_energy_smoothed_rows": [
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 369392,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212837,
+          "projector_columns": 307,
+          "projector_nnz": 74548,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.75141369333487,
+      "best_residual_inf_n": 24.75141369333487,
+      "relative_residual_inf": 0.7621970097860873,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.41303245265984,
+        31.950377950590255,
+        29.915741408206955,
+        28.602850813616776,
+        28.099375652911036,
+        28.737211344583393,
+        27.908289414097524
+      ],
+      "residual_history_tail": [
+        27.601329601351864,
+        27.359224690154804,
+        26.36975640650538,
+        26.052413081854514,
+        26.02861687435058,
+        25.45962554973413,
+        25.11459359537182,
+        24.75141369333487
+      ],
+      "solve_seconds": 1.1844759650011838,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355329132,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 369392,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212837,
+          "projector_columns": 307,
+          "projector_nnz": 74548,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.05,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.298022542458124,
+      "best_residual_inf_n": 25.298022542458124,
+      "relative_residual_inf": 0.7790293263352042,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.43652638276985,
+        32.09681481847513,
+        30.257609366096574,
+        29.039560891968016,
+        28.26015331013241,
+        28.750243500208484,
+        27.918330073520014
+      ],
+      "residual_history_tail": [
+        27.829774651852997,
+        27.174724861853655,
+        26.48378229886159,
+        26.55690406722456,
+        26.845006854490748,
+        26.092787263070736,
+        25.628019785145582,
+        25.298022542458124
+      ],
+      "solve_seconds": 0.8763569239999924,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355329132,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.324310976328043,
+      "best_residual_inf_n": 24.324310976328043,
+      "relative_residual_inf": 0.7490447746124745,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        33.0640402480153,
+        30.93406193292241,
+        28.72821318090427,
+        27.525118805012205,
+        27.00336748333812,
+        27.711861395037918,
+        28.189713423318814
+      ],
+      "residual_history_tail": [
+        26.91338765036194,
+        26.871747669562318,
+        26.65146492619111,
+        26.002504006355714,
+        25.330219347378467,
+        24.896663688035677,
+        24.324310976328043,
+        24.33429509720904
+      ],
+      "solve_seconds": 1.2943172350005625,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692971824,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.05,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.70482112844354,
+      "best_residual_inf_n": 24.70482112844354,
+      "relative_residual_inf": 0.7607622346221944,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.965892865327746,
+        31.198609905692905,
+        29.28020862242518,
+        28.07348894724179,
+        27.22355308606919,
+        27.419784452280382,
+        27.989862957115133
+      ],
+      "residual_history_tail": [
+        27.05702646958438,
+        27.029920675757733,
+        26.836589580038936,
+        26.22144307972663,
+        25.64804658316227,
+        25.347998443492873,
+        24.953329235497936,
+        24.70482112844354
+      ],
+      "solve_seconds": 1.2516738140002417,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692971824,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 416272,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 423333,
+          "projector_columns": 602,
+          "projector_nnz": 157792,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 295290,
+          "projector_columns": 151,
+          "projector_nnz": 73977,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 18511,
+          "projector_columns": 38,
+          "projector_nnz": 4639,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 1160,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.203343712207634,
+      "best_residual_inf_n": 25.203343712207634,
+      "relative_residual_inf": 0.7761137788759331,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.5550682311589,
+        33.391634650292175,
+        29.750898725510808,
+        28.303487388786323,
+        27.358642049727067,
+        27.15788966653924,
+        27.800575876064148
+      ],
+      "residual_history_tail": [
+        27.196864959205094,
+        27.515866645135972,
+        27.922732982585934,
+        27.617132631399674,
+        27.019363556817947,
+        26.733724808205025,
+        26.574161761105884,
+        26.170103469662763
+      ],
+      "solve_seconds": 1.2606841679989884,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 692917224,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    }
+  ],
+  "energy_smoothed_probe_summary": {
+    "best_latest_residual_inf_n": 24.324310976328043,
+    "row_count": 5
+  },
+  "latest_rigid_body_rows": [
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623,
+          "projector_nnz": 56207,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 42133,
+          "projector_columns": 156,
+          "projector_nnz": 623,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5806,
+          "projector_columns": 39,
+          "projector_nnz": 156,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 39,
+          "nnz": 925,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 30.725766876056596,
+      "best_residual_inf_n": 30.725766876056596,
+      "relative_residual_inf": 0.9461717187742332,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.34130489954311,
+        31.80803040327081,
+        30.725766876056596,
+        32.78674977457794,
+        34.052556878705296,
+        34.344240849183876,
+        34.964666516943616
+      ],
+      "residual_history_tail": [
+        34.17474913804016,
+        34.08973273536549,
+        34.437397148788015,
+        34.3103167446372,
+        34.73578899304309,
+        35.140484993543836,
+        35.00934332683412,
+        34.82409354974307
+      ],
+      "solve_seconds": 1.045435861000442,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181660740,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 56076,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 73727,
+          "projector_columns": 307,
+          "projector_nnz": 1225,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11232,
+          "projector_columns": 77,
+          "projector_nnz": 307,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2665,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.672563704271276,
+      "best_residual_inf_n": 26.672563704271276,
+      "relative_residual_inf": 0.8213570566354738,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.50782521658518,
+        32.13452960069849,
+        30.399438579084837,
+        29.03881015216042,
+        29.34503456526652,
+        30.027983045178843,
+        29.49998292738774
+      ],
+      "residual_history_tail": [
+        27.410387679448373,
+        27.5262444447311,
+        26.98193049975195,
+        26.672563704271276,
+        26.97531404729875,
+        27.322621906653097,
+        27.229138802615587,
+        26.760455001770953
+      ],
+      "solve_seconds": 0.8843257190001168,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347962812,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 55748,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 121507,
+          "projector_columns": 602,
+          "projector_nnz": 2407,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 19742,
+          "projector_columns": 151,
+          "projector_nnz": 602,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 6973,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.25603853096381,
+      "best_residual_inf_n": 24.25603853096381,
+      "relative_residual_inf": 0.7469423874780615,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.768285103161844,
+        32.15033793895589,
+        28.8665499084004,
+        28.04146863352193,
+        27.305364104546463,
+        27.27903608530608,
+        28.002553974646137
+      ],
+      "residual_history_tail": [
+        26.39396207451852,
+        26.15425749398961,
+        26.3285589408675,
+        25.990689550624726,
+        25.183942873850533,
+        24.64507262392156,
+        24.41744427146735,
+        24.25603853096381
+      ],
+      "solve_seconds": 1.0771417030009616,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678833472,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 56076,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 73727,
+          "projector_columns": 307,
+          "projector_nnz": 1225,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11232,
+          "projector_columns": 77,
+          "projector_nnz": 307,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2665,
+          "projector_columns": 20,
+          "projector_nnz": 77,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 4,
+          "size": 20,
+          "nnz": 262,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.423669632729325,
+      "best_residual_inf_n": 26.423669632729325,
+      "relative_residual_inf": 0.8136925927210815,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.4802103986998,
+        32.366675853428944,
+        31.350412630073155,
+        29.927828101437715,
+        28.83274194394716,
+        29.26450263546258,
+        30.142899220925905
+      ],
+      "residual_history_tail": [
+        27.24237194201967,
+        26.915328406445216,
+        26.423669632729325,
+        26.58052014446316,
+        27.020624442272265,
+        27.285657465049592,
+        27.02289887180452,
+        26.485524323060325
+      ],
+      "solve_seconds": 0.868815492000067,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347935364,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 512,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 5,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 2407,
+          "projector_nnz": 55748,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 1,
+          "size": 2407,
+          "nnz": 121507,
+          "projector_columns": 602,
+          "projector_nnz": 2407,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 2,
+          "size": 602,
+          "nnz": 19742,
+          "projector_columns": 151,
+          "projector_nnz": 602,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 3,
+          "size": 151,
+          "nnz": 6973,
+          "projector_columns": 38,
+          "projector_nnz": 151,
+          "projector_smoothing_steps_applied": 0
+        },
+        {
+          "level": 4,
+          "size": 38,
+          "nnz": 994,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.02,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 0,
+      "prolongation_smoothing_weight": 0.0,
+      "projector_smoothing_steps_applied": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.620184102139827,
+      "best_residual_inf_n": 25.620184102139827,
+      "relative_residual_inf": 0.7889499951301158,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.69361768163195,
+        32.67224006186697,
+        30.079996318825486,
+        28.361348056713727,
+        27.980348644054736,
+        27.407368520268236,
+        27.264903846357548
+      ],
+      "residual_history_tail": [
+        26.399808018430612,
+        26.34106107505431,
+        26.811354193117264,
+        26.650255718311957,
+        25.900011027674907,
+        25.620184102139827,
+        25.737844686658022,
+        25.715957392360277
+      ],
+      "solve_seconds": 1.0513080719993013,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 678723024,
+      "hip_kernel_invocation_count": 1680,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_rigid_body_orthogonal_projection",
+      "first_level_projector": "rigid_body",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225,
+          "projector_nnz": 373030,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 212867,
+          "projector_columns": 307,
+          "projector_nnz": 74293,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 77853,
+          "projector_columns": 77,
+          "projector_nnz": 19555,
+          "projector_smoothing_steps_applied": 1
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 4907,
+          "projector_columns": null,
+          "projector_nnz": null,
+          "projector_smoothing_steps_applied": null
+        }
+      ],
+      "pre_smooth_steps": 1,
+      "post_smooth_steps": 1,
+      "smoother_weight": 0.05,
+      "coarse_regularization_factor": 1e-08,
+      "prolongation_smoothing_steps": 1,
+      "prolongation_smoothing_weight": 0.02,
+      "projector_smoothing_steps_applied": [
+        1,
+        1,
+        1
+      ],
+      "krylov_method": "fgmres",
+      "restart_dimension": 24,
+      "restart_cycles": 2,
+      "iteration_count": 48,
+      "max_iterations": 48,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.069199216663534,
+      "best_residual_inf_n": 25.069199216663534,
+      "relative_residual_inf": 0.7719829225680969,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.3990113562351,
+        31.883707864681966,
+        29.846752712684477,
+        28.613469090204863,
+        27.964923788383004,
+        28.696585156507986,
+        27.86446305422174
+      ],
+      "residual_history_tail": [
+        27.36952224774538,
+        27.62200070765253,
+        26.65451920542745,
+        25.780554330888034,
+        26.066868953052733,
+        25.983684600321425,
+        25.15949120720488,
+        25.069199216663534
+      ],
+      "solve_seconds": 0.9791913499993825,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 48,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 355370088,
+      "hip_kernel_invocation_count": 1344,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_fgmres_probe",
+      "breakdown": "multilevel_projected_fgmres_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle FGMRES uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, Arnoldi updates, least-squares solves, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    }
+  ],
+  "rigid_body_probe_summary": {
+    "best_latest_residual_inf_n": 24.25603853096381,
+    "row_count": 6
+  }
+}

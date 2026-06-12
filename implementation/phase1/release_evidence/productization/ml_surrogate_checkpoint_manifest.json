@@ -1,0 +1,18 @@
+{
+  "schema_version": "ml-surrogate-checkpoint-manifest.v1",
+  "generated_at": "2026-06-05T13:34:30.799630+00:00",
+  "status": "ready",
+  "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+  "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+  "checkpoint_payload_sha256": "1ca325a2c40649f51b42715a1464aecf2cccca6790826150f81074d5245e64e5",
+  "dataset_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
+  "model_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
+  "validation_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+  "ood_gate_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/ood_gate.json",
+  "solver_fallback_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json",
+  "validation_pass": true,
+  "ood_pass": true,
+  "solver_fallback_verified": true,
+  "production_activation_mode": "shadow_with_solver_fallback",
+  "claim": "Validated shadow surrogate checkpoint; final structural decisions still require solver/code/human gates."
+}

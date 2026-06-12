@@ -1,13 +1,13 @@
 {
   "schema_version": "delivery-evidence-bundle.v1",
-  "generated_at": "2026-05-31T09:13:48.786488+00:00",
+  "generated_at": "2026-06-05T13:35:54.495752+00:00",
   "status": "ready",
   "claim": "Engineer-in-loop delivery evidence bundle; not permit approval.",
   "steps": [
     {
       "step": "mgt_roundtrip_sync",
       "exit_code": 0,
-      "log": "sync-mgt: ready sha=1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
+      "log": "sync-mgt: synced sha=1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4"
     },
     {
       "step": "mgt_global_fea_readiness",
@@ -17,7 +17,7 @@
     {
       "step": "mgt_roundtrip_assembly_fingerprint",
       "exit_code": 0,
-      "log": "mgt-fingerprint: ready sha=f6983a27d201"
+      "log": "mgt-fingerprint: ready sha=2bfec1e76c92"
     },
     {
       "step": "mgt_global_fea_mesh_contract",
@@ -25,19 +25,44 @@
       "log": "mgt-mesh-contract: ready -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_mesh_contract_gate.json"
     },
     {
+      "step": "load_combination_engine_gate",
+      "exit_code": 0,
+      "log": "Wrote load-combination engine gate report: /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_combination_engine_gate.json\nLoad-combination engine gate: PASS | models=1 | family=KDS-2022-steel-gravity | runtime_combo_range=8-8 | nested=2 max_depth=2 | breadth=rc | rc/wind/seismic=8/0/0 | exact_roundtrip=1/1 | pattern_coverage=1/1 min=1.00 | kds_strength_avg=1.000 min=1.000 | kds_service_avg=1.000 min=1.000 | gaps=none"
+    },
+    {
+      "step": "load_stage_semantics_contract",
+      "exit_code": 0,
+      "log": "load-stage-semantics: status=ready typed=True stage=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json"
+    },
+    {
       "step": "optimization_pareto_research_archive",
       "exit_code": 0,
       "log": "pareto-archive: research_archive_ready front=3"
     },
     {
+      "step": "ml_surrogate_checkpoint",
+      "exit_code": 0,
+      "log": "ml-surrogate-checkpoint: status=ready validation=True ood=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ml_surrogate_checkpoint_manifest.json"
+    },
+    {
       "step": "ml_multi_objective_status",
       "exit_code": 0,
-      "log": "ml-status: research_archive_ready production_ml_wired=False"
+      "log": "ml-status: production_shadow_solver_gated_ready production_ml_wired=True"
+    },
+    {
+      "step": "ai_engine_productization_contracts",
+      "exit_code": 0,
+      "log": "ai-engine-contracts: status=production_ai_ready production_ai_ready=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json"
     },
     {
       "step": "commercial_cross_validation",
       "exit_code": 0,
       "log": "crossval: pass_with_marginal_metrics (12/12 cases, 0 metric failures)"
+    },
+    {
+      "step": "mgt_native_modal_buckling_solver",
+      "exit_code": 0,
+      "log": "mgt-native-modal-buckling: status=ready modes=4 critical=7053.141480946014 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_modal_buckling_solver.json"
     },
     {
       "step": "proxy_solver_divergence",
@@ -55,9 +80,115 @@
       "log": "mgt-3d-native: mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_3d_native_solve.json"
     },
     {
+      "step": "mgt_full_line_mesh_sparse_equilibrium",
+      "exit_code": 0,
+      "log": "mgt-full-line-sparse: status=ready line=5572/5576 elastic_residual=3.8929283618927e-06 geometric_residual=1.6093254089355469e-06 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_full_line_mesh_sparse_equilibrium.json"
+    },
+    {
+      "step": "mgt_full_frame_6dof_sparse_equilibrium",
+      "exit_code": 0,
+      "log": "mgt-full-frame-6dof-sparse: status=ready line=5572/5576 elastic_residual=7.097434718161821e-06 geometric_residual=0.00037202611565589905 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json"
+    },
+    {
+      "step": "mgt_pdelta_continuation_probe",
+      "exit_code": 0,
+      "log": "reused_existing_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_pdelta_continuation_probe.json",
+      "execution_mode": "reuse_existing_receipt",
+      "timeout_seconds": 180
+    },
+    {
+      "step": "mgt_coarsened_authored_support_pdelta_probe",
+      "exit_code": 0,
+      "log": "reused_existing_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coarsened_authored_support_pdelta_probe.json",
+      "execution_mode": "reuse_existing_receipt",
+      "timeout_seconds": 180
+    },
+    {
+      "step": "mgt_uncoarsened_boundary_pdelta_probe",
+      "exit_code": 0,
+      "log": "reused_existing_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_probe.json",
+      "execution_mode": "reuse_existing_receipt",
+      "timeout_seconds": 180
+    },
+    {
+      "step": "mgt_surface_membrane_tangent",
+      "exit_code": 0,
+      "log": "mgt-surface-membrane: status=ready surface=7152 tri=14120 residual=1.3838654273623519e-06 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_surface_membrane_tangent.json"
+    },
+    {
+      "step": "mgt_surface_shell_bending_tangent",
+      "exit_code": 0,
+      "log": "mgt-surface-shell-bending: status=ready surface=7152 tri=14120 residual=4.256728516338626e-07 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json"
+    },
+    {
+      "step": "mgt_shell_calibration_benchmarks",
+      "exit_code": 0,
+      "log": "mgt-shell-calibration-benchmarks: status=ready ready=5/5 plate_rel_error=0.07627092354623946 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_shell_calibration_benchmarks.json"
+    },
+    {
+      "step": "mgt_coupled_frame_surface_sparse_equilibrium",
+      "exit_code": 0,
+      "log": "reused_existing_heavy_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_surface_sparse_equilibrium.json script=run_mgt_coupled_frame_surface_sparse_equilibrium.py timeout_seconds=180"
+    },
+    {
+      "step": "mgt_coupled_frame_shell_sparse_equilibrium",
+      "exit_code": 0,
+      "log": "reused_existing_heavy_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_sparse_equilibrium.json script=run_mgt_coupled_frame_shell_sparse_equilibrium.py timeout_seconds=180"
+    },
+    {
       "step": "mgt_global_fea_condensed_solve",
       "exit_code": 0,
       "log": "mgt-condensed-solve: condensed_global_fea_wired -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json"
+    },
+    {
+      "step": "mgt_frame_material_nonlinear_tangent",
+      "exit_code": 0,
+      "log": "mgt-frame-material-nonlinear-tangent: status=ready nonlinear_probe=5487 min_tangent_ratio=0.015 residual=0.00010153651237487793 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json"
+    },
+    {
+      "step": "material_element_tangent_support_matrix",
+      "exit_code": 0,
+      "log": "material-element-tangent-support: status=ready line=True unsupported_queue=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/material_element_tangent_support_matrix.json"
+    },
+    {
+      "step": "mgt_beam_offset_support_receipt",
+      "exit_code": 0,
+      "log": "mgt-beam-offset-support: partial rows=708 max_abs=0.523 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_beam_offset_support_receipt.json"
+    },
+    {
+      "step": "mgt_element_local_axis_opening_semantics_receipt",
+      "exit_code": 0,
+      "log": "mgt-local-axis-opening: ready nonzero_frame_angles=150 openings=0"
+    },
+    {
+      "step": "mgt_boundary_entity_support_receipt",
+      "exit_code": 0,
+      "log": "mgt-boundary-entity-support: status=partial constraints=8 support_nodes=2133 elastic_links=1692 story_eccentricity=True"
+    },
+    {
+      "step": "mgt_boundary_spring_tangent_receipt",
+      "exit_code": 0,
+      "log": "mgt-boundary-spring-tangent: status=ready springs=10152 restrained_dof=7707 rel_residual=0.000e+00"
+    },
+    {
+      "step": "mgt_uncoarsened_boundary_global_equilibrium",
+      "exit_code": 0,
+      "log": "mgt-uncoarsened-boundary-global: status=ready springs=10152 restrained_dof=7707 rel=9.826650835577004e-09 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_global_equilibrium.json"
+    },
+    {
+      "step": "mgt_story_eccentricity_load_receipt",
+      "exit_code": 0,
+      "log": "mgt-story-eccentricity-load: status=ready stories=31 cases=4 max_torsion=3439041.688220291"
+    },
+    {
+      "step": "mgt_coupled_frame_shell_story_eccentricity_equilibrium",
+      "exit_code": 0,
+      "log": "reused_existing_heavy_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_story_eccentricity_equilibrium.json script=run_mgt_coupled_frame_shell_story_eccentricity_equilibrium.py timeout_seconds=180"
+    },
+    {
+      "step": "load_stage_runtime_flow_receipt",
+      "exit_code": 0,
+      "log": "load-stage-runtime-flow: status=ready solve=True viewer=True export=True audit=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_stage_runtime_flow_receipt.json"
     },
     {
       "step": "midas_model_derived_extract_wind",
@@ -107,6 +238,24 @@
       "log": "gpu-newton-checklist: certified -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json"
     },
     {
+      "step": "gpu_rocm_workstation_receipt",
+      "exit_code": 0,
+      "log": "rocm-workstation-gpu: ready device=AMD Radeon RX 6900 XT torch_rocm=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_rocm_workstation_receipt.json"
+    },
+    {
+      "step": "mgt_rocm_sparse_solver_probe",
+      "exit_code": 0,
+      "log": "reused_existing_receipt=/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json",
+      "execution_mode": "reuse_existing_receipt",
+      "timeout_seconds": 180,
+      "claim_boundary": "Delivery bundling reuses the existing ROCm sparse probe receipt by default so the evidence bundle stays bounded. Dedicated ROCm closure work must run scripts/run_mgt_rocm_sparse_solver_probe.py explicitly."
+    },
+    {
+      "step": "solver_runtime_backend_policy",
+      "exit_code": 0,
+      "log": "solver-runtime-backend-policy: ready -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json"
+    },
+    {
       "step": "story_model_reanalysis",
       "exit_code": 0,
       "log": "story-reanalysis: pass drift=1.987%"
@@ -115,6 +264,31 @@
       "step": "post_optimization_reanalysis",
       "exit_code": 0,
       "log": "gate: pass_with_story_proxy_check -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json"
+    },
+    {
+      "step": "ai_decision_review_artifacts",
+      "exit_code": 0,
+      "log": "ai-decision-review: status=ready trace=True queue=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json"
+    },
+    {
+      "step": "ai_physics_guard_execution",
+      "exit_code": 0,
+      "log": "ai-physics-guard: status=ready correction_blocked=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_physics_guard_execution.json"
+    },
+    {
+      "step": "ai_input_code_guard_artifacts",
+      "exit_code": 0,
+      "log": "ai-input-code-guard: status=ready input=True code=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_input_code_guard_artifacts.json"
+    },
+    {
+      "step": "kds_detailing_support_matrix",
+      "exit_code": 0,
+      "log": "kds-detailing-support: status=ready clauses=23 guarded=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json"
+    },
+    {
+      "step": "optimization_productization_audit",
+      "exit_code": 0,
+      "log": "optimization-productization-audit: status=ready pareto_wired=True ml_bypass_prevented=True -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/optimization_productization_audit.json"
     },
     {
       "step": "rh_closure_checklist",
@@ -147,9 +321,19 @@
       "log": "rh-checklist: complete (0 open) -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json"
     },
     {
+      "step": "commercial_gap_ledger_status",
+      "exit_code": 0,
+      "log": "commercial-gap-ledger: status=open closed=16/20 partial=3 open=0 external_blocked=1 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
+    },
+    {
       "step": "gap_closure_status",
       "exit_code": 0,
-      "log": "gap-status: delivery=ready authority_holdout=closed -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
+      "log": "gap-status: delivery=ready authority_holdout=closed full_gap_ledger=open -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
+    },
+    {
+      "step": "solver_governance_support_contract",
+      "exit_code": 0,
+      "log": "solver-governance-support: status=ready unsupported_visible=4 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/solver_governance_support_contract.json"
     },
     {
       "step": "productization_delivery_evidence_validation",
@@ -157,9 +341,19 @@
       "log": "productization-validate: pass missing=0"
     },
     {
+      "step": "solver_governance_support_contract_final",
+      "exit_code": 0,
+      "log": "solver-governance-support: status=ready unsupported_visible=4 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/solver_governance_support_contract.json"
+    },
+    {
+      "step": "commercial_gap_ledger_status_final",
+      "exit_code": 0,
+      "log": "commercial-gap-ledger: status=open closed=16/20 partial=3 open=0 external_blocked=1 -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
+    },
+    {
       "step": "gap_closure_status_final",
       "exit_code": 0,
-      "log": "gap-status: delivery=ready authority_holdout=closed -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
+      "log": "gap-status: delivery=ready authority_holdout=closed full_gap_ledger=open -> /home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json"
     }
   ],
   "artifacts": {
@@ -168,9 +362,36 @@
     "story_model_reanalysis": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
     "gpu_solver_claim_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json",
     "mgt_native_reanalysis_pipeline": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_reanalysis_pipeline.json",
+    "mgt_full_line_mesh_sparse_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_full_line_mesh_sparse_equilibrium.json",
+    "mgt_full_frame_6dof_sparse_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "mgt_pdelta_continuation_probe": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_pdelta_continuation_probe.json",
+    "mgt_coarsened_authored_support_pdelta_probe": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coarsened_authored_support_pdelta_probe.json",
+    "mgt_uncoarsened_boundary_pdelta_probe": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_probe.json",
+    "mgt_surface_membrane_tangent": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_surface_membrane_tangent.json",
+    "mgt_surface_shell_bending_tangent": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_surface_shell_bending_tangent.json",
+    "mgt_shell_calibration_benchmarks": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_shell_calibration_benchmarks.json",
+    "mgt_coupled_frame_surface_sparse_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_surface_sparse_equilibrium.json",
+    "mgt_coupled_frame_shell_sparse_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_sparse_equilibrium.json",
+    "mgt_native_modal_buckling_solver": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_native_modal_buckling_solver.json",
     "mgt_global_fea_condensed_solve": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json",
+    "mgt_frame_material_nonlinear_tangent": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json",
+    "material_element_tangent_support_matrix": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/material_element_tangent_support_matrix.json",
+    "mgt_beam_offset_support_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_beam_offset_support_receipt.json",
+    "mgt_element_local_axis_opening_semantics_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_element_local_axis_opening_semantics_receipt.json",
+    "mgt_boundary_entity_support_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_boundary_entity_support_receipt.json",
+    "mgt_boundary_spring_tangent_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_boundary_spring_tangent_receipt.json",
+    "mgt_uncoarsened_boundary_global_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_global_equilibrium.json",
+    "mgt_story_eccentricity_load_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_story_eccentricity_load_receipt.json",
+    "mgt_coupled_frame_shell_story_eccentricity_equilibrium": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_coupled_frame_shell_story_eccentricity_equilibrium.json",
+    "load_stage_runtime_flow_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_stage_runtime_flow_receipt.json",
     "gpu_newton_terminal_certification": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_terminal_certification.json",
+    "gpu_rocm_workstation_receipt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_rocm_workstation_receipt.json",
+    "solver_runtime_backend_policy": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
+    "mgt_rocm_sparse_solver_probe": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json",
     "post_optimization_reanalysis": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+    "ai_decision_review_artifacts": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_decision_review_artifacts.json",
+    "ml_surrogate_checkpoint_manifest": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ml_surrogate_checkpoint_manifest.json",
+    "kds_detailing_support_matrix": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json",
     "mgt_roundtrip_sync": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_roundtrip_sync.json",
     "mgt_global_fea_readiness": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_readiness_gate.json",
     "rh_closure_checklist": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json",
@@ -180,19 +401,27 @@
     "mgt_global_fea_3d_native_solve": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_3d_native_solve.json",
     "gpu_production_newton_equivalence_gate": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_production_newton_equivalence_gate.json",
     "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+    "commercial_gap_ledger_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json",
     "gap_closure_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_closure_status.json",
     "mgt_roundtrip_assembly_fingerprint": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_roundtrip_assembly_fingerprint.json",
     "mgt_global_fea_mesh_contract": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_mesh_contract_gate.json",
     "rh_engineer_review_packet_html": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_engineer_review_packet_template.html",
     "ml_multi_objective_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json",
+    "load_combination_engine_gate": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_combination_engine_gate.json",
+    "load_stage_semantics_contract": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+    "ai_engine_productization_contracts": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_engine_productization_contracts.json",
+    "ai_physics_guard_execution": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_physics_guard_execution.json",
+    "optimization_productization_audit": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/optimization_productization_audit.json",
+    "ai_input_code_guard_artifacts": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_input_code_guard_artifacts.json",
+    "solver_governance_support_contract": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/solver_governance_support_contract.json",
     "productization_delivery_evidence_validation": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/productization_delivery_evidence_validation.json"
   },
   "summary": {
     "cross_validation_status": "pass_with_marginal_metrics",
     "cross_validation_marginal_accepted": 1,
     "cross_validation_hard_failures": 0,
-    "mgt_roundtrip_sync_status": "ready",
-    "mgt_roundtrip_parsed": true,
+    "mgt_roundtrip_sync_status": "synced",
+    "mgt_roundtrip_parsed": false,
     "global_fea_readiness_status": "ready",
     "global_fea_readiness_ready": true,
     "proxy_divergence_count": 0,
@@ -202,8 +431,20 @@
     "native_fea_solve_status": "mesh_3d_beam_global_wired_with_midas_model_derived",
     "mgt_condensed_solve_status": "condensed_global_fea_wired",
     "mgt_integrity_status": "verified",
+    "official_solver_compute_backend": "amd_rocm_hip",
+    "official_solver_backend": "amd_rocm_hip",
+    "official_solver_backend_family": "rocm_hip",
+    "gpu_required_for_commercial_solver_closure": true,
+    "torch_device_label_is_pytorch_rocm_compat_alias": true,
+    "cpu_diagnostic_promotes_solver_closure": false,
+    "cpu_solver_fallback_detected": false,
+    "cpu_fallback_allowed_for_official_solver_closure": false,
+    "step_timeout_seconds": 180,
+    "heavy_rocm_probe_execution_mode": "reuse_existing_receipt",
+    "heavy_probe_reuse_policy": "delivery bundle reuses existing heavy nonlinear/GPU receipts unless --rerun-heavy-probes or --rerun-heavy-rocm-probe is explicit",
     "member_alignment_status": "aligned",
-    "removed_member_count": 0
+    "removed_member_count": 0,
+    "delivery_solve_basis": "legacy_native_and_condensed"
   },
   "blockers": [],
   "holdout_evidence_hints": {

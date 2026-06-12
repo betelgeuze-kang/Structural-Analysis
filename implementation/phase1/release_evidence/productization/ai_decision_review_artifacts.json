@@ -1,0 +1,19 @@
+{
+  "schema_version": "ai-decision-review-artifacts.v1",
+  "generated_at": "2026-06-09T15:42:17.552932+00:00",
+  "status": "ready",
+  "decision_trace_ready": true,
+  "review_queue_ready": true,
+  "policy_replay_contract_ready": true,
+  "artifacts": {
+    "ai_decision_trace_ledger": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json",
+    "ai_review_queue": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+  },
+  "summary": {
+    "proposal_count": 20,
+    "review_queue_item_count": 20,
+    "blocked_action_count": 47,
+    "solver_replay_status": "pass_with_story_proxy_check",
+    "proxy_replay_status": "pass"
+  }
+}

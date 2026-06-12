@@ -1,0 +1,13 @@
+{
+  "capability_lane": "balanced",
+  "coordinator": "active Codex session/model",
+  "explorer": "role-based explorer agent when explicitly requested, otherwise coordinator",
+  "external_state_authority": "confirmation-required",
+  "model_binding": "inherit-codex-active-model",
+  "reviewer": "role-based reviewer agent or coordinator review pass",
+  "runtime": "codex",
+  "subagent_policy": "explicit-only",
+  "updated_at": "2026-05-31T10:05:05Z",
+  "worker": "role-based worker agent for narrow independent work when explicitly requested",
+  "write_authority": "coordinator-controlled"
+}

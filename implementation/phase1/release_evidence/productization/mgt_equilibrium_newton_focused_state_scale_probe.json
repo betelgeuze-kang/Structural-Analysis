@@ -1,0 +1,91 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-11T12:36:35.005255+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": null,
+    "accepted_state_history_count": 0,
+    "accepted_residual_history_count": 0,
+    "residual_inf_n": 0.00011023672608700963,
+    "fixed_point_relative_increment": 5.180648577593716e-06,
+    "max_translation_m": 0.8996613409904088
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 34171425607.3816,
+  "initial_residual_inf_n": 34171425607.3816,
+  "final_residual_inf_n": 8676.13911480824,
+  "accepted_newton_iteration_count": 1,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "regularized_direct",
+  "state_scale_line_search_values": [
+    0.0,
+    0.001,
+    0.01,
+    0.05,
+    0.1,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "residual_tolerance_n": 0.0005,
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": true,
+      "update_mode": "state_scale_line_search",
+      "state_scale": 0.0,
+      "start_residual_inf_n": 34171425607.3816,
+      "best_residual_inf_n": 8676.13911480824,
+      "relative_increment": 899623941.0553101,
+      "trial_rows": [
+        {
+          "state_scale": 0.0,
+          "residual_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.001,
+          "residual_inf_n": 34171147.89118761,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.01,
+          "residual_inf_n": 341713980.85956967,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.05,
+          "residual_inf_n": 1708571016.2746012,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.1,
+          "residual_inf_n": 3417142310.5433903,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.25,
+          "residual_inf_n": 8542856193.349758,
+          "free_dof_set_stable": true
+        },
+        {
+          "state_scale": 0.5,
+          "residual_inf_n": 17085712664.693705,
+          "free_dof_set_stable": true
+        }
+      ],
+      "allow_negative_alphas": true
+    }
+  ],
+  "runtime_metrics": {
+    "total_seconds": 159.79857488100015
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

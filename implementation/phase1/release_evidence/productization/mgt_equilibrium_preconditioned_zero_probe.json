@@ -1,0 +1,304 @@
+{
+  "schema_version": "mgt-equilibrium-preconditioned-zero-probe.v1",
+  "generated_at": "2026-06-11T13:49:02.458239+00:00",
+  "status": "ready",
+  "checkpoint": {
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": null,
+    "accepted_state_history_count": 0,
+    "accepted_residual_history_count": 0,
+    "residual_inf_n": 0.00011023672608700963,
+    "fixed_point_relative_increment": 5.180648577593716e-06,
+    "max_translation_m": 0.8996613409904088
+  },
+  "load_scale": 0.656,
+  "checkpoint_residual_inf_n": 34171425607.3816,
+  "zero_state_residual_inf_n": 8676.13911480824,
+  "zero_state_relative_residual_inf": 1.0,
+  "zero_state_rhs_inf_n": 8676.13911480824,
+  "free_dof_count": 58998,
+  "zero_state_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs",
+    "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "stiffness_unit_audit": {
+      "per_component": {
+        "frame": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 12882,
+          "diag_abs_min": 2172.9583362166586,
+          "diag_abs_max": 263291938026322.7,
+          "diag_abs_mean": 156315359184.00784,
+          "diag_abs_median": 82837515.0898557,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "shell": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 44988,
+          "diag_abs_min": 411.94743221423107,
+          "diag_abs_max": 936561378488.6742,
+          "diag_abs_mean": 22775105512.83593,
+          "diag_abs_median": 6701456070.4574375,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "spring": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 20304,
+          "diag_abs_min": 1.0,
+          "diag_abs_max": 1000000000.0,
+          "diag_abs_mean": 166700000.5,
+          "diag_abs_median": 50000.5,
+          "unit": "N_per_m_or_Nm_per_rad"
+        }
+      },
+      "cross_component_diag_max_ratio": 263291938026322.7,
+      "unit_consistency_warning": true,
+      "imbalance_ratio_threshold": 100000000.0,
+      "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+    }
+  },
+  "correction_rows": [
+    {
+      "correction_mode": "diagonal_jacobi",
+      "diag_abs_min": 1.0,
+      "diag_abs_median": 2921681153.6893134,
+      "diag_abs_max": 263305013223928.78,
+      "diag_floor": 0.002921681153689313,
+      "zero_or_tiny_diag_count": 0,
+      "correction_inf_m": 8.233693735033951e-06,
+      "alpha_values": [
+        0.0,
+        -0.5
+      ],
+      "trial_rows": [
+        {
+          "alpha": 0.0,
+          "residual_inf_n": 8676.13911480824,
+          "relative_residual_inf": 1.0,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 0.0,
+          "candidate_max_abs_displacement_m": 0.0
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 8506.774059393221,
+          "relative_residual_inf": 0.980479213948293,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 4.1168468675169755e-06,
+          "candidate_max_abs_displacement_m": 4.1168468675169755e-06
+        }
+      ],
+      "best_alpha": -0.5,
+      "best_residual_inf_n": 8506.774059393221,
+      "best_relative_residual_inf": 0.980479213948293,
+      "best_candidate_max_abs_displacement_m": 4.1168468675169755e-06,
+      "residual_descent": true,
+      "improvement_inf_n": 169.36505541501901,
+      "relative_improvement": 0.019520786051707092,
+      "seconds": 27.67754569600038
+    },
+    {
+      "correction_mode": "node_block_jacobi",
+      "preconditioner_build_seconds": 0.03164958800061868,
+      "preconditioner_total_seconds": 0.0319884179998553,
+      "preconditioner_singular_block_count": 0,
+      "preconditioner_block_count": 9833,
+      "correction_inf_m": 9.21770297430373e-06,
+      "alpha_values": [
+        0.0,
+        -0.5
+      ],
+      "trial_rows": [
+        {
+          "alpha": 0.0,
+          "residual_inf_n": 8676.13911480824,
+          "relative_residual_inf": 1.0,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 0.0,
+          "candidate_max_abs_displacement_m": 0.0
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 7723.7159525154,
+          "relative_residual_inf": 0.8902250010413888,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 4.608851487151865e-06,
+          "candidate_max_abs_displacement_m": 4.608851487151865e-06
+        }
+      ],
+      "best_alpha": -0.5,
+      "best_residual_inf_n": 7723.7159525154,
+      "best_relative_residual_inf": 0.8902250010413888,
+      "best_candidate_max_abs_displacement_m": 4.608851487151865e-06,
+      "residual_descent": true,
+      "improvement_inf_n": 952.4231622928401,
+      "relative_improvement": 0.10977499895861115,
+      "seconds": 28.031552540999655
+    }
+  ],
+  "iterative_search": {
+    "enabled": true,
+    "mode": "node_block_jacobi",
+    "max_iterations": 3,
+    "alpha_values": [
+      0.0,
+      -0.5,
+      -0.125,
+      0.0625
+    ],
+    "iteration_rows": [
+      {
+        "iteration": 1,
+        "mode": "node_block_jacobi",
+        "base_residual_inf_n": 8676.13911480824,
+        "best_alpha": -0.5,
+        "best_residual_inf_n": 7723.7159525154,
+        "relative_improvement": 0.10977499895861115,
+        "accepted": true,
+        "correction_inf_m": 9.21770297430373e-06,
+        "trial_rows": [
+          {
+            "alpha": 0.0,
+            "residual_inf_n": 8676.13911480824,
+            "relative_residual_inf": 1.0,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 0.0
+          },
+          {
+            "alpha": -0.5,
+            "residual_inf_n": 7723.7159525154,
+            "relative_residual_inf": 0.8902250010413888,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 4.608851487151865e-06
+          },
+          {
+            "alpha": -0.125,
+            "residual_inf_n": 8428.097207207547,
+            "relative_residual_inf": 0.9714110269189505,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 1.1522128717879663e-06
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 8800.160068608588,
+            "relative_residual_inf": 1.0142944865405248,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 5.761064358939832e-07
+          }
+        ]
+      },
+      {
+        "iteration": 2,
+        "mode": "node_block_jacobi",
+        "base_residual_inf_n": 7723.7159525154,
+        "best_alpha": -0.125,
+        "best_residual_inf_n": 7540.959476872,
+        "relative_improvement": 0.02366172924625505,
+        "accepted": true,
+        "correction_inf_m": 1.380557530457983e-05,
+        "trial_rows": [
+          {
+            "alpha": 0.0,
+            "residual_inf_n": 7723.7159525154,
+            "relative_residual_inf": 0.8902250010413888,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 4.608851487151865e-06
+          },
+          {
+            "alpha": -0.5,
+            "residual_inf_n": 9112.983948262412,
+            "relative_residual_inf": 1.0503501416555867,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 1.1511636323314245e-05
+          },
+          {
+            "alpha": -0.125,
+            "residual_inf_n": 7540.959476872,
+            "relative_residual_inf": 0.8691607380985004,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 6.3345455840968085e-06
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 7920.679483779917,
+            "relative_residual_inf": 0.9129267499020478,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 3.7551876100364154e-06
+          }
+        ]
+      },
+      {
+        "iteration": 3,
+        "mode": "node_block_jacobi",
+        "base_residual_inf_n": 7540.959476872,
+        "best_alpha": null,
+        "best_residual_inf_n": 7540.959476872,
+        "relative_improvement": 0.0,
+        "accepted": false,
+        "correction_inf_m": 1.5897479776496076e-05,
+        "trial_rows": [
+          {
+            "alpha": 0.0,
+            "residual_inf_n": 7540.959476872,
+            "relative_residual_inf": 0.8691607380985004,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 6.3345455840968085e-06
+          },
+          {
+            "alpha": -0.5,
+            "residual_inf_n": 10230.15462008206,
+            "relative_residual_inf": 1.1791137146039372,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 1.4283285472344847e-05
+          },
+          {
+            "alpha": -0.125,
+            "residual_inf_n": 7723.0234720742355,
+            "relative_residual_inf": 0.8901451866871004,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 8.321730556158818e-06
+          },
+          {
+            "alpha": 0.0625,
+            "residual_inf_n": 7651.639078805128,
+            "relative_residual_inf": 0.8819175185590883,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 5.3409530980658035e-06
+          }
+        ]
+      }
+    ],
+    "accepted_iteration_count": 2,
+    "final_residual_inf_n": 7540.959476872,
+    "final_max_abs_displacement_m": 6.3345455840968085e-06,
+    "residual_gate_passed": false
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_zero_final_checkpoint.npz",
+    "residual_inf_n": 7540.959476872,
+    "accepted_iteration_count": 2
+  },
+  "best_correction_mode": "node_block_jacobi",
+  "best_residual_inf_n": 7723.7159525154,
+  "best_relative_improvement": 0.10977499895861115,
+  "overall_best_residual_inf_n": 7540.959476872,
+  "overall_residual_gate_passed": false,
+  "residual_tolerance_n": 0.0005,
+  "residual_gate_passed": false,
+  "runtime_metrics": {
+    "setup_and_bad_checkpoint_seconds": 29.867325402999995,
+    "zero_assembly_seconds": 13.715305619999526,
+    "total_seconds": 310.31801040499977
+  },
+  "claim_boundary": "Diagnostic-only cheap correction from the zero state. It tests diagonal and nodal-block preconditioned one-shot directions with residual replay, but it is not full Newton closure unless the residual gate passes.",
+  "blockers": [
+    "preconditioned_zero_residual_gate_not_closed"
+  ]
+}

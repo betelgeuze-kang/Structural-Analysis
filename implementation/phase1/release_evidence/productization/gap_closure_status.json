@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-09T15:41:15.692611+00:00",
+  "generated_at": "2026-06-10T12:06:15.245128+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",

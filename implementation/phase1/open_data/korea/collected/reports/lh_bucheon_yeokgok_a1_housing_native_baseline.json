@@ -14,7 +14,7 @@
   "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
   "reference_scheme": "local_path",
   "resolved_reference": "implementation/phase1/open_data/korea/curated/lh_bucheon_yeokgok_a1_housing_native_baseline.mgt",
-  "retrieved_at_utc": "2026-05-31T09:21:51.018312+00:00",
+  "retrieved_at_utc": "2026-06-12T12:42:49.853792+00:00",
   "schema_version": "1.0",
   "seed_basis": "official LH competition seed with a committed manual local MIDAS baseline for truthful native writeback validation",
   "seed_priority": "P0",

@@ -1,6 +1,6 @@
 {
   "schema_version": "optimization-pareto-research-archive.v1",
-  "generated_at": "2026-05-31T09:13:04.398284+00:00",
+  "generated_at": "2026-06-05T13:34:30.712432+00:00",
   "status": "research_archive_ready",
   "claim": "Pareto archive from applied optimization change rows (cost vs DCR vs drift). Research-track only; production search remains deterministic greedy.",
   "source_changes_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",

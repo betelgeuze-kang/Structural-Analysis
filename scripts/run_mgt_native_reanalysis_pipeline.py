@@ -45,6 +45,11 @@ def main() -> int:
         action="store_true",
         help="Re-parse optimized MGT into roundtrip JSON (slow).",
     )
+    parser.add_argument(
+        "--skip-global-solves",
+        action="store_true",
+        help="Run integrity, story proxy, readiness, and mesh-contract checks without replaying global FEA solves.",
+    )
     args = parser.parse_args()
 
     for label, path in (
@@ -62,6 +67,7 @@ def main() -> int:
         state_npz=args.state_npz,
         refresh_parse=args.refresh_parse,
         sync_provenance=args.sync_provenance,
+        skip_global_solves=args.skip_global_solves,
     )
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

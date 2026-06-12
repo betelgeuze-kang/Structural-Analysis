@@ -1,0 +1,391 @@
+{
+  "schema_version": "ai-code-reasoning-guard.v1",
+  "generated_at": "2026-06-09T15:39:34.834649+00:00",
+  "status": "ready",
+  "code_reasoning_guard_ready": true,
+  "claim_boundary": "deterministic rule/citation guard only; no autonomous legal approval",
+  "rule_engine_path": "/home/betelgeuze/건축구조분석/implementation/phase1/kds_rc_rule_engine.py",
+  "rule_engine_present": true,
+  "jurisdiction_profile": "KDS-2022 bounded lane",
+  "governing_clause_ids": [
+    "KDS-MOMENT-Y-001",
+    "KDS-SVC-DRIFT-001"
+  ],
+  "governing_clause_count": 2,
+  "change_row_count": 20,
+  "explicit_clause_row_count": 19,
+  "missing_governing_clause_count": 1,
+  "review_guarded_row_count": 20,
+  "all_rows_have_clause_or_review_guard": true,
+  "constraint_trace_rows": [
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "action_name": "rebar_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "rebar_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "action_name": "perimeter_frame_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:perimeter:1:slab:default",
+      "action_name": "slab_thickness_down",
+      "governing_clause": "",
+      "governing_constraint": "hard_gate_pass",
+      "constraint_source": "engineer_review_queue",
+      "auto_code_claim_allowed": false,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S02:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S07:intermediate:nogroup:slab:SB1500X800",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "constraint_source": "governing_clause",
+      "auto_code_claim_allowed": true,
+      "engineer_review_required": true,
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    }
+  ],
+  "clause_trace_rows": [
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "action_name": "rebar_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "rebar_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S05:perimeter:2:column:P 50x4",
+      "action_name": "perimeter_frame_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S02:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S07:intermediate:nogroup:slab:SB1500X800",
+      "action_name": "wall_thickness_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S03:perimeter:nogroup:slab:default",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:perimeter:nogroup:slab:default",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "action_name": "detailing_down",
+      "governing_clause": "KDS-MOMENT-Y-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    },
+    {
+      "group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "action_name": "connection_detailing_down",
+      "governing_clause": "KDS-SVC-DRIFT-001",
+      "load_stage_semantics_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_stage_semantics_contract.json",
+      "review_queue_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json"
+    }
+  ],
+  "hallucination_guard": {
+    "llm_free_default": true,
+    "allowed_claim_source": "explicit governing_clause ids and deterministic KDS rule-engine rows only",
+    "unsupported_clause_behavior": "blocked_or_engineer_review_required"
+  },
+  "unsupported_clause_queue": [
+    {
+      "group_id": "S04:perimeter:1:slab:default",
+      "action_name": "slab_thickness_down",
+      "governing_constraint": "hard_gate_pass",
+      "status": "engineer_review_required",
+      "reason": "No explicit deterministic KDS clause was attached to this optimization row; automatic code/regulation explanation is blocked and routed to engineer review."
+    }
+  ]
+}

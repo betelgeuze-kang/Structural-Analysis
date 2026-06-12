@@ -1,0 +1,21 @@
+{
+  "confidence": "medium",
+  "contract": "partial",
+  "diff_review": "changed",
+  "generated_at": "2026-05-31T10:13:53Z",
+  "human_confirmation": "not_required",
+  "intent": "passed",
+  "issues": [
+    {
+      "category": "project-contract",
+      "severity": "medium",
+      "summary": "project_contract.yaml still contains TODO placeholders"
+    }
+  ],
+  "recommended_next_action": "Add project contract, intent success criteria, and at least one verification oracle before claiming high confidence.",
+  "runtime_smoke": "not_run",
+  "static_checks": "available",
+  "status": "needs_quality_context",
+  "tests": "recorded",
+  "version": "1.0"
+}

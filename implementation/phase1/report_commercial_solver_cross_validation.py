@@ -142,7 +142,10 @@ def summarize_modal_buckling(cases: list[dict[str, Any]]) -> dict[str, Any]:
         "mode_shape_mac_hf_mean": round(sum(mode_mac_hf) / len(mode_mac_hf), 4) if mode_mac_hf else None,
         "buckling_factor_hf_min": min(buckling_hf) if buckling_hf else None,
         "buckling_factor_hf_mean": round(sum(buckling_hf) / len(buckling_hf), 3) if buckling_hf else None,
-        "note": "Ingested from commercial exports; native eigen/buckling solver not run in-repo.",
+        "note": (
+            "Ingested from commercial exports; this artifact records benchmark tolerances, "
+            "while native eigen/buckling solve evidence is emitted separately."
+        ),
     }
 
 

@@ -66,6 +66,67 @@ def test_equilibrium_newton_stops_when_already_converged() -> None:
     assert result["accepted_newton_iteration_count"] == 1
 
 
+def test_equilibrium_newton_signed_alpha_recovers_from_opposite_tangent_direction() -> None:
+    f_ext = 1.0
+
+    def assemble_residual(u: np.ndarray, **_: object):
+        stiffness = sp.csc_matrix(np.asarray([[-1.0]], dtype=np.float64))
+        free = np.asarray([0], dtype=np.int64)
+        residual = np.asarray([float(u[0]) - f_ext], dtype=np.float64)
+        rhs = np.asarray([f_ext], dtype=np.float64)
+        return stiffness, rhs, free, residual, rhs, {}
+
+    positive_only = run_equilibrium_newton(
+        u0=np.asarray([0.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=3,
+        residual_tolerance_n=1.0e-9,
+        prefer_host_ilu=False,
+    )
+    signed = run_equilibrium_newton(
+        u0=np.asarray([0.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=3,
+        residual_tolerance_n=1.0e-9,
+        prefer_host_ilu=False,
+        allow_negative_alphas=True,
+    )
+
+    assert positive_only["converged"] is False
+    assert signed["converged"] is True
+    assert signed["allow_negative_alphas"] is True
+    np.testing.assert_allclose(signed["final_u"], [f_ext], rtol=1.0e-6, atol=1.0e-8)
+    assert any(
+        any(trial["alpha"] < 0.0 for trial in row["trial_rows"])
+        for row in signed["iterations"]
+    )
+
+
+def test_equilibrium_newton_state_scale_line_search_can_rescue_bad_checkpoint() -> None:
+    stiffness = sp.csc_matrix(np.asarray([[100.0]], dtype=np.float64))
+    f_ext = 1.0
+
+    def assemble_residual(u: np.ndarray, **_: object):
+        free = np.asarray([0], dtype=np.int64)
+        residual = np.asarray([100.0 * float(u[0]) - f_ext], dtype=np.float64)
+        rhs = np.asarray([f_ext], dtype=np.float64)
+        return stiffness, rhs, free, residual, rhs, {}
+
+    result = run_equilibrium_newton(
+        u0=np.asarray([1.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=1,
+        residual_tolerance_n=1.0e-9,
+        prefer_host_ilu=False,
+        state_scale_line_search_values=(0.0, 0.01, 0.1),
+    )
+
+    assert result["converged"] is True
+    assert result["iterations"][0]["update_mode"] == "state_scale_line_search"
+    assert result["iterations"][0]["state_scale"] == 0.01
+    np.testing.assert_allclose(result["final_u"], [0.01], rtol=1.0e-12, atol=1.0e-12)
+
+
 def test_annotate_equilibrium_gates_prefers_replay_over_solver() -> None:
     row = {
         "equilibrium_replay_residual_inf_n": 1.0e-3,

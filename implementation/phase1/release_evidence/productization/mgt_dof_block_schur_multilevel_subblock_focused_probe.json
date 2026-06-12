@@ -1,0 +1,1929 @@
+{
+  "schema_version": "mgt-rocm-sparse-solver-probe.v1",
+  "generated_at": "2026-06-05T16:19:35.311788+00:00",
+  "status": "partial",
+  "probe_kind": "g9_dof_block_schur_multilevel_subblock_focused_probe",
+  "backend": "amd_rocm_hip_torch",
+  "torch_rocm": {
+    "torch_import_ok": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_name": "AMD Radeon RX 6900 XT"
+  },
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mesh_fingerprint": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "combined_component_count": 3,
+    "combined_base_node_count": 404,
+    "restrained_dof_count": 2424,
+    "active_dof_count": 35935,
+    "free_dof_count": 33932
+  },
+  "shell_gate_abs_n": 0.001,
+  "frontier_reference_residual_inf_n": 15.396808816819568,
+  "best_residual_inf_n": 22.975876831045937,
+  "best_converged": false,
+  "best_subblock_multilevel_aggregate_count": 8,
+  "best_subblock_multilevel_smoother_weight": 0.25,
+  "improves_frontier": false,
+  "rows": [
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 16,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.35,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 16,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 50,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 16,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 52,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.44533190118888,
+      "best_residual_inf_n": 24.44533190118888,
+      "relative_residual_inf": 0.7527715026367132,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.899634592974806,
+        30.791446582128316,
+        30.508911295258354,
+        30.4170768317938,
+        29.419310042717203,
+        28.938791590598427,
+        29.270651380004992
+      ],
+      "residual_history_tail": [
+        25.078990578861376,
+        25.04655691342802,
+        25.182517783393795,
+        25.24127877687226,
+        25.058116627738034,
+        24.834961486259846,
+        24.48148461562045,
+        24.44533190118888
+      ],
+      "solve_seconds": 0.6837841059987113,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 32178380,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 16,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 16,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 50,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 16,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 52,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 32.275420352675326,
+      "best_residual_inf_n": 32.275420352675326,
+      "relative_residual_inf": 0.9938918716801446,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.294088026077674,
+        32.275420352675326,
+        32.35458154640211,
+        32.33282322507782,
+        32.33804290649815,
+        32.43722315976879,
+        32.4268719474638
+      ],
+      "residual_history_tail": [
+        32.43407693028077,
+        32.38871115651828,
+        32.38375166954916,
+        32.383474224581484,
+        32.365011904590226,
+        32.337242404143936,
+        32.29618108922033,
+        32.29620085365062
+      ],
+      "solve_seconds": 0.285680743998455,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 32178380,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 32,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.35,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 32,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 32,
+            "nnz": 156,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 32,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 32,
+            "nnz": 138,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.83764564930507,
+      "best_residual_inf_n": 24.83764564930507,
+      "relative_residual_inf": 0.7648524435242495,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.919543628219664,
+        31.009621120368095,
+        30.743017670267772,
+        30.607640680718852,
+        29.671734721629406,
+        29.244462904902843,
+        29.511072525660786
+      ],
+      "residual_history_tail": [
+        25.305400704049283,
+        25.296698938603523,
+        25.47458492573297,
+        25.51546385118666,
+        25.392504329648194,
+        25.213619950428246,
+        24.890515838968945,
+        24.83764564930507
+      ],
+      "solve_seconds": 0.29513289100032125,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 36525004,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 32,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 32,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 32,
+            "nnz": 156,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 32,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 32,
+            "nnz": 138,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 32.2532511291787,
+      "best_residual_inf_n": 32.2532511291787,
+      "relative_residual_inf": 0.9932091908414756,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.270960624529486,
+        32.256626811463356,
+        32.33144487235663,
+        32.312970766930356,
+        32.30164043024693,
+        32.37201954896904,
+        32.401353443072345
+      ],
+      "residual_history_tail": [
+        32.25366693413251,
+        32.25466176041678,
+        32.25473103627901,
+        32.25450562678702,
+        32.25355421083547,
+        32.254059322759936,
+        32.254202783602686,
+        32.254354956295245
+      ],
+      "solve_seconds": 0.2889421170002606,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 36525004,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.35,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 64,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 64,
+            "nnz": 474,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 64,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 64,
+            "nnz": 420,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.717576236542044,
+      "best_residual_inf_n": 24.717576236542044,
+      "relative_residual_inf": 0.7611550164395333,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.98255289074621,
+        31.13038389168903,
+        30.86213279334208,
+        30.7294227991454,
+        29.86024412601594,
+        29.456508286659766,
+        29.73776175636714
+      ],
+      "residual_history_tail": [
+        25.22461997410546,
+        25.225801457474972,
+        25.35130222533411,
+        25.430995190020877,
+        25.30157154192733,
+        25.088165758221777,
+        24.8235569434377,
+        24.717576236542044
+      ],
+      "solve_seconds": 0.3044407620000129,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 45221708,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 64,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 64,
+            "nnz": 474,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 64,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 64,
+            "nnz": 420,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 32.264756679367125,
+      "best_residual_inf_n": 32.264756679367125,
+      "relative_residual_inf": 0.9935634936727488,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.26605295409435,
+        32.27054282154932,
+        32.34364082323877,
+        32.32577404568027,
+        32.31339791523935,
+        32.377036576707965,
+        32.423194866780264
+      ],
+      "residual_history_tail": [
+        32.38133176284213,
+        32.35850812882251,
+        32.358832261244466,
+        32.35634828365247,
+        32.35190849353255,
+        32.32260735910899,
+        32.28826717964404,
+        32.28826195065201
+      ],
+      "solve_seconds": 0.30080390800139867,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 45221708,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 128,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.35,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 128,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 128,
+            "nnz": 1344,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 128,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 128,
+            "nnz": 1118,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.922049115350966,
+      "best_residual_inf_n": 24.922049115350966,
+      "relative_residual_inf": 0.7674515705976694,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.990585130008007,
+        31.169528725227647,
+        30.939531667724836,
+        30.79219817907845,
+        29.917920563445044,
+        29.664484541390237,
+        29.905949276155685
+      ],
+      "residual_history_tail": [
+        25.410561898882143,
+        25.40728234387172,
+        25.57300357434879,
+        25.69525077221335,
+        25.517176926593123,
+        25.329630124804556,
+        25.099786206036466,
+        24.922049115350966
+      ],
+      "solve_seconds": 0.38799944600032177,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 62621004,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 128,
+      "subblock_multilevel_max_levels": 2,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 128,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 128,
+            "nnz": 1344,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 128,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 128,
+            "nnz": 1118,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 32.25382930092179,
+      "best_residual_inf_n": 32.25382930092179,
+      "relative_residual_inf": 0.9932269951083019,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.25382930092179,
+        32.308708948884345,
+        32.378982875439846,
+        32.34862571118261,
+        32.3354134915203,
+        32.39016330243121,
+        32.452869499652294
+      ],
+      "residual_history_tail": [
+        32.39804709161308,
+        32.37802189113783,
+        32.38322662845792,
+        32.380814520511386,
+        32.39100295008147,
+        32.36792626434467,
+        32.307118965290314,
+        32.306406013318266
+      ],
+      "solve_seconds": 0.3736714580008993,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 62621004,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 4,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.25,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 4,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 4,
+            "nnz": 10,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 4,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 4,
+            "nnz": 10,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 24.79691659481866,
+      "best_residual_inf_n": 24.79691659481866,
+      "relative_residual_inf": 0.7635982297679939,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.86415444463863,
+        30.08895997893893,
+        29.17081994430816,
+        29.18636253722926,
+        29.127752149485723,
+        27.829867892472215,
+        27.297041145640854
+      ],
+      "residual_history_tail": [
+        25.706327184346296,
+        25.76080194055588,
+        25.51086582881114,
+        25.4642963388033,
+        25.523154689630974,
+        25.425561567103554,
+        25.337072759075767,
+        24.79691659481866
+      ],
+      "solve_seconds": 0.7095516749996023,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 28919404,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 8,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.25,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 8,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 22,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 8,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 20,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 25.73155463586063,
+      "best_residual_inf_n": 25.73155463586063,
+      "relative_residual_inf": 0.7923795482389604,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.10325183221112,
+        30.915896482550924,
+        30.44908614635761,
+        30.429769442640715,
+        30.31041245463912,
+        29.31088272872803,
+        28.920093653709685
+      ],
+      "residual_history_tail": [
+        26.13327340382148,
+        26.207642643068194,
+        26.045752228233486,
+        26.157653243296735,
+        26.17183061012744,
+        26.00026139243124,
+        25.98767700174978,
+        25.73155463586063
+      ],
+      "solve_seconds": 0.2903816119996918,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 30005644,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 8,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 2,
+      "subblock_multilevel_post_smooth_steps": 2,
+      "subblock_multilevel_smoother_weight": 0.25,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 8,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 22,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 8,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 20,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.975876831045937,
+      "best_residual_inf_n": 22.975876831045937,
+      "relative_residual_inf": 0.7075209858640266,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.251441807252004,
+        29.671036636339622,
+        29.483542405371477,
+        29.35440235018146,
+        28.022521744046415,
+        28.270036112532026,
+        28.884638552170344
+      ],
+      "residual_history_tail": [
+        24.05466421668709,
+        24.026053247718117,
+        23.968758065355974,
+        23.718308080096186,
+        23.33878909390489,
+        23.36301718050169,
+        23.16873662941046,
+        22.975876831045937
+      ],
+      "solve_seconds": 0.32747632399878057,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 30005644,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 16,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 2,
+      "subblock_multilevel_post_smooth_steps": 2,
+      "subblock_multilevel_smoother_weight": 0.25,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 16,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 50,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 16,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 52,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 23.266863939915204,
+      "best_residual_inf_n": 23.266863939915204,
+      "relative_residual_inf": 0.7164816661311977,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.359430261869075,
+        30.379278779726373,
+        30.12891917556703,
+        29.78193778960732,
+        28.68516717223399,
+        28.82333560291175,
+        29.12524154001083
+      ],
+      "residual_history_tail": [
+        24.372436320045963,
+        24.335877805202507,
+        24.4050679984189,
+        24.16107877457872,
+        23.709233958180537,
+        23.661752143250517,
+        23.410993107144122,
+        23.266863939915204
+      ],
+      "solve_seconds": 0.33026332999907027,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 32178380,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 8,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.15,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 8,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 22,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 8,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 20,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 26.70163735340838,
+      "best_residual_inf_n": 26.70163735340838,
+      "relative_residual_inf": 0.8222523529086655,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.36370289403295,
+        31.528922205627705,
+        30.864649803099468,
+        30.59456866505612,
+        30.604377922552537,
+        30.559213463876166,
+        30.104082650130202
+      ],
+      "residual_history_tail": [
+        27.326446250270006,
+        27.39625303557331,
+        27.39136314437835,
+        27.280489634742807,
+        27.092179977933785,
+        27.04215113117833,
+        26.887568685393635,
+        26.70163735340838
+      ],
+      "solve_seconds": 0.2912211379989458,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 30005644,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 8,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.75,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 11462,
+            "nnz": 125087,
+            "projector_columns": 8,
+            "projector_nnz": 11462
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 22,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 22470,
+            "nnz": 319381,
+            "projector_columns": 8,
+            "projector_nnz": 22470
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 20,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 31.90563695473602,
+      "best_residual_inf_n": 31.90563695473602,
+      "relative_residual_inf": 0.9825047321951069,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.29430671879337,
+        32.14588032968747,
+        32.10402278862003,
+        32.04233855625335,
+        31.961574712810375,
+        31.929814963227823,
+        31.91821406303204
+      ],
+      "residual_history_tail": [
+        31.906176383818984,
+        31.90601446445481,
+        31.914701260387368,
+        31.915293680770954,
+        31.920261633569428,
+        31.91670177352188,
+        31.92112833342462,
+        31.9209673508182
+      ],
+      "solve_seconds": 0.2906037299999298,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 30005644,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    }
+  ],
+  "claim_boundary": "Focused ROCm torch Schur preconditioner with multilevel TT/RR subblock V-cycles. Closure requires full assembled CSR replay at the shell gate and no CPU fallback promotion.",
+  "coupled_gate_abs_n": 0.05,
+  "coupled_rows": [
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 15373,
+      "rotation_dof_count": 24486,
+      "subblock_nnz": {
+        "tt": 148121,
+        "tr": 205323,
+        "rt": 204980,
+        "rr": 330456
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 16,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.35,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 15373,
+            "nnz": 148121,
+            "projector_columns": 16,
+            "projector_nnz": 15373
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 60,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 24486,
+            "nnz": 330456,
+            "projector_columns": 16,
+            "projector_nnz": 24486
+          },
+          {
+            "level": 1,
+            "size": 16,
+            "nnz": 54,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 16737.34661208725,
+        "translation_mean_abs": 187419757094.4507,
+        "rotation_min_abs": 1160.3663541611888,
+        "rotation_mean_abs": 4162341133.97933
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 22323.093943383923,
+      "residual_inf_n": 867.0670486139297,
+      "best_residual_inf_n": 867.0670486139297,
+      "relative_residual_inf": 0.03884170585013864,
+      "rhs_inf_n": 22323.093943383923,
+      "threshold_n": 0.05,
+      "residual_history_head": [
+        22323.093943383923,
+        28221.435657066068,
+        8281.532263518986,
+        9182.894638350175,
+        5793.562358197652,
+        5195.438359796459,
+        4620.677977711308,
+        3412.8351661790402
+      ],
+      "residual_history_tail": [
+        1332.1039959187049,
+        1301.8506118956484,
+        1148.4637941914923,
+        1064.6514541067777,
+        1001.5223403844532,
+        961.589867484417,
+        912.186437471204,
+        867.0670486139297
+      ],
+      "solve_seconds": 0.71403055600058,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 35210488,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 15373,
+      "rotation_dof_count": 24486,
+      "subblock_nnz": {
+        "tt": 148121,
+        "tr": 205323,
+        "rt": 204980,
+        "rr": 330456
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "multilevel_vcycle",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 8,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 2,
+      "subblock_multilevel_post_smooth_steps": 2,
+      "subblock_multilevel_smoother_weight": 0.25,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [
+          {
+            "level": 0,
+            "size": 15373,
+            "nnz": 148121,
+            "projector_columns": 8,
+            "projector_nnz": 15373
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 24,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ],
+        "rr": [
+          {
+            "level": 0,
+            "size": 24486,
+            "nnz": 330456,
+            "projector_columns": 8,
+            "projector_nnz": 24486
+          },
+          {
+            "level": 1,
+            "size": 8,
+            "nnz": 22,
+            "projector_columns": null,
+            "projector_nnz": null
+          }
+        ]
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "schur_diagonal_stats": {
+        "translation_min_abs": 16737.34661208725,
+        "translation_mean_abs": 187419757094.4507,
+        "rotation_min_abs": 1160.3663541611888,
+        "rotation_mean_abs": 4162341133.97933
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 2,
+      "iteration_count": 32,
+      "max_iterations": 32,
+      "initial_residual_inf_n": 22323.093943383923,
+      "residual_inf_n": 703.9110398140688,
+      "best_residual_inf_n": 703.9110398140688,
+      "relative_residual_inf": 0.031532861958980044,
+      "rhs_inf_n": 22323.093943383923,
+      "threshold_n": 0.05,
+      "residual_history_head": [
+        22323.093943383923,
+        29224.28493645022,
+        8107.512383563122,
+        8107.381117988996,
+        5533.290440847959,
+        5094.9896794343495,
+        4152.367935001268,
+        3019.313306457414
+      ],
+      "residual_history_tail": [
+        1216.7390453795945,
+        1170.8623803897274,
+        1091.5373086145828,
+        1004.5600882367567,
+        886.5491223200142,
+        810.6937987980564,
+        762.3471956693138,
+        703.9110398140688
+      ],
+      "solve_seconds": 0.3523530820002634,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 32,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 32658296,
+      "hip_kernel_invocation_count": 960,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    }
+  ],
+  "best_coupled_residual_inf_n": 703.9110398140688,
+  "best_coupled_converged": false,
+  "coupled_improves_gate": false
+}

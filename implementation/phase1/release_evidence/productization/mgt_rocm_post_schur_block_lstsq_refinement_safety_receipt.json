@@ -1,0 +1,30 @@
+{
+  "schema_version": "mgt-rocm-post-schur-block-lstsq-refinement-safety.v1",
+  "generated_at": "2026-06-06T00:00:00+09:00",
+  "status": "disabled_by_default",
+  "backend": "rocm_torch_sparse_post_schur_residual_row_block_lstsq_refinement",
+  "official_runtime_lane": "amd_rocm_hip",
+  "trigger": "post_schur_residual_row_block_lstsq_refinement",
+  "attempted_default_integration": true,
+  "default_enabled": false,
+  "opt_in_environment_variable": "RUN_POST_SCHUR_BLOCK_LSTSQ_REFINEMENT=1",
+  "observed_failure": {
+    "kind": "rocm_memory_access_fault",
+    "message_excerpt": "Memory access fault by GPU node-1. Reason: Page not present or supervisor privilege.",
+    "during_command": "python3 scripts/run_mgt_rocm_sparse_solver_probe.py --output-json implementation/phase1/release_evidence/productization/mgt_rocm_sparse_solver_probe.json"
+  },
+  "guardrail": {
+    "host_dense_solve_fallback_allowed": false,
+    "cpu_promotion_allowed": false,
+    "commercial_closure_promotion_allowed": false,
+    "default_receipt_behavior": "record_disabled_hook_without_running_faulting_gpu_stage"
+  },
+  "current_g9_effect": {
+    "surface_shell_frontier_n": 3.0792002451710445,
+    "coupled_frame_shell_frontier_n": 0.17902634022354746,
+    "surface_shell_gate_n": 0.001,
+    "coupled_frame_shell_gate_n": 0.05,
+    "g9_closed": false
+  },
+  "next_gate": "replace local post-Schur residual polishing with a robust large-component AMG, Schur/domain-decomposition, or production ROCm preconditioner path"
+}

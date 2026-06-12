@@ -1,0 +1,50 @@
+{
+  "schema_version": "mgt-ginkgo-hip-backend-probe.v1",
+  "generated_at": "2026-06-05T15:11:55Z",
+  "status": "blocked_after_configure",
+  "purpose": "Check whether a Ginkgo HIP sparse/AMG backend can be built on the current ROCm workstation for G9 GPU preconditioner closure.",
+  "workstation_gpu": {
+    "backend_family": "amd_rocm_hip",
+    "rocm_smi_product": "Navi 21 [Radeon RX 6800/6800 XT / 6900 XT]",
+    "rocminfo_arch": "gfx1030",
+    "observed_gpu_solver_activity": true,
+    "observed_gpu_use_percent_during_rocalution_coupled_attempt": 99
+  },
+  "attempt": {
+    "source": "https://github.com/ginkgo-project/ginkgo.git",
+    "clone": "git clone --depth 1",
+    "build_root": "/tmp/ginkgo_build",
+    "install_root": "/tmp/ginkgo_install",
+    "cmake_compiler": "/opt/rocm/bin/amdclang++",
+    "cmake_hip_architectures": "gfx1030",
+    "build_tests": false,
+    "build_examples": false,
+    "build_benchmarks": false
+  },
+  "result": {
+    "configured": true,
+    "built": false,
+    "blocked_reason": "ginkgo_hip_bfloat16_rocm_header_incompatibility",
+    "missing_package_evidence": {
+      "rocm_device_libs_installed": false,
+      "local_rocm_device_libs_package_extracted": true,
+      "amd_device_libs_config_found": true,
+      "rocm_device_bitcode_found": true,
+      "apt_candidate_rocm_device_libs": "1.0.0.50701-98~22.04",
+      "sudo_nopass_available": false
+    },
+    "configure_workaround": {
+      "used_local_deb_extract": "/tmp/rocm_device_libs_extract/opt/rocm-5.7.1",
+      "amd_device_libs_dir": "/tmp/rocm_device_libs_extract/opt/rocm-5.7.1/lib/cmake/AMDDeviceLibs",
+      "rocm_device_lib_path": "/tmp/rocm_device_libs_extract/opt/rocm-5.7.1/amdgcn/bitcode",
+      "ginkgo_enable_bfloat16": false,
+      "configure_passed": true
+    },
+    "cmake_error_summary": [
+      "Initial configure failed because AMDDeviceLibs and ROCm device bitcode were missing from the active /opt/rocm path.",
+      "Local extraction of rocm-device-libs_1.0.0.50701-98~22.04 allowed Ginkgo HIP configure to pass.",
+      "Ginkgo HIP build still failed in csr_kernels.instantiate.cpp because Ginkgo bfloat16 helpers reference __hip_bfloat16_raw / conversions not available in the installed ROCm 6.0.2 HIP headers, even with GINKGO_ENABLE_BFLOAT16=OFF."
+    ]
+  },
+  "claim_boundary": "This receipt does not close G9. It documents that the current workstation can configure Ginkgo HIP with a local device-libs extract, but the external HIP AMG dependency still does not build cleanly against the installed ROCm header/toolchain combination."
+}

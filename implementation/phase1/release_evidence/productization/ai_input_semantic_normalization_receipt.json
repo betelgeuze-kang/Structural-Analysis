@@ -1,0 +1,141 @@
+{
+  "schema_version": "ai-input-semantic-normalization-receipt.v1",
+  "generated_at": "2026-06-09T15:39:34.834649+00:00",
+  "status": "ready",
+  "input_semantic_normalization_ready": true,
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "source_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "source_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+  "roundtrip_sha256": "ed48cdfdf124a9dd7f8f3f78cf8e47b299f0ba107896aa443a75745ee6c8a25e",
+  "entity_families": [
+    {
+      "family": "nodes",
+      "count": 11355,
+      "source": "roundtrip.model.nodes",
+      "confidence": "high"
+    },
+    {
+      "family": "elements",
+      "count": 12728,
+      "source": "roundtrip.model.elements",
+      "confidence": "high"
+    },
+    {
+      "family": "materials",
+      "count": 6,
+      "source": "roundtrip.model.materials",
+      "confidence": "medium"
+    },
+    {
+      "family": "sections",
+      "count": 183,
+      "source": "roundtrip.model.sections",
+      "confidence": "medium"
+    },
+    {
+      "family": "load_cases",
+      "count": 6,
+      "source": "roundtrip.model.loads.static_load_cases",
+      "confidence": "medium"
+    },
+    {
+      "family": "load_combinations",
+      "count": 8,
+      "source": "roundtrip.model.loads.load_combinations",
+      "confidence": "medium"
+    }
+  ],
+  "confidence_policy": {
+    "high": "direct parsed geometry/topology identity",
+    "medium": "typed semantic row with fallback/coverage caveats",
+    "missing": "unsupported or absent entity family"
+  },
+  "repair_diff": {
+    "auto_repair_applied": false,
+    "reason": "current lane preserves parsed entities; unsupported cases are queued rather than repaired silently"
+  },
+  "unsupported_queue": [
+    {
+      "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
+      "format": "pdf",
+      "scale": "medium",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "lh_happy_city_5_1_design_competition",
+      "format": "pdf",
+      "scale": "medium",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e",
+      "format": "pdf",
+      "scale": "medium",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
+      "format": "mgt",
+      "scale": "medium",
+      "blockers": [
+        "mgt_file_too_small:283"
+      ]
+    },
+    {
+      "source_id": "lh_yeongjong_international_city_block_competition",
+      "format": "zip",
+      "scale": "medium",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "lh_cheongna_international_city_tower_competition",
+      "format": "pdf",
+      "scale": "large",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "koneps_public_highrise_design_service_g2b_portal",
+      "format": "pdf",
+      "scale": "medium",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "koneps_mixed_use_tower_design_attachment_lane",
+      "format": "mgt",
+      "scale": "large",
+      "blockers": [
+        "awaiting_manual_mgt_attach",
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_korea_awards_hub",
+      "format": "ifc",
+      "scale": "large",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_2025_megaproject_lane",
+      "format": "ifc",
+      "scale": "large",
+      "blockers": [
+        "metadata_only_operator_download_required"
+      ]
+    }
+  ],
+  "load_stage_semantics_status": "ready"
+}

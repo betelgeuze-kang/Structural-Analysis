@@ -1,0 +1,657 @@
+{
+  "schema_version": "1.0",
+  "run_id": "phase1-load-combination-engine-gate",
+  "generated_at": "2026-06-05T13:34:30.394468+00:00",
+  "inputs": {
+    "model_jsons": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "loadcomb_roundtrip_reports": "implementation/phase1/release/midas_generator_33_loadcomb_roundtrip_report.json,implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_roundtrip_report.json,implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json",
+    "out": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/load_combination_engine_gate.json"
+  },
+  "checks": {
+    "model_artifacts_present_pass": true,
+    "roundtrip_reports_present_pass": true,
+    "runtime_combo_inventory_pass": true,
+    "exact_roundtrip_fidelity_pass": true,
+    "required_load_pattern_coverage_pass": true,
+    "runtime_nested_depth_surface_pass": true,
+    "runtime_case_breadth_surface_pass": true,
+    "kds_strength_alignment_pass": true,
+    "kds_service_alignment_pass": true
+  },
+  "summary": {
+    "model_count": 1,
+    "runtime_combo_count_total": 8,
+    "runtime_combo_count_min": 8,
+    "runtime_combo_count_max": 8,
+    "runtime_linear_combo_count_total": 6,
+    "runtime_nested_combo_count_total": 2,
+    "runtime_max_nested_depth_global": 2,
+    "runtime_case_breadth_count_min": 1,
+    "runtime_case_breadth_count_max": 1,
+    "runtime_case_breadth_label": "rc",
+    "runtime_case_family_counts_total": {
+      "rc": 2,
+      "seismic": 0,
+      "wind": 0
+    },
+    "runtime_combo_family_counts_total": {
+      "rc": 6,
+      "rc+nested": 2
+    },
+    "runtime_limit_state_counts_total": {
+      "ACTIVE": 7,
+      "SLS": 1
+    },
+    "runtime_rc_combo_count_total": 8,
+    "runtime_wind_combo_count_total": 0,
+    "runtime_seismic_combo_count_total": 0,
+    "runtime_rc_max_nested_depth_global": 2,
+    "runtime_wind_max_nested_depth_global": 0,
+    "runtime_seismic_max_nested_depth_global": 0,
+    "exact_roundtrip_ready_artifact_count": 1,
+    "required_load_pattern_covered_artifact_count": 1,
+    "required_load_pattern_case_total": 2,
+    "covered_required_pattern_case_total": 2,
+    "required_load_pattern_coverage_ratio_min": 1.0,
+    "selected_kds_family": "KDS-2022-steel-gravity",
+    "recommended_kds_family": "KDS-2022-steel-gravity",
+    "supported_kds_family_labels": [
+      "KDS-2022-generic",
+      "KDS-2022-rc-nested",
+      "KDS-2022-rc-seismic",
+      "KDS-2022-rc-wind",
+      "KDS-2022-steel-gravity"
+    ],
+    "selected_kds_family_counts": {
+      "KDS-2022-steel-gravity": 1
+    },
+    "kds_strength_target_count": 2,
+    "kds_service_target_count": 1,
+    "kds_strength_avg_match_score_mean": 1.0,
+    "kds_strength_min_match_score_global": 1.0,
+    "kds_service_avg_match_score_mean": 1.0,
+    "kds_service_min_match_score_global": 1.0,
+    "kds_strength_avg_match_threshold": 0.9,
+    "kds_strength_min_match_threshold": 0.75,
+    "kds_service_avg_match_threshold": 0.9,
+    "kds_service_min_match_threshold": 0.75,
+    "artifact_gap_counts": {},
+    "artifact_rows": [
+      {
+        "model_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+        "model_exists": true,
+        "roundtrip_report": "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json",
+        "roundtrip_report_present": true,
+        "runtime_combo_count": 8,
+        "runtime_combo_names": [
+          "gLCB1",
+          "gLCB2",
+          "gLCB3",
+          "STL ENV_STR",
+          "STL ENV_SER",
+          "sLCB1",
+          "sLCB2",
+          "sLCB3"
+        ],
+        "runtime_linear_combo_count": 6,
+        "runtime_nested_combo_count": 2,
+        "runtime_max_nested_depth": 2,
+        "runtime_unresolved_reference_count": 0,
+        "runtime_unresolved_reference_names": [],
+        "runtime_combo_depth_rows": [
+          {
+            "name": "STL ENV_SER",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 1,
+            "nested_depth": 2,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc+nested",
+            "family_tags": [
+              "rc",
+              "nested"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": true
+          },
+          {
+            "name": "STL ENV_STR",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 2,
+            "nested_depth": 2,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc+nested",
+            "family_tags": [
+              "rc",
+              "nested"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": true
+          },
+          {
+            "name": "gLCB1",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          },
+          {
+            "name": "gLCB2",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          },
+          {
+            "name": "gLCB3",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          },
+          {
+            "name": "sLCB1",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          },
+          {
+            "name": "sLCB2",
+            "limit_state": "ACTIVE",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          },
+          {
+            "name": "sLCB3",
+            "limit_state": "SLS",
+            "nested_reference_count": 0,
+            "nested_depth": 1,
+            "case_count": 2,
+            "case_names": [
+              "D",
+              "L"
+            ],
+            "family_label": "rc",
+            "family_tags": [
+              "rc"
+            ],
+            "rc_present": true,
+            "wind_present": false,
+            "seismic_present": false,
+            "nested_present": false
+          }
+        ],
+        "runtime_authoring_summary_line": "Runtime load-combination authoring: PASS | combos=8 | linear=6 | nested=2 | max_depth=2 | cases=2 | breadth=rc | rc/wind/seismic=8/0/0 | unresolved=0",
+        "runtime_authoring_ready": true,
+        "runtime_required_case_count": 2,
+        "runtime_required_cases": [
+          "D",
+          "L"
+        ],
+        "runtime_case_family_counts": {
+          "rc": 2,
+          "seismic": 0,
+          "wind": 0
+        },
+        "runtime_case_breadth_count": 1,
+        "runtime_case_breadth_label": "rc",
+        "runtime_combo_family_counts": {
+          "rc": 6,
+          "rc+nested": 2
+        },
+        "runtime_family_tag_counts": {
+          "nested": 2,
+          "other": 0,
+          "rc": 8,
+          "seismic": 0,
+          "wind": 0
+        },
+        "runtime_limit_state_counts": {
+          "ACTIVE": 7,
+          "SLS": 1
+        },
+        "runtime_rc_combo_count": 8,
+        "runtime_wind_combo_count": 0,
+        "runtime_seismic_combo_count": 0,
+        "runtime_rc_max_nested_depth": 2,
+        "runtime_wind_max_nested_depth": 0,
+        "runtime_seismic_max_nested_depth": 0,
+        "load_pattern_case_count": 2,
+        "load_pattern_cases": [
+          "D",
+          "L"
+        ],
+        "semantic_case_count": 4,
+        "semantic_cases": [
+          "D",
+          "L",
+          "Wx",
+          "Wy"
+        ],
+        "covered_required_pattern_case_count": 2,
+        "required_load_pattern_coverage_ratio": 1.0,
+        "missing_required_load_pattern_cases": [],
+        "roundtrip_raw_combo_count": 8,
+        "roundtrip_export_combo_count": 8,
+        "roundtrip_pass": true,
+        "roundtrip_supported": true,
+        "exact_name_coverage": 1.0,
+        "exact_entry_row_coverage": 1.0,
+        "exact_header_coverage": 1.0,
+        "exact_factor_map_coverage": 1.0,
+        "exact_expression_coverage": 1.3333333333333333,
+        "exact_roundtrip_fidelity_pass": true,
+        "selected_kds_family": "KDS-2022-steel-gravity",
+        "recommended_kds_family": "KDS-2022-steel-gravity",
+        "kds_family_selection_reason": "steel_named_gravity_signature_match",
+        "kds_family_selection_signals": {
+          "steel_family_clear_signal": true,
+          "gravity_only_runtime": true,
+          "steel_name_token_hits": [
+            "ENV_SER",
+            "ENV_STR",
+            "SLCB",
+            "STL"
+          ],
+          "steel_signature_match_count": 3,
+          "steel_signature_matches": [
+            "D=1.000|L=1.000",
+            "D=1.000|L=1.500",
+            "D=1.300|L=1.500"
+          ],
+          "family_scores": {
+            "KDS-2022-generic": 0.4541216698474762,
+            "KDS-2022-rc-nested": 0.4541216698474762,
+            "KDS-2022-rc-seismic": 0.4541216698474762,
+            "KDS-2022-rc-wind": 0.4541216698474762,
+            "KDS-2022-steel-gravity": 1.0
+          }
+        },
+        "kds_family_candidates": {
+          "KDS-2022-generic": {
+            "label": "KDS generic",
+            "strength": {
+              "target_count": 14,
+              "avg_match_score": 0.3930918245434373,
+              "min_match_score": 0.3225806451612903,
+              "exact_match_count": 0,
+              "strong_match_count": 0,
+              "weak_match_count": 13,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_ULS_7_RSX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_7_RSX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_8_RSY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                }
+              ]
+            },
+            "service": {
+              "target_count": 9,
+              "avg_match_score": 0.5151515151515151,
+              "min_match_score": 0.45454545454545453,
+              "exact_match_count": 1,
+              "strong_match_count": 1,
+              "weak_match_count": 8,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_SLS_2_WX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_2_WX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_3_WY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                }
+              ]
+            }
+          },
+          "KDS-2022-rc-nested": {
+            "label": "KDS RC nested",
+            "strength": {
+              "target_count": 14,
+              "avg_match_score": 0.3930918245434373,
+              "min_match_score": 0.3225806451612903,
+              "exact_match_count": 0,
+              "strong_match_count": 0,
+              "weak_match_count": 13,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_ULS_7_RSX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_7_RSX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_8_RSY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                }
+              ]
+            },
+            "service": {
+              "target_count": 9,
+              "avg_match_score": 0.5151515151515151,
+              "min_match_score": 0.45454545454545453,
+              "exact_match_count": 1,
+              "strong_match_count": 1,
+              "weak_match_count": 8,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_SLS_2_WX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_2_WX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_3_WY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                }
+              ]
+            }
+          },
+          "KDS-2022-rc-seismic": {
+            "label": "KDS RC seismic",
+            "strength": {
+              "target_count": 14,
+              "avg_match_score": 0.3930918245434373,
+              "min_match_score": 0.3225806451612903,
+              "exact_match_count": 0,
+              "strong_match_count": 0,
+              "weak_match_count": 13,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_ULS_7_RSX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_7_RSX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_8_RSY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                }
+              ]
+            },
+            "service": {
+              "target_count": 9,
+              "avg_match_score": 0.5151515151515151,
+              "min_match_score": 0.45454545454545453,
+              "exact_match_count": 1,
+              "strong_match_count": 1,
+              "weak_match_count": 8,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_SLS_2_WX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_2_WX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_3_WY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                }
+              ]
+            }
+          },
+          "KDS-2022-rc-wind": {
+            "label": "KDS RC wind",
+            "strength": {
+              "target_count": 14,
+              "avg_match_score": 0.3930918245434373,
+              "min_match_score": 0.3225806451612903,
+              "exact_match_count": 0,
+              "strong_match_count": 0,
+              "weak_match_count": 13,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_ULS_7_RSX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_7_RSX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                },
+                {
+                  "kds_name": "KDS_ULS_8_RSY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.3225806451612903
+                }
+              ]
+            },
+            "service": {
+              "target_count": 9,
+              "avg_match_score": 0.5151515151515151,
+              "min_match_score": 0.45454545454545453,
+              "exact_match_count": 1,
+              "strong_match_count": 1,
+              "weak_match_count": 8,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_SLS_2_WX+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_2_WX-",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                },
+                {
+                  "kds_name": "KDS_SLS_3_WY+",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 0.45454545454545453
+                }
+              ]
+            }
+          },
+          "KDS-2022-steel-gravity": {
+            "label": "KDS steel gravity",
+            "strength": {
+              "target_count": 2,
+              "avg_match_score": 1.0,
+              "min_match_score": 1.0,
+              "exact_match_count": 2,
+              "strong_match_count": 2,
+              "weak_match_count": 0,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_STEEL_ULS_1",
+                  "matched_runtime_name": "gLCB1",
+                  "match_score": 1.0
+                },
+                {
+                  "kds_name": "KDS_STEEL_ULS_2",
+                  "matched_runtime_name": "gLCB2",
+                  "match_score": 1.0
+                }
+              ]
+            },
+            "service": {
+              "target_count": 1,
+              "avg_match_score": 1.0,
+              "min_match_score": 1.0,
+              "exact_match_count": 1,
+              "strong_match_count": 1,
+              "weak_match_count": 0,
+              "worst_cases": [
+                {
+                  "kds_name": "KDS_STEEL_SLS_1",
+                  "matched_runtime_name": "gLCB3",
+                  "match_score": 1.0
+                }
+              ]
+            }
+          }
+        },
+        "kds_strength_target_count": 2,
+        "kds_service_target_count": 1,
+        "kds_strength_match": {
+          "target_count": 2,
+          "avg_match_score": 1.0,
+          "min_match_score": 1.0,
+          "exact_match_count": 2,
+          "strong_match_count": 2,
+          "weak_match_count": 0,
+          "worst_cases": [
+            {
+              "kds_name": "KDS_STEEL_ULS_1",
+              "matched_runtime_name": "gLCB1",
+              "match_score": 1.0
+            },
+            {
+              "kds_name": "KDS_STEEL_ULS_2",
+              "matched_runtime_name": "gLCB2",
+              "match_score": 1.0
+            }
+          ]
+        },
+        "kds_service_match": {
+          "target_count": 1,
+          "avg_match_score": 1.0,
+          "min_match_score": 1.0,
+          "exact_match_count": 1,
+          "strong_match_count": 1,
+          "weak_match_count": 0,
+          "worst_cases": [
+            {
+              "kds_name": "KDS_STEEL_SLS_1",
+              "matched_runtime_name": "gLCB3",
+              "match_score": 1.0
+            }
+          ]
+        },
+        "gap_labels": []
+      }
+    ],
+    "evidence_notes": [
+      "Exact roundtrip fidelity is evaluated from canonical MIDAS LOADCOMB roundtrip reports and must stay exact.",
+      "Required load-pattern coverage is computed only over runtime leaf cases actually referenced by runtime combinations.",
+      "Runtime authoring summaries surface deterministic RC/wind/seismic breadth plus nested depth before KDS alignment is checked.",
+      "KDS/runtime alignment uses best-match similarity against the canonical KDS strength/service libraries and is intentionally conservative.",
+      "Supported KDS family selection is heuristic; a steel family is selected only when the runtime inventory presents clear steel/gravity signatures."
+    ]
+  },
+  "summary_line": "Load-combination engine gate: PASS | models=1 | family=KDS-2022-steel-gravity | runtime_combo_range=8-8 | nested=2 max_depth=2 | breadth=rc | rc/wind/seismic=8/0/0 | exact_roundtrip=1/1 | pattern_coverage=1/1 min=1.00 | kds_strength_avg=1.000 min=1.000 | kds_service_avg=1.000 min=1.000 | gaps=none",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "reason": "load-combination engine evidence satisfies the current exact-roundtrip and KDS alignment gate",
+  "artifacts": {
+    "model_jsons": [
+      "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json"
+    ],
+    "loadcomb_roundtrip_reports": [
+      "implementation/phase1/release/midas_generator_33_loadcomb_roundtrip_report.json",
+      "implementation/phase1/release/midas_generator_33_pr_recheck_loadcomb_roundtrip_report.json",
+      "implementation/phase1/release/midas_generator_33_optimized_roundtrip_loadcomb_roundtrip_report.json"
+    ]
+  }
+}

@@ -1,0 +1,350 @@
+{
+  "schema_version": "ai-review-queue.v1",
+  "generated_at": "2026-06-09T15:42:17.552932+00:00",
+  "status": "ready",
+  "queue_item_count": 20,
+  "review_complete": true,
+  "grounded_answer_contract": {
+    "required_fields": [
+      "evidence_links",
+      "confidence",
+      "unsupported_caveat",
+      "next_review_action"
+    ],
+    "templates": [
+      {
+        "question": "Which proposed optimization changes need engineer review first?",
+        "answer_grounding": "sort by governing DCR, unsupported caveat, and replay artifact status",
+        "next_review_action": "open pending_review proposal and inspect solver/code evidence links"
+      },
+      {
+        "question": "Why was this member or group changed?",
+        "answer_grounding": "proposal trace reward_components, constraint_vector, rejected_alternatives",
+        "next_review_action": "accept, reject, waive, or request rerun"
+      }
+    ]
+  },
+  "queue_items": [
+    {
+      "proposal_id": "AI-PROP-0001",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:intermediate:nogroup:slab:SB1500X800",
+      "before_state_hash": "31e7311405378383b93398a74761eda001003daa001228b4561cba00f47276bf",
+      "after_state_hash": "3347cacf98b6d5c97690cb16a06d13ae788f334532e9e6eefd6e44ea6519c613",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0002",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S03:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "ca8e3402901595e728715e11976fdf7c820e13f666e5b5ea7cb22d64e3c38de5",
+      "after_state_hash": "8da0b8acece1291a489d9d2607e89d0f1aac2649a23c222f5fe61ec474784981",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0003",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S05:perimeter:2:column:P 50x4",
+      "before_state_hash": "8a39240ec623d814bd6565b618f1401f7e2e64d468d65dcadac0e7bfb339de00",
+      "after_state_hash": "018a0552744e7ce78d20c459cb74009a21a9ccae5dfae23ac4b44a3ef9c27ad2",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0004",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:perimeter:1:slab:default",
+      "before_state_hash": "343590e9497f095a97b57a014aea9f82d3c9699ea329522962cc2f059d834991",
+      "after_state_hash": "d2a30f64819cf7d5ed879ff636586f6cf3e99b0198cf6a1cba665d2196617ec7",
+      "governing_constraint": "hard_gate_pass",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0005",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S02:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "089aa7c3a69fa18ee37fb959895c043f04e079f39ac1acd754dc1cdeb44db919",
+      "after_state_hash": "eff7159987f9ad5e631e77267e03ce8a20853c3c5d264e864953dbd737f30e66",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0006",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S03:intermediate:nogroup:slab:SB800X3002.00",
+      "before_state_hash": "9991bbbd6fda8fde2970ff5e0537683bedab5caebf91e7345ef4764c44a4a4eb",
+      "after_state_hash": "31ffbcfccf3c6796baed20c6d67e5fa3473dbcb336ee152add1b118195c9e31a",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0007",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:intermediate:nogroup:slab:SB800X3002.00",
+      "before_state_hash": "7cd2fd97e2dd4b238fcbf84c32f3f8785e0deddb6e77eda6a1a2f4e2491638ca",
+      "after_state_hash": "665aa3e4fcea623a5ababea3cf4a5040d96042cb9f5083596b81ae08e805fc77",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0008",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S06:intermediate:nogroup:slab:SB800X3002.00",
+      "before_state_hash": "e9b83f1b529efb7c02fb8ed74c733d795eae7cd51cbc9eaf62052a6bd0c5155d",
+      "after_state_hash": "9963d900e1d10f11b088e8d89819a9e51d3c7d2794648263e04a5642dfdb822f",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0009",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S07:intermediate:nogroup:slab:SB1500X800",
+      "before_state_hash": "0322cd43866c46560172a2e588df95a1d200590460de544cc48e528e82d13af9",
+      "after_state_hash": "a083da4bfddcbf4a1d48b58f245f028aeb32864b9ab45c14c12d41ff4eb0f357",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0010",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S03:perimeter:nogroup:slab:default",
+      "before_state_hash": "0006b441a8120f3bcbbdfb21feeff80e52e19ab1dab85b40a6030d7d925a6e78",
+      "after_state_hash": "688d53f8983cfd0c595520e2b4f69455d5c3baa048d409fa9deccab32b4bc38d",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0011",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "b3747de8582ee3e6436795f027571f5158cc940092b4c7d47adda84af8a75764",
+      "after_state_hash": "6fb2576efe338d1998fbf9c14f3fa6d101411ab9bd74499e6536cbdce8ba055d",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0012",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:perimeter:nogroup:slab:default",
+      "before_state_hash": "c17101bbd7fea7d65e9a3a3b715011a58747ecd933cdb48d5c0401865d3b921c",
+      "after_state_hash": "8655092279c92d539f47b08045aeef053d87b72870fce5663fb4afe80d0a6271",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0013",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S06:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "cc10ab1101b9878da983a922ed67764ca18344108abf983aff172bda120ca30d",
+      "after_state_hash": "b54f13317f9f10e09a08bd2468abd3daebd0c400e439dabee983b6ef1e2b69a7",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0014",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S07:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "faf0ad2cccc32cabd90c4d62c846025e30e2e3bac52192b17896c4337a8be33b",
+      "after_state_hash": "70849bd244f686e9c36fa994c4e46aa7f7943bc53067e89ea03e9aace28130d2",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0015",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S08:perimeter:nogroup:slab:SB1500X800",
+      "before_state_hash": "ed9db67e858ddd1fa9e78210318e5c9b304336d18784a841f07c7cbd0166760a",
+      "after_state_hash": "7c9d6d914f82d72464b7731fa520984992874ac0b58bfcbefd94450f9b1ada99",
+      "governing_constraint": "KDS-MOMENT-Y-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0016",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:transfer:nogroup:beam:SB800X7001.82",
+      "before_state_hash": "a87e965bcdb7a2db9607a91b41017f5d6cbfd149a4ca2e33a797b4717887c759",
+      "after_state_hash": "d7ddeaf5916594878553cef0a2c0f070a43a41b2b6385caaa7a9fcda73603217",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0017",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:transfer:nogroup:beam:SB800X7001.95",
+      "before_state_hash": "9b8e1b6b1827ae11c8f042fc6c5a458a25af6c249378238577e47f0ba1129e61",
+      "after_state_hash": "e063e06ebd758c316383214c11306909956be69fea5102fd6b4a59da27d8d293",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0018",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:transfer:nogroup:beam:SB800X7002.00",
+      "before_state_hash": "2ae36d5839341e96769e2628e3d729eb96cfb7eb08f6838bc1dd7d793b658835",
+      "after_state_hash": "4f5564093f4990805fb0a776a1028c00c83b40b5ab8eedf8dde2ec6491696a63",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0019",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:transfer:nogroup:beam:SB800X8002.00",
+      "before_state_hash": "6f2186591ff20aad296a8d37f01263150a33fa5f49a16be72740c5aab3d63427",
+      "after_state_hash": "d32d7126f3ee1034eb8e466a477c6c2e5e7aae8b2aeaafea2765dd33bc375539",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    },
+    {
+      "proposal_id": "AI-PROP-0020",
+      "queue_state": "pending_review",
+      "member_or_group_id": "S04:transfer:nogroup:beam:SB800X9001.75",
+      "before_state_hash": "3ad518fa51929c9c57ea3b7313f1f79b9da1b0fdd056301a3d568bcb4c205ba7",
+      "after_state_hash": "0417dd1765e0ff07b1d754e922bc7a8c09da9e522c42b5874edc708359b7ddad",
+      "governing_constraint": "KDS-SVC-DRIFT-001",
+      "confidence": "bounded_deterministic_replay",
+      "unsupported_caveat": "not a licensed structural approval; engineer review required",
+      "evidence_links": [
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+        "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json"
+      ],
+      "reviewer_decision": "pending"
+    }
+  ],
+  "blockers": []
+}

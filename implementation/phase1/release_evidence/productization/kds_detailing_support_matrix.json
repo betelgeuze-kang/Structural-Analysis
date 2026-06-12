@@ -1,0 +1,205 @@
+{
+  "schema_version": "kds-detailing-support-matrix.v1",
+  "generated_at": "2026-06-05T13:35:54.461641+00:00",
+  "status": "ready",
+  "rule_engine_present": true,
+  "clause_breadth_ready": true,
+  "optimization_rows_guarded": true,
+  "trace_ready": true,
+  "unsupported_queue_ready": true,
+  "claim_boundary": "Deterministic KDS RC clause/detailing support matrix plus automatic-claim guard; unsupported steel/composite/seismic/project-specific claims remain engineer-review-required.",
+  "rule_engine_path": "/home/betelgeuze/건축구조분석/implementation/phase1/kds_rc_rule_engine.py",
+  "clause_inventory": {
+    "clause_count": 23,
+    "required_rc_families": [
+      "beam",
+      "column",
+      "connection",
+      "foundation",
+      "slab",
+      "wall"
+    ],
+    "covered_rc_families": [
+      "beam",
+      "column",
+      "connection",
+      "foundation",
+      "slab",
+      "wall"
+    ],
+    "family_counts": {
+      "beam": 5,
+      "column": 3,
+      "connection": 3,
+      "foundation": 3,
+      "slab": 4,
+      "wall": 5
+    },
+    "component_counts": {
+      "beam:crack": 1,
+      "beam:deflection": 1,
+      "beam:flexure": 1,
+      "beam:shear": 1,
+      "beam:torsion": 1,
+      "column:axial_flexure": 1,
+      "column:shear": 1,
+      "column:slenderness": 1,
+      "connection:rotation": 1,
+      "connection:shear_friction": 1,
+      "connection:slip": 1,
+      "foundation:bearing": 1,
+      "foundation:flexure": 1,
+      "foundation:shear": 1,
+      "slab:deflection": 1,
+      "slab:flexure": 1,
+      "slab:punching": 1,
+      "slab:vibration": 1,
+      "wall:axial_flexure": 1,
+      "wall:boundary": 1,
+      "wall:coupling": 1,
+      "wall:drift": 1,
+      "wall:shear": 1
+    },
+    "clause_ids": [
+      "KDS-RC-BEAM-CRACK-001",
+      "KDS-RC-BEAM-DEF-001",
+      "KDS-RC-BEAM-FLEX-001",
+      "KDS-RC-BEAM-SHEAR-001",
+      "KDS-RC-BEAM-TORS-001",
+      "KDS-RC-COL-INT-001",
+      "KDS-RC-COL-SHEAR-001",
+      "KDS-RC-COL-SLEND-001",
+      "KDS-RC-CONN-ROT-001",
+      "KDS-RC-CONN-SHEAR-001",
+      "KDS-RC-CONN-SLIP-001",
+      "KDS-RC-FOUND-BEAR-001",
+      "KDS-RC-FOUND-FLEX-001",
+      "KDS-RC-FOUND-SHEAR-001",
+      "KDS-RC-SLAB-DEF-001",
+      "KDS-RC-SLAB-FLEX-001",
+      "KDS-RC-SLAB-PUNCH-001",
+      "KDS-RC-SLAB-VIB-001",
+      "KDS-RC-WALL-BE-001",
+      "KDS-RC-WALL-COUP-001",
+      "KDS-RC-WALL-DRIFT-001",
+      "KDS-RC-WALL-INT-001",
+      "KDS-RC-WALL-SHEAR-001"
+    ]
+  },
+  "optimization_code_guard": {
+    "status": "ready",
+    "jurisdiction_profile": "KDS-2022 bounded lane",
+    "change_row_count": 20,
+    "explicit_clause_row_count": 19,
+    "missing_governing_clause_count": 1,
+    "review_guarded_row_count": 20,
+    "all_rows_have_clause_or_review_guard": true,
+    "governing_clause_ids": [
+      "KDS-MOMENT-Y-001",
+      "KDS-SVC-DRIFT-001"
+    ],
+    "hallucination_guard": {
+      "llm_free_default": true,
+      "allowed_claim_source": "explicit governing_clause ids and deterministic KDS rule-engine rows only",
+      "unsupported_clause_behavior": "blocked_or_engineer_review_required"
+    }
+  },
+  "support_matrix": [
+    {
+      "family": "beam",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 5,
+      "components": [
+        "crack",
+        "deflection",
+        "flexure",
+        "shear",
+        "torsion"
+      ]
+    },
+    {
+      "family": "column",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 3,
+      "components": [
+        "axial_flexure",
+        "shear",
+        "slenderness"
+      ]
+    },
+    {
+      "family": "connection",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 3,
+      "components": [
+        "rotation",
+        "shear_friction",
+        "slip"
+      ]
+    },
+    {
+      "family": "foundation",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 3,
+      "components": [
+        "bearing",
+        "flexure",
+        "shear"
+      ]
+    },
+    {
+      "family": "slab",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 4,
+      "components": [
+        "deflection",
+        "flexure",
+        "punching",
+        "vibration"
+      ]
+    },
+    {
+      "family": "wall",
+      "status": "deterministic_rule_engine_supported",
+      "clause_count": 5,
+      "components": [
+        "axial_flexure",
+        "boundary",
+        "coupling",
+        "drift",
+        "shear"
+      ]
+    }
+  ],
+  "unsupported_clause_queue": [
+    {
+      "group_id": "S04:perimeter:1:slab:default",
+      "action_name": "slab_thickness_down",
+      "governing_constraint": "hard_gate_pass",
+      "status": "engineer_review_required",
+      "reason": "No explicit deterministic KDS clause was attached to this optimization row; automatic code/regulation explanation is blocked and routed to engineer review.",
+      "required_action_before_claim": "attach explicit deterministic KDS clause or keep engineer-review-required state"
+    }
+  ],
+  "broader_unsupported_claim_queue": [
+    {
+      "family": "steel_composite_code_breadth",
+      "status": "unsupported_or_engineer_review_required",
+      "reason": "Current deterministic rule engine is RC-focused; steel/composite automatic detailing claims are not promoted.",
+      "required_action_before_claim": "attach KDS steel/composite clause map, solver-result crosswalk, and regression rows"
+    },
+    {
+      "family": "seismic_special_detailing_breadth",
+      "status": "unsupported_or_engineer_review_required",
+      "reason": "Special seismic detailing beyond current bounded drift/moment guard is not automatically claimed.",
+      "required_action_before_claim": "attach jurisdiction profile, member family checks, load-combo trace, and reviewer workflow"
+    },
+    {
+      "family": "connection_foundation_project_specific_detailing",
+      "status": "unsupported_or_engineer_review_required",
+      "reason": "Project-specific connection/foundation detailing needs source-specific review before automatic claim.",
+      "required_action_before_claim": "attach source detail rows, governing clauses, and signed review disposition"
+    }
+  ],
+  "blockers": []
+}

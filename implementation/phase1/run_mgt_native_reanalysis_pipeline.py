@@ -68,6 +68,7 @@ def run_mgt_native_reanalysis_pipeline(
     mgt_path: Path | None = None,
     refresh_parse: bool = False,
     sync_provenance: bool = True,
+    skip_global_solves: bool = False,
 ) -> dict[str, Any]:
     changes_payload = load_json(changes_json)
     mgt_refresh: dict[str, Any] | None = None
@@ -110,7 +111,7 @@ def run_mgt_native_reanalysis_pipeline(
     midas_same_mesh_comparison: dict[str, Any] | None = None
     midas_result_json, _midas_resolution = resolve_midas_same_mesh_result_path(roundtrip_json=roundtrip_json)
     productization_dir = roundtrip_json.resolve().parents[2] / "release_evidence" / "productization"
-    if mesh_contract.get("mesh_contract_ready"):
+    if mesh_contract.get("mesh_contract_ready") and not skip_global_solves:
         condensed_solve = run_mgt_global_fea_condensed_solve(roundtrip_json=roundtrip_json)
         mesh_3d_solve = run_mgt_global_fea_3d_native_solve(roundtrip_json=roundtrip_json)
         if midas_result_json.is_file():
@@ -133,7 +134,7 @@ def run_mgt_native_reanalysis_pipeline(
         ):
             native_solve_status = "mesh_3d_beam_global_wired_with_midas_same_mesh_proxy"
     fea_status = "not_wired"
-    if native_solve_status == "mesh_3d_beam_global_wired":
+    if native_solve_status.startswith("mesh_3d_beam_global_wired"):
         fea_status = "mesh_3d_global_wired"
     elif native_solve_status == "condensed_global_fea_wired":
         fea_status = "condensed_solve_wired"
@@ -150,7 +151,7 @@ def run_mgt_native_reanalysis_pipeline(
         "readiness_for_global_fea_wiring": global_fea_readiness.get("readiness_for_global_fea_wiring"),
         "note": (
             "MGT NPZ same-mesh 3D beam global Newton wired; commercial HF export proxy crosscheck attached."
-            if native_solve_status == "mesh_3d_beam_global_wired"
+            if native_solve_status.startswith("mesh_3d_beam_global_wired")
             else "MGT NPZ condensed to story model and solved in-repo (not full 3D licensed global FEA)."
             if native_solve_status == "condensed_global_fea_wired"
             else "MGT roundtrip/NPZ mesh contract ready; condensed solve not completed."
@@ -167,6 +168,7 @@ def run_mgt_native_reanalysis_pipeline(
         "condensed_global_fea_solve": condensed_solve,
         "mesh_3d_global_fea_solve": mesh_3d_solve,
         "midas_gen_same_mesh_comparison": midas_same_mesh_comparison,
+        "global_solves_skipped": bool(skip_global_solves),
     }
 
     if "mgt_file_missing" in blockers:

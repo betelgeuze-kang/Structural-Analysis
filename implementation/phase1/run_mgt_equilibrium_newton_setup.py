@@ -20,11 +20,7 @@ from parse_mgt_section_material_properties import (
     parse_mgt_support_constraints,
 )
 from run_mgt_coupled_frame_surface_sparse_equilibrium import _select_frame_elements
-from run_mgt_direct_residual_newton_probe import (
-    _active_free,
-    _load_checkpoint,
-    _service_tangent_by_element,
-)
+from run_mgt_direct_residual_newton_probe import _load_checkpoint
 from run_mgt_full_frame_6dof_sparse_equilibrium import (
     DOF_PER_NODE,
     _beam_end_offset_lookup,
@@ -36,11 +32,7 @@ from run_mgt_uncoarsened_boundary_global_equilibrium import (
     _authored_support_restraints,
     _run_uncoarsened_parser,
 )
-from mgt_physical_residual_assembly import (
-    assemble_newton_tangent_stiffness,
-    assemble_physical_internal_forces,
-    assemble_physical_residual,
-)
+from mgt_equilibrium_step_assembly import build_equilibrium_step_assembler
 
 
 def build_direct_residual_assembler(
@@ -114,105 +106,46 @@ def build_direct_residual_assembler(
         section_props=section_props,
         material_props=material_props,
     )
-    reference_holder: dict[str, np.ndarray] = {}
-
-    def assemble_residual(
-        u: np.ndarray,
-        *,
-        external_load_override: np.ndarray | None = None,
-    ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
-        translations = np.asarray(u, dtype=np.float64).reshape((-1, DOF_PER_NODE))[:, :3]
-        deformed_xyz = node_xyz + translations
-        axial_forces = {
-            int(elem): float(force) * float(frame_gravity_load_scale) * load_scale
-            for elem, force in base_axial_forces.items()
-        }
-        service_tangent_by_element, service_material_meta = _service_tangent_by_element(
-            elements=frame_elements,
-            node_xyz=deformed_xyz,
-            u=u,
-            material_props=material_props,
-        )
-        stiffness, assembled_f_ext, tangent_meta = assemble_newton_tangent_stiffness(
-            u=u,
-            node_xyz=node_xyz,
-            frame_elements=frame_elements,
-            elem_type_code=elem_type_code,
-            elem_section_id=elem_section_id,
-            elem_material_id=elem_material_id,
-            conn_ptr=conn_ptr,
-            conn_idx=conn_idx,
-            section_props=section_props,
-            material_props=material_props,
-            plate_thickness_props=plate_thickness_props,
-            spring_stiffness=spring_stiffness,
-            base_axial_forces=base_axial_forces,
-            frame_gravity_load_scale=frame_gravity_load_scale,
-            load_scale=load_scale,
-            service_tangent_by_element=service_tangent_by_element,
-            service_material_meta=service_material_meta,
-        )
-        f_int, physical_meta = assemble_physical_internal_forces(
-            u=u,
-            node_xyz=node_xyz,
-            frame_elements=frame_elements,
-            elem_type_code=elem_type_code,
-            elem_section_id=elem_section_id,
-            elem_material_id=elem_material_id,
-            conn_ptr=conn_ptr,
-            conn_idx=conn_idx,
-            section_props=section_props,
-            material_props=material_props,
-            plate_thickness_props=plate_thickness_props,
-            spring_stiffness=spring_stiffness,
-            base_axial_forces=base_axial_forces,
-            frame_gravity_load_scale=frame_gravity_load_scale,
-            load_scale=load_scale,
-        )
-        if external_load_override is not None:
-            f_ext = np.asarray(external_load_override, dtype=np.float64)
-        elif "reference_f_ext" in reference_holder:
-            f_ext = reference_holder["reference_f_ext"]
-        else:
-            f_ext = assembled_f_ext
-        active, free = _active_free(stiffness, restrained)
-        residual, rhs = assemble_physical_residual(
-            u=u,
-            f_ext=f_ext,
-            free=free,
-            f_int=f_int,
-        )
-        return stiffness, f_ext, free, residual, rhs, {
-            **tangent_meta,
-            **physical_meta,
-            "active_dof_count": int(active.size),
-            "free_dof_count": int(free.size),
-        }
-
-    _reference_stiffness, reference_f_ext, _reference_free, _reference_residual, _reference_rhs, _ = (
-        assemble_residual(np.zeros_like(u0))
+    assemble_with_frozen_external_load, step_meta = build_equilibrium_step_assembler(
+        node_xyz=node_xyz,
+        frame_elements=frame_elements,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        section_props=section_props,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        spring_stiffness=spring_stiffness,
+        base_axial_forces=base_axial_forces,
+        frame_gravity_load_scale=frame_gravity_load_scale,
+        load_scale=load_scale,
+        restrained=restrained,
     )
-    reference_holder["reference_f_ext"] = reference_f_ext
 
     setup_meta = {
         "checkpoint": checkpoint_meta,
         "u0": u0,
         "load_scale": load_scale,
-        "reference_f_ext_inf_n": float(np.max(np.abs(reference_f_ext))) if reference_f_ext.size else 0.0,
+        "reference_f_ext_inf_n": step_meta.get("reference_f_ext_inf_n"),
         "frame_select_meta": frame_select_meta,
         "support_meta": support_meta,
         "spring_meta": spring_meta,
         "parser_report_contract_pass": bool(parser_report.get("contract_pass")),
         "parser_run": parser_run,
+        "equilibrium_step_meta": step_meta,
+        "frame_gravity_load_scale": float(frame_gravity_load_scale),
+        "_node_xyz": node_xyz,
+        "_node_id": node_id,
+        "_elem_id": elem_id,
+        "_elem_type_code": elem_type_code,
+        "_conn_ptr": conn_ptr,
+        "_conn_idx": conn_idx,
+        "_frame_elements": frame_elements,
+        "_section_props": section_props,
+        "_material_props": material_props,
+        "_base_axial_forces": base_axial_forces,
         "_temp_dir": temp_dir,
     }
-
-    def assemble_with_reference(
-        u: np.ndarray,
-        *,
-        external_load_override: np.ndarray | None = None,
-    ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
-        override = reference_f_ext if external_load_override is None else external_load_override
-        return assemble_residual(u, external_load_override=override)
-
-    return assemble_with_reference, setup_meta
+    return assemble_with_frozen_external_load, setup_meta

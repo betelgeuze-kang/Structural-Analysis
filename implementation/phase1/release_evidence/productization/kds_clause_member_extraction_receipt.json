@@ -1,0 +1,595 @@
+{
+  "schema_version": "kds-clause-member-extraction-receipt.v1",
+  "generated_at": "2026-06-09T16:09:13.763255+00:00",
+  "status": "partial",
+  "contract_pass": false,
+  "source": {
+    "hf_csv": "implementation/phase1/commercial_hf_export_sample.csv",
+    "hf_csv_sha256": "4d685cd857c08a29d235f2f3e17e1b1741bb7af5e4e4cc87189b3c59fa051f57",
+    "hf_row_count": 12,
+    "detailing_matrix_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/kds_detailing_support_matrix.json",
+    "detailing_matrix_sha256": "b6d543992a13467955c6cf9354d8305dd5529d5d7fb4a902d6e302fbc962bd37",
+    "solver_equilibrium_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_full_frame_6dof_sparse_equilibrium.json",
+    "solver_equilibrium_sha256": "5bf144aab17c0193a51b72e2ad26f1339a62de8b14e4581e9c1e9a8fa9f20ddf",
+    "solver_equilibrium_status": "ready",
+    "solver_mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "midas_model_name": "midas_generator_33.optimized"
+  },
+  "inputs": {
+    "axial_capacity_kN": 2200.0,
+    "shear_capacity_kN": 380.0,
+    "moment_capacity_kNm": 2600.0,
+    "combination_scales": [
+      1.0,
+      1.2,
+      1.4
+    ],
+    "combination_family": "KDS-2022",
+    "max_dcr": 1.0,
+    "capacity_source": "user_input"
+  },
+  "summary": {
+    "member_count": 12,
+    "case_count": 12,
+    "combination_count": 3,
+    "clause_evaluated_count": 16,
+    "clause_expected_count": 23,
+    "clause_coverage_ready": true,
+    "family_evaluated_count": 9,
+    "family_expected_count": 6,
+    "family_coverage_ready": true,
+    "global_max_dcr": 1.1907,
+    "governing_member_id": "MF-012",
+    "governing_case_id": "C-TST-003",
+    "governing_component": "bending_moment_y_kNm",
+    "member_type_counts": {
+      "beam": 66,
+      "brace": 60,
+      "column": 66,
+      "wall": 72
+    },
+    "family_dcr_counts": {
+      "axial": 36,
+      "beam": 6,
+      "column": 6,
+      "interaction": 36,
+      "moment": 72,
+      "serviceability": 12,
+      "shear": 72,
+      "stability": 12,
+      "wall": 12
+    },
+    "rule_family_max_dcr": {
+      "rc_detail": 0.9818181818181818,
+      "serviceability": 1.0750000000000002,
+      "stability": 0.9523809523809523,
+      "strength": 1.1907,
+      "strength_interaction": 1.1126704306220097
+    },
+    "rule_family_dcr_count": {
+      "rc_detail": 24,
+      "serviceability": 12,
+      "stability": 12,
+      "strength": 180,
+      "strength_interaction": 36
+    }
+  },
+  "per_member_rows": [
+    {
+      "member_id": "MF-001",
+      "case_count": 2,
+      "max_dcr": 0.7,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "beam",
+      "topology_type": "rahmen"
+    },
+    {
+      "member_id": "MF-002",
+      "case_count": 2,
+      "max_dcr": 0.6166666666666667,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "brace",
+      "topology_type": "truss"
+    },
+    {
+      "member_id": "MF-003",
+      "case_count": 2,
+      "max_dcr": 0.9454545454545454,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "beam",
+      "topology_type": "rahmen"
+    },
+    {
+      "member_id": "MF-004",
+      "case_count": 2,
+      "max_dcr": 0.7917140468227425,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "wall",
+      "topology_type": "wall-frame"
+    },
+    {
+      "member_id": "MF-005",
+      "case_count": 2,
+      "max_dcr": 1.1347269230769228,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "column",
+      "topology_type": "outrigger"
+    },
+    {
+      "member_id": "MF-006",
+      "case_count": 2,
+      "max_dcr": 0.9555555555555555,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "brace",
+      "topology_type": "truss"
+    },
+    {
+      "member_id": "MF-007",
+      "case_count": 2,
+      "max_dcr": 1.0548285953177257,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "wall",
+      "topology_type": "wall-frame"
+    },
+    {
+      "member_id": "MF-008",
+      "case_count": 2,
+      "max_dcr": 0.9181818181818181,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "beam",
+      "topology_type": "rahmen"
+    },
+    {
+      "member_id": "MF-009",
+      "case_count": 2,
+      "max_dcr": 0.6555555555555556,
+      "governing_component": "drift_ratio_pct",
+      "governing_combination": "SVC_DRIFT",
+      "member_type": "brace",
+      "topology_type": "truss"
+    },
+    {
+      "member_id": "MF-010",
+      "case_count": 2,
+      "max_dcr": 1.0889307692307693,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "column",
+      "topology_type": "outrigger"
+    },
+    {
+      "member_id": "MF-011",
+      "case_count": 2,
+      "max_dcr": 0.9608026755852842,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "wall",
+      "topology_type": "wall-frame"
+    },
+    {
+      "member_id": "MF-012",
+      "case_count": 2,
+      "max_dcr": 1.1907,
+      "governing_component": "bending_moment_y_kNm",
+      "governing_combination": "USER_COMBO_03",
+      "member_type": "column",
+      "topology_type": "outrigger"
+    }
+  ],
+  "per_clause_summary": [
+    {
+      "clause_id": "KDS-AXIAL-001",
+      "family": "axial",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 1.0423636363636364,
+      "mean_dcr": 0.6663427206851118,
+      "max_dcr_pass": false
+    },
+    {
+      "clause_id": "KDS-INT-FRAME-001",
+      "family": "interaction",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 1.1126704306220097,
+      "mean_dcr": 0.7112871325337516,
+      "max_dcr_pass": false
+    },
+    {
+      "clause_id": "KDS-MOMENT-Y-001",
+      "family": "moment",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 1.1907,
+      "mean_dcr": 0.7611684155518395,
+      "max_dcr_pass": false
+    },
+    {
+      "clause_id": "KDS-MOMENT-Z-001",
+      "family": "moment",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 0.9702,
+      "mean_dcr": 0.620211301560758,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-CRACK-001",
+      "family": "beam",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-DEF-001",
+      "family": "beam",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-FLEX-001",
+      "family": "beam",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.6485192307692308,
+      "mean_dcr": 0.5817115384615384,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-SHEAR-001",
+      "family": "beam",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.5916315789473684,
+      "mean_dcr": 0.5306842105263158,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-TORS-001",
+      "family": "beam",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-COL-INT-001",
+      "family": "column",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.8028204545454546,
+      "mean_dcr": 0.7673682692307692,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-COL-SHEAR-001",
+      "family": "column",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.7758947368421052,
+      "mean_dcr": 0.7416315789473683,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-COL-SLEND-001",
+      "family": "column",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-CONN-ROT-001",
+      "family": "connection",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-CONN-SHEAR-001",
+      "family": "connection",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-CONN-SLIP-001",
+      "family": "connection",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-BEAR-001",
+      "family": "foundation",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-FLEX-001",
+      "family": "foundation",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-SHEAR-001",
+      "family": "foundation",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-DEF-001",
+      "family": "slab",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-FLEX-001",
+      "family": "slab",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-PUNCH-001",
+      "family": "slab",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-VIB-001",
+      "family": "slab",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-WALL-BE-001",
+      "family": "wall",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.9802165678524374,
+      "mean_dcr": 0.8695903784219001,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-WALL-COUP-001",
+      "family": "wall",
+      "expected_in_matrix": true,
+      "evaluated_count": 0,
+      "max_dcr": 0.0,
+      "mean_dcr": 0.0,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-WALL-DRIFT-001",
+      "family": "wall",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.9818181818181818,
+      "mean_dcr": 0.8272727272727272,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-WALL-INT-001",
+      "family": "wall",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.7205965909090909,
+      "mean_dcr": 0.6392708333333333,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-RC-WALL-SHEAR-001",
+      "family": "wall",
+      "expected_in_matrix": true,
+      "evaluated_count": 3,
+      "max_dcr": 0.6873569794050343,
+      "mean_dcr": 0.6097826086956522,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-SHEAR-Y-001",
+      "family": "shear",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 1.0862526315789471,
+      "mean_dcr": 0.6943992562929062,
+      "max_dcr_pass": false
+    },
+    {
+      "clause_id": "KDS-SHEAR-Z-001",
+      "family": "shear",
+      "expected_in_matrix": false,
+      "evaluated_count": 36,
+      "max_dcr": 0.8448631578947366,
+      "mean_dcr": 0.540088310450038,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-STAB-BUCKLING-001",
+      "family": "stability",
+      "expected_in_matrix": false,
+      "evaluated_count": 12,
+      "max_dcr": 0.9523809523809523,
+      "mean_dcr": 0.7569447193505973,
+      "max_dcr_pass": true
+    },
+    {
+      "clause_id": "KDS-SVC-DRIFT-001",
+      "family": "serviceability",
+      "expected_in_matrix": false,
+      "evaluated_count": 12,
+      "max_dcr": 1.0750000000000002,
+      "mean_dcr": 0.8606165824915823,
+      "max_dcr_pass": false
+    }
+  ],
+  "unsupported_clause_queue": [
+    {
+      "clause_id": "",
+      "family": "",
+      "status": "engineer_review_required",
+      "reason": "No explicit deterministic KDS clause was attached to this optimization row; automatic code/regulation explanation is blocked and routed to engineer review."
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-CRACK-001",
+      "family": "beam",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-DEF-001",
+      "family": "beam",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-BEAM-TORS-001",
+      "family": "beam",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-COL-SLEND-001",
+      "family": "column",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-CONN-ROT-001",
+      "family": "connection",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-CONN-SHEAR-001",
+      "family": "connection",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-CONN-SLIP-001",
+      "family": "connection",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-BEAR-001",
+      "family": "foundation",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-FLEX-001",
+      "family": "foundation",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-FOUND-SHEAR-001",
+      "family": "foundation",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-DEF-001",
+      "family": "slab",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-FLEX-001",
+      "family": "slab",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-PUNCH-001",
+      "family": "slab",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-SLAB-VIB-001",
+      "family": "slab",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    },
+    {
+      "clause_id": "KDS-RC-WALL-COUP-001",
+      "family": "wall",
+      "status": "not_evaluated_in_this_run",
+      "reason": "no member force demand row triggered this clause via evaluate_code_compliance"
+    }
+  ],
+  "checks": {
+    "code_check_contract_pass": false,
+    "max_dcr_pass": false,
+    "combination_coverage_pass": true,
+    "member_check_rows_min_pass": true,
+    "clause_coverage_pass": true,
+    "rc_rule_rows_min_pass": true,
+    "kds_23_clause_inventory_ready": true,
+    "rc_family_inventory_ready": true
+  },
+  "claim_boundary": "This receipt cross-walks evaluate_code_compliance() output against the KDS 23-clause support matrix. It is a deterministic, audit-friendly bridge from member force demand to per-clause DCR. It does not claim full KDS 41/42/etc. design check completion; unsupported steel/composite/seismic clauses remain engineer-review-required. max_dcr > 1.0 may simply reflect sample member demand exceeding the default capacity; see summary.rule_family_max_dcr to identify which KDS rule family (strength / serviceability / stability / interaction / rc_detail / steel_detail) drives the governing DCR, and re-run with --auto-fit-capacity or a member-specific capacity set for production-scale review.",
+  "blockers": [
+    "code_check_max_dcr_exceeded",
+    "clause_not_evaluated:KDS-RC-BEAM-CRACK-001",
+    "clause_not_evaluated:KDS-RC-BEAM-DEF-001",
+    "clause_not_evaluated:KDS-RC-BEAM-TORS-001",
+    "clause_not_evaluated:KDS-RC-COL-SLEND-001",
+    "clause_not_evaluated:KDS-RC-CONN-ROT-001",
+    "clause_not_evaluated:KDS-RC-CONN-SHEAR-001",
+    "clause_not_evaluated:KDS-RC-CONN-SLIP-001",
+    "clause_not_evaluated:KDS-RC-FOUND-BEAR-001",
+    "clause_not_evaluated:KDS-RC-FOUND-FLEX-001",
+    "clause_not_evaluated:KDS-RC-FOUND-SHEAR-001",
+    "clause_not_evaluated:KDS-RC-SLAB-DEF-001",
+    "clause_not_evaluated:KDS-RC-SLAB-FLEX-001",
+    "clause_not_evaluated:KDS-RC-SLAB-PUNCH-001",
+    "clause_not_evaluated:KDS-RC-SLAB-VIB-001",
+    "clause_not_evaluated:KDS-RC-WALL-COUP-001"
+  ]
+}

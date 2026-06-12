@@ -116,10 +116,43 @@ def _select_vertical_chain_elements(
         adjacency.setdefault(elem.node_i, []).append((elem.node_j, elem))
         adjacency.setdefault(elem.node_j, []).append((elem.node_i, elem))
 
-    z_by_node = {elem.node_i: float(node_xyz[elem.node_i, 2]) for elem in elements}
-    z_by_node.update({elem.node_j: float(node_xyz[elem.node_j, 2]) for elem in elements})
+    visited: set[int] = set()
+    components: list[list[BeamElement]] = []
+    for start in sorted(adjacency):
+        if start in visited:
+            continue
+        queue = [start]
+        visited.add(start)
+        component_nodes: set[int] = set()
+        component_edges: dict[int, BeamElement] = {}
+        while queue:
+            current = queue.pop(0)
+            component_nodes.add(current)
+            for neighbor, elem in adjacency.get(current, []):
+                component_edges[elem.elem_id] = elem
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+        if component_edges:
+            components.append(list(component_edges.values()))
+
+    candidate_elements = elements
+    if components:
+        def component_score(component: list[BeamElement]) -> tuple[float, int]:
+            nodes = {elem.node_i for elem in component} | {elem.node_j for elem in component}
+            z_vals = [float(node_xyz[node, 2]) for node in nodes if 0 <= node < node_xyz.shape[0]]
+            z_span = max(z_vals) - min(z_vals) if z_vals else 0.0
+            return z_span, len(component)
+
+        candidate_elements = max(components, key=component_score)
+        if len(candidate_elements) <= 80:
+            return candidate_elements
+
+    z_by_node = {elem.node_i: float(node_xyz[elem.node_i, 2]) for elem in candidate_elements}
+    z_by_node.update({elem.node_j: float(node_xyz[elem.node_j, 2]) for elem in candidate_elements})
     start = min(z_by_node, key=z_by_node.get)
     target = max(z_by_node, key=z_by_node.get)
+    candidate_ids = {elem.elem_id for elem in candidate_elements}
 
     parent: dict[int, tuple[int, BeamElement | None]] = {start: (-1, None)}
     queue = [start]
@@ -128,13 +161,15 @@ def _select_vertical_chain_elements(
         if current == target:
             break
         for neighbor, elem in adjacency.get(current, []):
+            if elem.elem_id not in candidate_ids:
+                continue
             if neighbor in parent:
                 continue
             parent[neighbor] = (current, elem)
             queue.append(neighbor)
 
     if target not in parent:
-        return elements[: min(80, len(elements))]
+        return candidate_elements[: min(80, len(candidate_elements))]
 
     chain: list[BeamElement] = []
     node = target
@@ -413,6 +448,7 @@ def solve_mgt_beam_mesh_3d_global(
         elem_material_id=elem_material_id,
         max_elements=max_elements,
     )
+    raw_beam_element_count = len(elements)
     if len(elements) < 8:
         return {
             "status": "blocked",
@@ -475,6 +511,7 @@ def solve_mgt_beam_mesh_3d_global(
             )
         )
     n_nodes = len(used_nodes)
+    partial_connected_component_mesh = raw_beam_element_count >= 8 and len(elements) < 8
     real_coverage_pct = _real_section_property_coverage_pct(
         elements,
         section_props=section_props,
@@ -694,8 +731,13 @@ def solve_mgt_beam_mesh_3d_global(
         except np.linalg.LinAlgError:
             pass
 
-    if converged and used_real_section_properties and solve_mode == "mgt_npz_beam_mesh_3d_global_newton":
-        solve_mode = "mgt_npz_beam_mesh_3d_real_section"
+    if converged and solve_mode == "mgt_npz_beam_mesh_3d_global_newton":
+        if used_real_section_properties and partial_connected_component_mesh:
+            solve_mode = "mgt_npz_beam_mesh_3d_real_section_connected_component"
+        elif used_real_section_properties:
+            solve_mode = "mgt_npz_beam_mesh_3d_real_section"
+        elif partial_connected_component_mesh:
+            solve_mode = "mgt_npz_beam_mesh_3d_global_connected_component"
 
     ux = u[0::DOF_PER_NODE]
     uz = u[1::DOF_PER_NODE]
@@ -705,23 +747,36 @@ def solve_mgt_beam_mesh_3d_global(
     max_drift_pct = float(np.max(np.maximum(drift_from_ux, drift_from_uz)))
     base_shear_kn = float(np.sum(np.abs(f_ext[1::DOF_PER_NODE])) / 1000.0) if converged else 0.0
     top_disp_m = float(np.max(np.hypot(ux, uz)))
+    representative_component_nonlinear_equilibrium = bool(
+        converged
+        and solve_mode
+        in {
+            "mgt_npz_beam_mesh_3d_global_newton",
+            "mgt_npz_beam_mesh_3d_real_section",
+            "mgt_npz_beam_mesh_3d_global_connected_component",
+            "mgt_npz_beam_mesh_3d_real_section_connected_component",
+        }
+    )
+    nonlinear_equilibrium = bool(
+        representative_component_nonlinear_equilibrium and not partial_connected_component_mesh
+    )
 
     return {
-        "status": "ready" if converged else "warn",
+        "status": "warn" if converged and partial_connected_component_mesh else ("ready" if converged else "warn"),
         "converged": converged,
         "solve_mode": solve_mode,
-        "nonlinear_equilibrium": bool(
-            converged
-            and solve_mode in {"mgt_npz_beam_mesh_3d_global_newton", "mgt_npz_beam_mesh_3d_real_section"}
-        ),
+        "nonlinear_equilibrium": nonlinear_equilibrium,
+        "representative_component_nonlinear_equilibrium": representative_component_nonlinear_equilibrium,
         "used_real_section_properties": used_real_section_properties,
         "real_section_property_coverage_pct": real_coverage_pct,
+        "partial_connected_component_mesh": partial_connected_component_mesh,
         "use_improved_newton": bool(use_improved_newton),
         "lateral_load_scale": lateral_scale,
         "newton_converged_at_load_step": newton_converged_at_load_step,
         "newton_iterations_total": int(newton_iterations_total),
         "fell_back_to_linear_tangent": bool(fell_back_to_linear_tangent),
         "mesh_fingerprint": {
+            "raw_beam_elements_available": raw_beam_element_count,
             "beam_elements_solved": len(elements),
             "nodes_in_submesh": n_nodes,
             "dof_count": n_dof,
@@ -734,5 +789,6 @@ def solve_mgt_beam_mesh_3d_global(
             "residual_inf": iteration_log[-1]["residual_inf"] if iteration_log else 0.0,
         },
         "newton_iteration_log": iteration_log,
+        "limitations": ["partial_connected_component_mesh"] if partial_connected_component_mesh else [],
         "blockers": [] if converged else ["global_beam_newton_not_converged"],
     }

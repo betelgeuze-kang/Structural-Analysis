@@ -260,6 +260,7 @@ def _select_residual_element_block_rows(
     elem_type_code: np.ndarray | None = None,
     target_element_count: int,
     neighbor_depth: int = 0,
+    allowed_element_type_codes: set[int] | None = None,
     dof_per_node: int = DOF_PER_NODE,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     if (
@@ -286,10 +287,22 @@ def _select_residual_element_block_rows(
     element_type_counts: dict[str, int] = {}
     node_to_elements: dict[int, set[int]] = {}
     element_count = int(conn_ptr.size - 1)
+    allowed_types = (
+        {int(value) for value in allowed_element_type_codes}
+        if allowed_element_type_codes is not None
+        else None
+    )
     for element_index in range(element_count):
         start = int(conn_ptr[element_index])
         end = int(conn_ptr[element_index + 1])
         if start < 0 or end < start or end > int(conn_idx.size):
+            continue
+        element_type = (
+            int(elem_type_code[element_index])
+            if elem_type_code is not None and element_index < int(elem_type_code.size)
+            else None
+        )
+        if allowed_types is not None and element_type not in allowed_types:
             continue
         nodes = sorted({int(node) for node in conn_idx[start:end].tolist()})
         rows = sorted({row for node in nodes for row in node_to_rows.get(node, [])})
@@ -371,6 +384,7 @@ def _select_residual_element_block_rows(
         ),
         "candidate_element_type_counts": element_type_counts,
         "selected_element_type_counts": selected_element_type_counts,
+        "allowed_element_type_codes": sorted(allowed_types) if allowed_types is not None else None,
     }
 
 
@@ -772,6 +786,18 @@ def run_mgt_direct_residual_newton_probe(
             last_correction_inf = (
                 float(np.max(np.abs(correction_free))) if correction_free.size else 0.0
             )
+            current_max_abs = max(
+                float(np.max(np.abs(current_u))) if current_u.size else 0.0,
+                1.0e-9,
+            )
+            gate_limited_alpha = (
+                0.95
+                * float(relative_increment_tolerance)
+                * current_max_abs
+                / last_correction_inf
+                if last_correction_inf > 0.0
+                else 0.0
+            )
             min_alpha = min(float(value) for value in alpha_values) if alpha_values else 0.0
             max_alpha = max(float(value) for value in alpha_values) if alpha_values else 0.0
             directional_jacobian_meta: dict[str, Any] = {
@@ -843,8 +869,15 @@ def run_mgt_direct_residual_newton_probe(
                 else:
                     directional_jacobian_meta["reason"] = "free_dof_set_changed"
             iteration_alpha_rows = _unique_positive_alphas(
-                [("configured_trust_region", float(value)) for value in alpha_values] + dynamic_alphas,
-                min_alpha=min_alpha,
+                [("configured_trust_region", float(value)) for value in alpha_values]
+                + [
+                    ("trust_region_gate_limited", gate_limited_alpha),
+                    ("trust_region_half_gate_limited", 0.5 * gate_limited_alpha),
+                ]
+                + dynamic_alphas,
+                min_alpha=min(min_alpha, gate_limited_alpha, 0.5 * gate_limited_alpha)
+                if gate_limited_alpha > 0.0
+                else min_alpha,
                 max_alpha=max_alpha,
             )
             directional_jacobian_meta["candidate_alphas"] = [
@@ -854,7 +887,7 @@ def run_mgt_direct_residual_newton_probe(
             candidate_vectors: list[np.ndarray] = []
             for alpha_source, alpha in iteration_alpha_rows:
                 candidate_u = current_u + float(alpha) * correction
-                _k, _f, _free, candidate_residual, candidate_rhs, _meta = assemble_residual(
+                _k, _f, candidate_free, candidate_residual, candidate_rhs, _meta = assemble_residual(
                     candidate_u,
                     external_load_override=reference_f_ext,
                 )
@@ -864,6 +897,10 @@ def run_mgt_direct_residual_newton_probe(
                 increment = float(np.max(np.abs(candidate_u - current_u))) if candidate_u.size else 0.0
                 max_abs = max(float(np.max(np.abs(candidate_u))) if candidate_u.size else 0.0, 1.0e-9)
                 metrics = _translation_metrics(candidate_u, node_xyz)
+                free_is_stable = bool(
+                    candidate_free.shape == current_free.shape
+                    and np.array_equal(candidate_free, current_free)
+                )
                 row = {
                     "iteration": int(iteration),
                     "alpha_source": alpha_source,
@@ -876,6 +913,7 @@ def run_mgt_direct_residual_newton_probe(
                     "max_translation_m": metrics["max_translation_m"],
                     "residual_gate_passed": bool(residual_inf <= residual_tolerance_n),
                     "relative_increment_gate_passed": bool(increment / max_abs <= relative_increment_tolerance),
+                    "free_dof_set_stable": free_is_stable,
                 }
                 iteration_rows.append(row)
                 candidate_rows.append(row)
@@ -884,24 +922,40 @@ def run_mgt_direct_residual_newton_probe(
                 enumerate(iteration_rows),
                 key=lambda item: float(item[1]["direct_residual_inf_n"]),
             )
-            accepted = bool(float(best_row["direct_residual_inf_n"]) < start_residual_inf)
+            gate_eligible_rows = [
+                (index, row)
+                for index, row in enumerate(iteration_rows)
+                if bool(row.get("relative_increment_gate_passed"))
+                and bool(row.get("free_dof_set_stable", True))
+            ]
+            best_gate_index, best_gate_row = min(
+                gate_eligible_rows,
+                key=lambda item: float(item[1]["direct_residual_inf_n"]),
+                default=(None, None),
+            )
+            accepted = bool(
+                best_gate_row is not None
+                and float(best_gate_row["direct_residual_inf_n"]) < start_residual_inf
+            )
             trust_iterations.append(
                 {
                     "iteration": int(iteration),
                     "start_direct_residual_inf_n": start_residual_inf,
                     "regularization": float(regularization),
                     "correction_inf_m": last_correction_inf,
+                    "gate_limited_alpha": float(gate_limited_alpha),
                     "linear_solve_seconds": float(solve_seconds),
                     "directional_residual_jacobian": directional_jacobian_meta,
                     "candidate_rows": iteration_rows,
                     "best_candidate": best_row,
+                    "best_gate_eligible_candidate": best_gate_row,
                     "accepted": accepted,
                 }
             )
             if not accepted:
                 break
             accepted_count += 1
-            current_u = candidate_vectors[best_index]
+            current_u = candidate_vectors[int(best_gate_index)]
             (
                 current_stiffness,
                 _current_f_ext,
@@ -915,9 +969,7 @@ def run_mgt_direct_residual_newton_probe(
             )
             accepted_state_history.append(np.asarray(current_u, dtype=np.float64).copy())
             accepted_residual_history.append(np.asarray(current_residual, dtype=np.float64).copy())
-            if current_residual_inf <= residual_tolerance_n and bool(
-                best_row.get("relative_increment_gate_passed")
-            ):
+            if current_residual_inf <= residual_tolerance_n and best_gate_row is not None:
                 break
 
         secant_subspace_globalization: dict[str, Any] = {
@@ -2562,6 +2614,7 @@ def run_mgt_direct_residual_newton_probe(
                 "largest_rows",
                 "residual_node_blocks",
                 "residual_element_blocks",
+                "residual_frame_element_blocks",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
@@ -2630,7 +2683,10 @@ def run_mgt_direct_residual_newton_probe(
                             dof_per_node=DOF_PER_NODE,
                         )
                         actual_target_count = int(target_rows.size)
-                    elif target_mode == "residual_element_blocks":
+                    elif target_mode in {
+                        "residual_element_blocks",
+                        "residual_frame_element_blocks",
+                    }:
                         target_rows, target_meta = _select_residual_element_block_rows(
                             current_residual,
                             current_free,
@@ -2640,6 +2696,9 @@ def run_mgt_direct_residual_newton_probe(
                             elem_type_code=elem_type_code,
                             target_element_count=int(target_row_count),
                             neighbor_depth=element_neighbor_depth,
+                            allowed_element_type_codes={1}
+                            if target_mode == "residual_frame_element_blocks"
+                            else None,
                             dof_per_node=DOF_PER_NODE,
                         )
                         actual_target_count = int(target_rows.size)
@@ -3762,13 +3821,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--current-tangent-residual-row-target-mode",
-        choices=("largest_rows", "residual_node_blocks", "residual_element_blocks"),
+        choices=(
+            "largest_rows",
+            "residual_node_blocks",
+            "residual_element_blocks",
+            "residual_frame_element_blocks",
+        ),
         default="largest_rows",
         help=(
             "Target selection mode for current-tangent row correction. largest_rows uses scalar "
             "residual rows; residual_node_blocks selects high-residual nodes and targets every "
             "free DOF row on those nodes; residual_element_blocks selects high-residual "
-            "mesh elements and targets every free DOF row on their connected nodes."
+            "mesh elements and targets every free DOF row on their connected nodes; "
+            "residual_frame_element_blocks restricts element seeds to frame elements."
         ),
     )
     parser.add_argument(

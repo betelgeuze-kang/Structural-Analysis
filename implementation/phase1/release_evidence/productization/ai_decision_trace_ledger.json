@@ -1,0 +1,912 @@
+{
+  "schema_version": "ai-decision-trace-ledger.v1",
+  "generated_at": "2026-06-09T15:42:17.552932+00:00",
+  "status": "ready",
+  "proposal_count": 20,
+  "source_change_count": 20,
+  "trace_complete": true,
+  "solver_replay_ready": true,
+  "proxy_replay_ready": true,
+  "final_report_promotion_requires": [
+    "solver_replay_passed",
+    "code_check_replay_passed",
+    "cost_provenance_attached",
+    "human_review_recorded"
+  ],
+  "pareto_context": {
+    "research_pareto_archive_ready": true,
+    "pareto_front_count": 3,
+    "production_pareto_wired": false
+  },
+  "proposal_traces": [
+    {
+      "proposal_id": "AI-PROP-0001",
+      "input_hash": "4d8d4daa3f3bbd6aeab65737f151299895fe8e61ccbfe10ec4834c2f1ccc9990",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:intermediate:nogroup:slab:SB1500X800:rebar_down",
+      "state_hash": "724d0f8b3326e142bb2ddea94d942676e7c7ad3219701a03b8511deb9bcc6f27",
+      "before_state_hash": "31e7311405378383b93398a74761eda001003daa001228b4561cba00f47276bf",
+      "after_state_hash": "3347cacf98b6d5c97690cb16a06d13ae788f334532e9e6eefd6e44ea6519c613",
+      "reward_components": {
+        "cost_proxy_delta": -154.37520000000006,
+        "max_dcr_after": 0.3504439952397963,
+        "governing_dcr_after": 1.2462441211956519,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.020000000000000018,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -440.5131835526719,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0002",
+      "input_hash": "ae9851aa02f259c81c8bc39fe182a966a455e341e00b4948fba8664c18c8fd1a",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S03:perimeter:nogroup:slab:SB1500X800:rebar_down",
+      "state_hash": "ab062b52ff7e86fd5b82604115afb43cedfa53eb5fab50bfd4d44501f5dfd24f",
+      "before_state_hash": "ca8e3402901595e728715e11976fdf7c820e13f666e5b5ea7cb22d64e3c38de5",
+      "after_state_hash": "8da0b8acece1291a489d9d2607e89d0f1aac2649a23c222f5fe61ec474784981",
+      "reward_components": {
+        "cost_proxy_delta": -154.37519999999995,
+        "max_dcr_after": 0.5501960651847766,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.020000000000000018,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -280.5821592856265,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0003",
+      "input_hash": "e7280275d9926d3c544afafc2c0c600ea3d15c6bd2f4bb939ac581a4132be8db",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S05:perimeter:2:column:P 50x4:perimeter_frame_down",
+      "state_hash": "228ac9cc571ac48ccdf329b9f2ccbeb4cfcd10145840a3cffd6960aeeb788d15",
+      "before_state_hash": "8a39240ec623d814bd6565b618f1401f7e2e64d468d65dcadac0e7bfb339de00",
+      "after_state_hash": "018a0552744e7ce78d20c459cb74009a21a9ccae5dfae23ac4b44a3ef9c27ad2",
+      "reward_components": {
+        "cost_proxy_delta": -47.99385600000005,
+        "max_dcr_after": 0.2387686827357232,
+        "governing_dcr_after": 1.3097713172543999,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.028000000000000025,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [
+        "S05:perimeter:2:column:P 50x4:connection_detailing_down",
+        "S05:perimeter:2:column:P 50x4:rebar_down",
+        "S05:perimeter:2:column:P 50x4:detailing_down"
+      ],
+      "rejected_alternatives": [
+        {
+          "action_name": "connection_detailing_down",
+          "block_reason": "no_cost_gain",
+          "detail": "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+        },
+        {
+          "action_name": "rebar_down",
+          "block_reason": "accepted_candidate",
+          "detail": "trial_cost=147048.8049;current_cost=147096.7988;projected_cost_delta=47.993856;trial_max_dcr=0.9857;trial_drift=1.9872;trial_residual=0.3740"
+        },
+        {
+          "action_name": "detailing_down",
+          "block_reason": "no_cost_gain",
+          "detail": "trial_cost=147101.9781;current_cost=147096.7988;projected_cost_delta=-5.179337"
+        }
+      ],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -56.350258182059775,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0004",
+      "input_hash": "06b8a7255a8f52028315f01d52178e54f5d564b00c585d0e751c8623d3920e5a",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:perimeter:1:slab:default:slab_thickness_down",
+      "state_hash": "2bcc7a22410d1a57a04febf4f2e90f574f5561298a249f6ccad3ca2a1fc23291",
+      "before_state_hash": "343590e9497f095a97b57a014aea9f82d3c9699ea329522962cc2f059d834991",
+      "after_state_hash": "d2a30f64819cf7d5ed879ff636586f6cf3e99b0198cf6a1cba665d2196617ec7",
+      "reward_components": {
+        "cost_proxy_delta": -14.870647765957415,
+        "max_dcr_after": 0.41903523089535444,
+        "governing_dcr_after": 0.0,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.04000000000000001,
+        "detailing_complexity_delta": -0.016
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [
+        "S04:perimeter:1:slab:default:rebar_down",
+        "S04:perimeter:1:slab:default:detailing_down"
+      ],
+      "rejected_alternatives": [
+        {
+          "action_name": "rebar_down",
+          "block_reason": "accepted_candidate",
+          "detail": "trial_cost=146993.8820;current_cost=147096.7988;projected_cost_delta=102.916800;trial_max_dcr=0.9332;trial_drift=1.9872;trial_residual=0.3740"
+        },
+        {
+          "action_name": "detailing_down",
+          "block_reason": "accepted_candidate",
+          "detail": "trial_cost=147093.8583;current_cost=147096.7988;projected_cost_delta=2.940480;trial_max_dcr=0.9332;trial_drift=1.9872;trial_residual=0.3740"
+        }
+      ],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -35.48782219142585,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0005",
+      "input_hash": "3451a1dd0e2d499c7e3ac91d1ca8363a718fb9da3cefd3ade8c66cb47cc233db",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S02:perimeter:nogroup:slab:SB1500X800:wall_thickness_down",
+      "state_hash": "ea9418b794fa6fbc12560770b1b6893ef8c1905facf7812185729b9b1c0843e4",
+      "before_state_hash": "089aa7c3a69fa18ee37fb959895c043f04e079f39ac1acd754dc1cdeb44db919",
+      "after_state_hash": "eff7159987f9ad5e631e77267e03ce8a20853c3c5d264e864953dbd737f30e66",
+      "reward_components": {
+        "cost_proxy_delta": -13.202751374791887,
+        "max_dcr_after": 0.9760890694325534,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.10200000000000009,
+        "detailing_complexity_delta": -0.03600000000000003
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -13.526174801309137,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0006",
+      "input_hash": "657622e30b6a231c4bff9cd537f3b8553792980d7a9f15aff32947d3b55fbd63",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S03:intermediate:nogroup:slab:SB800X3002.00:wall_thickness_down",
+      "state_hash": "cdae3d53e6b7cfc03a58bab47ea7830b51c3872a6cae7220ca3c5b8bfbcf28ca",
+      "before_state_hash": "9991bbbd6fda8fde2970ff5e0537683bedab5caebf91e7345ef4764c44a4a4eb",
+      "after_state_hash": "31ffbcfccf3c6796baed20c6d67e5fa3473dbcb336ee152add1b118195c9e31a",
+      "reward_components": {
+        "cost_proxy_delta": -4.339249999999993,
+        "max_dcr_after": 0.4871478485287804,
+        "governing_dcr_after": 1.2462441211956519,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.03400000000000003,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -8.907460051614356,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0007",
+      "input_hash": "d942f2b354545231e783b5051aabe464f5ef85e76dc40925885f52c92d9dbd74",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:intermediate:nogroup:slab:SB800X3002.00:wall_thickness_down",
+      "state_hash": "7ebf4cfcd5279bf8133767c91b74bcb52ea8eafaac7eab29cb10ff6a3561d9fe",
+      "before_state_hash": "7cd2fd97e2dd4b238fcbf84c32f3f8785e0deddb6e77eda6a1a2f4e2491638ca",
+      "after_state_hash": "665aa3e4fcea623a5ababea3cf4a5040d96042cb9f5083596b81ae08e805fc77",
+      "reward_components": {
+        "cost_proxy_delta": -4.339249999999993,
+        "max_dcr_after": 0.41160981012878034,
+        "governing_dcr_after": 1.2462441211956519,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.03400000000000003,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -10.542144266781134,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0008",
+      "input_hash": "24a02dcb48a89649338672761c14b6bf6e2ce07ddb0c2d24e912feb58ca987a5",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S06:intermediate:nogroup:slab:SB800X3002.00:wall_thickness_down",
+      "state_hash": "01bd5afdc4eb2d8bf4cd5622cc003bb8145c201ad0d33b38f9ec6f6ba6a24e0a",
+      "before_state_hash": "e9b83f1b529efb7c02fb8ed74c733d795eae7cd51cbc9eaf62052a6bd0c5155d",
+      "after_state_hash": "9963d900e1d10f11b088e8d89819a9e51d3c7d2794648263e04a5642dfdb822f",
+      "reward_components": {
+        "cost_proxy_delta": -4.339249999999993,
+        "max_dcr_after": 0.4552076437802751,
+        "governing_dcr_after": 1.2462441211956519,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.03400000000000003,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -9.532462952433443,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0009",
+      "input_hash": "97f2af4f482748ff81ccdc30ee6d4ba58bba67bd916888280dfda533cb7939ed",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S07:intermediate:nogroup:slab:SB1500X800:wall_thickness_down",
+      "state_hash": "b467e4718c4f8644dbb4328976e2cb4d2b825bb67a4de01544bf857cf2801f7e",
+      "before_state_hash": "0322cd43866c46560172a2e588df95a1d200590460de544cc48e528e82d13af9",
+      "after_state_hash": "a083da4bfddcbf4a1d48b58f245f028aeb32864b9ab45c14c12d41ff4eb0f357",
+      "reward_components": {
+        "cost_proxy_delta": -4.339249999999993,
+        "max_dcr_after": 0.4552076437802751,
+        "governing_dcr_after": 1.2462441211956519,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.03400000000000003,
+        "detailing_complexity_delta": -0.01200000000000001
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -9.532462952433443,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0010",
+      "input_hash": "ff8d1195b2c9580411c204e753a136eb151bf92a38741d8c6fd5e013cb4e69ff",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S03:perimeter:nogroup:slab:default:detailing_down",
+      "state_hash": "ce3b2dc845c39aeb1935479e109634c9088aaec4cd54bb495763d42af7719485",
+      "before_state_hash": "0006b441a8120f3bcbbdfb21feeff80e52e19ab1dab85b40a6030d7d925a6e78",
+      "after_state_hash": "688d53f8983cfd0c595520e2b4f69455d5c3baa048d409fa9deccab32b4bc38d",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5501960651847768,
+        "governing_dcr_after": 1.1156852132608692,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.06000000000000005
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.3444220816309445,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0011",
+      "input_hash": "c31f50672f1c2954c924c3b2655b06d253581cb961e01ee43b7466e238a8572e",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:perimeter:nogroup:slab:SB1500X800:detailing_down",
+      "state_hash": "c79a4c7dabcad0762a015fde98dd560afe5b8f2ea2d7dcf72b30c8189cb0fdda",
+      "before_state_hash": "b3747de8582ee3e6436795f027571f5158cc940092b4c7d47adda84af8a75764",
+      "after_state_hash": "6fb2576efe338d1998fbf9c14f3fa6d101411ab9bd74499e6536cbdce8ba055d",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5069535770461602,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.800294411833763,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0012",
+      "input_hash": "c8d68d4333668dc8c0a396514eac9f1e6a4467e4f91b775320bed72eb1b83cf2",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:perimeter:nogroup:slab:default:detailing_down",
+      "state_hash": "70017924a9cb06a2a61f76dc66fb42085b692cf93f60963f9b859f21d404b49e",
+      "before_state_hash": "c17101bbd7fea7d65e9a3a3b715011a58747ecd933cdb48d5c0401865d3b921c",
+      "after_state_hash": "8655092279c92d539f47b08045aeef053d87b72870fce5663fb4afe80d0a6271",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5069535770461602,
+        "governing_dcr_after": 1.1156852132608692,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.06000000000000005
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.800294411833763,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0013",
+      "input_hash": "a041124e50f9b02b949801a97ced7d4af9dbd29978c8ff4880950099045cd438",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S06:perimeter:nogroup:slab:SB1500X800:detailing_down",
+      "state_hash": "2a6af645bc01f1130b5cf3e73c48638fc16e0cf4a80cc6fb65002db4cf7c9fe8",
+      "before_state_hash": "cc10ab1101b9878da983a922ed67764ca18344108abf983aff172bda120ca30d",
+      "after_state_hash": "b54f13317f9f10e09a08bd2468abd3daebd0c400e439dabee983b6ef1e2b69a7",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5501960651847768,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.06000000000000005
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.3444220816309445,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0014",
+      "input_hash": "eac0848a50da966fab171c5ce3b652f54c474eb3ae5a88af4d56b853cfbf45b1",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S07:perimeter:nogroup:slab:SB1500X800:detailing_down",
+      "state_hash": "7faf58e25530aee8500061537e8145ae87ef1c918ab1ef3cb9b745909702a63b",
+      "before_state_hash": "faf0ad2cccc32cabd90c4d62c846025e30e2e3bac52192b17896c4337a8be33b",
+      "after_state_hash": "70849bd244f686e9c36fa994c4e46aa7f7943bc53067e89ea03e9aace28130d2",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5501960651847768,
+        "governing_dcr_after": 1.1714694739239129,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.06000000000000005
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.3444220816309445,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0015",
+      "input_hash": "18e330eaa6c2447fe03796d3abbcb9569249a7324ffe3edca727c86c4d6ff338",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S08:perimeter:nogroup:slab:SB1500X800:detailing_down",
+      "state_hash": "37239faade0bc1eab479207a6e9e400d1bf035190eaf53f2db92475b1b777302",
+      "before_state_hash": "ed9db67e858ddd1fa9e78210318e5c9b304336d18784a841f07c7cbd0166760a",
+      "after_state_hash": "7c9d6d914f82d72464b7731fa520984992874ac0b58bfcbefd94450f9b1ada99",
+      "reward_components": {
+        "cost_proxy_delta": -2.9404799999999796,
+        "max_dcr_after": 0.5043428600582276,
+        "governing_dcr_after": 1.101181305488478,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.06000000000000005
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-MOMENT-Y-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [
+        "S08:perimeter:nogroup:slab:SB1500X800:wall_thickness_down",
+        "S08:perimeter:nogroup:slab:SB1500X800:rebar_down"
+      ],
+      "rejected_alternatives": [
+        {
+          "action_name": "wall_thickness_down",
+          "block_reason": "accepted_candidate",
+          "detail": "trial_cost=147092.4595;current_cost=147096.7988;projected_cost_delta=4.339250;trial_max_dcr=0.9332;trial_drift=1.9872;trial_residual=0.3740"
+        },
+        {
+          "action_name": "rebar_down",
+          "block_reason": "accepted_candidate",
+          "detail": "trial_cost=146942.4236;current_cost=147096.7988;projected_cost_delta=154.375200;trial_max_dcr=0.9332;trial_drift=1.9872;trial_residual=0.3740"
+        }
+      ],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -5.830319476834656,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0016",
+      "input_hash": "77675e816fc9803176675e4ed7cb9e1a9b0df305d1dde9de01201c581c5dae80",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:transfer:nogroup:beam:SB800X7001.82:connection_detailing_down",
+      "state_hash": "6b1296edb5d0a0109a3b2ef81587a4a280f8e93a8b392042ea1d8b9f0930833e",
+      "before_state_hash": "a87e965bcdb7a2db9607a91b41017f5d6cbfd149a4ca2e33a797b4717887c759",
+      "after_state_hash": "d7ddeaf5916594878553cef0a2c0f070a43a41b2b6385caaa7a9fcda73603217",
+      "reward_components": {
+        "cost_proxy_delta": 1.7316556799999887,
+        "max_dcr_after": 0.3521714054408085,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-SVC-DRIFT-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -11.8695941952688,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0017",
+      "input_hash": "b106fb4aeac48194debc538184260fdfa39ca9c579b5706614d7f038c24bf721",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:transfer:nogroup:beam:SB800X7001.95:connection_detailing_down",
+      "state_hash": "24d60fabb5a748ae683f2d29b3ddf516409f0204866e6d7909421f31c8346d8b",
+      "before_state_hash": "9b8e1b6b1827ae11c8f042fc6c5a458a25af6c249378238577e47f0ba1129e61",
+      "after_state_hash": "e063e06ebd758c316383214c11306909956be69fea5102fd6b4a59da27d8d293",
+      "reward_components": {
+        "cost_proxy_delta": 1.7316556799999887,
+        "max_dcr_after": 0.35217140544080866,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-SVC-DRIFT-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -11.869594195268814,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0018",
+      "input_hash": "e0fff8e592fea7d73f687be5e712188021a7f6fccf27868025b5281f2c5b7317",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:transfer:nogroup:beam:SB800X7002.00:connection_detailing_down",
+      "state_hash": "d580a572ad207a62cdba6901c3258dcb8acc4d493df74e193941315a426bae8a",
+      "before_state_hash": "2ae36d5839341e96769e2628e3d729eb96cfb7eb08f6838bc1dd7d793b658835",
+      "after_state_hash": "4f5564093f4990805fb0a776a1028c00c83b40b5ab8eedf8dde2ec6491696a63",
+      "reward_components": {
+        "cost_proxy_delta": 1.7316556799999887,
+        "max_dcr_after": 0.35217140544080855,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-SVC-DRIFT-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -11.869594195268805,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0019",
+      "input_hash": "700a661f8d01310750f9b1472ef4d261bb01c5b32e9e87ff02c43897ea59bb95",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:transfer:nogroup:beam:SB800X8002.00:connection_detailing_down",
+      "state_hash": "cdd6c5d3d03bad0a2a762b59032818c7e4209fcaded642cd13c1da8e676f0045",
+      "before_state_hash": "6f2186591ff20aad296a8d37f01263150a33fa5f49a16be72740c5aab3d63427",
+      "after_state_hash": "d32d7126f3ee1034eb8e466a477c6c2e5e7aae8b2aeaafea2765dd33bc375539",
+      "reward_components": {
+        "cost_proxy_delta": 1.7316556799999887,
+        "max_dcr_after": 0.35217140544080844,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-SVC-DRIFT-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -11.869594195268796,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    },
+    {
+      "proposal_id": "AI-PROP-0020",
+      "input_hash": "6309d308325f523ba712f1c8e91fcf24bb46e24ead1b49aa459a4582507af76f",
+      "model_or_policy_version": "deterministic-greedy-optimization-policy.v1",
+      "action_id": "S04:transfer:nogroup:beam:SB800X9001.75:connection_detailing_down",
+      "state_hash": "c13ba42cbd2c02e9ea90e138406366aad204ab77e0749787581294f341570bb5",
+      "before_state_hash": "3ad518fa51929c9c57ea3b7313f1f79b9da1b0fdd056301a3d568bcb4c205ba7",
+      "after_state_hash": "0417dd1765e0ff07b1d754e922bc7a8c09da9e522c42b5874edc708359b7ddad",
+      "reward_components": {
+        "cost_proxy_delta": 1.7316556799999887,
+        "max_dcr_after": 0.35217140544080844,
+        "governing_dcr_after": 1.2905454545454547,
+        "drift_after_pct": 1.9872000000000005,
+        "residual_after_pct": 0.37399104000000005,
+        "constructability_delta": -0.07200000000000001,
+        "detailing_complexity_delta": -0.05999999999999994
+      },
+      "constraint_vector": {
+        "selection_gate": "hard_gate_pass",
+        "governing_clause": "KDS-SVC-DRIFT-001",
+        "max_governing_dcr_limit": 1.35,
+        "proxy_divergence_count": 0,
+        "story_reanalysis_status": "pass",
+        "post_reanalysis_status": "pass_with_story_proxy_check"
+      },
+      "solver_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+      "proxy_replay_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+      "code_check_artifact": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "rejected_alternative_ids": [],
+      "rejected_alternatives": [],
+      "sensitivity": {
+        "cost_delta_per_dcr_delta": -11.869594195268796,
+        "drift_delta_pct": 0.0,
+        "residual_delta_pct": 0.0
+      },
+      "human_decision": {
+        "state": "engineer_review_required",
+        "reviewer": "",
+        "decision_at": "",
+        "note": "Automatic proposal cannot be final-report promoted before engineer review."
+      }
+    }
+  ],
+  "blockers": []
+}

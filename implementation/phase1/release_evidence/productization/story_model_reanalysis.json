@@ -1,7 +1,7 @@
 {
   "story_model_reanalysis": {
     "schema_version": "story-model-reanalysis-receipt.v1",
-    "generated_at": "2026-05-31T09:13:43.842078+00:00",
+    "generated_at": "2026-06-05T13:35:49.687510+00:00",
     "status": "pass",
     "claim": "Reduced story shear-building reanalysis on optimization terminal state; not licensed approval.",
     "state_npz_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/design_optimization/design_optimization_solver_loop_state.npz",

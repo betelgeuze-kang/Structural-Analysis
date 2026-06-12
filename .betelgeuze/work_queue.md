@@ -144,6 +144,8 @@
 - Add Drawing Force Vector Evidence to the drawing handoff rail so selected load-combination force rows render as axial/shear/moment/check SVG vectors beside the active drawing sheet with D/C, source-backed count, material-lock receipt, and member/combination focus behavior.
 - Regenerate the optimized single-file viewer and workstation package; dense browser state now shows Drawing Force Vector Evidence ready with schema `structure-viewer-drawing-force-vector-evidence.v1`, rowCount>=3, renderedRows=rowCount, SVG count=rowCount, selected-combination/member sync, active-sheet sync, source-backed count>=1, materialLocked=true, browser state sync, vector kinds include axial/shear/moment, and overflow=0; package smoke now reports `marker_count=86/86`.
 - Compact `.betelgeuze/trace.jsonl` so source-boundary footprint stays below the 10MiB PR gate and independent readiness remains blocked only by EB/RH.
+- Add semantic material layer controls so the left rail shows Structure, Material families, and Material laws rather than only Beam/Shell; source browser smoke verifies layer count > 2, material-family/material-law groups, Concrete/Steel/Bilinear model labels, and zero layer overflow.
+- Add drawing clean workflow and Drawing Sheet Force Overlay so the Drawings tab opens `#drawing-handoff-section`, hides stage analysis callouts/glyphs/contours by default, and renders active-sheet source-backed force vectors; delivery viewer smoke now reports `marker_count=89/89` with static=true browser=true and latest package job `20260529T221424-bd376eaf7819ec28`.
 
 ## Next
 

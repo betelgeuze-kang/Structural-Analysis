@@ -1,0 +1,157 @@
+{
+  "schema_version": "ml-surrogate-drift-guard-receipt.v1",
+  "generated_at": "2026-06-09T15:37:57.685227+00:00",
+  "status": "guard_fired",
+  "drift_guard_decision": "disarm_recommended",
+  "production_ml_wired": true,
+  "forced_disabled": false,
+  "drift_multiplier": 1.5,
+  "source": {
+    "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+    "validation_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+    "ood_gate_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/ood_gate.json",
+    "solver_fallback_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json",
+    "live_shadow_metrics_provided": true
+  },
+  "gate": {
+    "schema_version": "ml-surrogate-production-gate.v1",
+    "generated_at": "2026-06-09T15:37:57.685676+00:00",
+    "opt_in_env": "PHASE1_ML_SURROGATE_OPT_IN",
+    "checkpoint_env": "PHASE1_ML_SURROGATE_CHECKPOINT",
+    "disable_env": "PHASE1_ML_SURROGATE_DISABLE",
+    "opt_in_enabled": false,
+    "forced_disabled": false,
+    "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+    "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+    "checkpoint_ready": true,
+    "checkpoint_validated": true,
+    "activation_enabled": true,
+    "dataset_card_ready": true,
+    "model_card_ready": true,
+    "validation_ready": true,
+    "ood_gate_ready": true,
+    "solver_fallback_ready": true,
+    "hard_gate_bypass_prevented": true,
+    "dataset_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
+    "model_card_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
+    "validation_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+    "ood_gate_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/ood_gate.json",
+    "solver_fallback_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json",
+    "validation_summary": {
+      "train": {
+        "count": 309,
+        "mae": {
+          "max_dcr": 0.0710755971907663,
+          "member_story_drift_contribution_pct": 4.40844043264053e-10,
+          "log1p_group_cost_proxy": 1.1225377884242954e-06
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2221259686268612,
+          "member_story_drift_contribution_pct": 1.7642071636902998e-09,
+          "log1p_group_cost_proxy": 4.112836507275118e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.30127517646654633,
+          "member_story_drift_contribution_pct": 1.114850055328187e-08,
+          "log1p_group_cost_proxy": 1.2520967129781013e-05
+        }
+      },
+      "validation": {
+        "count": 116,
+        "mae": {
+          "max_dcr": 0.09359743877436073,
+          "member_story_drift_contribution_pct": 4.980363439113549e-07,
+          "log1p_group_cost_proxy": 5.0583734531162545e-05
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2875053277438434,
+          "member_story_drift_contribution_pct": 2.755915648466889e-09,
+          "log1p_group_cost_proxy": 7.128249291499245e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.8475418237792511,
+          "member_story_drift_contribution_pct": 5.77013658972364e-05,
+          "log1p_group_cost_proxy": 0.005669367004332848
+        }
+      },
+      "test": {
+        "count": 92,
+        "mae": {
+          "max_dcr": 0.10049882927974284,
+          "member_story_drift_contribution_pct": 1.2550410178183449e-06,
+          "log1p_group_cost_proxy": 0.0001250375354288021
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2809347408156612,
+          "member_story_drift_contribution_pct": 5.304854325954846e-09,
+          "log1p_group_cost_proxy": 8.756670329779232e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.40694044201888485,
+          "member_story_drift_contribution_pct": 5.7702083555710715e-05,
+          "log1p_group_cost_proxy": 0.0056696984264634764
+        }
+      }
+    },
+    "uncertainty_contract": {
+      "method": "holdout_abs_error_quantile",
+      "p95_error_targets": {
+        "max_dcr": 0.2809347408156612,
+        "member_story_drift_contribution_pct": 5.304854325954846e-09,
+        "log1p_group_cost_proxy": 8.756670329779232e-06
+      },
+      "confidence_label": "bounded_shadow"
+    },
+    "production_ml_wired": true,
+    "status": "production_ready_shadow_solver_gated",
+    "claim": "Validated ML surrogate is wired only as shadow_with_solver_fallback; it cannot promote final structural decisions without solver/code/human gates."
+  },
+  "drift_per_component": [
+    {
+      "component": "max_dcr",
+      "threshold": 0.3,
+      "baseline_test_p95": 0.2809347408156612,
+      "drift_breach_threshold": 0.4214021112234918,
+      "drift_multiplier": 1.5,
+      "live_value": 0.6,
+      "drift_breach": true
+    },
+    {
+      "component": "member_story_drift_contribution_pct",
+      "threshold": 0.0,
+      "baseline_test_p95": 5.304854325954846e-09,
+      "drift_breach_threshold": 7.957281488932269e-09,
+      "drift_multiplier": 1.5,
+      "live_value": 0.0001,
+      "drift_breach": true
+    },
+    {
+      "component": "log1p_group_cost_proxy",
+      "threshold": 0.02,
+      "baseline_test_p95": 8.756670329779232e-06,
+      "drift_breach_threshold": 1.3135005494668848e-05,
+      "drift_multiplier": 1.5,
+      "live_value": 0.01,
+      "drift_breach": true
+    }
+  ],
+  "drift_breach_count": 3,
+  "env_recommendation": {
+    "set_disable_env": true,
+    "env_var": "PHASE1_ML_SURROGATE_DISABLE",
+    "env_value": "1",
+    "rationale": "One or more drift components exceeded the configured threshold; set PHASE1_ML_SURROGATE_DISABLE=1 to force disable shadow inference in the next CI run."
+  },
+  "ood_gate_summary": {
+    "ood_pass": true,
+    "status": "pass"
+  },
+  "solver_fallback_summary": {
+    "solver_fallback_verified": true,
+    "status": "verified"
+  },
+  "claim_boundary": "Drift guard is an honest read-only evaluator of the current production ML surrogate activation state. It compares the live shadow inference metric (if provided) against the validated baseline p95, and recommends disabling via PHASE1_ML_SURROGATE_DISABLE when any component exceeds the configured threshold. It does not retroactively change any previously emitted decision; it only emits a receipt describing the current state and the recommended next action.",
+  "blockers": [
+    "drift_guard_disarm_recommended"
+  ]
+}

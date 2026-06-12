@@ -1,0 +1,35 @@
+{
+  "ci_files": [
+    ".github/workflows"
+  ],
+  "commands": {
+    "build": "npm run build",
+    "test": "pytest",
+    "typecheck": "python -m compileall ."
+  },
+  "confidence": "high",
+  "detected_files": [
+    "package.json",
+    "pyproject.toml",
+    "requirements.txt"
+  ],
+  "frameworks": [
+    "react",
+    "typescript"
+  ],
+  "generated_at": "2026-05-31T10:05:19Z",
+  "languages": [
+    "javascript/typescript",
+    "python"
+  ],
+  "missing": [
+    "no lint command discovered"
+  ],
+  "source_dirs": [
+    "src"
+  ],
+  "test_dirs": [
+    "tests"
+  ],
+  "version": "1.0"
+}

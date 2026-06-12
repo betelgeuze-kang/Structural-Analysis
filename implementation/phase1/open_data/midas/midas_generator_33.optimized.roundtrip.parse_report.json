@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "run_id": "phase1-midas-mgt-converter",
-  "generated_at": "2026-05-31T09:13:07.437071+00:00",
+  "generated_at": "2026-06-05T13:04:15.397789+00:00",
   "inputs": {
     "mgt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "json_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
@@ -280,7 +280,10 @@
       "node_count": 11355,
       "edge_count_directed": 38238,
       "element_count": 12728,
-      "elem_conn_index_count": 39576
+      "elem_conn_index_count": 39576,
+      "elem_angle_nonzero_count": 150,
+      "elem_angle_max_abs_deg": 270.0,
+      "elem_lcaxis_nonzero_count": 0
     }
   },
   "contract_pass": true,

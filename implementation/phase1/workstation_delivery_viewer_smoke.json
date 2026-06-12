@@ -1,6 +1,6 @@
 {
   "schema_version": "workstation-delivery-viewer-smoke.v1",
-  "generated_at": "2026-05-25T21:42:40.605Z",
+  "generated_at": "2026-05-29T22:14:47.414Z",
   "contract_pass": true,
   "reason_code": "PASS",
   "status": "ready",
@@ -36,8 +36,8 @@
     },
     "commercial_cockpit_alignment": {
       "status": "current_cockpit_delivery",
-      "marker_count": 86,
-      "required_marker_count_for_current_cockpit": 86,
+      "marker_count": 89,
+      "required_marker_count_for_current_cockpit": 89,
       "markers": {
         "structural_insight_title": true,
         "cockpit_polish_css": true,
@@ -123,8 +123,11 @@
         "drawing_material_curve_evidence": true,
         "drawing_force_handoff_ledger": true,
         "drawing_force_vector_evidence": true,
+        "drawing_sheet_force_overlay": true,
         "drawing_capacity_handoff_ledger": true,
-        "drawing_sheet_force_matrix": true
+        "drawing_sheet_force_matrix": true,
+        "material_layer_controls": true,
+        "drawing_clean_workflow": true
       },
       "note": "Current cockpit alignment is required for workstation delivery handoff acceptance."
     }
@@ -132,7 +135,7 @@
   "browser_checks": {
     "pass": true,
     "reason": "PASS",
-    "opened_url": "http://127.0.0.1:35223/viewer.html",
+    "opened_url": "http://127.0.0.1:33505/viewer.html",
     "viewport": {
       "width": 1440,
       "height": 1000
@@ -163,8 +166,8 @@
       "canvasHeight": 600,
       "sampleWidth": 180,
       "sampleHeight": 120,
-      "significantPixelCount": 7058,
-      "significantPixelRatio": 0.32675925925925925,
+      "significantPixelCount": 11576,
+      "significantPixelRatio": 0.5359259259259259,
       "bbox": {
         "minX": 0,
         "minY": 40,
@@ -183,8 +186,8 @@
       "nonBlank": true,
       "width": 500,
       "height": 601,
-      "significantPixelCount": 70546,
-      "significantPixelRatio": 0.2347620632279534,
+      "significantPixelCount": 104857,
+      "significantPixelRatio": 0.3489417637271215,
       "bbox": {
         "minX": 0,
         "minY": 0,

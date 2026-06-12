@@ -1,0 +1,36 @@
+{
+  "schema_version": "ai-physics-guard-contract.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "contract_ready_model_not_promoted",
+  "production_gate_ready": false,
+  "required_gates": [
+    {
+      "id": "equilibrium_residual",
+      "metric": "force_residual_inf_norm",
+      "required_evidence": "solver replay residual before/after AI correction"
+    },
+    {
+      "id": "energy_monotonicity",
+      "metric": "incremental_internal_energy_nonnegative",
+      "required_evidence": "load-step energy history"
+    },
+    {
+      "id": "boundary_condition_violation",
+      "metric": "constrained_dof_displacement_norm",
+      "required_evidence": "BC residual audit"
+    },
+    {
+      "id": "ood_generalization",
+      "metric": "task_family_split_error_bound",
+      "required_evidence": "train/validation/test/OOD split receipt"
+    },
+    {
+      "id": "long_rollout_stability",
+      "metric": "rollout_error_growth_rate",
+      "required_evidence": "multi-step surrogate rollout receipt"
+    }
+  ],
+  "blockers": [
+    "no_validated_ai_correction_model"
+  ]
+}

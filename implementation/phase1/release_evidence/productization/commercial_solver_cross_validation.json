@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-solver-cross-validation.v1",
-  "generated_at": "2026-05-31T09:13:04.500271+00:00",
+  "generated_at": "2026-06-05T13:34:30.949852+00:00",
   "status": "pass_with_marginal_metrics",
   "claim": "Commercial HF/LF export agreement check; not independent solver certification.",
   "source": {
@@ -41,7 +41,7 @@
     "mode_shape_mac_hf_mean": 0.9777,
     "buckling_factor_hf_min": 2.1,
     "buckling_factor_hf_mean": 2.604,
-    "note": "Ingested from commercial exports; native eigen/buckling solver not run in-repo."
+    "note": "Ingested from commercial exports; this artifact records benchmark tolerances, while native eigen/buckling solve evidence is emitted separately."
   },
   "cases": [
     {

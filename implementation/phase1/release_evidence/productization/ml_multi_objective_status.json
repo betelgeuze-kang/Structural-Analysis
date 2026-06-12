@@ -1,29 +1,110 @@
 {
   "schema_version": "ml-multi-objective-status.v1",
-  "generated_at": "2026-05-31T09:13:04.464548+00:00",
-  "status": "research_archive_ready",
-  "production_ml_wired": false,
+  "generated_at": "2026-06-05T13:34:30.882357+00:00",
+  "status": "production_shadow_solver_gated_ready",
+  "production_ml_wired": true,
   "multi_objective_pareto_wired": false,
   "research_pareto_archive_ready": true,
   "research_pareto_front_count": 3,
   "ml_surrogate_production_gate": {
     "schema_version": "ml-surrogate-production-gate.v1",
-    "generated_at": "2026-05-31T09:13:04.464521+00:00",
+    "generated_at": "2026-06-05T13:34:30.882231+00:00",
     "opt_in_env": "PHASE1_ML_SURROGATE_OPT_IN",
     "checkpoint_env": "PHASE1_ML_SURROGATE_CHECKPOINT",
+    "disable_env": "PHASE1_ML_SURROGATE_DISABLE",
     "opt_in_enabled": false,
+    "forced_disabled": false,
     "checkpoint_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/checkpoint.pt",
-    "checkpoint_ready": false,
-    "production_ml_wired": false,
-    "status": "disabled",
-    "claim": "ML surrogate affects optimization only when opt-in and checkpoint are both present."
+    "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+    "checkpoint_ready": true,
+    "checkpoint_validated": true,
+    "activation_enabled": true,
+    "dataset_card_ready": true,
+    "model_card_ready": true,
+    "validation_ready": true,
+    "ood_gate_ready": true,
+    "solver_fallback_ready": true,
+    "hard_gate_bypass_prevented": true,
+    "dataset_card_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/dataset_card.json",
+    "model_card_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/model_card.json",
+    "validation_receipt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+    "ood_gate_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/ood_gate.json",
+    "solver_fallback_receipt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json",
+    "validation_summary": {
+      "train": {
+        "count": 309,
+        "mae": {
+          "max_dcr": 0.0710755971907663,
+          "member_story_drift_contribution_pct": 4.40844043264053e-10,
+          "log1p_group_cost_proxy": 1.1225377884242954e-06
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2221259686268612,
+          "member_story_drift_contribution_pct": 1.7642071636902998e-09,
+          "log1p_group_cost_proxy": 4.112836507275118e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.30127517646654633,
+          "member_story_drift_contribution_pct": 1.114850055328187e-08,
+          "log1p_group_cost_proxy": 1.2520967129781013e-05
+        }
+      },
+      "validation": {
+        "count": 116,
+        "mae": {
+          "max_dcr": 0.09359743877436073,
+          "member_story_drift_contribution_pct": 4.980363439113549e-07,
+          "log1p_group_cost_proxy": 5.0583734531162545e-05
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2875053277438434,
+          "member_story_drift_contribution_pct": 2.755915648466889e-09,
+          "log1p_group_cost_proxy": 7.128249291499245e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.8475418237792511,
+          "member_story_drift_contribution_pct": 5.77013658972364e-05,
+          "log1p_group_cost_proxy": 0.005669367004332848
+        }
+      },
+      "test": {
+        "count": 92,
+        "mae": {
+          "max_dcr": 0.10049882927974284,
+          "member_story_drift_contribution_pct": 1.2550410178183449e-06,
+          "log1p_group_cost_proxy": 0.0001250375354288021
+        },
+        "p95_abs_error": {
+          "max_dcr": 0.2809347408156612,
+          "member_story_drift_contribution_pct": 5.304854325954846e-09,
+          "log1p_group_cost_proxy": 8.756670329779232e-06
+        },
+        "max_abs_error": {
+          "max_dcr": 0.40694044201888485,
+          "member_story_drift_contribution_pct": 5.7702083555710715e-05,
+          "log1p_group_cost_proxy": 0.0056696984264634764
+        }
+      }
+    },
+    "uncertainty_contract": {
+      "method": "holdout_abs_error_quantile",
+      "p95_error_targets": {
+        "max_dcr": 0.2809347408156612,
+        "member_story_drift_contribution_pct": 5.304854325954846e-09,
+        "log1p_group_cost_proxy": 8.756670329779232e-06
+      },
+      "confidence_label": "bounded_shadow"
+    },
+    "production_ml_wired": true,
+    "status": "production_ready_shadow_solver_gated",
+    "claim": "Validated ML surrogate is wired only as shadow_with_solver_fallback; it cannot promote final structural decisions without solver/code/human gates."
   },
-  "claim": "Production optimization remains deterministic greedy/heuristic unless ML opt-in + checkpoint are set.",
+  "claim": "Production optimization remains solver/code gated; validated ML may run only in shadow_with_solver_fallback mode and cannot bypass hard gates.",
   "runner_static_scan": {
     "run_design_optimization_cost_reduction.py": [],
     "run_design_optimization_solver_loop.py": [],
     "design_optimization_env.py": []
   },
   "pareto_archive_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/optimization_pareto_research_archive.json",
-  "next_step": "Set PHASE1_ML_SURROGATE_OPT_IN=1 and ship validated checkpoint to enable surrogate hook."
+  "next_step": "Broaden checkpoint validation beyond the current bounded design-optimization state before using surrogate output for autonomous design action ranking."
 }

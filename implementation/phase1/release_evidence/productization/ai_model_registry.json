@@ -1,0 +1,67 @@
+{
+  "schema_version": "ai-model-registry.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "production_model_ready",
+  "production_model_ready": true,
+  "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+  "checkpoint_ready": true,
+  "checkpoint_validated": true,
+  "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+  "registry_states": [
+    "candidate",
+    "shadow",
+    "production",
+    "deprecated"
+  ],
+  "active_models": [
+    {
+      "model_id": "bounded-linear-response-shadow-v1",
+      "state": "production",
+      "mode": "shadow_with_solver_fallback",
+      "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+      "dataset_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
+      "model_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
+      "validation_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+      "ood_gate": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/ood_gate.json",
+      "solver_fallback_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json"
+    }
+  ],
+  "promotion_requirements": [
+    "dataset_card_attached",
+    "model_card_attached",
+    "ood_gate_passed",
+    "physics_guard_passed",
+    "solver_fallback_verified",
+    "rollback_plan_attached"
+  ],
+  "rollback_contract": {
+    "required": true,
+    "minimum_fields": [
+      "previous_model_id",
+      "reason_code",
+      "approval_id",
+      "restored_checkpoint_sha256"
+    ]
+  },
+  "drift_monitoring_contract": {
+    "required": true,
+    "minimum_fields": [
+      "population_id",
+      "metric",
+      "baseline_window",
+      "current_window",
+      "threshold",
+      "action"
+    ]
+  },
+  "release_note_contract": {
+    "required": true,
+    "minimum_fields": [
+      "model_id",
+      "checkpoint_sha256",
+      "numerical_change_summary",
+      "rollback_reference"
+    ]
+  },
+  "blockers": []
+}

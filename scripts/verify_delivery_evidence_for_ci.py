@@ -12,6 +12,17 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+def build_gap_status_command(*, gap_json: Path, productization_dir: Path) -> list[str]:
+    return [
+        sys.executable,
+        str(REPO_ROOT / "scripts/report_gap_closure_status.py"),
+        "--productization-dir",
+        str(productization_dir),
+        "--output-json",
+        str(gap_json),
+    ]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -26,26 +37,45 @@ def main() -> int:
         help="Exit 0 when bundle status is review_required (default: require ready).",
     )
     parser.add_argument("--enrich-changes", action="store_true")
+    parser.add_argument(
+        "--check-existing",
+        action="store_true",
+        help="Validate existing bundle/gap JSON without rerunning the full delivery orchestrator.",
+    )
+    parser.add_argument(
+        "--gap-json",
+        type=Path,
+        default=REPO_ROOT / "implementation/phase1/release_evidence/productization/gap_closure_status.json",
+    )
     args = parser.parse_args()
 
-    cmd = [sys.executable, str(REPO_ROOT / "scripts/run_delivery_evidence_bundle.py"), "--output-json", str(args.bundle_json)]
-    if args.enrich_changes:
-        cmd.append("--enrich-changes")
-    proc = subprocess.run(cmd, cwd=REPO_ROOT, check=False, capture_output=True, text=True)
-    if proc.returncode != 0:
-        print(proc.stdout + proc.stderr, file=sys.stderr)
-        return proc.returncode
+    if not args.check_existing:
+        cmd = [
+            sys.executable,
+            str(REPO_ROOT / "scripts/run_delivery_evidence_bundle.py"),
+            "--output-json",
+            str(args.bundle_json),
+        ]
+        if args.enrich_changes:
+            cmd.append("--enrich-changes")
+        proc = subprocess.run(cmd, cwd=REPO_ROOT, check=False, capture_output=True, text=True)
+        if proc.returncode != 0:
+            print(proc.stdout + proc.stderr, file=sys.stderr)
+            return proc.returncode
 
-    gap_proc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/report_gap_closure_status.py")],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    if gap_proc.returncode != 0:
-        print(gap_proc.stdout + gap_proc.stderr, file=sys.stderr)
-        return gap_proc.returncode
+        gap_proc = subprocess.run(
+            build_gap_status_command(
+                gap_json=args.gap_json,
+                productization_dir=args.bundle_json.parent,
+            ),
+            cwd=REPO_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if gap_proc.returncode != 0:
+            print(gap_proc.stdout + gap_proc.stderr, file=sys.stderr)
+            return gap_proc.returncode
 
     if not args.bundle_json.is_file():
         print(f"ci-delivery: missing bundle: {args.bundle_json}", file=sys.stderr)
@@ -54,10 +84,9 @@ def main() -> int:
     bundle = json.loads(args.bundle_json.read_text(encoding="utf-8"))
     status = str(bundle.get("status") or "")
     print(f"ci-delivery: bundle_status={status}")
-    gap_path = REPO_ROOT / "implementation/phase1/release_evidence/productization/gap_closure_status.json"
     gap_status = ""
-    if gap_path.is_file():
-        gap = json.loads(gap_path.read_text(encoding="utf-8"))
+    if args.gap_json.is_file():
+        gap = json.loads(args.gap_json.read_text(encoding="utf-8"))
         gap_status = str(gap.get("delivery_status") or "")
         print(f"ci-delivery: gap_delivery_status={gap_status}")
 

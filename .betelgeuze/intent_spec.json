@@ -1,0 +1,11 @@
+{
+  "goal": "Implement and verify closures for the commercial structural solver and structural-analysis AI engine gap ledgers",
+  "notes": [],
+  "out_of_scope": [
+    "No claim of engineer replacement, legal approval automation, public release, destructive cleanup, commit, or push without explicit user request"
+  ],
+  "success_criteria": [
+    "Each G1-G10 and AI-G1-AI-G10 requirement has an authoritative gate/evidence artifact, and readiness scripts pass without unsupported/proxy gaps being misrepresented"
+  ],
+  "updated_at": "2026-05-31T10:05:19Z"
+}

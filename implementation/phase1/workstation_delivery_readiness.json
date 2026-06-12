@@ -120,8 +120,8 @@
     {
       "blockers": [],
       "checksum_self_test_pass": true,
-      "job_dir": "implementation/phase1/workstation_jobs/20260525T214218-bd376eaf7819ec28",
-      "job_id": "20260525T214218-bd376eaf7819ec28",
+      "job_dir": "implementation/phase1/workstation_jobs/20260529T221424-bd376eaf7819ec28",
+      "job_id": "20260529T221424-bd376eaf7819ec28",
       "job_record_path": "implementation/phase1/workstation_job_record.json",
       "label": "Job reproducibility contract",
       "ok": true,
@@ -146,7 +146,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-05-25T21:42:45.290664+00:00",
+  "generated_at": "2026-06-11T18:25:21.158226+00:00",
   "independent_commercial_product_ready": false,
   "reason_code": "PASS",
   "schema_version": "workstation-delivery-readiness.v1",

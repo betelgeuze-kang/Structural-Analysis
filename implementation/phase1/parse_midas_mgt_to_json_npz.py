@@ -1502,6 +1502,12 @@ def _parse_elements(rows: list[str], node_ids: set[int]) -> tuple[list[dict], di
     out: list[dict] = []
     skip_reason_count: Counter[str] = Counter()
     unsupported_type_count: Counter[str] = Counter()
+    line_angle_token_count = 0
+    line_nonzero_angle_count = 0
+    line_max_abs_angle_deg = 0.0
+    surface_lcaxis_token_count = 0
+    surface_nonzero_lcaxis_count = 0
+    surface_compact_lcaxis_token_count = 0
     unresolved_head: list[dict] = []
     for row in rows:
         toks = _split_csv_like(row)
@@ -1595,20 +1601,56 @@ def _parse_elements(rows: list[str], node_ids: set[int]) -> tuple[list[dict], di
             continue
 
         fam = _canonical_element_family(etype)
-        out.append(
-            {
-                "id": int(eid),
-                "type": str(etype),
-                "family": fam,
-                "node_ids": node_conn_unique,
-                "section_id": int(sec) if sec is not None else -1,
-                "material_id": int(mat) if mat is not None else -1,
-            }
-        )
+        element = {
+            "id": int(eid),
+            "type": str(etype),
+            "family": fam,
+            "node_ids": node_conn_unique,
+            "section_id": int(sec) if sec is not None else -1,
+            "material_id": int(mat) if mat is not None else -1,
+        }
+        etype_upper = str(etype).strip().upper()
+        if fam == "beam" and etype_upper in {"BEAM", "TRUSS", "TENSTR", "COMPTR"}:
+            angle = _as_float(toks[6]) if len(toks) >= 7 else None
+            angle_deg = float(angle) if angle is not None else 0.0
+            if len(toks) >= 7:
+                line_angle_token_count += 1
+            if abs(angle_deg) > 1.0e-12:
+                line_nonzero_angle_count += 1
+                line_max_abs_angle_deg = max(line_max_abs_angle_deg, abs(angle_deg))
+            element["angle_deg"] = angle_deg
+            element["angle_token_present"] = bool(len(toks) >= 7)
+        elif fam == "shell":
+            lcaxis = None
+            lcaxis_source = "missing"
+            lcaxis_token_present = False
+            if len(toks) >= 11:
+                lcaxis = _as_int(toks[10])
+                lcaxis_source = "explicit_lcaxis_token"
+                lcaxis_token_present = True
+                surface_lcaxis_token_count += 1
+            elif len(toks) >= 10:
+                lcaxis_source = "default_lcaxis_token_omitted"
+                surface_compact_lcaxis_token_count += 1
+            width_id = _as_int(toks[9]) if len(toks) >= 10 else None
+            lcaxis_code = int(lcaxis) if lcaxis is not None else 0
+            if lcaxis_code != 0:
+                surface_nonzero_lcaxis_count += 1
+            element["lcaxis_code"] = lcaxis_code
+            element["lcaxis_token_present"] = lcaxis_token_present
+            element["lcaxis_source"] = lcaxis_source
+            element["width_id"] = int(width_id) if width_id is not None else None
+        out.append(element)
     return out, {
         "skipped_count": int(sum(skip_reason_count.values())),
         "skip_reason_count": {str(k): int(v) for k, v in sorted(skip_reason_count.items())},
         "unsupported_type_count": {str(k): int(v) for k, v in sorted(unsupported_type_count.items())},
+        "line_angle_token_count": int(line_angle_token_count),
+        "line_nonzero_angle_count": int(line_nonzero_angle_count),
+        "line_max_abs_angle_deg": float(line_max_abs_angle_deg),
+        "surface_lcaxis_token_count": int(surface_lcaxis_token_count),
+        "surface_nonzero_lcaxis_count": int(surface_nonzero_lcaxis_count),
+        "surface_compact_lcaxis_token_count": int(surface_compact_lcaxis_token_count),
         "unresolved_head": unresolved_head,
     }
 
@@ -4241,6 +4283,8 @@ def _make_npz(npz_out: Path, nodes: dict[int, tuple[float, float, float]], eleme
     elem_type_code = np.asarray([fam_code.get(str(e.get("family", "other")), 0) for e in elements], dtype=np.int32)
     elem_section_id = np.asarray([int(e.get("section_id", -1)) for e in elements], dtype=np.int64)
     elem_material_id = np.asarray([int(e.get("material_id", -1)) for e in elements], dtype=np.int64)
+    elem_angle_deg = np.asarray([float(e.get("angle_deg", 0.0) or 0.0) for e in elements], dtype=np.float64)
+    elem_lcaxis_code = np.asarray([int(e.get("lcaxis_code", 0) or 0) for e in elements], dtype=np.int32)
 
     conn_ptr = [0]
     conn_idx: list[int] = []
@@ -4262,6 +4306,8 @@ def _make_npz(npz_out: Path, nodes: dict[int, tuple[float, float, float]], eleme
         elem_type_code=elem_type_code,
         elem_section_id=elem_section_id,
         elem_material_id=elem_material_id,
+        elem_angle_deg=elem_angle_deg,
+        elem_lcaxis_code=elem_lcaxis_code,
         elem_conn_ptr=elem_conn_ptr,
         elem_conn_idx=elem_conn_idx,
     )
@@ -4270,6 +4316,9 @@ def _make_npz(npz_out: Path, nodes: dict[int, tuple[float, float, float]], eleme
         "edge_count_directed": int(edge_index.shape[1]),
         "element_count": int(len(elements)),
         "elem_conn_index_count": int(elem_conn_idx.size),
+        "elem_angle_nonzero_count": int(np.count_nonzero(np.abs(elem_angle_deg) > 1.0e-12)),
+        "elem_angle_max_abs_deg": float(np.max(np.abs(elem_angle_deg))) if elem_angle_deg.size else 0.0,
+        "elem_lcaxis_nonzero_count": int(np.count_nonzero(elem_lcaxis_code != 0)),
     }
 
 

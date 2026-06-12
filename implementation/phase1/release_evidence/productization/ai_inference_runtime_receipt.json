@@ -1,0 +1,38 @@
+{
+  "schema_version": "ai-inference-runtime-receipt.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "ready",
+  "inference_executed": true,
+  "backend": "numpy_ridge_shadow_surrogate",
+  "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
+  "checkpoint_ready": true,
+  "checkpoint_validated": true,
+  "checkpoint_sha256": "e070f4ac2364c2ea3e7f8a4d5ad5752e2d7d7f0cd63fb1eeb2b21af6b4b59a35",
+  "latency_ms": 1.0,
+  "memory_peak_mb": 64.0,
+  "confidence": 0.7919001919883991,
+  "ood_status": "pass",
+  "fallback_reason": "solver_replay_required_for_final_promotion",
+  "fallback_policy": {
+    "hard_constraints": "solver_and_code_check_required",
+    "unsupported_or_ood": "solver_only_engineer_review_required",
+    "timeout": "discard_ai_suggestion_and_replay_deterministic_solver"
+  },
+  "runtime_budget_contract": {
+    "latency_budget_ms": 250,
+    "memory_budget_mb": 512,
+    "cpu_gpu_parity_policy": "required_before_production_promotion",
+    "supported_backends": [
+      "cpu",
+      "gpu",
+      "deterministic_solver_fallback"
+    ]
+  },
+  "validation_artifacts": {
+    "dataset_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
+    "model_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
+    "validation_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",
+    "ood_gate": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/ood_gate.json",
+    "solver_fallback_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json"
+  }
+}

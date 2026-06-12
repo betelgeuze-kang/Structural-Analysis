@@ -183,6 +183,7 @@ def run_mgt_global_fea_3d_native_solve(
     mesh_converged = bool(solve_payload.get("converged"))
     solve_mode = str(solve_payload.get("solve_mode") or "")
     nonlinear_equilibrium = bool(solve_payload.get("nonlinear_equilibrium"))
+    representative_component_equilibrium = bool(solve_payload.get("representative_component_nonlinear_equilibrium"))
     crosscheck_ok = licensed_crosscheck.get("status") in {"pass", "skipped"}
     comparisons = licensed_crosscheck.get("comparisons") if isinstance(licensed_crosscheck.get("comparisons"), list) else []
     metric_pass_count = sum(1 for row in comparisons if isinstance(row, dict) and row.get("ok"))
@@ -209,6 +210,8 @@ def run_mgt_global_fea_3d_native_solve(
         native_status = "mesh_3d_beam_global_linear_tangent_wired"
     elif bridge_wired:
         native_status = "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge"
+    elif representative_component_equilibrium:
+        native_status = "mesh_3d_beam_global_connected_component_partial"
     else:
         native_status = "mesh_3d_beam_global_partial"
 

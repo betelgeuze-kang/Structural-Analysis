@@ -1,0 +1,23 @@
+{
+  "schema_version": "ai-safety-governance-contract.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "contract_ready",
+  "allowed_result_states": [
+    "auto_applied",
+    "suggested_only",
+    "blocked",
+    "engineer_review_required",
+    "unsupported"
+  ],
+  "final_report_promotion_requires": [
+    "solver_replay_passed",
+    "code_check_replay_passed",
+    "cost_provenance_attached",
+    "human_review_recorded"
+  ],
+  "data_use_contract": {
+    "project_training_reuse_default": "disabled_without_project_consent",
+    "retention_policy_required": true,
+    "delete_policy_required": true
+  }
+}

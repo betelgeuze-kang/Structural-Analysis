@@ -1,0 +1,1499 @@
+{
+  "schema_version": "mgt-dof-block-schur-recycled-krylov-focused-probe.v1",
+  "generated_at": "2026-06-06T08:23:25.350688+00:00",
+  "status": "partial",
+  "rocm_parent_schema_version": "mgt-rocm-sparse-solver-probe.v1",
+  "torch_rocm": {
+    "torch_import_ok": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_name": "AMD Radeon RX 6900 XT"
+  },
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "mesh_fingerprint": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "combined_component_count": 3,
+    "combined_base_node_count": 404,
+    "restrained_dof_count": 2424,
+    "active_dof_count": 35935,
+    "free_dof_count": 33932,
+    "matrix_shape": [
+      33932,
+      33932
+    ],
+    "matrix_nnz": 823815,
+    "cpu_reference": {
+      "backend": "scipy_sparse_spsolve_cpu",
+      "residual_inf_n": 4.256728516338626e-07,
+      "relative_residual_inf": 1.310820378513631e-08,
+      "rhs_inf_n": 32.47377433333335,
+      "solve_seconds": 0.415569789998699
+    }
+  },
+  "probe_contract": {
+    "matrix_family": "surface_shell_bending_6dof",
+    "official_backend_family": "amd_rocm_hip",
+    "cpu_fallback_promoted": false,
+    "host_dense_solve_fallback_allowed": false,
+    "residual_replay_gate_n": 0.001,
+    "previous_block_schur_frontier_residual_inf_n": 15.396808816819568,
+    "node_block_coarse_aggregate_count_candidates": [
+      8
+    ],
+    "schur_basis_aggregate_count_candidates": [
+      8
+    ],
+    "schur_basis_selection_candidates": [
+      "rhs_weighted"
+    ],
+    "schur_basis_weight_candidates": [
+      1.0
+    ],
+    "coupling_hotspot_correction_size_candidates": [
+      0
+    ],
+    "coupling_hotspot_selection_candidates": [
+      "rhs_residual"
+    ],
+    "coupling_hotspot_ridge_factor": 1e-10,
+    "coupling_hotspot_post_pass_candidates": [
+      0
+    ],
+    "coupling_hotspot_post_correction_size_candidates": [
+      0
+    ],
+    "coupling_hotspot_post_selection_candidates": [
+      ""
+    ],
+    "coupling_pair_smoother_count_candidates": [
+      0
+    ],
+    "coupling_pair_smoother_selection_candidates": [
+      "coupling_strength"
+    ],
+    "coupling_pair_smoother_weight_candidates": [
+      1.0
+    ],
+    "coupling_pair_smoother_sweeps": 0,
+    "coupling_pair_smoother_ridge_factor": 1e-10,
+    "coupling_pair_basis_count_candidates": [
+      0
+    ],
+    "coupling_pair_basis_selection_candidates": [
+      "coupling_strength"
+    ],
+    "coupling_pair_basis_weight_candidates": [
+      1.0
+    ],
+    "coupling_pair_basis_ridge_factor": 1e-10,
+    "node_block_subdomain_smoother_sweeps": 0,
+    "node_block_subdomain_smoother_weight_candidates": [
+      0.0
+    ],
+    "node_block_subdomain_smoother_max_dof_count_candidates": [
+      96
+    ],
+    "node_block_subdomain_smoother_ridge_factor": 1e-10,
+    "node_block_subdomain_smoother_update_mode_candidates": [
+      "additive"
+    ],
+    "node_block_coarse_weight_candidates": [
+      0.0015
+    ],
+    "node_block_coarse_harmonic_extension_weight_candidates": [
+      0.5
+    ],
+    "node_block_coarse_harmonic_extension_step_candidates": [
+      1,
+      2,
+      3
+    ],
+    "node_block_coarse_correction_pass_candidates": [
+      5
+    ],
+    "node_block_coarse_smoothing_weight_candidates": [
+      0.0
+    ],
+    "node_block_coarse_mode": "interface_edge_geneo_harmonic_restricted",
+    "node_block_coarse_energy_modes_per_dof_candidates": [
+      3
+    ],
+    "node_block_coarse_energy_mode_selection_candidates": [
+      "low_eigen"
+    ],
+    "node_block_coarse_schur_cycle_pass_candidates": [
+      0
+    ],
+    "node_block_coarse_schur_cycle_weight_candidates": [
+      1.0
+    ],
+    "node_block_coarse_overlap_depth": 0,
+    "node_block_coarse_secondary_mode": "",
+    "node_block_coarse_secondary_weight": 0.0,
+    "node_block_coarse_secondary_correction_passes": 1
+  },
+  "rows": [
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 4,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "rhs_residual",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "coupling_hotspot_post_passes": 0,
+      "coupling_hotspot_post_correction_size": 0,
+      "coupling_hotspot_post_selection": "",
+      "coupling_hotspot_post_correction_dof_count": 0,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 8,
+      "schur_basis_selection": "rhs_weighted",
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_weight": 1.0,
+      "schur_basis_column_count": 16,
+      "schur_basis_signed_weights": false,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0
+      ],
+      "recycled_krylov_correction_passes": 1,
+      "recycled_krylov_accept_count": 0,
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0
+        ],
+        "source_counts": {
+          "residual": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          22.593705557868677,
+          23.322154977189587,
+          24.1697325916358,
+          25.070170994608393,
+          27.526041044083463,
+          27.60985262003943,
+          28.36146991215849,
+          28.689972575619194
+        ],
+        "ridge": 6.888825736912639,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 2.984136170890798e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 149.1094433506912,
+            "improvement_inf_n": -126.51573779282253,
+            "relative_improvement": -5.599601068925193
+          }
+        ],
+        "best_alpha": 1.0,
+        "candidate_residual_inf_n": 149.1094433506912,
+        "improvement_inf_n": -126.51573779282253,
+        "relative_improvement": -5.599601068925193,
+        "reason": "no_recycled_krylov_residual_descent",
+        "pass": 1
+      },
+      "recycled_krylov_correction_pass_rows": [
+        {
+          "enabled": true,
+          "attempted": true,
+          "accepted": false,
+          "candidate_vector_count": 32,
+          "basis_size_requested": 8,
+          "basis_size_used": 8,
+          "source": "residual_and_preconditioned",
+          "ridge_factor": 1e-10,
+          "minimum_relative_improvement": 1e-08,
+          "alpha_values": [
+            1.0
+          ],
+          "source_counts": {
+            "residual": 8
+          },
+          "selected_candidate_residual_inf_head": [
+            22.593705557868677,
+            23.322154977189587,
+            24.1697325916358,
+            25.070170994608393,
+            27.526041044083463,
+            27.60985262003943,
+            28.36146991215849,
+            28.689972575619194
+          ],
+          "ridge": 6.888825736912639,
+          "solve_backend": "torch_linalg_solve",
+          "coefficient_l2": 2.984136170890798e-08,
+          "trial_rows": [
+            {
+              "alpha": 1.0,
+              "candidate_residual_inf_n": 149.1094433506912,
+              "improvement_inf_n": -126.51573779282253,
+              "relative_improvement": -5.599601068925193
+            }
+          ],
+          "best_alpha": 1.0,
+          "candidate_residual_inf_n": 149.1094433506912,
+          "improvement_inf_n": -126.51573779282253,
+          "relative_improvement": -5.599601068925193,
+          "reason": "no_recycled_krylov_residual_descent",
+          "pass": 1
+        }
+      ],
+      "node_block_smoother_sweeps": 0,
+      "node_block_smoother_weight": 1.0,
+      "node_block_smoother_block_count": 0,
+      "node_block_smoother_max_width": 0,
+      "node_block_smoother_size_counts": {},
+      "node_block_subdomain_smoother_sweeps": 0,
+      "node_block_subdomain_smoother_weight": 0.0,
+      "node_block_subdomain_smoother_update_mode": "additive",
+      "node_block_subdomain_smoother_max_dof_count": 96,
+      "node_block_subdomain_smoother_ridge_factor": 1e-10,
+      "node_block_subdomain_smoother_block_count": 0,
+      "node_block_subdomain_smoother_max_width": 0,
+      "node_block_subdomain_smoother_truncated_count": 0,
+      "node_block_subdomain_smoother_size_head": [],
+      "node_block_subdomain_smoother_storage_mode": "none",
+      "coupling_pair_smoother_count": 0,
+      "coupling_pair_smoother_pair_count": 0,
+      "coupling_pair_smoother_sweeps": 0,
+      "coupling_pair_smoother_weight": 1.0,
+      "coupling_pair_smoother_ridge_factor": 1e-10,
+      "coupling_pair_smoother_selection": "coupling_strength",
+      "coupling_pair_smoother_selection_used": "coupling_strength",
+      "coupling_pair_basis_count": 0,
+      "coupling_pair_basis_column_count": 0,
+      "coupling_pair_basis_selection": "coupling_strength",
+      "coupling_pair_basis_selection_used": "coupling_strength",
+      "coupling_pair_basis_weight": 0.0,
+      "coupling_pair_basis_ridge_factor": 1e-10,
+      "node_block_coarse_aggregate_count": 8,
+      "node_block_coarse_actual_aggregate_count": 8,
+      "node_block_coarse_ridge_factor": 1e-10,
+      "node_block_coarse_order": "coarse_then_smooth",
+      "node_block_coarse_correction_passes": 5,
+      "node_block_coarse_partition": "sorted_node_id",
+      "node_block_coarse_partition_used": "sorted_node_id",
+      "node_block_coarse_overlap_depth": 0,
+      "node_block_coarse_overlap_depth_used": 0,
+      "node_block_coarse_overlap_node_count": 0,
+      "node_block_coarse_mode": "interface_edge_geneo_harmonic_restricted",
+      "node_block_coarse_energy_modes_per_dof": 3,
+      "node_block_coarse_energy_mode_selection": "low_eigen",
+      "node_block_coarse_operator": "galerkin_ptap",
+      "node_block_coarse_boundary_node_count": 4607,
+      "node_block_coarse_interface_pair_count": 22,
+      "node_block_coarse_interface_pair_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "node_block_coarse_energy_mode_count": 362,
+      "node_block_coarse_energy_eigenvalue_head": [
+        1.0000000000003084,
+        1.0000000000023954,
+        1.0000000000057134,
+        1.0000000000005287,
+        1.0000000000007332,
+        1.0000000000017606,
+        0.0607150331185914,
+        0.07844643514069533,
+        0.08900889286477787,
+        0.056453217556847415,
+        0.1014716624609713,
+        0.12243260939332033,
+        0.061697087935524246,
+        0.0981933174519256,
+        0.11838995718955729,
+        1.000000000000002
+      ],
+      "node_block_coarse_weight": 0.0015,
+      "node_block_coarse_harmonic_extension_weight": 0.5,
+      "node_block_coarse_harmonic_extension_steps": 1,
+      "node_block_coarse_harmonic_extension_dof_count": 26189,
+      "node_block_coarse_schur_cycle_passes": 0,
+      "node_block_coarse_schur_cycle_weight": 1.0,
+      "node_block_coarse_smoothing_steps": 0,
+      "node_block_coarse_smoothing_applied_steps": 0,
+      "node_block_coarse_smoothing_weight": 0.0,
+      "node_block_coarse_column_count": 362,
+      "node_block_coarse_load_restriction_applied": true,
+      "node_block_coarse_load_restriction_column_count": 122,
+      "node_block_coarse_secondary_mode": "",
+      "node_block_coarse_secondary_operator": "none",
+      "node_block_coarse_secondary_weight": 0.0,
+      "node_block_coarse_secondary_correction_passes": 1,
+      "node_block_coarse_secondary_column_count": 0,
+      "node_block_coarse_secondary_load_restriction_applied": false,
+      "node_block_coarse_secondary_load_restriction_column_count": 0,
+      "node_block_coarse_aggregate_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "residual_region_summary": {
+        "operator": "galerkin_ptap",
+        "secondary_operator": "none",
+        "primary_support": {
+          "dof_count": 26414,
+          "residual_inf_n": 22.593705557868677,
+          "residual_l2_n": 192.6236404860028,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 0.9375
+        },
+        "primary_load_restriction_support": {
+          "dof_count": 21435,
+          "residual_inf_n": 22.593705557868677,
+          "residual_l2_n": 160.53330888721453,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 0.671875
+        },
+        "secondary_support": {
+          "dof_count": 0,
+          "residual_inf_n": null,
+          "residual_l2_n": null,
+          "residual_inf_fraction_of_global": null,
+          "top64_abs_residual_share": null
+        },
+        "translation_dofs": {
+          "dof_count": 11462,
+          "residual_inf_n": 22.593705557868677,
+          "residual_l2_n": 199.52511306122412,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 1.0
+        },
+        "rotation_dofs": {
+          "dof_count": 22470,
+          "residual_inf_n": 5.221343454661906,
+          "residual_l2_n": 29.871014810025773,
+          "residual_inf_fraction_of_global": 0.2310972603094527,
+          "top64_abs_residual_share": 0.0
+        }
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 1,
+      "iteration_count": 16,
+      "max_iterations": 16,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.593705557868677,
+      "best_residual_inf_n": 22.593705557868677,
+      "relative_residual_inf": 0.6957523731596829,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.49925601731,
+        29.102251711877052,
+        29.093847396959095,
+        28.689972575619194,
+        27.526041044083463,
+        28.36146991215849,
+        29.84902172894912
+      ],
+      "residual_history_tail": [
+        29.600315286734787,
+        29.11607820675212,
+        29.11964236423802,
+        27.60985262003943,
+        25.070170994608393,
+        24.1697325916358,
+        23.322154977189587,
+        22.593705557868677
+      ],
+      "solve_seconds": 7.689452828999492,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 16,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 125232236,
+      "hip_kernel_invocation_count": 320,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis, node-local 6DOF smoother, and node-aggregate 6DOF coarse corrections improve the preconditioner residual through replay-checked block structure, and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 4,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "rhs_residual",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "coupling_hotspot_post_passes": 0,
+      "coupling_hotspot_post_correction_size": 0,
+      "coupling_hotspot_post_selection": "",
+      "coupling_hotspot_post_correction_dof_count": 0,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 8,
+      "schur_basis_selection": "rhs_weighted",
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_weight": 1.0,
+      "schur_basis_column_count": 16,
+      "schur_basis_signed_weights": false,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0
+      ],
+      "recycled_krylov_correction_passes": 1,
+      "recycled_krylov_accept_count": 0,
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0
+        ],
+        "source_counts": {
+          "residual": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          22.899531912544845,
+          23.504028074559447,
+          23.540893035524142,
+          24.379653331752905,
+          27.03162788714452,
+          27.793895670747318,
+          28.974522556301483,
+          29.109297127089466
+        ],
+        "ridge": 5.511644116543786,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 3.072014491164836e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 181.09635620652844,
+            "improvement_inf_n": -158.19682429398358,
+            "relative_improvement": -6.908299475209798
+          }
+        ],
+        "best_alpha": 1.0,
+        "candidate_residual_inf_n": 181.09635620652844,
+        "improvement_inf_n": -158.19682429398358,
+        "relative_improvement": -6.908299475209798,
+        "reason": "no_recycled_krylov_residual_descent",
+        "pass": 1
+      },
+      "recycled_krylov_correction_pass_rows": [
+        {
+          "enabled": true,
+          "attempted": true,
+          "accepted": false,
+          "candidate_vector_count": 32,
+          "basis_size_requested": 8,
+          "basis_size_used": 8,
+          "source": "residual_and_preconditioned",
+          "ridge_factor": 1e-10,
+          "minimum_relative_improvement": 1e-08,
+          "alpha_values": [
+            1.0
+          ],
+          "source_counts": {
+            "residual": 8
+          },
+          "selected_candidate_residual_inf_head": [
+            22.899531912544845,
+            23.504028074559447,
+            23.540893035524142,
+            24.379653331752905,
+            27.03162788714452,
+            27.793895670747318,
+            28.974522556301483,
+            29.109297127089466
+          ],
+          "ridge": 5.511644116543786,
+          "solve_backend": "torch_linalg_solve",
+          "coefficient_l2": 3.072014491164836e-08,
+          "trial_rows": [
+            {
+              "alpha": 1.0,
+              "candidate_residual_inf_n": 181.09635620652844,
+              "improvement_inf_n": -158.19682429398358,
+              "relative_improvement": -6.908299475209798
+            }
+          ],
+          "best_alpha": 1.0,
+          "candidate_residual_inf_n": 181.09635620652844,
+          "improvement_inf_n": -158.19682429398358,
+          "relative_improvement": -6.908299475209798,
+          "reason": "no_recycled_krylov_residual_descent",
+          "pass": 1
+        }
+      ],
+      "node_block_smoother_sweeps": 0,
+      "node_block_smoother_weight": 1.0,
+      "node_block_smoother_block_count": 0,
+      "node_block_smoother_max_width": 0,
+      "node_block_smoother_size_counts": {},
+      "node_block_subdomain_smoother_sweeps": 0,
+      "node_block_subdomain_smoother_weight": 0.0,
+      "node_block_subdomain_smoother_update_mode": "additive",
+      "node_block_subdomain_smoother_max_dof_count": 96,
+      "node_block_subdomain_smoother_ridge_factor": 1e-10,
+      "node_block_subdomain_smoother_block_count": 0,
+      "node_block_subdomain_smoother_max_width": 0,
+      "node_block_subdomain_smoother_truncated_count": 0,
+      "node_block_subdomain_smoother_size_head": [],
+      "node_block_subdomain_smoother_storage_mode": "none",
+      "coupling_pair_smoother_count": 0,
+      "coupling_pair_smoother_pair_count": 0,
+      "coupling_pair_smoother_sweeps": 0,
+      "coupling_pair_smoother_weight": 1.0,
+      "coupling_pair_smoother_ridge_factor": 1e-10,
+      "coupling_pair_smoother_selection": "coupling_strength",
+      "coupling_pair_smoother_selection_used": "coupling_strength",
+      "coupling_pair_basis_count": 0,
+      "coupling_pair_basis_column_count": 0,
+      "coupling_pair_basis_selection": "coupling_strength",
+      "coupling_pair_basis_selection_used": "coupling_strength",
+      "coupling_pair_basis_weight": 0.0,
+      "coupling_pair_basis_ridge_factor": 1e-10,
+      "node_block_coarse_aggregate_count": 8,
+      "node_block_coarse_actual_aggregate_count": 8,
+      "node_block_coarse_ridge_factor": 1e-10,
+      "node_block_coarse_order": "coarse_then_smooth",
+      "node_block_coarse_correction_passes": 5,
+      "node_block_coarse_partition": "sorted_node_id",
+      "node_block_coarse_partition_used": "sorted_node_id",
+      "node_block_coarse_overlap_depth": 0,
+      "node_block_coarse_overlap_depth_used": 0,
+      "node_block_coarse_overlap_node_count": 0,
+      "node_block_coarse_mode": "interface_edge_geneo_harmonic_restricted",
+      "node_block_coarse_energy_modes_per_dof": 3,
+      "node_block_coarse_energy_mode_selection": "low_eigen",
+      "node_block_coarse_operator": "galerkin_ptap",
+      "node_block_coarse_boundary_node_count": 4607,
+      "node_block_coarse_interface_pair_count": 22,
+      "node_block_coarse_interface_pair_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "node_block_coarse_energy_mode_count": 362,
+      "node_block_coarse_energy_eigenvalue_head": [
+        1.0000000000003084,
+        1.0000000000023954,
+        1.0000000000057134,
+        1.0000000000005287,
+        1.0000000000007332,
+        1.0000000000017606,
+        0.0607150331185914,
+        0.07844643514069533,
+        0.08900889286477787,
+        0.056453217556847415,
+        0.1014716624609713,
+        0.12243260939332033,
+        0.061697087935524246,
+        0.0981933174519256,
+        0.11838995718955729,
+        1.000000000000002
+      ],
+      "node_block_coarse_weight": 0.0015,
+      "node_block_coarse_harmonic_extension_weight": 0.5,
+      "node_block_coarse_harmonic_extension_steps": 2,
+      "node_block_coarse_harmonic_extension_dof_count": 28652,
+      "node_block_coarse_schur_cycle_passes": 0,
+      "node_block_coarse_schur_cycle_weight": 1.0,
+      "node_block_coarse_smoothing_steps": 0,
+      "node_block_coarse_smoothing_applied_steps": 0,
+      "node_block_coarse_smoothing_weight": 0.0,
+      "node_block_coarse_column_count": 362,
+      "node_block_coarse_load_restriction_applied": true,
+      "node_block_coarse_load_restriction_column_count": 122,
+      "node_block_coarse_secondary_mode": "",
+      "node_block_coarse_secondary_operator": "none",
+      "node_block_coarse_secondary_weight": 0.0,
+      "node_block_coarse_secondary_correction_passes": 1,
+      "node_block_coarse_secondary_column_count": 0,
+      "node_block_coarse_secondary_load_restriction_applied": false,
+      "node_block_coarse_secondary_load_restriction_column_count": 0,
+      "node_block_coarse_aggregate_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "residual_region_summary": {
+        "operator": "galerkin_ptap",
+        "secondary_operator": "none",
+        "primary_support": {
+          "dof_count": 28875,
+          "residual_inf_n": 22.899531912544845,
+          "residual_l2_n": 200.64205973816632,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 0.984375
+        },
+        "primary_load_restriction_support": {
+          "dof_count": 21435,
+          "residual_inf_n": 22.899531912544845,
+          "residual_l2_n": 161.17819175633622,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 0.6875
+        },
+        "secondary_support": {
+          "dof_count": 0,
+          "residual_inf_n": null,
+          "residual_l2_n": null,
+          "residual_inf_fraction_of_global": null,
+          "top64_abs_residual_share": null
+        },
+        "translation_dofs": {
+          "dof_count": 11462,
+          "residual_inf_n": 22.899531912544845,
+          "residual_l2_n": 200.25923163331078,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 1.0
+        },
+        "rotation_dofs": {
+          "dof_count": 22470,
+          "residual_inf_n": 4.9919320272007806,
+          "residual_l2_n": 30.876836676714717,
+          "residual_inf_fraction_of_global": 0.2179927540119759,
+          "top64_abs_residual_share": 0.0
+        }
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 1,
+      "iteration_count": 16,
+      "max_iterations": 16,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.899531912544845,
+      "best_residual_inf_n": 22.899531912544845,
+      "relative_residual_inf": 0.7051700143472133,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.494543084220023,
+        29.429901702659997,
+        29.452647950260918,
+        29.109297127089466,
+        27.793895670747318,
+        29.558550179308476,
+        30.413350435168887
+      ],
+      "residual_history_tail": [
+        29.830362979206612,
+        29.46821978074767,
+        28.974522556301483,
+        27.03162788714452,
+        24.379653331752905,
+        23.504028074559447,
+        22.899531912544845,
+        23.540893035524142
+      ],
+      "solve_seconds": 14.720220668998081,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 16,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 125232236,
+      "hip_kernel_invocation_count": 320,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis, node-local 6DOF smoother, and node-aggregate 6DOF coarse corrections improve the preconditioner residual through replay-checked block structure, and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 4,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "rhs_residual",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "coupling_hotspot_post_passes": 0,
+      "coupling_hotspot_post_correction_size": 0,
+      "coupling_hotspot_post_selection": "",
+      "coupling_hotspot_post_correction_dof_count": 0,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 8,
+      "schur_basis_selection": "rhs_weighted",
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_weight": 1.0,
+      "schur_basis_column_count": 16,
+      "schur_basis_signed_weights": false,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0
+      ],
+      "recycled_krylov_correction_passes": 1,
+      "recycled_krylov_accept_count": 0,
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0
+        ],
+        "source_counts": {
+          "residual": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          22.993533780768566,
+          23.445386772726,
+          23.611006323960225,
+          24.380399664089204,
+          26.99132815356418,
+          27.77551022024239,
+          28.93989703354745,
+          29.11213278196169
+        ],
+        "ridge": 5.4443820426392655,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 3.0859860596644676e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 183.40489051716338,
+            "improvement_inf_n": -160.41135673639482,
+            "relative_improvement": -6.976368150534581
+          }
+        ],
+        "best_alpha": 1.0,
+        "candidate_residual_inf_n": 183.40489051716338,
+        "improvement_inf_n": -160.41135673639482,
+        "relative_improvement": -6.976368150534581,
+        "reason": "no_recycled_krylov_residual_descent",
+        "pass": 1
+      },
+      "recycled_krylov_correction_pass_rows": [
+        {
+          "enabled": true,
+          "attempted": true,
+          "accepted": false,
+          "candidate_vector_count": 32,
+          "basis_size_requested": 8,
+          "basis_size_used": 8,
+          "source": "residual_and_preconditioned",
+          "ridge_factor": 1e-10,
+          "minimum_relative_improvement": 1e-08,
+          "alpha_values": [
+            1.0
+          ],
+          "source_counts": {
+            "residual": 8
+          },
+          "selected_candidate_residual_inf_head": [
+            22.993533780768566,
+            23.445386772726,
+            23.611006323960225,
+            24.380399664089204,
+            26.99132815356418,
+            27.77551022024239,
+            28.93989703354745,
+            29.11213278196169
+          ],
+          "ridge": 5.4443820426392655,
+          "solve_backend": "torch_linalg_solve",
+          "coefficient_l2": 3.0859860596644676e-08,
+          "trial_rows": [
+            {
+              "alpha": 1.0,
+              "candidate_residual_inf_n": 183.40489051716338,
+              "improvement_inf_n": -160.41135673639482,
+              "relative_improvement": -6.976368150534581
+            }
+          ],
+          "best_alpha": 1.0,
+          "candidate_residual_inf_n": 183.40489051716338,
+          "improvement_inf_n": -160.41135673639482,
+          "relative_improvement": -6.976368150534581,
+          "reason": "no_recycled_krylov_residual_descent",
+          "pass": 1
+        }
+      ],
+      "node_block_smoother_sweeps": 0,
+      "node_block_smoother_weight": 1.0,
+      "node_block_smoother_block_count": 0,
+      "node_block_smoother_max_width": 0,
+      "node_block_smoother_size_counts": {},
+      "node_block_subdomain_smoother_sweeps": 0,
+      "node_block_subdomain_smoother_weight": 0.0,
+      "node_block_subdomain_smoother_update_mode": "additive",
+      "node_block_subdomain_smoother_max_dof_count": 96,
+      "node_block_subdomain_smoother_ridge_factor": 1e-10,
+      "node_block_subdomain_smoother_block_count": 0,
+      "node_block_subdomain_smoother_max_width": 0,
+      "node_block_subdomain_smoother_truncated_count": 0,
+      "node_block_subdomain_smoother_size_head": [],
+      "node_block_subdomain_smoother_storage_mode": "none",
+      "coupling_pair_smoother_count": 0,
+      "coupling_pair_smoother_pair_count": 0,
+      "coupling_pair_smoother_sweeps": 0,
+      "coupling_pair_smoother_weight": 1.0,
+      "coupling_pair_smoother_ridge_factor": 1e-10,
+      "coupling_pair_smoother_selection": "coupling_strength",
+      "coupling_pair_smoother_selection_used": "coupling_strength",
+      "coupling_pair_basis_count": 0,
+      "coupling_pair_basis_column_count": 0,
+      "coupling_pair_basis_selection": "coupling_strength",
+      "coupling_pair_basis_selection_used": "coupling_strength",
+      "coupling_pair_basis_weight": 0.0,
+      "coupling_pair_basis_ridge_factor": 1e-10,
+      "node_block_coarse_aggregate_count": 8,
+      "node_block_coarse_actual_aggregate_count": 8,
+      "node_block_coarse_ridge_factor": 1e-10,
+      "node_block_coarse_order": "coarse_then_smooth",
+      "node_block_coarse_correction_passes": 5,
+      "node_block_coarse_partition": "sorted_node_id",
+      "node_block_coarse_partition_used": "sorted_node_id",
+      "node_block_coarse_overlap_depth": 0,
+      "node_block_coarse_overlap_depth_used": 0,
+      "node_block_coarse_overlap_node_count": 0,
+      "node_block_coarse_mode": "interface_edge_geneo_harmonic_restricted",
+      "node_block_coarse_energy_modes_per_dof": 3,
+      "node_block_coarse_energy_mode_selection": "low_eigen",
+      "node_block_coarse_operator": "galerkin_ptap",
+      "node_block_coarse_boundary_node_count": 4607,
+      "node_block_coarse_interface_pair_count": 22,
+      "node_block_coarse_interface_pair_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "node_block_coarse_energy_mode_count": 362,
+      "node_block_coarse_energy_eigenvalue_head": [
+        1.0000000000003084,
+        1.0000000000023954,
+        1.0000000000057134,
+        1.0000000000005287,
+        1.0000000000007332,
+        1.0000000000017606,
+        0.0607150331185914,
+        0.07844643514069533,
+        0.08900889286477787,
+        0.056453217556847415,
+        0.1014716624609713,
+        0.12243260939332033,
+        0.061697087935524246,
+        0.0981933174519256,
+        0.11838995718955729,
+        1.000000000000002
+      ],
+      "node_block_coarse_weight": 0.0015,
+      "node_block_coarse_harmonic_extension_weight": 0.5,
+      "node_block_coarse_harmonic_extension_steps": 3,
+      "node_block_coarse_harmonic_extension_dof_count": 29657,
+      "node_block_coarse_schur_cycle_passes": 0,
+      "node_block_coarse_schur_cycle_weight": 1.0,
+      "node_block_coarse_smoothing_steps": 0,
+      "node_block_coarse_smoothing_applied_steps": 0,
+      "node_block_coarse_smoothing_weight": 0.0,
+      "node_block_coarse_column_count": 362,
+      "node_block_coarse_load_restriction_applied": true,
+      "node_block_coarse_load_restriction_column_count": 122,
+      "node_block_coarse_secondary_mode": "",
+      "node_block_coarse_secondary_operator": "none",
+      "node_block_coarse_secondary_weight": 0.0,
+      "node_block_coarse_secondary_correction_passes": 1,
+      "node_block_coarse_secondary_column_count": 0,
+      "node_block_coarse_secondary_load_restriction_applied": false,
+      "node_block_coarse_secondary_load_restriction_column_count": 0,
+      "node_block_coarse_aggregate_size_head": [
+        666,
+        78,
+        18,
+        30,
+        2,
+        428,
+        214,
+        90
+      ],
+      "residual_region_summary": {
+        "operator": "galerkin_ptap",
+        "secondary_operator": "none",
+        "primary_support": {
+          "dof_count": 29880,
+          "residual_inf_n": 22.993533780768566,
+          "residual_l2_n": 201.74281490157767,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 1.0
+        },
+        "primary_load_restriction_support": {
+          "dof_count": 21435,
+          "residual_inf_n": 22.993533780768566,
+          "residual_l2_n": 160.55515220781513,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 0.6875
+        },
+        "secondary_support": {
+          "dof_count": 0,
+          "residual_inf_n": null,
+          "residual_l2_n": null,
+          "residual_inf_fraction_of_global": null,
+          "top64_abs_residual_share": null
+        },
+        "translation_dofs": {
+          "dof_count": 11462,
+          "residual_inf_n": 22.993533780768566,
+          "residual_l2_n": 199.75054095169634,
+          "residual_inf_fraction_of_global": 1.0,
+          "top64_abs_residual_share": 1.0
+        },
+        "rotation_dofs": {
+          "dof_count": 22470,
+          "residual_inf_n": 5.22997707942274,
+          "residual_l2_n": 31.005708064410037,
+          "residual_inf_fraction_of_global": 0.2274542542824371,
+          "top64_abs_residual_share": 0.0
+        }
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 16,
+      "restart_cycles": 1,
+      "iteration_count": 16,
+      "max_iterations": 16,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 22.993533780768566,
+      "best_residual_inf_n": 22.993533780768566,
+      "relative_residual_inf": 0.7080647153837734,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        31.49595825317434,
+        29.312397866138824,
+        29.299332285354254,
+        29.11213278196169,
+        27.77551022024239,
+        29.426989370764613,
+        30.373166543417923
+      ],
+      "residual_history_tail": [
+        29.820252268778017,
+        29.410109185351402,
+        28.93989703354745,
+        26.99132815356418,
+        24.380399664089204,
+        23.611006323960225,
+        22.993533780768566,
+        23.445386772726
+      ],
+      "solve_seconds": 22.848237706988584,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 16,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 125232236,
+      "hip_kernel_invocation_count": 320,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis, node-local 6DOF smoother, and node-aggregate 6DOF coarse corrections improve the preconditioner residual through replay-checked block structure, and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    }
+  ],
+  "best_row": {
+    "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+    "device": "cuda:0",
+    "converged": false,
+    "schur_order": "rotations_first",
+    "translation_dof_count": 11462,
+    "rotation_dof_count": 22470,
+    "subblock_nnz": {
+      "tt": 125087,
+      "tr": 189836,
+      "rt": 189511,
+      "rr": 319381
+    },
+    "inner_jacobi_steps": 4,
+    "inner_jacobi_weight": 0.35,
+    "subblock_solver": "jacobi",
+    "subblock_cg_iterations": 8,
+    "subblock_multilevel_aggregate_count": 64,
+    "subblock_multilevel_max_levels": 3,
+    "subblock_multilevel_pre_smooth_steps": 1,
+    "subblock_multilevel_post_smooth_steps": 1,
+    "subblock_multilevel_smoother_weight": 0.55,
+    "subblock_multilevel_coarse_regularization_factor": 1e-08,
+    "subblock_multilevel_levels": {
+      "tt": [],
+      "rr": []
+    },
+    "schur_diagonal_correction": false,
+    "schur_diagonal_floor": 1e-12,
+    "block_schur_sweeps": 1,
+    "coupling_hotspot_correction_size": 0,
+    "coupling_hotspot_selection": "rhs_residual",
+    "coupling_hotspot_correction_dof_count": 0,
+    "coupling_hotspot_ridge_factor": 1e-10,
+    "coupling_hotspot_post_passes": 0,
+    "coupling_hotspot_post_correction_size": 0,
+    "coupling_hotspot_post_selection": "",
+    "coupling_hotspot_post_correction_dof_count": 0,
+    "krylov_adaptive_hotspot_size": 0,
+    "krylov_adaptive_ridge_factor": 1e-10,
+    "krylov_adaptive_hotspot_solve_count": 0,
+    "krylov_adaptive_hotspot_accept_count": 0,
+    "schur_basis_aggregate_count": 8,
+    "schur_basis_selection": "rhs_weighted",
+    "schur_basis_ridge_factor": 1e-10,
+    "schur_basis_weight": 1.0,
+    "schur_basis_column_count": 16,
+    "schur_basis_signed_weights": false,
+    "recycled_krylov_basis_size": 8,
+    "recycled_krylov_ridge_factor": 1e-10,
+    "recycled_krylov_min_relative_improvement": 1e-08,
+    "recycled_krylov_source": "residual_and_preconditioned",
+    "recycled_krylov_alpha_values": [
+      1.0
+    ],
+    "recycled_krylov_correction_passes": 1,
+    "recycled_krylov_accept_count": 0,
+    "recycled_krylov_candidate_count": 32,
+    "recycled_krylov_correction": {
+      "enabled": true,
+      "attempted": true,
+      "accepted": false,
+      "candidate_vector_count": 32,
+      "basis_size_requested": 8,
+      "basis_size_used": 8,
+      "source": "residual_and_preconditioned",
+      "ridge_factor": 1e-10,
+      "minimum_relative_improvement": 1e-08,
+      "alpha_values": [
+        1.0
+      ],
+      "source_counts": {
+        "residual": 8
+      },
+      "selected_candidate_residual_inf_head": [
+        22.593705557868677,
+        23.322154977189587,
+        24.1697325916358,
+        25.070170994608393,
+        27.526041044083463,
+        27.60985262003943,
+        28.36146991215849,
+        28.689972575619194
+      ],
+      "ridge": 6.888825736912639,
+      "solve_backend": "torch_linalg_solve",
+      "coefficient_l2": 2.984136170890798e-08,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "candidate_residual_inf_n": 149.1094433506912,
+          "improvement_inf_n": -126.51573779282253,
+          "relative_improvement": -5.599601068925193
+        }
+      ],
+      "best_alpha": 1.0,
+      "candidate_residual_inf_n": 149.1094433506912,
+      "improvement_inf_n": -126.51573779282253,
+      "relative_improvement": -5.599601068925193,
+      "reason": "no_recycled_krylov_residual_descent",
+      "pass": 1
+    },
+    "recycled_krylov_correction_pass_rows": [
+      {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0
+        ],
+        "source_counts": {
+          "residual": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          22.593705557868677,
+          23.322154977189587,
+          24.1697325916358,
+          25.070170994608393,
+          27.526041044083463,
+          27.60985262003943,
+          28.36146991215849,
+          28.689972575619194
+        ],
+        "ridge": 6.888825736912639,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 2.984136170890798e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 149.1094433506912,
+            "improvement_inf_n": -126.51573779282253,
+            "relative_improvement": -5.599601068925193
+          }
+        ],
+        "best_alpha": 1.0,
+        "candidate_residual_inf_n": 149.1094433506912,
+        "improvement_inf_n": -126.51573779282253,
+        "relative_improvement": -5.599601068925193,
+        "reason": "no_recycled_krylov_residual_descent",
+        "pass": 1
+      }
+    ],
+    "node_block_smoother_sweeps": 0,
+    "node_block_smoother_weight": 1.0,
+    "node_block_smoother_block_count": 0,
+    "node_block_smoother_max_width": 0,
+    "node_block_smoother_size_counts": {},
+    "node_block_subdomain_smoother_sweeps": 0,
+    "node_block_subdomain_smoother_weight": 0.0,
+    "node_block_subdomain_smoother_update_mode": "additive",
+    "node_block_subdomain_smoother_max_dof_count": 96,
+    "node_block_subdomain_smoother_ridge_factor": 1e-10,
+    "node_block_subdomain_smoother_block_count": 0,
+    "node_block_subdomain_smoother_max_width": 0,
+    "node_block_subdomain_smoother_truncated_count": 0,
+    "node_block_subdomain_smoother_size_head": [],
+    "node_block_subdomain_smoother_storage_mode": "none",
+    "coupling_pair_smoother_count": 0,
+    "coupling_pair_smoother_pair_count": 0,
+    "coupling_pair_smoother_sweeps": 0,
+    "coupling_pair_smoother_weight": 1.0,
+    "coupling_pair_smoother_ridge_factor": 1e-10,
+    "coupling_pair_smoother_selection": "coupling_strength",
+    "coupling_pair_smoother_selection_used": "coupling_strength",
+    "coupling_pair_basis_count": 0,
+    "coupling_pair_basis_column_count": 0,
+    "coupling_pair_basis_selection": "coupling_strength",
+    "coupling_pair_basis_selection_used": "coupling_strength",
+    "coupling_pair_basis_weight": 0.0,
+    "coupling_pair_basis_ridge_factor": 1e-10,
+    "node_block_coarse_aggregate_count": 8,
+    "node_block_coarse_actual_aggregate_count": 8,
+    "node_block_coarse_ridge_factor": 1e-10,
+    "node_block_coarse_order": "coarse_then_smooth",
+    "node_block_coarse_correction_passes": 5,
+    "node_block_coarse_partition": "sorted_node_id",
+    "node_block_coarse_partition_used": "sorted_node_id",
+    "node_block_coarse_overlap_depth": 0,
+    "node_block_coarse_overlap_depth_used": 0,
+    "node_block_coarse_overlap_node_count": 0,
+    "node_block_coarse_mode": "interface_edge_geneo_harmonic_restricted",
+    "node_block_coarse_energy_modes_per_dof": 3,
+    "node_block_coarse_energy_mode_selection": "low_eigen",
+    "node_block_coarse_operator": "galerkin_ptap",
+    "node_block_coarse_boundary_node_count": 4607,
+    "node_block_coarse_interface_pair_count": 22,
+    "node_block_coarse_interface_pair_size_head": [
+      666,
+      78,
+      18,
+      30,
+      2,
+      428,
+      214,
+      90
+    ],
+    "node_block_coarse_energy_mode_count": 362,
+    "node_block_coarse_energy_eigenvalue_head": [
+      1.0000000000003084,
+      1.0000000000023954,
+      1.0000000000057134,
+      1.0000000000005287,
+      1.0000000000007332,
+      1.0000000000017606,
+      0.0607150331185914,
+      0.07844643514069533,
+      0.08900889286477787,
+      0.056453217556847415,
+      0.1014716624609713,
+      0.12243260939332033,
+      0.061697087935524246,
+      0.0981933174519256,
+      0.11838995718955729,
+      1.000000000000002
+    ],
+    "node_block_coarse_weight": 0.0015,
+    "node_block_coarse_harmonic_extension_weight": 0.5,
+    "node_block_coarse_harmonic_extension_steps": 1,
+    "node_block_coarse_harmonic_extension_dof_count": 26189,
+    "node_block_coarse_schur_cycle_passes": 0,
+    "node_block_coarse_schur_cycle_weight": 1.0,
+    "node_block_coarse_smoothing_steps": 0,
+    "node_block_coarse_smoothing_applied_steps": 0,
+    "node_block_coarse_smoothing_weight": 0.0,
+    "node_block_coarse_column_count": 362,
+    "node_block_coarse_load_restriction_applied": true,
+    "node_block_coarse_load_restriction_column_count": 122,
+    "node_block_coarse_secondary_mode": "",
+    "node_block_coarse_secondary_operator": "none",
+    "node_block_coarse_secondary_weight": 0.0,
+    "node_block_coarse_secondary_correction_passes": 1,
+    "node_block_coarse_secondary_column_count": 0,
+    "node_block_coarse_secondary_load_restriction_applied": false,
+    "node_block_coarse_secondary_load_restriction_column_count": 0,
+    "node_block_coarse_aggregate_size_head": [
+      666,
+      78,
+      18,
+      30,
+      2,
+      428,
+      214,
+      90
+    ],
+    "residual_region_summary": {
+      "operator": "galerkin_ptap",
+      "secondary_operator": "none",
+      "primary_support": {
+        "dof_count": 26414,
+        "residual_inf_n": 22.593705557868677,
+        "residual_l2_n": 192.6236404860028,
+        "residual_inf_fraction_of_global": 1.0,
+        "top64_abs_residual_share": 0.9375
+      },
+      "primary_load_restriction_support": {
+        "dof_count": 21435,
+        "residual_inf_n": 22.593705557868677,
+        "residual_l2_n": 160.53330888721453,
+        "residual_inf_fraction_of_global": 1.0,
+        "top64_abs_residual_share": 0.671875
+      },
+      "secondary_support": {
+        "dof_count": 0,
+        "residual_inf_n": null,
+        "residual_l2_n": null,
+        "residual_inf_fraction_of_global": null,
+        "top64_abs_residual_share": null
+      },
+      "translation_dofs": {
+        "dof_count": 11462,
+        "residual_inf_n": 22.593705557868677,
+        "residual_l2_n": 199.52511306122412,
+        "residual_inf_fraction_of_global": 1.0,
+        "top64_abs_residual_share": 1.0
+      },
+      "rotation_dofs": {
+        "dof_count": 22470,
+        "residual_inf_n": 5.221343454661906,
+        "residual_l2_n": 29.871014810025773,
+        "residual_inf_fraction_of_global": 0.2310972603094527,
+        "top64_abs_residual_share": 0.0
+      }
+    },
+    "schur_diagonal_stats": {
+      "translation_min_abs": 139341.0756078213,
+      "translation_mean_abs": 15822585238.426039,
+      "rotation_min_abs": 482.1108386662821,
+      "rotation_mean_abs": 2524254612.863602
+    },
+    "restart_dimension": 16,
+    "restart_cycles": 1,
+    "iteration_count": 16,
+    "max_iterations": 16,
+    "initial_residual_inf_n": 32.47377433333335,
+    "residual_inf_n": 22.593705557868677,
+    "best_residual_inf_n": 22.593705557868677,
+    "relative_residual_inf": 0.6957523731596829,
+    "rhs_inf_n": 32.47377433333335,
+    "threshold_n": 0.001,
+    "residual_history_head": [
+      32.47377433333335,
+      31.49925601731,
+      29.102251711877052,
+      29.093847396959095,
+      28.689972575619194,
+      27.526041044083463,
+      28.36146991215849,
+      29.84902172894912
+    ],
+    "residual_history_tail": [
+      29.600315286734787,
+      29.11607820675212,
+      29.11964236423802,
+      27.60985262003943,
+      25.070170994608393,
+      24.1697325916358,
+      23.322154977189587,
+      22.593705557868677
+    ],
+    "solve_seconds": 7.689452828999492,
+    "device_residency_ratio": 1.0,
+    "preconditioner_apply_count": 16,
+    "host_dense_solve_fallback_count": 0,
+    "host_copy_bytes": 125232236,
+    "hip_kernel_invocation_count": 320,
+    "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+    "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+    "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis, node-local 6DOF smoother, and node-aggregate 6DOF coarse corrections improve the preconditioner residual through replay-checked block structure, and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+  },
+  "recycled_krylov_frontier_improved": false,
+  "blockers": [
+    "g9_surface_shell_bending_6dof_residual_gate_not_closed"
+  ]
+}

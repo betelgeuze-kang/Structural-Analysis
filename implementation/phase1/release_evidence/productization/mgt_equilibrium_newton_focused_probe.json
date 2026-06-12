@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
-  "generated_at": "2026-06-09T15:02:54.812066+00:00",
+  "generated_at": "2026-06-10T11:14:07.610716+00:00",
   "status": "partial",
   "equilibrium_newton_ready": false,
   "checkpoint": {
@@ -15,55 +15,176 @@
     "max_translation_m": 0.8996613409904088
   },
   "load_scale": 0.656,
-  "base_residual_inf_n": 42792.134806616465,
-  "initial_residual_inf_n": 42792.134806616465,
-  "final_residual_inf_n": 42792.134806616465,
-  "accepted_newton_iteration_count": 0,
+  "base_residual_inf_n": 192314312.6671346,
+  "initial_residual_inf_n": 192314312.6671346,
+  "final_residual_inf_n": 295.0748666189786,
+  "accepted_newton_iteration_count": 3,
   "residual_tolerance_n": 0.0005,
   "newton_iterations": [
     {
       "iteration": 1,
+      "accepted": true,
+      "alpha": 1.0,
+      "start_residual_inf_n": 192314312.6671346,
+      "best_residual_inf_n": 295.0749022201892,
+      "relative_increment": 0.9956142747147636,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 295.0749022201892
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 96157156.33354566
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 144235734.50034013
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 168275023.58373737
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 180294668.12543604
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 186304490.3962853
+        }
+      ],
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 295.07482004121766,
+      "linear_solver_regularization": 4.337386531019598,
+      "linear_solver_fallback_from_host_ilu": true,
+      "linear_solver_iterative_refinement_enabled": true
+    },
+    {
+      "iteration": 2,
+      "accepted": true,
+      "alpha": 0.25,
+      "start_residual_inf_n": 295.0749022201892,
+      "best_residual_inf_n": 295.0748670054775,
+      "relative_increment": 0.14223955450007686,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 295.0749022164639
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 295.0749022201892
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 295.0748670054775
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 295.0748692266818
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 295.07490221832654
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 295.07514635895154
+        }
+      ],
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 295.07486291758886,
+      "linear_solver_regularization": 4.337386531019598,
+      "linear_solver_fallback_from_host_ilu": true,
+      "linear_solver_iterative_refinement_enabled": true
+    },
+    {
+      "iteration": 3,
+      "accepted": true,
+      "alpha": 0.0625,
+      "start_residual_inf_n": 295.0748670054775,
+      "best_residual_inf_n": 295.0748666189786,
+      "relative_increment": 0.017469340384877206,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 295.07559324988983
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 295.07490221832654
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 295.07510960290097
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 295.07511037310474
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 295.0748666189786
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 295.0751109533187
+        }
+      ],
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 295.0749223037369,
+      "linear_solver_regularization": 4.337386531019598,
+      "linear_solver_fallback_from_host_ilu": true,
+      "linear_solver_iterative_refinement_enabled": true
+    },
+    {
+      "iteration": 4,
       "accepted": false,
       "alpha": 0.0,
-      "start_residual_inf_n": 42792.134806616465,
-      "best_residual_inf_n": 42792.134806616465,
+      "start_residual_inf_n": 295.0748666189786,
+      "best_residual_inf_n": 295.0748666189786,
       "relative_increment": 0.0,
       "trial_rows": [
         {
           "alpha": 1.0,
-          "residual_inf_n": 73500876.00109577
+          "residual_inf_n": 295.07490221832654
         },
         {
           "alpha": 0.5,
-          "residual_inf_n": 32564050.903655943
+          "residual_inf_n": 295.0751421339985
         },
         {
           "alpha": 0.25,
-          "residual_inf_n": 15218876.601385005
+          "residual_inf_n": 295.07490221832654
         },
         {
           "alpha": 0.125,
-          "residual_inf_n": 7329273.950711265
+          "residual_inf_n": 295.0751186013397
         },
         {
           "alpha": 0.0625,
-          "residual_inf_n": 3583930.012752804
+          "residual_inf_n": 295.0749022164639
         },
         {
           "alpha": 0.03125,
-          "residual_inf_n": 3575968.9178387057
+          "residual_inf_n": 295.0748685794126
         }
       ],
-      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized",
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
       "linear_solver_converged": true,
-      "linear_solver_residual_inf_n": 306.67245156068566,
-      "linear_solver_regularization": 382.1164945427174,
+      "linear_solver_residual_inf_n": 295.0747404261004,
+      "linear_solver_regularization": 4.337386531019598,
       "linear_solver_fallback_from_host_ilu": true,
+      "linear_solver_iterative_refinement_enabled": true,
       "stop_reason": "no_residual_descent"
     }
   ],
   "runtime_metrics": {
-    "total_seconds": 422.6353512900005
+    "total_seconds": 339.3525681120004
   },
   "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
   "blockers": [

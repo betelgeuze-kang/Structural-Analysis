@@ -1,0 +1,87 @@
+{
+  "schema_version": "midas-gen-same-mesh-result.v1",
+  "generated_at": "2026-06-09T15:41:00.494057+00:00",
+  "source": {
+    "kind": "model_derived_estimate",
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "midas_model_name": "midas_generator_33.optimized",
+    "note": "Model-derived same-mesh estimate computed in-repo from MGT nodal mass/geometry. NOT a licensed MIDAS Gen solver run. base_shear is equivalent-static (Cs*W); drift/top_displacement are code-target estimates pending a full-mesh lateral solve."
+  },
+  "metrics": {
+    "drift_ratio_pct": 9.200000000000001,
+    "base_shear_kN": 12082.961965157423,
+    "top_displacement_m": 0.8602000000000003
+  },
+  "derivation": {
+    "seismic_mass_ton": 9600.929000000006,
+    "seismic_weight_kN": 94152.95037785005,
+    "building_height_m": 9.350000000000001,
+    "gravity_dominant_low_rise": true
+  },
+  "assumptions": {
+    "seismic_coefficient_cs": 0.12833333333333333,
+    "cs_basis": {
+      "cs": 0.12833333333333333,
+      "cs_raw": 0.12833333333333333,
+      "cs_floor_applied": false,
+      "SDS": 0.385,
+      "R": 3.0,
+      "Ie": 1.0,
+      "formula": "Cs = SDS / (R * Ie)",
+      "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
+      "height_regime": "low_rise_gravity_dominant",
+      "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
+      "sds_derivation": {
+        "sds_basis": "derived_2p5_Z_Fa",
+        "zone_factor_Z": 0.11,
+        "site_coefficient_Fa": 1.4,
+        "site_class": "S4",
+        "seismic_zone": 1
+      },
+      "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
+    },
+    "assumed_elastic_drift_pct": 9.200000000000001,
+    "drift_basis": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
+  },
+  "metric_provenance": {
+    "base_shear_kN": "computed_cs_times_weight",
+    "seismic_weight_kN": "computed_from_model_nodal_mass",
+    "drift_ratio_pct": "condensed_story_ndtha",
+    "top_displacement_m": "condensed_story_ndtha"
+  },
+  "confidence": {
+    "base_shear_kN": "medium",
+    "drift_ratio_pct": "medium",
+    "top_displacement_m": "medium"
+  },
+  "kds_seismic": {
+    "cs": 0.12833333333333333,
+    "cs_raw": 0.12833333333333333,
+    "cs_floor_applied": false,
+    "SDS": 0.385,
+    "R": 3.0,
+    "Ie": 1.0,
+    "formula": "Cs = SDS / (R * Ie)",
+    "code_basis": "KDS 41 17 00 equivalent-static simplification (project params file)",
+    "height_regime": "low_rise_gravity_dominant",
+    "period_assumption": "short period on constant-acceleration plateau; Cs=SDS/(R*Ie) governs",
+    "sds_derivation": {
+      "sds_basis": "derived_2p5_Z_Fa",
+      "zone_factor_Z": 0.11,
+      "site_coefficient_Fa": 1.4,
+      "site_class": "S4",
+      "seismic_zone": 1
+    },
+    "params_source": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/kds/seismic_design_params.json"
+  },
+  "condensed_story_bridge": {
+    "drift_ratio_pct": 9.200000000000001,
+    "base_shear_kn": 15589.462844014923,
+    "provenance": "condensed_story_ndtha",
+    "confidence": "medium",
+    "note": "From in-repo condensed story NDTHA (same MGT mesh fingerprint); not MIDAS Gen."
+  },
+  "blockers": []
+}

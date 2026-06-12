@@ -1,0 +1,47 @@
+{
+  "schema_version": "optimization-productization-audit.v1",
+  "generated_at": "2026-06-09T15:39:34.984189+00:00",
+  "status": "ready",
+  "optimization_productization_ready": true,
+  "change_count": 20,
+  "accepted_rows_have_cost": true,
+  "accepted_rows_have_explicit_clause": false,
+  "accepted_rows_have_code": true,
+  "missing_governing_clause_count": 1,
+  "review_guarded_row_count": 20,
+  "all_rows_have_clause_or_review_guard": true,
+  "accepted_rows_have_safety": true,
+  "solver_replay_ready": true,
+  "proxy_replay_ready": true,
+  "decision_trace_ready": true,
+  "review_queue_ready": true,
+  "production_pareto_wired": true,
+  "ml_bypass_prevented": true,
+  "ml_surrogate_gate_status": "production_ready_shadow_solver_gated",
+  "ml_surrogate_checkpoint_validated": true,
+  "final_report_promotion_requires": [
+    "solver_replay_passed",
+    "code_check_replay_passed",
+    "cost_provenance_attached",
+    "human_review_recorded"
+  ],
+  "claim": "Production optimization is deterministic/replayable with governed ML disabled; accepted deltas carry solver, cost, Pareto, review, and either explicit code-clause evidence or an engineer-review code guard.",
+  "artifacts": {
+    "changes_json": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+    "proxy_solver_divergence": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/proxy_solver_divergence_gate.json",
+    "post_optimization_reanalysis": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
+    "ai_decision_trace_ledger": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_decision_trace_ledger.json",
+    "ai_review_queue": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue.json",
+    "ai_code_reasoning_guard": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_code_reasoning_guard.json",
+    "optimization_pareto_research_archive": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/optimization_pareto_research_archive.json",
+    "ml_multi_objective_status": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ml_multi_objective_status.json"
+  },
+  "summary": {
+    "cost_proxy_delta_sum": -411.1593,
+    "max_governing_dcr_after": 1.3098,
+    "pareto_front_count": 3,
+    "proposal_count": 20,
+    "review_queue_item_count": 20
+  },
+  "blockers": []
+}

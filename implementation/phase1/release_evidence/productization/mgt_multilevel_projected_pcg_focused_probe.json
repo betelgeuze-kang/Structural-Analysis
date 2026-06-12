@@ -1,0 +1,419 @@
+{
+  "schema_version": "mgt-rocm-sparse-solver-probe.v1",
+  "generated_at": "2026-06-05T15:26:14.359061+00:00",
+  "status": "partial",
+  "label": "surface_shell_bending_rocm_multilevel_projected_pcg_focused_probe",
+  "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "torch_rocm": {
+    "torch_import_ok": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_name": "AMD Radeon RX 6900 XT"
+  },
+  "matrix_shape": [
+    33932,
+    33932
+  ],
+  "matrix_nnz": 823815,
+  "mesh_fingerprint": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "combined_component_count": 3,
+    "combined_base_node_count": 404,
+    "restrained_dof_count": 2424,
+    "free_dof_count": 33932
+  },
+  "cpu_reference": {
+    "backend": "scipy_sparse_spsolve_cpu",
+    "residual_inf_n": 4.256728516338626e-07,
+    "relative_residual_inf": 1.310820378513631e-08,
+    "rhs_inf_n": 32.47377433333335,
+    "solve_seconds": 0.4154966959995363
+  },
+  "gate": {
+    "tolerance_abs": 0.001,
+    "tolerance_rel": 5e-08
+  },
+  "best_residual_inf_n": 215.75629815195504,
+  "best_converged": false,
+  "best_row": {
+    "backend": "rocm_torch_sparse_multilevel_projected_pcg",
+    "device": "cuda:0",
+    "converged": false,
+    "aggregate_count": 128,
+    "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+    "level_count": 4,
+    "levels": [
+      {
+        "level": 0,
+        "size": 33932,
+        "nnz": 823815,
+        "projector_columns": 623
+      },
+      {
+        "level": 1,
+        "size": 623,
+        "nnz": 41689,
+        "projector_columns": 156
+      },
+      {
+        "level": 2,
+        "size": 156,
+        "nnz": 5893,
+        "projector_columns": 39
+      },
+      {
+        "level": 3,
+        "size": 39,
+        "nnz": 877,
+        "projector_columns": null
+      }
+    ],
+    "pre_smooth_steps": 2,
+    "post_smooth_steps": 2,
+    "smoother_weight": 0.35,
+    "coarse_regularization_factor": 1e-08,
+    "iteration_count": 40,
+    "max_iterations": 40,
+    "initial_residual_inf_n": 32.47377433333335,
+    "residual_inf_n": 215.75629815195504,
+    "relative_residual_inf": 6.64401667441803,
+    "rhs_inf_n": 32.47377433333335,
+    "threshold_n": 0.001,
+    "residual_history_head": [
+      32.47377433333335,
+      302.33001424800665,
+      299.9450083918075,
+      282.2893371426759,
+      376.1820141827157,
+      240.82307452446986,
+      361.7520435853584,
+      243.83396089010364
+    ],
+    "residual_history_tail": [
+      325.21126691998217,
+      245.52990404670467,
+      237.95873075693564,
+      294.91411090914016,
+      190.93122464191129,
+      255.5516157476854,
+      289.6720170584189,
+      215.7562981519386
+    ],
+    "solve_seconds": 0.4037413740006741,
+    "device_residency_ratio": 1.0,
+    "vcycle_count": 41,
+    "host_dense_solve_fallback_count": 0,
+    "host_copy_bytes": 181388580,
+    "hip_kernel_invocation_count": 1120,
+    "solver_path_kind": "rocm_sparse_multilevel_projected_pcg_probe",
+    "breakdown": "multilevel_projected_pcg_residual_gate_not_met",
+    "claim_boundary": "Recursive projected V-cycle PCG uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+  },
+  "rows": [
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_pcg",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 64,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 3,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 315
+        },
+        {
+          "level": 1,
+          "size": 315,
+          "nnz": 20263,
+          "projector_columns": 79
+        },
+        {
+          "level": 2,
+          "size": 79,
+          "nnz": 2228,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 2,
+      "post_smooth_steps": 2,
+      "smoother_weight": 0.5,
+      "coarse_regularization_factor": 1e-08,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 3079.8061882024167,
+      "relative_residual_inf": 94.83979769610853,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        274.04029389591744,
+        955.5771191510192,
+        498.49318977022676,
+        997.9675578550332,
+        1718.6114125456377,
+        1555.7902777538482,
+        2676.0026926593773
+      ],
+      "residual_history_tail": [
+        2188.023025922623,
+        2021.6625347019192,
+        2089.061029027464,
+        2100.6187089577393,
+        2727.6035615631076,
+        2673.821769191578,
+        2676.6602618241855,
+        3079.8061882024167
+      ],
+      "solve_seconds": 0.5790449240012094,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 41,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 96870052,
+      "hip_kernel_invocation_count": 840,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_pcg_probe",
+      "breakdown": "multilevel_projected_pcg_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle PCG uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_pcg",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 3,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 41689,
+          "projector_columns": 156
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5893,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 2,
+      "post_smooth_steps": 2,
+      "smoother_weight": 0.5,
+      "coarse_regularization_factor": 1e-08,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 2418.71907217519,
+      "relative_residual_inf": 74.48222825433777,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        354.43118923823806,
+        962.3228719317808,
+        541.8670639019788,
+        1441.4672458842856,
+        2187.0349382760396,
+        1794.0141042424189,
+        2431.0288195694925
+      ],
+      "residual_history_tail": [
+        2489.333903569332,
+        2551.5229695983658,
+        2508.3005403473876,
+        2587.8527269975043,
+        2526.2538419704388,
+        2438.4746403782,
+        2505.869139428413,
+        2418.7190721751895
+      ],
+      "solve_seconds": 0.40666356700057804,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 41,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181509244,
+      "hip_kernel_invocation_count": 840,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_pcg_probe",
+      "breakdown": "multilevel_projected_pcg_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle PCG uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_pcg",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 128,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 623
+        },
+        {
+          "level": 1,
+          "size": 623,
+          "nnz": 41689,
+          "projector_columns": 156
+        },
+        {
+          "level": 2,
+          "size": 156,
+          "nnz": 5893,
+          "projector_columns": 39
+        },
+        {
+          "level": 3,
+          "size": 39,
+          "nnz": 877,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 2,
+      "post_smooth_steps": 2,
+      "smoother_weight": 0.35,
+      "coarse_regularization_factor": 1e-08,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 215.75629815195504,
+      "relative_residual_inf": 6.64401667441803,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        302.33001424800665,
+        299.9450083918075,
+        282.2893371426759,
+        376.1820141827157,
+        240.82307452446986,
+        361.7520435853584,
+        243.83396089010364
+      ],
+      "residual_history_tail": [
+        325.21126691998217,
+        245.52990404670467,
+        237.95873075693564,
+        294.91411090914016,
+        190.93122464191129,
+        255.5516157476854,
+        289.6720170584189,
+        215.7562981519386
+      ],
+      "solve_seconds": 0.4037413740006741,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 41,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 181388580,
+      "hip_kernel_invocation_count": 1120,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_pcg_probe",
+      "breakdown": "multilevel_projected_pcg_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle PCG uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    },
+    {
+      "backend": "rocm_torch_sparse_multilevel_projected_pcg",
+      "device": "cuda:0",
+      "converged": false,
+      "aggregate_count": 256,
+      "projector_kind": "distributed_structural_node_dof_orthogonal_projection",
+      "level_count": 4,
+      "levels": [
+        {
+          "level": 0,
+          "size": 33932,
+          "nnz": 823815,
+          "projector_columns": 1225
+        },
+        {
+          "level": 1,
+          "size": 1225,
+          "nnz": 72703,
+          "projector_columns": 307
+        },
+        {
+          "level": 2,
+          "size": 307,
+          "nnz": 11823,
+          "projector_columns": 77
+        },
+        {
+          "level": 3,
+          "size": 77,
+          "nnz": 2535,
+          "projector_columns": null
+        }
+      ],
+      "pre_smooth_steps": 2,
+      "post_smooth_steps": 2,
+      "smoother_weight": 0.35,
+      "coarse_regularization_factor": 1e-08,
+      "iteration_count": 40,
+      "max_iterations": 40,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 221.14877163278757,
+      "relative_residual_inf": 6.810072933400446,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        283.46953861030624,
+        301.1139442284559,
+        286.1252127012625,
+        380.5482239100589,
+        244.8030624085382,
+        342.42930203381275,
+        254.77008188231565
+      ],
+      "residual_history_tail": [
+        279.53896884063107,
+        251.18009208020237,
+        246.50082843202637,
+        400.2900317459557,
+        203.38450118973768,
+        280.00442792525854,
+        274.0564425943619,
+        221.14877163280028
+      ],
+      "solve_seconds": 0.5037268020005286,
+      "device_residency_ratio": 1.0,
+      "vcycle_count": 41,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 347690328,
+      "hip_kernel_invocation_count": 1120,
+      "solver_path_kind": "rocm_sparse_multilevel_projected_pcg_probe",
+      "breakdown": "multilevel_projected_pcg_residual_gate_not_met",
+      "claim_boundary": "Recursive projected V-cycle PCG uses distributed structural-node DOF modes as the first-level orthogonal projection basis when authored free_global_dof metadata is available, then algebraic RCM aggregation on coarser levels. Sparse matvecs, restrictions, prolongations, Jacobi smoothing, and coarse dense solves run on the ROCm torch device; CPU work is hierarchy setup only and cannot promote closure without full assembled CSR residual replay."
+    }
+  ],
+  "claim_boundary": "Focused no-new-dependency ROCm torch recursive V-cycle PCG using distributed structural-node DOF projection as the first-level near-nullspace. This is not closure unless full assembled CSR residual replay meets the G9 gate."
+}

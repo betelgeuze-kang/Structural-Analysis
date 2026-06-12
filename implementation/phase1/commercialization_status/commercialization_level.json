@@ -5,23 +5,23 @@
     "engineer_in_loop_95_99_ready",
     "external_submission_queue_operational",
     "external_submission_update_sidecar_applied",
-    "p1_benchmark_breadth_inputs_ready",
+    "p1_benchmark_execution_unblocked",
     "residual_holdout_operational_queue_present"
   ],
   "artifacts": {
-    "commercial_readiness": "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json",
+    "commercial_readiness": "implementation/phase1/commercial_readiness_report.json",
     "external_benchmark_submission_readiness": "implementation/phase1/release/external_benchmark_submission_readiness.json",
     "external_benchmark_submission_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
     "p1_benchmark_breadth_status": "implementation/phase1/release/p1_benchmark_breadth_status.json",
-    "p1_operational_queues": "implementation/phase1/commercialization_status/p1_operational_queues.json",
+    "p1_operational_queues": "implementation/phase1/release/p1_operational_queues/p1_operational_queues.json",
     "residual_holdout_closure_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
   },
   "blockers": [
     "external_submission_receipts_pending=4",
-    "p1_benchmark_execution_blocked_by_p0_or_execution_gate",
     "residual_holdout_closure_pending=3",
     "full_commercial_replacement_ready=false"
   ],
+  "closure_mode": "strict",
   "commercial_scope": {
     "accelerated_coverage_target_pct_range": [
       95,
@@ -39,7 +39,8 @@
   },
   "commercialization_level": "L3",
   "commercialization_level_label": "engineer_in_loop_commercial_assist_ready",
-  "commercialization_score": 7.0,
+  "commercialization_score": 7.5,
+  "conditional_productization_closed": true,
   "contract_pass": true,
   "external_benchmark_submission": {
     "closure_evidence_attached_count": 0,
@@ -51,9 +52,14 @@
     "submission_receipt_attached_count": 0,
     "submission_receipt_pending_count": 4
   },
-  "p1_benchmark_execution_unblocked": false,
+  "p1_benchmark_execution_unblocked": true,
   "p1_operational_queues_present": true,
   "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
   "schema_version": "commercialization-level-report.v1",
-  "summary_line": "Commercialization level: L3 engineer_in_loop_commercial_assist_ready | score=7.0/10 | grade=Commercial | mode=engineer_in_the_loop_accelerated_coverage | full_commercial_replacement_ready=False"
+  "strict_evidence_blockers": [
+    "external_submission_receipts_pending",
+    "residual_holdout_closure_pending"
+  ],
+  "strict_evidence_closed": false,
+  "summary_line": "Commercialization level: L3 engineer_in_loop_commercial_assist_ready | score=7.5/10 | grade=Commercial | mode=engineer_in_the_loop_accelerated_coverage | full_commercial_replacement_ready=False"
 }

@@ -1,0 +1,33 @@
+{
+  "checks_required": true,
+  "created_at": "2026-05-31T10:05:19Z",
+  "done_criteria": "Verify the requested outcome and hand off exact gaps.",
+  "external_state": false,
+  "goal": "Close gaps from docs/commercial-structural-solver-product-gap-ledger.md and docs/structural-analysis-ai-engine-gap-ledger.md until commercial structural solver and AI engine readiness gates are evidence-backed",
+  "handoff_required": true,
+  "mode": "deep",
+  "mode_contract": {
+    "forbids": [
+      "done without verification evidence"
+    ],
+    "requires": [
+      "task.json",
+      "todo.md",
+      "trace.jsonl",
+      "verification.json",
+      "handoff"
+    ]
+  },
+  "notes": [
+    {
+      "from": "created",
+      "note": "Gap-ledger matrix and AI productization contracts implemented; focused tests pass; full objective remains open.",
+      "to": "acting",
+      "ts": "2026-05-31T10:13:16Z"
+    }
+  ],
+  "risk": "R3",
+  "state": "acting",
+  "task_id": "2026-05-31T10-05-19-close-gaps-from-docs/commercial-structural-solver-product-gap-ledger.md-and",
+  "updated_at": "2026-05-31T10:13:16Z"
+}

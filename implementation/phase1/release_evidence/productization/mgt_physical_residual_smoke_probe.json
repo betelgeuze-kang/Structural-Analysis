@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-physical-residual-smoke-probe.v1",
-  "generated_at": "2026-06-09T13:27:51.705115+00:00",
+  "generated_at": "2026-06-10T10:42:20.937648+00:00",
   "status": "partial",
   "physical_residual_gate_ready": false,
   "checkpoint": {
@@ -15,14 +15,14 @@
     "max_translation_m": 0.8996613409904088
   },
   "residual_tolerance_n": 0.0005,
-  "physical_residual_inf_n": 42792.134806616465,
-  "physical_residual_deformed_load_inf_n": 42792.134806616465,
-  "quasi_tangent_residual_inf_n": 42754.66805918372,
+  "physical_residual_inf_n": 192314312.6671346,
+  "physical_residual_deformed_load_inf_n": 192314312.6671346,
+  "quasi_tangent_residual_inf_n": 192139971.78194255,
   "fixed_point_solver_receipt_residual_inf_n": 0.00011023672608700963,
   "equilibrium_replay_matches_pdelta_operator": true,
-  "physical_relative_residual_inf": 4.932163286038119,
-  "quasi_relative_residual_inf": 4.927844919661443,
-  "improvement_factor_quasi_over_physical": 0.9991244478079427,
+  "physical_relative_residual_inf": 22165.886245288166,
+  "quasi_relative_residual_inf": 22145.791951860516,
+  "improvement_factor_quasi_over_physical": 0.9990934586054766,
   "claim_note": "fixed_point_solver_receipt_residual_inf_n is the regularized linear-solve residual K_reg u_solve - rhs, not the equilibrium replay ||F_int(u)-F_ext|| at the stored displacement.",
   "mesh_fingerprint": {
     "raw_line_element_count": 5576,
@@ -35,11 +35,12 @@
     "frame_local_axis_nonzero_angle_count": 150,
     "frame_local_axis_max_abs_angle_deg": 270.0,
     "node_count": 13047,
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
     "frame_material_stiffness_nnz": 291132,
-    "frame_geometric_delta_stiffness_nnz": 134118,
+    "frame_geometric_delta_stiffness_nnz": 44913,
     "shell_stiffness_nnz": 1901664,
     "spring_stiffness_nnz": 40608,
-    "coupled_stiffness_nnz": 2000607,
+    "coupled_stiffness_nnz": 1141197,
     "frame_material_meta": {
       "real_section_material_element_count": 5485,
       "real_section_material_coverage_pct": 98.58015815959742,
@@ -102,7 +103,7 @@
       "surface_material_coverage_pct": 96.33668903803132,
       "unique_surface_material_count": 20,
       "unique_surface_section_count": 15,
-      "surface_total_area_m2": 11403.866992783793,
+      "surface_total_area_m2": 11404.192103423085,
       "surface_stiffness_nnz": 1901664,
       "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
       "source_plate_thickness_coverage_count": 7152,
@@ -111,41 +112,17 @@
       "thickness_min_m": 0.140625,
       "thickness_max_m": 0.85
     },
-    "physical_internal_force_model": "elastic_frame_geometric_plus_linear_shell_plus_springs",
-    "frame_equilibrium_stiffness_nnz": 291132,
-    "equilibrium_stiffness_nnz": 2000607,
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_linear_shell_plus_springs",
+    "use_force_based_frame": true,
+    "frame_equilibrium_stiffness_nnz": 0,
+    "shell_spring_stiffness_nnz": 1072990,
     "frame_equilibrium_meta": {
+      "frame_internal_force_model": "corotational_force_based_6dof",
       "real_section_material_element_count": 5485,
-      "real_section_material_coverage_pct": 98.58015815959742,
-      "total_gravity_n": 129592198.79379755,
-      "unique_section_count": 182,
-      "unique_material_count": 11,
-      "local_axis_roll_transform_applied_count": 150,
-      "local_axis_max_abs_angle_deg": 270.0,
-      "section_usage_head": {
-        "1088": 3374,
-        "4": 446,
-        "6": 200,
-        "29": 138,
-        "1053": 84,
-        "44": 76,
-        "248": 58,
-        "93": 56,
-        "256": 38,
-        "48": 34
-      },
-      "material_usage_head": {
-        "1": 2110,
-        "2": 1686,
-        "3": 1683,
-        "29": 17,
-        "30": 15,
-        "28": 14,
-        "31": 10,
-        "27": 9,
-        "26": 9,
-        "5": 6
-      }
+      "geometric_element_count": 1946,
+      "min_chord_length_m": 0.31923032437409377,
+      "max_chord_length_ratio": 1.0,
+      "element_count": 5564
     },
     "stress_corrected_element_count": 0,
     "support_constraint_row_count": 8,
@@ -187,7 +164,7 @@
     "stiffness_abs_max_n_per_m_or_nm_per_rad": 1000000000.0
   },
   "runtime_metrics": {
-    "total_seconds": 21.79051567099998
+    "total_seconds": 21.840618927999913
   },
   "claim_boundary": "Compares physical F_int-based direct residual against the legacy quasi-tangent K_tangent(u)u - F_ext residual at the same checkpoint.",
   "blockers": [

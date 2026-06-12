@@ -65,7 +65,7 @@ def build_ml_multi_objective_status(
     ml_gate = probe_ml_surrogate_production_gate()
     production_ml_wired = production_ml_wired or bool(ml_gate.get("production_ml_wired"))
     if production_ml_wired:
-        overall_status = "production_opt_in_ready"
+        overall_status = "production_shadow_solver_gated_ready"
     elif pareto_ready:
         overall_status = "research_archive_ready"
     else:
@@ -79,8 +79,16 @@ def build_ml_multi_objective_status(
         "research_pareto_archive_ready": pareto_ready,
         "research_pareto_front_count": pareto_count,
         "ml_surrogate_production_gate": ml_gate,
-        "claim": "Production optimization remains deterministic greedy/heuristic unless ML opt-in + checkpoint are set.",
+        "claim": (
+            "Production optimization remains solver/code gated; validated ML may run only in "
+            "shadow_with_solver_fallback mode and cannot bypass hard gates."
+        ),
         "runner_static_scan": runner_hits,
         "pareto_archive_path": str(pareto_path) if pareto_path.is_file() else "",
-        "next_step": "Set PHASE1_ML_SURROGATE_OPT_IN=1 and ship validated checkpoint to enable surrogate hook.",
+        "next_step": (
+            "Broaden checkpoint validation beyond the current bounded design-optimization state before using "
+            "surrogate output for autonomous design action ranking."
+        )
+        if production_ml_wired
+        else "Build validated checkpoint with dataset/model cards, OOD gate, and solver fallback receipt.",
     }

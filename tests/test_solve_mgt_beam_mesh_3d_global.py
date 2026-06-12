@@ -61,8 +61,11 @@ def test_mgt_beam_mesh_3d_real_section_properties_stable() -> None:
     assert payload.get("converged") is True
     assert payload.get("solve_mode") in {
         "mgt_npz_beam_mesh_3d_real_section",
+        "mgt_npz_beam_mesh_3d_real_section_connected_component",
         "mgt_npz_beam_mesh_3d_real_section_linear_tangent",
     }
+    mesh = payload.get("mesh_fingerprint") if isinstance(payload.get("mesh_fingerprint"), dict) else {}
+    assert int(mesh.get("nodes_in_submesh") or 0) <= int(mesh.get("beam_elements_solved") or 0) + 1
     metrics = payload.get("response_metrics") if isinstance(payload.get("response_metrics"), dict) else {}
     assert np.isfinite(float(metrics.get("max_drift_ratio_pct") or 0.0))
 
@@ -114,6 +117,7 @@ def test_mgt_beam_mesh_3d_improved_newton_real_section_convergence() -> None:
     newton_iters = int(improved.get("newton_iterations_total") or 0)
     fell_back = bool(improved.get("fell_back_to_linear_tangent"))
     nonlinear = bool(improved.get("nonlinear_equilibrium"))
+    component_nonlinear = bool(improved.get("representative_component_nonlinear_equilibrium"))
     improved_first_residual: float | None = None
     for row in improved.get("newton_iteration_log") or []:
         if isinstance(row, dict) and row.get("solver_mode") == "global_beam_newton":
@@ -121,6 +125,7 @@ def test_mgt_beam_mesh_3d_improved_newton_real_section_convergence() -> None:
             break
 
     geometric_ok = nonlinear and newton_at is not None and float(newton_at) >= 0.5
+    component_geometric_ok = component_nonlinear and newton_at is not None and float(newton_at) >= 0.5
     fallback_documented = fell_back and newton_iters > 0
     if fallback_documented and legacy_first_residual is not None and improved_first_residual is not None:
         fallback_documented = improved_first_residual < legacy_first_residual
@@ -131,8 +136,8 @@ def test_mgt_beam_mesh_3d_improved_newton_real_section_convergence() -> None:
             legacy_metrics.get("residual_inf") or 1.0
         )
 
-    assert geometric_ok or fallback_documented, (
-        f"expected geometric Newton at load>=0.5 or documented fallback; "
+    assert geometric_ok or component_geometric_ok or fallback_documented, (
+        f"expected geometric Newton at load>=0.5, representative component Newton, or documented fallback; "
         f"newton_at={newton_at}, nonlinear={nonlinear}, fell_back={fell_back}, iters={newton_iters}, "
         f"improved_r0={improved_first_residual}, legacy_r0={legacy_first_residual}"
     )

@@ -1,0 +1,24 @@
+{
+  "schema_version": "ai-review-queue-contract.v1",
+  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "status": "contract_ready",
+  "queue_item_states": [
+    "pending_review",
+    "accepted",
+    "rejected",
+    "waived",
+    "blocked",
+    "unsupported"
+  ],
+  "minimum_fields": [
+    "proposal_id",
+    "member_or_group_id",
+    "before_state_hash",
+    "after_state_hash",
+    "governing_constraint",
+    "confidence",
+    "unsupported_caveat",
+    "evidence_links",
+    "reviewer_decision"
+  ]
+}

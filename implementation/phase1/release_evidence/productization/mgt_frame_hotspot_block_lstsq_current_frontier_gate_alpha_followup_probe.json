@@ -1,0 +1,84 @@
+{
+  "schema_version": "mgt-frame-hotspot-diagonal-newton-probe.v1",
+  "generated_at": "2026-06-12T14:38:14.059838+00:00",
+  "status": "partial",
+  "direct_residual_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_probe_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 85,
+    "accepted_residual_history_count": 85,
+    "residual_inf_n": 6680.772153435075,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 7.2199044927738195e-06
+  },
+  "base_direct_residual": {
+    "direct_residual_inf_n": 6680.772153435075,
+    "direct_relative_residual_inf": 0.7700167165407114,
+    "rhs_inf_n": 8676.13911480824
+  },
+  "final_direct_residual": {
+    "direct_residual_inf_n": 6645.0522909041065,
+    "direct_relative_residual_inf": 0.7658996937430936,
+    "rhs_inf_n": 8676.13911480824,
+    "free_dof_set_stable": true,
+    "improvement_inf_n": 35.719862530968385,
+    "relative_improvement": 0.005346666779019276
+  },
+  "promotion_mode": "block_lstsq",
+  "promoted_to_final_state": true,
+  "promotion_count": 1,
+  "max_promotions": 2,
+  "stop_reason": "progress_artifact_after_accepted_pass",
+  "promotion_passes": [
+    {
+      "pass_index": 0,
+      "base_direct_residual_inf_n": 6680.772153435075,
+      "candidate_direct_residual_inf_n": 6645.0522909041065,
+      "actual_direct_residual_inf_n": 6645.0522909041065,
+      "direct_relative_residual_inf": 0.7658996937430936,
+      "improvement_inf_n": 35.719862530968385,
+      "relative_improvement": 0.005346666779019276,
+      "alpha": 0.005346666779019321,
+      "step_m": null,
+      "relative_increment": 9.99999999999e-05,
+      "relative_increment_gate_passed": true,
+      "residual_gate_passed": false,
+      "free_dof_set_stable": true,
+      "selected_hotspot_row_count": 8,
+      "correction_inf_m": 1.3503561735131836e-07
+    }
+  ],
+  "promotion_candidate": {
+    "alpha": 0.005346666779019321,
+    "step_m": null,
+    "direct_residual_inf_n": 6645.0522909041065,
+    "direct_relative_residual_inf": 0.7658996937430936,
+    "improvement_inf_n": 35.719862530968385,
+    "relative_improvement": 0.005346666779019276,
+    "relative_increment": 9.99999999999e-05,
+    "residual_gate_passed": false,
+    "relative_increment_gate_passed": true
+  },
+  "output_final_checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_probe_final_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 6645.0522909041065,
+    "direct_relative_residual_inf": 0.7658996937430936,
+    "max_translation_m": 7.2199044927738195e-06,
+    "accepted_history_count": 86,
+    "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_probe_final_checkpoint.npz"
+  },
+  "runtime_metrics": {
+    "total_seconds": 163.40557112100032
+  },
+  "claim_boundary": "Progress artifact written after an accepted promotion pass. This is not final nonlinear residual closure.",
+  "blockers": [
+    "direct_residual_gate_not_closed",
+    "global_consistent_newton_or_load_path_required"
+  ]
+}

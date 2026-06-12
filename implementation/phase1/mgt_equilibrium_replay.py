@@ -7,6 +7,10 @@ from typing import Any, Callable
 
 import numpy as np
 
+from mgt_equilibrium_line_search import (
+    select_residual_descent_alpha,
+    trust_region_line_search_alphas,
+)
 from mgt_physical_residual_assembly import assemble_physical_internal_forces
 
 
@@ -108,8 +112,27 @@ def run_equilibrium_newton(
         0.03125,
     ),
     prefer_host_ilu: bool = True,
+    displacement_cap_m: float | None = None,
+    max_newton_translation_increment_m: float | None = None,
+    node_xyz: np.ndarray | None = None,
+    use_trust_region_line_search: bool = True,
+    allow_negative_alphas: bool = False,
+    linear_solver_profile: str = "production",
+    state_scale_line_search_values: tuple[float, ...] = (),
 ) -> dict[str, Any]:
     from mgt_sparse_linear_solver import solve_newton_correction
+    from run_mgt_coupled_frame_surface_sparse_equilibrium import _translation_metrics
+
+    per_step_increment_cap = max_newton_translation_increment_m
+    if (
+        per_step_increment_cap is None
+        and displacement_cap_m is not None
+        and float(displacement_cap_m) > 0.0
+    ):
+        per_step_increment_cap = max(
+            float(displacement_cap_m) / max(4.0, float(max_newton_iterations)),
+            min(1.0, 0.2 * float(displacement_cap_m)),
+        )
 
     u = np.asarray(u0, dtype=np.float64).copy()
     iterations: list[dict[str, Any]] = []
@@ -134,11 +157,67 @@ def run_equilibrium_newton(
                 }
             )
             break
+        state_scale_rows: list[dict[str, Any]] = []
+        best_state_scale = 1.0
+        best_state_scale_residual = residual_inf
+        best_state_scale_u = u
+        for state_scale in state_scale_line_search_values:
+            scale = float(state_scale)
+            if not np.isfinite(scale) or abs(scale - 1.0) <= 1.0e-15:
+                continue
+            candidate = scale * u
+            _scale_k, _scale_f, scale_free, scale_residual, _scale_rhs, _scale_meta = assemble_residual(
+                candidate
+            )
+            free_stable = bool(
+                np.asarray(scale_free, dtype=np.int64).shape == np.asarray(free, dtype=np.int64).shape
+                and np.array_equal(np.asarray(scale_free, dtype=np.int64), np.asarray(free, dtype=np.int64))
+            )
+            scale_residual_inf = (
+                float(np.max(np.abs(scale_residual))) if scale_residual.size else float("inf")
+            )
+            state_scale_rows.append(
+                {
+                    "state_scale": scale,
+                    "residual_inf_n": scale_residual_inf,
+                    "free_dof_set_stable": free_stable,
+                }
+            )
+            if free_stable and scale_residual_inf < best_state_scale_residual:
+                best_state_scale = scale
+                best_state_scale_residual = scale_residual_inf
+                best_state_scale_u = candidate
+        if abs(best_state_scale - 1.0) > 1.0e-15 and best_state_scale_residual < residual_inf:
+            increment_inf = (
+                float(np.max(np.abs(best_state_scale_u - u))) if best_state_scale_u.size else 0.0
+            )
+            max_abs = max(float(np.max(np.abs(best_state_scale_u))) if best_state_scale_u.size else 0.0, 1.0e-9)
+            relative_increment = increment_inf / max_abs
+            u = np.asarray(best_state_scale_u, dtype=np.float64)
+            iterations.append(
+                {
+                    "iteration": iteration,
+                    "accepted": True,
+                    "update_mode": "state_scale_line_search",
+                    "state_scale": float(best_state_scale),
+                    "start_residual_inf_n": residual_inf,
+                    "best_residual_inf_n": best_state_scale_residual,
+                    "relative_increment": relative_increment,
+                    "trial_rows": state_scale_rows,
+                    "allow_negative_alphas": bool(allow_negative_alphas),
+                }
+            )
+            if best_state_scale_residual <= float(residual_tolerance_n):
+                converged = True
+                break
+            continue
         k_ff = stiffness[free, :][:, free].tocsc()
         delta_free, solver_meta = solve_newton_correction(
             k_ff,
             residual,
             prefer_host_ilu=prefer_host_ilu,
+            free_global_dofs=np.asarray(free, dtype=np.int64),
+            solver_profile=linear_solver_profile,
         )
         if not np.all(np.isfinite(delta_free)):
             iterations.append(
@@ -153,20 +232,50 @@ def run_equilibrium_newton(
             break
         delta = np.zeros_like(u)
         delta[free] = np.asarray(delta_free, dtype=np.float64)
-        best_alpha = 0.0
-        best_residual_inf = residual_inf
-        best_u = u
-        trial_rows: list[dict[str, Any]] = []
-        for alpha in line_search_alphas:
-            candidate = u + float(alpha) * delta
-            _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(candidate)
-            trial_inf = float(np.max(np.abs(trial_residual))) if trial_residual.size else float("inf")
-            trial_rows.append({"alpha": float(alpha), "residual_inf_n": trial_inf})
-            if trial_inf < best_residual_inf:
-                best_residual_inf = trial_inf
-                best_alpha = float(alpha)
-                best_u = candidate
-        accepted = best_alpha > 0.0 and best_residual_inf < residual_inf
+        search_displacement_cap = displacement_cap_m
+        if (
+            use_trust_region_line_search
+            and displacement_cap_m is not None
+            and residual_inf > float(residual_tolerance_n)
+        ):
+            search_displacement_cap = float(displacement_cap_m) * 0.85
+        search_alphas = (
+            trust_region_line_search_alphas(
+                u=u,
+                delta=delta,
+                node_xyz=node_xyz,
+                displacement_cap_m=search_displacement_cap,
+                translation_metrics=_translation_metrics,
+                max_translation_increment_m=per_step_increment_cap,
+                base_alphas=line_search_alphas,
+                include_negative=bool(allow_negative_alphas),
+            )
+            if use_trust_region_line_search
+            else (
+                line_search_alphas
+                if not allow_negative_alphas
+                else tuple(
+                    list(line_search_alphas)
+                    + [
+                        -float(alpha)
+                        for alpha in line_search_alphas
+                        if float(alpha) > 0.0
+                    ]
+                )
+            )
+        )
+        best_alpha, best_residual_inf, best_u, trial_rows = select_residual_descent_alpha(
+            u=u,
+            delta=delta,
+            residual_inf=residual_inf,
+            assemble_residual=assemble_residual,
+            alphas=search_alphas,
+            node_xyz=node_xyz,
+            displacement_cap_m=displacement_cap_m,
+            max_translation_increment_m=per_step_increment_cap,
+            translation_metrics=_translation_metrics if displacement_cap_m is not None else None,
+        )
+        accepted = abs(float(best_alpha)) > 0.0 and best_residual_inf < residual_inf
         if accepted:
             u = best_u
             increment_inf = float(np.max(np.abs(float(best_alpha) * delta))) if delta.size else 0.0
@@ -180,10 +289,11 @@ def run_equilibrium_newton(
             "best_residual_inf_n": best_residual_inf,
             "relative_increment": relative_increment,
             "trial_rows": trial_rows,
+            "allow_negative_alphas": bool(allow_negative_alphas),
             **solver_meta,
         }
         iterations.append(iteration_row)
-        if best_residual_inf <= float(residual_tolerance_n):
+        if accepted and best_residual_inf <= float(residual_tolerance_n):
             converged = True
             break
         if not accepted:
@@ -210,4 +320,10 @@ def run_equilibrium_newton(
         "final_meta": final_meta,
         "residual_tolerance_n": float(residual_tolerance_n),
         "relative_increment_tolerance": float(relative_increment_tolerance),
+        "max_newton_translation_increment_m": per_step_increment_cap,
+        "allow_negative_alphas": bool(allow_negative_alphas),
+        "linear_solver_profile": str(linear_solver_profile or "production"),
+        "state_scale_line_search_values": [
+            float(value) for value in state_scale_line_search_values
+        ],
     }

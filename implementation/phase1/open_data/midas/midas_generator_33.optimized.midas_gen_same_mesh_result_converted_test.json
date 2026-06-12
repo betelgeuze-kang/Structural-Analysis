@@ -1,0 +1,20 @@
+{
+  "schema_version": "midas-gen-same-mesh-result.v1",
+  "generated_at": "2026-05-31T05:11:32.916882+00:00",
+  "source": {
+    "kind": "midas_gen_live_export",
+    "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+    "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "load_case": "COMB1",
+    "run_id": "",
+    "midas_model_name": "midas_generator_33.optimized.roundtrip",
+    "note": "Converted from CSV midas_generator_33.optimized.midas_gen_summary.example.csv",
+    "source_csv": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.midas_gen_summary.example.csv"
+  },
+  "metrics": {
+    "drift_ratio_pct": 1.92,
+    "base_shear_kN": 1640.0,
+    "top_displacement_m": 0.55
+  },
+  "blockers": []
+}

@@ -1,0 +1,284 @@
+{
+  "schema_version": "mgt-equilibrium-preconditioned-zero-probe.v1",
+  "generated_at": "2026-06-11T14:09:38.584693+00:00",
+  "status": "ready",
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_zero_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": null,
+    "accepted_state_history_count": 0,
+    "accepted_residual_history_count": 0,
+    "residual_inf_n": 7540.959476872,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": null
+  },
+  "load_scale": 0.656,
+  "start_mode": "checkpoint",
+  "checkpoint_residual_inf_n": 7540.959476872,
+  "start_state_residual_inf_n": 7540.959476872,
+  "start_state_relative_residual_inf": 0.8691607380985004,
+  "start_state_rhs_inf_n": 8676.13911480824,
+  "start_state_max_abs_displacement_m": 6.3345455840968085e-06,
+  "zero_state_residual_inf_n": 7540.959476872,
+  "zero_state_relative_residual_inf": 0.8691607380985004,
+  "zero_state_rhs_inf_n": 8676.13911480824,
+  "free_dof_count": 58998,
+  "zero_state_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs",
+    "newton_tangent_model": "equilibrium_operator_consistent_with_force_based_f_int",
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "stiffness_unit_audit": {
+      "per_component": {
+        "frame": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 12882,
+          "diag_abs_min": 2172.9583362166586,
+          "diag_abs_max": 263291938026322.7,
+          "diag_abs_mean": 156315359184.00784,
+          "diag_abs_median": 82837515.0898557,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "shell": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 44988,
+          "diag_abs_min": 411.94743221423107,
+          "diag_abs_max": 936561378488.6742,
+          "diag_abs_mean": 22775105512.83593,
+          "diag_abs_median": 6701456070.4574375,
+          "unit": "N_per_m_or_Nm_per_rad"
+        },
+        "spring": {
+          "free_diag_count": 58998,
+          "nonzero_diag_count": 20304,
+          "diag_abs_min": 1.0,
+          "diag_abs_max": 1000000000.0,
+          "diag_abs_mean": 166700000.5,
+          "diag_abs_median": 50000.5,
+          "unit": "N_per_m_or_Nm_per_rad"
+        }
+      },
+      "cross_component_diag_max_ratio": 263291938026322.7,
+      "unit_consistency_warning": true,
+      "imbalance_ratio_threshold": 100000000.0,
+      "claim_boundary": "Diagonal audit only; it does not prove unit conversion correctness but flags solver-hostile stiffness scale separation across coupled components."
+    }
+  },
+  "correction_rows": [
+    {
+      "correction_mode": "diagonal_jacobi",
+      "diag_abs_min": 1.0,
+      "diag_abs_median": 2921681153.6893134,
+      "diag_abs_max": 263305013223928.78,
+      "diag_floor": 0.002921681153689313,
+      "zero_or_tiny_diag_count": 0,
+      "correction_inf_m": 1.4169289816699557e-05,
+      "alpha_values": [
+        0.0,
+        -0.0625
+      ],
+      "trial_rows": [
+        {
+          "alpha": 0.0,
+          "residual_inf_n": 7540.959476872,
+          "relative_residual_inf": 0.8691607380985004,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 0.0,
+          "candidate_max_abs_displacement_m": 6.3345455840968085e-06
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 7325.9547714166265,
+          "relative_residual_inf": 0.8443795880258363,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 8.855806135437223e-07,
+          "candidate_max_abs_displacement_m": 7.220126197640531e-06
+        }
+      ],
+      "best_alpha": -0.0625,
+      "best_residual_inf_n": 7325.9547714166265,
+      "best_relative_residual_inf": 0.8443795880258363,
+      "best_candidate_max_abs_displacement_m": 7.220126197640531e-06,
+      "residual_descent": true,
+      "improvement_inf_n": 215.00470545537337,
+      "relative_improvement": 0.02851158478105993,
+      "seconds": 27.661157439000817
+    },
+    {
+      "correction_mode": "node_block_jacobi",
+      "preconditioner_build_seconds": 0.02956260300015856,
+      "preconditioner_total_seconds": 0.029995900998983416,
+      "preconditioner_singular_block_count": 0,
+      "preconditioner_block_count": 9833,
+      "correction_inf_m": 1.5897479776496076e-05,
+      "alpha_values": [
+        0.0,
+        -0.0625
+      ],
+      "trial_rows": [
+        {
+          "alpha": 0.0,
+          "residual_inf_n": 7540.959476872,
+          "relative_residual_inf": 0.8691607380985004,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 0.0,
+          "candidate_max_abs_displacement_m": 6.3345455840968085e-06
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 7430.27987493887,
+          "relative_residual_inf": 0.8564039576379123,
+          "rhs_inf_n": 8676.13911480824,
+          "free_dof_set_stable": true,
+          "increment_inf_m": 9.935924860310048e-07,
+          "candidate_max_abs_displacement_m": 7.3281380701278135e-06
+        }
+      ],
+      "best_alpha": -0.0625,
+      "best_residual_inf_n": 7430.27987493887,
+      "best_relative_residual_inf": 0.8564039576379123,
+      "best_candidate_max_abs_displacement_m": 7.3281380701278135e-06,
+      "residual_descent": true,
+      "improvement_inf_n": 110.67960193312956,
+      "relative_improvement": 0.014677124611607063,
+      "seconds": 27.833681852000154
+    }
+  ],
+  "iterative_search": {
+    "enabled": true,
+    "mode": "diagonal_jacobi",
+    "max_iterations": 3,
+    "alpha_values": [
+      0.0,
+      -0.125,
+      -0.0625,
+      -0.03125,
+      0.03125
+    ],
+    "iteration_rows": [
+      {
+        "iteration": 1,
+        "mode": "diagonal_jacobi",
+        "base_residual_inf_n": 7540.959476872,
+        "best_alpha": -0.0625,
+        "best_residual_inf_n": 7325.9547714166265,
+        "relative_improvement": 0.02851158478105993,
+        "accepted": true,
+        "correction_inf_m": 1.4169289816699557e-05,
+        "trial_rows": [
+          {
+            "alpha": 0.0,
+            "residual_inf_n": 7540.959476872,
+            "relative_residual_inf": 0.8691607380985004,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 6.3345455840968085e-06
+          },
+          {
+            "alpha": -0.125,
+            "residual_inf_n": 7751.654766186017,
+            "relative_residual_inf": 0.8934451907249465,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 8.105706811184254e-06
+          },
+          {
+            "alpha": -0.0625,
+            "residual_inf_n": 7325.9547714166265,
+            "relative_residual_inf": 0.8443795880258363,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 7.220126197640531e-06
+          },
+          {
+            "alpha": -0.03125,
+            "residual_inf_n": 7433.457124144313,
+            "relative_residual_inf": 0.8567701630621684,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 6.777335890868669e-06
+          },
+          {
+            "alpha": 0.03125,
+            "residual_inf_n": 7648.461829599687,
+            "relative_residual_inf": 0.8815513131348325,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 5.892457404559085e-06
+          }
+        ]
+      },
+      {
+        "iteration": 2,
+        "mode": "diagonal_jacobi",
+        "base_residual_inf_n": 7325.9547714166265,
+        "best_alpha": null,
+        "best_residual_inf_n": 7325.9547714166265,
+        "relative_improvement": 0.0,
+        "accepted": false,
+        "correction_inf_m": 1.5072881235965692e-05,
+        "trial_rows": [
+          {
+            "alpha": 0.0,
+            "residual_inf_n": 7325.9547714166265,
+            "relative_residual_inf": 0.8443795880258363,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 7.220126197640531e-06
+          },
+          {
+            "alpha": -0.125,
+            "residual_inf_n": 8302.516133255871,
+            "relative_residual_inf": 0.9569367230506162,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 9.104236352136243e-06
+          },
+          {
+            "alpha": -0.0625,
+            "residual_inf_n": 7780.575666040561,
+            "relative_residual_inf": 0.8967785743270125,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 8.162181274888388e-06
+          },
+          {
+            "alpha": -0.03125,
+            "residual_inf_n": 7550.029796918025,
+            "relative_residual_inf": 0.8702061708567815,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 7.69115373626446e-06
+          },
+          {
+            "alpha": 0.03125,
+            "residual_inf_n": 7440.015852689192,
+            "relative_residual_inf": 0.8575261131982934,
+            "free_dof_set_stable": true,
+            "candidate_max_abs_displacement_m": 6.749098659016603e-06
+          }
+        ]
+      }
+    ],
+    "accepted_iteration_count": 1,
+    "final_residual_inf_n": 7325.9547714166265,
+    "final_max_abs_displacement_m": 7.220126197640531e-06,
+    "residual_gate_passed": false
+  },
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_final_checkpoint.npz",
+    "residual_inf_n": 7325.9547714166265,
+    "accepted_iteration_count": 1
+  },
+  "best_correction_mode": "diagonal_jacobi",
+  "best_residual_inf_n": 7325.9547714166265,
+  "best_relative_improvement": 0.02851158478105993,
+  "overall_best_residual_inf_n": 7325.9547714166265,
+  "overall_residual_gate_passed": false,
+  "residual_tolerance_n": 0.0005,
+  "residual_gate_passed": false,
+  "runtime_metrics": {
+    "setup_and_bad_checkpoint_seconds": 29.672764077000465,
+    "zero_assembly_seconds": 13.71385357500003,
+    "total_seconds": 266.9925029790011
+  },
+  "claim_boundary": "Diagnostic-only cheap correction from the zero state. It tests diagonal and nodal-block preconditioned one-shot directions with residual replay, but it is not full Newton closure unless the residual gate passes.",
+  "blockers": [
+    "preconditioned_zero_residual_gate_not_closed"
+  ]
+}

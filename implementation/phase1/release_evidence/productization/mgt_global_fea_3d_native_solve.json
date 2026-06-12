@@ -1,37 +1,40 @@
 {
   "schema_version": "mgt-global-fea-3d-native-solve.v1",
-  "generated_at": "2026-05-31T09:33:37.592786+00:00",
+  "generated_at": "2026-06-05T13:34:39.867619+00:00",
   "status": "warn",
   "claim": "Same MGT NPZ mesh fingerprint: 3D beam global Newton solve in-repo, cross-checked against commercial HF export reference medians (proxy for licensed solver metrics).",
   "native_solve_status": "mesh_3d_beam_global_wired_with_licensed_fingerprint_bridge",
-  "solve_mode": "mgt_npz_beam_mesh_3d_real_section_linear_tangent",
+  "solve_mode": "mgt_npz_beam_mesh_3d_real_section_connected_component",
   "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "roundtrip_npz": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
   "mgt_sha256": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
   "mgt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
   "mesh_3d_global_solve": {
-    "status": "ready",
+    "status": "warn",
     "converged": true,
-    "solve_mode": "mgt_npz_beam_mesh_3d_real_section_linear_tangent",
+    "solve_mode": "mgt_npz_beam_mesh_3d_real_section_connected_component",
     "nonlinear_equilibrium": false,
+    "representative_component_nonlinear_equilibrium": true,
     "used_real_section_properties": true,
-    "real_section_property_coverage_pct": 91.25,
+    "real_section_property_coverage_pct": 100.0,
+    "partial_connected_component_mesh": true,
     "use_improved_newton": true,
     "lateral_load_scale": 0.0,
-    "newton_converged_at_load_step": null,
-    "newton_iterations_total": 48,
-    "fell_back_to_linear_tangent": true,
+    "newton_converged_at_load_step": 1.0,
+    "newton_iterations_total": 20,
+    "fell_back_to_linear_tangent": false,
     "mesh_fingerprint": {
-      "beam_elements_solved": 80,
-      "nodes_in_submesh": 149,
-      "dof_count": 447,
-      "base_node_count": 22
+      "raw_beam_elements_available": 358,
+      "beam_elements_solved": 4,
+      "nodes_in_submesh": 5,
+      "dof_count": 15,
+      "base_node_count": 1
     },
     "response_metrics": {
-      "max_drift_ratio_pct": 2051.8497242644057,
-      "base_shear_kn": 499.9368652268803,
-      "top_displacement_m": 115.92950942093893,
-      "residual_inf": 0.0001390061224810779
+      "max_drift_ratio_pct": 0.09422650960883919,
+      "base_shear_kn": 179.26071779087061,
+      "top_displacement_m": 0.005323797792899414,
+      "residual_inf": 8.755127055337653e-06
     },
     "newton_iteration_log": [
       {
@@ -43,303 +46,186 @@
       {
         "iteration": 1,
         "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "residual_inf": 0.044053197686935164,
         "solver_mode": "global_beam_newton"
       },
       {
         "iteration": 2,
         "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "residual_inf": 2.1861283130419906e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 3,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.1,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.1,
+        "residual_inf": 0.04405320032947202,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 4,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.1,
+        "residual_inf": 2.1855112208868377e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 5,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.15,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.15,
+        "residual_inf": 0.04405319924626383,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 6,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.15,
+        "residual_inf": 2.1853593352716416e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 7,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.2,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.2,
+        "residual_inf": 0.044053198163965135,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 8,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.2,
+        "residual_inf": 2.1880023268749937e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 9,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.3,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.3,
+        "residual_inf": 0.08810639476723736,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 10,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.3,
+        "residual_inf": 4.374443960841745e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 11,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.4,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.4,
+        "residual_inf": 0.08810639260263997,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 12,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.4,
+        "residual_inf": 4.3760046537499875e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 13,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.5,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.5,
+        "residual_inf": 0.08810639043622359,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 14,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.5,
+        "residual_inf": 4.377563527668826e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 15,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.65,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.65,
+        "residual_inf": 0.13215958223190682,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 16,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.65,
+        "residual_inf": 6.562922862940468e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 17,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 0,
+        "load_step": 0.8,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
+      },
+      {
+        "iteration": 1,
+        "load_step": 0.8,
+        "residual_inf": 0.13215959574881708,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 18,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
+        "iteration": 2,
+        "load_step": 0.8,
+        "residual_inf": 6.5615386120043695e-06,
         "solver_mode": "global_beam_newton"
       },
       {
-        "iteration": 19,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 20,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 21,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 22,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 23,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 24,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 25,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 26,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 27,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 28,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 29,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 30,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 31,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 32,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 33,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 34,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 35,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 36,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 37,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 38,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 39,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 40,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 41,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 42,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 43,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 44,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 45,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 46,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 47,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
-      },
-      {
-        "iteration": 48,
-        "load_step": 0.05,
-        "residual_inf": 390.68467768749997,
-        "solver_mode": "global_beam_newton"
+        "iteration": 0,
+        "load_step": 1.0,
+        "residual_inf": 0.0,
+        "solver_mode": "elastic_predictor"
       },
       {
         "iteration": 1,
         "load_step": 1.0,
-        "residual_inf": 0.0001390061224810779,
-        "solver_mode": "linear_tangent_fallback"
+        "residual_inf": 0.17621279577360838,
+        "solver_mode": "global_beam_newton"
+      },
+      {
+        "iteration": 2,
+        "load_step": 1.0,
+        "residual_inf": 8.755127055337653e-06,
+        "solver_mode": "global_beam_newton"
       }
+    ],
+    "limitations": [
+      "partial_connected_component_mesh"
     ],
     "blockers": []
   },
   "condensed_bridge_solve": {
     "schema_version": "mgt-global-fea-condensed-solve.v1",
-    "generated_at": "2026-05-31T09:33:37.485700+00:00",
+    "generated_at": "2026-06-05T13:34:39.752743+00:00",
     "status": "ready",
     "claim": "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; not a full 3D global FEA licensed-engine replay.",
     "native_solve_status": "condensed_global_fea_wired",
@@ -451,7 +337,7 @@
     "note": "MGT mesh contract + condensed in-repo solve wired; commercial HF/LF export cross-validation passes on benchmark cases (licensed-solver proxy, not live MIDAS Gen replay on full mesh).",
     "commercial_cross_validation_status": "pass_with_marginal_metrics"
   },
-  "load_scale_applied": 0.1,
+  "load_scale_applied": 1.0,
   "licensed_solver_crosscheck": {
     "status": "warn",
     "reference_family": "commercial_export_hf_proxy",
@@ -459,17 +345,17 @@
     "comparisons": [
       {
         "metric": "max_drift_ratio_pct",
-        "native": 2051.8497242644057,
+        "native": 0.09422650960883919,
         "reference_hf": 1.95,
-        "rel_error": 1051.2306278279004,
+        "rel_error": 0.9516787130211081,
         "tolerance_ratio": 0.45,
         "ok": false
       },
       {
         "metric": "base_shear_kn",
-        "native": 499.9368652268803,
+        "native": 179.26071779087061,
         "reference_hf": 1657.5,
-        "rel_error": 0.6983789651723196,
+        "rel_error": 0.8918487373810736,
         "tolerance_ratio": 0.45,
         "ok": false
       }

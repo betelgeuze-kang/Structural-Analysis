@@ -1,0 +1,1813 @@
+{
+  "schema_version": "mgt-dof-block-schur-recycled-krylov-focused-probe.v1",
+  "generated_at": "2026-06-05T21:39:21.773714+00:00",
+  "status": "partial",
+  "rocm_parent_schema_version": "mgt-rocm-sparse-solver-probe.v1",
+  "torch_rocm": {
+    "torch_import_ok": true,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_version_hip": "6.1.40091-a8dbc0c19",
+    "torch_cuda_api_available": true,
+    "torch_cuda_device_count": 1,
+    "device_name": "AMD Radeon RX 6900 XT"
+  },
+  "roundtrip_json": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+  "mesh_fingerprint": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "combined_component_count": 3,
+    "combined_base_node_count": 404,
+    "restrained_dof_count": 2424,
+    "active_dof_count": 35935,
+    "free_dof_count": 33932,
+    "matrix_shape": [
+      33932,
+      33932
+    ],
+    "matrix_nnz": 823815,
+    "cpu_reference": {
+      "backend": "scipy_sparse_spsolve_cpu",
+      "residual_inf_n": 4.256728516338626e-07,
+      "relative_residual_inf": 1.310820378513631e-08,
+      "rhs_inf_n": 32.47377433333335,
+      "solve_seconds": 0.445499467998161
+    }
+  },
+  "probe_contract": {
+    "matrix_family": "surface_shell_bending_6dof",
+    "official_backend_family": "amd_rocm_hip",
+    "cpu_fallback_promoted": false,
+    "host_dense_solve_fallback_allowed": false,
+    "residual_replay_gate_n": 0.001,
+    "previous_block_schur_frontier_residual_inf_n": 15.396808816819568
+  },
+  "rows": [
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 2,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 8,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": true,
+        "candidate_vector_count": 8,
+        "basis_size_requested": 2,
+        "basis_size_used": 2,
+        "source": "residual",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 2
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.510900445781877
+        ],
+        "ridge": 3.696822869250489,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 1.8384050799560645e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 168.0033062452594,
+            "improvement_inf_n": -152.60649742843984,
+            "relative_improvement": -9.911566691776518
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 36.097376124877286,
+            "improvement_inf_n": -20.700567308057717,
+            "relative_improvement": -1.344471283259963
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 15.101759554712084,
+            "improvement_inf_n": 0.2950492621074847,
+            "relative_improvement": 0.019163013947745527
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 15.276687680377554,
+            "improvement_inf_n": 0.12012113644201428,
+            "relative_improvement": 0.007801690458791253
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.346772278469782,
+            "improvement_inf_n": 0.0500365383497865,
+            "relative_improvement": 0.0032497992892609197
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.384299682250198,
+            "improvement_inf_n": 0.012509134569370417,
+            "relative_improvement": 0.0008124498211412069
+          }
+        ],
+        "best_alpha": 0.0625,
+        "candidate_residual_inf_n": 15.101759554712084,
+        "improvement_inf_n": 0.2950492621074847,
+        "relative_improvement": 0.019163013947745527
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.101759554712084,
+      "best_residual_inf_n": 15.101759554712084,
+      "relative_residual_inf": 0.4650447896723413,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524,
+        15.101759554712084
+      ],
+      "solve_seconds": 1.8047550339979352,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 20993132,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 2,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 8,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 8,
+        "basis_size_requested": 2,
+        "basis_size_used": 2,
+        "source": "preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "preconditioned": 2
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.00020488313226295032,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.0006351437223082622,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 784.1962062465927,
+            "improvement_inf_n": -768.7993974297732,
+            "relative_improvement": -49.93238576749307
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 195.29509540971148,
+            "improvement_inf_n": -179.8982865928919,
+            "relative_improvement": -11.684128102985206
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 48.86850694621531,
+            "improvement_inf_n": -33.47169812939575,
+            "relative_improvement": -2.173937374141521
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 20.44917683048933,
+            "improvement_inf_n": -5.05236801366976,
+            "relative_improvement": -0.3281438429079227
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.847279258045342,
+            "improvement_inf_n": -0.4504704412257734,
+            "relative_improvement": -0.029257390059534722
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.429767620438215,
+            "improvement_inf_n": -0.032958803618646115,
+            "relative_improvement": -0.0021406256329325668
+          }
+        ],
+        "best_alpha": 0.0009765625,
+        "candidate_residual_inf_n": 15.429767620438215,
+        "improvement_inf_n": -0.032958803618646115,
+        "relative_improvement": -0.0021406256329325668,
+        "reason": "no_recycled_krylov_residual_descent"
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.396808816819568,
+      "best_residual_inf_n": 15.396808816819568,
+      "relative_residual_inf": 0.47413056021071154,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.813097558172615,
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524
+      ],
+      "solve_seconds": 1.2579333539979416,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 20993132,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 2,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 8,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 8,
+        "basis_size_requested": 2,
+        "basis_size_used": 2,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 1,
+          "preconditioned": 1
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.40423065598554603,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.00025775133952161245,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 552.2672792376436,
+            "improvement_inf_n": -536.8704704208241,
+            "relative_improvement": -34.868944390239065
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 147.74372521856162,
+            "improvement_inf_n": -132.34691640174205,
+            "relative_improvement": -8.59573681639571
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 46.62910633450091,
+            "improvement_inf_n": -31.232297517681342,
+            "relative_improvement": -2.0284916107786564
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 22.00273969766043,
+            "improvement_inf_n": -6.605930880840862,
+            "relative_improvement": -0.42904545736935457
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 16.092487828103167,
+            "improvement_inf_n": -0.6956790112835982,
+            "relative_improvement": -0.04518332464605485
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.491069762951183,
+            "improvement_inf_n": -0.09426094613161418,
+            "relative_improvement": -0.006122109279465947
+          }
+        ],
+        "best_alpha": 0.0009765625,
+        "candidate_residual_inf_n": 15.491069762951183,
+        "improvement_inf_n": -0.09426094613161418,
+        "relative_improvement": -0.006122109279465947,
+        "reason": "no_recycled_krylov_residual_descent"
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.396808816819568,
+      "best_residual_inf_n": 15.396808816819568,
+      "relative_residual_inf": 0.47413056021071154,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.813097558172615,
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524
+      ],
+      "solve_seconds": 1.2858508369972697,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 20993132,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 4,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 16,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": true,
+        "candidate_vector_count": 16,
+        "basis_size_requested": 4,
+        "basis_size_used": 4,
+        "source": "residual",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 4
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.510900445781877,
+          15.551391767995499,
+          15.701958961219736
+        ],
+        "ridge": 4.73758620397791,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 1.8469636037661244e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 168.12489488654325,
+            "improvement_inf_n": -152.72808606972367,
+            "relative_improvement": -9.919463694508083
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 36.127773285196966,
+            "improvement_inf_n": -20.730964468377397,
+            "relative_improvement": -1.3464455339427717
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 15.092940379843535,
+            "improvement_inf_n": 0.3038684369760336,
+            "relative_improvement": 0.01973580633436754
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 15.274482886637356,
+            "improvement_inf_n": 0.12232593018221216,
+            "relative_improvement": 0.007944888556944512
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.346797702380165,
+            "improvement_inf_n": 0.050011114439403315,
+            "relative_improvement": 0.003248148043818721
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.384306038222466,
+            "improvement_inf_n": 0.012502778597102804,
+            "relative_improvement": 0.0008120370101267148
+          }
+        ],
+        "best_alpha": 0.0625,
+        "candidate_residual_inf_n": 15.092940379843535,
+        "improvement_inf_n": 0.3038684369760336,
+        "relative_improvement": 0.01973580633436754
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.092940379843535,
+      "best_residual_inf_n": 15.092940379843535,
+      "relative_residual_inf": 0.46477321129718774,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524,
+        15.092940379843535
+      ],
+      "solve_seconds": 1.2473037089948775,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 21536044,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 4,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 16,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": true,
+        "candidate_vector_count": 16,
+        "basis_size_requested": 4,
+        "basis_size_used": 4,
+        "source": "preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "preconditioned": 4
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.0006467817603611969,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.0010573903734254974,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 706.7817441144567,
+            "improvement_inf_n": -691.3849352976372,
+            "relative_improvement": -44.90443075076467
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 177.07162294718376,
+            "improvement_inf_n": -161.67481413036418,
+            "relative_improvement": -10.500540472630252
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 44.64409265536567,
+            "improvement_inf_n": -29.2472838385461,
+            "relative_improvement": -1.899567903096659
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 16.05313491101957,
+            "improvement_inf_n": -0.6563260942000007,
+            "relative_improvement": -0.04262741078417665
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.382470627299178,
+            "improvement_inf_n": 0.014338189520390898,
+            "relative_improvement": 0.0009312442396977595
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.393224269497667,
+            "improvement_inf_n": 0.00358454732190161,
+            "relative_improvement": 0.00023281105614468813
+          }
+        ],
+        "best_alpha": 0.00390625,
+        "candidate_residual_inf_n": 15.382470627299178,
+        "improvement_inf_n": 0.014338189520390898,
+        "relative_improvement": 0.0009312442396977595
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.382470627299178,
+      "best_residual_inf_n": 15.382470627299178,
+      "relative_residual_inf": 0.47368902885765063,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524,
+        15.382470627299178
+      ],
+      "solve_seconds": 1.2658616030021221,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 21536044,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 4,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 16,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 16,
+        "basis_size_requested": 4,
+        "basis_size_used": 4,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 1,
+          "preconditioned": 3
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.2078000033031989,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.0008236136764318633,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 834.6717979883219,
+            "improvement_inf_n": -819.2749891715024,
+            "relative_improvement": -53.21070092631931
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 208.62321640329404,
+            "improvement_inf_n": -193.22640758647447,
+            "relative_improvement": -12.549769883184673
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 52.11107100703664,
+            "improvement_inf_n": -36.71426219021707,
+            "relative_improvement": -2.3845371224009866
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 19.96272781140743,
+            "improvement_inf_n": -4.565918994587861,
+            "relative_improvement": -0.2965496973372835
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.941902426804349,
+            "improvement_inf_n": -0.5450936099847805,
+            "relative_improvement": -0.03540302516384544
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.453423412640072,
+            "improvement_inf_n": -0.056614595820503766,
+            "relative_improvement": -0.003677034409796505
+          }
+        ],
+        "best_alpha": 0.0009765625,
+        "candidate_residual_inf_n": 15.453423412640072,
+        "improvement_inf_n": -0.056614595820503766,
+        "relative_improvement": -0.003677034409796505,
+        "reason": "no_recycled_krylov_residual_descent"
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.396808816819568,
+      "best_residual_inf_n": 15.396808816819568,
+      "relative_residual_inf": 0.47413056021071154,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.813097558172615,
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524
+      ],
+      "solve_seconds": 1.2916967030032538,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 21536044,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": true,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.510900445781877,
+          15.551391767995499,
+          15.701958961219736,
+          15.743720097569232,
+          15.82452105070354,
+          16.019475733744343,
+          16.057196955850173
+        ],
+        "ridge": 5.829957211361925,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 1.8937770607444232e-08,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 171.1887367237156,
+            "improvement_inf_n": -155.79192790689603,
+            "relative_improvement": -10.118455698216371
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 36.89373374449781,
+            "improvement_inf_n": -21.49692492767824,
+            "relative_improvement": -1.3961935348703471
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 15.031766501031372,
+            "improvement_inf_n": 0.36504231578819635,
+            "relative_improvement": 0.023708959442908836
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 15.25918941694834,
+            "improvement_inf_n": 0.1376193998712285,
+            "relative_improvement": 0.008938176833168977
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.34581014792978,
+            "improvement_inf_n": 0.05099866888978788,
+            "relative_improvement": 0.003312288247294246
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.384059149626257,
+            "improvement_inf_n": 0.012749667193311609,
+            "relative_improvement": 0.0008280720599312628
+          }
+        ],
+        "best_alpha": 0.0625,
+        "candidate_residual_inf_n": 15.031766501031372,
+        "improvement_inf_n": 0.36504231578819635,
+        "relative_improvement": 0.023708959442908836
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.031766501031372,
+      "best_residual_inf_n": 15.031766501031372,
+      "relative_residual_inf": 0.4628894179880321,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524,
+        15.031766501031372
+      ],
+      "solve_seconds": 1.2989667850051774,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 22621868,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "preconditioned": 8
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.00082857466128394,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.0017606328272456453,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 588.8471366100684,
+            "improvement_inf_n": -573.4503277932489,
+            "relative_improvement": -37.24475211816674
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 146.56141416379046,
+            "improvement_inf_n": -131.1646053469709,
+            "relative_improvement": -8.518947459014095
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 36.45408557288599,
+            "improvement_inf_n": -21.05727675606642,
+            "relative_improvement": -1.3676390352436747
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 18.7904268023876,
+            "improvement_inf_n": -3.3936179855680315,
+            "relative_improvement": -0.22041047764786315
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 15.849674386181707,
+            "improvement_inf_n": -0.45286556936213884,
+            "relative_improvement": -0.029412950095699424
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.510025209165677,
+            "improvement_inf_n": -0.11321639234610892,
+            "relative_improvement": -0.007353237524286892
+          }
+        ],
+        "best_alpha": 0.0009765625,
+        "candidate_residual_inf_n": 15.510025209165677,
+        "improvement_inf_n": -0.11321639234610892,
+        "relative_improvement": -0.007353237524286892,
+        "reason": "no_recycled_krylov_residual_descent"
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.396808816819568,
+      "best_residual_inf_n": 15.396808816819568,
+      "relative_residual_inf": 0.47413056021071154,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.813097558172615,
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524
+      ],
+      "solve_seconds": 1.2842877490038518,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 22621868,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    },
+    {
+      "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+      "device": "cuda:0",
+      "converged": false,
+      "schur_order": "rotations_first",
+      "translation_dof_count": 11462,
+      "rotation_dof_count": 22470,
+      "subblock_nnz": {
+        "tt": 125087,
+        "tr": 189836,
+        "rt": 189511,
+        "rr": 319381
+      },
+      "inner_jacobi_steps": 12,
+      "inner_jacobi_weight": 0.35,
+      "subblock_solver": "jacobi",
+      "subblock_cg_iterations": 8,
+      "subblock_multilevel_aggregate_count": 64,
+      "subblock_multilevel_max_levels": 3,
+      "subblock_multilevel_pre_smooth_steps": 1,
+      "subblock_multilevel_post_smooth_steps": 1,
+      "subblock_multilevel_smoother_weight": 0.55,
+      "subblock_multilevel_coarse_regularization_factor": 1e-08,
+      "subblock_multilevel_levels": {
+        "tt": [],
+        "rr": []
+      },
+      "schur_diagonal_correction": false,
+      "schur_diagonal_floor": 1e-12,
+      "block_schur_sweeps": 1,
+      "coupling_hotspot_correction_size": 0,
+      "coupling_hotspot_selection": "coupling_strength",
+      "coupling_hotspot_correction_dof_count": 0,
+      "coupling_hotspot_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_size": 0,
+      "krylov_adaptive_ridge_factor": 1e-10,
+      "krylov_adaptive_hotspot_solve_count": 0,
+      "krylov_adaptive_hotspot_accept_count": 0,
+      "schur_basis_aggregate_count": 0,
+      "schur_basis_ridge_factor": 1e-10,
+      "schur_basis_column_count": 0,
+      "recycled_krylov_basis_size": 8,
+      "recycled_krylov_ridge_factor": 1e-10,
+      "recycled_krylov_min_relative_improvement": 1e-08,
+      "recycled_krylov_source": "residual_and_preconditioned",
+      "recycled_krylov_alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "recycled_krylov_candidate_count": 32,
+      "recycled_krylov_correction": {
+        "enabled": true,
+        "attempted": true,
+        "accepted": false,
+        "candidate_vector_count": 32,
+        "basis_size_requested": 8,
+        "basis_size_used": 8,
+        "source": "residual_and_preconditioned",
+        "ridge_factor": 1e-10,
+        "minimum_relative_improvement": 1e-08,
+        "alpha_values": [
+          1.0,
+          0.25,
+          0.0625,
+          0.015625,
+          0.00390625,
+          0.0009765625
+        ],
+        "source_counts": {
+          "residual": 1,
+          "preconditioned": 7
+        },
+        "selected_candidate_residual_inf_head": [
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568,
+          15.396808816819568
+        ],
+        "ridge": 0.10947384326421981,
+        "solve_backend": "torch_linalg_solve",
+        "coefficient_l2": 0.001629992710641366,
+        "trial_rows": [
+          {
+            "alpha": 1.0,
+            "candidate_residual_inf_n": 610.9636686565013,
+            "improvement_inf_n": -595.5668598396818,
+            "relative_improvement": -38.6811882205799
+          },
+          {
+            "alpha": 0.25,
+            "candidate_residual_inf_n": 152.09909574553834,
+            "improvement_inf_n": -136.70228692871876,
+            "relative_improvement": -8.8786117016264
+          },
+          {
+            "alpha": 0.0625,
+            "candidate_residual_inf_n": 37.38295251779325,
+            "improvement_inf_n": -21.98614370097368,
+            "relative_improvement": -1.4279675718877463
+          },
+          {
+            "alpha": 0.015625,
+            "candidate_residual_inf_n": 18.214313669907668,
+            "improvement_inf_n": -2.8175048530880993,
+            "relative_improvement": -0.1829927802968002
+          },
+          {
+            "alpha": 0.00390625,
+            "candidate_residual_inf_n": 16.021526223436474,
+            "improvement_inf_n": -0.6247174066169059,
+            "relative_improvement": -0.04057447319437134
+          },
+          {
+            "alpha": 0.0009765625,
+            "candidate_residual_inf_n": 15.47332936174285,
+            "improvement_inf_n": -0.07652054492328197,
+            "relative_improvement": -0.0049698964138393704
+          }
+        ],
+        "best_alpha": 0.0009765625,
+        "candidate_residual_inf_n": 15.47332936174285,
+        "improvement_inf_n": -0.07652054492328197,
+        "relative_improvement": -0.0049698964138393704,
+        "reason": "no_recycled_krylov_residual_descent"
+      },
+      "schur_diagonal_stats": {
+        "translation_min_abs": 139341.0756078213,
+        "translation_mean_abs": 15822585238.426039,
+        "rotation_min_abs": 482.1108386662821,
+        "rotation_mean_abs": 2524254612.863602
+      },
+      "restart_dimension": 32,
+      "restart_cycles": 3,
+      "iteration_count": 96,
+      "max_iterations": 96,
+      "initial_residual_inf_n": 32.47377433333335,
+      "residual_inf_n": 15.396808816819568,
+      "best_residual_inf_n": 15.396808816819568,
+      "relative_residual_inf": 0.47413056021071154,
+      "rhs_inf_n": 32.47377433333335,
+      "threshold_n": 0.001,
+      "residual_history_head": [
+        32.47377433333335,
+        32.086139512658576,
+        34.33271805828588,
+        30.455424623545603,
+        30.04244778215943,
+        32.05413879507083,
+        32.799753032344455,
+        29.584856386719746
+      ],
+      "residual_history_tail": [
+        17.813097558172615,
+        17.884865173436523,
+        17.50632891296288,
+        17.39533928789662,
+        17.7843154855247,
+        17.85425766838558,
+        17.86695996490785,
+        17.804106020788524
+      ],
+      "solve_seconds": 1.331700850998459,
+      "device_residency_ratio": 1.0,
+      "preconditioner_apply_count": 96,
+      "host_dense_solve_fallback_count": 0,
+      "host_copy_bytes": 22621868,
+      "hip_kernel_invocation_count": 3072,
+      "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+      "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+      "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+    }
+  ],
+  "best_row": {
+    "backend": "rocm_torch_sparse_dof_block_schur_fgmres",
+    "device": "cuda:0",
+    "converged": false,
+    "schur_order": "rotations_first",
+    "translation_dof_count": 11462,
+    "rotation_dof_count": 22470,
+    "subblock_nnz": {
+      "tt": 125087,
+      "tr": 189836,
+      "rt": 189511,
+      "rr": 319381
+    },
+    "inner_jacobi_steps": 12,
+    "inner_jacobi_weight": 0.35,
+    "subblock_solver": "jacobi",
+    "subblock_cg_iterations": 8,
+    "subblock_multilevel_aggregate_count": 64,
+    "subblock_multilevel_max_levels": 3,
+    "subblock_multilevel_pre_smooth_steps": 1,
+    "subblock_multilevel_post_smooth_steps": 1,
+    "subblock_multilevel_smoother_weight": 0.55,
+    "subblock_multilevel_coarse_regularization_factor": 1e-08,
+    "subblock_multilevel_levels": {
+      "tt": [],
+      "rr": []
+    },
+    "schur_diagonal_correction": false,
+    "schur_diagonal_floor": 1e-12,
+    "block_schur_sweeps": 1,
+    "coupling_hotspot_correction_size": 0,
+    "coupling_hotspot_selection": "coupling_strength",
+    "coupling_hotspot_correction_dof_count": 0,
+    "coupling_hotspot_ridge_factor": 1e-10,
+    "krylov_adaptive_hotspot_size": 0,
+    "krylov_adaptive_ridge_factor": 1e-10,
+    "krylov_adaptive_hotspot_solve_count": 0,
+    "krylov_adaptive_hotspot_accept_count": 0,
+    "schur_basis_aggregate_count": 0,
+    "schur_basis_ridge_factor": 1e-10,
+    "schur_basis_column_count": 0,
+    "recycled_krylov_basis_size": 8,
+    "recycled_krylov_ridge_factor": 1e-10,
+    "recycled_krylov_min_relative_improvement": 1e-08,
+    "recycled_krylov_source": "residual",
+    "recycled_krylov_alpha_values": [
+      1.0,
+      0.25,
+      0.0625,
+      0.015625,
+      0.00390625,
+      0.0009765625
+    ],
+    "recycled_krylov_candidate_count": 32,
+    "recycled_krylov_correction": {
+      "enabled": true,
+      "attempted": true,
+      "accepted": true,
+      "candidate_vector_count": 32,
+      "basis_size_requested": 8,
+      "basis_size_used": 8,
+      "source": "residual",
+      "ridge_factor": 1e-10,
+      "minimum_relative_improvement": 1e-08,
+      "alpha_values": [
+        1.0,
+        0.25,
+        0.0625,
+        0.015625,
+        0.00390625,
+        0.0009765625
+      ],
+      "source_counts": {
+        "residual": 8
+      },
+      "selected_candidate_residual_inf_head": [
+        15.396808816819568,
+        15.510900445781877,
+        15.551391767995499,
+        15.701958961219736,
+        15.743720097569232,
+        15.82452105070354,
+        16.019475733744343,
+        16.057196955850173
+      ],
+      "ridge": 5.829957211361925,
+      "solve_backend": "torch_linalg_solve",
+      "coefficient_l2": 1.8937770607444232e-08,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "candidate_residual_inf_n": 171.1887367237156,
+          "improvement_inf_n": -155.79192790689603,
+          "relative_improvement": -10.118455698216371
+        },
+        {
+          "alpha": 0.25,
+          "candidate_residual_inf_n": 36.89373374449781,
+          "improvement_inf_n": -21.49692492767824,
+          "relative_improvement": -1.3961935348703471
+        },
+        {
+          "alpha": 0.0625,
+          "candidate_residual_inf_n": 15.031766501031372,
+          "improvement_inf_n": 0.36504231578819635,
+          "relative_improvement": 0.023708959442908836
+        },
+        {
+          "alpha": 0.015625,
+          "candidate_residual_inf_n": 15.25918941694834,
+          "improvement_inf_n": 0.1376193998712285,
+          "relative_improvement": 0.008938176833168977
+        },
+        {
+          "alpha": 0.00390625,
+          "candidate_residual_inf_n": 15.34581014792978,
+          "improvement_inf_n": 0.05099866888978788,
+          "relative_improvement": 0.003312288247294246
+        },
+        {
+          "alpha": 0.0009765625,
+          "candidate_residual_inf_n": 15.384059149626257,
+          "improvement_inf_n": 0.012749667193311609,
+          "relative_improvement": 0.0008280720599312628
+        }
+      ],
+      "best_alpha": 0.0625,
+      "candidate_residual_inf_n": 15.031766501031372,
+      "improvement_inf_n": 0.36504231578819635,
+      "relative_improvement": 0.023708959442908836
+    },
+    "schur_diagonal_stats": {
+      "translation_min_abs": 139341.0756078213,
+      "translation_mean_abs": 15822585238.426039,
+      "rotation_min_abs": 482.1108386662821,
+      "rotation_mean_abs": 2524254612.863602
+    },
+    "restart_dimension": 32,
+    "restart_cycles": 3,
+    "iteration_count": 96,
+    "max_iterations": 96,
+    "initial_residual_inf_n": 32.47377433333335,
+    "residual_inf_n": 15.031766501031372,
+    "best_residual_inf_n": 15.031766501031372,
+    "relative_residual_inf": 0.4628894179880321,
+    "rhs_inf_n": 32.47377433333335,
+    "threshold_n": 0.001,
+    "residual_history_head": [
+      32.47377433333335,
+      32.086139512658576,
+      34.33271805828588,
+      30.455424623545603,
+      30.04244778215943,
+      32.05413879507083,
+      32.799753032344455,
+      29.584856386719746
+    ],
+    "residual_history_tail": [
+      17.884865173436523,
+      17.50632891296288,
+      17.39533928789662,
+      17.7843154855247,
+      17.85425766838558,
+      17.86695996490785,
+      17.804106020788524,
+      15.031766501031372
+    ],
+    "solve_seconds": 1.2989667850051774,
+    "device_residency_ratio": 1.0,
+    "preconditioner_apply_count": 96,
+    "host_dense_solve_fallback_count": 0,
+    "host_copy_bytes": 22621868,
+    "hip_kernel_invocation_count": 3072,
+    "solver_path_kind": "rocm_sparse_dof_block_schur_fgmres_probe",
+    "breakdown": "dof_block_schur_fgmres_residual_gate_not_met",
+    "claim_boundary": "Translation/rotation DOF block Schur FGMRES is a physics-aware ROCm sparse preconditioner. It uses sparse subblock matvecs and Jacobi approximate triangular block solves on the ROCm torch device. Optional Schur-basis correction projects the preconditioner residual through a small algebraic basis and can only promote closure when full assembled CSR residual replay meets the G9 gate."
+  },
+  "recycled_krylov_frontier_improved": true,
+  "blockers": [
+    "g9_surface_shell_residual_gate_not_closed"
+  ]
+}
