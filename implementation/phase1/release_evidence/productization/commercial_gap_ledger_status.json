@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T20:32:37.504637+00:00",
+  "generated_at": "2026-06-12T20:49:17.115592+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -28603,6 +28603,526 @@
           "top_row_dominant_component_counts": {
             "frame": 19,
             "shell_membrane": 1,
+            "shell_bending_drilling": 4
+          }
+        },
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup31": {
+          "schema_version": "mgt-frame-hotspot-diagonal-newton-probe.v1",
+          "status": "partial",
+          "ready": false,
+          "base_direct_residual_inf_n": 5927.737618081928,
+          "final_direct_residual_inf_n": 5886.372194347398,
+          "promoted_to_final_state": true,
+          "promotion_mode": "block_lstsq",
+          "promotion_count": 2,
+          "max_promotions": 10,
+          "stop_reason": "no_gate_eligible_descent",
+          "promotion_candidate_direct_residual_inf_n": 5886.372194347398,
+          "promotion_candidate_alpha": 0.005491565954891124,
+          "promotion_candidate_step_m": null,
+          "promotion_candidate_relative_increment": 9.99999999999e-05,
+          "promotion_candidate_residual_gate_passed": false,
+          "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            5927.737618081928,
+            5897.376264903195
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            5897.376264903195,
+            5886.372194347398
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true
+          ],
+          "frame_hotspot_diagonal_newton_selected_count": null,
+          "frame_hotspot_diagonal_newton_correction_inf_m": null,
+          "frame_hotspot_block_lstsq_selected_count": 19,
+          "frame_hotspot_block_lstsq_support_size": 205,
+          "frame_hotspot_block_lstsq_correction_inf_m": 1.3928025901564277e-07,
+          "trust_region_accepted": null,
+          "trust_region_accepted_iteration_count": null,
+          "trust_region_best_candidate_direct_residual_inf_n": null,
+          "trust_region_best_candidate_relative_increment": null,
+          "trust_region_best_candidate_residual_gate_passed": null,
+          "trust_region_best_candidate_relative_increment_gate_passed": null,
+          "trust_region_gate_limited_alpha": null,
+          "trust_region_best_gate_eligible_candidate_direct_residual_inf_n": null,
+          "trust_region_best_gate_eligible_candidate_alpha": null,
+          "trust_region_best_gate_eligible_candidate_alpha_source": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment": null,
+          "trust_region_best_gate_eligible_candidate_residual_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_free_dof_set_stable": null,
+          "current_tangent_residual_row_correction_enabled": null,
+          "current_tangent_residual_row_correction_accepted": null,
+          "current_tangent_residual_row_promotion_count": null,
+          "current_tangent_residual_row_stop_reason": null,
+          "current_tangent_residual_row_target_mode": null,
+          "current_tangent_residual_row_element_neighbor_depth": null,
+          "current_tangent_residual_row_jacobian_mode": null,
+          "current_tangent_residual_row_fd_max_support_columns": null,
+          "current_tangent_residual_row_svd_max_condition": null,
+          "matrix_free_global_krylov_enabled": null,
+          "matrix_free_global_krylov_attempted": null,
+          "matrix_free_global_krylov_accepted": null,
+          "matrix_free_global_krylov_stop_reason": null,
+          "matrix_free_global_krylov_scaling_mode": null,
+          "matrix_free_global_krylov_preconditioner_mode": null,
+          "matrix_free_global_krylov_preconditioner_regularization": null,
+          "matrix_free_global_krylov_preconditioner_solve_count": null,
+          "matrix_free_global_krylov_preconditioner_solve_seconds": null,
+          "matrix_free_global_krylov_column_scale_units": null,
+          "matrix_free_global_krylov_minimum_relative_improvement": null,
+          "matrix_free_global_krylov_allow_negative_alphas": null,
+          "matrix_free_global_krylov_max_alpha": null,
+          "matrix_free_global_krylov_row_scale_inf": null,
+          "matrix_free_global_krylov_column_scale_inf_m": null,
+          "matrix_free_global_krylov_matvec_count": null,
+          "matrix_free_global_krylov_unstable_free_dof_probe_count": null,
+          "matrix_free_global_krylov_correction_inf_m": null,
+          "matrix_free_global_krylov_best_candidate_direct_residual_inf_n": null,
+          "matrix_free_global_krylov_best_candidate_relative_improvement": null,
+          "best_candidate_direct_residual_inf_n": null,
+          "best_candidate_improvement_inf_n": null,
+          "best_candidate_relative_improvement": null,
+          "best_candidate_target_row_count": null,
+          "best_candidate_configured_target_count": null,
+          "best_candidate_support_column_count": null,
+          "best_candidate_support_size": null,
+          "best_candidate_alpha": null,
+          "best_candidate_residual_gate_passed": null,
+          "best_candidate_relative_increment_gate_passed": null,
+          "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup31_probe_final_checkpoint.npz",
+          "blockers": [
+            "direct_residual_gate_not_closed",
+            "global_consistent_newton_or_load_path_required"
+          ]
+        },
+        "residual_jacobian_post_block_rows21_support16_followup31_component_status": "partial",
+        "residual_jacobian_post_block_rows21_support16_followup31_component_only": true,
+        "residual_jacobian_post_block_rows21_support16_followup31_base_residual_inf_n": 5886.372194347398,
+        "residual_jacobian_post_block_rows21_support16_followup31_component_breakdown": {
+          "component_inf_n": {
+            "frame": 3098.487870640647,
+            "spring": 0.8387057679917196,
+            "material_stress_correction": 0.0,
+            "shell_bending_drilling": 2343.8725411568835,
+            "shell_membrane": 2614.446934801875
+          },
+          "top_rows": [
+            {
+              "free_row": 10568,
+              "global_dof": 13184,
+              "node_index": 2197,
+              "dof": "uz",
+              "residual_n": 5886.372194347398,
+              "external_load_n": -3230.063830907181,
+              "component_values_n": {
+                "frame": 10.050794414132007,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 31.81063422421023,
+                "shell_membrane": 2614.446934801875
+              },
+              "internal_sum_n": 2656.3083634402174,
+              "dominant_component": "shell_membrane"
+            },
+            {
+              "free_row": 54218,
+              "global_dof": 67304,
+              "node_index": 11217,
+              "dof": "uz",
+              "residual_n": 5864.99043418367,
+              "external_load_n": -4173.851848025999,
+              "component_values_n": {
+                "frame": 1691.1385861576705,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1691.1385861576705,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5870,
+              "global_dof": 6926,
+              "node_index": 1154,
+              "dof": "uz",
+              "residual_n": 5864.035590280851,
+              "external_load_n": -8676.13911480824,
+              "component_values_n": {
+                "frame": -2781.9071150802283,
+                "spring": 0.000872199195474877,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -30.197281646356487,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2812.1035245273897,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5864,
+              "global_dof": 6920,
+              "node_index": 1153,
+              "dof": "uz",
+              "residual_n": 5862.765460460682,
+              "external_load_n": -8292.745422450198,
+              "component_values_n": {
+                "frame": -2389.439985402578,
+                "spring": 0.0007855188104625813,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -40.54076210574854,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2429.9799619895157,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 422,
+              "global_dof": 518,
+              "node_index": 86,
+              "dof": "uz",
+              "residual_n": 5859.604296663201,
+              "external_load_n": -8109.798360708659,
+              "component_values_n": {
+                "frame": -2227.9863527958555,
+                "spring": 0.001094540559037766,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -22.2088057901605,
+                "shell_membrane": -1.4210854715202004e-14
+              },
+              "internal_sum_n": -2250.1940640454573,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 56528,
+              "global_dof": 72722,
+              "node_index": 12120,
+              "dof": "uz",
+              "residual_n": 5855.944240901448,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1737.0114961389486,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1737.0114961389486,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 428,
+              "global_dof": 524,
+              "node_index": 87,
+              "dof": "uz",
+              "residual_n": 5855.7553898512015,
+              "external_load_n": -8550.816102481398,
+              "component_values_n": {
+                "frame": -2661.6609283283296,
+                "spring": 0.0008167920553105075,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -33.40060109392204,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2695.060712630196,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 56534,
+              "global_dof": 72728,
+              "node_index": 12121,
+              "dof": "uz",
+              "residual_n": 5847.898326937408,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1728.965582174907,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1728.965582174907,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54206,
+              "global_dof": 67292,
+              "node_index": 11215,
+              "dof": "uz",
+              "residual_n": 5846.2202253386495,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1727.2874805761492,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1727.2874805761492,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 416,
+              "global_dof": 512,
+              "node_index": 85,
+              "dof": "uz",
+              "residual_n": 5845.607005242291,
+              "external_load_n": -6897.62858288701,
+              "component_values_n": {
+                "frame": -1006.134995495456,
+                "spring": 0.0009148320571125074,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -45.88749698132075,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -1052.0215776447196,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54212,
+              "global_dof": 67298,
+              "node_index": 11216,
+              "dof": "uz",
+              "residual_n": 5842.157292002218,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1723.224547239718,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1723.224547239718,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54188,
+              "global_dof": 67274,
+              "node_index": 11212,
+              "dof": "uz",
+              "residual_n": 5653.556380314174,
+              "external_load_n": -3707.0399665824984,
+              "component_values_n": {
+                "frame": 1946.5164137316751,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1946.5164137316751,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 8864,
+              "global_dof": 10226,
+              "node_index": 1704,
+              "dof": "uz",
+              "residual_n": 5565.797646057914,
+              "external_load_n": -4000.4046034858848,
+              "component_values_n": {
+                "frame": 379.4473088666366,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 1185.9457337053923,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1565.393042572029,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 10418,
+              "global_dof": 13034,
+              "node_index": 2172,
+              "dof": "uz",
+              "residual_n": 5468.104708921197,
+              "external_load_n": -3153.1987846554102,
+              "component_values_n": {
+                "frame": 900.3561136436575,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 1414.5498106221296,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 2314.9059242657872,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 386,
+              "global_dof": 482,
+              "node_index": 80,
+              "dof": "uz",
+              "residual_n": 5296.601674444508,
+              "external_load_n": -5304.7622385637715,
+              "component_values_n": {
+                "frame": 11.929197090242155,
+                "spring": 0.0006646053073979799,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -20.090425814812896,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -8.160564119263343,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 392,
+              "global_dof": 488,
+              "node_index": 81,
+              "dof": "uz",
+              "residual_n": 4971.327104513905,
+              "external_load_n": -5394.250622899691,
+              "component_values_n": {
+                "frame": -381.3923091523927,
+                "spring": 0.0007271209690957166,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -41.53193635436189,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -422.92351838578554,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 398,
+              "global_dof": 494,
+              "node_index": 82,
+              "dof": "uz",
+              "residual_n": 4918.307585525154,
+              "external_load_n": -5996.963253492609,
+              "component_values_n": {
+                "frame": -1056.2329161456673,
+                "spring": 0.0011954665984564357,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -22.423947288385666,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -1078.6556679674547,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 8870,
+              "global_dof": 10232,
+              "node_index": 1705,
+              "dof": "uz",
+              "residual_n": 4519.288754964141,
+              "external_load_n": -3593.573931179161,
+              "component_values_n": {
+                "frame": 86.20206426012237,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 839.5127595248579,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 925.7148237849802,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 380,
+              "global_dof": 476,
+              "node_index": 79,
+              "dof": "uz",
+              "residual_n": 4518.6954813019665,
+              "external_load_n": -4266.004051245534,
+              "component_values_n": {
+                "frame": 253.24527750165066,
+                "spring": 0.0005687643697215886,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -0.5544162095886356,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 252.69143005643176,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5846,
+              "global_dof": 6902,
+              "node_index": 1150,
+              "dof": "uz",
+              "residual_n": 4512.431123742318,
+              "external_load_n": -5281.6197825210575,
+              "component_values_n": {
+                "frame": -695.3047980357613,
+                "spring": 0.0008971667258699086,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -73.88475790970354,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -769.1886587787391,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 10544,
+              "global_dof": 13160,
+              "node_index": 2193,
+              "dof": "uz",
+              "residual_n": 4487.2436028683405,
+              "external_load_n": -2832.1008491691764,
+              "component_values_n": {
+                "frame": 878.8796379971225,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 27.47422481013828,
+                "shell_membrane": 748.7888908919036
+              },
+              "internal_sum_n": 1655.1427536991644,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 410,
+              "global_dof": 506,
+              "node_index": 84,
+              "dof": "uz",
+              "residual_n": 4486.637858091174,
+              "external_load_n": -5445.2303603010505,
+              "component_values_n": {
+                "frame": -918.6761557241558,
+                "spring": 0.0009566780852982689,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -39.91730316380596,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -958.5925022098764,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5852,
+              "global_dof": 6908,
+              "node_index": 1151,
+              "dof": "uz",
+              "residual_n": 4485.897664721474,
+              "external_load_n": -5819.324672991066,
+              "component_values_n": {
+                "frame": -1264.2895080127578,
+                "spring": 0.0007452181886642667,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -69.13824547502294,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -1333.427008269592,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5876,
+              "global_dof": 6932,
+              "node_index": 1155,
+              "dof": "uz",
+              "residual_n": 4480.54795938474,
+              "external_load_n": -3347.6280610218055,
+              "component_values_n": {
+                "frame": 1193.2894219318298,
+                "spring": 0.0005264685893416326,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -60.37005003748408,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1132.919898362935,
+              "dominant_component": "frame"
+            }
+          ],
+          "top_row_dominant_component_counts": {
+            "shell_membrane": 1,
+            "frame": 19,
             "shell_bending_drilling": 4
           }
         },
