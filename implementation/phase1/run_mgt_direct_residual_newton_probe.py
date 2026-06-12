@@ -99,6 +99,22 @@ def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray
         )
 
 
+def _skipped_output_final_checkpoint_meta(
+    *,
+    output_final_checkpoint_npz: Path,
+    checkpoint_npz: Path,
+    final_direct_residual_inf: float,
+    reason: str,
+) -> dict[str, Any]:
+    return {
+        "written": False,
+        "path": str(output_final_checkpoint_npz),
+        "reason": reason,
+        "direct_residual_inf_n": float(final_direct_residual_inf),
+        "source_checkpoint_path": str(checkpoint_npz),
+    }
+
+
 def _active_free(stiffness: Any, restrained: set[int]) -> tuple[np.ndarray, np.ndarray]:
     diag = np.asarray(stiffness.diagonal(), dtype=np.float64)
     active = np.asarray(np.where(np.abs(diag) > 1.0e-9)[0], dtype=np.int64)
@@ -3417,7 +3433,8 @@ def run_mgt_direct_residual_newton_probe(
         and bool(final_gate_candidate.get("relative_increment_gate_passed"))
     )
     output_final_checkpoint_meta: dict[str, Any] | None = None
-    if output_final_checkpoint_npz is not None:
+    final_state_improved = final_direct_residual_inf < base_residual_inf
+    if output_final_checkpoint_npz is not None and final_state_improved:
         output_final_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
         final_translation_metrics = _translation_metrics(current_u, node_xyz)
         accepted_state_history_array = np.vstack(
@@ -3452,6 +3469,7 @@ def run_mgt_direct_residual_newton_probe(
             source_checkpoint_path=np.asarray(str(checkpoint_npz)),
         )
         output_final_checkpoint_meta = {
+            "written": True,
             "path": str(output_final_checkpoint_npz),
             "schema": "mgt-direct-residual-newton-state.v1",
             "load_scale": float(load_scale),
@@ -3461,6 +3479,13 @@ def run_mgt_direct_residual_newton_probe(
             "accepted_history_count": int(accepted_state_history_array.shape[0]),
             "source_checkpoint_path": str(checkpoint_npz),
         }
+    elif output_final_checkpoint_npz is not None:
+        output_final_checkpoint_meta = _skipped_output_final_checkpoint_meta(
+            output_final_checkpoint_npz=output_final_checkpoint_npz,
+            checkpoint_npz=checkpoint_npz,
+            final_direct_residual_inf=final_direct_residual_inf,
+            reason="no_residual_descent",
+        )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,

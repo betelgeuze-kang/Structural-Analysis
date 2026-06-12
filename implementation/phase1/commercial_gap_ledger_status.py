@@ -311,7 +311,9 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "best_candidate_relative_increment_gate_passed": best_candidate.get(
             "relative_increment_gate_passed"
         ),
+        "output_final_checkpoint_written": output_checkpoint.get("written"),
         "output_final_checkpoint_path": output_checkpoint.get("path"),
+        "output_final_checkpoint_reason": output_checkpoint.get("reason"),
         "blockers": payload.get("blockers"),
     }
 
@@ -1256,6 +1258,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     direct_residual_newton_followup48_replay = _load(
         productization / "mgt_direct_residual_newton_followup48_replay_probe.json"
     )
+    direct_residual_newton_followup48_rowcorr_narrow = _load(
+        productization / "mgt_direct_residual_newton_followup48_rowcorr_narrow_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2159,6 +2164,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_newton_followup48_replay": _direct_residual_probe_summary(
                     direct_residual_newton_followup48_replay
+                ),
+                "direct_residual_newton_followup48_rowcorr_narrow": _direct_residual_probe_summary(
+                    direct_residual_newton_followup48_rowcorr_narrow
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"

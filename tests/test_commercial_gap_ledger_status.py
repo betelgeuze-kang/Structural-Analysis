@@ -549,6 +549,34 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         is None
     )
     assert "direct_residual_gate_not_closed" in direct_followup48_replay["blockers"]
+    direct_followup48_rowcorr = rows["G1"]["evidence"][
+        "direct_residual_newton_followup48_rowcorr_narrow"
+    ]
+    assert direct_followup48_rowcorr["status"] == "partial"
+    assert direct_followup48_rowcorr["ready"] is False
+    assert direct_followup48_rowcorr["base_direct_residual_inf_n"] == 5662.74655057728
+    assert (
+        direct_followup48_rowcorr["final_direct_residual_inf_n"]
+        == direct_followup48_rowcorr["base_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup48_rowcorr["current_tangent_residual_row_correction_enabled"]
+        is True
+    )
+    assert (
+        direct_followup48_rowcorr["current_tangent_residual_row_correction_accepted"]
+        is False
+    )
+    assert direct_followup48_rowcorr["current_tangent_residual_row_promotion_count"] == 0
+    assert (
+        direct_followup48_rowcorr["current_tangent_residual_row_stop_reason"]
+        == "no_residual_descent"
+    )
+    assert direct_followup48_rowcorr["output_final_checkpoint_written"] is False
+    assert (
+        direct_followup48_rowcorr["output_final_checkpoint_reason"]
+        == "no_residual_descent"
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]

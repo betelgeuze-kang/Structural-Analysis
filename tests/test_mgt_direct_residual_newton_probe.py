@@ -18,6 +18,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     _parse_matrix_free_basis_sources,
     _select_residual_element_block_rows,
     _select_residual_node_block_rows,
+    _skipped_output_final_checkpoint_meta,
     _truncated_svd_lstsq,
     _unique_positive_alphas,
 )
@@ -208,6 +209,26 @@ def test_load_checkpoint_reads_optional_history(tmp_path: Path) -> None:
     np.testing.assert_array_equal(u, state_history[-1])
     np.testing.assert_array_equal(loaded_state_history, state_history)
     np.testing.assert_array_equal(loaded_residual_history, residual_history)
+
+
+def test_skipped_output_final_checkpoint_meta_marks_no_descent(tmp_path: Path) -> None:
+    output = tmp_path / "no_descent_state.npz"
+    source = tmp_path / "source_state.npz"
+
+    meta = _skipped_output_final_checkpoint_meta(
+        output_final_checkpoint_npz=output,
+        checkpoint_npz=source,
+        final_direct_residual_inf=5662.74655057728,
+        reason="no_residual_descent",
+    )
+
+    assert meta == {
+        "written": False,
+        "path": str(output),
+        "reason": "no_residual_descent",
+        "direct_residual_inf_n": 5662.74655057728,
+        "source_checkpoint_path": str(source),
+    }
 
 
 def test_direct_residual_cli_requires_explicit_cpu_diagnostic_ack(tmp_path: Path) -> None:
