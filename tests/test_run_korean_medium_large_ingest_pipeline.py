@@ -34,6 +34,7 @@ def test_ingest_pipeline_detects_manual_mgt_under_artifact_root(tmp_path: Path, 
     )
 
     monkeypatch.setattr(ingest, "ARTIFACT_ROOT", tmp_path / "collected" / "artifacts")
+    monkeypatch.setattr(ingest, "CURATED_ROOT", tmp_path / "curated")
     monkeypatch.setattr(ingest, "BENCHMARK_MGT", benchmark)
     monkeypatch.setattr(ingest, "_regenerate_catalog", lambda *, skip_regenerate: None)
     monkeypatch.setattr(
@@ -68,6 +69,16 @@ def test_ingest_pipeline_detects_manual_mgt_under_artifact_root(tmp_path: Path, 
     assert (
         "sha256_differs_from_repo_benchmark_bridge"
         in action_packet["acceptance_check_inventory"]
+    )
+    bridge_matrix = action_packet["candidate_blocker_matrix"][0]
+    assert bridge_matrix["source_id"] == source_id
+    assert bridge_matrix["repo_candidate_match_count"] == 1
+    assert bridge_matrix["candidate_promotion_blocker_counts"] == {
+        "repo_benchmark_bridge_mgt": 1
+    }
+    assert (
+        bridge_matrix["next_resolvable_step"]
+        == "replace_repo_benchmark_bridge_with_source_native_mgt"
     )
     row = receipt["per_source"][0]
     assert row["mgt_path"] == str(artifact_mgt)
@@ -254,6 +265,7 @@ def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(
     )
 
     monkeypatch.setattr(ingest, "ARTIFACT_ROOT", tmp_path / "collected" / "artifacts")
+    monkeypatch.setattr(ingest, "CURATED_ROOT", tmp_path / "curated")
     monkeypatch.setattr(ingest, "BENCHMARK_MGT", benchmark)
     monkeypatch.setattr(ingest, "PRIVATE_REAL_DRAWING_MANIFEST", private_manifest)
     monkeypatch.setattr(ingest, "_regenerate_catalog", lambda *, skip_regenerate: None)
@@ -295,6 +307,21 @@ def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(
     assert candidate_matches[0]["candidate_file_name"] == private_pdf.name
     assert candidate_matches[0]["requires_rights_confirmation"] is True
     assert candidate_matches[0]["counted_in_g7"] is False
+    candidate_matrix = {
+        row["source_id"]: row
+        for row in receipt["operator_action_packet"]["candidate_blocker_matrix"]
+    }
+    pdf_matrix = candidate_matrix["awaiting_real_pdf"]
+    assert pdf_matrix["private_candidate_match_count"] == 1
+    assert pdf_matrix["candidate_promotion_blocker_counts"] == {
+        "not_catalog_source_matched": 1,
+        "raw_redistribution_not_allowed": 1,
+    }
+    assert (
+        pdf_matrix["next_resolvable_step"]
+        == "confirm_rights_and_map_private_candidate_to_catalog_source"
+    )
+    assert candidate_matrix["awaiting_real_mgt"]["candidate_match_count"] == 0
 
 
 def test_ingest_pipeline_reports_repo_public_candidates_without_counting_them(
@@ -399,6 +426,21 @@ def test_ingest_pipeline_reports_repo_public_candidates_without_counting_them(
     assert ifc_match["candidate_file_name"] == curated_ifc.name
     assert ifc_match["requires_operator_source_mapping"] is True
     assert "catalog_source_unmatched_candidate" in ifc_match["promotion_blockers"]
+    candidate_matrix = {
+        row["source_id"]: row
+        for row in receipt["operator_action_packet"]["candidate_blocker_matrix"]
+    }
+    assert candidate_matrix["bridge_mgt"]["candidate_promotion_blocker_counts"] == {
+        "repo_benchmark_bridge_mgt": 1
+    }
+    assert candidate_matrix["bridge_mgt"]["exact_clean_repo_candidate_count"] == 0
+    assert candidate_matrix["missing_ifc"]["candidate_promotion_blocker_counts"] == {
+        "catalog_source_unmatched_candidate": 1
+    }
+    assert (
+        candidate_matrix["missing_ifc"]["next_resolvable_step"]
+        == "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
+    )
     assert receipt["operator_action_repo_candidate_ifc_source_mapping_candidates"] == [
         ifc_match
     ]

@@ -148,6 +148,9 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "promotion_candidate_relative_increment": _float_or_none(
             promotion_candidate.get("relative_increment")
         ),
+        "promotion_candidate_residual_gate_passed": (
+            promotion_candidate.get("residual_gate_passed")
+        ),
         "promotion_candidate_relative_increment_gate_passed": (
             promotion_candidate.get("relative_increment_gate_passed")
         ),
@@ -1695,6 +1698,22 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_probe_replay.json"
     )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup7 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup7_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_followup7 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_followup7_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup7 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup7_probe.json"
+    )
+    residual_jacobian_post_block_rows21_support16_followup7_component = _load(
+        productization
+        / "mgt_residual_jacobian_post_block_rows21_support16_followup7_component_probe.json"
+    )
     direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
         productization
         / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
@@ -2432,6 +2451,29 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay": _direct_residual_probe_summary(
                     direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_replay
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup7": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup7
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_followup7": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_followup7
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup7": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup7
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup7_component_status": (
+                    residual_jacobian_post_block_rows21_support16_followup7_component.get("status")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup7_component_only": (
+                    residual_jacobian_post_block_rows21_support16_followup7_component.get("component_only")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup7_base_residual_inf_n": (
+                    residual_jacobian_post_block_rows21_support16_followup7_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup7_component_breakdown": (
+                    residual_jacobian_post_block_rows21_support16_followup7_component.get(
+                        "residual_component_breakdown"
+                    )
                 ),
                 "direct_residual_current_frontier_frame_block_current_tangent_narrow": _direct_residual_probe_summary(
                     direct_residual_current_frontier_frame_block_current_tangent_narrow

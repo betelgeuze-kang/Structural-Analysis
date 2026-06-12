@@ -199,6 +199,8 @@ def _operator_action_packet(
     operator_attached_real_mgt_header_ok_remaining: int,
     metadata_only_source_ids: list[str],
     repo_benchmark_bridge_source_ids: list[str],
+    private_candidate_match_rows: list[dict[str, Any]],
+    repo_candidate_match_rows: list[dict[str, Any]],
 ) -> dict[str, Any]:
     rows = [row for row in operator_action_queue if isinstance(row, dict)]
     by_action_type: dict[str, list[str]] = {}
@@ -215,6 +217,11 @@ def _operator_action_packet(
         for check in row.get("acceptance_checks", []):
             if check:
                 acceptance_checks.add(str(check))
+    candidate_blocker_matrix = _operator_action_candidate_blocker_matrix(
+        operator_action_queue=rows,
+        private_candidate_match_rows=private_candidate_match_rows,
+        repo_candidate_match_rows=repo_candidate_match_rows,
+    )
     next_actions = [
         {
             "source_id": str(row.get("source_id") or ""),
@@ -243,6 +250,7 @@ def _operator_action_packet(
         "operator_attached_real_mgt_header_ok_remaining": int(
             operator_attached_real_mgt_header_ok_remaining
         ),
+        "candidate_blocker_matrix": candidate_blocker_matrix,
         "next_actions": next_actions,
         "claim_boundary": (
             "This packet is an operator action checklist. It does not count local "
@@ -250,6 +258,71 @@ def _operator_action_packet(
             "rights are cleared where required, and the acceptance checks pass."
         ),
     }
+
+
+def _normalized_blocker_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for row in rows:
+        blockers = row.get("promotion_blockers")
+        if not isinstance(blockers, list):
+            blockers = []
+        for blocker in blockers:
+            key = str(blocker)
+            if key.startswith("mgt_file_too_small:"):
+                key = "mgt_file_too_small"
+            counts[key] = counts.get(key, 0) + 1
+    return dict(sorted(counts.items()))
+
+
+def _operator_action_candidate_blocker_matrix(
+    *,
+    operator_action_queue: list[dict[str, Any]],
+    private_candidate_match_rows: list[dict[str, Any]],
+    repo_candidate_match_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for action in operator_action_queue:
+        source_id = str(action.get("source_id") or "")
+        private_matches = [
+            row
+            for row in private_candidate_match_rows
+            if str(row.get("source_id") or "") == source_id
+        ]
+        repo_matches = [
+            row
+            for row in repo_candidate_match_rows
+            if str(row.get("source_id") or "") == source_id
+        ]
+        blocker_counts = _normalized_blocker_counts(private_matches + repo_matches)
+        exact_clean_repo_candidate_count = sum(
+            1
+            for row in repo_matches
+            if not bool(row.get("requires_operator_source_mapping"))
+            and not row.get("promotion_blockers")
+        )
+        if "repo_benchmark_bridge_mgt" in blocker_counts:
+            next_resolvable_step = "replace_repo_benchmark_bridge_with_source_native_mgt"
+        elif private_matches:
+            next_resolvable_step = "confirm_rights_and_map_private_candidate_to_catalog_source"
+        elif "catalog_source_unmatched_candidate" in blocker_counts:
+            next_resolvable_step = "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
+        elif exact_clean_repo_candidate_count:
+            next_resolvable_step = "run_acceptance_checks_for_exact_repo_candidate"
+        else:
+            next_resolvable_step = "attach_expected_operator_artifact"
+        rows.append(
+            {
+                "source_id": source_id,
+                "action_type": str(action.get("action_type") or ""),
+                "private_candidate_match_count": int(len(private_matches)),
+                "repo_candidate_match_count": int(len(repo_matches)),
+                "candidate_match_count": int(len(private_matches) + len(repo_matches)),
+                "exact_clean_repo_candidate_count": int(exact_clean_repo_candidate_count),
+                "candidate_promotion_blocker_counts": blocker_counts,
+                "next_resolvable_step": next_resolvable_step,
+            }
+        )
+    return rows
 
 
 def _local_private_candidate_artifacts(
@@ -812,6 +885,8 @@ def run_korean_medium_large_ingest_pipeline(
         operator_attached_real_mgt_header_ok_remaining=operator_attached_real_mgt_header_ok_remaining,
         metadata_only_source_ids=metadata_only_source_ids,
         repo_benchmark_bridge_source_ids=repo_benchmark_bridge_source_ids,
+        private_candidate_match_rows=private_candidate_matches["rows"],
+        repo_candidate_match_rows=repo_candidate_matches["rows"],
     )
 
     receipt = {

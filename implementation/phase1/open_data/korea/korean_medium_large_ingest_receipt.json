@@ -1,6 +1,6 @@
 {
   "schema_version": "korean_medium_large_ingest_receipt.v1",
-  "generated_at_utc": "2026-06-12T13:51:22.343576+00:00",
+  "generated_at_utc": "2026-06-12T19:19:07.579917+00:00",
   "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
   "collection_report_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
   "summary": {
@@ -6995,6 +6995,210 @@
     ],
     "operator_attached_real_mgt_header_ok_target": 4,
     "operator_attached_real_mgt_header_ok_remaining": 4,
+    "candidate_blocker_matrix": [
+      {
+        "source_id": "koneps_goyang_changneung_powerplant_design_service",
+        "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
+        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+        "private_candidate_match_count": 2,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 14,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "not_catalog_source_matched": 2,
+          "raw_redistribution_not_allowed": 2,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_happy_city_5_1_design_competition",
+        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+        "private_candidate_match_count": 2,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 14,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "not_catalog_source_matched": 2,
+          "raw_redistribution_not_allowed": 2,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
+        "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_happy_city_5_1_native_baseline",
+        "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "kci_concrete_building_design_examples_2e",
+        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+        "private_candidate_match_count": 2,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 14,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "not_catalog_source_matched": 2,
+          "raw_redistribution_not_allowed": 2,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
+        "action_type": "replace_placeholder_mgt_with_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_yeongjong_international_city_block_competition",
+        "action_type": "attach_operator_real_zip_or_pdf_derived_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_cheongna_international_city_tower_competition",
+        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+        "private_candidate_match_count": 2,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 14,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "not_catalog_source_matched": 2,
+          "raw_redistribution_not_allowed": 2,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "lh_newtown_highrise_block_competition",
+        "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "koneps_public_highrise_design_service_g2b_portal",
+        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+        "private_candidate_match_count": 2,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 14,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "not_catalog_source_matched": 2,
+          "raw_redistribution_not_allowed": 2,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "koneps_mixed_use_tower_design_attachment_lane",
+        "action_type": "attach_operator_real_mgt",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 12,
+        "candidate_match_count": 12,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 12,
+          "mgt_file_too_small": 4,
+          "repo_benchmark_bridge_mgt": 8
+        },
+        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+      },
+      {
+        "source_id": "ifc_public_buildingsmart_korea_awards_hub",
+        "action_type": "attach_operator_real_ifc",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 10,
+        "candidate_match_count": 10,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10
+        },
+        "next_resolvable_step": "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
+      },
+      {
+        "source_id": "ifc_public_buildingsmart_2025_megaproject_lane",
+        "action_type": "attach_operator_real_ifc",
+        "private_candidate_match_count": 0,
+        "repo_candidate_match_count": 10,
+        "candidate_match_count": 10,
+        "exact_clean_repo_candidate_count": 0,
+        "candidate_promotion_blocker_counts": {
+          "catalog_source_unmatched_candidate": 10
+        },
+        "next_resolvable_step": "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
+      }
+    ],
     "next_actions": [
       {
         "source_id": "koneps_goyang_changneung_powerplant_design_service",
