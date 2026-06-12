@@ -1,6 +1,6 @@
 {
   "schema_version": "korean_medium_large_ingest_receipt.v1",
-  "generated_at_utc": "2026-06-12T19:19:07.579917+00:00",
+  "generated_at_utc": "2026-06-12T19:32:37.950614+00:00",
   "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
   "collection_report_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
   "summary": {
@@ -7024,7 +7024,7 @@
           "raw_redistribution_not_allowed": 2,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "confirm_rights_and_map_private_candidate_to_catalog_source"
       },
       {
         "source_id": "lh_happy_city_5_1_design_competition",
@@ -7040,7 +7040,7 @@
           "raw_redistribution_not_allowed": 2,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "confirm_rights_and_map_private_candidate_to_catalog_source"
       },
       {
         "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
@@ -7084,7 +7084,7 @@
           "raw_redistribution_not_allowed": 2,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "confirm_rights_and_map_private_candidate_to_catalog_source"
       },
       {
         "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
@@ -7098,7 +7098,7 @@
           "mgt_file_too_small": 4,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "replace_placeholder_with_source_native_mgt"
       },
       {
         "source_id": "lh_yeongjong_international_city_block_competition",
@@ -7112,7 +7112,7 @@
           "mgt_file_too_small": 4,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
       },
       {
         "source_id": "lh_cheongna_international_city_tower_competition",
@@ -7128,7 +7128,7 @@
           "raw_redistribution_not_allowed": 2,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "confirm_rights_and_map_private_candidate_to_catalog_source"
       },
       {
         "source_id": "lh_newtown_highrise_block_competition",
@@ -7158,7 +7158,7 @@
           "raw_redistribution_not_allowed": 2,
           "repo_benchmark_bridge_mgt": 8
         },
-        "next_resolvable_step": "replace_repo_benchmark_bridge_with_source_native_mgt"
+        "next_resolvable_step": "confirm_rights_and_map_private_candidate_to_catalog_source"
       },
       {
         "source_id": "koneps_mixed_use_tower_design_attachment_lane",

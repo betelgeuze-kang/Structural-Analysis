@@ -283,6 +283,8 @@ def _operator_action_candidate_blocker_matrix(
     rows: list[dict[str, Any]] = []
     for action in operator_action_queue:
         source_id = str(action.get("source_id") or "")
+        action_type = str(action.get("action_type") or "")
+        action_format = str(action.get("format") or "").lower()
         private_matches = [
             row
             for row in private_candidate_match_rows
@@ -300,10 +302,14 @@ def _operator_action_candidate_blocker_matrix(
             if not bool(row.get("requires_operator_source_mapping"))
             and not row.get("promotion_blockers")
         )
-        if "repo_benchmark_bridge_mgt" in blocker_counts:
+        if action_type == "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt":
             next_resolvable_step = "replace_repo_benchmark_bridge_with_source_native_mgt"
+        elif action_type == "replace_placeholder_mgt_with_operator_real_mgt":
+            next_resolvable_step = "replace_placeholder_with_source_native_mgt"
         elif private_matches:
             next_resolvable_step = "confirm_rights_and_map_private_candidate_to_catalog_source"
+        elif "repo_benchmark_bridge_mgt" in blocker_counts and action_format == "mgt":
+            next_resolvable_step = "replace_repo_benchmark_bridge_with_source_native_mgt"
         elif "catalog_source_unmatched_candidate" in blocker_counts:
             next_resolvable_step = "map_repo_candidate_to_catalog_source_or_attach_native_artifact"
         elif exact_clean_repo_candidate_count:
@@ -313,7 +319,7 @@ def _operator_action_candidate_blocker_matrix(
         rows.append(
             {
                 "source_id": source_id,
-                "action_type": str(action.get("action_type") or ""),
+                "action_type": action_type,
                 "private_candidate_match_count": int(len(private_matches)),
                 "repo_candidate_match_count": int(len(repo_matches)),
                 "candidate_match_count": int(len(private_matches) + len(repo_matches)),

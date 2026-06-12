@@ -14,7 +14,7 @@
   "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
   "reference_scheme": "local_path",
   "resolved_reference": "implementation/phase1/open_data/korea/curated/koneps_goyang_changneung_powerplant_design_service.mgt",
-  "retrieved_at_utc": "2026-06-12T19:19:07.482726+00:00",
+  "retrieved_at_utc": "2026-06-12T19:32:37.854256+00:00",
   "schema_version": "1.0",
   "seed_basis": "official g2b attachment seed with a committed manual local MIDAS baseline for truthful native writeback validation",
   "seed_priority": "P0",
