@@ -351,6 +351,12 @@ def _translation_frontier_followup_series(productization: Path) -> dict[str, Any
                 "base_direct_residual_inf_n": summary.get("base_direct_residual_inf_n"),
                 "final_direct_residual_inf_n": summary.get("final_direct_residual_inf_n"),
                 "promotion_count": summary.get("promotion_count"),
+                "promotion_pass_actual_direct_residual_inf_n": summary.get(
+                    "promotion_pass_actual_direct_residual_inf_n"
+                ),
+                "promotion_pass_relative_increment_gate_passed": summary.get(
+                    "promotion_pass_relative_increment_gate_passed"
+                ),
                 "promotion_candidate_alpha": summary.get("promotion_candidate_alpha"),
                 "promotion_candidate_relative_increment": summary.get(
                     "promotion_candidate_relative_increment"

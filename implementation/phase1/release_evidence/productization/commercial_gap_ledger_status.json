@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T23:38:27.824003+00:00",
+  "generated_at": "2026-06-12T23:52:16.543353+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -35094,16 +35094,16 @@
         },
         "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": {
           "series_schema": "mgt-translation-frontier-followup-series.v1",
-          "count": 10,
+          "count": 11,
           "strictly_decreasing_final_residual": true,
-          "latest_followup_index": 53,
-          "latest_final_direct_residual_inf_n": 5594.942299914306,
+          "latest_followup_index": 54,
+          "latest_final_direct_residual_inf_n": 5555.073010872516,
           "latest_component_inf_n": {
-            "frame": 3517.4797739856767,
+            "frame": 3539.777606168417,
             "spring": 0.8387057679917196,
             "material_stress_correction": 0.0,
-            "shell_bending_drilling": 2173.352230364505,
-            "shell_membrane": 2327.9378819811577
+            "shell_bending_drilling": 2151.2559607832814,
+            "shell_membrane": 2288.743356088593
           },
           "rows": [
             {
@@ -35115,6 +35115,12 @@
               "base_direct_residual_inf_n": 5850.328431810043,
               "final_direct_residual_inf_n": 5836.367803368419,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5836.367803368419
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.002386298240234806,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35150,6 +35156,12 @@
               "base_direct_residual_inf_n": 5824.357499442276,
               "final_direct_residual_inf_n": 5810.396871000652,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5810.396871000652
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.0023969387941864357,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35185,6 +35197,20 @@
               "base_direct_residual_inf_n": 5810.396871000652,
               "final_direct_residual_inf_n": 5742.548363248055,
               "promotion_count": 5,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5798.39087701455,
+                5784.430248572926,
+                5770.469620131304,
+                5756.5089916896795,
+                5742.548363248055
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
               "promotion_candidate_alpha": 0.002425190069498385,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35220,6 +35246,20 @@
               "base_direct_residual_inf_n": 5742.548363248055,
               "final_direct_residual_inf_n": 5674.717309170781,
               "promotion_count": 5,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5730.559822937275,
+                5716.599194495651,
+                5702.63856605403,
+                5688.677937612405,
+                5674.717309170781
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
               "promotion_candidate_alpha": 0.002454107719707436,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35255,6 +35295,12 @@
               "base_direct_residual_inf_n": 5674.717309170781,
               "final_direct_residual_inf_n": 5662.74655057728,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5662.74655057728
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.002109489854967226,
               "promotion_candidate_relative_increment": 9.999999999990003e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35290,6 +35336,12 @@
               "base_direct_residual_inf_n": 5662.74655057728,
               "final_direct_residual_inf_n": 5648.785922135653,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5648.785922135653
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.0024653458029480022,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35325,6 +35377,12 @@
               "base_direct_residual_inf_n": 5648.785922135653,
               "final_direct_residual_inf_n": 5634.82529369403,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5634.82529369403
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.002471438754107678,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35360,6 +35418,12 @@
               "base_direct_residual_inf_n": 5634.82529369403,
               "final_direct_residual_inf_n": 5622.863556797554,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5622.863556797554
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.002122823028757177,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35395,6 +35459,12 @@
               "base_direct_residual_inf_n": 5622.863556797554,
               "final_direct_residual_inf_n": 5608.9029283559275,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5608.9029283559275
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.0024828325106247295,
               "promotion_candidate_relative_increment": 9.99999999999e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35430,6 +35500,12 @@
               "base_direct_residual_inf_n": 5608.9029283559275,
               "final_direct_residual_inf_n": 5594.942299914306,
               "promotion_count": 1,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5594.942299914306
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true
+              ],
               "promotion_candidate_alpha": 0.002489012311310589,
               "promotion_candidate_relative_increment": 9.999999999990003e-05,
               "promotion_candidate_relative_increment_gate_passed": true,
@@ -35449,6 +35525,51 @@
                 "material_stress_correction": 0.0,
                 "shell_bending_drilling": 2173.352230364505,
                 "shell_membrane": 2327.9378819811577
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 54,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup54_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup54_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5594.942299914306,
+              "final_direct_residual_inf_n": 5555.073010872516,
+              "promotion_count": 3,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5580.981671472682,
+                5569.033639314141,
+                5555.073010872516
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true,
+                true,
+                true
+              ],
+              "promotion_candidate_alpha": 0.0025068314084278603,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 339,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup54_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5555.073010872516,
+              "component_inf_n": {
+                "frame": 3539.777606168417,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2151.2559607832814,
+                "shell_membrane": 2288.743356088593
               },
               "top_row_dominant_component_counts": {
                 "shell_membrane": 1,

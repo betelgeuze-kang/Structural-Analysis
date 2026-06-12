@@ -5061,40 +5061,50 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert support32_translation_series["series_schema"] == (
         "mgt-translation-frontier-followup-series.v1"
     )
-    assert support32_translation_series["count"] == 10
+    assert support32_translation_series["count"] == 11
     assert support32_translation_series["strictly_decreasing_final_residual"] is True
-    assert support32_translation_series["latest_followup_index"] == 53
+    assert support32_translation_series["latest_followup_index"] == 54
     assert (
         support32_translation_series["latest_final_direct_residual_inf_n"]
-        == 5594.942299914306
+        == 5555.073010872516
     )
     series_rows = support32_translation_series["rows"]
-    assert [row["followup_index"] for row in series_rows[-4:]] == [50, 51, 52, 53]
-    followup53 = series_rows[-1]
+    assert [row["followup_index"] for row in series_rows[-4:]] == [51, 52, 53, 54]
+    followup54 = series_rows[-1]
     assert (
-        followup53["base_direct_residual_inf_n"]
+        followup54["base_direct_residual_inf_n"]
         == support32_translation_series["rows"][-2]["final_direct_residual_inf_n"]
     )
-    assert followup53["final_direct_residual_inf_n"] == 5594.942299914306
-    assert followup53["promotion_count"] == 1
-    assert followup53["frame_hotspot_block_lstsq_support_size"] == 332
-    assert followup53["frame_hotspot_block_lstsq_selected_component_counts"] == {
+    assert followup54["final_direct_residual_inf_n"] == 5555.073010872516
+    assert followup54["promotion_count"] == 3
+    assert followup54["promotion_pass_actual_direct_residual_inf_n"] == [
+        5580.981671472682,
+        5569.033639314141,
+        5555.073010872516,
+    ]
+    assert followup54["promotion_pass_relative_increment_gate_passed"] == [
+        True,
+        True,
+        True,
+    ]
+    assert followup54["frame_hotspot_block_lstsq_support_size"] == 339
+    assert followup54["frame_hotspot_block_lstsq_selected_component_counts"] == {
         "shell_membrane": 1,
         "frame": 18,
         "shell_bending_drilling": 2,
     }
     assert (
-        followup53["output_final_checkpoint_path"]
-        == "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup53_probe_final_checkpoint.npz"
+        followup54["output_final_checkpoint_path"]
+        == "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup54_probe_final_checkpoint.npz"
     )
-    assert followup53["component_status"] == "partial"
-    assert followup53["component_only"] is True
-    assert followup53["component_base_residual_inf_n"] == followup53[
+    assert followup54["component_status"] == "partial"
+    assert followup54["component_only"] is True
+    assert followup54["component_base_residual_inf_n"] == followup54[
         "final_direct_residual_inf_n"
     ]
-    assert followup53["component_inf_n"]["frame"] == 3517.4797739856767
-    assert followup53["component_inf_n"]["shell_membrane"] == 2327.9378819811577
-    assert followup53["top_row_dominant_component_counts"] == {
+    assert followup54["component_inf_n"]["frame"] == 3539.777606168417
+    assert followup54["component_inf_n"]["shell_membrane"] == 2288.743356088593
+    assert followup54["top_row_dominant_component_counts"] == {
         "shell_membrane": 1,
         "frame": 20,
         "shell_bending_drilling": 3,
