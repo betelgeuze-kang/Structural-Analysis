@@ -373,6 +373,12 @@ def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(
         row["source_id"]: row
         for row in receipt["operator_action_packet"]["candidate_blocker_matrix"]
     }
+    assert receipt["operator_action_packet"]["candidate_matrix_summary"] == {
+        "candidate_action_count": 2,
+        "candidate_match_count": 1,
+        "exact_clean_repo_candidate_count": 0,
+        "actions_with_candidate_blockers_count": 1,
+    }
     pdf_matrix = candidate_matrix["awaiting_real_pdf"]
     assert pdf_matrix["private_candidate_match_count"] == 1
     assert pdf_matrix["candidate_promotion_blocker_counts"] == {
@@ -491,6 +497,12 @@ def test_ingest_pipeline_reports_repo_public_candidates_without_counting_them(
     candidate_matrix = {
         row["source_id"]: row
         for row in receipt["operator_action_packet"]["candidate_blocker_matrix"]
+    }
+    assert receipt["operator_action_packet"]["candidate_matrix_summary"] == {
+        "candidate_action_count": 2,
+        "candidate_match_count": 2,
+        "exact_clean_repo_candidate_count": 0,
+        "actions_with_candidate_blockers_count": 2,
     }
     assert candidate_matrix["bridge_mgt"]["candidate_promotion_blocker_counts"] == {
         "repo_benchmark_bridge_mgt": 1

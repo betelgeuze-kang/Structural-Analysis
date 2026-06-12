@@ -222,6 +222,9 @@ def _operator_action_packet(
         private_candidate_match_rows=private_candidate_match_rows,
         repo_candidate_match_rows=repo_candidate_match_rows,
     )
+    candidate_matrix_summary = _operator_action_candidate_matrix_summary(
+        candidate_blocker_matrix
+    )
     next_actions = [
         {
             "source_id": str(row.get("source_id") or ""),
@@ -250,12 +253,29 @@ def _operator_action_packet(
         "operator_attached_real_mgt_header_ok_remaining": int(
             operator_attached_real_mgt_header_ok_remaining
         ),
+        "candidate_matrix_summary": candidate_matrix_summary,
         "candidate_blocker_matrix": candidate_blocker_matrix,
         "next_actions": next_actions,
         "claim_boundary": (
             "This packet is an operator action checklist. It does not count local "
             "or repo candidate files as G7 evidence until each source is matched, "
             "rights are cleared where required, and the acceptance checks pass."
+        ),
+    }
+
+
+def _operator_action_candidate_matrix_summary(
+    candidate_blocker_matrix: list[dict[str, Any]],
+) -> dict[str, int]:
+    rows = [row for row in candidate_blocker_matrix if isinstance(row, dict)]
+    return {
+        "candidate_action_count": int(len(rows)),
+        "candidate_match_count": sum(int(row.get("candidate_match_count") or 0) for row in rows),
+        "exact_clean_repo_candidate_count": sum(
+            int(row.get("exact_clean_repo_candidate_count") or 0) for row in rows
+        ),
+        "actions_with_candidate_blockers_count": sum(
+            1 for row in rows if bool(row.get("candidate_promotion_blocker_counts"))
         ),
     }
 

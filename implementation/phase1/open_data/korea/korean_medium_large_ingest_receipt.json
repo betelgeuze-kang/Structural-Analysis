@@ -1,6 +1,6 @@
 {
   "schema_version": "korean_medium_large_ingest_receipt.v1",
-  "generated_at_utc": "2026-06-12T19:32:37.950614+00:00",
+  "generated_at_utc": "2026-06-12T19:57:56.113002+00:00",
   "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
   "collection_report_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
   "summary": {
@@ -6995,6 +6995,12 @@
     ],
     "operator_attached_real_mgt_header_ok_target": 4,
     "operator_attached_real_mgt_header_ok_remaining": 4,
+    "candidate_matrix_summary": {
+      "candidate_action_count": 14,
+      "candidate_match_count": 174,
+      "exact_clean_repo_candidate_count": 0,
+      "actions_with_candidate_blockers_count": 14
+    },
     "candidate_blocker_matrix": [
       {
         "source_id": "koneps_goyang_changneung_powerplant_design_service",

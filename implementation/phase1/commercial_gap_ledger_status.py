@@ -1738,6 +1738,18 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_post_block_rows21_support16_followup11_component_probe.json"
     )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup12 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup12_probe.json"
+    )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup13 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup13_probe.json"
+    )
+    residual_jacobian_post_block_rows21_support16_followup13_component = _load(
+        productization
+        / "mgt_residual_jacobian_post_block_rows21_support16_followup13_component_probe.json"
+    )
     direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
         productization
         / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
@@ -2536,6 +2548,26 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_post_block_rows21_support16_followup11_component_breakdown": (
                     residual_jacobian_post_block_rows21_support16_followup11_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup12": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup12
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup13": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup13
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup13_component_status": (
+                    residual_jacobian_post_block_rows21_support16_followup13_component.get("status")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup13_component_only": (
+                    residual_jacobian_post_block_rows21_support16_followup13_component.get("component_only")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup13_base_residual_inf_n": (
+                    residual_jacobian_post_block_rows21_support16_followup13_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup13_component_breakdown": (
+                    residual_jacobian_post_block_rows21_support16_followup13_component.get(
                         "residual_component_breakdown"
                     )
                 ),
