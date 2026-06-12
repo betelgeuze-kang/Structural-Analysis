@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T23:24:06.402389+00:00",
+  "generated_at": "2026-06-12T23:31:53.737301+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -35091,6 +35091,337 @@
             "frame": 21,
             "shell_bending_drilling": 2
           }
+        },
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": {
+          "series_schema": "mgt-translation-frontier-followup-series.v1",
+          "count": 9,
+          "strictly_decreasing_final_residual": true,
+          "latest_followup_index": 52,
+          "latest_final_direct_residual_inf_n": 5608.9029283559275,
+          "latest_component_inf_n": {
+            "frame": 3528.414739726482,
+            "spring": 0.8387057679917196,
+            "material_stress_correction": 0.0,
+            "shell_bending_drilling": 2174.8783544631237,
+            "shell_membrane": 2341.6622353890675
+          },
+          "rows": [
+            {
+              "followup_index": 35,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup35_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup35_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5850.328431810043,
+              "final_direct_residual_inf_n": 5836.367803368419,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.002386298240234806,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 342,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 17,
+                "shell_bending_drilling": 3
+              },
+              "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup35_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5836.367803368419,
+              "component_inf_n": {
+                "frame": 3249.2798743246726,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2286.8231961921897,
+                "shell_membrane": 2565.2773862213944
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 37,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup37_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup37_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5824.357499442276,
+              "final_direct_residual_inf_n": 5810.396871000652,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.0023969387941864357,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 327,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup37_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5810.396871000652,
+              "component_inf_n": {
+                "frame": 3328.4911168500994,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2266.754816078911,
+                "shell_membrane": 2539.7460172168726
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 42,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup42_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup42_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5810.396871000652,
+              "final_direct_residual_inf_n": 5742.548363248055,
+              "promotion_count": 5,
+              "promotion_candidate_alpha": 0.002425190069498385,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 322,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup42_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5742.548363248055,
+              "component_inf_n": {
+                "frame": 3481.6216116307305,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2242.073335594112,
+                "shell_membrane": 2473.04580364914
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 47,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup47_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup47_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5742.548363248055,
+              "final_direct_residual_inf_n": 5674.717309170781,
+              "promotion_count": 5,
+              "promotion_candidate_alpha": 0.002454107719707436,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 332,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup47_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5674.717309170781,
+              "component_inf_n": {
+                "frame": 3482.1284647623875,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2217.2512191488836,
+                "shell_membrane": 2406.362748364031
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 48,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup48_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup48_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5674.717309170781,
+              "final_direct_residual_inf_n": 5662.74655057728,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.002109489854967226,
+              "promotion_candidate_relative_increment": 9.999999999990003e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 319,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 17,
+                "shell_bending_drilling": 3
+              },
+              "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup48_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5662.74655057728,
+              "component_inf_n": {
+                "frame": 3517.743223902462,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2198.390319883804,
+                "shell_membrane": 2394.594587483238
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 49,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup49_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup49_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5662.74655057728,
+              "final_direct_residual_inf_n": 5648.785922135653,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.0024653458029480022,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 315,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup49_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5648.785922135653,
+              "component_inf_n": {
+                "frame": 3506.9437246956677,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2196.8641957851846,
+                "shell_membrane": 2380.8702340753234
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 50,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup50_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5648.785922135653,
+              "final_direct_residual_inf_n": 5634.82529369403,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.002471438754107678,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 320,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup50_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5634.82529369403,
+              "component_inf_n": {
+                "frame": 3496.1390256393806,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2195.338071686566,
+                "shell_membrane": 2367.1458806674123
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 51,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup51_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup51_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5634.82529369403,
+              "final_direct_residual_inf_n": 5622.863556797554,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.002122823028757177,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 312,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 17,
+                "shell_bending_drilling": 3
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup51_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5622.863556797554,
+              "component_inf_n": {
+                "frame": 3486.881350177466,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2176.404478561743,
+                "shell_membrane": 2355.386588796982
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 21,
+                "shell_bending_drilling": 2
+              }
+            },
+            {
+              "followup_index": 52,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup52_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup52_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5622.863556797554,
+              "final_direct_residual_inf_n": 5608.9029283559275,
+              "promotion_count": 1,
+              "promotion_candidate_alpha": 0.0024828325106247295,
+              "promotion_candidate_relative_increment": 9.99999999999e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 327,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup52_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5608.9029283559275,
+              "component_inf_n": {
+                "frame": 3528.414739726482,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2174.8783544631237,
+                "shell_membrane": 2341.6622353890675
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            }
+          ]
         },
         "direct_residual_current_frontier_frame_block_current_tangent_narrow": {
           "schema_version": "mgt-direct-residual-newton-probe.v1",

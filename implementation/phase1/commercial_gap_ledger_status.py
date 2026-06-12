@@ -318,6 +318,83 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _translation_frontier_followup_series(productization: Path) -> dict[str, Any]:
+    pattern = re.compile(
+        r"mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup(\d+)_probe\.json$"
+    )
+    rows: list[dict[str, Any]] = []
+    for path in sorted(
+        productization.glob(
+            "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup*_probe.json"
+        )
+    ):
+        match = pattern.match(path.name)
+        if not match:
+            continue
+        followup_index = int(match.group(1))
+        payload = _load(path)
+        summary = _direct_residual_probe_summary(payload)
+        component_path = (
+            productization
+            / f"mgt_residual_jacobian_post_block_rows21_support32_translation_followup{followup_index}_component_probe.json"
+        )
+        component = _load(component_path)
+        breakdown = component.get("residual_component_breakdown")
+        breakdown = breakdown if isinstance(breakdown, dict) else {}
+        rows.append(
+            {
+                "followup_index": followup_index,
+                "probe_file": path.name,
+                "component_probe_file": component_path.name if component_path.is_file() else None,
+                "status": summary.get("status"),
+                "ready": summary.get("ready"),
+                "base_direct_residual_inf_n": summary.get("base_direct_residual_inf_n"),
+                "final_direct_residual_inf_n": summary.get("final_direct_residual_inf_n"),
+                "promotion_count": summary.get("promotion_count"),
+                "promotion_candidate_alpha": summary.get("promotion_candidate_alpha"),
+                "promotion_candidate_relative_increment": summary.get(
+                    "promotion_candidate_relative_increment"
+                ),
+                "promotion_candidate_relative_increment_gate_passed": summary.get(
+                    "promotion_candidate_relative_increment_gate_passed"
+                ),
+                "frame_hotspot_block_lstsq_support_size": summary.get(
+                    "frame_hotspot_block_lstsq_support_size"
+                ),
+                "frame_hotspot_block_lstsq_selected_component_counts": summary.get(
+                    "frame_hotspot_block_lstsq_selected_component_counts"
+                ),
+                "output_final_checkpoint_path": summary.get("output_final_checkpoint_path"),
+                "component_status": component.get("status"),
+                "component_only": component.get("component_only"),
+                "component_base_residual_inf_n": component.get("base_residual_inf_n"),
+                "component_inf_n": breakdown.get("component_inf_n"),
+                "top_row_dominant_component_counts": breakdown.get(
+                    "top_row_dominant_component_counts"
+                ),
+            }
+        )
+    rows.sort(key=lambda row: int(row["followup_index"]))
+    finals = [
+        _float_or_none(row.get("final_direct_residual_inf_n"))
+        for row in rows
+        if _float_or_none(row.get("final_direct_residual_inf_n")) is not None
+    ]
+    strictly_decreasing = all(
+        later < earlier for earlier, later in zip(finals, finals[1:], strict=False)
+    )
+    latest = rows[-1] if rows else {}
+    return {
+        "series_schema": "mgt-translation-frontier-followup-series.v1",
+        "count": int(len(rows)),
+        "strictly_decreasing_final_residual": bool(strictly_decreasing),
+        "latest_followup_index": latest.get("followup_index"),
+        "latest_final_direct_residual_inf_n": latest.get("final_direct_residual_inf_n"),
+        "latest_component_inf_n": latest.get("component_inf_n"),
+        "rows": rows,
+    }
+
+
 def _hotspot_jvp_summary(payload: dict[str, Any]) -> dict[str, Any]:
     rows = payload.get("residual_hotspot_tangent_fd_jvp_rows")
     rows = rows if isinstance(rows, list) else []
@@ -2932,6 +3009,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                     residual_jacobian_post_block_rows21_support32_translation_followup51_component.get(
                         "residual_component_breakdown"
                     )
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": _translation_frontier_followup_series(
+                    productization
                 ),
                 "direct_residual_current_frontier_frame_block_current_tangent_narrow": _direct_residual_probe_summary(
                     direct_residual_current_frontier_frame_block_current_tangent_narrow

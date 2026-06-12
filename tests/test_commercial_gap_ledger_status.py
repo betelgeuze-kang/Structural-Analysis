@@ -5055,6 +5055,52 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert post_block_translation_followup51_component_breakdown[
         "top_row_dominant_component_counts"
     ] == {"shell_membrane": 1, "frame": 21, "shell_bending_drilling": 2}
+    support32_translation_series = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series"
+    ]
+    assert support32_translation_series["series_schema"] == (
+        "mgt-translation-frontier-followup-series.v1"
+    )
+    assert support32_translation_series["count"] == 9
+    assert support32_translation_series["strictly_decreasing_final_residual"] is True
+    assert support32_translation_series["latest_followup_index"] == 52
+    assert (
+        support32_translation_series["latest_final_direct_residual_inf_n"]
+        == 5608.9029283559275
+    )
+    series_rows = support32_translation_series["rows"]
+    assert [row["followup_index"] for row in series_rows[-4:]] == [49, 50, 51, 52]
+    followup52 = series_rows[-1]
+    assert (
+        followup52["base_direct_residual_inf_n"]
+        == g1_frame_hotspot_block_translation_rows21_support32_followup51[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert followup52["final_direct_residual_inf_n"] == 5608.9029283559275
+    assert followup52["promotion_count"] == 1
+    assert followup52["frame_hotspot_block_lstsq_support_size"] == 327
+    assert followup52["frame_hotspot_block_lstsq_selected_component_counts"] == {
+        "shell_membrane": 1,
+        "frame": 18,
+        "shell_bending_drilling": 2,
+    }
+    assert (
+        followup52["output_final_checkpoint_path"]
+        == "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup52_probe_final_checkpoint.npz"
+    )
+    assert followup52["component_status"] == "partial"
+    assert followup52["component_only"] is True
+    assert followup52["component_base_residual_inf_n"] == followup52[
+        "final_direct_residual_inf_n"
+    ]
+    assert followup52["component_inf_n"]["frame"] == 3528.414739726482
+    assert followup52["component_inf_n"]["shell_membrane"] == 2341.6622353890675
+    assert followup52["top_row_dominant_component_counts"] == {
+        "shell_membrane": 1,
+        "frame": 20,
+        "shell_bending_drilling": 3,
+    }
     assert rows["G1"]["evidence"][
         "residual_jacobian_current_frontier_component_status"
     ] == "partial"
