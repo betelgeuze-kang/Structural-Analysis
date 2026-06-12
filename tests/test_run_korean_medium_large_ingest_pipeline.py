@@ -87,6 +87,68 @@ def test_ingest_pipeline_detects_manual_mgt_under_artifact_root(tmp_path: Path, 
     assert row["blockers"] == []
 
 
+def test_ingest_pipeline_routes_placeholder_mgt_to_source_native_replacement(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    benchmark = tmp_path / "midas_generator_33.optimized.mgt"
+    benchmark.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "0" * 800, encoding="utf-8")
+
+    source_id = "placeholder_mgt"
+    artifact_dir = tmp_path / "collected" / "artifacts" / source_id
+    artifact_dir.mkdir(parents=True)
+    artifact_mgt = artifact_dir / f"{source_id}.mgt"
+    artifact_mgt.write_text("*VERSION\n9.5\n", encoding="utf-8")
+
+    catalog = tmp_path / "korean_source_catalog.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean_source_catalog.v1",
+                "source_records": [
+                    {
+                        "source_id": source_id,
+                        "storey_band": "10_20",
+                        "format": "mgt",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ingest, "ARTIFACT_ROOT", tmp_path / "collected" / "artifacts")
+    monkeypatch.setattr(ingest, "CURATED_ROOT", tmp_path / "curated")
+    monkeypatch.setattr(ingest, "BENCHMARK_MGT", benchmark)
+    monkeypatch.setattr(ingest, "_regenerate_catalog", lambda *, skip_regenerate: None)
+    monkeypatch.setattr(
+        ingest,
+        "_run_collector",
+        lambda *, catalog_path, skip_collect: {
+            "records": [{"source_id": source_id, "status": "", "local_path": ""}]
+        },
+    )
+
+    receipt = ingest.run_korean_medium_large_ingest_pipeline(
+        catalog_path=catalog,
+        collection_report_path=tmp_path / "collection.json",
+        receipt_path=tmp_path / "receipt.json",
+    )
+
+    assert receipt["summary"]["attached_count"] == 1
+    assert receipt["summary"]["mgt_header_ok_count"] == 0
+    assert receipt["summary"]["placeholder_mgt_count"] == 1
+    assert receipt["summary"]["operator_action_type_counts"] == {
+        "replace_placeholder_mgt_with_operator_real_mgt": 1
+    }
+    matrix = receipt["operator_action_packet"]["candidate_blocker_matrix"][0]
+    assert matrix["source_id"] == source_id
+    assert matrix["next_resolvable_step"] == "replace_placeholder_with_source_native_mgt"
+    row = receipt["per_source"][0]
+    assert row["mgt_path"] == str(artifact_mgt)
+    assert any(str(blocker).startswith("mgt_file_too_small:") for blocker in row["blockers"])
+
+
 def test_ingest_pipeline_splits_mgt_provenance_and_curated_ifc(tmp_path: Path, monkeypatch) -> None:
     benchmark = tmp_path / "midas_generator_33.optimized.mgt"
     benchmark.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "0" * 800, encoding="utf-8")
