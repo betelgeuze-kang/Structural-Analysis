@@ -127,6 +127,8 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
     final = final if isinstance(final, dict) else {}
     output_checkpoint = payload.get("output_final_checkpoint")
     output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
+    promotion_passes = payload.get("promotion_passes")
+    promotion_passes = promotion_passes if isinstance(promotion_passes, list) else []
     return {
         "schema_version": payload.get("schema_version"),
         "status": payload.get("status"),
@@ -154,6 +156,21 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "promotion_candidate_relative_increment_gate_passed": (
             promotion_candidate.get("relative_increment_gate_passed")
         ),
+        "promotion_pass_base_direct_residual_inf_n": [
+            _float_or_none(row.get("base_direct_residual_inf_n"))
+            for row in promotion_passes
+            if isinstance(row, dict)
+        ],
+        "promotion_pass_actual_direct_residual_inf_n": [
+            _float_or_none(row.get("actual_direct_residual_inf_n"))
+            for row in promotion_passes
+            if isinstance(row, dict)
+        ],
+        "promotion_pass_relative_increment_gate_passed": [
+            row.get("relative_increment_gate_passed")
+            for row in promotion_passes
+            if isinstance(row, dict)
+        ],
         "frame_hotspot_diagonal_newton_selected_count": hotspot_diagonal.get(
             "selected_hotspot_row_count"
         ),
@@ -1750,6 +1767,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_post_block_rows21_support16_followup13_component_probe.json"
     )
+    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16_probe.json"
+    )
+    residual_jacobian_post_block_rows21_support16_followup16_component = _load(
+        productization
+        / "mgt_residual_jacobian_post_block_rows21_support16_followup16_component_probe.json"
+    )
     direct_residual_current_frontier_frame_block_current_tangent_narrow = _load(
         productization
         / "mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe.json"
@@ -2568,6 +2593,23 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_post_block_rows21_support16_followup13_component_breakdown": (
                     residual_jacobian_post_block_rows21_support16_followup13_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16": _direct_residual_probe_summary(
+                    direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup16_component_status": (
+                    residual_jacobian_post_block_rows21_support16_followup16_component.get("status")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup16_component_only": (
+                    residual_jacobian_post_block_rows21_support16_followup16_component.get("component_only")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup16_base_residual_inf_n": (
+                    residual_jacobian_post_block_rows21_support16_followup16_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_post_block_rows21_support16_followup16_component_breakdown": (
+                    residual_jacobian_post_block_rows21_support16_followup16_component.get(
                         "residual_component_breakdown"
                     )
                 ),

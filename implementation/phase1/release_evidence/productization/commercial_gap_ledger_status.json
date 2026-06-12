@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T19:58:01.529527+00:00",
+  "generated_at": "2026-06-12T20:12:14.255324+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -14699,6 +14699,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -14781,6 +14784,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -14863,6 +14869,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -14945,6 +14954,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15027,6 +15039,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15109,6 +15124,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15191,6 +15209,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15273,6 +15294,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15355,6 +15379,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15437,6 +15464,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15519,6 +15549,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15601,6 +15634,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15683,6 +15719,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15765,6 +15804,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15847,6 +15889,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -15929,6 +15974,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16011,6 +16059,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16093,6 +16144,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16175,6 +16229,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16257,6 +16314,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16339,6 +16399,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16421,6 +16484,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16503,6 +16569,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16585,6 +16654,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16866,6 +16938,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -16948,6 +17023,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17030,6 +17108,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17112,6 +17193,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17194,6 +17278,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17276,6 +17363,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17358,6 +17448,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17440,6 +17533,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17522,6 +17618,9 @@
           "promotion_candidate_relative_increment": 2.484647015744973e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7938914151934166e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17603,6 +17702,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17685,6 +17787,9 @@
           "promotion_candidate_relative_increment": 2.482240069421013e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7921536229355938e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17766,6 +17871,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17848,6 +17956,30 @@
           "promotion_candidate_relative_increment": 2.4678495485926892e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7298.029063674274,
+            7290.918430975851,
+            7283.814911039804,
+            7276.71849656658,
+            7269.6291802643,
+            7262.546954848745
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7290.918430975851,
+            7283.814911039804,
+            7276.71849656658,
+            7269.6291802643,
+            7262.546954848745,
+            7255.471813043352
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.781763804337417e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -17929,6 +18061,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18011,6 +18146,30 @@
           "promotion_candidate_relative_increment": 2.453546329670179e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7255.471813043352,
+            7248.403747579205,
+            7241.342751195026,
+            7234.288816637165,
+            7227.241936659597,
+            7220.202104023908
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7248.403747579205,
+            7241.342751195026,
+            7234.288816637165,
+            7227.241936659597,
+            7220.202104023908,
+            7216.53467452999
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.771437016881441e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18092,6 +18251,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18174,6 +18336,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7216.53467452999
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7213.16931149929
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18255,6 +18426,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18337,6 +18511,30 @@
           "promotion_candidate_relative_increment": 2.439325646951236e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7213.16931149929,
+            7206.140650893131,
+            7199.119021761151,
+            7192.104416886532,
+            7185.096829060038,
+            7178.096251080015
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7206.140650893131,
+            7199.119021761151,
+            7192.104416886532,
+            7185.096829060038,
+            7178.096251080015,
+            7171.102675752372
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7611698197761604e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18418,6 +18616,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18500,6 +18701,48 @@
           "promotion_candidate_relative_increment": 2.4111408354404114e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7171.102675752372,
+            7164.116095890583,
+            7157.13650431567,
+            7150.163893856204,
+            7143.198257348286,
+            7136.23958763555,
+            7129.287877569149,
+            7122.343120007745,
+            7115.4053078175075,
+            7108.474433872099,
+            7105.712733861292,
+            7105.708571618484
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7164.116095890583,
+            7157.13650431567,
+            7150.163893856204,
+            7143.198257348286,
+            7136.23958763555,
+            7129.287877569149,
+            7122.343120007745,
+            7115.4053078175075,
+            7108.474433872099,
+            7105.712733861292,
+            7105.708571618484,
+            7105.697496519113
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7408206550506617e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18581,6 +18824,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18663,6 +18909,48 @@
           "promotion_candidate_relative_increment": 2.3832967813746877e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7105.697496519113,
+            7105.6795223929485,
+            7105.654663048828,
+            7105.6229322747,
+            7105.584343837634,
+            7105.538911483864,
+            7105.486648938809,
+            7105.427569907106,
+            7105.361688072631,
+            7105.289017098537,
+            7105.209570627272,
+            7105.123362280616
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7105.6795223929485,
+            7105.654663048828,
+            7105.6229322747,
+            7105.584343837634,
+            7105.538911483864,
+            7105.486648938809,
+            7105.427569907106,
+            7105.361688072631,
+            7105.289017098537,
+            7105.209570627272,
+            7105.123362280616,
+            7105.0304056597015
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7207175139460465e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18744,6 +19032,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18826,6 +19117,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7105.0304056597015
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            7005.339091005231
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18907,6 +19207,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -18989,6 +19292,33 @@
           "promotion_candidate_relative_increment": 2.3672050302836833e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            7005.339091005231,
+            6998.515364911349,
+            6993.340741090329,
+            6993.339098812095,
+            6993.33064809112,
+            6993.315402545888,
+            6993.293375774279
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6998.515364911349,
+            6993.340741090329,
+            6993.339098812095,
+            6993.33064809112,
+            6993.315402545888,
+            6993.293375774279,
+            6993.264581353599
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.7074463262215266e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19070,6 +19400,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19152,6 +19485,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6993.264581353599
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6957.716068351557
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19233,6 +19575,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19315,6 +19660,45 @@
           "promotion_candidate_relative_increment": 2.341756101316317e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6957.716068351557,
+            6950.937062779651,
+            6944.164890388157,
+            6937.399491916625,
+            6930.640912698255,
+            6923.889093399508,
+            6917.144079455737,
+            6910.40581146058,
+            6903.674282491989,
+            6896.949538164072,
+            6892.054982306346
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6950.937062779651,
+            6944.164890388157,
+            6937.399491916625,
+            6930.640912698255,
+            6923.889093399508,
+            6917.144079455737,
+            6910.40581146058,
+            6903.674282491989,
+            6896.949538164072,
+            6892.054982306346,
+            6892.053158842975
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.6890907129106137e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19396,6 +19780,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19478,6 +19865,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6892.053158842975
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6883.520270521328
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19559,6 +19955,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -19641,6 +20040,15 @@
           "promotion_candidate_relative_increment": 1.8669603438476712e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6883.520270521328
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6876.6367502508065
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -19722,6 +20130,15 @@
           "promotion_candidate_relative_increment": 1.8650933835038237e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6876.6367502508065
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6869.760113500556
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -19803,6 +20220,15 @@
           "promotion_candidate_relative_increment": 1.86322829012032e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6869.760113500556
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6862.890353387056
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -19884,6 +20310,15 @@
           "promotion_candidate_relative_increment": 1.8613650618301997e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6862.890353387056
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6856.027463033668
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -19965,6 +20400,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -20047,6 +20485,15 @@
           "promotion_candidate_relative_increment": 1.8595036967683696e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6856.027463033668
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6849.171435570635
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -20128,6 +20575,15 @@
           "promotion_candidate_relative_increment": 8.453404291176058e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6849.171435570635
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6845.74684985285
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -20209,6 +20665,15 @@
           "promotion_candidate_relative_increment": 9.285433072618013e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6845.74684985285
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6842.323976427923
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -20290,6 +20755,15 @@
           "promotion_candidate_relative_increment": 9.280790356081708e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6842.323976427923
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6838.902814439709
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -20371,6 +20845,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -20453,6 +20930,24 @@
           "promotion_candidate_relative_increment": 9.262242691915259e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6838.902814439709,
+            6835.48336303249,
+            6832.065621350972,
+            6828.649588540297
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6835.48336303249,
+            6832.065621350972,
+            6828.649588540297,
+            6825.235263746027
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -20534,6 +21029,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -20616,6 +21114,15 @@
           "promotion_candidate_relative_increment": 1.8341813608155707e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6825.235263746027
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6818.410028482282
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -20697,6 +21204,18 @@
           "promotion_candidate_relative_increment": 1.8305148322753007e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6818.410028482282,
+            6811.591618453799
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6811.591618453799,
+            6804.780026835346
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -20778,6 +21297,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -20860,6 +21382,18 @@
           "promotion_candidate_relative_increment": 1.826855633125582e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6804.780026835346,
+            6797.97524680851
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6797.97524680851,
+            6791.177271561701
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -20941,6 +21475,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21023,6 +21560,15 @@
           "promotion_candidate_relative_increment": 9.447648798322914e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6791.177271561701
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6757.221385203893
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -21104,6 +21650,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21186,6 +21735,18 @@
           "promotion_candidate_relative_increment": 1.6936759542886687e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6757.221385203893,
+            6723.435278277873
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6723.435278277873,
+            6716.711842999595
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -21267,6 +21828,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21349,6 +21913,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6716.711842999595
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6680.772153435075
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -21430,6 +22003,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21512,6 +22088,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6680.772153435075
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6645.0522909041065
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21593,6 +22178,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21674,6 +22262,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6645.0522909041065
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6607.81899605729
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -21755,6 +22352,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21836,6 +22436,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6607.81899605729
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6570.266723299206
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -21917,6 +22526,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -21998,6 +22610,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -22079,6 +22694,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -22160,6 +22778,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -22241,6 +22862,15 @@
           "promotion_candidate_relative_increment": 1.7823554760794406e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6570.266723299206
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6569.156742952773
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -22322,6 +22952,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22403,6 +23036,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6569.156742952774
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6563.696456575908
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22484,6 +23126,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22565,6 +23210,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -22646,6 +23294,15 @@
           "promotion_candidate_relative_increment": 1.0686771018031754e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6563.696456575908
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6560.830484870141
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -22727,6 +23384,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22808,6 +23468,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22890,6 +23553,15 @@
           "promotion_candidate_relative_increment": 1.3850598730230724e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6557.5500695988685
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6557.132760119332
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -22971,6 +23643,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23052,6 +23727,15 @@
           "promotion_candidate_relative_increment": 1.654919232832507e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6557.132760119332
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6550.575627359212
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -23133,6 +23817,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23214,6 +23901,15 @@
           "promotion_candidate_relative_increment": 8.885257724606344e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6550.575627359212
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6547.300339545533
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -23295,6 +23991,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23376,6 +24075,15 @@
           "promotion_candidate_relative_increment": 2.241909648832186e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6547.300339545533
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6540.922416805359
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.618637354599645e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23457,6 +24165,15 @@
           "promotion_candidate_relative_increment": 2.239746110586519e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6540.922416805359
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6534.550925656016
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": 8,
           "frame_hotspot_diagonal_newton_correction_inf_m": 1.6170753006496269e-07,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23538,6 +24255,15 @@
           "promotion_candidate_relative_increment": 8.863919385834794e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6534.550925656016
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6531.283650193189
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -23619,6 +24345,15 @@
           "promotion_candidate_relative_increment": 1.8288463277913023e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6531.283650193189
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6524.752366542994
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 4,
@@ -23700,6 +24435,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -23781,6 +24519,15 @@
           "promotion_candidate_relative_increment": 9.077485053637617e-06,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6524.752366542994
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6521.489990359723
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 8,
@@ -23862,6 +24609,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6521.489990359723
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6483.933515906723
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 12,
@@ -23943,6 +24699,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6483.933515906723
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6449.142677918151
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 16,
@@ -24024,6 +24789,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6449.142677918151
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6417.030627577194
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -24105,6 +24879,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6417.030627577194
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6385.116404581466
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -24186,6 +24969,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -24267,6 +25053,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6385.116404581466
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6355.187822144744
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -24348,6 +25143,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6385.116404581466
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6354.8767856721515
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 21,
@@ -24429,6 +25233,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6385.116404581466
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6354.488211004593
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 21,
@@ -24937,6 +25750,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6354.488211004593
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6322.126691982422
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -25018,6 +25840,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6322.126691982422
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6291.868996137375
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -25526,6 +26357,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6291.868996137375
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6262.085519334063
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -25607,6 +26447,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6262.085519334063
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6231.827823489015
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -26115,6 +26964,15 @@
           "promotion_candidate_relative_increment": 9.99999999999e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6231.827823489015
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6201.526714728498
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 20,
@@ -26196,6 +27054,15 @@
           "promotion_candidate_relative_increment": 9.999999999990003e-05,
           "promotion_candidate_residual_gate_passed": false,
           "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6201.526714728498
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6168.906165812469
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": 19,
@@ -26687,6 +27554,529 @@
             "shell_bending_drilling": 3
           }
         },
+        "direct_residual_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16": {
+          "schema_version": "mgt-frame-hotspot-diagonal-newton-probe.v1",
+          "status": "partial",
+          "ready": false,
+          "base_direct_residual_inf_n": 6168.906165812469,
+          "final_direct_residual_inf_n": 6078.021415574665,
+          "promoted_to_final_state": true,
+          "promotion_mode": "block_lstsq",
+          "promotion_count": 3,
+          "max_promotions": 3,
+          "stop_reason": "max_promotions_exhausted",
+          "promotion_candidate_direct_residual_inf_n": 6078.021415574665,
+          "promotion_candidate_alpha": 0.004962743192271133,
+          "promotion_candidate_step_m": null,
+          "promotion_candidate_relative_increment": 9.999999999989999e-05,
+          "promotion_candidate_residual_gate_passed": false,
+          "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            6168.906165812469,
+            6138.649616571666,
+            6108.335516073165
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            6138.649616571666,
+            6108.335516073165,
+            6078.021415574665
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true,
+            true,
+            true
+          ],
+          "frame_hotspot_diagonal_newton_selected_count": null,
+          "frame_hotspot_diagonal_newton_correction_inf_m": null,
+          "frame_hotspot_block_lstsq_selected_count": 20,
+          "frame_hotspot_block_lstsq_support_size": 217,
+          "frame_hotspot_block_lstsq_correction_inf_m": 1.454821298029426e-07,
+          "trust_region_accepted": null,
+          "trust_region_accepted_iteration_count": null,
+          "trust_region_best_candidate_direct_residual_inf_n": null,
+          "trust_region_best_candidate_relative_increment": null,
+          "trust_region_best_candidate_residual_gate_passed": null,
+          "trust_region_best_candidate_relative_increment_gate_passed": null,
+          "trust_region_gate_limited_alpha": null,
+          "trust_region_best_gate_eligible_candidate_direct_residual_inf_n": null,
+          "trust_region_best_gate_eligible_candidate_alpha": null,
+          "trust_region_best_gate_eligible_candidate_alpha_source": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment": null,
+          "trust_region_best_gate_eligible_candidate_residual_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_free_dof_set_stable": null,
+          "current_tangent_residual_row_correction_enabled": null,
+          "current_tangent_residual_row_correction_accepted": null,
+          "current_tangent_residual_row_promotion_count": null,
+          "current_tangent_residual_row_stop_reason": null,
+          "current_tangent_residual_row_target_mode": null,
+          "current_tangent_residual_row_element_neighbor_depth": null,
+          "current_tangent_residual_row_jacobian_mode": null,
+          "current_tangent_residual_row_fd_max_support_columns": null,
+          "current_tangent_residual_row_svd_max_condition": null,
+          "matrix_free_global_krylov_enabled": null,
+          "matrix_free_global_krylov_attempted": null,
+          "matrix_free_global_krylov_accepted": null,
+          "matrix_free_global_krylov_stop_reason": null,
+          "matrix_free_global_krylov_scaling_mode": null,
+          "matrix_free_global_krylov_preconditioner_mode": null,
+          "matrix_free_global_krylov_preconditioner_regularization": null,
+          "matrix_free_global_krylov_preconditioner_solve_count": null,
+          "matrix_free_global_krylov_preconditioner_solve_seconds": null,
+          "matrix_free_global_krylov_column_scale_units": null,
+          "matrix_free_global_krylov_minimum_relative_improvement": null,
+          "matrix_free_global_krylov_allow_negative_alphas": null,
+          "matrix_free_global_krylov_max_alpha": null,
+          "matrix_free_global_krylov_row_scale_inf": null,
+          "matrix_free_global_krylov_column_scale_inf_m": null,
+          "matrix_free_global_krylov_matvec_count": null,
+          "matrix_free_global_krylov_unstable_free_dof_probe_count": null,
+          "matrix_free_global_krylov_correction_inf_m": null,
+          "matrix_free_global_krylov_best_candidate_direct_residual_inf_n": null,
+          "matrix_free_global_krylov_best_candidate_relative_improvement": null,
+          "best_candidate_direct_residual_inf_n": null,
+          "best_candidate_improvement_inf_n": null,
+          "best_candidate_relative_improvement": null,
+          "best_candidate_target_row_count": null,
+          "best_candidate_configured_target_count": null,
+          "best_candidate_support_column_count": null,
+          "best_candidate_support_size": null,
+          "best_candidate_alpha": null,
+          "best_candidate_residual_gate_passed": null,
+          "best_candidate_relative_increment_gate_passed": null,
+          "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16_probe_final_checkpoint.npz",
+          "blockers": [
+            "direct_residual_gate_not_closed",
+            "global_consistent_newton_or_load_path_required"
+          ]
+        },
+        "residual_jacobian_post_block_rows21_support16_followup16_component_status": "partial",
+        "residual_jacobian_post_block_rows21_support16_followup16_component_only": true,
+        "residual_jacobian_post_block_rows21_support16_followup16_base_residual_inf_n": 6078.021415574665,
+        "residual_jacobian_post_block_rows21_support16_followup16_component_breakdown": {
+          "component_inf_n": {
+            "frame": 2566.555450602663,
+            "spring": 0.8387057679917196,
+            "material_stress_correction": 0.0,
+            "shell_bending_drilling": 2343.8725411568835,
+            "shell_membrane": 2614.446934801875
+          },
+          "top_rows": [
+            {
+              "free_row": 54218,
+              "global_dof": 67304,
+              "node_index": 11217,
+              "dof": "uz",
+              "residual_n": 6078.021415574665,
+              "external_load_n": -4173.851848025999,
+              "component_values_n": {
+                "frame": 1904.1695675486665,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1904.1695675486665,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5870,
+              "global_dof": 6926,
+              "node_index": 1154,
+              "dof": "uz",
+              "residual_n": 6077.031889375947,
+              "external_load_n": -8676.13911480824,
+              "component_values_n": {
+                "frame": -2566.555450602663,
+                "spring": 0.0007777005154623887,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -32.55255253014528,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2599.107225432293,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5864,
+              "global_dof": 6920,
+              "node_index": 1153,
+              "dof": "uz",
+              "residual_n": 6075.715625294325,
+              "external_load_n": -8292.745422450198,
+              "component_values_n": {
+                "frame": -2175.2481296309606,
+                "spring": 0.0007050223317453138,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -41.782372547243796,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2217.029797155873,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 422,
+              "global_dof": 518,
+              "node_index": 86,
+              "dof": "uz",
+              "residual_n": 6072.439640196849,
+              "external_load_n": -8109.798360708659,
+              "component_values_n": {
+                "frame": -2011.741270730785,
+                "spring": 0.0009614765861381806,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -25.618411257611562,
+                "shell_membrane": -7.105427357601002e-15
+              },
+              "internal_sum_n": -2037.3587205118104,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 56528,
+              "global_dof": 72722,
+              "node_index": 12120,
+              "dof": "uz",
+              "residual_n": 6068.646642143099,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1949.7138973805984,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1949.7138973805984,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 428,
+              "global_dof": 524,
+              "node_index": 87,
+              "dof": "uz",
+              "residual_n": 6068.450931554882,
+              "external_load_n": -8550.816102481398,
+              "component_values_n": {
+                "frame": -2448.2004601952676,
+                "spring": 0.00070948315257084,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -34.16542021440115,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -2482.3651709265164,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 56534,
+              "global_dof": 72728,
+              "node_index": 12121,
+              "dof": "uz",
+              "residual_n": 6060.308480652453,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1941.3757358899534,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1941.3757358899534,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54206,
+              "global_dof": 67292,
+              "node_index": 11215,
+              "dof": "uz",
+              "residual_n": 6058.569426246616,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1939.6366814841158,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1939.6366814841158,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 416,
+              "global_dof": 512,
+              "node_index": 85,
+              "dof": "uz",
+              "residual_n": 6057.933932477284,
+              "external_load_n": -6897.62858288701,
+              "component_values_n": {
+                "frame": -797.4950350469192,
+                "spring": 0.0008845861151463457,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -42.20049994892284,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -839.6946504097268,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54212,
+              "global_dof": 67298,
+              "node_index": 11216,
+              "dof": "uz",
+              "residual_n": 6054.358917106661,
+              "external_load_n": -4118.9327447625,
+              "component_values_n": {
+                "frame": 1935.4261723441602,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1935.4261723441602,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 10568,
+              "global_dof": 13184,
+              "node_index": 2197,
+              "dof": "uz",
+              "residual_n": 5886.372194347398,
+              "external_load_n": -3230.063830907181,
+              "component_values_n": {
+                "frame": 10.050794414132007,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 31.81063422421023,
+                "shell_membrane": 2614.446934801875
+              },
+              "internal_sum_n": 2656.3083634402174,
+              "dominant_component": "shell_membrane"
+            },
+            {
+              "free_row": 54188,
+              "global_dof": 67274,
+              "node_index": 11212,
+              "dof": "uz",
+              "residual_n": 5858.907553101768,
+              "external_load_n": -3707.0399665824984,
+              "component_values_n": {
+                "frame": 2151.867586519269,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 2151.867586519269,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 8864,
+              "global_dof": 10226,
+              "node_index": 1704,
+              "dof": "uz",
+              "residual_n": 5565.797646057914,
+              "external_load_n": -4000.4046034858848,
+              "component_values_n": {
+                "frame": 379.4473088666366,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 1185.9457337053923,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1565.393042572029,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 10418,
+              "global_dof": 13034,
+              "node_index": 2172,
+              "dof": "uz",
+              "residual_n": 5468.104708921197,
+              "external_load_n": -3153.1987846554102,
+              "component_values_n": {
+                "frame": 900.3561136436575,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 1414.5498106221296,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 2314.9059242657872,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 386,
+              "global_dof": 482,
+              "node_index": 80,
+              "dof": "uz",
+              "residual_n": 5337.004034969305,
+              "external_load_n": -5304.7622385637715,
+              "component_values_n": {
+                "frame": 51.45702544068513,
+                "spring": 0.0006245220310768602,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -19.215853557182403,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 32.241796405533805,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 398,
+              "global_dof": 494,
+              "node_index": 82,
+              "dof": "uz",
+              "residual_n": 5096.952700719282,
+              "external_load_n": -5996.963253492609,
+              "component_values_n": {
+                "frame": -878.0552318754571,
+                "spring": 0.0011238522527922748,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -21.95644475012268,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -900.010552773327,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 10544,
+              "global_dof": 13160,
+              "node_index": 2193,
+              "dof": "uz",
+              "residual_n": 4650.23140637574,
+              "external_load_n": -2832.1008491691764,
+              "component_values_n": {
+                "frame": 960.2354108326034,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 30.505745908025567,
+                "shell_membrane": 827.3894004659344
+              },
+              "internal_sum_n": 1818.1305572065635,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 5876,
+              "global_dof": 6932,
+              "node_index": 1155,
+              "dof": "uz",
+              "residual_n": 4643.29256053429,
+              "external_load_n": -3347.6280610218055,
+              "component_values_n": {
+                "frame": 1353.2380206582907,
+                "spring": 0.000514880684577271,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -57.57403602649095,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1295.664499512484,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 392,
+              "global_dof": 488,
+              "node_index": 81,
+              "dof": "uz",
+              "residual_n": 4582.984949687807,
+              "external_load_n": -5394.250622899691,
+              "component_values_n": {
+                "frame": -766.7645682526096,
+                "spring": 0.0006347871401708395,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -44.50173974641403,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -811.2656732118835,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 380,
+              "global_dof": 476,
+              "node_index": 79,
+              "dof": "uz",
+              "residual_n": 4524.822892575294,
+              "external_load_n": -4266.004051245534,
+              "component_values_n": {
+                "frame": 260.35694951009225,
+                "spring": 0.0005364934465632604,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -1.5386446737790829,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 258.8188413297598,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 8870,
+              "global_dof": 10232,
+              "node_index": 1705,
+              "dof": "uz",
+              "residual_n": 4519.288754964141,
+              "external_load_n": -3593.573931179161,
+              "component_values_n": {
+                "frame": 86.20206426012237,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 839.5127595248579,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 925.7148237849802,
+              "dominant_component": "shell_bending_drilling"
+            },
+            {
+              "free_row": 5852,
+              "global_dof": 6908,
+              "node_index": 1151,
+              "dof": "uz",
+              "residual_n": 4502.601114853773,
+              "external_load_n": -5819.324672991066,
+              "component_values_n": {
+                "frame": -1247.663346222521,
+                "spring": 0.0007273782956970124,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -69.06093929306769,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -1316.723558137293,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 54176,
+              "global_dof": 67262,
+              "node_index": 11210,
+              "dof": "uz",
+              "residual_n": 4483.192824818693,
+              "external_load_n": -2636.1169566480003,
+              "component_values_n": {
+                "frame": 1847.075868170693,
+                "spring": 0.0,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 0.0,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": 1847.075868170693,
+              "dominant_component": "frame"
+            },
+            {
+              "free_row": 410,
+              "global_dof": 506,
+              "node_index": 84,
+              "dof": "uz",
+              "residual_n": 4483.054431498549,
+              "external_load_n": -5445.2303603010505,
+              "component_values_n": {
+                "frame": -920.2860426161765,
+                "spring": 0.0009102638637168657,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": -41.89079645018845,
+                "shell_membrane": 0.0
+              },
+              "internal_sum_n": -962.1759288025012,
+              "dominant_component": "frame"
+            }
+          ],
+          "top_row_dominant_component_counts": {
+            "frame": 20,
+            "shell_membrane": 1,
+            "shell_bending_drilling": 3
+          }
+        },
         "direct_residual_current_frontier_frame_block_current_tangent_narrow": {
           "schema_version": "mgt-direct-residual-newton-probe.v1",
           "status": "partial",
@@ -26704,6 +28094,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -26786,6 +28179,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
@@ -26868,6 +28264,9 @@
           "promotion_candidate_relative_increment": null,
           "promotion_candidate_residual_gate_passed": null,
           "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
           "frame_hotspot_diagonal_newton_selected_count": null,
           "frame_hotspot_diagonal_newton_correction_inf_m": null,
           "frame_hotspot_block_lstsq_selected_count": null,
