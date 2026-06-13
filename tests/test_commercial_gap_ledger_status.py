@@ -816,6 +816,64 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "directional_row_correction_timed_out_before_receipt"
         in direct_followup56_directional_timeout["blockers"]
     )
+    direct_followup56_block_lstsq = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32"
+    ]
+    assert direct_followup56_block_lstsq["status"] == "partial"
+    assert (
+        direct_followup56_block_lstsq["base_direct_residual_inf_n"]
+        == direct_followup56_largest_rows["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_block_lstsq["final_direct_residual_inf_n"]
+        == 5439.563146990605
+    )
+    assert direct_followup56_block_lstsq["promoted_to_final_state"] is True
+    assert direct_followup56_block_lstsq["promotion_mode"] == "block_lstsq"
+    assert direct_followup56_block_lstsq["promotion_count"] == 1
+    assert direct_followup56_block_lstsq["max_promotions"] == 3
+    assert (
+        direct_followup56_block_lstsq["stop_reason"]
+        == "max_wall_seconds_exceeded"
+    )
+    assert (
+        direct_followup56_block_lstsq["frame_hotspot_block_lstsq_component_filter"]
+        == "translation"
+    )
+    assert direct_followup56_block_lstsq[
+        "frame_hotspot_block_lstsq_support_size"
+    ] == 320
+    assert direct_followup56_block_lstsq["output_final_checkpoint_written"] is None
+    assert (
+        direct_followup56_block_lstsq["output_final_checkpoint_path"]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_followup56_rowcorr_support32_probe_final_checkpoint.npz"
+    )
+    direct_followup56_block_lstsq_followup2 = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2"
+    ]
+    assert (
+        direct_followup56_block_lstsq_followup2["base_direct_residual_inf_n"]
+        == direct_followup56_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_block_lstsq_followup2["final_direct_residual_inf_n"]
+        == direct_followup56_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert direct_followup56_block_lstsq_followup2["promotion_count"] == 0
+    assert (
+        direct_followup56_block_lstsq_followup2["stop_reason"]
+        == "max_wall_seconds_exceeded"
+    )
+    assert (
+        direct_followup56_block_lstsq_followup2[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_followup56_block_lstsq_followup2["output_final_checkpoint_path"]
+        is None
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]
@@ -5728,6 +5786,37 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert len(operator_action_queue) == rows["G7"]["evidence"][
         "operator_action_queue_count"
     ]
+    assert (
+        rows["G7"]["evidence"]["operator_attachment_manifest_queue_status"]
+        == "pending_operator_fill"
+    )
+    assert rows["G7"]["evidence"][
+        "operator_attachment_manifest_queue_attachment_count"
+    ] == rows["G7"]["evidence"]["operator_action_queue_count"]
+    attachment_queue = rows["G7"]["evidence"]["operator_attachment_manifest_queue"]
+    assert attachment_queue["attachment_count"] == rows["G7"]["evidence"][
+        "operator_action_queue_count"
+    ]
+    assert attachment_queue["attachments"][0]["rights_confirmed"] is False
+    assert attachment_queue["attachments"][0]["source_native_artifact"] is False
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_validation_ready_for_collection_overlay"
+        ]
+        is False
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_validation_accepted_source_count"
+        ]
+        == 0
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_validation_rejected_source_count"
+        ]
+        == rows["G7"]["evidence"]["operator_action_queue_count"]
+    )
     operator_action_by_source = {
         row["source_id"]: row for row in operator_action_queue
     }

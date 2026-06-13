@@ -1392,6 +1392,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout_diagnostic.json"
     )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_followup56_rowcorr_support32_probe.json"
+    )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_followup56_rowcorr_support32_followup2_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2031,6 +2039,12 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     story_eccentricity_load = _load(productization / "mgt_story_eccentricity_load_receipt.json")
     coupled_story_eccentricity = _load(productization / "mgt_coupled_frame_shell_story_eccentricity_equilibrium.json")
     korea = _load(KOREA_OPEN_DATA / "korean_medium_large_ingest_receipt.json")
+    korea_operator_attachment_queue = _load(
+        KOREA_OPEN_DATA / "operator_attachment_manifest.queue.json"
+    )
+    korea_operator_attachment_queue_validation = _load(
+        KOREA_OPEN_DATA / "operator_attachment_manifest.queue.validation_report.json"
+    )
     independent = _load(RELEASE / "independent_product_readiness.json")
     workstation = _load(REPO_ROOT / "implementation/phase1/workstation_delivery_readiness.json")
     governance = _load(productization / "solver_governance_support_contract.json")
@@ -2358,6 +2372,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout": (
                     direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32
+                    )
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2
+                    )
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"
@@ -4001,6 +4025,24 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "operator_action_queue": korea.get("operator_action_queue"),
                 "operator_action_packet": korea.get("operator_action_packet"),
+                "operator_attachment_manifest_queue_status": (
+                    korea_operator_attachment_queue.get("status")
+                ),
+                "operator_attachment_manifest_queue_attachment_count": (
+                    korea_operator_attachment_queue.get("attachment_count")
+                ),
+                "operator_attachment_manifest_queue": korea_operator_attachment_queue,
+                "operator_attachment_manifest_validation_ready_for_collection_overlay": (
+                    korea_operator_attachment_queue_validation.get(
+                        "ready_for_collection_overlay"
+                    )
+                ),
+                "operator_attachment_manifest_validation_accepted_source_count": (
+                    korea_operator_attachment_queue_validation.get("accepted_source_count")
+                ),
+                "operator_attachment_manifest_validation_rejected_source_count": (
+                    korea_operator_attachment_queue_validation.get("rejected_source_count")
+                ),
                 "operator_attached_real_mgt_header_ok_target": ingest_summary.get(
                     "operator_attached_real_mgt_header_ok_target"
                 ),
