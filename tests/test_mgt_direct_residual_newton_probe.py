@@ -178,6 +178,55 @@ def test_select_residual_element_block_rows_can_restrict_to_frame_elements() -> 
     assert meta["allowed_element_type_codes"] == [1]
 
 
+def test_select_residual_element_block_rows_can_target_shell_normal_dofs() -> None:
+    current_free = np.asarray(
+        [
+            0,
+            1,
+            2,
+            6,
+            7,
+            8,
+            12,
+            13,
+            14,
+            18,
+            19,
+            20,
+        ],
+        dtype=np.int64,
+    )
+    residual = np.asarray(
+        [0.1, 0.1, 1.0, 0.1, 0.1, 9.0, 0.1, 0.1, 2.0, 0.1, 0.1, 3.0],
+        dtype=np.float64,
+    )
+    conn_ptr = np.asarray([0, 2, 6], dtype=np.int64)
+    conn_idx = np.asarray([0, 1, 1, 2, 3, 0], dtype=np.int64)
+    elem_id = np.asarray([101, 202], dtype=np.int64)
+    elem_type_code = np.asarray([1, 2], dtype=np.int32)
+
+    rows, meta = _select_residual_element_block_rows(
+        residual,
+        current_free,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        elem_id=elem_id,
+        elem_type_code=elem_type_code,
+        target_element_count=1,
+        allowed_element_type_codes={2},
+        target_dof_indices={2},
+        dof_per_node=6,
+    )
+
+    np.testing.assert_array_equal(rows, np.asarray([2, 5, 8, 11], dtype=np.int64))
+    assert meta["selected_elements"][0]["element_id"] == 202
+    assert meta["selected_elements"][0]["row_count"] == 4
+    assert meta["candidate_element_type_counts"] == {"2": 1}
+    assert meta["selected_element_type_counts"] == {"2": 1}
+    assert meta["allowed_element_type_codes"] == [2]
+    assert meta["target_dof_indices"] == [2]
+
+
 def test_select_residual_element_block_rows_can_expand_shared_node_neighbors() -> None:
     current_free = np.asarray([0, 1, 6, 7, 12, 13, 18, 19], dtype=np.int64)
     residual = np.asarray([1.0, 1.0, 10.0, 1.0, 2.0, 2.0, 3.0, 3.0], dtype=np.float64)

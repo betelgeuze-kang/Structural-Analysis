@@ -277,6 +277,7 @@ def _select_residual_element_block_rows(
     target_element_count: int,
     neighbor_depth: int = 0,
     allowed_element_type_codes: set[int] | None = None,
+    target_dof_indices: set[int] | None = None,
     dof_per_node: int = DOF_PER_NODE,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     if (
@@ -308,6 +309,11 @@ def _select_residual_element_block_rows(
         if allowed_element_type_codes is not None
         else None
     )
+    target_dofs = (
+        {int(value) for value in target_dof_indices}
+        if target_dof_indices is not None
+        else None
+    )
     for element_index in range(element_count):
         start = int(conn_ptr[element_index])
         end = int(conn_ptr[element_index + 1])
@@ -321,7 +327,15 @@ def _select_residual_element_block_rows(
         if allowed_types is not None and element_type not in allowed_types:
             continue
         nodes = sorted({int(node) for node in conn_idx[start:end].tolist()})
-        rows = sorted({row for node in nodes for row in node_to_rows.get(node, [])})
+        rows = sorted(
+            {
+                row
+                for node in nodes
+                for row in node_to_rows.get(node, [])
+                if target_dofs is None
+                or int(current_free[int(row)]) % int(dof_per_node) in target_dofs
+            }
+        )
         if not rows:
             continue
         score = float(np.sum(np.abs(residual[np.asarray(rows, dtype=np.int64)])))
@@ -401,6 +415,7 @@ def _select_residual_element_block_rows(
         "candidate_element_type_counts": element_type_counts,
         "selected_element_type_counts": selected_element_type_counts,
         "allowed_element_type_codes": sorted(allowed_types) if allowed_types is not None else None,
+        "target_dof_indices": sorted(target_dofs) if target_dofs is not None else None,
     }
 
 
@@ -2726,6 +2741,7 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_node_blocks",
                 "residual_element_blocks",
                 "residual_frame_element_blocks",
+                "residual_shell_normal_rows",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
@@ -2826,6 +2842,7 @@ def run_mgt_direct_residual_newton_probe(
                     elif target_mode in {
                         "residual_element_blocks",
                         "residual_frame_element_blocks",
+                        "residual_shell_normal_rows",
                     }:
                         target_rows, target_meta = _select_residual_element_block_rows(
                             current_residual,
@@ -2836,8 +2853,15 @@ def run_mgt_direct_residual_newton_probe(
                             elem_type_code=elem_type_code,
                             target_element_count=int(target_row_count),
                             neighbor_depth=element_neighbor_depth,
-                            allowed_element_type_codes={1}
-                            if target_mode == "residual_frame_element_blocks"
+                            allowed_element_type_codes=(
+                                {1}
+                                if target_mode == "residual_frame_element_blocks"
+                                else {2}
+                                if target_mode == "residual_shell_normal_rows"
+                                else None
+                            ),
+                            target_dof_indices={2}
+                            if target_mode == "residual_shell_normal_rows"
                             else None,
                             dof_per_node=DOF_PER_NODE,
                         )
@@ -3976,6 +4000,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_node_blocks",
             "residual_element_blocks",
             "residual_frame_element_blocks",
+            "residual_shell_normal_rows",
         ),
         default="largest_rows",
         help=(
@@ -3983,7 +4008,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual rows; residual_node_blocks selects high-residual nodes and targets every "
             "free DOF row on those nodes; residual_element_blocks selects high-residual "
             "mesh elements and targets every free DOF row on their connected nodes; "
-            "residual_frame_element_blocks restricts element seeds to frame elements."
+            "residual_frame_element_blocks restricts element seeds to frame elements; "
+            "residual_shell_normal_rows restricts element seeds to shell elements and targets "
+            "their normal translation rows."
         ),
     )
     parser.add_argument(
