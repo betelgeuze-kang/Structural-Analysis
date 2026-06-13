@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-13T18:54:37.297767+00:00",
+  "generated_at": "2026-06-13T19:03:36.475872+00:00",
   "status": "partial",
   "residual_jacobian_consistency_ready": false,
   "checkpoint": {
@@ -2749,6 +2749,1052 @@
     ],
     "claim_boundary": "Diagnostic only: fits a scalar multiplier on the displayed top-row external loads. It does not prove that the full load path should be rescaled."
   },
+  "residual_shell_surface_load_diagnostics": {
+    "evaluated": true,
+    "row_count": 12,
+    "load_scale": 0.656,
+    "external_minus_reference_shell_load_inf_n": 1.1102230246251565e-16,
+    "required_reference_shell_load_scale_min": -0.5075078467577262,
+    "required_reference_shell_load_scale_median": 0.2500021634705037,
+    "required_reference_shell_load_scale_max": 1.8460649533664037,
+    "rows": [
+      {
+        "free_row": 11066,
+        "global_dof": 13706,
+        "node_index": 2284,
+        "raw_node_id": 2285,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.2803783945661925,
+        "external_load_n": 0.37383887466666776,
+        "reference_shell_load_reconstructed_n": 0.37383887466666765,
+        "external_minus_reference_shell_load_n": 1.1102230246251565e-16,
+        "shell_internal_sum_n": 0.09346048010047525,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.2500020367967591,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 5820,
+            "elem_id": 25880,
+            "conn": [
+              2275,
+              2273,
+              2284,
+              2285
+            ],
+            "target_dof_reference_shell_load_n": 0.37383887466666765,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2275,
+                  2273,
+                  2284
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              },
+              {
+                "tri_nodes": [
+                  2275,
+                  2284,
+                  2285
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 33812,
+        "global_dof": 46706,
+        "node_index": 7784,
+        "raw_node_id": 7785,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.28037829985505225,
+        "external_load_n": 0.37383887466666776,
+        "reference_shell_load_reconstructed_n": 0.37383887466666765,
+        "external_minus_reference_shell_load_n": 1.1102230246251565e-16,
+        "shell_internal_sum_n": 0.09346057481161552,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.2500022901442483,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 12184,
+            "elem_id": 32530,
+            "conn": [
+              7784,
+              7782,
+              7792,
+              7794
+            ],
+            "target_dof_reference_shell_load_n": 0.37383887466666765,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  7784,
+                  7782,
+                  7792
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              },
+              {
+                "tri_nodes": [
+                  7784,
+                  7792,
+                  7794
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 11018,
+        "global_dof": 13640,
+        "node_index": 2273,
+        "raw_node_id": 2274,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.28037819511215617,
+        "external_load_n": 0.18785128533333023,
+        "reference_shell_load_reconstructed_n": 0.18785128533333023,
+        "external_minus_reference_shell_load_n": 0.0,
+        "shell_internal_sum_n": -0.09252690977882594,
+        "required_reference_shell_load_scale_for_zero_row_residual": -0.49255404143039416,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 5820,
+            "elem_id": 25880,
+            "conn": [
+              2275,
+              2273,
+              2284,
+              2285
+            ],
+            "target_dof_reference_shell_load_n": 0.18785128533333023,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2275,
+                  2273,
+                  2284
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 33848,
+        "global_dof": 46754,
+        "node_index": 7792,
+        "raw_node_id": 7793,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.28037808431935984,
+        "external_load_n": 0.37383887466666776,
+        "reference_shell_load_reconstructed_n": 0.37383887466666765,
+        "external_minus_reference_shell_load_n": 1.1102230246251565e-16,
+        "shell_internal_sum_n": 0.09346079034730792,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.25000286669127697,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 12184,
+            "elem_id": 32530,
+            "conn": [
+              7784,
+              7782,
+              7792,
+              7794
+            ],
+            "target_dof_reference_shell_load_n": 0.37383887466666765,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  7784,
+                  7782,
+                  7792
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              },
+              {
+                "tri_nodes": [
+                  7784,
+                  7792,
+                  7794
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 33806,
+        "global_dof": 46694,
+        "node_index": 7782,
+        "raw_node_id": 7783,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.2803779386492022,
+        "external_load_n": 0.18785128533333023,
+        "reference_shell_load_reconstructed_n": 0.18785128533333023,
+        "external_minus_reference_shell_load_n": 0.0,
+        "shell_internal_sum_n": -0.09252665331587195,
+        "required_reference_shell_load_scale_for_zero_row_residual": -0.49255267618578846,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 12184,
+            "elem_id": 32530,
+            "conn": [
+              7784,
+              7782,
+              7792,
+              7794
+            ],
+            "target_dof_reference_shell_load_n": 0.18785128533333023,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  7784,
+                  7782,
+                  7792
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 33860,
+        "global_dof": 46766,
+        "node_index": 7794,
+        "raw_node_id": 7795,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.28037775031955986,
+        "external_load_n": 0.18598758933333753,
+        "reference_shell_load_reconstructed_n": 0.18598758933333745,
+        "external_minus_reference_shell_load_n": 8.326672684688674e-17,
+        "shell_internal_sum_n": -0.09439016098622233,
+        "required_reference_shell_load_scale_for_zero_row_residual": -0.5075078467577262,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 12184,
+            "elem_id": 32530,
+            "conn": [
+              7784,
+              7782,
+              7792,
+              7794
+            ],
+            "target_dof_reference_shell_load_n": 0.18598758933333745,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  7784,
+                  7792,
+                  7794
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 11024,
+        "global_dof": 13652,
+        "node_index": 2275,
+        "raw_node_id": 2276,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.2803773539441826,
+        "external_load_n": 0.37383887466666776,
+        "reference_shell_load_reconstructed_n": 0.37383887466666765,
+        "external_minus_reference_shell_load_n": 1.1102230246251565e-16,
+        "shell_internal_sum_n": 0.09346152072248515,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.2500048204077755,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 5820,
+            "elem_id": 25880,
+            "conn": [
+              2275,
+              2273,
+              2284,
+              2285
+            ],
+            "target_dof_reference_shell_load_n": 0.37383887466666765,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2275,
+                  2273,
+                  2284
+                ],
+                "area_m2": 0.8590759999999859,
+                "normal": [
+                  -0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  -0.0,
+                  0.0,
+                  0.18785128533333023
+                ],
+                "target_dof_reference_load_n": 0.18785128533333023
+              },
+              {
+                "tri_nodes": [
+                  2275,
+                  2284,
+                  2285
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 11072,
+        "global_dof": 13712,
+        "node_index": 2285,
+        "raw_node_id": 2286,
+        "dof": "uz",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.28037695555215775,
+        "external_load_n": 0.18598758933333753,
+        "reference_shell_load_reconstructed_n": 0.18598758933333745,
+        "external_minus_reference_shell_load_n": 8.326672684688674e-17,
+        "shell_internal_sum_n": -0.09438936621882021,
+        "required_reference_shell_load_scale_for_zero_row_residual": -0.5075035735295771,
+        "incident_surface_element_count": 1,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 5820,
+            "elem_id": 25880,
+            "conn": [
+              2275,
+              2273,
+              2284,
+              2285
+            ],
+            "target_dof_reference_shell_load_n": 0.18598758933333745,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2275,
+                  2284,
+                  2285
+                ],
+                "area_m2": 0.8505530000000189,
+                "normal": [
+                  0.0,
+                  0.0,
+                  1.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0,
+                  0.0,
+                  0.18598758933333745
+                ],
+                "target_dof_reference_load_n": 0.18598758933333745
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 21918,
+        "global_dof": 24594,
+        "node_index": 4099,
+        "raw_node_id": 4100,
+        "dof": "ux",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.11524294414354089,
+        "external_load_n": 0.21875140000000107,
+        "reference_shell_load_reconstructed_n": 0.2187514000000011,
+        "external_minus_reference_shell_load_n": -2.7755575615628914e-17,
+        "shell_internal_sum_n": 0.10350845585646018,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.4731784841443742,
+        "incident_surface_element_count": 4,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 1599,
+            "elem_id": 12162,
+            "conn": [
+              2870,
+              4097,
+              4099,
+              2871
+            ],
+            "target_dof_reference_shell_load_n": 0.0730182666666704,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2870,
+                  4097,
+                  4099
+                ],
+                "area_m2": 0.1675769683235227,
+                "normal": [
+                  0.9963332173289596,
+                  -0.0855577001030528,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0365091333333352,
+                  -0.0031351333333339317,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0365091333333352
+              },
+              {
+                "tri_nodes": [
+                  2870,
+                  4099,
+                  2871
+                ],
+                "area_m2": 0.1675769683235227,
+                "normal": [
+                  0.9963332173289596,
+                  -0.0855577001030528,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0365091333333352,
+                  -0.0031351333333339317,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0365091333333352
+              }
+            ]
+          },
+          {
+            "elem_index": 1597,
+            "elem_id": 12160,
+            "conn": [
+              4099,
+              4097,
+              2987,
+              2988
+            ],
+            "target_dof_reference_shell_load_n": 0.07281599999999702,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4099,
+                  4097,
+                  2987
+                ],
+                "area_m2": 0.16715648357152552,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378828,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03640799999999851,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03640799999999851
+              },
+              {
+                "tri_nodes": [
+                  4099,
+                  2987,
+                  2988
+                ],
+                "area_m2": 0.16715648357152552,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378828,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03640799999999851,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03640799999999851
+              }
+            ]
+          },
+          {
+            "elem_index": 1598,
+            "elem_id": 12161,
+            "conn": [
+              2871,
+              4099,
+              4098,
+              2872
+            ],
+            "target_dof_reference_shell_load_n": 0.03650913333333519,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2871,
+                  4099,
+                  4098
+                ],
+                "area_m2": 0.16757696832352265,
+                "normal": [
+                  0.9963332173289596,
+                  -0.08555770010305282,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03650913333333519,
+                  -0.003135133333333931,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03650913333333519
+              }
+            ]
+          },
+          {
+            "elem_index": 1596,
+            "elem_id": 12159,
+            "conn": [
+              4098,
+              4099,
+              2988,
+              2989
+            ],
+            "target_dof_reference_shell_load_n": 0.0364079999999985,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4098,
+                  4099,
+                  2988
+                ],
+                "area_m2": 0.16715648357152546,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378829,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0364079999999985,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0364079999999985
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 21936,
+        "global_dof": 24612,
+        "node_index": 4102,
+        "raw_node_id": 4103,
+        "dof": "ux",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": 0.11211843557027143,
+        "external_load_n": 0.21905480000000258,
+        "reference_shell_load_reconstructed_n": 0.21905480000000255,
+        "external_minus_reference_shell_load_n": 2.7755575615628914e-17,
+        "shell_internal_sum_n": 0.331173235570274,
+        "required_reference_shell_load_scale_for_zero_row_residual": 1.5118282528858995,
+        "incident_surface_element_count": 4,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 1607,
+            "elem_id": 12170,
+            "conn": [
+              2990,
+              4100,
+              4102,
+              2991
+            ],
+            "target_dof_reference_shell_load_n": 0.0730182666666704,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2990,
+                  4100,
+                  4102
+                ],
+                "area_m2": 0.1676171721699564,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304104,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0365091333333352,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0365091333333352
+              },
+              {
+                "tri_nodes": [
+                  2990,
+                  4102,
+                  2991
+                ],
+                "area_m2": 0.1676171721699564,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304104,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0365091333333352,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0365091333333352
+              }
+            ]
+          },
+          {
+            "elem_index": 1605,
+            "elem_id": 12168,
+            "conn": [
+              4102,
+              4100,
+              2846,
+              2847
+            ],
+            "target_dof_reference_shell_load_n": 0.07301826666666465,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4102,
+                  4100,
+                  2846
+                ],
+                "area_m2": 0.1676171721699433,
+                "normal": [
+                  0.9960942416491542,
+                  -0.08829644247304794,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.036509133333332326,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.036509133333332326
+              },
+              {
+                "tri_nodes": [
+                  4102,
+                  2846,
+                  2847
+                ],
+                "area_m2": 0.1676171721699433,
+                "normal": [
+                  0.9960942416491542,
+                  -0.08829644247304794,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.036509133333332326,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.036509133333332326
+              }
+            ]
+          },
+          {
+            "elem_index": 1606,
+            "elem_id": 12169,
+            "conn": [
+              2991,
+              4102,
+              4101,
+              2992
+            ],
+            "target_dof_reference_shell_load_n": 0.03650913333333519,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2991,
+                  4102,
+                  4101
+                ],
+                "area_m2": 0.16761717216995634,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304105,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03650913333333519,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03650913333333519
+              }
+            ]
+          },
+          {
+            "elem_index": 1604,
+            "elem_id": 12167,
+            "conn": [
+              4101,
+              4102,
+              2847,
+              2848
+            ],
+            "target_dof_reference_shell_load_n": 0.03650913333333232,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4101,
+                  4102,
+                  2847
+                ],
+                "area_m2": 0.16761717216994326,
+                "normal": [
+                  0.9960942416491542,
+                  -0.08829644247304794,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03650913333333232,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03650913333333232
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 15270,
+        "global_dof": 17946,
+        "node_index": 2991,
+        "raw_node_id": 2992,
+        "dof": "ux",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.10274637084819559,
+        "external_load_n": 0.10952740000000559,
+        "reference_shell_load_reconstructed_n": 0.10952740000000558,
+        "external_minus_reference_shell_load_n": 1.3877787807814457e-17,
+        "shell_internal_sum_n": 0.006781029151810003,
+        "required_reference_shell_load_scale_for_zero_row_residual": 0.06191171480204641,
+        "incident_surface_element_count": 2,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 1606,
+            "elem_id": 12169,
+            "conn": [
+              2991,
+              4102,
+              4101,
+              2992
+            ],
+            "target_dof_reference_shell_load_n": 0.07301826666667038,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2991,
+                  4102,
+                  4101
+                ],
+                "area_m2": 0.16761717216995634,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304105,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03650913333333519,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03650913333333519
+              },
+              {
+                "tri_nodes": [
+                  2991,
+                  4101,
+                  2992
+                ],
+                "area_m2": 0.16761717216995634,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304105,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03650913333333519,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03650913333333519
+              }
+            ]
+          },
+          {
+            "elem_index": 1607,
+            "elem_id": 12170,
+            "conn": [
+              2990,
+              4100,
+              4102,
+              2991
+            ],
+            "target_dof_reference_shell_load_n": 0.0365091333333352,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  2990,
+                  4102,
+                  2991
+                ],
+                "area_m2": 0.1676171721699564,
+                "normal": [
+                  0.9960942416491548,
+                  -0.08829644247304104,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0365091333333352,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0365091333333352
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "free_row": 15252,
+        "global_dof": 17928,
+        "node_index": 2988,
+        "raw_node_id": 2989,
+        "dof": "ux",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": 0.09241059846648828,
+        "external_load_n": 0.10922399999999552,
+        "reference_shell_load_reconstructed_n": 0.1092239999999955,
+        "external_minus_reference_shell_load_n": 1.3877787807814457e-17,
+        "shell_internal_sum_n": 0.2016345984664838,
+        "required_reference_shell_load_scale_for_zero_row_residual": 1.8460649533664037,
+        "incident_surface_element_count": 2,
+        "sample_incident_surface_elements": [
+          {
+            "elem_index": 1596,
+            "elem_id": 12159,
+            "conn": [
+              4098,
+              4099,
+              2988,
+              2989
+            ],
+            "target_dof_reference_shell_load_n": 0.072815999999997,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4098,
+                  4099,
+                  2988
+                ],
+                "area_m2": 0.16715648357152546,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378829,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0364079999999985,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0364079999999985
+              },
+              {
+                "tri_nodes": [
+                  4098,
+                  2988,
+                  2989
+                ],
+                "area_m2": 0.16715648357152546,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378829,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.0364079999999985,
+                  -0.0032362666666663096,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.0364079999999985
+              }
+            ]
+          },
+          {
+            "elem_index": 1597,
+            "elem_id": 12160,
+            "conn": [
+              4099,
+              4097,
+              2987,
+              2988
+            ],
+            "target_dof_reference_shell_load_n": 0.03640799999999851,
+            "triangles": [
+              {
+                "tri_nodes": [
+                  4099,
+                  2987,
+                  2988
+                ],
+                "area_m2": 0.16715648357152552,
+                "normal": [
+                  0.9960726406926871,
+                  -0.08853979028378828,
+                  0.0
+                ],
+                "reference_nodal_load_vector_n": [
+                  0.03640799999999851,
+                  -0.0032362666666663105,
+                  0.0
+                ],
+                "target_dof_reference_load_n": 0.03640799999999851
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "claim_boundary": "Diagnostic only: reconstructs the reference unit shell surface load assigned by the current triangular shell load rule for selected hotspot rows."
+  },
   "residual_shell_local_projection": {
     "self_rows": {
       "evaluated": true,
@@ -4015,9 +5061,9 @@
     }
   },
   "runtime_metrics": {
-    "setup_and_reference_seconds": 16.284088254999915,
-    "base_assembly_seconds": 12.374775634999423,
-    "total_seconds": 28.691243946999748
+    "setup_and_reference_seconds": 16.07667366699934,
+    "base_assembly_seconds": 12.231140666000101,
+    "total_seconds": 28.351513140999486
   },
   "claim_boundary": "Full-model diagnostic comparing assembled tangent K*d against finite-difference physical residual action dR/du*d. This is not a nonlinear equilibrium closure.",
   "blockers": [

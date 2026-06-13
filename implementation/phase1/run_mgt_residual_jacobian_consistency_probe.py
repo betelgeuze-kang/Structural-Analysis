@@ -466,6 +466,154 @@ def _shell_membrane_hotspot_diagnostics(
     return rows
 
 
+def _shell_surface_load_hotspot_diagnostics(
+    *,
+    top_rows: list[dict[str, Any]],
+    setup_meta: dict[str, Any],
+    max_rows: int = 12,
+    max_elements_per_row: int = 12,
+    shell_component_names: tuple[str, ...] = ("shell_bending_drilling", "shell_membrane", "shell"),
+) -> dict[str, Any]:
+    node_xyz = setup_meta.get("_node_xyz")
+    node_id = setup_meta.get("_node_id")
+    elem_id = setup_meta.get("_elem_id")
+    elem_type_code = setup_meta.get("_elem_type_code")
+    conn_ptr = setup_meta.get("_conn_ptr")
+    conn_idx = setup_meta.get("_conn_idx")
+    if not all(isinstance(value, np.ndarray) for value in (node_xyz, elem_id, elem_type_code, conn_ptr, conn_idx)):
+        return {
+            "evaluated": False,
+            "reason": "missing_shell_mesh_arrays",
+            "rows": [],
+        }
+    xyz = np.asarray(node_xyz, dtype=np.float64)
+    raw_node_id = np.asarray(node_id, dtype=np.int64) if isinstance(node_id, np.ndarray) else None
+    ids = np.asarray(elem_id, dtype=np.int64)
+    type_code = np.asarray(elem_type_code, dtype=np.int32)
+    ptr = np.asarray(conn_ptr, dtype=np.int64)
+    idx = np.asarray(conn_idx, dtype=np.int64)
+    load_scale = float(setup_meta.get("load_scale") or setup_meta.get("frozen_load_scale") or 1.0)
+    surface_indices = np.where(type_code == 2)[0]
+    incident_by_node: dict[int, list[int]] = {}
+    for elem_index in surface_indices.tolist():
+        start = int(ptr[int(elem_index)])
+        end = int(ptr[int(elem_index) + 1])
+        if start < 0 or end < start or end > int(idx.size):
+            continue
+        conn = [int(node) for node in idx[start:end].tolist()]
+        if len(conn) not in {3, 4}:
+            continue
+        for node in conn:
+            incident_by_node.setdefault(int(node), []).append(int(elem_index))
+
+    selected = [
+        row
+        for row in top_rows
+        if str(row.get("dominant_component") or "") in set(shell_component_names)
+        and str(row.get("dof") or "") in {"ux", "uy", "uz"}
+    ][: max(int(max_rows), 0)]
+    dof_to_index = {"ux": 0, "uy": 1, "uz": 2}
+    rows: list[dict[str, Any]] = []
+    reconstruction_errors: list[float] = []
+    shell_required_scales: list[float] = []
+    for row in selected:
+        node = int(row.get("node_index", -1))
+        dof = str(row.get("dof") or "")
+        dof_index = dof_to_index.get(dof, -1)
+        if node < 0 or node >= int(xyz.shape[0]) or dof_index < 0:
+            continue
+        element_rows: list[dict[str, Any]] = []
+        reconstructed_shell_load = 0.0
+        incident = incident_by_node.get(node, [])
+        for elem_index in incident[: max(int(max_elements_per_row), 0)]:
+            conn = [int(n) for n in idx[int(ptr[elem_index]) : int(ptr[elem_index + 1])].tolist()]
+            element_shell_load = 0.0
+            tri_rows: list[dict[str, Any]] = []
+            for tri in _triangulate_conn(conn):
+                if node not in tri:
+                    continue
+                points = np.asarray([xyz[n] for n in tri], dtype=np.float64)
+                basis = _local_shell_basis(points)
+                if basis is None:
+                    continue
+                _e1, _e2, e3 = basis
+                area = 0.5 * float(np.linalg.norm(np.cross(points[1] - points[0], points[2] - points[0])))
+                nodal_load_vec = e3 * area / 3.0 * load_scale
+                dof_load = float(nodal_load_vec[dof_index])
+                element_shell_load += dof_load
+                tri_rows.append(
+                    {
+                        "tri_nodes": [int(n) for n in tri],
+                        "area_m2": float(area),
+                        "normal": [float(v) for v in e3.tolist()],
+                        "reference_nodal_load_vector_n": [float(v) for v in nodal_load_vec.tolist()],
+                        "target_dof_reference_load_n": dof_load,
+                    }
+                )
+            if tri_rows:
+                reconstructed_shell_load += element_shell_load
+                element_rows.append(
+                    {
+                        "elem_index": int(elem_index),
+                        "elem_id": int(ids[elem_index]) if elem_index < int(ids.size) else int(elem_index),
+                        "conn": conn,
+                        "target_dof_reference_shell_load_n": float(element_shell_load),
+                        "triangles": tri_rows,
+                    }
+                )
+        component_values = row.get("component_values_n") if isinstance(row.get("component_values_n"), dict) else {}
+        shell_internal_sum = sum(float(component_values.get(name, 0.0)) for name in shell_component_names)
+        external_load = float(row.get("external_load_n") or 0.0)
+        reconstruction_errors.append(external_load - reconstructed_shell_load)
+        required_scale = (
+            shell_internal_sum / reconstructed_shell_load
+            if abs(reconstructed_shell_load) > 1.0e-30
+            else None
+        )
+        if required_scale is not None and np.isfinite(required_scale):
+            shell_required_scales.append(float(required_scale))
+        element_rows.sort(
+            key=lambda item: abs(float(item["target_dof_reference_shell_load_n"])),
+            reverse=True,
+        )
+        rows.append(
+            {
+                "free_row": int(row.get("free_row", -1)),
+                "global_dof": int(row.get("global_dof", -1)),
+                "node_index": int(node),
+                "raw_node_id": int(raw_node_id[node])
+                if raw_node_id is not None and 0 <= node < int(raw_node_id.size)
+                else None,
+                "dof": dof,
+                "dominant_component": str(row.get("dominant_component") or ""),
+                "residual_n": float(row.get("residual_n") or 0.0),
+                "external_load_n": external_load,
+                "reference_shell_load_reconstructed_n": float(reconstructed_shell_load),
+                "external_minus_reference_shell_load_n": float(external_load - reconstructed_shell_load),
+                "shell_internal_sum_n": float(shell_internal_sum),
+                "required_reference_shell_load_scale_for_zero_row_residual": required_scale,
+                "incident_surface_element_count": int(len(incident)),
+                "sample_incident_surface_elements": element_rows[: max(int(max_elements_per_row), 0)],
+            }
+        )
+    scale_arr = np.asarray(shell_required_scales, dtype=np.float64)
+    error_arr = np.asarray(reconstruction_errors, dtype=np.float64)
+    return {
+        "evaluated": True,
+        "row_count": int(len(rows)),
+        "load_scale": float(load_scale),
+        "external_minus_reference_shell_load_inf_n": _max_abs(error_arr),
+        "required_reference_shell_load_scale_min": float(np.min(scale_arr)) if scale_arr.size else None,
+        "required_reference_shell_load_scale_median": float(np.median(scale_arr)) if scale_arr.size else None,
+        "required_reference_shell_load_scale_max": float(np.max(scale_arr)) if scale_arr.size else None,
+        "rows": rows,
+        "claim_boundary": (
+            "Diagnostic only: reconstructs the reference unit shell surface load assigned by the "
+            "current triangular shell load rule for selected hotspot rows."
+        ),
+    }
+
+
 def _frame_hotspot_diagnostics(
     *,
     top_rows: list[dict[str, Any]],
@@ -1150,6 +1298,10 @@ def run_mgt_residual_jacobian_consistency_probe(
     shell_load_balance = _scalar_load_balance_diagnostics(
         top_rows=residual_component_breakdown.get("top_rows", []),
     )
+    shell_surface_load_diagnostics = _shell_surface_load_hotspot_diagnostics(
+        top_rows=residual_component_breakdown.get("top_rows", []),
+        setup_meta=setup_meta,
+    )
     shell_local_projection = {
         "self_rows": _local_row_projection_diagnostics(
             stiffness=stiffness,
@@ -1281,6 +1433,7 @@ def run_mgt_residual_jacobian_consistency_probe(
         "top_residual_count": int(top_residual_count),
         "residual_component_breakdown": residual_component_breakdown,
         "residual_shell_load_balance": shell_load_balance,
+        "residual_shell_surface_load_diagnostics": shell_surface_load_diagnostics,
         "residual_shell_local_projection": shell_local_projection,
         "residual_hotspot_shell_membrane_diagnostics": shell_membrane_hotspots,
         "residual_hotspot_frame_diagnostics": frame_hotspots,

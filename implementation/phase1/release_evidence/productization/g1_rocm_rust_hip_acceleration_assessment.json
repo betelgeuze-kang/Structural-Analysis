@@ -1522,6 +1522,15 @@
       "shell_dominant_top_row_count": 85,
       "best_l2_external_load_scale": 1.000066460873031,
       "best_l2_scaled_residual_inf_n": 0.2804032402241758,
+      "reference_shell_surface_load_reconstruction": {
+        "row_count": 12,
+        "load_scale": 0.656,
+        "external_minus_reference_shell_load_inf_n": 1.1102230246251565e-16,
+        "required_reference_shell_load_scale_min": -0.5075078467577262,
+        "required_reference_shell_load_scale_median": 0.2500021634705037,
+        "required_reference_shell_load_scale_max": 1.8460649533664037,
+        "assessment": "The displayed top-row external loads reconstruct from the current reference triangular shell surface load rule to roundoff. The G1 hotspot is therefore not an external-load split or scalar load-scale wiring error."
+      },
       "top_row_required_external_scale_examples": [
         0.25000203679675903,
         0.2500022901442482,
@@ -1539,18 +1548,39 @@
         "node_block_strongest8_rank": 6,
         "node_block_strongest8_coefficient_linf": 2.1132329430538995e-16
       },
-      "assessment": "The current tangent local support cannot represent the dominant shell residual rows: the projection residual is effectively the same size as the target residual. The leading shell rows also show row-scale load/internal balance patterns around 0.25 and -0.5, while a whole-set scalar external-load fit does not reduce the max residual. This points at shell load/internal consistency or full-load path state before raw engine acceleration."
+      "assessment": "The current tangent local support cannot represent the dominant shell residual rows: the projection residual is effectively the same size as the target residual. The leading shell rows also show row-scale shell internal/reference-load patterns around 0.25 and -0.5, while the shell surface load reconstruction matches the displayed external loads to roundoff. This points at shell internal replay/full-load transfer state before raw engine acceleration."
+    },
+    "shell_patch_neighbor1_counterprobe": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_patch_neighbor1_row_correction_probe.json",
+      "status": "partial",
+      "target_mode": "residual_shell_geometry_normal_rows",
+      "element_neighbor_depth": 1,
+      "node_block_support": true,
+      "support_sizes_tested": [
+        48
+      ],
+      "selected_elements": [
+        32530,
+        25880
+      ],
+      "accepted": false,
+      "stop_reason": "no_residual_descent",
+      "best_candidate_direct_residual_inf_n": 0.28037839479902316,
+      "best_candidate_improvement_inf_n": -2.3283064365386963e-10,
+      "assessment": "Expanding the top shell target to a one-hop shell patch with node-block support did not recover descent. The best residual-only candidate worsened the frontier, so the remaining G1 path should move away from local/patch row LSTSQ polishing toward full shell internal force transfer or global load-path correction."
     },
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
       "use_rust_for_next_g1_push": "not_until_full_3d_mgt_frame_shell_assembly_is_wired",
       "use_hip_custom_kernel_for_next_g1_push": "blocked_as_quick_path_by_missing_hipcc_and_algorithmic_mismatch",
-      "recommended_next_step": "First fix or falsify shell external-load/internal-force consistency at the full-load frontier, then move the corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
+      "recommended_next_step": "Stop spending G1 cycles on narrow local/patch row corrections. First fix or falsify the shell internal force transfer/full-load path for the pressure-driven shell hotspots, then move the corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
       "why": [
         "ROCm runtime sees the RX 6900 XT, but the existing full G1 Newton swap to host-ILU/device-GMRES timed out beyond the 240 second budget.",
         "Existing shell sparse GPU solve evidence converges but is slow for shell-dominant systems because Krylov iterations saturate.",
         "Rust nonlinear-frame and NDTHA contracts are not wired to the current MGT full 3D frame-shell residual/Jacobian assembly.",
         "The latest local tangent projection diagnostic shows almost no representable descent direction for the dominant shell residual rows.",
+        "The shell surface load reconstruction matches the displayed external load at roundoff, so the hotspot is not a simple external-load split bug.",
+        "A one-hop shell patch row-correction counterprobe also produced no residual descent.",
         "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
       ]
     }

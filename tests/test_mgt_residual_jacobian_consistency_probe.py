@@ -20,6 +20,7 @@ from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
     _local_row_projection_diagnostics,
     _scalar_load_balance_diagnostics,
     _shell_membrane_hotspot_diagnostics,
+    _shell_surface_load_hotspot_diagnostics,
     _state_scale_sweep,
     evaluate_residual_jacobian_direction,
 )
@@ -495,6 +496,48 @@ def test_shell_membrane_hotspot_diagnostics_reports_global_dof_participation() -
     assert rows[0]["max_global_dof_normal_participation"] < 1.0e-12
     assert rows[0]["max_relative_membrane_displacement_m"] > 0.0
     assert rows[0]["sample_incident_elements"][0]["elem_id"] == 101
+
+
+def test_shell_surface_load_hotspot_diagnostics_reconstructs_reference_load() -> None:
+    setup_meta = {
+        "_node_xyz": np.asarray(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
+            dtype=np.float64,
+        ),
+        "_node_id": np.asarray([10, 11, 12], dtype=np.int64),
+        "_elem_id": np.asarray([101], dtype=np.int64),
+        "_elem_type_code": np.asarray([2], dtype=np.int32),
+        "_conn_ptr": np.asarray([0, 3], dtype=np.int64),
+        "_conn_idx": np.asarray([0, 1, 2], dtype=np.int64),
+        "load_scale": 2.0,
+    }
+    row = _shell_surface_load_hotspot_diagnostics(
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 2,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": -0.25,
+                "external_load_n": 1.0 / 3.0,
+                "component_values_n": {"shell_bending_drilling": 1.0 / 12.0},
+            }
+        ],
+        setup_meta=setup_meta,
+    )
+
+    assert row["evaluated"] is True
+    assert row["row_count"] == 1
+    assert abs(row["external_minus_reference_shell_load_inf_n"]) <= 1.0e-12
+    assert row["rows"][0]["raw_node_id"] == 10
+    assert row["rows"][0]["reference_shell_load_reconstructed_n"] == 1.0 / 3.0
+    assert row["rows"][0]["required_reference_shell_load_scale_for_zero_row_residual"] == 0.25
+    assert row["rows"][0]["sample_incident_surface_elements"][0]["elem_id"] == 101
 
 
 def test_frame_hotspot_diagnostics_reconstructs_incident_frame_contribution() -> None:
