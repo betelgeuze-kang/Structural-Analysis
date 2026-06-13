@@ -1209,6 +1209,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     direct_residual_preconditioned_continuation_seed = _load(
         productization / "mgt_direct_residual_preconditioned_continuation_seed_base.json"
     )
+    direct_residual_preconditioned_continuation_standard_seed = _load(
+        productization
+        / "mgt_direct_residual_preconditioned_continuation_standard_seed_base.json"
+    )
+    direct_residual_preconditioned_continuation_standard_rowcorr = _load(
+        productization
+        / "mgt_direct_residual_preconditioned_continuation_standard_rowcorr_probe.json"
+    )
     pdelta_frontier_diagnostic = _pdelta_frontier_diagnostic(pdelta_continuation)
     pdelta_residual_jacobian_summary = _pdelta_residual_jacobian_summary(pdelta_continuation)
     surface_membrane = _load(productization / "mgt_surface_membrane_tangent.json")
@@ -3240,6 +3248,59 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         direct_residual_preconditioned_continuation_seed,
                         "base_direct_residual",
                         "direct_residual_inf_n",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_seed_status": (
+                    direct_residual_preconditioned_continuation_standard_seed.get("status")
+                ),
+                "direct_residual_preconditioned_continuation_standard_seed_checkpoint_schema": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_seed,
+                        "checkpoint",
+                        "checkpoint_schema",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_seed_base_residual_inf_n": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_seed,
+                        "base_direct_residual",
+                        "direct_residual_inf_n",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_status": (
+                    direct_residual_preconditioned_continuation_standard_rowcorr.get("status")
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_accepted": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_rowcorr,
+                        "current_tangent_residual_row_correction",
+                        "accepted",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_base_residual_inf_n": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_rowcorr,
+                        "base_direct_residual",
+                        "direct_residual_inf_n",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_final_residual_inf_n": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_rowcorr,
+                        "final_direct_residual",
+                        "direct_residual_inf_n",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_improvement_factor": (
+                    _get(
+                        direct_residual_preconditioned_continuation_standard_rowcorr,
+                        "final_direct_residual",
+                        "improvement_factor",
+                    )
+                ),
+                "direct_residual_preconditioned_continuation_standard_rowcorr_final_checkpoint": (
+                    direct_residual_preconditioned_continuation_standard_rowcorr.get(
+                        "output_final_checkpoint"
                     )
                 ),
                 "full_load_nonlinear_newton_ready": pdelta_continuation.get(

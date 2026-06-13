@@ -436,6 +436,60 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
             "equilibrium_preconditioned_continuation_overall_best_residual_inf_n"
         ]
     )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_seed_status"
+        ]
+        == "partial"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_seed_checkpoint_schema"
+        ]
+        == "mgt-direct-residual-newton-state.v1"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_seed_base_residual_inf_n"
+        ]
+        == rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_standard_checkpoint"
+        ]["direct_residual_inf_n"]
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_status"
+        ]
+        == "partial"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_accepted"
+        ]
+        is True
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_base_residual_inf_n"
+        ]
+        == rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_seed_base_residual_inf_n"
+        ]
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_final_residual_inf_n"
+        ]
+        < rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_base_residual_inf_n"
+        ]
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "direct_residual_preconditioned_continuation_standard_rowcorr_final_checkpoint"
+        ]["schema"]
+        == "mgt-direct-residual-newton-state.v1"
+    )
     direct_contract = rows["G1"]["evidence"]["direct_residual_contract"]
     assert direct_contract["definition"] == "R(u, lambda) = F_int(u) - lambda * F_ext"
     assert direct_contract["external_load_vector_configuration"] == "reference"

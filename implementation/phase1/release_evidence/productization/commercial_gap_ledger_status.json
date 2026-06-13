@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-13T01:12:33.490775+00:00",
+  "generated_at": "2026-06-13T01:21:16.666795+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -37775,6 +37775,25 @@
         },
         "direct_residual_preconditioned_continuation_seed_status": "partial",
         "direct_residual_preconditioned_continuation_seed_base_residual_inf_n": 7325.9547714166265,
+        "direct_residual_preconditioned_continuation_standard_seed_status": "partial",
+        "direct_residual_preconditioned_continuation_standard_seed_checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+        "direct_residual_preconditioned_continuation_standard_seed_base_residual_inf_n": 7325.9547714166265,
+        "direct_residual_preconditioned_continuation_standard_rowcorr_status": "partial",
+        "direct_residual_preconditioned_continuation_standard_rowcorr_accepted": true,
+        "direct_residual_preconditioned_continuation_standard_rowcorr_base_residual_inf_n": 7325.9547714166265,
+        "direct_residual_preconditioned_continuation_standard_rowcorr_final_residual_inf_n": 7312.271816678203,
+        "direct_residual_preconditioned_continuation_standard_rowcorr_improvement_factor": 1.0018712316885177,
+        "direct_residual_preconditioned_continuation_standard_rowcorr_final_checkpoint": {
+          "written": true,
+          "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_preconditioned_continuation_standard_rowcorr_final_checkpoint.npz",
+          "schema": "mgt-direct-residual-newton-state.v1",
+          "load_scale": 0.656,
+          "dof_count": 78282,
+          "direct_residual_inf_n": 7312.271816678203,
+          "max_translation_m": 7.220126197640542e-06,
+          "accepted_history_count": 2,
+          "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_standard_checkpoint.npz"
+        },
         "full_load_nonlinear_newton_ready": false,
         "full_frame_6dof_runtime_metrics": {
           "backend": "scipy_sparse_spsolve_cpu_6dof_frame",
