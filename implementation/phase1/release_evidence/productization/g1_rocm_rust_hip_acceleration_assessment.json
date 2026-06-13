@@ -380,45 +380,60 @@
       "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; shell-bending/drilling and shell-normal targeted passes then lowered the frontier to 0.0369241239 N. A shell-only coupled element-block counterprobe worsened residual, so the current 2202 rx shell-bending frontier needs frame-coupled support rather than shell-only targeting."
     },
     "current_rocm_probe_refresh": {
+      "rechecked_at": "2026-06-14T07:55:52+09:00",
       "hardware": {
         "gpu": "AMD Radeon RX 6900 XT",
         "gfx_target": "gfx1030",
         "compute_units": 80,
         "max_clock_mhz": 2660
       },
+      "toolchain": {
+        "hipcc_on_path": false,
+        "hipcc_path": "/opt/rocm/bin/hipcc",
+        "hipcc_version": "HIP version: 6.0.32831-204d35d16",
+        "amdclang_version": "AMD clang version 17.0.0 (ROCm 6.0.2)",
+        "rustc_version": "rustc 1.93.0 (254b59607 2026-01-19)",
+        "cargo_version": "cargo 1.93.0 (083ac5135 2025-12-15)"
+      },
       "coupled_sparse_probe": {
-        "output_json": "/tmp/g1_rocm_coupled_probe_current.json",
+        "output_json": "/tmp/g1_rocm_coupled_probe_recheck.json",
         "backend": "rocm_torch_sparse_host_ilu_device_gmres",
         "converged": true,
         "residual_inf_n": 2.0700099412351847e-08,
-        "solve_seconds": 0.8014116089998424,
-        "factor_seconds": 0.44434616200123855,
-        "krylov_seconds": 0.35392243999922357,
+        "relative_residual_inf": 9.272952694125494e-13,
+        "solve_seconds": 0.8023993550013984,
+        "factor_seconds": 0.44838178700229037,
+        "krylov_seconds": 0.34988924199933535,
+        "iteration_count": 35,
+        "max_iterations": 4000,
         "hip_kernel_invocation_count": 37
       },
       "shell_sparse_probe": {
-        "output_json": "/tmp/g1_rocm_shell_probe_current.json",
+        "output_json": "/tmp/g1_rocm_shell_probe_recheck.json",
         "backend": "rocm_torch_sparse_host_ilu_device_gmres",
         "converged": true,
         "residual_inf_n": 2.1432831953660525e-08,
-        "solve_seconds": 37.52947819700057,
-        "factor_seconds": 0.42803576400001475,
-        "krylov_seconds": 37.09739010699923,
+        "relative_residual_inf": 6.600043386906328e-10,
+        "solve_seconds": 36.60335629200199,
+        "factor_seconds": 0.4207645679998677,
+        "krylov_seconds": 36.17863257499994,
+        "iteration_count": 4000,
+        "max_iterations": 4000,
         "hip_kernel_invocation_count": 4080
       },
       "hip_kernel_smokes": {
         "axpy_1048576_reps20": {
           "ok": true,
-          "elapsed_ms": 0.640038,
-          "bandwidth_gbps": 393.192646
+          "elapsed_ms": 0.64932,
+          "bandwidth_gbps": 387.571979
         },
         "beam_element_1048576_reps20": {
           "ok": true,
-          "elapsed_ms": 0.877688,
-          "bandwidth_gbps": 669.033377
+          "elapsed_ms": 0.858798,
+          "bandwidth_gbps": 683.749312
         }
       },
-      "assessment": "ROCm/HIP runtime is present and fast for raw kernels and favorable coupled sparse solves, but shell-dominant GMRES remains iteration-bound."
+      "assessment": "ROCm/HIP runtime is present and fast for raw kernels and favorable coupled sparse solves. The shell probe still converges but consumes the full 4000-iteration GMRES budget, so the current shell/frame cancellation frontier is conditioning- and correction-model-limited rather than raw HIP throughput-limited."
     },
     "rust_path_current_status": {
       "runtime_wrapper": "implementation/phase1/rust_hip_md3bead_hook.py",
@@ -1938,7 +1953,9 @@
       "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
       "gfx_target": "gfx1030",
       "compute_units": 80,
-      "hipcc_on_path": false
+      "hipcc_on_path": false,
+      "hipcc_path": "/opt/rocm/bin/hipcc",
+      "hipcc_path_status": "available_outside_default_path"
     },
     "latest_frontier": {
       "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_geometry_normal_row_support8_probe_final_checkpoint.npz",
@@ -2146,7 +2163,7 @@
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
       "use_rust_for_next_g1_push": "not_until_full_3d_mgt_frame_shell_assembly_is_wired",
-      "use_hip_custom_kernel_for_next_g1_push": "blocked_as_quick_path_by_missing_hipcc_and_algorithmic_mismatch",
+      "use_hip_custom_kernel_for_next_g1_push": "available_as_toolchain_but_not_a_quick_path_due_to_algorithmic_and_assembly_mismatch",
       "recommended_next_step": "Continue from the attached-policy correction checkpoint and replace narrow local row polishing with a coupled attached-component shell bending/membrane/frame correction. ROCm/HIP should be reserved for batching the now-correct residual/JVP replays or sparse preconditioner solves after this coupled direction is defined.",
       "why": [
         "ROCm runtime sees the RX 6900 XT, but the existing full G1 Newton swap to host-ILU/device-GMRES timed out beyond the 240 second budget.",
