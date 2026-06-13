@@ -15,6 +15,7 @@ from mgt_cached_residual_jvp import (  # noqa: E402
     build_fd_jvp_submatrix,
 )
 import run_mgt_cached_residual_jvp_batch_probe as batch_probe  # noqa: E402
+import run_mgt_cached_residual_jvp_replay_probe as replay_probe  # noqa: E402
 
 
 def test_cached_residual_jvp_reuses_duplicate_columns() -> None:
@@ -175,3 +176,77 @@ def test_cached_residual_jvp_batch_probe_can_promote_gate_candidate(
     assert payload["best_gate_eligible_candidate"]["direct_residual_inf_n"] < 0.2
     with np.load(final_checkpoint, allow_pickle=False) as archive:
         assert float(np.asarray(archive["direct_residual_inf_n"]).item()) < 0.2
+
+
+def test_cached_residual_jvp_replay_probe_promotes_saved_correction(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    stiffness = diags([2.0, 3.0], format="csr")
+    free = np.asarray([0, 1], dtype=np.int64)
+    base_u = np.asarray([0.1, 0.0], dtype=np.float64)
+    rhs = np.asarray([0.0, 0.0], dtype=np.float64)
+    correction_npz = tmp_path / "correction.npz"
+    np.savez_compressed(
+        correction_npz,
+        schema_version=np.asarray("fixture-correction"),
+        checkpoint_npz=np.asarray("fixture.npz"),
+        target_rows=np.asarray([0], dtype=np.int64),
+        support_cols=np.asarray([0], dtype=np.int64),
+        correction_u=np.asarray([-0.1, 0.0], dtype=np.float64),
+    )
+
+    def assemble_residual(
+        u: np.ndarray,
+        *,
+        residual_only: bool = False,
+        free_override: np.ndarray | None = None,
+        external_load_override: np.ndarray | None = None,
+        **_kwargs,
+    ):
+        f_ext = rhs if external_load_override is None else external_load_override
+        free_out = free if free_override is None else free_override
+        full_residual = np.asarray(stiffness @ u, dtype=np.float64) - f_ext
+        residual = full_residual[free_out]
+        return stiffness, f_ext, free_out, residual, f_ext[free_out], {}
+
+    def build_direct_residual_assembler(**_kwargs):
+        return assemble_residual, {"u0": base_u.copy(), "load_scale": 1.0}
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {
+                "load_scale": 1.0,
+                "path": "fixture.npz",
+                "dof_count": 2,
+            },
+            base_u.copy(),
+            None,
+            None,
+        )
+
+    monkeypatch.setattr(
+        replay_probe,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(replay_probe, "_load_checkpoint", load_checkpoint)
+
+    final_checkpoint = tmp_path / "replay_final.npz"
+    payload = replay_probe.run_mgt_cached_residual_jvp_replay_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        correction_npz=correction_npz,
+        output_json=tmp_path / "replay.json",
+        output_final_checkpoint_npz=final_checkpoint,
+        promote_gate_eligible=True,
+        alpha_values=(1.0, 0.5),
+        relative_increment_tolerance=2.0,
+    )
+
+    assert payload["correction_checkpoint_matches_requested"] is True
+    assert payload["residual_only_trial_count"] == 2
+    assert payload["promoted_to_final_state"] is True
+    assert payload["best_gate_eligible_candidate"]["alpha"] == 1.0
+    assert final_checkpoint.is_file()
+    with np.load(final_checkpoint, allow_pickle=False) as archive:
+        assert float(np.asarray(archive["direct_residual_inf_n"]).item()) == 0.0

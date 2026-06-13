@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T16:08:41Z",
+  "generated_at": "2026-06-13T16:22:59.204877+00:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -59,7 +59,17 @@
     "latest_cached_residual_jvp_batch_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_component_dof_frontier_rows4_support12_probe_final_checkpoint.npz",
     "latest_cached_residual_jvp_batch_final_residual_inf_n": 0.28037931296242474,
     "latest_cached_residual_jvp_batch_improvement_from_component_dof_frontier_inf_n": 1.083086659248167e-08,
-    "latest_cached_residual_jvp_batch_checkpoint_accepted_state_history_count": 29
+    "latest_cached_residual_jvp_batch_checkpoint_accepted_state_history_count": 29,
+    "latest_cached_residual_jvp_alpha_wide_replay_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows4_support12_alpha_wide_probe.json",
+    "latest_cached_residual_jvp_alpha_wide_replay_best_residual_inf_n": 0.28037931296242474,
+    "latest_cached_residual_jvp_alpha_wide_replay_best_alpha": 3e-06,
+    "latest_cached_residual_jvp_rows8_support24_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_component_dof_frontier_rows8_support24_probe.json",
+    "latest_cached_residual_jvp_rows8_support24_best_residual_inf_n": 0.28037931296242474,
+    "latest_cached_residual_jvp_rows8_support24_promoted": false,
+    "latest_cached_residual_jvp_rows8_support24_alpha_wide_replay_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows8_support24_alpha_wide_probe.json",
+    "latest_cached_residual_jvp_rows8_support24_alpha_wide_best_residual_inf_n": 0.28037931296242474,
+    "latest_cached_residual_jvp_top_rows4_support24_alpha_wide_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_top_frontier_rows4_support24_alpha_wide_probe.json",
+    "latest_cached_residual_jvp_top_rows4_support24_alpha_wide_best_residual_inf_n": 0.2803796724571802
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -1081,18 +1091,76 @@
       "promoted_to_final_state": false,
       "runtime_s": 44.1053710970009
     },
-    "assessment": "A small cached residual-only FD-JVP batch produced one gate-eligible frontier promotion faster than the latest block-LSTSQ followups, but the same rows4/support12 lane saturated immediately on positive and signed followups. The useful next step is not repeating this exact batch; it is broadening cached batch target/support selection or feeding the cached submatrix into a different coarse/global correction."
+    "assessment": "Cached residual-only FD-JVP remains useful as an inexpensive diagnostic and produced one tiny frontier promotion, but alpha-wide replay, rows8/support24 broadening, and pure top-residual rows4/support24 all failed to improve beyond 0.28037931296242474 N. The bottleneck is now correction-direction/model consistency, not the small LSTSQ solve or alpha sweep. The next G1 closure attempt should move to a consistent/global residual-Jacobian or material/full-load Newton lane rather than repeating local cached FD-JVP polishing.",
+    "alpha_wide_replay_from_first_pass": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows4_support12_alpha_wide_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows4_support12_alpha_wide_probe_final_checkpoint.npz",
+      "base_residual_inf_n": 0.28037932379329134,
+      "best_candidate_residual_inf_n": 0.28037931296242474,
+      "best_improvement_inf_n": 1.083086659248167e-08,
+      "best_alpha": 3e-06,
+      "residual_only_trial_count": 26,
+      "promoted_to_final_state": true,
+      "runtime_s": 41.97540391099756,
+      "assessment": "Wide alpha replay did not beat the existing cached rows4/support12 frontier; larger alpha values quickly worsen the direct residual."
+    },
+    "broadened_rows8_support24": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_component_dof_frontier_rows8_support24_probe.json",
+      "base_residual_inf_n": 0.28037931296242474,
+      "best_candidate_residual_inf_n": 0.28037931296242474,
+      "best_improvement_inf_n": 0.0,
+      "promoted_to_final_state": false,
+      "selected_hotspot_row_count": 8,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 4,
+        "shell_membrane": 3,
+        "frame": 1
+      },
+      "support_size": 24,
+      "finite_difference_jvp_request_count": 24,
+      "residual_only_assembly_count": 24,
+      "jvp_seconds": 15.791101372989942,
+      "runtime_s": 52.99956032598857
+    },
+    "broadened_rows8_support24_alpha_wide_replay": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows8_support24_alpha_wide_probe.json",
+      "base_residual_inf_n": 0.28037931296242474,
+      "best_candidate_residual_inf_n": 0.28037931296242474,
+      "best_improvement_inf_n": 0.0,
+      "residual_only_trial_count": 26,
+      "promoted_to_final_state": false,
+      "runtime_s": 40.900083232001634,
+      "large_alpha_observation": "alpha >= 1e-5 increased the direct residual; alpha around 3e-6 or smaller was numerically neutral."
+    },
+    "top_rows4_support24_alpha_wide": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_top_frontier_rows4_support24_alpha_wide_probe.json",
+      "base_residual_inf_n": 0.28037931296242474,
+      "best_candidate_residual_inf_n": 0.2803796724571802,
+      "best_improvement_inf_n": -3.5949475546415144e-07,
+      "promoted_to_final_state": false,
+      "selected_hotspot_row_count": 4,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 4
+      },
+      "support_size": 24,
+      "finite_difference_jvp_request_count": 24,
+      "runtime_s": 62.76434742299898,
+      "assessment": "Pure top-residual shell-bending rows worsened the direct residual for every tested alpha, including signed alphas."
+    }
   },
   "current_acceleration_decision": {
     "status": "algorithmic_direction_limited_after_rocm_rust_hip_review",
     "latest_frontier_residual_inf_n": 0.28037931296242474,
     "residual_gate_n": 0.001,
-    "latest_local_probe_runtime_s": 42.7048428709968,
-    "rocm_hip_decision": "Use ROCm/HIP for sparse linear diagnostics and future residual/Jacobian assembly batching, but do not expect backend substitution alone to close G1. Existing host-ILU/device-GMRES evidence is fast for favorable coupled systems, slow for shell-dominant systems, and the active local probes are correction-direction limited. The new cached FD-JVP batch confirms the right acceleration boundary: residual-only JVP assembly is useful, while the tiny ridge solve itself ran on CPU because ROCm device access was unavailable in-process.",
+    "latest_local_probe_runtime_s": 62.76434742299898,
+    "rocm_hip_decision": "Use ROCm/HIP for future production residual/Jacobian assembly batching and sparse diagnostics, but do not expect backend substitution alone to close G1. The latest cached-JVP evidence shows residual-only assembly is cheap enough for targeted probes, while the small ridge/LSTSQ solve is not the limiting cost and in-process torch still reports no ROCm device. Rows8/support24 and top-row support24 both failed algorithmically despite acceptable replay/assembly times.",
     "rust_decision": "The Rust/HIP runtime path remains useful for existing nonlinear-frame/NDTHA contracts, but it is not connected to the current MGT full 3D frame+shell residual/Jacobian assembly. Wiring it now would be integration work before algorithmic closure evidence, not a quick gate-closing path.",
-    "next_g1_step": "Stop spending full turns on local block-LSTSQ polishing or repeating the saturated rows4/support12 cached batch. The next substantive G1 closure attempt should broaden cached residual-JVP target/support selection or feed cached batches into a different coarse/global correction model, then use the child-timeout controller so long global probes always emit partial receipts.",
+    "next_g1_step": "Stop repeating local cached FD-JVP polishing, alpha widening, or top-row LSTSQ variants. The next substantive G1 attempt should build a consistency-preserving global correction path: reuse residual-only batching for JVP sampling, but solve/update with a full residual/Jacobian contract that includes shell/frame coupling, material Newton state, P-Delta/full-load continuation, and child-timeout receipts for any long global Krylov probe.",
     "latest_adaptive_global_krylov_timeout_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_child_timeout_smoke.json",
     "latest_adaptive_global_krylov_timeout_status": "child_timeout_receipt_written_after_45s_without_progress_claim",
-    "latest_adaptive_global_krylov_child_timeout_seconds": 45.0
+    "latest_adaptive_global_krylov_child_timeout_seconds": 45.0,
+    "latest_cached_jvp_replay_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows4_support12_alpha_wide_probe.json",
+    "latest_cached_jvp_broadened_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_component_dof_frontier_rows8_support24_probe.json",
+    "latest_cached_jvp_top_row_counter_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_top_frontier_rows4_support24_alpha_wide_probe.json"
   }
 }
