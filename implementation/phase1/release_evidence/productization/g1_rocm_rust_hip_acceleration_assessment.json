@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T15:35:31Z",
+  "generated_at": "2026-06-13T15:42:51Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -950,7 +950,8 @@
         "shell_membrane": 47414.69162367852
       }
     },
-    "assessment": "Component+DOF round-robin target selection with node-block support reopens a better local descent path than raw top-row selection. The strongest pass in this batch used rows16/support2 and improved by 8.7195e-08 N, but follow-up passes fell back to roughly 2.6e-08 N. Rows24 and support1 both slowed descent, so simple target widening or support shrinking is not enough to close the 1e-3 N gate quickly."
+    "assessment": "Component+DOF round-robin target selection with node-block support reopens a better local descent path than raw top-row selection. The strongest pass in this batch used rows16/support2 and improved by 8.7195e-08 N, but follow-up passes fell back to roughly 2.6e-08 N. Rows24 and support1 both slowed descent, so simple target widening or support shrinking is not enough to close the 1e-3 N gate quickly.",
+    "adaptive_global_krylov_timeout_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_interrupted_probe.json"
   },
   "current_acceleration_decision": {
     "status": "algorithmic_direction_limited_after_rocm_rust_hip_review",
@@ -959,6 +960,8 @@
     "latest_local_probe_runtime_s": 60.48802061799506,
     "rocm_hip_decision": "Use ROCm/HIP for sparse linear diagnostics and future residual/Jacobian assembly batching, but do not expect backend substitution alone to close G1. Existing host-ILU/device-GMRES evidence is fast for favorable coupled systems, slow for shell-dominant systems, and the active local probes are correction-direction limited.",
     "rust_decision": "The Rust/HIP runtime path remains useful for existing nonlinear-frame/NDTHA contracts, but it is not connected to the current MGT full 3D frame+shell residual/Jacobian assembly. Wiring it now would be integration work before algorithmic closure evidence, not a quick gate-closing path.",
-    "next_g1_step": "Keep G1 focused on component+DOF balanced local polishing only as a diagnostic, and shift the main closure attempt to broader coarse/global correction or cached residual/Jacobian assembly. The latest local descent rate remains orders of magnitude too slow for the 1e-3 N gate."
+    "next_g1_step": "Do not spend more turns on the current adaptive global Krylov child configuration as a fast G1 path. Use the component+DOF balanced node-block lane for controlled diagnostics, and make the next substantive G1 closure attempt either a cached residual/Jacobian batch evaluator or a different coarse/global correction that can emit partial receipts before long child solves.",
+    "latest_adaptive_global_krylov_timeout_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_interrupted_probe.json",
+    "latest_adaptive_global_krylov_timeout_status": "terminated_after_fast_iteration_budget_without_child_artifacts"
   }
 }

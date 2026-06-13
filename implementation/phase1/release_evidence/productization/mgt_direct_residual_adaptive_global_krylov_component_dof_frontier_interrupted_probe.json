@@ -1,0 +1,15 @@
+{
+  "schema_version": "mgt-direct-residual-adaptive-global-krylov-interrupted-probe.v1",
+  "generated_at": "2026-06-13T15:42:51Z",
+  "status": "terminated_after_fast_iteration_budget",
+  "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz",
+  "base_direct_residual_inf_n": 0.28037932612159777,
+  "residual_gate_n": 0.001,
+  "attempted_command": "python3 implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py --checkpoint-npz implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz --output-json implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_smoke.json --output-final-checkpoint-npz implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_smoke_final_checkpoint.npz --child-output-dir implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_children --adaptive-tangent-regularization-factors 1e-6 --max-controller-steps 1 --matrix-free-global-krylov-max-iterations 1 --matrix-free-global-krylov-alpha-values 1,0.3,0.1,0.03,0.01 --matrix-free-global-krylov-max-alpha 1 --matrix-free-global-krylov-min-relative-improvement 1e-8 --max-controller-runtime-seconds 180 --allow-cpu-diagnostic",
+  "observed_wall_seconds_greater_than": 185,
+  "terminated_by": "manual_interrupt_after_child_probe_exceeded_fast_iteration_budget",
+  "output_json_written": false,
+  "output_final_checkpoint_written": false,
+  "child_artifacts_written": false,
+  "assessment": "A one-step adaptive matrix-free global Krylov smoke did not finish its first child probe within the fast-iteration budget from the component+DOF frontier. This does not disprove the global Krylov method, but it disqualifies this configuration as the quick path for pushing the G1 residual gate compared with the roughly 60 s local block-LSTSQ probes."
+}
