@@ -1499,7 +1499,7 @@
   },
   "current_acceleration_decision_2026_06_14": {
     "status": "rocm_runtime_available_but_g1_gate_not_backend_throughput_limited",
-    "generated_at": "2026-06-14T04:52:00+09:00",
+    "generated_at": "2026-06-14T05:03:00+09:00",
     "device_observation": {
       "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
       "gfx_target": "gfx1030",
@@ -1658,24 +1658,33 @@
       "rotation_element_block_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_element_block_rotation_probe.json",
       "rotation_element_block_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_element_block_rotation_final_checkpoint.npz",
       "rotation_element_block_residual_inf_n": 0.05288275788082397,
-      "latest_frontier_diagnostic_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_cleanup_followup_frontier_probe.json",
-      "latest_frontier_residual_inf_n": 0.052882760779810356,
-      "latest_frontier_relative_residual_inf": 0.000006095195118477439,
+      "largest_rotation_row_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_probe.json",
+      "largest_rotation_row_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_final_checkpoint.npz",
+      "largest_rotation_row_residual_inf_n": 0.0458033805763749,
+      "largest_rotation_row_absolute_reduction_n": 0.007079377304449075,
+      "largest_rotation_row_followup_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_followup_probe.json",
+      "largest_rotation_row_followup_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_followup_final_checkpoint.npz",
+      "largest_rotation_row_followup_residual_inf_n": 0.04437202493757986,
+      "largest_rotation_row_multistep_saturation_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_multistep_probe.json",
+      "largest_rotation_row_multistep_stop_reason": "no_residual_descent",
+      "latest_frontier_diagnostic_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_largest_rotation_followup_frontier_probe.json",
+      "latest_frontier_residual_inf_n": 0.04437202493757986,
+      "latest_frontier_relative_residual_inf": 0.000005114259274824983,
       "latest_top96_dominant_component_counts": {
-        "shell_bending_drilling": 49,
-        "shell_membrane": 33,
+        "shell_bending_drilling": 44,
+        "shell_membrane": 38,
         "frame": 14
       },
       "next_active_residual": {
         "raw_node_id": 2203,
         "dof": "rx",
-        "residual_n": -0.052882760779810356,
+        "residual_n": -0.04437202493757986,
         "dominant_component": "shell_bending_drilling",
-        "frame_component_n": 0.4926072651037956,
-        "shell_bending_drilling_component_n": -0.545490025883606,
+        "frame_component_n": 0.4926130785221019,
+        "shell_bending_drilling_component_n": -0.5369851034596818,
         "external_load_n": 0
       },
-      "assessment": "The diagnostic pressure policy has now been promoted into executable direct-residual correction evidence. Cleaning the two suppressed free shell components removed their stale displacement state, and a finite-difference residual-row correction on the large attached shell component reduced the frontier from 0.115243 N to 0.052893 N. Follow-up and rotation-inclusive element-block corrections then saturated near 0.052883 N, with the active top row shifting to an attached shell drilling/bending rx residual balanced against frame contribution. The gate is still not closed; the next correction needs a coupled attached-component shell bending/membrane/frame strategy, not raw ROCm/HIP throughput alone."
+      "assessment": "The diagnostic pressure policy has now been promoted into executable direct-residual correction evidence. Cleaning the two suppressed free shell components removed their stale displacement state, finite-difference residual-row correction on the large attached shell component reduced the frontier from 0.115243 N to 0.052893 N, and subsequent largest-row rotation-focused corrections advanced it to 0.044372 N. A multistep repeat then saturated with no residual descent. The gate is still not closed; the next correction needs a coupled attached-component shell bending/membrane/frame strategy around node 2203 rather than raw ROCm/HIP throughput alone."
     },
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
@@ -1693,7 +1702,8 @@
         "The top 8 shell hotspot rows are attached to one-element free pressure components with no frame-connected nodes and no restrained translational DOFs; each carries a nonzero pressure resultant.",
         "Suppressing pressure only on those unattached surface components lowers the current checkpoint residual by about 59%, from 0.280378 N to 0.115243 N, while leaving the large attached shell component loaded.",
         "Promoting the policy into the direct-residual correction lane, cleaning the two suppressed free shell component states, and applying finite-difference residual-row correction reduced the frontier further to 0.052893 N.",
-        "A follow-up normal-row pass and a rotation-inclusive element-block pass saturated near 0.052883 N; the top active row is now an attached shell drilling/bending rx residual with a frame counter-contribution.",
+        "Largest-row rotation-focused finite-difference correction advanced the frontier to 0.044372 N before the same narrow lane saturated with no residual descent.",
+        "The top active row is now an attached shell drilling/bending rx residual at raw node 2203 with a frame counter-contribution, while the top96 set remains mixed shell bending, shell membrane, and frame.",
         "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
       ]
     }
