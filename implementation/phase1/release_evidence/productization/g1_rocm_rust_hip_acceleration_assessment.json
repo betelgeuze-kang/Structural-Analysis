@@ -38,11 +38,11 @@
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
     "post_reassessment_frontier_advances": {
-      "generated_at": "2026-06-14T06:05:11+09:00",
-      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_expand1_final_checkpoint.npz",
-      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_largest_rows_expand1_frontier_probe.json",
-      "latest_direct_residual_inf_n": 0.04180495793067962,
-      "latest_direct_relative_residual_inf": 4.818382621289215e-06,
+      "generated_at": "2026-06-14T06:14:26+09:00",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup_final_checkpoint.npz",
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_largest_rows_compact_followup_frontier_probe.json",
+      "latest_direct_residual_inf_n": 0.04115175546345995,
+      "latest_direct_relative_residual_inf": 4.743095392883115e-06,
       "advances": [
         {
           "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
@@ -85,6 +85,17 @@
           "improvement_inf_n": 0.00032917289786382753,
           "runtime_seconds": 165.94678741899952,
           "assessment": "Directly targeting the top scalar residual rows, including node 2380 uz, reopened a much larger descent path after compact shell-normal and node-score selectors saturated."
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup_final_checkpoint.npz",
+          "target_mode": "largest_rows",
+          "support_expansion_depth": 0,
+          "base_residual_inf_n": 0.04180495793067962,
+          "final_residual_inf_n": 0.04115175546345995,
+          "improvement_inf_n": 0.0006532024672196712,
+          "runtime_seconds": 151.97871486999975,
+          "assessment": "Turning off support expansion while preserving largest-row targets produced a stronger descent than the prior one-hop support and established a lower-cost compact lane."
         }
       ],
       "latest_top_residual_summary": {
@@ -97,10 +108,10 @@
         "largest_row": {
           "node_index": 2380,
           "dof": "uz",
-          "residual_n": -0.04180495793067962,
+          "residual_n": -0.04115175546345995,
           "dominant_component": "shell_membrane",
-          "frame_component_n": 361.32719636847827,
-          "shell_membrane_component_n": -361.9609364479353,
+          "frame_component_n": 361.3271963757675,
+          "shell_membrane_component_n": -361.96028325275734,
           "external_load_n": -0.5919351215263475
         }
       },
@@ -155,7 +166,7 @@
           "assessment": "Repeating the exact largest-row expand1 family from the new frontier reversed the prior accepted descent; the single-step family is saturated at 0.0418049579 N."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, and direct largest-row targeting with one-hop/node-block support produced one strong 3.29e-4 N descent before the identical follow-up saturated at 0.0418049579 N. The next G1 push should change the largest-row alpha/support policy or target a refreshed coupled patch, rather than repeat the same expand1 configuration."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and a compact largest-row support policy reopened a larger 6.53e-4 N descent to 0.0411517555 N. The next G1 push should continue from the compact largest-row checkpoint and check whether the compact lane remains live."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
