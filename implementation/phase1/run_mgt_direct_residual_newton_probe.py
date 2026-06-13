@@ -2839,6 +2839,7 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_node_blocks",
                 "residual_element_blocks",
                 "residual_frame_element_blocks",
+                "residual_shell_bending_drilling_rows",
                 "residual_shell_normal_rows",
                 "residual_shell_geometry_normal_rows",
             }:
@@ -2941,6 +2942,7 @@ def run_mgt_direct_residual_newton_probe(
                     elif target_mode in {
                         "residual_element_blocks",
                         "residual_frame_element_blocks",
+                        "residual_shell_bending_drilling_rows",
                         "residual_shell_normal_rows",
                         "residual_shell_geometry_normal_rows",
                     }:
@@ -2959,10 +2961,16 @@ def run_mgt_direct_residual_newton_probe(
                                 if target_mode == "residual_frame_element_blocks"
                                 else {2}
                                 if target_mode
-                                in {"residual_shell_normal_rows", "residual_shell_geometry_normal_rows"}
+                                in {
+                                    "residual_shell_bending_drilling_rows",
+                                    "residual_shell_normal_rows",
+                                    "residual_shell_geometry_normal_rows",
+                                }
                                 else None
                             ),
-                            target_dof_indices={2}
+                            target_dof_indices={3, 4, 5}
+                            if target_mode == "residual_shell_bending_drilling_rows"
+                            else {2}
                             if target_mode == "residual_shell_normal_rows"
                             else {0, 1, 2}
                             if target_mode == "residual_shell_geometry_normal_rows"
@@ -4125,6 +4133,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_node_blocks",
             "residual_element_blocks",
             "residual_frame_element_blocks",
+            "residual_shell_bending_drilling_rows",
             "residual_shell_normal_rows",
             "residual_shell_geometry_normal_rows",
         ),
@@ -4135,6 +4144,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "free DOF row on those nodes; residual_element_blocks selects high-residual "
             "mesh elements and targets every free DOF row on their connected nodes; "
             "residual_frame_element_blocks restricts element seeds to frame elements; "
+            "residual_shell_bending_drilling_rows restricts element seeds to shell "
+            "elements and targets rotational rx/ry/rz rows; "
             "residual_shell_normal_rows restricts element seeds to shell elements and targets "
             "their global-z normal translation rows; residual_shell_geometry_normal_rows "
             "uses shell element geometry to target global translation rows aligned with "
