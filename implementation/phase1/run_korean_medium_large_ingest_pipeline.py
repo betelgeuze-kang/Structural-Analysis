@@ -259,6 +259,31 @@ def _operator_action_packet(
         }
         for row in rows[:10]
     ]
+    source_url_matrix = [
+        {
+            "source_id": str(row.get("source_id") or ""),
+            "action_type": str(row.get("action_type") or ""),
+            "url_kind": (
+                "specific_remote_download"
+                if bool(row.get("specific_remote_download"))
+                else "portal_or_landing_page"
+            ),
+            "download_url": str(row.get("download_url") or ""),
+            "provenance_url": str(row.get("provenance_url") or ""),
+            "license_hint": str(row.get("license_hint") or ""),
+            "collection_policy": str(row.get("collection_policy") or ""),
+            "target_directory": str(row.get("target_directory") or ""),
+            "expected_artifacts": list(row.get("expected_artifacts") or []),
+            "acceptance_checks": list(row.get("acceptance_checks") or []),
+        }
+        for row in rows
+    ]
+    direct_download_actions = [
+        row for row in source_url_matrix if row["url_kind"] == "specific_remote_download"
+    ]
+    portal_landing_actions = [
+        row for row in source_url_matrix if row["url_kind"] == "portal_or_landing_page"
+    ]
     return {
         "schema_version": "korean-medium-large-operator-action-packet.v1",
         "status": "pending" if rows else "ready",
@@ -282,6 +307,9 @@ def _operator_action_packet(
             )
             and not bool(row.get("specific_remote_download"))
         ),
+        "source_url_matrix": source_url_matrix,
+        "direct_download_actions": direct_download_actions,
+        "portal_landing_actions": portal_landing_actions,
         "operator_attached_real_mgt_header_ok_target": int(
             operator_attached_real_mgt_header_ok_target
         ),

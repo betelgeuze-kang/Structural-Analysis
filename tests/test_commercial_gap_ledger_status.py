@@ -5077,6 +5077,29 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert support32_translation_series["latest_final_direct_residual_inf_n"] <= (
         5555.073010872516
     )
+    followup57_timeout = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_diagnostic"
+    ]
+    assert followup57_timeout["status"] == "partial"
+    assert followup57_timeout["stop_reason"] == "max_wall_seconds_exceeded"
+    assert followup57_timeout["promotion_count"] == 0
+    assert (
+        followup57_timeout["base_direct_residual_inf_n"]
+        == support32_translation_series["latest_final_direct_residual_inf_n"]
+    )
+    assert (
+        followup57_timeout["final_direct_residual_inf_n"]
+        == support32_translation_series["latest_final_direct_residual_inf_n"]
+    )
+    assert "frontier_probe_wall_time_exceeded" in followup57_timeout["blockers"]
+    followup57_timeout_runtime = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_runtime"
+    ]
+    assert followup57_timeout_runtime["max_wall_seconds"] == 0.0
+    assert followup57_timeout_runtime["total_seconds"] > 0.0
+    assert "frontier_probe_wall_time_exceeded" in rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_blockers"
+    ]
     assert series_rows[-1]["component_status"] == "partial"
     assert series_rows[-1]["component_only"] is True
     assert series_rows[-1]["component_base_residual_inf_n"] == series_rows[-1][
@@ -5513,6 +5536,23 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert operator_action_packet["specific_remote_download_action_count"] == 5
     assert operator_action_packet["portal_landing_action_count"] == 9
+    assert len(operator_action_packet["source_url_matrix"]) == operator_action_packet[
+        "action_count"
+    ]
+    assert len(operator_action_packet["direct_download_actions"]) == 5
+    assert len(operator_action_packet["portal_landing_actions"]) == 9
+    assert {
+        row["url_kind"] for row in operator_action_packet["source_url_matrix"]
+    } == {"specific_remote_download", "portal_or_landing_page"}
+    assert {
+        row["source_id"] for row in operator_action_packet["direct_download_actions"]
+    } == {
+        "koneps_goyang_changneung_powerplant_design_service",
+        "lh_bucheon_yeokgok_a1_housing_competition",
+        "lh_happy_city_5_1_design_competition",
+        "lh_bucheon_yeokgok_a1_housing_native_baseline",
+        "lh_happy_city_5_1_native_baseline",
+    }
     assert operator_action_packet["next_actions"][0]["specific_remote_download"] is True
     assert operator_action_packet["next_actions"][0]["download_url"].startswith(
         "https://www.g2b.go.kr/"

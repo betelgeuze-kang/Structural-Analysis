@@ -1171,6 +1171,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_state_scale = _load(
         productization / "mgt_equilibrium_newton_focused_state_scale_probe.json"
     )
+    translation_frontier_followup57_timeout_diagnostic = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_diagnostic_probe.json"
+    )
     residual_jacobian_consistency = _load(
         productization / "mgt_residual_jacobian_consistency_probe.json"
     )
@@ -3018,6 +3022,15 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": _translation_frontier_followup_series(
                     productization
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_diagnostic": _direct_residual_probe_summary(
+                    translation_frontier_followup57_timeout_diagnostic
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_runtime": (
+                    translation_frontier_followup57_timeout_diagnostic.get("runtime_metrics")
+                ),
+                "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_blockers": (
+                    translation_frontier_followup57_timeout_diagnostic.get("blockers")
                 ),
                 "direct_residual_current_frontier_frame_block_current_tangent_narrow": _direct_residual_probe_summary(
                     direct_residual_current_frontier_frame_block_current_tangent_narrow
