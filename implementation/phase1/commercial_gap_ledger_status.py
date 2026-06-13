@@ -1208,6 +1208,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_support128_followup30_hotspot_jvp_probe.json"
     )
+    residual_jacobian_support128_followup33_hotspot_jvp = _load(
+        productization
+        / "mgt_residual_jacobian_support128_followup33_hotspot_jvp_probe.json"
+    )
     preconditioned_zero = _load(
         productization / "mgt_equilibrium_preconditioned_zero_probe.json"
     )
@@ -1586,6 +1590,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     direct_residual_post_frame_support64_block_lstsq_translation_support128_followup33 = _load(
         productization
         / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup33_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup34 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup34_probe.json"
     )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
@@ -2788,6 +2796,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         direct_residual_post_frame_support64_block_lstsq_translation_support128_followup33
                     )
                 ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup34": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup34
+                    )
+                ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"
                 ),
@@ -2954,6 +2967,36 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_support128_followup30_component_blockers": (
                     residual_jacobian_support128_followup30_hotspot_jvp.get("blockers")
+                ),
+                "residual_jacobian_support128_followup33_component_status": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get("status")
+                ),
+                "residual_jacobian_support128_followup33_component_only": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get("component_only")
+                ),
+                "residual_jacobian_support128_followup33_base_residual_inf_n": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_support128_followup33_base_relative_residual_inf": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get(
+                        "base_relative_residual_inf"
+                    )
+                ),
+                "residual_jacobian_support128_followup33_component_breakdown": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "residual_jacobian_support128_followup33_hotspot_frame_diagnostics": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get(
+                        "residual_hotspot_frame_diagnostics"
+                    )
+                ),
+                "residual_jacobian_support128_followup33_hotspot_jvp": _hotspot_jvp_summary(
+                    residual_jacobian_support128_followup33_hotspot_jvp
+                ),
+                "residual_jacobian_support128_followup33_component_blockers": (
+                    residual_jacobian_support128_followup33_hotspot_jvp.get("blockers")
                 ),
                 "direct_residual_row_element_block_target_smoke": _direct_residual_probe_summary(
                     direct_residual_row_element_block_target

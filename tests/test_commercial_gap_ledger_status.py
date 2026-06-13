@@ -2716,6 +2716,53 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup33_probe_final_checkpoint.npz"
     )
+    direct_post_frame_support64_translation_support128_followup34 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup34"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup33[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "final_direct_residual_inf_n"
+        ]
+        == 4837.662336647199
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 349
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup34[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup34_probe_final_checkpoint.npz"
+    )
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"
@@ -2884,6 +2931,60 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert support128_followup30_jvp["max_relative_inf_error"] <= 1.0e-12
     assert support128_followup30_jvp["max_relative_l2_error"] <= 1.0e-12
     assert support128_followup30_jvp["min_action_cosine"] >= 0.999999999999
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_support128_followup33_component_status"
+    ] == "partial"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_support128_followup33_component_only"
+    ] is True
+    assert (
+        rows["G1"]["evidence"][
+            "residual_jacobian_support128_followup33_base_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup33[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "residual_jacobian_support128_followup33_base_relative_residual_inf"
+        ]
+        == 0.5591411630822996
+    )
+    support128_followup33_components = rows["G1"]["evidence"][
+        "residual_jacobian_support128_followup33_component_breakdown"
+    ]
+    assert support128_followup33_components[
+        "top_row_dominant_component_counts"
+    ] == {
+        "shell_membrane": 1,
+        "frame": 20,
+        "shell_bending_drilling": 3,
+    }
+    support128_followup33_frame_hotspots = rows["G1"]["evidence"][
+        "residual_jacobian_support128_followup33_hotspot_frame_diagnostics"
+    ]
+    assert support128_followup33_frame_hotspots[0]["raw_node_id"] == 11233
+    assert (
+        support128_followup33_frame_hotspots[0][
+            "incident_frame_target_dof_contribution_sum_n"
+        ]
+        == support128_followup33_frame_hotspots[0]["component_frame_n"]
+    )
+    support128_followup33_jvp = rows["G1"]["evidence"][
+        "residual_jacobian_support128_followup33_hotspot_jvp"
+    ]
+    assert support128_followup33_jvp["status"] == "partial"
+    assert (
+        support128_followup33_jvp["base_residual_inf_n"]
+        == direct_post_frame_support64_translation_support128_followup33[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert support128_followup33_jvp["evaluated_row_count"] == 8
+    assert support128_followup33_jvp["max_relative_inf_error"] <= 1.0e-12
+    assert support128_followup33_jvp["max_relative_l2_error"] <= 1.0e-12
+    assert support128_followup33_jvp["min_action_cosine"] >= 0.999999999999
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]

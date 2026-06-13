@@ -31,11 +31,14 @@ Use `operator_attachment_manifest.template.json` as the starting point for sourc
 
 ```bash
 python3 scripts/build_korean_operator_attachment_manifest_queue.py --show-summary
+python3 scripts/build_korean_operator_direct_download_review.py --show-summary
 python3 scripts/validate_korean_operator_attachment_manifest.py --show-summary
 python3 scripts/run_korean_medium_large_ingest_pipeline.py --skip-regenerate --skip-collect
 ```
 
 The queue builder writes `operator_attachment_manifest.queue.json` with `rights_confirmed=false` and `source_native_artifact=false` by default. Copy or rename it to `operator_attachment_manifest.json` after filling paths and confirmations. The validator writes `operator_attachment_manifest_validation_report.json`. The ingest receipt counts accepted rows only after replaying artifact/header checks.
+
+`operator_attachment_direct_download_review.json` identifies queue rows with specific official download URLs and emits prefill rows for the operator manifest. It does not download raw files or confirm redistribution rights.
 
 ## Collection
 
