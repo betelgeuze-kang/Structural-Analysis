@@ -215,6 +215,8 @@ def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: st
         return dominant == "frame"
     if component_filter == "shell_bending_drilling":
         return dominant == "shell_bending_drilling"
+    if component_filter == "shell_membrane":
+        return dominant == "shell_membrane"
     if component_filter == "translation":
         return True
     raise ValueError(f"unsupported block_lstsq_component_filter: {component_filter}")
@@ -1219,7 +1221,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--block-lstsq-allow-negative-alphas", action="store_true")
     parser.add_argument(
         "--block-lstsq-component-filter",
-        choices=("frame", "shell_bending_drilling", "translation"),
+        choices=("frame", "shell_bending_drilling", "shell_membrane", "translation"),
         default="frame",
     )
     parser.add_argument(
