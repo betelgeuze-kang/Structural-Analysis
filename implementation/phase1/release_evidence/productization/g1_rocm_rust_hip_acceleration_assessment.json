@@ -37,6 +37,54 @@
       "accepted_relative_improvement": 1.841499101404688e-05,
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
+    "post_reassessment_frontier_advances": {
+      "generated_at": "2026-06-14T05:46:44+09:00",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup_final_checkpoint.npz",
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_geometry_normal_followup_frontier_probe.json",
+      "latest_direct_residual_inf_n": 0.04214191012962942,
+      "latest_direct_relative_residual_inf": 4.8572192736862125e-06,
+      "advances": [
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_final_checkpoint.npz",
+          "target_mode": "residual_element_blocks",
+          "element_neighbor_depth": 1,
+          "base_residual_inf_n": 0.04215555840957563,
+          "final_residual_inf_n": 0.042155111286405145,
+          "improvement_inf_n": 4.471231704883394e-07,
+          "runtime_seconds": 176.89268371399885,
+          "assessment": "A mixed frame/shell neighbor patch still descends, but only at sub-micro-Newton scale."
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup_final_checkpoint.npz",
+          "target_mode": "residual_shell_geometry_normal_rows",
+          "base_residual_inf_n": 0.042155111286405145,
+          "final_residual_inf_n": 0.04214191012962942,
+          "improvement_inf_n": 1.3201156775721756e-05,
+          "runtime_seconds": 130.92197048400158,
+          "assessment": "Shell geometry normal targeting remains a materially better frontier direction than the broader neighbor patch at this state."
+        }
+      ],
+      "latest_top_residual_summary": {
+        "top_residual_count": 96,
+        "top_row_dominant_component_counts": {
+          "shell_membrane": 42,
+          "shell_bending_drilling": 40,
+          "frame": 14
+        },
+        "largest_row": {
+          "node_index": 2380,
+          "dof": "uz",
+          "residual_n": -0.04214191012962942,
+          "dominant_component": "shell_membrane",
+          "frame_component_n": 361.32719636572614,
+          "shell_membrane_component_n": -361.9612733973821,
+          "external_load_n": -0.5919351215263475
+        }
+      },
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. The shell-normal family can still produce 1e-5 N-class descent, while wider mixed patches are much slower per Newton of residual reduction."
+    },
     "current_rocm_probe_refresh": {
       "hardware": {
         "gpu": "AMD Radeon RX 6900 XT",
