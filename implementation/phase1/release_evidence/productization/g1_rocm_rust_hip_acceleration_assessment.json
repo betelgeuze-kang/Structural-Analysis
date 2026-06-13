@@ -1499,7 +1499,7 @@
   },
   "current_acceleration_decision_2026_06_14": {
     "status": "rocm_runtime_available_but_g1_gate_not_backend_throughput_limited",
-    "generated_at": "2026-06-14T05:22:00+09:00",
+    "generated_at": "2026-06-14T05:25:00+09:00",
     "device_observation": {
       "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
       "gfx_target": "gfx1030",
@@ -1686,9 +1686,13 @@
       "membrane_normal_row_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_membrane_normal_row_probe.json",
       "membrane_normal_row_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_membrane_normal_row_final_checkpoint.npz",
       "membrane_normal_row_residual_inf_n": 0.04215633471810065,
-      "latest_frontier_diagnostic_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_membrane_normal_frontier_probe.json",
-      "latest_frontier_residual_inf_n": 0.04215633471810065,
-      "latest_frontier_relative_residual_inf": 0.000004858881832144573,
+      "frame_coupled_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_frame_coupled_probe.json",
+      "frame_coupled_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_frame_coupled_final_checkpoint.npz",
+      "frame_coupled_residual_inf_n": 0.04215555840957563,
+      "frame_coupled_absolute_reduction_n": 0.0000007763085250189761,
+      "latest_frontier_diagnostic_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_frame_coupled_frontier_probe.json",
+      "latest_frontier_residual_inf_n": 0.04215555840957563,
+      "latest_frontier_relative_residual_inf": 0.000004858792355879295,
       "latest_top96_dominant_component_counts": {
         "shell_membrane": 41,
         "shell_bending_drilling": 41,
@@ -1697,13 +1701,13 @@
       "next_active_residual": {
         "raw_node_id": 2381,
         "dof": "uz",
-        "residual_n": -0.04215633471810065,
+        "residual_n": -0.04215555840957563,
         "dominant_component": "shell_membrane",
-        "frame_component_n": 361.3271963657177,
-        "shell_membrane_component_n": -361.9612878219622,
+        "frame_component_n": 361.32719636572614,
+        "shell_membrane_component_n": -361.96128704566206,
         "external_load_n": -0.5919351215263475
       },
-      "assessment": "The diagnostic pressure policy has now been promoted into executable direct-residual correction evidence. Cleaning the two suppressed free shell components removed their stale displacement state, finite-difference residual-row correction on the large attached shell component reduced the frontier from 0.115243 N to 0.052893 N, largest-row rotation-focused corrections advanced it to 0.044372 N, and coupled node-block plus membrane-normal corrections advanced it to 0.042156 N. The latest active row moved from node 2203 rx to node 2381 uz, dominated by shell membrane/frame cancellation. The gate is still not closed; the next correction needs a broader coupled attached-component membrane/frame equilibrium strategy rather than raw ROCm/HIP throughput alone."
+      "assessment": "The diagnostic pressure policy has now been promoted into executable direct-residual correction evidence. Cleaning the two suppressed free shell components removed their stale displacement state, finite-difference residual-row correction on the large attached shell component reduced the frontier from 0.115243 N to 0.052893 N, largest-row rotation-focused corrections advanced it to 0.044372 N, and coupled node-block plus membrane/frame-normal corrections advanced it to 0.042156 N. The latest active row moved from node 2203 rx to node 2381 uz, dominated by shell membrane/frame cancellation; a frame-element coupled counterprobe produced only 7.76e-7 N additional descent. The gate is still not closed; the next correction needs a broader coupled attached-component membrane/frame equilibrium strategy rather than raw ROCm/HIP throughput alone."
     },
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
@@ -1722,7 +1726,7 @@
         "Suppressing pressure only on those unattached surface components lowers the current checkpoint residual by about 59%, from 0.280378 N to 0.115243 N, while leaving the large attached shell component loaded.",
         "Promoting the policy into the direct-residual correction lane, cleaning the two suppressed free shell component states, and applying finite-difference residual-row correction reduced the frontier further to 0.052893 N.",
         "Largest-row rotation-focused finite-difference correction advanced the frontier to 0.044372 N before the same narrow lane saturated with no residual descent.",
-        "Coupled residual-node-block corrections and a membrane-normal row correction advanced the frontier further to 0.042156 N.",
+        "Coupled residual-node-block corrections, a membrane-normal row correction, and a frame-coupled counterprobe advanced the frontier further to 0.042156 N with the latest frame-coupled improvement down to 7.76e-7 N.",
         "The top active row is now an attached shell membrane uz residual at raw node 2381 with a large frame/shell membrane cancellation, while the top96 set remains mixed shell membrane, shell bending, and frame.",
         "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
       ]
