@@ -38,11 +38,11 @@
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
     "post_reassessment_frontier_advances": {
-            "generated_at": "2026-06-14T08:27:32+09:00",
-            "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_wider_followup21_final_checkpoint.npz",
-            "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_mixed_largest_rows_expand1_wider_followup21_frontier_probe.json",
-            "latest_direct_residual_inf_n": 0.03488374705258224,
-            "latest_direct_relative_residual_inf": 4.02065326419714e-06,
+            "generated_at": "2026-06-14T08:38:46+09:00",
+            "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_control_followup23_final_checkpoint.npz",
+            "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_mixed_largest_rows_expand1_control_followup23_frontier_probe.json",
+            "latest_direct_residual_inf_n": 0.034747482418208187,
+            "latest_direct_relative_residual_inf": 4.004947587677791e-06,
       "advances": [
         {
           "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
@@ -330,6 +330,21 @@
           "improvement_inf_n": 0.0013570208918518567,
           "runtime_seconds": 230.66243571900122,
           "assessment": "Expanding the same width-tuned mixed lane to 144 FD support DOFs produced an even larger accepted directional-L2 descent while retaining 12 target rows, confirming that the current G1 frontier is support-width limited rather than target-family limited."
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_control_followup23_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_control_followup23_final_checkpoint.npz",
+          "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_mixed_largest_rows_expand1_control_followup23_frontier_probe.json",
+          "target_mode": "largest_rows",
+          "support_selection": "residual_weighted",
+          "support_expansion_depth": 1,
+          "target_row_count": 8,
+          "support_size": 144,
+          "base_residual_inf_n": 0.03488374705258224,
+          "final_residual_inf_n": 0.034747482418208187,
+          "improvement_inf_n": 0.00013626463437405034,
+          "runtime_seconds": 232.19549150299645,
+          "assessment": "After the 168-DOF support over-expansion failed, returning to 144 FD support DOFs with a smaller 8-row target set recovered a smaller but accepted physical residual descent."
         }
       ],
       "latest_top_residual_summary": {
@@ -342,10 +357,10 @@
         "largest_row": {
           "node_index": 2202,
           "dof": "rx",
-          "residual_n": -0.03488374705258224,
+          "residual_n": -0.034747482418208187,
           "dominant_component": "shell_bending_drilling",
-          "frame_component_n": 0.4926234751638643,
-          "shell_bending_drilling_component_n": -0.5275072222164465,
+          "frame_component_n": 0.49262363757428534,
+          "shell_bending_drilling_component_n": -0.5273711199924935,
           "shell_membrane_component_n": 0.0,
           "external_load_n": 0.0
         }
@@ -453,9 +468,30 @@
           "stop_reason": "no_residual_descent",
           "runtime_seconds": 175.68313038999986,
           "assessment": "Restricting coupled element-block seeds to frame elements only also worsened the residual. The current frontier is not solved by shell-only or frame-only element seeds; it needs scalar hotspot targets with mixed frame/shell support."
+        },
+        {
+          "generated_at": "2026-06-14T08:32:42+09:00",
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_wider_followup22_probe.json",
+          "target_mode": "largest_rows",
+          "target_counts": [
+            12,
+            16
+          ],
+          "support_column_counts": [
+            16,
+            20
+          ],
+          "support_expansion_depth": 1,
+          "base_residual_inf_n": 0.03488374705258224,
+          "best_candidate_residual_inf_n": 0.03488429040144564,
+          "best_candidate_improvement_inf_n": -5.433488634021266e-07,
+          "promoted_to_final_state": false,
+          "stop_reason": "no_residual_descent",
+          "runtime_seconds": 238.8833770900019,
+          "assessment": "Further widening the mixed lane to a 168-DOF support over-expanded the correction and removed descent; the best candidate worsened the physical residual."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; shell-bending/drilling and shell-normal targeted passes then lowered the frontier to 0.0369241239 N. Shell-only and frame-only element-block counterprobes both worsened residual, but scalar largest-row targets with one-hop residual-weighted mixed support reopened descent. Widening that lane to 12 target rows and 120 then 144 FD support DOFs advanced the frontier to 0.0348837471 N. The next G1 push should continue width-tuned mixed support before returning to single-family element seeds."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; shell-bending/drilling and shell-normal targeted passes then lowered the frontier to 0.0369241239 N. Shell-only and frame-only element-block counterprobes both worsened residual, but scalar largest-row targets with one-hop residual-weighted mixed support reopened descent. Widening that lane to 12 target rows and 120 then 144 FD support DOFs advanced the frontier to 0.0348837471 N; over-expanding to 168 support DOFs failed, while returning to 144 support with an 8-row target advanced the frontier to 0.0347474824 N. The next G1 push should stay near the 144-support mixed lane and tune target count/alpha rather than widen support further."
     },
     "current_rocm_probe_refresh": {
       "rechecked_at": "2026-06-14T07:55:52+09:00",
