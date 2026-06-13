@@ -1,17 +1,21 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T13:41:09Z",
+  "generated_at": "2026-06-13T13:51:33Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
-    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe_final_checkpoint.npz",
-    "direct_residual_inf_n": 0.280685596708914,
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.28038028917462354,
     "residual_gate_n": 0.001,
-    "latest_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
-    "latest_cached_shell_newton_runtime_s": 167.08520195700112,
-    "latest_cached_shell_newton_accepted_iterations": 5,
-    "latest_cached_shell_newton_total_residual_only_trials": 144,
-    "latest_cached_shell_newton_final_residual_inf_n": 0.280685596708914
+    "previous_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
+    "previous_cached_shell_newton_final_residual_inf_n": 0.280685596708914,
+    "true_frontier_seed_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_probe.json",
+    "true_frontier_seed_residual_inf_n": 0.28038098724758326,
+    "latest_shell_bending_followup_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe.json",
+    "latest_shell_bending_followup_runtime_s": 56.315339715001755,
+    "latest_shell_bending_followup_residual_only_trials": 18,
+    "latest_shell_bending_followup_improvement_inf_n": 6.980729597150237e-07,
+    "latest_shell_bending_followup_final_residual_inf_n": 0.28038028917462354
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -82,6 +86,43 @@
     "connected_to_current_mgt_g1_full_3d_residual": false,
     "assessment": "Rust backend is useful for existing runtime/NDTHA/nonlinear-frame contracts, but it is not wired into the current MGT full 3D frame+shell residual/Jacobian assembly."
   },
+  "latest_hotspot_direction_counter_evidence": {
+    "shell_bending_tangent_followup": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe.json",
+      "operator_source": "tangent",
+      "component_filter": "shell_bending_drilling",
+      "selected_hotspot_row_count": 8,
+      "support_size": 40,
+      "residual_only_trial_count": 18,
+      "full_trial_count": 0,
+      "base_residual_inf_n": 0.28038098724758326,
+      "best_candidate_residual_inf_n": 0.28038028917462354,
+      "improvement_inf_n": 6.980729597150237e-07,
+      "correction_inf_m": 1.2443731140088887e-15,
+      "assessment": "Same-component shell-bending tangent correction is now saturated; it still descends, but only at micro-Newton scale."
+    },
+    "translation_wide_tangent_followup": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_translation_wide_probe.json",
+      "operator_source": "tangent",
+      "component_filter": "translation",
+      "selected_hotspot_row_count": 16,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 8,
+        "shell_membrane": 5,
+        "frame": 3
+      },
+      "support_size": 191,
+      "residual_only_trial_count": 18,
+      "full_trial_count": 0,
+      "promoted_to_final_state": false,
+      "base_residual_inf_n": 0.28038028917462354,
+      "best_candidate_residual_inf_n": 0.28038028917462354,
+      "improvement_inf_n": 0.0,
+      "correction_inf_m": 9.022081796050578e-08,
+      "assessment": "Widening to mixed translation rows does not create descent from the current frontier."
+    },
+    "assessment": "The latest local tangent probes indicate the current frontier is direction-quality limited, not raw evaluation-throughput limited."
+  },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
       "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup_probe.json",
@@ -107,9 +148,10 @@
     "use_rocm_for_g1_fast_push_now": false,
     "use_rust_for_g1_fast_push_now": false,
     "use_hip_sparse_directly_for_g1_fast_push_now": false,
-    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration. Keep the cached residual-only path, but focus on a better global/coarse consistent Newton direction or load-path correction for the shell-dominant residual frontier.",
+    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration alone. Keep the cached residual-only path, but focus on shell-dominant residual/Jacobian consistency, external-load/internal-force reconciliation, or a broader global/coarse correction that changes the direction quality.",
     "why": [
       "The current residual decay is limited by correction direction quality, not only by per-evaluation speed.",
+      "The latest shell-bending tangent follow-up improved only 6.98e-7 N, and the wider translation tangent probe produced no descent from 0.28038028917462354 N.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."
