@@ -446,6 +446,92 @@ def test_frame_hotspot_block_lstsq_all_filter_can_target_rotation_hotspots(
     assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
 
 
+def test_frame_hotspot_block_lstsq_can_balance_targets_by_component(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(
+        (
+            [10.0, 10.0, 10.0],
+            ([0, 6, 12], [0, 6, 12]),
+        ),
+        shape=(13, 13),
+    ).tocsc()
+    free = np.asarray([0, 6, 12], dtype=np.int64)
+    u0 = np.zeros(13, dtype=np.float64)
+    u0[free] = 0.1
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(
+            u: np.ndarray,
+            *,
+            include_component_forces: bool = False,
+            residual_only: bool = False,
+            free_override: np.ndarray | None = None,
+            external_load_override: np.ndarray | None = None,
+        ):
+            if residual_only:
+                assert free_override is not None
+                assert external_load_override is not None
+            rhs = np.asarray([3.0, 2.9, 2.8], dtype=np.float64)
+            internal_global = np.asarray(stiffness @ u, dtype=np.float64)
+            residual = internal_global[free] - rhs
+            meta = {}
+            if include_component_forces:
+                shell_global = np.zeros(13, dtype=np.float64)
+                frame_global = np.zeros(13, dtype=np.float64)
+                shell_global[[0, 6]] = internal_global[[0, 6]]
+                frame_global[12] = internal_global[12]
+                meta["component_forces"] = {
+                    "shell_bending_drilling": shell_global,
+                    "frame": frame_global,
+                }
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=2,
+        max_promotions=1,
+        relative_increment_tolerance=1.0,
+        block_lstsq_component_filter="all",
+        block_lstsq_selection_policy="component_round_robin",
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert sweep["evaluated"] is True
+    assert sweep["selection_policy"] == "component_round_robin"
+    assert sweep["target_global_dofs"] == [0, 12]
+    assert sweep["selected_hotspot_dominant_component_counts"] == {
+        "shell_bending_drilling": 1,
+        "frame": 1,
+    }
+    assert sweep["selected_hotspot_dof_counts"] == {"ux": 2}
+
+
 def test_frame_hotspot_block_lstsq_can_expand_support_to_node_blocks(
     monkeypatch,
 ) -> None:

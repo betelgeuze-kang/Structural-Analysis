@@ -246,6 +246,69 @@ def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: st
     raise ValueError(f"unsupported block_lstsq_component_filter: {component_filter}")
 
 
+def _select_block_lstsq_target_rows(
+    *,
+    top_rows: list[dict[str, Any]],
+    local_row_by_global: dict[int, int],
+    max_rows: int,
+    component_filter: str,
+    selection_policy: str = "top",
+) -> tuple[list[dict[str, Any]], list[int], dict[str, int], dict[str, int]]:
+    row_limit = max(int(max_rows), 0)
+    policy = str(selection_policy or "top")
+    if policy not in {"top", "component_round_robin", "component_dof_round_robin"}:
+        raise ValueError(
+            "block_lstsq_selection_policy must be top, component_round_robin, "
+            "or component_dof_round_robin"
+        )
+    eligible: list[tuple[dict[str, Any], int]] = []
+    seen: set[int] = set()
+    for row in top_rows:
+        if not _block_lstsq_row_matches_filter(row, component_filter=component_filter):
+            continue
+        global_dof = int(row.get("global_dof", -1))
+        if global_dof < 0 or global_dof in seen or global_dof not in local_row_by_global:
+            continue
+        eligible.append((row, int(local_row_by_global[global_dof])))
+        seen.add(global_dof)
+    if row_limit <= 0:
+        eligible = []
+    elif policy == "top":
+        eligible = eligible[:row_limit]
+    else:
+        buckets: dict[str, list[tuple[dict[str, Any], int]]] = {}
+        for row, local_row in eligible:
+            dominant = str(row.get("dominant_component") or "none")
+            if policy == "component_round_robin":
+                key = dominant
+            else:
+                key = f"{dominant}:{str(row.get('dof') or '')}"
+            buckets.setdefault(key, []).append((row, local_row))
+        selected: list[tuple[dict[str, Any], int]] = []
+        while len(selected) < row_limit:
+            before = len(selected)
+            for key in list(buckets.keys()):
+                bucket = buckets[key]
+                if not bucket:
+                    continue
+                selected.append(bucket.pop(0))
+                if len(selected) >= row_limit:
+                    break
+            if len(selected) == before:
+                break
+        eligible = selected
+    selected_rows = [row for row, _local_row in eligible]
+    selected_local_rows = [int(local_row) for _row, local_row in eligible]
+    component_counts: dict[str, int] = {}
+    dof_counts: dict[str, int] = {}
+    for row in selected_rows:
+        dominant = str(row.get("dominant_component") or "none")
+        dof = str(row.get("dof") or "none")
+        component_counts[dominant] = component_counts.get(dominant, 0) + 1
+        dof_counts[dof] = dof_counts.get(dof, 0) + 1
+    return selected_rows, selected_local_rows, component_counts, dof_counts
+
+
 def _truncated_svd_coefficients(
     matrix: np.ndarray,
     rhs: np.ndarray,
@@ -404,6 +467,7 @@ def _hotspot_block_lstsq_sweep(
     solve_method: str = "truncated_svd",
     ridge_factor: float = 1.0e-6,
     node_block_support: bool = False,
+    selection_policy: str = "top",
 ) -> dict[str, Any]:
     operator_source = str(operator_source)
     if operator_source not in {"tangent", "finite_difference"}:
@@ -432,23 +496,15 @@ def _hotspot_block_lstsq_sweep(
         int(global_dof): int(local_row)
         for local_row, global_dof in enumerate(free_idx.tolist())
     }
-    selected_rows: list[dict[str, Any]] = []
-    selected_local_rows: list[int] = []
-    selected_component_counts: dict[str, int] = {}
-    seen: set[int] = set()
-    for row in top_rows:
-        if not _block_lstsq_row_matches_filter(row, component_filter=component_filter):
-            continue
-        global_dof = int(row.get("global_dof", -1))
-        if global_dof < 0 or global_dof in seen or global_dof not in local_row_by_global:
-            continue
-        selected_rows.append(row)
-        selected_local_rows.append(int(local_row_by_global[global_dof]))
-        seen.add(global_dof)
-        dominant = str(row.get("dominant_component") or "none")
-        selected_component_counts[dominant] = selected_component_counts.get(dominant, 0) + 1
-        if len(selected_rows) >= max(int(max_rows), 0):
-            break
+    selected_rows, selected_local_rows, selected_component_counts, selected_dof_counts = (
+        _select_block_lstsq_target_rows(
+            top_rows=top_rows,
+            local_row_by_global=local_row_by_global,
+            max_rows=max_rows,
+            component_filter=component_filter,
+            selection_policy=selection_policy,
+        )
+    )
     if not selected_local_rows:
         return {
             "enabled": True,
@@ -459,6 +515,7 @@ def _hotspot_block_lstsq_sweep(
                 else f"no_{component_filter}_hotspot_rows"
             ),
             "component_filter": component_filter,
+            "selection_policy": str(selection_policy or "top"),
             "candidate_rows": [],
             "best_candidate": {},
             "best_gate_eligible_candidate": {},
@@ -722,6 +779,7 @@ def _hotspot_block_lstsq_sweep(
             else f"block_lstsq_on_{component_filter}_hotspots"
         ),
         "component_filter": component_filter,
+        "selection_policy": str(selection_policy or "top"),
         "operator_source": operator_source,
         "equilibration": str(equilibration),
         "solve_method": str(solve_method),
@@ -732,6 +790,7 @@ def _hotspot_block_lstsq_sweep(
         ),
         "selected_hotspot_row_count": int(len(selected_rows)),
         "selected_hotspot_dominant_component_counts": selected_component_counts,
+        "selected_hotspot_dof_counts": selected_dof_counts,
         "target_rows": [int(row) for row in target_rows.tolist()],
         "target_global_dofs": [int(free_idx[int(row)]) for row in target_rows.tolist()],
         "support_size": int(support_cols.size),
@@ -780,6 +839,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_solve_method: str = "truncated_svd",
     block_lstsq_ridge_factor: float = 1.0e-6,
     block_lstsq_node_block_support: bool = False,
+    block_lstsq_selection_policy: str = "top",
     component_top_count: int = 24,
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
@@ -901,6 +961,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 solve_method=block_lstsq_solve_method,
                 ridge_factor=block_lstsq_ridge_factor,
                 node_block_support=block_lstsq_node_block_support,
+                selection_policy=block_lstsq_selection_policy,
             )
         last_sweep = sweep
         if _wall_time_exceeded():
@@ -1278,6 +1339,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--block-lstsq-ridge-factor", type=float, default=1.0e-6)
     parser.add_argument(
+        "--block-lstsq-selection-policy",
+        choices=("top", "component_round_robin", "component_dof_round_robin"),
+        default="top",
+        help=(
+            "Select block-LSTSQ target rows by raw residual order or by round-robin "
+            "component/DOF buckets."
+        ),
+    )
+    parser.add_argument(
         "--block-lstsq-node-block-support",
         action="store_true",
         help=(
@@ -1338,6 +1408,7 @@ def main(argv: list[str] | None = None) -> int:
         block_lstsq_solve_method=str(args.block_lstsq_solve_method),
         block_lstsq_ridge_factor=float(args.block_lstsq_ridge_factor),
         block_lstsq_node_block_support=bool(args.block_lstsq_node_block_support),
+        block_lstsq_selection_policy=str(args.block_lstsq_selection_policy),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,
     )

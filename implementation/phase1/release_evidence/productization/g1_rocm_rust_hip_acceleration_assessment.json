@@ -1,11 +1,11 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T15:16:53Z",
+  "generated_at": "2026-06-13T15:35:31Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
-    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe_final_checkpoint.npz",
-    "direct_residual_inf_n": 0.28037957384916096,
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.28037932612159777,
     "residual_gate_n": 0.001,
     "previous_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
     "previous_cached_shell_newton_final_residual_inf_n": 0.280685596708914,
@@ -42,7 +42,19 @@
       "shell_bending_drilling": 35,
       "shell_membrane": 22,
       "frame": 7
-    }
+    },
+    "latest_component_dof_nodeblock_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe.json",
+    "latest_component_dof_nodeblock_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz",
+    "latest_component_dof_nodeblock_final_residual_inf_n": 0.28037932612159777,
+    "latest_component_dof_nodeblock_total_improvement_from_all_dof_nodeblock_frontier_inf_n": 2.4772756318514055e-07,
+    "latest_component_dof_nodeblock_component_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_component_dof_rr_frontier_component_probe.json",
+    "latest_component_dof_nodeblock_component_probe_top_residual_count": 64,
+    "latest_component_dof_nodeblock_component_probe_top_row_dominant_component_counts": {
+      "shell_bending_drilling": 35,
+      "shell_membrane": 22,
+      "frame": 7
+    },
+    "latest_component_dof_nodeblock_checkpoint_accepted_state_history_count": 26
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -62,7 +74,10 @@
     "host_ilu_device_gmres_coupled_current": {
       "command_output_json": "/tmp/mgt_host_ilu_device_gmres_coupled_current_probe.json",
       "backend": "rocm_torch_sparse_host_ilu_device_gmres",
-      "matrix_shape": [39859, 39859],
+      "matrix_shape": [
+        39859,
+        39859
+      ],
       "matrix_nnz": 888880,
       "converged": true,
       "residual_inf_n": 2.0700099412351847e-08,
@@ -76,7 +91,10 @@
     "host_ilu_device_gmres_shell_current": {
       "command_output_json": "/tmp/mgt_host_ilu_device_gmres_shell_current_probe.json",
       "backend": "rocm_torch_sparse_host_ilu_device_gmres",
-      "matrix_shape": [33932, 33932],
+      "matrix_shape": [
+        33932,
+        33932
+      ],
       "matrix_nnz": 823815,
       "converged": true,
       "residual_inf_n": 2.1432831953660525e-08,
@@ -97,7 +115,7 @@
       "evidence": "implementation/phase1/release_evidence/productization/mgt_hipsparse_ilu0_focused_probe.json",
       "backend": "hipsparse_ilu0_bicgstab",
       "converged": false,
-      "residual_inf_n": 1.502116910094704e73,
+      "residual_inf_n": 1.502116910094704e+73,
       "assessment": "Prebuilt hipSPARSE ILU0-BiCGStab is unstable for the shell system and should not be promoted for G1."
     },
     "ginkgo_hip_existing": {
@@ -148,7 +166,7 @@
       "correction_inf_m": 9.022081796050578e-08,
       "assessment": "Widening to mixed translation rows does not create descent from the current frontier."
     },
-    "assessment": "The latest local tangent probes indicate the current frontier is direction-quality limited, not raw evaluation-throughput limited."
+    "assessment": "The newest local tangent probes show that balanced component+DOF row selection improves over raw top-row selection, but residual descent remains micro-scale. The active blocker is still correction-direction quality, not raw evaluation throughput."
   },
   "current_frontier_jvp_and_lowreg_counter_evidence": {
     "global_direction_jvp": {
@@ -198,7 +216,7 @@
       "accepted": false,
       "assessment": "Allowing negative alphas still did not find descent, so a faster sparse solve alone is unlikely to close the G1 residual gate without a better correction model."
     },
-    "assessment": "The newest evidence strengthens the acceleration decision: ROCm/HIP can reduce diagnostic and assembly wall time, but the current frontier is dominated by solve conditioning and correction-direction effectiveness rather than by raw residual-evaluation throughput."
+    "assessment": "ROCm/HIP can reduce selected sparse solve and diagnostic wall time, but the latest component+DOF node-block evidence keeps the conclusion unchanged: the current frontier is dominated by correction model and conditioning limits rather than by backend throughput alone."
   },
   "conditioned_block_lstsq_frontier_evidence": {
     "row_column_first_pass": {
@@ -452,7 +470,7 @@
       "base_residual_inf_n": 0.2803796001590237,
       "final_residual_inf_n": 0.28037957384916096,
       "improvement_inf_n": 2.6309862732887268e-08,
-      "best_alpha": -0.00003,
+      "best_alpha": -3e-05,
       "component_top_count": 64,
       "support_size": 318,
       "pre_node_block_support_size": 146,
@@ -584,5 +602,363 @@
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."
     ]
+  },
+  "balanced_block_lstsq_frontier_evidence": {
+    "schema_version": "g1-balanced-block-lstsq-frontier-evidence.v1",
+    "status": "partial",
+    "starting_frontier_residual_inf_n": 0.28037957384916096,
+    "latest_frontier_residual_inf_n": 0.28037932612159777,
+    "net_improvement_inf_n": 2.4772756318514055e-07,
+    "residual_gate_n": 0.001,
+    "best_single_pass_in_this_batch": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_probe_final_checkpoint.npz",
+      "base_residual_inf_n": 0.2803794530100569,
+      "final_residual_inf_n": 0.28037936581498085,
+      "improvement_inf_n": 8.719507604837418e-08,
+      "promotion_count": 1,
+      "promoted_to_final_state": true,
+      "selection_policy": "component_dof_round_robin",
+      "component_filter": "all",
+      "selected_hotspot_row_count": 16,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 8,
+        "shell_membrane": 4,
+        "frame": 4
+      },
+      "selected_hotspot_dof_counts": {
+        "uz": 5,
+        "ux": 4,
+        "rx": 2,
+        "uy": 3,
+        "ry": 1,
+        "rz": 1
+      },
+      "support_columns_per_row": 2,
+      "node_block_support": true,
+      "support_size": 108,
+      "pre_node_block_support_size": 49,
+      "correction_inf_m": 2.0422005463717733e-08,
+      "best_alpha": 1e-06,
+      "linear_rank": 16,
+      "linear_residual_inf_n_unscaled": 2.7063723395670536e-06,
+      "runtime_s": 59.47293882799568
+    },
+    "runs": [
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.28037957384916096,
+        "final_residual_inf_n": 0.2803795474228829,
+        "improvement_inf_n": 2.6426278054714203e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "top",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 15,
+          "shell_membrane": 1
+        },
+        "selected_hotspot_dof_counts": null,
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 138,
+        "pre_node_block_support_size": 60,
+        "correction_inf_m": 4.846682938381945e-09,
+        "best_alpha": -3e-05,
+        "linear_rank": 14,
+        "linear_residual_inf_n_unscaled": 0.28444433160061144,
+        "runtime_s": 59.08004526801233
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_followup2_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_followup2_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.2803795474228829,
+        "final_residual_inf_n": 0.28037952111302017,
+        "improvement_inf_n": 2.6309862732887268e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "top",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 15,
+          "shell_membrane": 1
+        },
+        "selected_hotspot_dof_counts": null,
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 138,
+        "pre_node_block_support_size": 60,
+        "correction_inf_m": 4.846828338668078e-09,
+        "best_alpha": -3e-05,
+        "linear_rank": 14,
+        "linear_residual_inf_n_unscaled": 0.284444461617362,
+        "runtime_s": 59.331896755989874
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_rr_top64_rows16_support4_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_rr_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.28037952111302017,
+        "final_residual_inf_n": 0.2803795154086694,
+        "improvement_inf_n": 5.704350769519806e-09,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 6,
+          "shell_membrane": 5,
+          "frame": 5
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 11,
+          "ux": 1,
+          "uy": 4
+        },
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 174,
+        "pre_node_block_support_size": 71,
+        "correction_inf_m": 6.073014916409149e-06,
+        "best_alpha": -3e-07,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 0.0001800939148138038,
+        "runtime_s": 59.81077578700206
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.28037952111302017,
+        "final_residual_inf_n": 0.2803794886331454,
+        "improvement_inf_n": 3.247987478971481e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 8,
+          "shell_membrane": 4,
+          "frame": 4
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 5,
+          "ux": 4,
+          "rx": 2,
+          "uy": 3,
+          "ry": 1,
+          "rz": 1
+        },
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 174,
+        "pre_node_block_support_size": 64,
+        "correction_inf_m": 1.19491110064691e-08,
+        "best_alpha": 1e-06,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 2.049196633158168e-06,
+        "runtime_s": 59.87486486599664
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_followup2_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_followup2_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.2803794886331454,
+        "final_residual_inf_n": 0.28037945650251656,
+        "improvement_inf_n": 3.213062882423401e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 8,
+          "shell_membrane": 4,
+          "frame": 4
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 5,
+          "ux": 4,
+          "rx": 2,
+          "uy": 3,
+          "ry": 1,
+          "rz": 1
+        },
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 174,
+        "pre_node_block_support_size": 64,
+        "correction_inf_m": 1.19490990565535e-08,
+        "best_alpha": 1e-06,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 2.0491964927149553e-06,
+        "runtime_s": 60.36130386200966
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows24_support4_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows24_support4_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.28037945650251656,
+        "final_residual_inf_n": 0.2803794530100569,
+        "improvement_inf_n": 3.4924596548080444e-09,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 24,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 12,
+          "shell_membrane": 6,
+          "frame": 6
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 8,
+          "ux": 5,
+          "rx": 3,
+          "uy": 5,
+          "ry": 2,
+          "rz": 1
+        },
+        "support_columns_per_row": 4,
+        "node_block_support": true,
+        "support_size": 234,
+        "pre_node_block_support_size": 90,
+        "correction_inf_m": 8.83113402724768e-06,
+        "best_alpha": 1e-07,
+        "linear_rank": 24,
+        "linear_residual_inf_n_unscaled": 0.008406216490691065,
+        "runtime_s": 59.52517544600414
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.2803794530100569,
+        "final_residual_inf_n": 0.28037936581498085,
+        "improvement_inf_n": 8.719507604837418e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 8,
+          "shell_membrane": 4,
+          "frame": 4
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 5,
+          "ux": 4,
+          "rx": 2,
+          "uy": 3,
+          "ry": 1,
+          "rz": 1
+        },
+        "support_columns_per_row": 2,
+        "node_block_support": true,
+        "support_size": 108,
+        "pre_node_block_support_size": 49,
+        "correction_inf_m": 2.0422005463717733e-08,
+        "best_alpha": 1e-06,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 2.7063723395670536e-06,
+        "runtime_s": 59.47293882799568
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_followup2_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_followup2_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.28037936581498085,
+        "final_residual_inf_n": 0.2803793398543641,
+        "improvement_inf_n": 2.5960616767406464e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 8,
+          "shell_membrane": 4,
+          "frame": 4
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 5,
+          "ux": 4,
+          "rx": 2,
+          "uy": 3,
+          "ry": 1,
+          "rz": 1
+        },
+        "support_columns_per_row": 2,
+        "node_block_support": true,
+        "support_size": 108,
+        "pre_node_block_support_size": 49,
+        "correction_inf_m": 2.042198504133015e-08,
+        "best_alpha": 3e-07,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 2.7063719619246918e-06,
+        "runtime_s": 59.874966633011354
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz",
+        "base_residual_inf_n": 0.2803793398543641,
+        "final_residual_inf_n": 0.28037932612159777,
+        "improvement_inf_n": 1.3732766313001576e-08,
+        "promotion_count": 1,
+        "promoted_to_final_state": true,
+        "selection_policy": "component_dof_round_robin",
+        "component_filter": "all",
+        "selected_hotspot_row_count": 16,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 8,
+          "shell_membrane": 4,
+          "frame": 4
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 5,
+          "ux": 4,
+          "rx": 2,
+          "uy": 3,
+          "ry": 1,
+          "rz": 1
+        },
+        "support_columns_per_row": 1,
+        "node_block_support": true,
+        "support_size": 72,
+        "pre_node_block_support_size": 41,
+        "correction_inf_m": 4.8612732293045594e-08,
+        "best_alpha": 3e-07,
+        "linear_rank": 16,
+        "linear_residual_inf_n_unscaled": 1.1301444607370037e-06,
+        "runtime_s": 60.48802061799506
+      }
+    ],
+    "component_probe": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_component_dof_rr_frontier_component_probe.json",
+      "base_residual_inf_n": 0.28037932612159777,
+      "top_residual_count": 64,
+      "top_row_dominant_component_counts": {
+        "shell_bending_drilling": 35,
+        "shell_membrane": 22,
+        "frame": 7
+      },
+      "component_inf_n": {
+        "frame": 156794.12661729383,
+        "spring": 0.0001124172149307226,
+        "material_stress_correction": 0.0,
+        "shell_bending_drilling": 156852.14356244876,
+        "shell_membrane": 47414.69162367852
+      }
+    },
+    "assessment": "Component+DOF round-robin target selection with node-block support reopens a better local descent path than raw top-row selection. The strongest pass in this batch used rows16/support2 and improved by 8.7195e-08 N, but follow-up passes fell back to roughly 2.6e-08 N. Rows24 and support1 both slowed descent, so simple target widening or support shrinking is not enough to close the 1e-3 N gate quickly."
+  },
+  "current_acceleration_decision": {
+    "status": "algorithmic_direction_limited_after_rocm_rust_hip_review",
+    "latest_frontier_residual_inf_n": 0.28037932612159777,
+    "residual_gate_n": 0.001,
+    "latest_local_probe_runtime_s": 60.48802061799506,
+    "rocm_hip_decision": "Use ROCm/HIP for sparse linear diagnostics and future residual/Jacobian assembly batching, but do not expect backend substitution alone to close G1. Existing host-ILU/device-GMRES evidence is fast for favorable coupled systems, slow for shell-dominant systems, and the active local probes are correction-direction limited.",
+    "rust_decision": "The Rust/HIP runtime path remains useful for existing nonlinear-frame/NDTHA contracts, but it is not connected to the current MGT full 3D frame+shell residual/Jacobian assembly. Wiring it now would be integration work before algorithmic closure evidence, not a quick gate-closing path.",
+    "next_g1_step": "Keep G1 focused on component+DOF balanced local polishing only as a diagnostic, and shift the main closure attempt to broader coarse/global correction or cached residual/Jacobian assembly. The latest local descent rate remains orders of magnitude too slow for the 1e-3 N gate."
   }
 }
