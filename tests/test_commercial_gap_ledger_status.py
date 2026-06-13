@@ -3143,6 +3143,67 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         shell_bending_lstsq["base_direct_residual_inf_n"]
     )
     assert shell_bending_lstsq["frame_hotspot_block_lstsq_selected_count"] == 8
+    shell_bending_fd_lstsq = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup"
+    ]
+    assert shell_bending_fd_lstsq["status"] == "partial"
+    assert shell_bending_fd_lstsq["promoted_to_final_state"] is False
+    assert shell_bending_fd_lstsq["stop_reason"] == "no_gate_eligible_descent"
+    assert shell_bending_fd_lstsq[
+        "frame_hotspot_block_lstsq_component_filter"
+    ] == "shell_bending_drilling"
+    assert (
+        shell_bending_fd_lstsq["frame_hotspot_block_lstsq_operator_source"]
+        == "finite_difference"
+    )
+    assert (
+        shell_bending_fd_lstsq[
+            "frame_hotspot_block_lstsq_finite_difference_step_m"
+        ]
+        == 1.0e-6
+    )
+    assert (
+        shell_bending_fd_lstsq[
+            "frame_hotspot_block_lstsq_residual_only_trial_count"
+        ]
+        == 30
+    )
+    assert shell_bending_fd_lstsq["frame_hotspot_block_lstsq_full_trial_count"] == 0
+    assert shell_bending_fd_lstsq["final_direct_residual_inf_n"] == (
+        shell_bending_fd_lstsq["base_direct_residual_inf_n"]
+    )
+    assert (
+        shell_bending_fd_lstsq[
+            "frame_hotspot_block_lstsq_best_candidate_direct_residual_inf_n"
+        ]
+        > shell_bending_fd_lstsq["base_direct_residual_inf_n"]
+    )
+    translation_fd_lstsq = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup"
+    ]
+    assert translation_fd_lstsq["status"] == "partial"
+    assert translation_fd_lstsq["promoted_to_final_state"] is False
+    assert translation_fd_lstsq["stop_reason"] == "no_gate_eligible_descent"
+    assert (
+        translation_fd_lstsq["frame_hotspot_block_lstsq_component_filter"]
+        == "translation"
+    )
+    assert (
+        translation_fd_lstsq["frame_hotspot_block_lstsq_operator_source"]
+        == "finite_difference"
+    )
+    assert (
+        translation_fd_lstsq["frame_hotspot_block_lstsq_residual_only_trial_count"]
+        == 66
+    )
+    assert translation_fd_lstsq["frame_hotspot_block_lstsq_full_trial_count"] == 0
+    assert translation_fd_lstsq["frame_hotspot_block_lstsq_support_size"] == 48
+    assert translation_fd_lstsq["final_direct_residual_inf_n"] == (
+        translation_fd_lstsq["base_direct_residual_inf_n"]
+    )
+    assert translation_fd_lstsq[
+        "frame_hotspot_block_lstsq_best_candidate_direct_residual_inf_n"
+    ] == translation_fd_lstsq["base_direct_residual_inf_n"]
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"

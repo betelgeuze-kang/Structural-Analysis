@@ -1,0 +1,118 @@
+{
+  "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
+  "generated_at": "2026-06-13T13:41:09Z",
+  "status": "partial",
+  "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
+  "current_g1_frontier": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.280685596708914,
+    "residual_gate_n": 0.001,
+    "latest_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
+    "latest_cached_shell_newton_runtime_s": 167.08520195700112,
+    "latest_cached_shell_newton_accepted_iterations": 5,
+    "latest_cached_shell_newton_total_residual_only_trials": 144,
+    "latest_cached_shell_newton_final_residual_inf_n": 0.280685596708914
+  },
+  "rocm_runtime": {
+    "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
+    "escalated_rocminfo_gpu": {
+      "name": "AMD Radeon RX 6900 XT",
+      "gfx_target": "gfx1030",
+      "compute_units": 80,
+      "max_clock_mhz": 2660
+    },
+    "torch_rocm": {
+      "torch_version": "2.6.0+rocm6.1",
+      "torch_version_hip": "6.1.40091-a8dbc0c19",
+      "device_name": "AMD Radeon RX 6900 XT"
+    }
+  },
+  "measured_gpu_solver_paths": {
+    "host_ilu_device_gmres_coupled_current": {
+      "command_output_json": "/tmp/mgt_host_ilu_device_gmres_coupled_current_probe.json",
+      "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "matrix_shape": [39859, 39859],
+      "matrix_nnz": 888880,
+      "converged": true,
+      "residual_inf_n": 2.0700099412351847e-08,
+      "threshold_n": 0.05,
+      "solve_seconds": 0.9185116970038507,
+      "factor_seconds": 0.4586330430029193,
+      "krylov_seconds": 0.45651430399448145,
+      "hip_kernel_invocation_count": 37,
+      "assessment": "Fast enough for coupled sparse linear correction when the matrix/preconditioner combination is favorable."
+    },
+    "host_ilu_device_gmres_shell_current": {
+      "command_output_json": "/tmp/mgt_host_ilu_device_gmres_shell_current_probe.json",
+      "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "matrix_shape": [33932, 33932],
+      "matrix_nnz": 823815,
+      "converged": true,
+      "residual_inf_n": 2.1432831953660525e-08,
+      "threshold_n": 0.001,
+      "solve_seconds": 42.46437694199267,
+      "factor_seconds": 0.45171386998845264,
+      "krylov_seconds": 42.00904335299856,
+      "hip_kernel_invocation_count": 4080,
+      "assessment": "Converges but is not a fast path for shell-dominant residual work because Krylov iteration count saturates."
+    },
+    "g1_newton_host_ilu_device_gmres_1iter_attempt": {
+      "command_output_json": "/tmp/mgt_equilibrium_newton_host_ilu_device_gmres_1iter_probe.json",
+      "status": "terminated_after_runtime_budget",
+      "terminated_after_seconds_greater_than": 240,
+      "assessment": "Directly swapping the current G1 Newton profile to host_ilu_device_gmres is not a quick residual-gate path."
+    },
+    "hipsparse_ilu0_focused_existing": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_hipsparse_ilu0_focused_probe.json",
+      "backend": "hipsparse_ilu0_bicgstab",
+      "converged": false,
+      "residual_inf_n": 1.502116910094704e73,
+      "assessment": "Prebuilt hipSPARSE ILU0-BiCGStab is unstable for the shell system and should not be promoted for G1."
+    },
+    "ginkgo_hip_existing": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_ginkgo_hip_backend_probe.json",
+      "status": "blocked_after_configure",
+      "blocked_reason": "ginkgo_hip_bfloat16_rocm_header_incompatibility",
+      "assessment": "Not currently available as a G1 acceleration dependency."
+    }
+  },
+  "rust_path": {
+    "runtime_wrapper": "implementation/phase1/rust_hip_md3bead_hook.py",
+    "crate": "implementation/phase1/rust_hip_md3bead_hook",
+    "connected_to_current_mgt_g1_full_3d_residual": false,
+    "assessment": "Rust backend is useful for existing runtime/NDTHA/nonlinear-frame contracts, but it is not wired into the current MGT full 3D frame+shell residual/Jacobian assembly."
+  },
+  "finite_difference_residual_only_counter_evidence": {
+    "shell_bending_fd_block_lstsq": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup_probe.json",
+      "operator_source": "finite_difference",
+      "residual_only_trial_count": 30,
+      "full_trial_count": 0,
+      "promoted_to_final_state": false,
+      "best_candidate_residual_inf_n": 0.2834936907335722,
+      "base_residual_inf_n": 0.280685596708914
+    },
+    "translation_fd_block_lstsq": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup_probe.json",
+      "operator_source": "finite_difference",
+      "residual_only_trial_count": 66,
+      "full_trial_count": 0,
+      "promoted_to_final_state": false,
+      "best_candidate_residual_inf_n": 0.280685596708914,
+      "base_residual_inf_n": 0.280685596708914
+    },
+    "assessment": "Residual-only finite-difference evaluation is cheap enough after shell operator caching, but local hotspot least-squares corrections do not create descent at the current frontier."
+  },
+  "decision": {
+    "use_rocm_for_g1_fast_push_now": false,
+    "use_rust_for_g1_fast_push_now": false,
+    "use_hip_sparse_directly_for_g1_fast_push_now": false,
+    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration. Keep the cached residual-only path, but focus on a better global/coarse consistent Newton direction or load-path correction for the shell-dominant residual frontier.",
+    "why": [
+      "The current residual decay is limited by correction direction quality, not only by per-evaluation speed.",
+      "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
+      "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
+      "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."
+    ]
+  }
+}

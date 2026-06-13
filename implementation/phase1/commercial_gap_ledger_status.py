@@ -183,15 +183,36 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "frame_hotspot_block_lstsq_component_filter": hotspot_block.get(
             "component_filter"
         ),
+        "frame_hotspot_block_lstsq_operator_source": hotspot_block.get(
+            "operator_source"
+        ),
+        "frame_hotspot_block_lstsq_finite_difference_step_m": _float_or_none(
+            hotspot_block.get("finite_difference_step_m")
+        ),
         "frame_hotspot_block_lstsq_selected_component_counts": hotspot_block.get(
             "selected_hotspot_dominant_component_counts"
         ),
         "frame_hotspot_block_lstsq_support_size": hotspot_block.get("support_size"),
+        "frame_hotspot_block_lstsq_residual_only_trial_count": hotspot_block.get(
+            "residual_only_trial_count"
+        ),
+        "frame_hotspot_block_lstsq_full_trial_count": hotspot_block.get(
+            "full_trial_count"
+        ),
         "frame_hotspot_block_lstsq_allow_negative_alphas": hotspot_block.get(
             "allow_negative_alphas"
         ),
         "frame_hotspot_block_lstsq_correction_inf_m": _float_or_none(
             hotspot_block.get("correction_inf_m")
+        ),
+        "frame_hotspot_block_lstsq_best_candidate_direct_residual_inf_n": (
+            _float_or_none(
+                (hotspot_block.get("best_candidate") or {}).get(
+                    "direct_residual_inf_n"
+                )
+                if isinstance(hotspot_block.get("best_candidate"), dict)
+                else None
+            )
         ),
         "trust_region_accepted": trust.get("accepted"),
         "trust_region_accepted_iteration_count": trust.get("accepted_iteration_count"),
@@ -1339,6 +1360,18 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         _load(
             productization
             / "mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_probe.json"
+        )
+    )
+    direct_residual_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup = (
+        _load(
+            productization
+            / "mgt_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup_probe.json"
+        )
+    )
+    direct_residual_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup = (
+        _load(
+            productization
+            / "mgt_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup_probe.json"
         )
     )
     residual_jacobian_current_frontier_frame_hotspot_sweep = _load(
@@ -4070,6 +4103,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect": (
                     _direct_residual_probe_summary(
                         direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect
+                    )
+                ),
+                "direct_residual_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup": (
+                    _direct_residual_probe_summary(
+                        direct_residual_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup
+                    )
+                ),
+                "direct_residual_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup": (
+                    _direct_residual_probe_summary(
+                        direct_residual_frame_hotspot_translation_fd_block_lstsq_cached_signed_followup
                     )
                 ),
                 "equilibrium_newton_state_scale_status": equilibrium_newton_state_scale.get(

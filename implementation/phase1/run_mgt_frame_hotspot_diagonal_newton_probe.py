@@ -278,10 +278,17 @@ def _hotspot_block_lstsq_sweep(
     include_gate_limited_alpha: bool = False,
     allow_negative_alphas: bool = False,
     component_filter: str = "frame",
+    operator_source: str = "tangent",
+    finite_difference_step_m: float = 1.0e-6,
 ) -> dict[str, Any]:
+    operator_source = str(operator_source)
+    if operator_source not in {"tangent", "finite_difference"}:
+        raise ValueError(
+            "block_lstsq_operator_source must be 'tangent' or 'finite_difference'"
+        )
     base_u = np.asarray(u, dtype=np.float64)
     free_idx = np.asarray(free, dtype=np.int64)
-    _base_k, _base_f, base_free, base_residual, base_rhs, _base_meta = assemble_residual(
+    _base_k, base_f, base_free, base_residual, base_rhs, _base_meta = assemble_residual(
         base_u
     )
     base_free_idx = np.asarray(base_free, dtype=np.int64)
@@ -363,7 +370,81 @@ def _hotspot_block_lstsq_sweep(
             "best_candidate": {},
             "best_gate_eligible_candidate": {},
         }
-    submatrix = k_ff[target_rows, :][:, support_cols].toarray()
+    residual_only_trial_count = 0
+    full_trial_count = 0
+    finite_difference_rows: list[dict[str, Any]] = []
+    if operator_source == "tangent":
+        submatrix = k_ff[target_rows, :][:, support_cols].toarray()
+    else:
+        fd_step = float(finite_difference_step_m)
+        if not np.isfinite(fd_step) or abs(fd_step) <= 0.0:
+            return {
+                "enabled": True,
+                "evaluated": False,
+                "reason": "invalid_finite_difference_step",
+                "finite_difference_step_m": fd_step,
+                "candidate_rows": [],
+                "best_candidate": {},
+                "best_gate_eligible_candidate": {},
+            }
+        submatrix = np.zeros((int(target_rows.size), int(support_cols.size)), dtype=np.float64)
+        for col_index, local_col in enumerate(support_cols.tolist()):
+            global_dof = int(free_idx[int(local_col)])
+            direction = np.zeros_like(base_u)
+            direction[global_dof] = 1.0
+            trial_u = base_u + fd_step * direction
+            used_residual_only = False
+            try:
+                _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(
+                    trial_u,
+                    residual_only=True,
+                    free_override=base_free_idx,
+                    external_load_override=base_f,
+                )
+                used_residual_only = True
+                residual_only_trial_count += 1
+            except TypeError:
+                _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(
+                    trial_u
+                )
+                full_trial_count += 1
+            trial_free_idx = np.asarray(trial_free, dtype=np.int64)
+            trial_free_stable = bool(
+                trial_free_idx.shape == base_free_idx.shape
+                and np.array_equal(trial_free_idx, base_free_idx)
+            )
+            row = {
+                "local_col": int(local_col),
+                "global_dof": global_dof,
+                "node_index": int(global_dof // 6),
+                "dof_index": int(global_dof % 6),
+                "free_dof_set_stable": trial_free_stable,
+                "residual_only_assembly": bool(used_residual_only),
+            }
+            if isinstance(trial_meta, dict):
+                shell_meta = trial_meta.get("shell_meta")
+                if isinstance(shell_meta, dict):
+                    row["shell_internal_force_cache_hit"] = bool(
+                        shell_meta.get("shell_internal_force_cache_hit")
+                    )
+            finite_difference_rows.append(row)
+            if not trial_free_stable:
+                return {
+                    "enabled": True,
+                    "evaluated": False,
+                    "reason": "finite_difference_free_dof_set_changed",
+                    "operator_source": operator_source,
+                    "finite_difference_step_m": fd_step,
+                    "finite_difference_rows": finite_difference_rows,
+                    "candidate_rows": [],
+                    "best_candidate": {},
+                    "best_gate_eligible_candidate": {},
+                }
+            trial_delta = (
+                np.asarray(trial_residual, dtype=np.float64)[target_rows]
+                - np.asarray(base_residual, dtype=np.float64)[target_rows]
+            ) / fd_step
+            submatrix[:, col_index] = trial_delta
     target_rhs = -np.asarray(base_residual, dtype=np.float64)[target_rows]
     coeffs, solve_meta = _truncated_svd_coefficients(
         submatrix,
@@ -420,9 +501,21 @@ def _hotspot_block_lstsq_sweep(
     for alpha in sweep_alpha_values:
         alpha_float = float(alpha)
         trial_u = base_u + alpha_float * correction
-        _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
-            trial_u
-        )
+        used_residual_only = False
+        try:
+            _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+                trial_u,
+                residual_only=True,
+                free_override=base_free_idx,
+                external_load_override=base_f,
+            )
+            used_residual_only = True
+            residual_only_trial_count += 1
+        except TypeError:
+            _trial_k, _trial_f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+                trial_u
+            )
+            full_trial_count += 1
         trial_free_idx = np.asarray(trial_free, dtype=np.int64)
         trial_free_stable = bool(
             trial_free_idx.shape == base_free_idx.shape
@@ -435,6 +528,7 @@ def _hotspot_block_lstsq_sweep(
             {
                 "alpha": alpha_float,
                 "free_dof_set_stable": trial_free_stable,
+                "residual_only_assembly": bool(used_residual_only),
                 "direct_residual_inf_n": residual_inf,
                 "direct_relative_residual_inf": residual_inf / max(rhs_inf, 1.0),
                 "improvement_inf_n": base_residual_inf - residual_inf,
@@ -474,12 +568,21 @@ def _hotspot_block_lstsq_sweep(
             else f"block_lstsq_on_{component_filter}_hotspots"
         ),
         "component_filter": component_filter,
+        "operator_source": operator_source,
+        "finite_difference_step_m": (
+            float(finite_difference_step_m)
+            if operator_source == "finite_difference"
+            else None
+        ),
         "selected_hotspot_row_count": int(len(selected_rows)),
         "selected_hotspot_dominant_component_counts": selected_component_counts,
         "target_rows": [int(row) for row in target_rows.tolist()],
         "target_global_dofs": [int(free_idx[int(row)]) for row in target_rows.tolist()],
         "support_size": int(support_cols.size),
         "support_columns_per_row": int(support_columns_per_row),
+        "residual_only_trial_count": int(residual_only_trial_count),
+        "full_trial_count": int(full_trial_count),
+        "finite_difference_rows": finite_difference_rows,
         "include_gate_limited_alpha": bool(include_gate_limited_alpha),
         "allow_negative_alphas": bool(allow_negative_alphas),
         "base_direct_residual_inf_n": base_residual_inf,
@@ -513,6 +616,8 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_include_gate_limited_alpha: bool = False,
     block_lstsq_allow_negative_alphas: bool = False,
     block_lstsq_component_filter: str = "frame",
+    block_lstsq_operator_source: str = "tangent",
+    block_lstsq_finite_difference_step_m: float = 1.0e-6,
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
 ) -> dict[str, Any]:
@@ -626,6 +731,8 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 include_gate_limited_alpha=block_lstsq_include_gate_limited_alpha,
                 allow_negative_alphas=block_lstsq_allow_negative_alphas,
                 component_filter=block_lstsq_component_filter,
+                operator_source=block_lstsq_operator_source,
+                finite_difference_step_m=block_lstsq_finite_difference_step_m,
             )
         last_sweep = sweep
         if _wall_time_exceeded():
@@ -978,6 +1085,16 @@ def main(argv: list[str] | None = None) -> int:
         choices=("frame", "shell_bending_drilling", "translation"),
         default="frame",
     )
+    parser.add_argument(
+        "--block-lstsq-operator-source",
+        choices=("tangent", "finite_difference"),
+        default="tangent",
+    )
+    parser.add_argument(
+        "--block-lstsq-finite-difference-step-m",
+        type=float,
+        default=1.0e-6,
+    )
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
         "--max-wall-seconds",
@@ -1022,6 +1139,10 @@ def main(argv: list[str] | None = None) -> int:
         ),
         block_lstsq_allow_negative_alphas=bool(args.block_lstsq_allow_negative_alphas),
         block_lstsq_component_filter=str(args.block_lstsq_component_filter),
+        block_lstsq_operator_source=str(args.block_lstsq_operator_source),
+        block_lstsq_finite_difference_step_m=float(
+            args.block_lstsq_finite_difference_step_m
+        ),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,
     )
