@@ -262,12 +262,55 @@ def _truncated_svd_coefficients(
     }
 
 
+def _ridge_coefficients(
+    matrix: np.ndarray,
+    rhs: np.ndarray,
+    *,
+    ridge_factor: float = 1.0e-6,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    a = np.asarray(matrix, dtype=np.float64)
+    b = np.asarray(rhs, dtype=np.float64)
+    column_count = int(a.shape[1]) if a.ndim == 2 else 0
+    if a.ndim != 2 or b.ndim != 1 or a.shape[0] != b.shape[0] or column_count == 0:
+        return np.zeros(column_count, dtype=np.float64), {
+            "solve_method": "ridge_tikhonov",
+            "rank": 0,
+            "singular_values": [],
+            "reason": "invalid_or_empty_system",
+        }
+    singular_values = np.linalg.svd(a, compute_uv=False)
+    spectral = float(np.max(singular_values)) if singular_values.size else 0.0
+    ridge = max(float(ridge_factor), 0.0) * max(spectral, 1.0)
+    lhs = a.T @ a
+    if ridge > 0.0:
+        lhs = lhs + (ridge * ridge) * np.eye(column_count, dtype=np.float64)
+    rhs_projected = a.T @ b
+    try:
+        coeffs = np.linalg.solve(lhs, rhs_projected)
+        solver = "solve"
+    except np.linalg.LinAlgError:
+        coeffs = np.linalg.lstsq(lhs, rhs_projected, rcond=None)[0]
+        solver = "lstsq_fallback"
+    residual_vector = a @ coeffs - b
+    return np.asarray(coeffs, dtype=np.float64), {
+        "solve_method": "ridge_tikhonov",
+        "ridge_factor": float(ridge_factor),
+        "ridge_lambda": float(ridge),
+        "normal_solver": solver,
+        "rank": int(np.linalg.matrix_rank(a)),
+        "singular_values": [float(value) for value in singular_values.tolist()],
+        "linear_residual_l2_n": float(np.linalg.norm(residual_vector))
+        if residual_vector.size
+        else 0.0,
+    }
+
+
 def _equilibrate_lstsq_system(
     matrix: np.ndarray,
     rhs: np.ndarray,
     *,
     mode: str = "none",
-    scale_floor: float = 1.0e-30,
+    scale_floor: float = 1.0e-12,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
     mode = str(mode or "none")
     if mode not in {"none", "row", "column", "row_column"}:
@@ -332,6 +375,8 @@ def _hotspot_block_lstsq_sweep(
     operator_source: str = "tangent",
     finite_difference_step_m: float = 1.0e-6,
     equilibration: str = "none",
+    solve_method: str = "truncated_svd",
+    ridge_factor: float = 1.0e-6,
 ) -> dict[str, Any]:
     operator_source = str(operator_source)
     if operator_source not in {"tangent", "finite_difference"}:
@@ -503,11 +548,22 @@ def _hotspot_block_lstsq_sweep(
         target_rhs,
         mode=equilibration,
     )
-    scaled_coeffs, solve_meta = _truncated_svd_coefficients(
-        scaled_submatrix,
-        scaled_target_rhs,
-        max_condition=svd_max_condition,
-    )
+    solve_method = str(solve_method or "truncated_svd")
+    if solve_method == "truncated_svd":
+        scaled_coeffs, solve_meta = _truncated_svd_coefficients(
+            scaled_submatrix,
+            scaled_target_rhs,
+            max_condition=svd_max_condition,
+        )
+    elif solve_method == "ridge":
+        scaled_coeffs, solve_meta = _ridge_coefficients(
+            scaled_submatrix,
+            scaled_target_rhs,
+            ridge_factor=ridge_factor,
+        )
+        solve_meta["svd_max_condition"] = float(svd_max_condition)
+    else:
+        raise ValueError("block_lstsq_solve_method must be truncated_svd or ridge")
     coeffs = np.asarray(scaled_coeffs, dtype=np.float64) * np.asarray(
         column_scales, dtype=np.float64
     )
@@ -638,6 +694,7 @@ def _hotspot_block_lstsq_sweep(
         "component_filter": component_filter,
         "operator_source": operator_source,
         "equilibration": str(equilibration),
+        "solve_method": str(solve_method),
         "finite_difference_step_m": (
             float(finite_difference_step_m)
             if operator_source == "finite_difference"
@@ -688,6 +745,8 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_operator_source: str = "tangent",
     block_lstsq_finite_difference_step_m: float = 1.0e-6,
     block_lstsq_equilibration: str = "none",
+    block_lstsq_solve_method: str = "truncated_svd",
+    block_lstsq_ridge_factor: float = 1.0e-6,
     component_top_count: int = 24,
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
@@ -806,6 +865,8 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 operator_source=block_lstsq_operator_source,
                 finite_difference_step_m=block_lstsq_finite_difference_step_m,
                 equilibration=block_lstsq_equilibration,
+                solve_method=block_lstsq_solve_method,
+                ridge_factor=block_lstsq_ridge_factor,
             )
         last_sweep = sweep
         if _wall_time_exceeded():
@@ -1176,6 +1237,12 @@ def main(argv: list[str] | None = None) -> int:
         choices=("none", "row", "column", "row_column"),
         default="none",
     )
+    parser.add_argument(
+        "--block-lstsq-solve-method",
+        choices=("truncated_svd", "ridge"),
+        default="truncated_svd",
+    )
+    parser.add_argument("--block-lstsq-ridge-factor", type=float, default=1.0e-6)
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
         "--max-wall-seconds",
@@ -1226,6 +1293,8 @@ def main(argv: list[str] | None = None) -> int:
             args.block_lstsq_finite_difference_step_m
         ),
         block_lstsq_equilibration=str(args.block_lstsq_equilibration),
+        block_lstsq_solve_method=str(args.block_lstsq_solve_method),
+        block_lstsq_ridge_factor=float(args.block_lstsq_ridge_factor),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,
     )
