@@ -47,7 +47,55 @@ def build_equilibrium_step_assembler(
         *,
         external_load_override: np.ndarray | None = None,
         include_component_forces: bool = False,
+        residual_only: bool = False,
+        free_override: np.ndarray | None = None,
     ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+        if residual_only:
+            if external_load_override is not None:
+                f_ext = np.asarray(external_load_override, dtype=np.float64)
+            elif "reference_f_ext" in reference_holder:
+                f_ext = reference_holder["reference_f_ext"]
+            else:
+                residual_only = False
+        if residual_only:
+            if free_override is not None:
+                free = np.asarray(free_override, dtype=np.int64)
+            elif "reference_free" in reference_holder:
+                free = np.asarray(reference_holder["reference_free"], dtype=np.int64)
+            else:
+                residual_only = False
+        if residual_only:
+            f_int, physical_meta = assemble_physical_internal_forces(
+                u=u,
+                node_xyz=node_xyz,
+                frame_elements=frame_elements,
+                elem_type_code=elem_type_code,
+                elem_section_id=elem_section_id,
+                elem_material_id=elem_material_id,
+                conn_ptr=conn_ptr,
+                conn_idx=conn_idx,
+                section_props=section_props,
+                material_props=material_props,
+                plate_thickness_props=plate_thickness_props,
+                spring_stiffness=spring_stiffness,
+                base_axial_forces=base_axial_forces,
+                frame_gravity_load_scale=frame_gravity_load_scale,
+                load_scale=load_scale,
+                include_component_forces=include_component_forces,
+            )
+            residual, rhs = assemble_physical_residual(
+                u=u,
+                f_ext=f_ext,
+                free=free,
+                f_int=f_int,
+            )
+            return None, f_ext, free, residual, rhs, {
+                **physical_meta,
+                "residual_only_assembly": True,
+                "residual_only_free_override": bool(free_override is not None),
+                "free_dof_count": int(free.size),
+                "frozen_external_load": bool("reference_f_ext" in reference_holder),
+            }
         stiffness, assembled_f_ext, tangent_meta = assemble_equilibrium_operator_stiffness(
             u=u,
             node_xyz=node_xyz,
@@ -109,19 +157,25 @@ def build_equilibrium_step_assembler(
         assemble_residual(np.zeros(n_dof, dtype=np.float64))
     )
     reference_holder["reference_f_ext"] = reference_f_ext
+    reference_holder["reference_free"] = _reference_free
 
     def assemble_with_frozen_external_load(
         u: np.ndarray,
         *,
         external_load_override: np.ndarray | None = None,
         include_component_forces: bool = False,
+        residual_only: bool = False,
+        free_override: np.ndarray | None = None,
     ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
         override = reference_f_ext if external_load_override is None else external_load_override
         return assemble_residual(
             u,
             external_load_override=override,
             include_component_forces=include_component_forces,
+            residual_only=residual_only,
+            free_override=free_override,
         )
+    assemble_with_frozen_external_load.supports_residual_only = True  # type: ignore[attr-defined]
 
     setup_meta = {
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,

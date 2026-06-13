@@ -213,6 +213,8 @@ def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: st
     dominant = str(row.get("dominant_component") or "")
     if component_filter == "frame":
         return dominant == "frame"
+    if component_filter == "shell_bending_drilling":
+        return dominant == "shell_bending_drilling"
     if component_filter == "translation":
         return True
     raise ValueError(f"unsupported block_lstsq_component_filter: {component_filter}")
@@ -323,7 +325,7 @@ def _hotspot_block_lstsq_sweep(
             "reason": (
                 "no_frame_translation_hotspot_rows"
                 if component_filter == "frame"
-                else "no_translation_hotspot_rows"
+                else f"no_{component_filter}_hotspot_rows"
             ),
             "component_filter": component_filter,
             "candidate_rows": [],
@@ -469,7 +471,7 @@ def _hotspot_block_lstsq_sweep(
         "direction": (
             "block_lstsq_on_frame_translation_hotspots"
             if component_filter == "frame"
-            else "block_lstsq_on_translation_hotspots"
+            else f"block_lstsq_on_{component_filter}_hotspots"
         ),
         "component_filter": component_filter,
         "selected_hotspot_row_count": int(len(selected_rows)),
@@ -973,7 +975,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--block-lstsq-allow-negative-alphas", action="store_true")
     parser.add_argument(
         "--block-lstsq-component-filter",
-        choices=("frame", "translation"),
+        choices=("frame", "shell_bending_drilling", "translation"),
         default="frame",
     )
     parser.add_argument("--write-progress-artifacts", action="store_true")

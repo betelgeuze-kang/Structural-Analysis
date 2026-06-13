@@ -146,8 +146,24 @@ def test_newton_correction_regularized_direct_profile_bypasses_iterative_attempt
     )
     np.testing.assert_allclose(correction, [0.25], rtol=1.0e-10, atol=1.0e-12)
     assert meta["linear_solver_profile"] == "regularized_direct"
+    assert meta["linear_solver_regularization_factor"] == 1.0e-12
     assert meta["linear_solver_direct_profile_bypassed_iterative_attempts"] is True
     assert meta["linear_solver_backend"] == "scipy_sparse_spsolve_cpu_regularized_refined"
+
+
+def test_newton_correction_regularized_direct_profile_accepts_factor_override() -> None:
+    k = coo_matrix(([4.0], ([0], [0])), shape=(1, 1)).tocsc()
+    residual = np.asarray([-1.0], dtype=np.float64)
+    correction, meta = solve_newton_correction(
+        k,
+        residual,
+        prefer_host_ilu=True,
+        free_global_dofs=np.asarray([0], dtype=np.int64),
+        solver_profile="regularized_direct",
+        direct_regularization_factor=1.0e-15,
+    )
+    np.testing.assert_allclose(correction, [0.25], rtol=1.0e-10, atol=1.0e-12)
+    assert meta["linear_solver_regularization_factor"] == 1.0e-15
 
 
 def test_newton_correction_block_jacobi_profile_bypasses_ilu() -> None:

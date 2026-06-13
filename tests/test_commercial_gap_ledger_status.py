@@ -3039,6 +3039,47 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "implementation/phase1/release_evidence/productization/"
         "mgt_equilibrium_newton_support128_followup42_state_scale_only_probe_final_checkpoint.npz"
     )
+    regdirect_checkpoint = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_regdirect_checkpoint"
+    ]
+    assert regdirect_checkpoint["status"] == "partial"
+    assert regdirect_checkpoint["final_residual_inf_n"] < 0.281
+    assert regdirect_checkpoint["output_final_checkpoint_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "mgt_equilibrium_newton_focused_regdirect_checkpoint_probe_final_checkpoint.npz"
+    )
+    fastpath = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_residual_only_fastpath"
+    ]
+    assert fastpath["status"] == "partial"
+    assert fastpath["line_search_residual_only_supported"] is True
+    assert fastpath["first_iteration_trial_count"] == 6
+    assert fastpath["first_iteration_residual_only_trial_count"] == 6
+    assert fastpath["final_residual_inf_n"] < fastpath["base_residual_inf_n"]
+    assert fastpath["final_residual_inf_n"] > 5.0e-4
+    ultralow_reg = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_ultralow_reg"
+    ]
+    assert ultralow_reg["direct_regularization_factor"] == 1.0e-15
+    assert ultralow_reg["final_residual_inf_n"] < regdirect_checkpoint[
+        "final_residual_inf_n"
+    ]
+    focused_component = rows["G1"]["evidence"][
+        "residual_jacobian_focused_regdirect_checkpoint_component_breakdown"
+    ]
+    assert focused_component["top_row_dominant_component_counts"][
+        "shell_bending_drilling"
+    ] >= 8
+    shell_bending_lstsq = rows["G1"]["evidence"][
+        "direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect"
+    ]
+    assert shell_bending_lstsq["frame_hotspot_block_lstsq_component_filter"] == (
+        "shell_bending_drilling"
+    )
+    assert shell_bending_lstsq["final_direct_residual_inf_n"] < (
+        shell_bending_lstsq["base_direct_residual_inf_n"]
+    )
+    assert shell_bending_lstsq["frame_hotspot_block_lstsq_selected_count"] == 8
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"

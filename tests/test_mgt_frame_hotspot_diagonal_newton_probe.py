@@ -259,6 +259,71 @@ def test_frame_hotspot_block_lstsq_can_target_nonframe_translation_hotspots(
     assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
 
 
+def test_frame_hotspot_block_lstsq_can_target_shell_bending_hotspots(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([2], [2])), shape=(3, 3)).tocsc()
+    free = np.asarray([2], dtype=np.int64)
+    u0 = np.asarray([0.0, 0.0, 0.1], dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal = np.asarray([10.0 * float(u[2])], dtype=np.float64)
+            rhs = np.asarray([2.0], dtype=np.float64)
+            residual = internal - rhs
+            meta = {}
+            if include_component_forces:
+                internal_global = np.zeros(3, dtype=np.float64)
+                internal_global[2] = internal[0]
+                meta["component_forces"] = {
+                    "shell_bending_drilling": internal_global
+                }
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=1,
+        max_promotions=1,
+        relative_increment_tolerance=1.0,
+        block_lstsq_component_filter="shell_bending_drilling",
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["status"] == "ready"
+    assert sweep["evaluated"] is True
+    assert sweep["component_filter"] == "shell_bending_drilling"
+    assert sweep["direction"] == "block_lstsq_on_shell_bending_drilling_hotspots"
+    assert sweep["selected_hotspot_dominant_component_counts"] == {
+        "shell_bending_drilling": 1
+    }
+    assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
+
+
 def test_frame_hotspot_block_lstsq_probe_exposes_support_and_svd_controls(
     monkeypatch,
 ) -> None:

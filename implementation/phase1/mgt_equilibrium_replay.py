@@ -119,6 +119,7 @@ def run_equilibrium_newton(
     use_trust_region_line_search: bool = True,
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
+    direct_regularization_factor: float | None = None,
     state_scale_line_search_values: tuple[float, ...] = (),
     state_scale_only: bool = False,
 ) -> dict[str, Any]:
@@ -262,6 +263,7 @@ def run_equilibrium_newton(
             prefer_host_ilu=prefer_host_ilu,
             free_global_dofs=np.asarray(free, dtype=np.int64),
             solver_profile=linear_solver_profile,
+            direct_regularization_factor=direct_regularization_factor,
         )
         if not np.all(np.isfinite(delta_free)):
             iterations.append(
@@ -318,6 +320,8 @@ def run_equilibrium_newton(
             displacement_cap_m=displacement_cap_m,
             max_translation_increment_m=per_step_increment_cap,
             translation_metrics=_translation_metrics if displacement_cap_m is not None else None,
+            residual_only_free=np.asarray(free, dtype=np.int64),
+            residual_only_external_load=np.asarray(_f_ext, dtype=np.float64),
         )
         accepted = abs(float(best_alpha)) > 0.0 and best_residual_inf < residual_inf
         if accepted:
@@ -376,8 +380,16 @@ def run_equilibrium_newton(
         "residual_tolerance_n": float(residual_tolerance_n),
         "relative_increment_tolerance": float(relative_increment_tolerance),
         "max_newton_translation_increment_m": per_step_increment_cap,
+        "line_search_residual_only_supported": bool(
+            getattr(assemble_residual, "supports_residual_only", False)
+        ),
         "allow_negative_alphas": bool(allow_negative_alphas),
         "linear_solver_profile": str(linear_solver_profile or "production"),
+        "direct_regularization_factor": (
+            None
+            if direct_regularization_factor is None
+            else float(direct_regularization_factor)
+        ),
         "state_scale_line_search_values": [
             float(value) for value in state_scale_line_search_values
         ],

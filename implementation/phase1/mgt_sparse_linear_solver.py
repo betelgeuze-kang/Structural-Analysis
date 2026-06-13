@@ -576,6 +576,7 @@ def solve_newton_correction(
     prefer_host_ilu: bool = True,
     free_global_dofs: np.ndarray | None = None,
     solver_profile: str = "production",
+    direct_regularization_factor: float | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     rhs = -np.asarray(residual, dtype=np.float64)
     rhs_inf = float(np.max(np.abs(rhs))) if rhs.size else 0.0
@@ -593,14 +594,20 @@ def solve_newton_correction(
         )
     if profile == "regularized_direct":
         solve_started = time.perf_counter()
+        regularization_factor = (
+            1.0e-12
+            if direct_regularization_factor is None
+            else float(direct_regularization_factor)
+        )
         solution, regularization, linear_residual_inf = solve_sparse_with_iterative_refinement(
             k_ff,
             rhs,
-            regularization_factor=1.0e-12,
+            regularization_factor=regularization_factor,
         )
         return solution, {
             "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
             "linear_solver_profile": profile,
+            "linear_solver_regularization_factor": regularization_factor,
             "linear_solver_converged": bool(np.isfinite(linear_residual_inf)),
             "linear_solver_residual_inf_n": linear_residual_inf,
             "linear_solver_regularization": regularization,

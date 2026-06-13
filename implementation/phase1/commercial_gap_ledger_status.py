@@ -327,6 +327,8 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
     first_iteration = (
         iterations[0] if iterations and isinstance(iterations[0], dict) else {}
     )
+    first_trial_rows = first_iteration.get("trial_rows")
+    first_trial_rows = first_trial_rows if isinstance(first_trial_rows, list) else []
     output_checkpoint = payload.get("output_final_checkpoint")
     output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
     runtime = payload.get("runtime_metrics")
@@ -344,9 +346,15 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
             "accepted_newton_iteration_count"
         ),
         "linear_solver_profile": payload.get("linear_solver_profile"),
+        "direct_regularization_factor": _float_or_none(
+            payload.get("direct_regularization_factor")
+        ),
         "state_scale_only": payload.get("state_scale_only"),
         "state_scale_line_search_values": payload.get(
             "state_scale_line_search_values"
+        ),
+        "line_search_residual_only_supported": payload.get(
+            "line_search_residual_only_supported"
         ),
         "runtime_total_seconds": _float_or_none(runtime.get("total_seconds")),
         "first_iteration_accepted": first_iteration.get("accepted"),
@@ -375,6 +383,12 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
         ),
         "first_iteration_linear_solver_cpu_attempt_bypassed": first_iteration.get(
             "linear_solver_cpu_attempt_bypassed"
+        ),
+        "first_iteration_trial_count": len(first_trial_rows),
+        "first_iteration_residual_only_trial_count": sum(
+            1
+            for row in first_trial_rows
+            if isinstance(row, dict) and bool(row.get("residual_only_assembly"))
         ),
         "output_final_checkpoint_path": output_checkpoint.get("path"),
         "blockers": payload.get("blockers"),
@@ -1234,6 +1248,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_state_scale = _load(
         productization / "mgt_equilibrium_newton_focused_state_scale_probe.json"
     )
+    equilibrium_newton_focused_regdirect_checkpoint = _load(
+        productization / "mgt_equilibrium_newton_focused_regdirect_checkpoint_probe.json"
+    )
+    equilibrium_newton_focused_residual_only_fastpath = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_residual_only_fastpath_smoke_probe.json"
+    )
+    equilibrium_newton_focused_ultralow_reg = _load(
+        productization / "mgt_equilibrium_newton_focused_ultralow_reg_probe.json"
+    )
     equilibrium_newton_support128_followup42_host_ilu_device_gmres = _load(
         productization
         / "mgt_equilibrium_newton_support128_followup42_host_ilu_device_gmres_probe.json"
@@ -1251,6 +1275,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     )
     residual_jacobian_current_frontier_component = _load(
         productization / "mgt_residual_jacobian_current_frontier_component_probe.json"
+    )
+    residual_jacobian_focused_regdirect_checkpoint_component = _load(
+        productization
+        / "mgt_residual_jacobian_focused_regdirect_checkpoint_component_probe.json"
+    )
+    direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect = (
+        _load(
+            productization
+            / "mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_probe.json"
+        )
     )
     residual_jacobian_current_frontier_frame_hotspot_sweep = _load(
         productization
@@ -3918,6 +3952,44 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "equilibrium_newton_support128_followup42_state_scale_only": (
                     _equilibrium_newton_probe_summary(
                         equilibrium_newton_support128_followup42_state_scale_only
+                    )
+                ),
+                "equilibrium_newton_focused_regdirect_checkpoint": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_regdirect_checkpoint
+                    )
+                ),
+                "equilibrium_newton_focused_residual_only_fastpath": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_residual_only_fastpath
+                    )
+                ),
+                "equilibrium_newton_focused_ultralow_reg": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_ultralow_reg
+                    )
+                ),
+                "residual_jacobian_focused_regdirect_checkpoint_component_status": (
+                    residual_jacobian_focused_regdirect_checkpoint_component.get("status")
+                ),
+                "residual_jacobian_focused_regdirect_checkpoint_component_only": (
+                    residual_jacobian_focused_regdirect_checkpoint_component.get(
+                        "component_only"
+                    )
+                ),
+                "residual_jacobian_focused_regdirect_checkpoint_base_residual_inf_n": (
+                    residual_jacobian_focused_regdirect_checkpoint_component.get(
+                        "base_residual_inf_n"
+                    )
+                ),
+                "residual_jacobian_focused_regdirect_checkpoint_component_breakdown": (
+                    residual_jacobian_focused_regdirect_checkpoint_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect": (
+                    _direct_residual_probe_summary(
+                        direct_residual_frame_hotspot_shell_bending_block_lstsq_focused_regdirect
                     )
                 ),
                 "equilibrium_newton_state_scale_status": equilibrium_newton_state_scale.get(

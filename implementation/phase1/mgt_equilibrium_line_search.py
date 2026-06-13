@@ -118,12 +118,18 @@ def select_residual_descent_alpha(
     displacement_cap_m: float | None = None,
     max_translation_increment_m: float | None = None,
     translation_metrics: Callable[[np.ndarray, np.ndarray], dict[str, Any]] | None = None,
+    residual_only_free: np.ndarray | None = None,
+    residual_only_external_load: np.ndarray | None = None,
 ) -> tuple[float, float, np.ndarray, list[dict[str, Any]]]:
     """Pick the best alpha that reduces the equilibrium residual."""
     best_alpha = 0.0
     best_residual_inf = float(residual_inf)
     best_u = np.asarray(u, dtype=np.float64)
     trial_rows: list[dict[str, Any]] = []
+    residual_only_supported = bool(
+        getattr(assemble_residual, "supports_residual_only", False)
+        and residual_only_free is not None
+    )
     for alpha in alphas:
         if abs(float(alpha)) <= 0.0:
             trial_rows.append({"alpha": float(alpha), "residual_inf_n": float(residual_inf), "skipped": True})
@@ -153,9 +159,29 @@ def select_residual_descent_alpha(
                     }
                 )
                 continue
-        _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(candidate)
+        if residual_only_supported:
+            try:
+                _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(
+                    candidate,
+                    residual_only=True,
+                    free_override=np.asarray(residual_only_free, dtype=np.int64),
+                    external_load_override=residual_only_external_load,
+                )
+                used_residual_only = True
+            except TypeError:
+                _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(candidate)
+                used_residual_only = False
+        else:
+            _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(candidate)
+            used_residual_only = False
         trial_inf = float(np.max(np.abs(trial_residual))) if trial_residual.size else float("inf")
-        trial_rows.append({"alpha": float(alpha), "residual_inf_n": trial_inf})
+        trial_rows.append(
+            {
+                "alpha": float(alpha),
+                "residual_inf_n": trial_inf,
+                "residual_only_assembly": bool(used_residual_only),
+            }
+        )
         if trial_inf < best_residual_inf:
             best_residual_inf = trial_inf
             best_alpha = float(alpha)

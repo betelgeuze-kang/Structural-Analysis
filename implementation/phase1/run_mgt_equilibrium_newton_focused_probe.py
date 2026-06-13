@@ -157,6 +157,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     prefer_host_ilu: bool = True,
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
+    direct_regularization_factor: float | None = None,
     state_scale_line_search_values: tuple[float, ...] = (),
     state_scale_only: bool = False,
     output_final_checkpoint_npz: Path | None = None,
@@ -180,6 +181,7 @@ def run_mgt_equilibrium_newton_focused_probe(
         prefer_host_ilu=prefer_host_ilu,
         allow_negative_alphas=bool(allow_negative_alphas),
         linear_solver_profile=str(linear_solver_profile or "production"),
+        direct_regularization_factor=direct_regularization_factor,
         state_scale_line_search_values=state_scale_line_search_values,
         state_scale_only=bool(state_scale_only),
     )
@@ -223,12 +225,20 @@ def run_mgt_equilibrium_newton_focused_probe(
         "accepted_newton_iteration_count": newton.get("accepted_newton_iteration_count"),
         "allow_negative_alphas": bool(allow_negative_alphas),
         "linear_solver_profile": str(linear_solver_profile or "production"),
+        "direct_regularization_factor": (
+            None
+            if direct_regularization_factor is None
+            else float(direct_regularization_factor)
+        ),
         "state_scale_line_search_values": [
             float(value) for value in state_scale_line_search_values
         ],
         "state_scale_only": bool(state_scale_only),
         "residual_tolerance_n": float(residual_tolerance_n),
         "newton_iterations": newton.get("iterations"),
+        "line_search_residual_only_supported": bool(
+            newton.get("line_search_residual_only_supported")
+        ),
         "output_final_checkpoint": output_checkpoint_meta,
         "runtime_metrics": {"total_seconds": time.perf_counter() - started},
         "claim_boundary": (
@@ -288,6 +298,15 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--direct-regularization-factor",
+        type=float,
+        default=None,
+        help=(
+            "Override the regularized_direct sparse solve regularization factor. "
+            "Default keeps the production diagnostic factor."
+        ),
+    )
+    parser.add_argument(
         "--state-scale-only",
         action="store_true",
         help="Evaluate state-scale candidates and skip the Newton linear solve.",
@@ -305,6 +324,7 @@ def main() -> int:
         max_newton_iterations=args.max_newton_iterations,
         allow_negative_alphas=bool(args.allow_negative_alphas),
         linear_solver_profile=str(args.linear_solver_profile),
+        direct_regularization_factor=args.direct_regularization_factor,
         state_scale_line_search_values=state_scale_line_search_values,
         state_scale_only=bool(args.state_scale_only),
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
