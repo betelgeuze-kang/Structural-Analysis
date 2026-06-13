@@ -1,11 +1,11 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T14:51:20Z",
+  "generated_at": "2026-06-13T15:12:45Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
-    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
-    "direct_residual_inf_n": 0.2803796687027861,
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.28037957384916096,
     "residual_gate_n": 0.001,
     "previous_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
     "previous_cached_shell_newton_final_residual_inf_n": 0.280685596708914,
@@ -31,6 +31,17 @@
       "shell_bending_drilling": 29,
       "shell_membrane": 25,
       "frame": 10
+    },
+    "latest_all_dof_nodeblock_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe.json",
+    "latest_all_dof_nodeblock_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe_final_checkpoint.npz",
+    "latest_all_dof_nodeblock_final_residual_inf_n": 0.28037957384916096,
+    "latest_all_dof_nodeblock_total_improvement_from_prior_frontier_inf_n": 9.485362512107187e-08,
+    "latest_all_dof_nodeblock_component_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_all_dof_nodeblock_frontier_component_probe.json",
+    "latest_all_dof_nodeblock_component_probe_top_residual_count": 64,
+    "latest_all_dof_nodeblock_component_probe_top_row_dominant_component_counts": {
+      "shell_bending_drilling": 35,
+      "shell_membrane": 22,
+      "frame": 7
     }
   },
   "rocm_runtime": {
@@ -404,7 +415,108 @@
       "stop_reason": "no_gate_eligible_descent",
       "assessment": "Frame-only local correction also produces no residual descent at the latest frontier."
     },
-    "assessment": "Conditioning-aware block LSTSQ is a real but now saturated descent path. It advances the frontier by 6.20e-7 N from the prior 0.280380289 N checkpoint, then decays to 1e-8 to 1e-9 N improvements. Widening shell rows requires ridge/trust-region protection and near-null column scale-flooring; the latest mixed, shell-membrane-only, and frame-only local probes all produce no descent. The next G1 push should change correction model scope, not merely evaluate the same local residual directions faster."
+    "all_dof_nodeblock_top64_rows32_support8_ridge1em3": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.001,
+      "component_filter": "all",
+      "node_block_support": true,
+      "base_residual_inf_n": 0.2803796687027861,
+      "final_residual_inf_n": 0.2803796001590237,
+      "improvement_inf_n": 6.85437623881846e-08,
+      "best_alpha": -0.0001,
+      "component_top_count": 64,
+      "support_size": 276,
+      "pre_node_block_support_size": 140,
+      "selected_hotspot_row_count": 32,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 17,
+        "shell_membrane": 8,
+        "frame": 7
+      },
+      "correction_inf_m": 1.0685061301878836e-07,
+      "accepted": true,
+      "runtime_s": 58.16520541100181,
+      "assessment": "Allowing all DOF rows and expanding support to structural node blocks reopened a coupled descent path after translation-only/component-specific probes saturated."
+    },
+    "all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.001,
+      "component_filter": "all",
+      "node_block_support": true,
+      "base_residual_inf_n": 0.2803796001590237,
+      "final_residual_inf_n": 0.28037957384916096,
+      "improvement_inf_n": 2.6309862732887268e-08,
+      "best_alpha": -0.00003,
+      "component_top_count": 64,
+      "support_size": 318,
+      "pre_node_block_support_size": 146,
+      "selected_hotspot_row_count": 32,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 10,
+        "shell_membrane": 14,
+        "frame": 8
+      },
+      "correction_inf_m": 3.563450290314921e-06,
+      "accepted": true,
+      "runtime_s": 57.86434705099964
+    },
+    "all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup3_no_descent": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup3_probe.json",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.001,
+      "component_filter": "all",
+      "node_block_support": true,
+      "base_residual_inf_n": 0.28037957384916096,
+      "final_residual_inf_n": 0.28037957384916096,
+      "component_top_count": 64,
+      "support_size": 360,
+      "selected_hotspot_row_count": 32,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 19,
+        "shell_membrane": 11,
+        "frame": 2
+      },
+      "correction_inf_m": 0.0034529215817126983,
+      "best_alpha": -1e-07,
+      "best_alpha_residual_inf_n": 9.369455176909135,
+      "accepted": false,
+      "stop_reason": "no_gate_eligible_descent",
+      "assessment": "The same all-DOF node-block branch saturated after two promotions; the next raw direction became too large and residual-worsening."
+    },
+    "all_dof_nodeblock_top64_rows32_support8_ridge1e1_no_descent": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1e1_probe.json",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.1,
+      "component_filter": "all",
+      "node_block_support": true,
+      "base_residual_inf_n": 0.28037957384916096,
+      "final_residual_inf_n": 0.28037957384916096,
+      "correction_inf_m": 0.003366392306990621,
+      "best_alpha": -1e-07,
+      "best_alpha_residual_inf_n": 9.134659171725326,
+      "accepted": false,
+      "stop_reason": "no_gate_eligible_descent",
+      "assessment": "Increasing ridge to 0.1 at the saturated frontier did not recover descent."
+    },
+    "all_dof_nodeblock_top64_rows32_support8_ridge1em3_tinyalpha_no_descent": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_tinyalpha_probe.json",
+      "base_residual_inf_n": 0.28037957384916096,
+      "final_residual_inf_n": 0.28037957384916096,
+      "best_alpha": 1e-09,
+      "best_alpha_residual_inf_n": 0.28037957384916096,
+      "accepted": false,
+      "stop_reason": "no_gate_eligible_descent",
+      "assessment": "Tiny alpha sweep confirmed the followup2 node-block frontier is locally flat until larger alphas worsen residual."
+    },
+    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent family. Narrow shell-bending ridge polish reached 0.2803796687 N, while translation-only, shell-membrane-only, and frame-only probes produced no descent. Expanding target rows to all DOFs and support to structural node blocks reopened coupled descent to 0.2803795738 N, then saturated when the raw correction grew to millimeter scale. The next G1 push should automate adaptive ridge/support/trust selection for this all-DOF node-block branch or move to a broader coarse/global correction, not simply repeat the old local translation probes."
   },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
@@ -431,7 +543,7 @@
     "use_rocm_for_g1_fast_push_now": false,
     "use_rust_for_g1_fast_push_now": false,
     "use_hip_sparse_directly_for_g1_fast_push_now": false,
-    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration alone. Keep the cached residual-only path and use ROCm/HIP selectively for repeated sparse/JVP diagnostics, retain conditioned block LSTSQ as a polishing step, and focus implementation on broader conditioning-aware global/coarse correction that changes the correction direction quality.",
+    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration alone. Keep the cached residual-only path, promote the new all-DOF node-block correction into an adaptive ridge/support/trust loop, and use ROCm/HIP selectively for repeated sparse/JVP diagnostics and broader coarse/global correction experiments.",
     "why": [
       "The current residual decay is limited by correction direction quality, not only by per-evaluation speed.",
       "The latest shell-bending tangent follow-up improved only 6.98e-7 N, and the wider translation tangent probe produced no descent from 0.28038028917462354 N.",
@@ -443,6 +555,8 @@
       "Fine alpha search improved the ridge-polish branch, but the branch is now at nanonewton-scale descent and not a credible path to the 1e-3 N gate by itself.",
       "The latest top64 component probe shows a mixed frontier, with 29 shell-bending rows, 25 shell-membrane rows, and 10 frame rows; the next correction needs coupled shell-membrane/frame participation rather than another narrow shell-bending polish.",
       "At the latest 0.2803796687027861 N frontier, mixed translation, shell-membrane-only, and frame-only ridge probes all ended with no gate-eligible descent.",
+      "The all-DOF node-block ridge branch reopened coupled descent and advanced the frontier to 0.28037957384916096 N with two accepted promotions before saturating.",
+      "The new all-DOF node-block component probe shows the frontier shifted to 35 shell-bending rows, 22 shell-membrane rows, and 7 frame rows in the top64 residual set.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."

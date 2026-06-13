@@ -206,8 +206,32 @@ def _block_lstsq_hotspot_correction_vector(
     return correction
 
 
+def _expand_support_to_node_blocks(
+    support_cols: np.ndarray,
+    free: np.ndarray,
+) -> np.ndarray:
+    free_idx = np.asarray(free, dtype=np.int64)
+    base_cols = {
+        int(col)
+        for col in np.asarray(support_cols, dtype=np.int64).tolist()
+        if 0 <= int(col) < int(free_idx.size)
+    }
+    if not base_cols:
+        return np.asarray([], dtype=np.int64)
+    selected_nodes = {int(free_idx[col]) // 6 for col in base_cols}
+    expanded = {
+        int(local_col)
+        for local_col, global_dof in enumerate(free_idx.tolist())
+        if int(global_dof) // 6 in selected_nodes
+    }
+    expanded.update(base_cols)
+    return np.asarray(sorted(expanded), dtype=np.int64)
+
+
 def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: str) -> bool:
     dof = str(row.get("dof") or "")
+    if component_filter == "all":
+        return dof in {"ux", "uy", "uz", "rx", "ry", "rz"}
     if dof not in {"ux", "uy", "uz"}:
         return False
     dominant = str(row.get("dominant_component") or "")
@@ -379,6 +403,7 @@ def _hotspot_block_lstsq_sweep(
     equilibration: str = "none",
     solve_method: str = "truncated_svd",
     ridge_factor: float = 1.0e-6,
+    node_block_support: bool = False,
 ) -> dict[str, Any]:
     operator_source = str(operator_source)
     if operator_source not in {"tangent", "finite_difference"}:
@@ -460,6 +485,9 @@ def _hotspot_block_lstsq_sweep(
                 strongest = np.argpartition(vals, -take)[-take:]
                 support.update(int(cols[index]) for index in strongest.tolist())
     support_cols = np.asarray(sorted(support), dtype=np.int64)
+    pre_node_block_support_size = int(support_cols.size)
+    if node_block_support:
+        support_cols = _expand_support_to_node_blocks(support_cols, free_idx)
     if support_cols.size == 0:
         return {
             "enabled": True,
@@ -707,6 +735,8 @@ def _hotspot_block_lstsq_sweep(
         "target_rows": [int(row) for row in target_rows.tolist()],
         "target_global_dofs": [int(free_idx[int(row)]) for row in target_rows.tolist()],
         "support_size": int(support_cols.size),
+        "node_block_support": bool(node_block_support),
+        "pre_node_block_support_size": pre_node_block_support_size,
         "support_columns_per_row": int(support_columns_per_row),
         "residual_only_trial_count": int(residual_only_trial_count),
         "full_trial_count": int(full_trial_count),
@@ -749,6 +779,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_equilibration: str = "none",
     block_lstsq_solve_method: str = "truncated_svd",
     block_lstsq_ridge_factor: float = 1.0e-6,
+    block_lstsq_node_block_support: bool = False,
     component_top_count: int = 24,
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
@@ -869,6 +900,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 equilibration=block_lstsq_equilibration,
                 solve_method=block_lstsq_solve_method,
                 ridge_factor=block_lstsq_ridge_factor,
+                node_block_support=block_lstsq_node_block_support,
             )
         last_sweep = sweep
         if _wall_time_exceeded():
@@ -1179,7 +1211,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
         },
         "claim_boundary": (
             "Promotes only a relative-increment-gate-eligible correction on frame-dominant "
-            "translation residual hotspots. This is an incremental frontier advance, not "
+            "or selected component residual hotspots. This is an incremental frontier advance, not "
             "full nonlinear residual closure."
         ),
         "blockers": []
@@ -1221,7 +1253,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--block-lstsq-allow-negative-alphas", action="store_true")
     parser.add_argument(
         "--block-lstsq-component-filter",
-        choices=("frame", "shell_bending_drilling", "shell_membrane", "translation"),
+        choices=("frame", "shell_bending_drilling", "shell_membrane", "translation", "all"),
         default="frame",
     )
     parser.add_argument(
@@ -1245,6 +1277,14 @@ def main(argv: list[str] | None = None) -> int:
         default="truncated_svd",
     )
     parser.add_argument("--block-lstsq-ridge-factor", type=float, default=1.0e-6)
+    parser.add_argument(
+        "--block-lstsq-node-block-support",
+        action="store_true",
+        help=(
+            "Expand selected block-LSTSQ support columns to all free 6DOF rows "
+            "on the same structural nodes."
+        ),
+    )
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
         "--max-wall-seconds",
@@ -1297,6 +1337,7 @@ def main(argv: list[str] | None = None) -> int:
         block_lstsq_equilibration=str(args.block_lstsq_equilibration),
         block_lstsq_solve_method=str(args.block_lstsq_solve_method),
         block_lstsq_ridge_factor=float(args.block_lstsq_ridge_factor),
+        block_lstsq_node_block_support=bool(args.block_lstsq_node_block_support),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,
     )

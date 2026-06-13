@@ -385,6 +385,135 @@ def test_frame_hotspot_block_lstsq_can_target_shell_membrane_hotspots(
     assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
 
 
+def test_frame_hotspot_block_lstsq_all_filter_can_target_rotation_hotspots(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([3], [3])), shape=(4, 4)).tocsc()
+    free = np.asarray([3], dtype=np.int64)
+    u0 = np.asarray([0.0, 0.0, 0.0, 0.1], dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal = np.asarray([10.0 * float(u[3])], dtype=np.float64)
+            rhs = np.asarray([2.0], dtype=np.float64)
+            residual = internal - rhs
+            meta = {}
+            if include_component_forces:
+                internal_global = np.zeros(4, dtype=np.float64)
+                internal_global[3] = internal[0]
+                meta["component_forces"] = {"frame": internal_global}
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=1,
+        max_promotions=1,
+        relative_increment_tolerance=1.0,
+        block_lstsq_component_filter="all",
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["status"] == "ready"
+    assert sweep["evaluated"] is True
+    assert sweep["component_filter"] == "all"
+    assert sweep["target_global_dofs"] == [3]
+    assert sweep["selected_hotspot_dominant_component_counts"] == {"frame": 1}
+    assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
+
+
+def test_frame_hotspot_block_lstsq_can_expand_support_to_node_blocks(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(
+        (
+            [10.0, 5.0],
+            ([0, 3], [0, 3]),
+        ),
+        shape=(4, 4),
+    ).tocsc()
+    free = np.asarray([0, 3], dtype=np.int64)
+    u0 = np.asarray([0.1, 0.0, 0.0, 0.0], dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal = np.asarray([10.0 * float(u[0]), 5.0 * float(u[3])], dtype=np.float64)
+            rhs = np.asarray([2.0, 0.0], dtype=np.float64)
+            residual = internal - rhs
+            meta = {}
+            if include_component_forces:
+                internal_global = np.zeros(4, dtype=np.float64)
+                internal_global[0] = internal[0]
+                internal_global[3] = internal[1]
+                meta["component_forces"] = {"frame": internal_global}
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=1,
+        max_promotions=1,
+        relative_increment_tolerance=1.0,
+        block_lstsq_support_columns_per_row=0,
+        block_lstsq_node_block_support=True,
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["status"] == "ready"
+    assert sweep["node_block_support"] is True
+    assert sweep["pre_node_block_support_size"] == 1
+    assert sweep["support_size"] == 2
+    assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
+
+
 def test_frame_hotspot_block_lstsq_can_use_finite_difference_operator(
     monkeypatch,
 ) -> None:
