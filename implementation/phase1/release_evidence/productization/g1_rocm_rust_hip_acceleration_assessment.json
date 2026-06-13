@@ -38,11 +38,11 @@
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
     "post_reassessment_frontier_advances": {
-      "generated_at": "2026-06-14T07:20:53+09:00",
-      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_rows_followup12_final_checkpoint.npz",
-      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_rows_followup12_frontier_probe.json",
-      "latest_direct_residual_inf_n": 0.037053928165647676,
-      "latest_direct_relative_residual_inf": 4.270785389137532e-06,
+      "generated_at": "2026-06-14T07:28:43+09:00",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup13_final_checkpoint.npz",
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_rows_followup13_frontier_probe.json",
+      "latest_direct_residual_inf_n": 0.036937621269282295,
+      "latest_direct_relative_residual_inf": 4.257380014370446e-06,
       "advances": [
         {
           "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
@@ -228,24 +228,38 @@
           "improvement_inf_n": 3.735794029213757e-05,
           "runtime_seconds": 194.339573579,
           "assessment": "Adding a shell-element rotational target mode for shell bending/drilling rows produced a larger accepted descent than ridge/support tuning and reduced the 2202 rx shell-bending hotspot enough for 2380 uz shell membrane to become the top row again."
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup13_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup13_final_checkpoint.npz",
+          "target_mode": "residual_shell_normal_rows",
+          "element_neighbor_depth": 1,
+          "support_expansion_depth": 0,
+          "target_row_count": 28,
+          "support_size": 96,
+          "base_residual_inf_n": 0.037053928165647676,
+          "final_residual_inf_n": 0.036937621269282295,
+          "improvement_inf_n": 0.00011630689636538127,
+          "runtime_seconds": 192.93651990900253,
+          "assessment": "Targeting shell global-z normal rows after the bending pass produced a larger accepted descent and moved the active top row back to 2202 rx shell bending/drilling."
         }
       ],
       "latest_top_residual_summary": {
         "top_residual_count": 96,
         "top_row_dominant_component_counts": {
-          "shell_membrane": 40,
           "shell_bending_drilling": 42,
+          "shell_membrane": 40,
           "frame": 14
         },
         "largest_row": {
-          "node_index": 2380,
-          "dof": "uz",
-          "residual_n": -0.037053928165647676,
-          "dominant_component": "shell_membrane",
-          "frame_component_n": 361.3271963445091,
-          "shell_bending_drilling_component_n": 6.745505120989871e-16,
-          "shell_membrane_component_n": -361.9561853942011,
-          "external_load_n": -0.5919351215263475
+          "node_index": 2202,
+          "dof": "rx",
+          "residual_n": -0.036937621269282295,
+          "dominant_component": "shell_bending_drilling",
+          "frame_component_n": 0.4926204986796749,
+          "shell_bending_drilling_component_n": -0.5295581199489572,
+          "shell_membrane_component_n": 0.0,
+          "external_load_n": 0.0
         }
       },
       "saturation_counter_evidence": [
@@ -317,7 +331,7 @@
           "assessment": "Repeating element-block targeting with broader seed counts 4/8 worsened residual and wrote no checkpoint; the followup8 element patch is useful, but simply widening the element seed set is saturated."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N and shifted the active hotspot to 2202 rx shell bending/drilling; a new shell-bending/drilling rotational target mode then lowered it to 0.0370539282 N and moved the active top row back to 2380 uz shell membrane. The next G1 push should alternate targeted shell-bending and shell-membrane/frame-cancellation patches rather than tune ridge/support alone."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; a shell-bending/drilling rotational pass then lowered it to 0.0370539282 N; and a shell-normal translation pass lowered it further to 0.0369376213 N. The active top row alternated back to 2202 rx shell bending/drilling, confirming the next G1 push should continue alternating targeted shell-bending and shell-normal/membrane patches."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
