@@ -2857,6 +2857,164 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup36_probe_final_checkpoint.npz"
     )
+    direct_post_frame_support64_translation_support128_followup37 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup37"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup36[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "final_direct_residual_inf_n"
+        ]
+        == 4799.040646487467
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "final_direct_residual_inf_n"
+        ]
+        < direct_post_frame_support64_translation_support128_followup36[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 323
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup37[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup37_probe_final_checkpoint.npz"
+    )
+    direct_post_frame_support64_translation_support128_followup42 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup42[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup37[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42[
+            "final_direct_residual_inf_n"
+        ]
+        == 4791.522794380646
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42["max_promotions"]
+        == 5
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42["stop_reason"]
+        == "no_gate_eligible_descent"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 346
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup42[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe_final_checkpoint.npz"
+    )
+    support256 = rows["G1"]["evidence"][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42_support256"
+    ]
+    assert support256["base_direct_residual_inf_n"] == (
+        direct_post_frame_support64_translation_support128_followup42[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert support256["final_direct_residual_inf_n"] == support256[
+        "base_direct_residual_inf_n"
+    ]
+    assert support256["promotion_count"] == 0
+    assert support256["stop_reason"] == "no_gate_eligible_descent"
+    assert support256["frame_hotspot_block_lstsq_support_size"] == 346
+    negalpha = rows["G1"]["evidence"][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup43_negalpha"
+    ]
+    assert negalpha["base_direct_residual_inf_n"] == support256[
+        "base_direct_residual_inf_n"
+    ]
+    assert negalpha["final_direct_residual_inf_n"] == negalpha[
+        "base_direct_residual_inf_n"
+    ]
+    assert negalpha["promotion_count"] == 0
+    assert negalpha["stop_reason"] == "no_gate_eligible_descent"
+    assert negalpha["frame_hotspot_block_lstsq_allow_negative_alphas"] is True
+    host_ilu_device_gmres = rows["G1"]["evidence"][
+        "equilibrium_newton_support128_followup42_host_ilu_device_gmres"
+    ]
+    assert host_ilu_device_gmres["status"] == "partial"
+    assert host_ilu_device_gmres["ready"] is False
+    assert host_ilu_device_gmres["base_residual_inf_n"] == (
+        direct_post_frame_support64_translation_support128_followup42[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert host_ilu_device_gmres["final_residual_inf_n"] == (
+        direct_post_frame_support64_translation_support128_followup42[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert host_ilu_device_gmres["linear_solver_profile"] == "host_ilu_device_gmres"
+    assert (
+        host_ilu_device_gmres["first_iteration_linear_solver_backend"]
+        == "rocm_torch_sparse_host_ilu_device_gmres"
+    )
+    assert (
+        host_ilu_device_gmres["first_iteration_linear_solver_breakdown"]
+        == "host_ilu_device_gmres_unavailable"
+    )
+    assert (
+        "No HIP GPUs are available"
+        in host_ilu_device_gmres["first_iteration_linear_solver_error_excerpt"]
+    )
+    assert (
+        host_ilu_device_gmres["first_iteration_linear_solver_gpu_first_profile"]
+        is True
+    )
+    assert (
+        host_ilu_device_gmres[
+            "first_iteration_linear_solver_cpu_attempt_bypassed"
+        ]
+        is True
+    )
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"

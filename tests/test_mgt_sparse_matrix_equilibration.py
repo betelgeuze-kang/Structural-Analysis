@@ -14,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
 from mgt_coupled_stiffness_unit_audit import audit_coupled_stiffness_diagonals  # noqa: E402
+import mgt_sparse_linear_solver as solver_module  # noqa: E402
 from mgt_sparse_linear_solver import (  # noqa: E402
     _translation_block_jacobi_precondition,
     build_node_block_jacobi_preconditioner,
@@ -163,6 +164,75 @@ def test_newton_correction_block_jacobi_profile_bypasses_ilu() -> None:
     assert meta["linear_solver_profile"] == "block_jacobi_gmres"
     assert meta["linear_solver_diagnostic_profile_bypassed_ilu"] is True
     assert meta["linear_solver_backend"] == "cpu_block_jacobi_gmres"
+
+
+def test_newton_correction_host_ilu_device_profile_bypasses_cpu_attempts(
+    monkeypatch,
+) -> None:
+    k = coo_matrix(([4.0, 3.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsc()
+    residual = np.asarray([-8.0, 6.0], dtype=np.float64)
+    calls: list[str] = []
+
+    def fake_host_ilu_device_gmres(*_args, **_kwargs):
+        calls.append("host_ilu_device_gmres")
+        return {
+            "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+            "preconditioner": "node_block_jacobi_plus_equilibrated_spilu_host",
+            "converged": True,
+            "residual_inf_n": 1.0e-9,
+            "solve_seconds": 0.125,
+            "solution": np.asarray([2.0, -2.0], dtype=np.float64),
+            "equilibration": {"applied": True},
+        }
+
+    monkeypatch.setattr(
+        solver_module,
+        "solve_host_ilu_device_gmres",
+        fake_host_ilu_device_gmres,
+    )
+
+    correction, meta = solve_newton_correction(
+        k,
+        residual,
+        prefer_host_ilu=True,
+        free_global_dofs=np.asarray([0, 1], dtype=np.int64),
+        solver_profile="host_ilu_device_gmres",
+    )
+
+    np.testing.assert_allclose(correction, [2.0, -2.0], rtol=1.0e-10, atol=1.0e-12)
+    assert calls == ["host_ilu_device_gmres"]
+    assert meta["linear_solver_profile"] == "host_ilu_device_gmres"
+    assert meta["linear_solver_backend"] == "rocm_torch_sparse_host_ilu_device_gmres"
+    assert meta["linear_solver_attempt"] == "host_ilu_device_gmres_only"
+    assert meta["linear_solver_gpu_first_profile"] is True
+    assert meta["linear_solver_cpu_attempt_bypassed"] is True
+
+
+def test_newton_correction_host_ilu_device_profile_reports_unavailable(
+    monkeypatch,
+) -> None:
+    k = coo_matrix(([4.0], ([0], [0])), shape=(1, 1)).tocsc()
+
+    def fake_host_ilu_device_gmres(*_args, **_kwargs):
+        raise RuntimeError("No HIP GPUs are available")
+
+    monkeypatch.setattr(
+        solver_module,
+        "solve_host_ilu_device_gmres",
+        fake_host_ilu_device_gmres,
+    )
+
+    correction, meta = solve_newton_correction(
+        k,
+        np.asarray([-1.0], dtype=np.float64),
+        free_global_dofs=np.asarray([0], dtype=np.int64),
+        solver_profile="host_ilu_device_gmres",
+    )
+
+    assert not np.all(np.isfinite(correction))
+    assert meta["linear_solver_profile"] == "host_ilu_device_gmres"
+    assert meta["linear_solver_breakdown"] == "host_ilu_device_gmres_unavailable"
+    assert meta["linear_solver_cpu_attempt_bypassed"] is True
 
 
 def test_newton_correction_rejects_unknown_solver_profile() -> None:

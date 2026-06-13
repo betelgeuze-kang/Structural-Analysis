@@ -187,6 +187,9 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
             "selected_hotspot_dominant_component_counts"
         ),
         "frame_hotspot_block_lstsq_support_size": hotspot_block.get("support_size"),
+        "frame_hotspot_block_lstsq_allow_negative_alphas": hotspot_block.get(
+            "allow_negative_alphas"
+        ),
         "frame_hotspot_block_lstsq_correction_inf_m": _float_or_none(
             hotspot_block.get("correction_inf_m")
         ),
@@ -314,6 +317,52 @@ def _direct_residual_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
         "output_final_checkpoint_written": output_checkpoint.get("written"),
         "output_final_checkpoint_path": output_checkpoint.get("path"),
         "output_final_checkpoint_reason": output_checkpoint.get("reason"),
+        "blockers": payload.get("blockers"),
+    }
+
+
+def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    iterations = payload.get("newton_iterations")
+    iterations = iterations if isinstance(iterations, list) else []
+    first_iteration = (
+        iterations[0] if iterations and isinstance(iterations[0], dict) else {}
+    )
+    output_checkpoint = payload.get("output_final_checkpoint")
+    output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
+    return {
+        "schema_version": payload.get("schema_version"),
+        "status": payload.get("status"),
+        "ready": payload.get("equilibrium_newton_ready"),
+        "base_residual_inf_n": _float_or_none(payload.get("base_residual_inf_n")),
+        "initial_residual_inf_n": _float_or_none(
+            payload.get("initial_residual_inf_n")
+        ),
+        "final_residual_inf_n": _float_or_none(payload.get("final_residual_inf_n")),
+        "accepted_newton_iteration_count": payload.get(
+            "accepted_newton_iteration_count"
+        ),
+        "linear_solver_profile": payload.get("linear_solver_profile"),
+        "first_iteration_accepted": first_iteration.get("accepted"),
+        "first_iteration_stop_reason": first_iteration.get("stop_reason"),
+        "first_iteration_linear_solver_backend": first_iteration.get(
+            "linear_solver_backend"
+        ),
+        "first_iteration_linear_solver_profile": first_iteration.get(
+            "linear_solver_profile"
+        ),
+        "first_iteration_linear_solver_breakdown": first_iteration.get(
+            "linear_solver_breakdown"
+        ),
+        "first_iteration_linear_solver_error_excerpt": first_iteration.get(
+            "linear_solver_error_excerpt"
+        ),
+        "first_iteration_linear_solver_gpu_first_profile": first_iteration.get(
+            "linear_solver_gpu_first_profile"
+        ),
+        "first_iteration_linear_solver_cpu_attempt_bypassed": first_iteration.get(
+            "linear_solver_cpu_attempt_bypassed"
+        ),
+        "output_final_checkpoint_path": output_checkpoint.get("path"),
         "blockers": payload.get("blockers"),
     }
 
@@ -1171,6 +1220,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_state_scale = _load(
         productization / "mgt_equilibrium_newton_focused_state_scale_probe.json"
     )
+    equilibrium_newton_support128_followup42_host_ilu_device_gmres = _load(
+        productization
+        / "mgt_equilibrium_newton_support128_followup42_host_ilu_device_gmres_probe.json"
+    )
     translation_frontier_followup57_timeout_diagnostic = _load(
         productization
         / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup57_timeout_diagnostic_probe.json"
@@ -1602,6 +1655,22 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     direct_residual_post_frame_support64_block_lstsq_translation_support128_followup36 = _load(
         productization
         / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup36_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup37 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup37_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42_support256 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_support256_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup43_negalpha = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup43_negalpha_probe.json"
     )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
@@ -2819,6 +2888,26 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         direct_residual_post_frame_support64_block_lstsq_translation_support128_followup36
                     )
                 ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup37": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup37
+                    )
+                ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42
+                    )
+                ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42_support256": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup42_support256
+                    )
+                ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup43_negalpha": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup43_negalpha
+                    )
+                ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"
                 ),
@@ -3803,6 +3892,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                     "equilibrium_replay_residual_inf_only_no_solver_receipt_accept"
                 ),
                 "equilibrium_newton_focused_blockers": equilibrium_newton_focused.get("blockers"),
+                "equilibrium_newton_support128_followup42_host_ilu_device_gmres": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_support128_followup42_host_ilu_device_gmres
+                    )
+                ),
                 "equilibrium_newton_state_scale_status": equilibrium_newton_state_scale.get(
                     "status"
                 ),

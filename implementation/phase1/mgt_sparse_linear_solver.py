@@ -407,10 +407,13 @@ def solve_host_ilu_device_gmres(
     require_convergence: bool = False,
     equilibrate: bool = True,
     free_global_dofs: np.ndarray | None = None,
+    regularization_factor: float = 0.0,
 ) -> dict[str, Any]:
     """GMRES with host ILU preconditioner and ROCm torch sparse matvec when available."""
     import torch  # type: ignore
 
+    if not torch.cuda.is_available():
+        raise RuntimeError("No HIP GPUs are available")
     device = torch.device("cuda:0")
     started = __import__("time").perf_counter()
     csr = k_ff.tocsr()
@@ -418,7 +421,11 @@ def solve_host_ilu_device_gmres(
     rhs_np = np.asarray(rhs, dtype=np.float64)
     rhs_inf = float(np.max(np.abs(rhs_np))) if rhs_np.size else 0.0
     threshold = max(float(tolerance_abs), float(tolerance_rel) * max(rhs_inf, 1.0))
-    k_mat = csr
+    regularization = 0.0
+    if float(regularization_factor) > 0.0:
+        diag = np.asarray(csr.diagonal(), dtype=np.float64)
+        regularization = float(regularization_factor) * max(float(np.mean(np.abs(diag))), 1.0)
+    k_mat = csr + eye(n, format="csr") * regularization if regularization > 0.0 else csr
     rhs_work = rhs_np
     scale = np.ones(n, dtype=np.float64)
     equilibration_meta: dict[str, Any] = {"applied": False}
@@ -440,6 +447,7 @@ def solve_host_ilu_device_gmres(
         "cpu_solver_fallback_detected": False,
         "matvec_backend": "rocm_torch_sparse_csr",
         "preconditioner_apply_backend": "scipy_spilu_host",
+        "regularization": float(regularization),
         "equilibration": equilibration_meta,
     }
     try:
@@ -573,9 +581,15 @@ def solve_newton_correction(
     rhs_inf = float(np.max(np.abs(rhs))) if rhs.size else 0.0
     newton_relative_tolerance = 1.0e-4
     profile = str(solver_profile or "production").strip()
-    if profile not in {"production", "regularized_direct", "block_jacobi_gmres"}:
+    if profile not in {
+        "production",
+        "regularized_direct",
+        "block_jacobi_gmres",
+        "host_ilu_device_gmres",
+    }:
         raise ValueError(
-            "solver_profile must be 'production', 'regularized_direct', or 'block_jacobi_gmres'"
+            "solver_profile must be 'production', 'regularized_direct', "
+            "'block_jacobi_gmres', or 'host_ilu_device_gmres'"
         )
     if profile == "regularized_direct":
         solve_started = time.perf_counter()
@@ -631,6 +645,63 @@ def solve_newton_correction(
             "linear_solver_rhs_inf_n": rhs_inf,
             "linear_solver_equilibration": row.get("equilibration"),
             "linear_solver_diagnostic_profile_bypassed_ilu": True,
+        }
+    if profile == "host_ilu_device_gmres":
+        if free_global_dofs is None:
+            raise ValueError("host_ilu_device_gmres profile requires free_global_dofs")
+        try:
+            row = solve_host_ilu_device_gmres(
+                k_ff,
+                rhs,
+                tolerance_abs=1.0e-6,
+                tolerance_rel=newton_relative_tolerance,
+                max_iterations=800,
+                restart=80,
+                drop_tol=1.0e-4,
+                fill_factor=40.0,
+                require_convergence=False,
+                equilibrate=True,
+                free_global_dofs=np.asarray(free_global_dofs, dtype=np.int64),
+                regularization_factor=1.0e-8,
+            )
+        except Exception as exc:
+            return np.full_like(rhs, np.nan, dtype=np.float64), {
+                "linear_solver_backend": "rocm_torch_sparse_host_ilu_device_gmres",
+                "linear_solver_profile": profile,
+                "linear_solver_converged": False,
+                "linear_solver_breakdown": "host_ilu_device_gmres_unavailable",
+                "linear_solver_error_excerpt": repr(exc)[:600],
+                "linear_solver_rhs_inf_n": rhs_inf,
+                "linear_solver_gpu_first_profile": True,
+                "linear_solver_cpu_attempt_bypassed": True,
+            }
+        solution = row.get("solution")
+        if not isinstance(solution, np.ndarray):
+            return np.full_like(rhs, np.nan, dtype=np.float64), {
+                "linear_solver_backend": row.get("backend"),
+                "linear_solver_profile": profile,
+                "linear_solver_preconditioner": row.get("preconditioner"),
+                "linear_solver_converged": False,
+                "linear_solver_breakdown": row.get("breakdown")
+                or "host_ilu_device_gmres_solution_missing",
+                "linear_solver_error_excerpt": row.get("error_excerpt"),
+                "linear_solver_seconds": row.get("solve_seconds"),
+                "linear_solver_rhs_inf_n": rhs_inf,
+                "linear_solver_gpu_first_profile": True,
+                "linear_solver_cpu_attempt_bypassed": True,
+            }
+        return np.asarray(solution, dtype=np.float64), {
+            "linear_solver_backend": row.get("backend"),
+            "linear_solver_profile": profile,
+            "linear_solver_preconditioner": row.get("preconditioner"),
+            "linear_solver_converged": bool(row.get("converged")),
+            "linear_solver_residual_inf_n": row.get("residual_inf_n"),
+            "linear_solver_seconds": row.get("solve_seconds"),
+            "linear_solver_attempt": "host_ilu_device_gmres_only",
+            "linear_solver_rhs_inf_n": rhs_inf,
+            "linear_solver_equilibration": row.get("equilibration"),
+            "linear_solver_gpu_first_profile": True,
+            "linear_solver_cpu_attempt_bypassed": True,
         }
     attempts: list[dict[str, Any]] = []
     if free_global_dofs is not None and int(free_global_dofs.size) > 0:

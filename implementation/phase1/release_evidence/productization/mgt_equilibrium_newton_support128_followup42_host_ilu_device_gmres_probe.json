@@ -1,0 +1,50 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-13T07:54:15.400603+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 198,
+    "accepted_residual_history_count": 198,
+    "residual_inf_n": 4791.522794380646,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 7.2199044927738195e-06
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 4791.522794380646,
+  "initial_residual_inf_n": 4791.522794380646,
+  "final_residual_inf_n": 4791.522794380646,
+  "accepted_newton_iteration_count": 0,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "host_ilu_device_gmres",
+  "state_scale_line_search_values": [],
+  "residual_tolerance_n": 0.0005,
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": false,
+      "stop_reason": "newton_linear_solve_non_finite",
+      "start_residual_inf_n": 4791.522794380646,
+      "linear_solver_backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "linear_solver_profile": "host_ilu_device_gmres",
+      "linear_solver_converged": false,
+      "linear_solver_breakdown": "host_ilu_device_gmres_unavailable",
+      "linear_solver_error_excerpt": "RuntimeError('No HIP GPUs are available')",
+      "linear_solver_rhs_inf_n": 4791.522794380646,
+      "linear_solver_gpu_first_profile": true,
+      "linear_solver_cpu_attempt_bypassed": true
+    }
+  ],
+  "output_final_checkpoint": null,
+  "runtime_metrics": {
+    "total_seconds": 61.6541308809974
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

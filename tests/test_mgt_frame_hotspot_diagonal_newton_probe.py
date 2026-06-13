@@ -320,9 +320,69 @@ def test_frame_hotspot_block_lstsq_probe_exposes_support_and_svd_controls(
     sweep = payload["frame_hotspot_block_lstsq_sweep"]
     assert sweep["support_columns_per_row"] == 2
     assert sweep["include_gate_limited_alpha"] is True
+    assert sweep["allow_negative_alphas"] is False
     assert sweep["linear_solve"]["svd_max_condition"] == 1234.0
     assert sweep["support_size"] >= 2
     assert len(sweep["candidate_rows"]) == 2
+
+
+def test_frame_hotspot_block_lstsq_can_promote_negative_alpha(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+    u0 = np.asarray([0.1], dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal = np.asarray(stiffness @ u, dtype=np.float64)
+            rhs = np.asarray([2.0], dtype=np.float64)
+            residual = rhs - internal
+            meta = {}
+            if include_component_forces:
+                meta["component_forces"] = {"frame": internal.copy()}
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=1,
+        max_promotions=1,
+        relative_increment_tolerance=1.0,
+        block_lstsq_allow_negative_alphas=True,
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["status"] == "ready"
+    assert payload["stop_reason"] == "direct_residual_gate_closed"
+    assert payload["promotion_candidate"]["alpha"] == -1.0
+    assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
+    assert sweep["allow_negative_alphas"] is True
+    assert [row["alpha"] for row in sweep["candidate_rows"]] == [1.0, -1.0]
 
 
 def test_frame_hotspot_probe_can_write_progress_artifacts(

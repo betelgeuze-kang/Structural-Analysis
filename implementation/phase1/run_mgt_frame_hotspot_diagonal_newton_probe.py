@@ -274,6 +274,7 @@ def _hotspot_block_lstsq_sweep(
     support_columns_per_row: int = 8,
     svd_max_condition: float = 1.0e8,
     include_gate_limited_alpha: bool = False,
+    allow_negative_alphas: bool = False,
     component_filter: str = "frame",
 ) -> dict[str, Any]:
     base_u = np.asarray(u, dtype=np.float64)
@@ -407,6 +408,11 @@ def _hotspot_block_lstsq_sweep(
             for value in sweep_alpha_values
         ):
             sweep_alpha_values.append(gate_alpha)
+    if allow_negative_alphas:
+        positive_alpha_values = [
+            value for value in sweep_alpha_values if np.isfinite(value) and value > 0.0
+        ]
+        sweep_alpha_values.extend(-value for value in positive_alpha_values)
     sweep_alpha_values = sorted(set(sweep_alpha_values), reverse=True)
     candidate_rows: list[dict[str, Any]] = []
     for alpha in sweep_alpha_values:
@@ -473,6 +479,7 @@ def _hotspot_block_lstsq_sweep(
         "support_size": int(support_cols.size),
         "support_columns_per_row": int(support_columns_per_row),
         "include_gate_limited_alpha": bool(include_gate_limited_alpha),
+        "allow_negative_alphas": bool(allow_negative_alphas),
         "base_direct_residual_inf_n": base_residual_inf,
         "base_relative_residual_inf": base_residual_inf / max(base_rhs_inf, 1.0),
         "correction_inf_m": correction_inf,
@@ -502,6 +509,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_support_columns_per_row: int = 8,
     block_lstsq_svd_max_condition: float = 1.0e8,
     block_lstsq_include_gate_limited_alpha: bool = False,
+    block_lstsq_allow_negative_alphas: bool = False,
     block_lstsq_component_filter: str = "frame",
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
@@ -614,6 +622,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 support_columns_per_row=block_lstsq_support_columns_per_row,
                 svd_max_condition=block_lstsq_svd_max_condition,
                 include_gate_limited_alpha=block_lstsq_include_gate_limited_alpha,
+                allow_negative_alphas=block_lstsq_allow_negative_alphas,
                 component_filter=block_lstsq_component_filter,
             )
         last_sweep = sweep
@@ -957,9 +966,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--step-values", default="1e-10,3e-10,1e-9")
     parser.add_argument("--max-rows", type=int, default=8)
     parser.add_argument("--max-promotions", type=int, default=1)
+    parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--block-lstsq-support-columns-per-row", type=int, default=8)
     parser.add_argument("--block-lstsq-svd-max-condition", type=float, default=1.0e8)
     parser.add_argument("--block-lstsq-include-gate-limited-alpha", action="store_true")
+    parser.add_argument("--block-lstsq-allow-negative-alphas", action="store_true")
     parser.add_argument(
         "--block-lstsq-component-filter",
         choices=("frame", "translation"),
@@ -999,6 +1010,7 @@ def main(argv: list[str] | None = None) -> int:
         max_rows=int(args.max_rows),
         max_promotions=int(args.max_promotions),
         promotion_mode=str(args.promotion_mode),
+        relative_increment_tolerance=float(args.relative_increment_tolerance),
         block_lstsq_support_columns_per_row=int(
             args.block_lstsq_support_columns_per_row
         ),
@@ -1006,6 +1018,7 @@ def main(argv: list[str] | None = None) -> int:
         block_lstsq_include_gate_limited_alpha=bool(
             args.block_lstsq_include_gate_limited_alpha
         ),
+        block_lstsq_allow_negative_alphas=bool(args.block_lstsq_allow_negative_alphas),
         block_lstsq_component_filter=str(args.block_lstsq_component_filter),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,

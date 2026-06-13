@@ -254,12 +254,18 @@ def main() -> int:
     )
     parser.add_argument(
         "--linear-solver-profile",
-        choices=("production", "regularized_direct", "block_jacobi_gmres"),
+        choices=(
+            "production",
+            "regularized_direct",
+            "block_jacobi_gmres",
+            "host_ilu_device_gmres",
+        ),
         default="production",
         help=(
             "Use production iterative attempts, bypass them for a focused "
-            "regularized-direct diagnostic, or use a block-Jacobi GMRES-only "
-            "diagnostic profile."
+            "regularized-direct diagnostic, use a block-Jacobi GMRES-only "
+            "diagnostic profile, or force the ROCm host-ILU/device-GMRES "
+            "path first."
         ),
     )
     parser.add_argument(
