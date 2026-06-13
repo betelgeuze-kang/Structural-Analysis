@@ -63,6 +63,7 @@ def _assemble_surface_shell_6dof(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     include_membrane: bool = False,
+    pressure_load_allowed_surface_elements: set[int] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any], list[list[int]]]:
     n_dof = int(node_xyz.shape[0]) * DOF_PER_NODE
     rows: list[int] = []
@@ -80,6 +81,8 @@ def _assemble_surface_shell_6dof(
     material_usage: Counter[int] = Counter()
     section_usage: Counter[int] = Counter()
     thickness_values: list[float] = []
+    pressure_loaded_element_count = 0
+    pressure_suppressed_element_count = 0
     for elem_index in surface_indices.tolist():
         conn = [int(node) for node in conn_idx[conn_ptr[elem_index] : conn_ptr[elem_index + 1]].tolist()]
         if len(conn) not in {3, 4}:
@@ -113,7 +116,11 @@ def _assemble_surface_shell_6dof(
             tri_count += 1
             total_area += area
             basis = _local_basis(points[0], points[1], points[2])
-            if basis is not None:
+            pressure_allowed = (
+                pressure_load_allowed_surface_elements is None
+                or int(elem_index) in pressure_load_allowed_surface_elements
+            )
+            if basis is not None and pressure_allowed:
                 e1, e2, _area = basis
                 e3 = np.cross(e1, e2)
                 e3 /= max(float(np.linalg.norm(e3)), 1.0e-12)
@@ -121,6 +128,10 @@ def _assemble_surface_shell_6dof(
                     tx, ty, tz, _rx, _ry, _rz = _node_dofs(node)
                     for dof, load in zip((tx, ty, tz), e3 * area / 3.0):
                         f_ext[dof] += float(load)
+            if pressure_allowed:
+                pressure_loaded_element_count += 1
+            else:
+                pressure_suppressed_element_count += 1
             dofs = tuple(dof for node in tri for dof in _node_dofs(node))
             for a, gi in enumerate(dofs):
                 for b, gj in enumerate(dofs):
@@ -171,6 +182,9 @@ def _assemble_surface_shell_6dof(
         "source_thickness_table_count": len(plate_thickness_props),
         "thickness_min_m": float(min(thickness_values)) if thickness_values else 0.0,
         "thickness_max_m": float(max(thickness_values)) if thickness_values else 0.0,
+        "pressure_load_filter_enabled": pressure_load_allowed_surface_elements is not None,
+        "pressure_loaded_triangle_count": int(pressure_loaded_element_count),
+        "pressure_suppressed_triangle_count": int(pressure_suppressed_element_count),
     }
     return stiffness, f_ext, meta, surface_conns
 

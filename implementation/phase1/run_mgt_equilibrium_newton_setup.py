@@ -41,6 +41,7 @@ def build_direct_residual_assembler(
     checkpoint_npz: Path,
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
+    shell_pressure_load_path_policy: str = "all_components",
 ) -> tuple[
     Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
     dict[str, Any],
@@ -122,6 +123,7 @@ def build_direct_residual_assembler(
         frame_gravity_load_scale=frame_gravity_load_scale,
         load_scale=load_scale,
         restrained=restrained,
+        shell_pressure_load_path_policy=shell_pressure_load_path_policy,
     )
 
     setup_meta = {
@@ -132,6 +134,7 @@ def build_direct_residual_assembler(
         "frame_select_meta": frame_select_meta,
         "support_meta": support_meta,
         "spring_meta": spring_meta,
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "parser_report_contract_pass": bool(parser_report.get("contract_pass")),
         "parser_run": parser_run,
         "equilibrium_step_meta": step_meta,
@@ -140,11 +143,15 @@ def build_direct_residual_assembler(
         "_node_id": node_id,
         "_elem_id": elem_id,
         "_elem_type_code": elem_type_code,
+        "_elem_section_id": elem_section_id,
+        "_elem_material_id": elem_material_id,
         "_conn_ptr": conn_ptr,
         "_conn_idx": conn_idx,
         "_frame_elements": frame_elements,
+        "_restrained_dofs": np.asarray(sorted(int(dof) for dof in restrained), dtype=np.int64),
         "_section_props": section_props,
         "_material_props": material_props,
+        "_plate_thickness_props": plate_thickness_props,
         "_base_axial_forces": base_axial_forces,
         "_temp_dir": temp_dir,
     }

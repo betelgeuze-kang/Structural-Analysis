@@ -21,6 +21,7 @@ def assemble_equilibrium_surface_shell_6dof(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     include_membrane: bool = True,
+    pressure_load_allowed_surface_elements: set[int] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any], list[list[int]]]:
     """Assemble shell stiffness, optionally with in-plane membrane terms."""
     return _assemble_surface_shell_6dof(
@@ -33,4 +34,5 @@ def assemble_equilibrium_surface_shell_6dof(
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
         include_membrane=bool(include_membrane),
+        pressure_load_allowed_surface_elements=pressure_load_allowed_surface_elements,
     )

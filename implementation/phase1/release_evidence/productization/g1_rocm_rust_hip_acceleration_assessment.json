@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T04:19:08+09:00",
+  "generated_at": "2026-06-14T04:31:05+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -1499,7 +1499,7 @@
   },
   "current_acceleration_decision_2026_06_14": {
     "status": "rocm_runtime_available_but_g1_gate_not_backend_throughput_limited",
-    "generated_at": "2026-06-14T04:19:08+09:00",
+    "generated_at": "2026-06-14T04:31:05+09:00",
     "device_observation": {
       "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
       "gfx_target": "gfx1030",
@@ -1585,11 +1585,62 @@
       "runtime_seconds": 62.70951976099968,
       "assessment": "A minimal checkpoint-start global diagonal/node-block Jacobi counterprobe found no residual descent. The only best alpha was 0.0; the tested negative alpha worsened the residual, especially for node-block Jacobi. This weakens the case for a quick ROCm/HIP solver swap and strengthens the case for fixing the physical shell load-path/internal-force transfer before batching more solves."
     },
+    "shell_internal_element_load_path_diagnosis": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_shell_internal_element_frontier_probe.json",
+      "status": "partial_component_only_diagnostic",
+      "base_residual_inf_n": 0.2803783945661925,
+      "top_shell_row_count": 12,
+      "component_minus_reconstructed_shell_inf_n": 2.94495839625597e-06,
+      "top8_surface_component_element_count": 1,
+      "top8_surface_component_node_count": 4,
+      "top8_surface_component_frame_connected_node_count": 0,
+      "top8_surface_component_restrained_translation_dof_count": 0,
+      "top8_surface_component_pressure_resultant_norm_n": 1.1215166240000032,
+      "top8_free_pressure_resultant": true,
+      "top8_element_ids": [
+        25880,
+        32530
+      ],
+      "top8_internal_to_reference_load_scales": [
+        0.24999864923506757,
+        0.24999490953262762,
+        -0.4925622019119959,
+        0.24999662946176804,
+        -0.4925444115911165,
+        -0.507513645378727,
+        0.2500126980218917,
+        -0.5075086172782844
+      ],
+      "assessment": "The dominant shell rows now reconstruct from incident element stiffness contributions to within 3e-6 N. The top 8 uz rows belong to two one-element/four-node shell components with no frame-connected nodes and no restrained translational DOFs, yet each component carries a nonzero pressure resultant of 1.121516624 N. This explains why local row correction, patch correction, generic Jacobi, and faster sparse solves do not close the residual: the active frontier is a shell load-path attachment/free-pressure-component issue."
+    },
+    "attached_pressure_policy_counterfactual": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_shell_attached_pressure_policy_frontier_probe.json",
+      "status": "partial_component_only_diagnostic",
+      "policy": "attached_components_only",
+      "baseline_all_components_residual_inf_n": 0.2803783945661925,
+      "attached_policy_residual_inf_n": 0.11524294414354089,
+      "absolute_reduction_n": 0.1651354504226516,
+      "relative_reduction": 0.588965709617186,
+      "surface_component_count": 3,
+      "attached_surface_component_count": 1,
+      "free_pressure_surface_component_count": 2,
+      "pressure_load_allowed_surface_element_count": 7150,
+      "pressure_load_suppressed_surface_element_count": 2,
+      "next_active_residual": {
+        "raw_node_id": 4100,
+        "dof": "ux",
+        "residual_n": -0.11524294414354089,
+        "surface_component_element_count": 7150,
+        "surface_component_frame_connected_node_count": 1836,
+        "surface_component_restrained_translation_dof_count": 1188
+      },
+      "assessment": "A diagnostic replay that suppresses pressure on surface components with no frame/support attachment lowers the current checkpoint residual from 0.280378 N to 0.115243 N without changing shell stiffness. The remaining active residual moves to the large attached shell component, so the next G1 work should combine this load-path policy with state cleanup/relaxation of the two suppressed free components and then resume correction on the attached shell component."
+    },
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
       "use_rust_for_next_g1_push": "not_until_full_3d_mgt_frame_shell_assembly_is_wired",
       "use_hip_custom_kernel_for_next_g1_push": "blocked_as_quick_path_by_missing_hipcc_and_algorithmic_mismatch",
-      "recommended_next_step": "Stop spending G1 cycles on narrow local/patch row corrections or generic checkpoint Jacobi sweeps. First fix or falsify the shell internal force transfer/full-load path for the pressure-driven shell hotspots, then move the corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
+      "recommended_next_step": "Promote the controlled shell load-path policy from diagnostic replay into the G1 correction lane, clean or relax the two suppressed free shell component states, and then resume residual correction on the large attached shell component. Only after that move corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
       "why": [
         "ROCm runtime sees the RX 6900 XT, but the existing full G1 Newton swap to host-ILU/device-GMRES timed out beyond the 240 second budget.",
         "Existing shell sparse GPU solve evidence converges but is slow for shell-dominant systems because Krylov iterations saturate.",
@@ -1598,6 +1649,8 @@
         "The shell surface load reconstruction matches the displayed external load at roundoff, so the hotspot is not a simple external-load split bug.",
         "A one-hop shell patch row-correction counterprobe also produced no residual descent.",
         "A checkpoint-start global diagonal/node-block Jacobi counterprobe also produced no residual descent; the tested nonzero alpha worsened the current frontier.",
+        "The top 8 shell hotspot rows are attached to one-element free pressure components with no frame-connected nodes and no restrained translational DOFs; each carries a nonzero pressure resultant.",
+        "Suppressing pressure only on those unattached surface components lowers the current checkpoint residual by about 59%, from 0.280378 N to 0.115243 N, while leaving the large attached shell component loaded.",
         "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
       ]
     }

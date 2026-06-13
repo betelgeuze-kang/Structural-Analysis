@@ -19,6 +19,7 @@ from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
     _hotspot_tangent_fd_jvp_rows,
     _local_row_projection_diagnostics,
     _scalar_load_balance_diagnostics,
+    _shell_internal_element_hotspot_diagnostics,
     _shell_membrane_hotspot_diagnostics,
     _shell_surface_load_hotspot_diagnostics,
     _state_scale_sweep,
@@ -538,6 +539,83 @@ def test_shell_surface_load_hotspot_diagnostics_reconstructs_reference_load() ->
     assert row["rows"][0]["reference_shell_load_reconstructed_n"] == 1.0 / 3.0
     assert row["rows"][0]["required_reference_shell_load_scale_for_zero_row_residual"] == 0.25
     assert row["rows"][0]["sample_incident_surface_elements"][0]["elem_id"] == 101
+
+
+def test_shell_internal_element_hotspot_diagnostics_reconstructs_component_force() -> None:
+    setup_meta = {
+        "_node_xyz": np.asarray(
+            [
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
+            dtype=np.float64,
+        ),
+        "_node_id": np.asarray([10, 11, 12], dtype=np.int64),
+        "_elem_id": np.asarray([101], dtype=np.int64),
+        "_elem_type_code": np.asarray([2], dtype=np.int32),
+        "_elem_section_id": np.asarray([7], dtype=np.int32),
+        "_elem_material_id": np.asarray([3], dtype=np.int32),
+        "_conn_ptr": np.asarray([0, 3], dtype=np.int64),
+        "_conn_idx": np.asarray([0, 1, 2], dtype=np.int64),
+        "_material_props": {3: {"E_kN_per_m2": 210000.0, "poisson": 0.2}},
+        "_plate_thickness_props": {7: {"effective_thickness_m": 0.2}},
+        "load_scale": 2.0,
+    }
+    u = np.zeros(18, dtype=np.float64)
+    u[2] = 0.001
+    u[8] = -0.00025
+
+    reconstructed = _shell_internal_element_hotspot_diagnostics(
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 2,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": 0.0,
+                "external_load_n": 1.0 / 3.0,
+                "component_values_n": {"shell_bending_drilling": 0.0, "shell_membrane": 0.0},
+            }
+        ],
+        u=u,
+        setup_meta=setup_meta,
+    )
+    shell_force = reconstructed["rows"][0]["reconstructed_shell_internal_force_n"]
+
+    row = _shell_internal_element_hotspot_diagnostics(
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 2,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": 0.0,
+                "external_load_n": 1.0 / 3.0,
+                "component_values_n": {
+                    "shell_bending_drilling": shell_force,
+                    "shell_membrane": 0.0,
+                },
+            }
+        ],
+        u=u,
+        setup_meta=setup_meta,
+    )
+
+    assert row["evaluated"] is True
+    assert row["row_count"] == 1
+    assert abs(row["component_minus_reconstructed_shell_inf_n"]) <= 1.0e-12
+    hotspot = row["rows"][0]
+    assert hotspot["raw_node_id"] == 10
+    assert hotspot["sample_incident_surface_elements"][0]["elem_id"] == 101
+    assert hotspot["sample_incident_surface_elements"][0]["source_thickness"] is True
+    assert hotspot["reference_shell_load_reconstructed_n"] == 1.0 / 3.0
+    assert hotspot["surface_component_element_count"] == 1
+    assert hotspot["surface_component_frame_connected_node_count"] == 0
+    assert hotspot["surface_component_restrained_translation_dof_count"] == 0
+    assert hotspot["surface_component_free_pressure_resultant"] is True
 
 
 def test_frame_hotspot_diagnostics_reconstructs_incident_frame_contribution() -> None:

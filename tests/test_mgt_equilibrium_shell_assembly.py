@@ -78,3 +78,37 @@ def test_equilibrium_shell_includes_membrane_stiffness_on_triangle() -> None:
     f_full = np.asarray(k_full @ u, dtype=np.float64)
     assert abs(float(f_full[0])) > abs(float(f_bend[0]))
     assert not np.allclose(np.asarray(k_bend.todense()), np.asarray(k_full.todense()))
+
+
+def test_surface_shell_pressure_filter_suppresses_load_without_removing_stiffness() -> None:
+    node_xyz = np.asarray(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    kwargs = {
+        "node_xyz": node_xyz,
+        "elem_type_code": np.asarray([2], dtype=np.int32),
+        "elem_section_id": np.asarray([1], dtype=np.int32),
+        "elem_material_id": np.asarray([1], dtype=np.int32),
+        "conn_ptr": np.asarray([0, 3], dtype=np.int64),
+        "conn_idx": np.asarray([0, 1, 2], dtype=np.int64),
+        "material_props": {1: {"E_kN_per_m2": 210000000.0, "poisson": 0.3}},
+        "plate_thickness_props": {1: {"effective_thickness_m": 0.2}},
+    }
+
+    k_all, f_all, meta_all, _ = _assemble_surface_shell_6dof(**kwargs)
+    k_suppressed, f_suppressed, meta_suppressed, _ = _assemble_surface_shell_6dof(
+        **kwargs,
+        pressure_load_allowed_surface_elements=set(),
+    )
+
+    assert k_suppressed.nnz == k_all.nnz
+    assert float(np.max(np.abs(f_all))) > 0.0
+    assert float(np.max(np.abs(f_suppressed))) == 0.0
+    assert meta_suppressed["pressure_load_filter_enabled"] is True
+    assert meta_suppressed["pressure_suppressed_triangle_count"] == 1
+    assert meta_all["pressure_load_filter_enabled"] is False

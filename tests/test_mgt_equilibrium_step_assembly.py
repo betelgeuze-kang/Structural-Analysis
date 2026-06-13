@@ -9,7 +9,10 @@ from scipy.sparse import coo_matrix
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
-from mgt_equilibrium_step_assembly import build_equilibrium_step_assembler  # noqa: E402
+from mgt_equilibrium_step_assembly import (  # noqa: E402
+    _surface_pressure_load_path_filter,
+    build_equilibrium_step_assembler,
+)
 from run_mgt_full_frame_6dof_sparse_equilibrium import FrameElement  # noqa: E402
 
 
@@ -56,3 +59,46 @@ def test_build_equilibrium_step_assembler_freezes_external_load() -> None:
     assert meta["frozen_load_scale"] == 0.5
     np.testing.assert_allclose(f0, f1)
     assert m1["frozen_external_load"] is True
+
+
+def test_surface_pressure_load_path_filter_keeps_attached_components_only() -> None:
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=6,
+            section_id=1,
+            material_id=1,
+            length_m=3.0,
+        )
+    ]
+    allowed, meta = _surface_pressure_load_path_filter(
+        frame_elements=elements,
+        elem_type_code=np.asarray([2, 2], dtype=np.int32),
+        conn_ptr=np.asarray([0, 3, 6], dtype=np.int64),
+        conn_idx=np.asarray([0, 1, 2, 3, 4, 5], dtype=np.int64),
+        restrained=set(),
+        policy="attached_components_only",
+    )
+
+    assert allowed == {0}
+    assert meta["pressure_load_filter_enabled"] is True
+    assert meta["surface_component_count"] == 2
+    assert meta["attached_surface_component_count"] == 1
+    assert meta["free_pressure_surface_component_count"] == 1
+    assert meta["pressure_load_suppressed_surface_element_count"] == 1
+
+
+def test_surface_pressure_load_path_filter_keeps_restrained_shell_component() -> None:
+    allowed, meta = _surface_pressure_load_path_filter(
+        frame_elements=[],
+        elem_type_code=np.asarray([2], dtype=np.int32),
+        conn_ptr=np.asarray([0, 3], dtype=np.int64),
+        conn_idx=np.asarray([0, 1, 2], dtype=np.int64),
+        restrained={1},
+        policy="attached_components_only",
+    )
+
+    assert allowed == {0}
+    assert meta["attached_surface_component_count"] == 1
+    assert meta["free_pressure_surface_component_count"] == 0

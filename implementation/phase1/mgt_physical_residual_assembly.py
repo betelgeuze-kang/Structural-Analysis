@@ -280,6 +280,7 @@ def assemble_equilibrium_operator_stiffness(
     frame_gravity_load_scale: float,
     load_scale: float,
     restrained: set[int] | None = None,
+    shell_pressure_load_allowed_surface_elements: set[int] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any]]:
     """Assemble K_eq consistent with force-based F_int at the reference geometry map."""
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -304,6 +305,7 @@ def assemble_equilibrium_operator_stiffness(
         conn_idx=conn_idx,
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
+        pressure_load_allowed_surface_elements=shell_pressure_load_allowed_surface_elements,
     )
     stiffness = frame_stiffness + shell_stiffness + spring_stiffness
     assembled_f_ext = (frame_f * float(frame_gravity_load_scale) + shell_f) * float(load_scale)

@@ -27,6 +27,11 @@ from run_mgt_full_frame_6dof_sparse_equilibrium import (  # noqa: E402
 )
 from run_mgt_uncoarsened_boundary_global_equilibrium import DEFAULT_MGT  # noqa: E402
 from mgt_frame_force_based_assembly import _element_force_based_end_forces  # noqa: E402
+from run_mgt_surface_membrane_tangent import (  # noqa: E402
+    _source_or_fallback_thickness,
+    _triangle_membrane_stiffness,
+)
+from run_mgt_surface_shell_bending_tangent import _triangle_shell_bending_stiffness  # noqa: E402
 
 
 SCHEMA_VERSION = "mgt-residual-jacobian-consistency-probe.v1"
@@ -610,6 +615,329 @@ def _shell_surface_load_hotspot_diagnostics(
         "claim_boundary": (
             "Diagnostic only: reconstructs the reference unit shell surface load assigned by the "
             "current triangular shell load rule for selected hotspot rows."
+        ),
+    }
+
+
+def _shell_internal_element_hotspot_diagnostics(
+    *,
+    top_rows: list[dict[str, Any]],
+    u: np.ndarray,
+    setup_meta: dict[str, Any],
+    max_rows: int = 12,
+    max_elements_per_row: int = 12,
+    shell_component_names: tuple[str, ...] = ("shell_bending_drilling", "shell_membrane", "shell"),
+) -> dict[str, Any]:
+    node_xyz = setup_meta.get("_node_xyz")
+    node_id = setup_meta.get("_node_id")
+    elem_id = setup_meta.get("_elem_id")
+    elem_type_code = setup_meta.get("_elem_type_code")
+    elem_section_id = setup_meta.get("_elem_section_id")
+    elem_material_id = setup_meta.get("_elem_material_id")
+    conn_ptr = setup_meta.get("_conn_ptr")
+    conn_idx = setup_meta.get("_conn_idx")
+    material_props = setup_meta.get("_material_props")
+    plate_thickness_props = setup_meta.get("_plate_thickness_props")
+    frame_elements = setup_meta.get("_frame_elements")
+    restrained_dofs = setup_meta.get("_restrained_dofs")
+    if not all(
+        isinstance(value, np.ndarray)
+        for value in (
+            node_xyz,
+            elem_id,
+            elem_type_code,
+            elem_section_id,
+            elem_material_id,
+            conn_ptr,
+            conn_idx,
+        )
+    ):
+        return {
+            "evaluated": False,
+            "reason": "missing_shell_element_property_arrays",
+            "rows": [],
+        }
+    if not isinstance(material_props, dict):
+        material_props = {}
+    if not isinstance(plate_thickness_props, dict):
+        plate_thickness_props = {}
+    xyz = np.asarray(node_xyz, dtype=np.float64)
+    raw_node_id = np.asarray(node_id, dtype=np.int64) if isinstance(node_id, np.ndarray) else None
+    ids = np.asarray(elem_id, dtype=np.int64)
+    type_code = np.asarray(elem_type_code, dtype=np.int32)
+    section_ids = np.asarray(elem_section_id, dtype=np.int32)
+    material_ids = np.asarray(elem_material_id, dtype=np.int32)
+    ptr = np.asarray(conn_ptr, dtype=np.int64)
+    idx = np.asarray(conn_idx, dtype=np.int64)
+    u_np = np.asarray(u, dtype=np.float64)
+    load_scale = float(setup_meta.get("load_scale") or setup_meta.get("frozen_load_scale") or 1.0)
+    surface_indices = np.where(type_code == 2)[0]
+    incident_by_node: dict[int, list[int]] = {}
+    surface_conn_by_elem: dict[int, list[int]] = {}
+    for elem_index in surface_indices.tolist():
+        start = int(ptr[int(elem_index)])
+        end = int(ptr[int(elem_index) + 1])
+        if start < 0 or end < start or end > int(idx.size):
+            continue
+        conn = [int(node) for node in idx[start:end].tolist()]
+        if len(conn) not in {3, 4}:
+            continue
+        surface_conn_by_elem[int(elem_index)] = conn
+        for node in conn:
+            incident_by_node.setdefault(int(node), []).append(int(elem_index))
+    frame_node_set: set[int] = set()
+    if isinstance(frame_elements, list):
+        for element in frame_elements:
+            node_i = getattr(element, "node_i", None)
+            node_j = getattr(element, "node_j", None)
+            if node_i is not None:
+                frame_node_set.add(int(node_i))
+            if node_j is not None:
+                frame_node_set.add(int(node_j))
+    restrained_set = (
+        {int(value) for value in np.asarray(restrained_dofs, dtype=np.int64).tolist()}
+        if isinstance(restrained_dofs, np.ndarray)
+        else set()
+    )
+
+    def surface_component_for_node(seed_node: int) -> tuple[set[int], set[int]]:
+        seed_elems = incident_by_node.get(int(seed_node), [])
+        pending = [int(elem) for elem in seed_elems]
+        component_elems: set[int] = set()
+        component_nodes: set[int] = set()
+        while pending:
+            elem_index = int(pending.pop())
+            if elem_index in component_elems:
+                continue
+            conn = surface_conn_by_elem.get(elem_index)
+            if not conn:
+                continue
+            component_elems.add(elem_index)
+            for component_node in conn:
+                if component_node in component_nodes:
+                    continue
+                component_nodes.add(int(component_node))
+                for neighbor_elem in incident_by_node.get(int(component_node), []):
+                    if int(neighbor_elem) not in component_elems:
+                        pending.append(int(neighbor_elem))
+        return component_elems, component_nodes
+
+    def component_pressure_resultant(component_elems: set[int]) -> np.ndarray:
+        resultant = np.zeros(3, dtype=np.float64)
+        for elem_index in sorted(int(value) for value in component_elems):
+            conn = surface_conn_by_elem.get(elem_index)
+            if not conn:
+                continue
+            for tri in _triangulate_conn(conn):
+                points = np.asarray([xyz[n] for n in tri], dtype=np.float64)
+                basis = _local_shell_basis(points)
+                if basis is None:
+                    continue
+                _e1, _e2, e3 = basis
+                area = 0.5 * float(
+                    np.linalg.norm(np.cross(points[1] - points[0], points[2] - points[0]))
+                )
+                resultant += e3 * area * load_scale
+        return resultant
+
+    selected = [
+        row
+        for row in top_rows
+        if str(row.get("dominant_component") or "") in set(shell_component_names)
+    ][: max(int(max_rows), 0)]
+    rows: list[dict[str, Any]] = []
+    total_errors: list[float] = []
+    bending_errors: list[float] = []
+    membrane_errors: list[float] = []
+    for row in selected:
+        node = int(row.get("node_index", -1))
+        global_dof = int(row.get("global_dof", -1))
+        dof_name = str(row.get("dof") or "")
+        if node < 0 or node >= int(xyz.shape[0]) or global_dof < 0 or global_dof >= int(u_np.size):
+            continue
+        dof_slot = int(global_dof % 6)
+        element_rows: list[dict[str, Any]] = []
+        bending_sum = 0.0
+        membrane_sum = 0.0
+        reference_shell_load = 0.0
+        incident = incident_by_node.get(node, [])
+        for elem_index in incident[: max(int(max_elements_per_row), 0)]:
+            conn = [int(n) for n in idx[int(ptr[elem_index]) : int(ptr[elem_index + 1])].tolist()]
+            section_id = int(section_ids[elem_index]) if elem_index < int(section_ids.size) else 0
+            material_id = int(material_ids[elem_index]) if elem_index < int(material_ids.size) else 0
+            mat = material_props.get(material_id)
+            e_n_per_m2 = float((mat or {}).get("E_kN_per_m2") or 2.1e8) * 1000.0
+            poisson = float((mat or {}).get("poisson") or 0.2)
+            thickness, has_source_thickness = _source_or_fallback_thickness(
+                section_id,
+                plate_thickness_props,
+            )
+            elem_bending = 0.0
+            elem_membrane = 0.0
+            elem_reference_load = 0.0
+            tri_rows: list[dict[str, Any]] = []
+            for tri in _triangulate_conn(conn):
+                if node not in tri:
+                    continue
+                points = np.asarray([xyz[n] for n in tri], dtype=np.float64)
+                bending_result = _triangle_shell_bending_stiffness(
+                    points=points,
+                    e_n_per_m2=e_n_per_m2,
+                    poisson=poisson,
+                    thickness_m=thickness,
+                )
+                basis = _local_shell_basis(points)
+                tri_reference_load = 0.0
+                if basis is not None and dof_slot < 3:
+                    _e1, _e2, e3 = basis
+                    area = 0.5 * float(
+                        np.linalg.norm(np.cross(points[1] - points[0], points[2] - points[0]))
+                    )
+                    tri_reference_load = float(e3[dof_slot] * area / 3.0 * load_scale)
+                    elem_reference_load += tri_reference_load
+                tri_bending = 0.0
+                if bending_result is not None:
+                    ke_bending, _area = bending_result
+                    dofs = tuple(int(tri_node) * 6 + comp for tri_node in tri for comp in range(6))
+                    if global_dof in dofs:
+                        local_row = dofs.index(global_dof)
+                        tri_bending = float(ke_bending[local_row, :] @ u_np[list(dofs)])
+                        elem_bending += tri_bending
+                tri_membrane = 0.0
+                if dof_slot < 3:
+                    membrane_result = _triangle_membrane_stiffness(
+                        points=points,
+                        e_n_per_m2=e_n_per_m2,
+                        poisson=poisson,
+                        thickness_m=thickness,
+                    )
+                    if membrane_result is not None:
+                        ke_membrane, _area = membrane_result
+                        trans_dofs = tuple(
+                            int(tri_node) * 6 + comp for tri_node in tri for comp in range(3)
+                        )
+                        if global_dof in trans_dofs:
+                            local_row = trans_dofs.index(global_dof)
+                            tri_membrane = float(ke_membrane[local_row, :] @ u_np[list(trans_dofs)])
+                            elem_membrane += tri_membrane
+                if (
+                    abs(tri_bending) > 0.0
+                    or abs(tri_membrane) > 0.0
+                    or abs(tri_reference_load) > 0.0
+                ):
+                    tri_rows.append(
+                        {
+                            "tri_nodes": [int(n) for n in tri],
+                            "target_dof_reference_shell_load_n": float(tri_reference_load),
+                            "target_dof_bending_internal_force_n": float(tri_bending),
+                            "target_dof_membrane_internal_force_n": float(tri_membrane),
+                            "target_dof_shell_internal_force_n": float(tri_bending + tri_membrane),
+                        }
+                    )
+            if tri_rows:
+                bending_sum += elem_bending
+                membrane_sum += elem_membrane
+                reference_shell_load += elem_reference_load
+                element_rows.append(
+                    {
+                        "elem_index": int(elem_index),
+                        "elem_id": int(ids[elem_index]) if elem_index < int(ids.size) else int(elem_index),
+                        "conn": conn,
+                        "section_id": int(section_id),
+                        "material_id": int(material_id),
+                        "thickness_m": float(thickness),
+                        "source_thickness": bool(has_source_thickness),
+                        "e_n_per_m2": float(e_n_per_m2),
+                        "poisson": float(poisson),
+                        "target_dof_reference_shell_load_n": float(elem_reference_load),
+                        "target_dof_bending_internal_force_n": float(elem_bending),
+                        "target_dof_membrane_internal_force_n": float(elem_membrane),
+                        "target_dof_shell_internal_force_n": float(elem_bending + elem_membrane),
+                        "triangles": tri_rows,
+                    }
+                )
+        component_values = row.get("component_values_n") if isinstance(row.get("component_values_n"), dict) else {}
+        component_bending = float(component_values.get("shell_bending_drilling", 0.0))
+        component_membrane = float(component_values.get("shell_membrane", 0.0))
+        component_shell = sum(float(component_values.get(name, 0.0)) for name in shell_component_names)
+        reconstructed_total = bending_sum + membrane_sum
+        total_error = component_shell - reconstructed_total
+        bending_error = component_bending - bending_sum
+        membrane_error = component_membrane - membrane_sum
+        total_errors.append(total_error)
+        bending_errors.append(bending_error)
+        membrane_errors.append(membrane_error)
+        element_rows.sort(
+            key=lambda item: abs(float(item["target_dof_shell_internal_force_n"])),
+            reverse=True,
+        )
+        component_elems, component_nodes = surface_component_for_node(node)
+        pressure_resultant = component_pressure_resultant(component_elems)
+        frame_connected_nodes = sorted(int(n) for n in component_nodes if int(n) in frame_node_set)
+        restrained_translation_dofs = [
+            int(node_index) * 6 + comp
+            for node_index in sorted(component_nodes)
+            for comp in range(3)
+            if int(node_index) * 6 + comp in restrained_set
+        ]
+        pressure_norm = float(np.linalg.norm(pressure_resultant))
+        rows.append(
+            {
+                "free_row": int(row.get("free_row", -1)),
+                "global_dof": int(global_dof),
+                "node_index": int(node),
+                "raw_node_id": int(raw_node_id[node])
+                if raw_node_id is not None and 0 <= node < int(raw_node_id.size)
+                else None,
+                "dof": dof_name,
+                "dominant_component": str(row.get("dominant_component") or ""),
+                "residual_n": float(row.get("residual_n") or 0.0),
+                "external_load_n": float(row.get("external_load_n") or 0.0),
+                "reference_shell_load_reconstructed_n": float(reference_shell_load),
+                "component_shell_bending_drilling_n": float(component_bending),
+                "component_shell_membrane_n": float(component_membrane),
+                "component_shell_sum_n": float(component_shell),
+                "reconstructed_bending_internal_force_n": float(bending_sum),
+                "reconstructed_membrane_internal_force_n": float(membrane_sum),
+                "reconstructed_shell_internal_force_n": float(reconstructed_total),
+                "component_minus_reconstructed_bending_n": float(bending_error),
+                "component_minus_reconstructed_membrane_n": float(membrane_error),
+                "component_minus_reconstructed_shell_n": float(total_error),
+                "shell_internal_to_reference_load_scale": (
+                    float(reconstructed_total / reference_shell_load)
+                    if abs(reference_shell_load) > 1.0e-30
+                    else None
+                ),
+                "incident_surface_element_count": int(len(incident)),
+                "surface_component_element_count": int(len(component_elems)),
+                "surface_component_node_count": int(len(component_nodes)),
+                "surface_component_frame_connected_node_count": int(len(frame_connected_nodes)),
+                "surface_component_frame_connected_nodes_head": frame_connected_nodes[:12],
+                "surface_component_restrained_translation_dof_count": int(
+                    len(restrained_translation_dofs)
+                ),
+                "surface_component_pressure_resultant_n": [
+                    float(value) for value in pressure_resultant.tolist()
+                ],
+                "surface_component_pressure_resultant_norm_n": pressure_norm,
+                "surface_component_free_pressure_resultant": bool(
+                    pressure_norm > 1.0e-12
+                    and not frame_connected_nodes
+                    and not restrained_translation_dofs
+                ),
+                "sample_incident_surface_elements": element_rows[: max(int(max_elements_per_row), 0)],
+            }
+        )
+    return {
+        "evaluated": True,
+        "row_count": int(len(rows)),
+        "component_minus_reconstructed_shell_inf_n": _max_abs(np.asarray(total_errors, dtype=np.float64)),
+        "component_minus_reconstructed_bending_inf_n": _max_abs(np.asarray(bending_errors, dtype=np.float64)),
+        "component_minus_reconstructed_membrane_inf_n": _max_abs(np.asarray(membrane_errors, dtype=np.float64)),
+        "rows": rows,
+        "claim_boundary": (
+            "Diagnostic only: reconstructs selected shell hotspot internal-force rows from "
+            "incident element stiffness contributions at the current checkpoint displacement."
         ),
     }
 
@@ -1273,12 +1601,14 @@ def run_mgt_residual_jacobian_consistency_probe(
         0.01,
         0.001,
     ),
+    shell_pressure_load_path_policy: str = "all_components",
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
+        shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
     )
     u0 = np.asarray(setup_meta["u0"], dtype=np.float64)
     assembly_started = time.perf_counter()
@@ -1300,6 +1630,11 @@ def run_mgt_residual_jacobian_consistency_probe(
     )
     shell_surface_load_diagnostics = _shell_surface_load_hotspot_diagnostics(
         top_rows=residual_component_breakdown.get("top_rows", []),
+        setup_meta=setup_meta,
+    )
+    shell_internal_element_diagnostics = _shell_internal_element_hotspot_diagnostics(
+        top_rows=residual_component_breakdown.get("top_rows", []),
+        u=u0,
         setup_meta=setup_meta,
     )
     shell_local_projection = {
@@ -1426,6 +1761,7 @@ def run_mgt_residual_jacobian_consistency_probe(
         "residual_jacobian_consistency_ready": consistency_ready,
         "checkpoint": setup_meta.get("checkpoint"),
         "load_scale": setup_meta.get("load_scale"),
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "base_residual_inf_n": base_residual_inf,
         "base_relative_residual_inf": base_residual_inf / max(rhs_inf, 1.0),
         "rhs_inf_n": rhs_inf,
@@ -1434,6 +1770,7 @@ def run_mgt_residual_jacobian_consistency_probe(
         "residual_component_breakdown": residual_component_breakdown,
         "residual_shell_load_balance": shell_load_balance,
         "residual_shell_surface_load_diagnostics": shell_surface_load_diagnostics,
+        "residual_shell_internal_element_diagnostics": shell_internal_element_diagnostics,
         "residual_shell_local_projection": shell_local_projection,
         "residual_hotspot_shell_membrane_diagnostics": shell_membrane_hotspots,
         "residual_hotspot_frame_diagnostics": frame_hotspots,
@@ -1454,6 +1791,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             "newton_tangent_model": base_meta.get("newton_tangent_model"),
             "equilibrium_geometry_contract": base_meta.get("equilibrium_geometry_contract"),
             "stiffness_unit_audit": base_meta.get("stiffness_unit_audit"),
+            "shell_pressure_load_path_meta": base_meta.get("shell_pressure_load_path_meta"),
         },
         "runtime_metrics": {
             "setup_and_reference_seconds": float(assembly_started - started),
@@ -1535,6 +1873,12 @@ def main(argv: list[str] | None = None) -> int:
         default="1,0.5,0.25,0.1,0.01,0.001",
         help="Comma-separated alpha values for --hotspot-diagonal-newton-sweep.",
     )
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=("all_components", "attached_components_only"),
+        default="all_components",
+        help="Diagnostic shell pressure load policy for the frozen external load.",
+    )
     args = parser.parse_args(argv)
     state_scale_values = tuple(
         float(value.strip())
@@ -1566,6 +1910,7 @@ def main(argv: list[str] | None = None) -> int:
             for value in str(args.hotspot_diagonal_newton_alpha_values).split(",")
             if value.strip()
         ),
+        shell_pressure_load_path_policy=str(args.shell_pressure_load_path_policy),
     )
     print(
         "mgt-residual-jacobian-consistency:",
