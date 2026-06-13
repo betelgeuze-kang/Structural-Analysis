@@ -93,7 +93,24 @@
           "external_load_n": -0.5919351215263475
         }
       },
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. The shell-normal family can still produce 1e-5 to 1e-6 N-class descent, while wider mixed patches are much slower per Newton of residual reduction."
+      "saturation_counter_evidence": [
+        {
+          "generated_at": "2026-06-14T05:54:23+09:00",
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup3_probe.json",
+          "target_mode": "residual_shell_geometry_normal_rows",
+          "target_counts": [
+            8
+          ],
+          "base_residual_inf_n": 0.04213413082854345,
+          "best_candidate_residual_inf_n": 0.04213808126050367,
+          "best_candidate_improvement_inf_n": -3.950431960220158e-06,
+          "promoted_to_final_state": false,
+          "stop_reason": "no_residual_descent",
+          "runtime_seconds": 81.72792343400033,
+          "assessment": "After two accepted shell-normal follow-ups, the compact target_count=8 continuation worsened residual and did not write a checkpoint."
+        }
+      ],
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. The shell-normal family produced two accepted follow-ups, then compact target_count=8 saturated at 0.0421341308 N. The next G1 push should change target selection or coupled support rather than repeat this exact shell-normal lane."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
