@@ -20,12 +20,131 @@ if str(PHASE1) not in sys.path:
 
 from mgt_equilibrium_replay import run_equilibrium_newton  # noqa: E402
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
-from run_mgt_direct_residual_newton_probe import DEFAULT_CHECKPOINT, PRODUCTIZATION  # noqa: E402
+from run_mgt_direct_residual_newton_probe import (  # noqa: E402
+    DEFAULT_CHECKPOINT,
+    PRODUCTIZATION,
+    _load_checkpoint,
+)
 from run_mgt_uncoarsened_boundary_global_equilibrium import DEFAULT_MGT  # noqa: E402
 
 
 SCHEMA_VERSION = "mgt-equilibrium-newton-focused-probe.v1"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_equilibrium_newton_focused_probe.json"
+DEFAULT_CHECKPOINT_OUT = (
+    PRODUCTIZATION / "mgt_equilibrium_newton_focused_probe_final_checkpoint.npz"
+)
+
+
+def _max_abs(values: np.ndarray) -> float:
+    arr = np.asarray(values, dtype=np.float64)
+    return float(np.max(np.abs(arr))) if arr.size else 0.0
+
+
+def _translation_metrics(u: np.ndarray) -> dict[str, float]:
+    arr = np.asarray(u, dtype=np.float64)
+    if arr.size % 6 != 0:
+        return {"max_translation_m": _max_abs(arr)}
+    translations = arr.reshape((-1, 6))[:, :3]
+    return {
+        "max_translation_m": float(np.max(np.linalg.norm(translations, axis=1)))
+        if translations.size
+        else 0.0
+    }
+
+
+def _same_state_exact(left: np.ndarray, right: np.ndarray) -> bool:
+    return bool(
+        np.array_equal(
+            np.asarray(left, dtype=np.float64),
+            np.asarray(right, dtype=np.float64),
+        )
+    )
+
+
+def _write_equilibrium_checkpoint(
+    *,
+    path: Path,
+    source_checkpoint_npz: Path,
+    checkpoint_meta: dict[str, Any],
+    u0: np.ndarray,
+    final_u: np.ndarray,
+    base_residual: np.ndarray,
+    final_residual: np.ndarray,
+    final_rhs: np.ndarray,
+    loaded_state_history: np.ndarray | None,
+    loaded_residual_history: np.ndarray | None,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    final_u = np.asarray(final_u, dtype=np.float64)
+    u0 = np.asarray(u0, dtype=np.float64)
+    final_residual = np.asarray(final_residual, dtype=np.float64)
+    final_rhs = np.asarray(final_rhs, dtype=np.float64)
+    base_residual = np.asarray(base_residual, dtype=np.float64)
+
+    state_rows: list[np.ndarray] = []
+    if (
+        loaded_state_history is not None
+        and loaded_state_history.ndim == 2
+        and loaded_state_history.shape[1] == final_u.size
+    ):
+        state_rows = [np.asarray(row, dtype=np.float64).copy() for row in loaded_state_history]
+    if not state_rows or not _same_state_exact(state_rows[-1], u0):
+        state_rows.append(u0.copy())
+    if not _same_state_exact(state_rows[-1], final_u):
+        state_rows.append(final_u.copy())
+
+    residual_rows: list[np.ndarray] = []
+    if (
+        loaded_residual_history is not None
+        and loaded_residual_history.ndim == 2
+        and loaded_residual_history.shape[1] == final_residual.size
+    ):
+        residual_rows = [
+            np.asarray(row, dtype=np.float64).copy() for row in loaded_residual_history
+        ]
+    while len(residual_rows) < max(len(state_rows) - 1, 0):
+        residual_rows.append(base_residual.copy())
+    if len(residual_rows) < len(state_rows):
+        residual_rows.append(final_residual.copy())
+    else:
+        residual_rows[-1] = final_residual.copy()
+
+    state_history = np.vstack(state_rows)
+    residual_history = np.vstack(residual_rows)
+    final_residual_inf = _max_abs(final_residual)
+    rhs_inf = _max_abs(final_rhs)
+    translation = _translation_metrics(final_u)
+    load_scale = float(checkpoint_meta["load_scale"])
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        source_schema_version=np.asarray(SCHEMA_VERSION),
+        load_scale=np.asarray(load_scale, dtype=np.float64),
+        displacement_u=final_u,
+        residual_inf_n=np.asarray(final_residual_inf, dtype=np.float64),
+        direct_residual_inf_n=np.asarray(final_residual_inf, dtype=np.float64),
+        direct_relative_residual_inf=np.asarray(
+            final_residual_inf / max(rhs_inf, 1.0),
+            dtype=np.float64,
+        ),
+        max_translation_m=np.asarray(translation["max_translation_m"], dtype=np.float64),
+        accepted_state_history_u=state_history,
+        accepted_residual_history=residual_history,
+        accepted_history_count=np.asarray(state_history.shape[0], dtype=np.int64),
+        source_checkpoint_path=np.asarray(str(source_checkpoint_npz)),
+    )
+    return {
+        "written": True,
+        "path": str(path),
+        "schema": "mgt-direct-residual-newton-state.v1",
+        "load_scale": load_scale,
+        "dof_count": int(final_u.size),
+        "direct_residual_inf_n": final_residual_inf,
+        "direct_relative_residual_inf": final_residual_inf / max(rhs_inf, 1.0),
+        "max_translation_m": translation["max_translation_m"],
+        "accepted_history_count": int(state_history.shape[0]),
+        "source_checkpoint_path": str(source_checkpoint_npz),
+    }
 
 
 def run_mgt_equilibrium_newton_focused_probe(
@@ -39,6 +158,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
     state_scale_line_search_values: tuple[float, ...] = (),
+    output_final_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -59,6 +179,27 @@ def run_mgt_equilibrium_newton_focused_probe(
         linear_solver_profile=str(linear_solver_profile or "production"),
         state_scale_line_search_values=state_scale_line_search_values,
     )
+    output_checkpoint_meta: dict[str, Any] | None = None
+    if output_final_checkpoint_npz is not None and float(newton.get("final_residual_inf_n") or 0.0) < base_residual_inf:
+        checkpoint_meta, _loaded_u, loaded_state_history, loaded_residual_history = _load_checkpoint(
+            checkpoint_npz
+        )
+        final_u = np.asarray(newton["final_u"], dtype=np.float64)
+        _final_k, _final_f, _final_free, final_residual, final_rhs, _final_meta = assemble_residual(
+            final_u
+        )
+        output_checkpoint_meta = _write_equilibrium_checkpoint(
+            path=output_final_checkpoint_npz,
+            source_checkpoint_npz=checkpoint_npz,
+            checkpoint_meta=checkpoint_meta,
+            u0=u0,
+            final_u=final_u,
+            base_residual=np.asarray(base_residual, dtype=np.float64),
+            final_residual=np.asarray(final_residual, dtype=np.float64),
+            final_rhs=np.asarray(final_rhs, dtype=np.float64),
+            loaded_state_history=loaded_state_history,
+            loaded_residual_history=loaded_residual_history,
+        )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -77,6 +218,7 @@ def run_mgt_equilibrium_newton_focused_probe(
         ],
         "residual_tolerance_n": float(residual_tolerance_n),
         "newton_iterations": newton.get("iterations"),
+        "output_final_checkpoint": output_checkpoint_meta,
         "runtime_metrics": {"total_seconds": time.perf_counter() - started},
         "claim_boundary": (
             "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, "
@@ -98,6 +240,12 @@ def main() -> int:
     parser.add_argument("--mgt-path", type=Path, default=DEFAULT_MGT)
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)
+    parser.add_argument(
+        "--output-final-checkpoint-npz",
+        type=Path,
+        default=None,
+        help="Write a resumable mgt-direct-residual-newton-state checkpoint when the Newton state improves the residual.",
+    )
     parser.add_argument("--max-newton-iterations", type=int, default=8)
     parser.add_argument(
         "--allow-negative-alphas",
@@ -136,6 +284,7 @@ def main() -> int:
         allow_negative_alphas=bool(args.allow_negative_alphas),
         linear_solver_profile=str(args.linear_solver_profile),
         state_scale_line_search_values=state_scale_line_search_values,
+        output_final_checkpoint_npz=args.output_final_checkpoint_npz,
     )
     print(
         "equilibrium-newton-focused:",
