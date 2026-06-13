@@ -254,9 +254,27 @@
           "stop_reason": "no_residual_descent",
           "runtime_seconds": 142.70735955599957,
           "assessment": "Repeating the exact largest-row expand1 family from the new frontier reversed the prior accepted descent; the single-step family is saturated at 0.0418049579 N."
+        },
+        {
+          "generated_at": "2026-06-14T06:56:34+09:00",
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup9_probe.json",
+          "target_mode": "residual_element_blocks",
+          "target_counts": [
+            4,
+            8
+          ],
+          "element_neighbor_depth": 0,
+          "support_expansion_depth": 0,
+          "base_residual_inf_n": 0.03710044471379187,
+          "best_candidate_residual_inf_n": 0.037101343211487614,
+          "best_candidate_improvement_inf_n": -8.984976957449042e-07,
+          "promoted_to_final_state": false,
+          "stop_reason": "no_residual_descent",
+          "runtime_seconds": 209.69125564899878,
+          "assessment": "Repeating element-block targeting with broader seed counts 4/8 worsened residual and wrote no checkpoint; the followup8 element patch is useful, but simply widening the element seed set is saturated."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N and shifted the active hotspot to 2202 rx shell bending/drilling, so the next G1 push should continue element/shell-bending coupled patches rather than return to largest-row polishing."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N and shifted the active hotspot to 2202 rx shell bending/drilling; however, simply widening element seeds to 4/8 saturated. The next G1 push should continue element/shell-bending coupled patches with a different support/neighbor policy rather than return to largest-row polishing."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
