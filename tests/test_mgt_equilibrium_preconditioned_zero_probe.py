@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -155,3 +156,59 @@ def test_preconditioned_zero_probe_writes_standard_checkpoint(
     assert residual_history is not None
     assert state_history.shape[0] == 2
     assert residual_history.shape[0] == 2
+
+
+def test_preconditioned_zero_probe_serializes_when_disabled_iterative_and_builders_fail(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsr()
+    free = np.asarray([0], dtype=np.int64)
+    input_checkpoint = tmp_path / "input_checkpoint.npz"
+    output_json = tmp_path / "probe.json"
+    np.savez_compressed(
+        input_checkpoint,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        load_scale=np.asarray(1.0, dtype=np.float64),
+        displacement_u=np.asarray([0.0], dtype=np.float64),
+        residual_inf_n=np.asarray(1.0, dtype=np.float64),
+    )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray):
+            rhs = np.asarray([1.0], dtype=np.float64)
+            residual = np.asarray(stiffness @ u - rhs, dtype=np.float64)
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), {}
+
+        return assemble_residual, {
+            "u0": np.asarray([0.0], dtype=np.float64),
+            "checkpoint": {"path": str(input_checkpoint)},
+            "load_scale": 1.0,
+        }
+
+    def fail_builder(**_kwargs):
+        raise RuntimeError("fixture correction failure")
+
+    import run_mgt_equilibrium_preconditioned_zero_probe as probe_module  # noqa: E402
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "diagonal_jacobi_correction", fail_builder)
+    monkeypatch.setattr(probe_module, "node_block_jacobi_correction", fail_builder)
+
+    payload = run_mgt_equilibrium_preconditioned_zero_probe(
+        checkpoint_npz=input_checkpoint,
+        output_json=output_json,
+        output_final_checkpoint_npz=None,
+        start_mode="zero",
+        max_iterative_corrections=0,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["overall_best_residual_inf_n"] == payload["start_state_residual_inf_n"]
+    assert output_json.is_file()
+    written = json.loads(output_json.read_text(encoding="utf-8"))
+    assert written["overall_best_residual_inf_n"] == written["start_state_residual_inf_n"]

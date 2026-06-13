@@ -439,6 +439,10 @@ def run_mgt_equilibrium_preconditioned_zero_probe(
         alpha_values=iterative_alpha_values,
         max_iterations=max_iterative_corrections,
     )
+    if not bool(iterative_search.get("enabled")):
+        iterative_search["final_residual_inf_n"] = base_residual_inf
+        iterative_search["final_max_abs_displacement_m"] = _max_abs(start_u)
+        iterative_search["residual_gate_passed"] = bool(base_residual_inf <= 5.0e-4)
     iterative_final_u = iterative_search.pop("_final_u", np.asarray(start_u, dtype=np.float64))
     iterative_final = _float_or_inf(iterative_search.get("final_residual_inf_n"))
     best_single = _float_or_inf(best_row.get("best_residual_inf_n"))
