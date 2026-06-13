@@ -721,6 +721,62 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         "finite_difference_row_correction_timed_out_before_receipt"
         in direct_followup48_fd_timeout["blockers"]
     )
+    direct_followup56_replay = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_external_checkpoint_replay"
+    ]
+    assert direct_followup56_replay["status"] == "partial"
+    assert direct_followup56_replay["ready"] is False
+    assert direct_followup56_replay["base_direct_residual_inf_n"] == 5471.309240222771
+    assert (
+        direct_followup56_replay["final_direct_residual_inf_n"]
+        == direct_followup56_replay["base_direct_residual_inf_n"]
+    )
+    direct_followup56_largest_rows = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_rowcorr_largest_rows_support4"
+    ]
+    assert direct_followup56_largest_rows["status"] == "partial"
+    assert (
+        direct_followup56_largest_rows["base_direct_residual_inf_n"]
+        == direct_followup56_replay["base_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_largest_rows["final_direct_residual_inf_n"]
+        == 5451.435161912128
+    )
+    assert (
+        direct_followup56_largest_rows[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is True
+    )
+    assert direct_followup56_largest_rows["output_final_checkpoint_written"] is True
+    direct_followup56_largest_rows_followup2 = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2"
+    ]
+    assert (
+        direct_followup56_largest_rows_followup2["base_direct_residual_inf_n"]
+        == direct_followup56_largest_rows["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_largest_rows_followup2["final_direct_residual_inf_n"]
+        == direct_followup56_largest_rows["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_largest_rows_followup2[
+            "current_tangent_residual_row_correction_accepted"
+        ]
+        is False
+    )
+    assert (
+        direct_followup56_largest_rows_followup2[
+            "current_tangent_residual_row_stop_reason"
+        ]
+        == "no_residual_descent"
+    )
+    assert (
+        direct_followup56_largest_rows_followup2["output_final_checkpoint_written"]
+        is False
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]

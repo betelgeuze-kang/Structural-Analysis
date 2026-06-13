@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from implementation.phase1 import run_korean_medium_large_ingest_pipeline as ingest
+from implementation.phase1.open_data.korea import validate_operator_attachment_manifest
 
 
 def test_ingest_pipeline_detects_manual_mgt_under_artifact_root(tmp_path: Path, monkeypatch) -> None:
@@ -404,6 +405,58 @@ def test_ingest_pipeline_rejects_unconfirmed_operator_attachment_manifest(
         "accepted_for_collection_overlay"
     ] is False
     assert receipt["operator_action_queue"][0]["action_type"] == "attach_operator_real_mgt"
+
+
+def test_operator_attachment_manifest_validator_reports_overlay_readiness(
+    tmp_path: Path,
+) -> None:
+    operator_mgt = tmp_path / "native_source.mgt"
+    operator_mgt.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "1" * 800, encoding="utf-8")
+    manifest = tmp_path / "operator_attachment_manifest.json"
+    catalog = tmp_path / "korean_source_catalog.json"
+    source_id = "validated_manifest_mgt"
+    catalog.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean_source_catalog.v1",
+                "source_records": [
+                    {
+                        "source_id": source_id,
+                        "storey_band": "20_30",
+                        "format": "mgt",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+                "attachments": [
+                    {
+                        "source_id": source_id,
+                        "local_path": str(operator_mgt),
+                        "file_type": ".mgt",
+                        "rights_confirmed": True,
+                        "source_native_artifact": True,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_operator_attachment_manifest.validate_operator_attachment_manifest(
+        manifest_path=manifest,
+        catalog_path=catalog,
+    )
+
+    assert report["ready_for_collection_overlay"] is True
+    assert report["accepted_source_count"] == 1
+    assert report["rejected_source_count"] == 0
+    assert report["rows"][0]["accepted_for_collection_overlay"] is True
 
 
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(

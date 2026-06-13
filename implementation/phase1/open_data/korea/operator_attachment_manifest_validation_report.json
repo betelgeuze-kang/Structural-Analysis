@@ -1,0 +1,17 @@
+{
+  "schema_version": "korean-medium-large-operator-attachment-manifest-validation.v1",
+  "manifest_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/operator_attachment_manifest.json",
+  "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
+  "ready_for_collection_overlay": false,
+  "accepted_source_count": 0,
+  "rejected_source_count": 0,
+  "summary": {
+    "operator_attachment_manifest_present": false,
+    "operator_attachment_manifest_row_count": 0,
+    "operator_attachment_manifest_accepted_count": 0,
+    "operator_attachment_manifest_rejected_count": 0,
+    "operator_attachment_manifest_rejection_counts": {}
+  },
+  "rows": [],
+  "claim_boundary": "Accepted rows are eligible for ingest overlay. They still count as G7 evidence only after run_korean_medium_large_ingest_pipeline replays the artifact checks and updates the ingest receipt."
+}

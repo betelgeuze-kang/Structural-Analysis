@@ -1,0 +1,15 @@
+{
+  "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+  "attachments": [
+    {
+      "source_id": "replace_with_catalog_source_id",
+      "local_path": "implementation/phase1/open_data/korea/collected/artifacts/replace_with_catalog_source_id/replace_with_catalog_source_id.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "",
+      "license_hint": "",
+      "operator_note": "Set rights_confirmed and source_native_artifact to true only after confirming this is a source-native real artifact for the catalog source."
+    }
+  ]
+}

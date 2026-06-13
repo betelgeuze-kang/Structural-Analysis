@@ -1372,6 +1372,18 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_direct_residual_newton_followup48_rowcorr_largest_rows_fd_support4_timeout_diagnostic.json"
     )
+    direct_residual_newton_followup56_external_checkpoint_replay = _load(
+        productization
+        / "mgt_direct_residual_newton_followup56_external_checkpoint_replay_probe.json"
+    )
+    direct_residual_newton_followup56_rowcorr_largest_rows_support4 = _load(
+        productization
+        / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_probe.json"
+    )
+    direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2 = _load(
+        productization
+        / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2315,6 +2327,21 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_newton_followup48_rowcorr_largest_rows_fd_support4_timeout": (
                     direct_residual_newton_followup48_rowcorr_largest_rows_fd_support4_timeout
+                ),
+                "direct_residual_newton_followup56_external_checkpoint_replay": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_external_checkpoint_replay
+                    )
+                ),
+                "direct_residual_newton_followup56_rowcorr_largest_rows_support4": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_rowcorr_largest_rows_support4
+                    )
+                ),
+                "direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2
+                    )
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"
