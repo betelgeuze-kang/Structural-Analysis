@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T15:12:45Z",
+  "generated_at": "2026-06-13T15:16:53Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -506,6 +506,29 @@
       "stop_reason": "no_gate_eligible_descent",
       "assessment": "Increasing ridge to 0.1 at the saturated frontier did not recover descent."
     },
+    "all_dof_nodeblock_top64_rows32_support8_ridge10_no_descent": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge10_probe.json",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 10.0,
+      "component_filter": "all",
+      "node_block_support": true,
+      "base_residual_inf_n": 0.28037957384916096,
+      "final_residual_inf_n": 0.28037957384916096,
+      "support_size": 360,
+      "selected_hotspot_row_count": 32,
+      "selected_hotspot_dominant_component_counts": {
+        "shell_bending_drilling": 19,
+        "shell_membrane": 11,
+        "frame": 2
+      },
+      "correction_inf_m": 1.448334572818648e-05,
+      "best_alpha": 3e-07,
+      "best_alpha_residual_inf_n": 0.28037957384916096,
+      "accepted": false,
+      "stop_reason": "no_gate_eligible_descent",
+      "assessment": "Very strong ridge reduced the correction size but still left the frontier flat; ridge magnitude alone is not the next lever."
+    },
     "all_dof_nodeblock_top64_rows32_support8_ridge1em3_tinyalpha_no_descent": {
       "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_tinyalpha_probe.json",
       "base_residual_inf_n": 0.28037957384916096,
@@ -516,7 +539,7 @@
       "stop_reason": "no_gate_eligible_descent",
       "assessment": "Tiny alpha sweep confirmed the followup2 node-block frontier is locally flat until larger alphas worsen residual."
     },
-    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent family. Narrow shell-bending ridge polish reached 0.2803796687 N, while translation-only, shell-membrane-only, and frame-only probes produced no descent. Expanding target rows to all DOFs and support to structural node blocks reopened coupled descent to 0.2803795738 N, then saturated when the raw correction grew to millimeter scale. The next G1 push should automate adaptive ridge/support/trust selection for this all-DOF node-block branch or move to a broader coarse/global correction, not simply repeat the old local translation probes."
+    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent family. Narrow shell-bending ridge polish reached 0.2803796687 N, while translation-only, shell-membrane-only, and frame-only probes produced no descent. Expanding target rows to all DOFs and support to structural node blocks reopened coupled descent to 0.2803795738 N, then saturated when the raw correction grew to millimeter scale. Ridge factors 0.1 and 10.0 did not recover descent at the saturated frontier, so the next G1 push should adapt support/target selection or move to a broader coarse/global correction rather than simply increasing damping."
   },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
