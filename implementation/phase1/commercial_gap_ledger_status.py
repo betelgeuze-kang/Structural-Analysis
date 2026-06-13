@@ -1424,6 +1424,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup3_probe.json"
     )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup4 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup4_probe.json"
+    )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup5 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup5_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2435,6 +2443,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup3": (
                     _direct_residual_probe_summary(
                         direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup3
+                    )
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup4": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup4
+                    )
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup5": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support64_followup5
                     )
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
