@@ -3,6 +3,98 @@
   "generated_at": "2026-06-14T04:31:05+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
+  "current_attached_policy_frontier_reassessment": {
+    "generated_at": "2026-06-14T05:35:48+09:00",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_frame_coupled_final_checkpoint.npz",
+    "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_frame_coupled_frontier_probe.json",
+    "direct_residual_inf_n": 0.04215555840957563,
+    "direct_relative_residual_inf": 4.858792355879295e-06,
+    "residual_gate_n": 0.001,
+    "frontier_pattern": {
+      "top_residual_count": 96,
+      "top_row_dominant_component_counts": {
+        "shell_membrane": 41,
+        "shell_bending_drilling": 41,
+        "frame": 14
+      },
+      "component_internal_force_inf_n": {
+        "frame": 156794.12661617243,
+        "shell_bending_drilling": 156852.1435613269,
+        "shell_membrane": 47414.691621066835
+      },
+      "assessment": "The active residual is a small frame/shell cancellation remainder over very large opposing internal components, not a raw residual assembly correctness failure."
+    },
+    "current_row_correction_runtime": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_frame_coupled_probe.json",
+      "runtime_seconds": 134.14110258599976,
+      "initial_full_assembly_seconds": 24.925574014998347,
+      "finite_difference_candidate_count": 4,
+      "finite_difference_total_seconds": 36.663401747000535,
+      "finite_difference_max_seconds": 30.849414033000357,
+      "residual_only_eval_count": 147,
+      "full_assembly_eval_count": 0,
+      "accepted_improvement_inf_n": 7.763085250189761e-07,
+      "accepted_relative_improvement": 1.841499101404688e-05,
+      "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
+    },
+    "current_rocm_probe_refresh": {
+      "hardware": {
+        "gpu": "AMD Radeon RX 6900 XT",
+        "gfx_target": "gfx1030",
+        "compute_units": 80,
+        "max_clock_mhz": 2660
+      },
+      "coupled_sparse_probe": {
+        "output_json": "/tmp/g1_rocm_coupled_probe_current.json",
+        "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+        "converged": true,
+        "residual_inf_n": 2.0700099412351847e-08,
+        "solve_seconds": 0.8014116089998424,
+        "factor_seconds": 0.44434616200123855,
+        "krylov_seconds": 0.35392243999922357,
+        "hip_kernel_invocation_count": 37
+      },
+      "shell_sparse_probe": {
+        "output_json": "/tmp/g1_rocm_shell_probe_current.json",
+        "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+        "converged": true,
+        "residual_inf_n": 2.1432831953660525e-08,
+        "solve_seconds": 37.52947819700057,
+        "factor_seconds": 0.42803576400001475,
+        "krylov_seconds": 37.09739010699923,
+        "hip_kernel_invocation_count": 4080
+      },
+      "hip_kernel_smokes": {
+        "axpy_1048576_reps20": {
+          "ok": true,
+          "elapsed_ms": 0.640038,
+          "bandwidth_gbps": 393.192646
+        },
+        "beam_element_1048576_reps20": {
+          "ok": true,
+          "elapsed_ms": 0.877688,
+          "bandwidth_gbps": 669.033377
+        }
+      },
+      "assessment": "ROCm/HIP runtime is present and fast for raw kernels and favorable coupled sparse solves, but shell-dominant GMRES remains iteration-bound."
+    },
+    "rust_path_current_status": {
+      "runtime_wrapper": "implementation/phase1/rust_hip_md3bead_hook.py",
+      "crate": "implementation/phase1/rust_hip_md3bead_hook",
+      "connected_to_current_mgt_full_3d_frame_shell_residual": false,
+      "assessment": "The Rust/HIP contracts cover story-frame, NDTHA, and track/load-path kernels; they are not yet wired into the MGT full 3D frame+shell residual/Jacobian assembly that controls the current G1 frontier."
+    },
+    "decision": {
+      "short_answer": "Use ROCm/HIP for batching and sparse/JVP acceleration, but do not expect a simple backend swap to close G1.",
+      "recommended_next_path": [
+        "Keep the attached_components_only load-path policy and attack the frame/shell cancellation patch selection first.",
+        "Parallelize or batch residual-only FD-JVP columns on GPU only after the correction target family is producing millinewton-scale descent.",
+        "Do not promote hipSPARSE ILU0-BiCGStab for G1; prior focused evidence was unstable.",
+        "Do not spend immediate time wiring Rust into full MGT 3D residual assembly unless the G1 plan shifts to a broader production backend milestone."
+      ],
+      "overall_assessment": "The current G1 bottleneck is correction-direction quality/conditioning at a shell-frame cancellation frontier. ROCm/HIP can cut wall time for evidence collection and selected solves, but the residual gate needs a better coupled correction model before raw acceleration changes the outcome."
+    }
+  },
   "current_g1_frontier": {
     "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_probe_final_checkpoint.npz",
     "direct_residual_inf_n": 0.28037907020613034,
