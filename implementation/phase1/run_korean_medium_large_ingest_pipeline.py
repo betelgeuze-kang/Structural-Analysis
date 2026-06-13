@@ -11,6 +11,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
@@ -34,6 +35,16 @@ PRIVATE_REAL_DRAWING_MANIFEST = (
     REPO_ROOT / "private_corpus/real_drawings/private_real_drawing_corpus_manifest.json"
 )
 LOCAL_CANDIDATE_EXTENSIONS = {".mgt", ".ifc", ".pdf", ".zip"}
+
+
+def _is_specific_remote_download(url_text: str) -> bool:
+    parsed = urlparse(str(url_text or "").strip())
+    if parsed.scheme not in {"http", "https"}:
+        return False
+    path = parsed.path.rstrip("/")
+    if not path:
+        return False
+    return bool(parsed.query) or "." in Path(path).name
 
 
 def _sha256_file(path: Path) -> str:
@@ -184,6 +195,14 @@ def _operator_action_row(
         "scale": entry.get("scale", ""),
         "action_type": action_type,
         "target_directory": str(target_dir),
+        "provenance_url": str(record.get("provenance_url") or ""),
+        "download_url": str(record.get("download_url") or ""),
+        "license_hint": str(record.get("license_hint") or ""),
+        "collection_policy": str(record.get("collection_policy") or ""),
+        "seed_basis": str(record.get("seed_basis") or ""),
+        "specific_remote_download": _is_specific_remote_download(
+            str(record.get("download_url") or record.get("provenance_url") or "")
+        ),
         "expected_artifacts": expected_artifacts,
         "current_blockers": blockers,
         "current_attach_provenance": provenance,
@@ -230,6 +249,11 @@ def _operator_action_packet(
             "source_id": str(row.get("source_id") or ""),
             "action_type": str(row.get("action_type") or ""),
             "target_directory": str(row.get("target_directory") or ""),
+            "download_url": str(row.get("download_url") or ""),
+            "provenance_url": str(row.get("provenance_url") or ""),
+            "license_hint": str(row.get("license_hint") or ""),
+            "collection_policy": str(row.get("collection_policy") or ""),
+            "specific_remote_download": bool(row.get("specific_remote_download")),
             "expected_artifacts": list(row.get("expected_artifacts") or []),
             "acceptance_checks": list(row.get("acceptance_checks") or []),
         }
@@ -247,6 +271,17 @@ def _operator_action_packet(
         "acceptance_check_inventory": sorted(acceptance_checks),
         "metadata_only_source_ids": list(metadata_only_source_ids),
         "repo_benchmark_bridge_source_ids": list(repo_benchmark_bridge_source_ids),
+        "specific_remote_download_action_count": sum(
+            1 for row in rows if bool(row.get("specific_remote_download"))
+        ),
+        "portal_landing_action_count": sum(
+            1
+            for row in rows
+            if str(row.get("download_url") or row.get("provenance_url") or "").startswith(
+                ("http://", "https://")
+            )
+            and not bool(row.get("specific_remote_download"))
+        ),
         "operator_attached_real_mgt_header_ok_target": int(
             operator_attached_real_mgt_header_ok_target
         ),

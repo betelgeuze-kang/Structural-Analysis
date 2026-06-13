@@ -5481,6 +5481,15 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
             "koneps_goyang_changneung_powerplant_design_service"
         ]["acceptance_checks"]
     )
+    assert operator_action_by_source[
+        "koneps_goyang_changneung_powerplant_design_service"
+    ]["specific_remote_download"] is True
+    assert operator_action_by_source[
+        "koneps_goyang_changneung_powerplant_design_service"
+    ]["download_url"].startswith("https://www.g2b.go.kr/")
+    assert operator_action_by_source[
+        "koneps_goyang_changneung_powerplant_design_service"
+    ]["license_hint"] == "public_attachment_check_terms"
     assert (
         operator_action_by_source[
             "lh_bucheon_yeokgok_a1_housing_competition"
@@ -5501,6 +5510,12 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert (
         "sha256_differs_from_repo_benchmark_bridge"
         in operator_action_packet["acceptance_check_inventory"]
+    )
+    assert operator_action_packet["specific_remote_download_action_count"] == 5
+    assert operator_action_packet["portal_landing_action_count"] == 9
+    assert operator_action_packet["next_actions"][0]["specific_remote_download"] is True
+    assert operator_action_packet["next_actions"][0]["download_url"].startswith(
+        "https://www.g2b.go.kr/"
     )
     assert (
         rows["G7"]["evidence"]["operator_action_type_counts"][

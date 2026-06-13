@@ -504,6 +504,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_include_gate_limited_alpha: bool = False,
     block_lstsq_component_filter: str = "frame",
     write_progress_artifacts: bool = False,
+    max_wall_seconds: float | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     checkpoint_meta, loaded_u, loaded_state_history, loaded_residual_history = _load_checkpoint(
@@ -525,12 +526,22 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     initial_component_breakdown: dict[str, Any] = {}
     initial_residual = np.asarray([], dtype=np.float64)
     initial_rhs = np.asarray([], dtype=np.float64)
+    latest_residual = np.asarray([], dtype=np.float64)
+    latest_rhs = np.asarray([], dtype=np.float64)
+    latest_free: np.ndarray | None = None
     previous_free: np.ndarray | None = None
     final_free_stable = True
     stop_reason = "max_promotions_exhausted"
     promotion_mode = str(promotion_mode)
     if promotion_mode not in {"diagonal_newton", "signed_displacement", "block_lstsq"}:
         raise ValueError(f"unsupported promotion_mode: {promotion_mode}")
+
+    def _wall_time_exceeded() -> bool:
+        return (
+            max_wall_seconds is not None
+            and float(max_wall_seconds) >= 0.0
+            and (time.perf_counter() - started) >= float(max_wall_seconds)
+        )
 
     for pass_index in range(max(int(max_promotions), 0)):
         stiffness, _f_ext, free, residual, rhs, meta = assemble_residual(
@@ -558,9 +569,15 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             residual=residual,
             rhs=rhs,
         )
+        latest_residual = residual.copy()
+        latest_rhs = rhs.copy()
+        latest_free = free_idx.copy()
         if pass_index == 0:
             initial_component_breakdown = component_breakdown
         last_component_breakdown = component_breakdown
+        if _wall_time_exceeded():
+            stop_reason = "max_wall_seconds_exceeded"
+            break
         if promotion_mode == "diagonal_newton":
             sweep = _hotspot_diagonal_newton_sweep(
                 u=current_u,
@@ -600,6 +617,9 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 component_filter=block_lstsq_component_filter,
             )
         last_sweep = sweep
+        if _wall_time_exceeded():
+            stop_reason = "max_wall_seconds_exceeded"
+            break
         base_residual_inf = _max_abs(residual)
         promotion_candidate = sweep.get("best_gate_eligible_candidate")
         promotion_candidate = promotion_candidate if isinstance(promotion_candidate, dict) else {}
@@ -686,6 +706,9 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             break
         promotion_passes.append(pass_row)
         current_u = trial_u
+        latest_residual = trial_residual.copy()
+        latest_rhs = trial_rhs.copy()
+        latest_free = trial_free_idx.copy()
         accepted_state_rows.append(current_u.copy())
         accepted_residual_rows.append(trial_residual.copy())
         if (
@@ -772,6 +795,9 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
         if trial_residual_inf <= float(residual_tolerance_n):
             stop_reason = "direct_residual_gate_closed"
             break
+        if _wall_time_exceeded():
+            stop_reason = "max_wall_seconds_exceeded"
+            break
     else:
         if int(max_promotions) <= 0:
             stop_reason = "max_promotions_zero"
@@ -790,8 +816,17 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             rhs=np.asarray(initial_rhs, dtype=np.float64),
         )
         last_component_breakdown = initial_component_breakdown
-    _final_k, _final_f, final_free, final_residual, final_rhs, final_meta = assemble_residual(current_u)
-    final_free_idx = np.asarray(final_free, dtype=np.int64)
+    if latest_residual.size:
+        final_residual = latest_residual
+        final_rhs = latest_rhs
+        final_free_idx = (
+            np.asarray(latest_free, dtype=np.int64)
+            if latest_free is not None
+            else np.asarray([], dtype=np.int64)
+        )
+    else:
+        _final_k, _final_f, final_free, final_residual, final_rhs, _final_meta = assemble_residual(current_u)
+        final_free_idx = np.asarray(final_free, dtype=np.int64)
     final_free_stable = bool(
         final_free_stable
         and previous_free is not None
@@ -880,7 +915,12 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
         "promotion_passes": promotion_passes,
         "promotion_candidate": promotion_candidate,
         "output_final_checkpoint": output_checkpoint_meta,
-        "runtime_metrics": {"total_seconds": time.perf_counter() - started},
+        "runtime_metrics": {
+            "total_seconds": time.perf_counter() - started,
+            "max_wall_seconds": None
+            if max_wall_seconds is None
+            else float(max_wall_seconds),
+        },
         "claim_boundary": (
             "Promotes only a relative-increment-gate-eligible correction on frame-dominant "
             "translation residual hotspots. This is an incremental frontier advance, not "
@@ -891,6 +931,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
         else [
             "direct_residual_gate_not_closed",
             "global_consistent_newton_or_load_path_required",
+            *(["frontier_probe_wall_time_exceeded"] if stop_reason == "max_wall_seconds_exceeded" else []),
         ],
     }
     if output_json is not None:
@@ -926,6 +967,15 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
+        "--max-wall-seconds",
+        type=float,
+        default=None,
+        help=(
+            "Stop after the next safe residual/sweep boundary once this wall-clock "
+            "budget is exceeded, writing a partial diagnostic payload."
+        ),
+    )
+    parser.add_argument(
         "--promotion-mode",
         choices=("diagonal_newton", "signed_displacement", "block_lstsq"),
         default="diagonal_newton",
@@ -958,6 +1008,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
         block_lstsq_component_filter=str(args.block_lstsq_component_filter),
         write_progress_artifacts=bool(args.write_progress_artifacts),
+        max_wall_seconds=args.max_wall_seconds,
     )
     print(
         "mgt-frame-hotspot-diagonal-newton:",
