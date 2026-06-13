@@ -1193,6 +1193,13 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_residual_jacobian_current_frontier_frame_hotspot_jvp_probe.json"
     )
+    residual_jacobian_support128_followup11_component = _load(
+        productization / "mgt_residual_jacobian_support128_followup11_component_probe.json"
+    )
+    residual_jacobian_support128_followup11_hotspot_jvp = _load(
+        productization
+        / "mgt_residual_jacobian_support128_followup11_hotspot_jvp_probe.json"
+    )
     preconditioned_zero = _load(
         productization / "mgt_equilibrium_preconditioned_zero_probe.json"
     )
@@ -2648,6 +2655,36 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "residual_jacobian_current_frontier_component_blockers": (
                     residual_jacobian_current_frontier_component.get("blockers")
+                ),
+                "residual_jacobian_support128_followup11_component_status": (
+                    residual_jacobian_support128_followup11_component.get("status")
+                ),
+                "residual_jacobian_support128_followup11_component_only": (
+                    residual_jacobian_support128_followup11_component.get("component_only")
+                ),
+                "residual_jacobian_support128_followup11_base_residual_inf_n": (
+                    residual_jacobian_support128_followup11_component.get("base_residual_inf_n")
+                ),
+                "residual_jacobian_support128_followup11_base_relative_residual_inf": (
+                    residual_jacobian_support128_followup11_component.get(
+                        "base_relative_residual_inf"
+                    )
+                ),
+                "residual_jacobian_support128_followup11_component_breakdown": (
+                    residual_jacobian_support128_followup11_component.get(
+                        "residual_component_breakdown"
+                    )
+                ),
+                "residual_jacobian_support128_followup11_hotspot_frame_diagnostics": (
+                    residual_jacobian_support128_followup11_component.get(
+                        "residual_hotspot_frame_diagnostics"
+                    )
+                ),
+                "residual_jacobian_support128_followup11_hotspot_jvp": _hotspot_jvp_summary(
+                    residual_jacobian_support128_followup11_hotspot_jvp
+                ),
+                "residual_jacobian_support128_followup11_component_blockers": (
+                    residual_jacobian_support128_followup11_component.get("blockers")
                 ),
                 "direct_residual_row_element_block_target_smoke": _direct_residual_probe_summary(
                     direct_residual_row_element_block_target
