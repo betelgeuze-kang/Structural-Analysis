@@ -24,7 +24,14 @@
     "latest_conditioned_block_lstsq_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe.json",
     "latest_conditioned_block_lstsq_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
     "latest_conditioned_block_lstsq_final_residual_inf_n": 0.2803796687027861,
-    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 6.204718374333096e-07
+    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 6.204718374333096e-07,
+    "latest_component_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_ridge_alpha_polished_frontier_component_probe.json",
+    "latest_component_probe_top_residual_count": 64,
+    "latest_component_probe_top_row_dominant_component_counts": {
+      "shell_bending_drilling": 29,
+      "shell_membrane": 25,
+      "frame": 10
+    }
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -366,6 +373,7 @@
       "After exposing top64 residual rows, the 16-row shell-bending LSTSQ correction was too ill-conditioned to descend even under tiny alpha search.",
       "Ridge regularization plus near-null column scale-floor protection converted the top64/16-row path into a controlled polishing step instead of a 5530 m correction blow-up.",
       "Fine alpha search improved the ridge-polish branch, but the branch is now at nanonewton-scale descent and not a credible path to the 1e-3 N gate by itself.",
+      "The latest top64 component probe shows a mixed frontier, with 29 shell-bending rows, 25 shell-membrane rows, and 10 frame rows; the next correction needs coupled shell-membrane/frame participation rather than another narrow shell-bending polish.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."

@@ -346,6 +346,43 @@ def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:
     assert payload["blockers"] == ["component_only_diagnostic_not_consistency_closure"]
 
 
+def test_component_breakdown_probe_honors_top_residual_count(monkeypatch) -> None:
+    stiffness = coo_matrix(([1.0, 1.0, 1.0], ([0, 1, 2], [0, 1, 2])), shape=(3, 3)).tocsc()
+    free = np.asarray([0, 1, 2], dtype=np.int64)
+
+    def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+        residual = np.asarray([5.0, -4.0, 3.0], dtype=np.float64)
+        meta = {"physical_internal_force_model": "fixture"}
+        if include_component_forces:
+            meta["component_forces"] = {
+                "frame": np.asarray([5.0, -4.0, 3.0], dtype=np.float64)
+            }
+        return stiffness, np.zeros(3), free, residual, np.ones(3), meta
+
+    def build_direct_residual_assembler(**_kwargs):
+        return assemble_residual, {
+            "u0": np.zeros(3, dtype=np.float64),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        top_residual_count=2,
+    )
+
+    rows = payload["residual_component_breakdown"]["top_rows"]
+    assert payload["top_residual_count"] == 2
+    assert [row["free_row"] for row in rows] == [0, 1]
+
+
 def test_shell_membrane_hotspot_diagnostics_reports_global_dof_participation() -> None:
     setup_meta = {
         "_node_xyz": np.asarray(

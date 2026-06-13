@@ -975,6 +975,7 @@ def run_mgt_residual_jacobian_consistency_probe(
         free=np.asarray(free, dtype=np.int64),
         residual=np.asarray(residual, dtype=np.float64),
         rhs=np.asarray(rhs, dtype=np.float64),
+        top_count=int(top_residual_count),
     )
     shell_membrane_hotspots = _shell_membrane_hotspot_diagnostics(
         top_rows=residual_component_breakdown.get("top_rows", []),
@@ -1084,6 +1085,7 @@ def run_mgt_residual_jacobian_consistency_probe(
         "base_relative_residual_inf": base_residual_inf / max(rhs_inf, 1.0),
         "rhs_inf_n": rhs_inf,
         "free_dof_count": int(np.asarray(free).size),
+        "top_residual_count": int(top_residual_count),
         "residual_component_breakdown": residual_component_breakdown,
         "residual_hotspot_shell_membrane_diagnostics": shell_membrane_hotspots,
         "residual_hotspot_frame_diagnostics": frame_hotspots,
