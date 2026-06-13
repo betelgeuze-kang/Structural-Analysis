@@ -76,6 +76,7 @@ def _child_launch_receipt(
     child_checkpoint: Path,
     checkpoint_npz: Path,
     tangent_regularization_factor: float,
+    preconditioner_input_scale: float,
     child_timeout_seconds: float | None,
     command: list[str],
 ) -> dict[str, Any]:
@@ -87,6 +88,7 @@ def _child_launch_receipt(
         "output_json": str(child_json),
         "output_final_checkpoint_npz": str(child_checkpoint),
         "tangent_regularization_factor": float(tangent_regularization_factor),
+        "preconditioner_input_scale": float(preconditioner_input_scale),
         "child_timeout_seconds": (
             None if child_timeout_seconds is None else float(child_timeout_seconds)
         ),
@@ -113,6 +115,7 @@ def _run_child_subprocess(
     child_json: Path,
     child_checkpoint: Path,
     factor: float,
+    preconditioner_input_scale: float,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
     matrix_free_global_krylov_max_iterations: int,
@@ -161,7 +164,7 @@ def _run_child_subprocess(
         "--matrix-free-global-krylov-preconditioner-mode",
         "current_tangent",
         "--matrix-free-global-krylov-preconditioner-input-scale",
-        "1.0",
+        str(float(preconditioner_input_scale)),
         "--matrix-free-global-krylov-tangent-regularization-factor",
         str(float(factor)),
         "--matrix-free-global-krylov-allow-negative-alphas",
@@ -196,6 +199,7 @@ def _run_child_subprocess(
             child_checkpoint=child_checkpoint,
             checkpoint_npz=checkpoint_npz,
             tangent_regularization_factor=factor,
+            preconditioner_input_scale=preconditioner_input_scale,
             child_timeout_seconds=child_timeout_seconds,
             command=cmd,
         ),
@@ -222,6 +226,8 @@ def _run_child_subprocess(
             "base_direct_residual": {
                 "direct_residual_inf_n": checkpoint_meta.get("residual_inf_n"),
             },
+            "tangent_regularization_factor": float(factor),
+            "preconditioner_input_scale": float(preconditioner_input_scale),
             "matrix_free_global_krylov": {
                 "enabled": True,
                 "attempted": True,
@@ -285,6 +291,7 @@ def run_adaptive_preconditioned_global_newton(
     matrix_free_global_krylov_max_iterations: int = 3,
     matrix_free_global_krylov_probe_epsilon: float = 1.0e-6,
     matrix_free_global_krylov_probe_max_step: float = 1.0e-5,
+    matrix_free_global_krylov_preconditioner_input_scales: tuple[float, ...] = (1.0,),
     matrix_free_global_krylov_alpha_values: tuple[float, ...] = (
         8.0,
         4.0,
@@ -336,7 +343,198 @@ def run_adaptive_preconditioned_global_newton(
 
     for step_index in range(max(int(max_controller_steps), 0)):
         step_promoted = False
+        preconditioner_input_scales = tuple(
+            float(value)
+            for value in matrix_free_global_krylov_preconditioner_input_scales
+            if float(value) > 0.0
+        ) or (1.0,)
         for factor in tangent_regularization_factors:
+            for preconditioner_input_scale in preconditioner_input_scales:
+                if (
+                    runtime_budget_seconds is not None
+                    and time.perf_counter() - started >= runtime_budget_seconds
+                ):
+                    runtime_budget_exceeded = True
+                    stop_reason = "runtime_budget_exceeded"
+                    break
+                label = _factor_label(float(factor))
+                scale_label = _factor_label(float(preconditioner_input_scale))
+                child_json = child_output_dir / (
+                    f"{output_json.stem}_step{step_index + 1}_reg{label}_scale{scale_label}.json"
+                )
+                child_checkpoint = child_output_dir / (
+                    f"{output_json.stem}_step{step_index + 1}_reg{label}_scale{scale_label}_final_checkpoint.npz"
+                )
+                child_started = time.perf_counter()
+                child_subprocess_meta: dict[str, Any] = {}
+                if child_timeout_seconds is not None and float(child_timeout_seconds) > 0.0:
+                    child_payload, child_subprocess_meta = _run_child_subprocess(
+                        mgt_path=mgt_path,
+                        checkpoint_npz=current_checkpoint,
+                        child_json=child_json,
+                        child_checkpoint=child_checkpoint,
+                        factor=float(factor),
+                        preconditioner_input_scale=float(preconditioner_input_scale),
+                        residual_tolerance_n=residual_tolerance_n,
+                        relative_increment_tolerance=relative_increment_tolerance,
+                        matrix_free_global_krylov_max_iterations=(
+                            matrix_free_global_krylov_max_iterations
+                        ),
+                        matrix_free_global_krylov_probe_epsilon=(
+                            matrix_free_global_krylov_probe_epsilon
+                        ),
+                        matrix_free_global_krylov_probe_max_step=(
+                            matrix_free_global_krylov_probe_max_step
+                        ),
+                        matrix_free_global_krylov_alpha_values=(
+                            matrix_free_global_krylov_alpha_values
+                        ),
+                        matrix_free_global_krylov_max_alpha=(
+                            matrix_free_global_krylov_max_alpha
+                        ),
+                        matrix_free_global_krylov_min_relative_improvement=(
+                            matrix_free_global_krylov_min_relative_improvement
+                        ),
+                        enable_secant_family_seed=bool(enable_secant_family_seed),
+                        max_secant_family_promotions=max_secant_family_promotions,
+                        secant_family_window_sizes=secant_family_window_sizes,
+                        secant_family_ridge_factors=secant_family_ridge_factors,
+                        secant_family_alpha_values=secant_family_alpha_values,
+                        secant_family_min_relative_improvement=(
+                            secant_family_min_relative_improvement
+                        ),
+                        child_timeout_seconds=float(child_timeout_seconds),
+                    )
+                else:
+                    child_payload = run_mgt_direct_residual_newton_probe(
+                        mgt_path=mgt_path,
+                        checkpoint_npz=current_checkpoint,
+                        output_json=child_json,
+                        output_final_checkpoint_npz=child_checkpoint,
+                        residual_tolerance_n=residual_tolerance_n,
+                        relative_increment_tolerance=relative_increment_tolerance,
+                        max_trust_iterations=0,
+                        enable_secant_subspace_globalization=False,
+                        enable_secant_family_globalization=bool(enable_secant_family_seed),
+                        max_secant_family_promotions=max_secant_family_promotions,
+                        secant_family_window_sizes=secant_family_window_sizes,
+                        secant_family_ridge_factors=secant_family_ridge_factors,
+                        secant_family_alpha_values=secant_family_alpha_values,
+                        secant_family_min_relative_improvement=(
+                            secant_family_min_relative_improvement
+                        ),
+                        enable_matrix_free_jacobian_subspace=False,
+                        enable_matrix_free_global_krylov=True,
+                        matrix_free_global_krylov_max_iterations=(
+                            matrix_free_global_krylov_max_iterations
+                        ),
+                        matrix_free_global_krylov_probe_epsilon=(
+                            matrix_free_global_krylov_probe_epsilon
+                        ),
+                        matrix_free_global_krylov_probe_max_step=(
+                            matrix_free_global_krylov_probe_max_step
+                        ),
+                        matrix_free_global_krylov_scaling_mode="residual_diagonal_displacement",
+                        matrix_free_global_krylov_preconditioner_mode="current_tangent",
+                        matrix_free_global_krylov_preconditioner_input_scale=(
+                            float(preconditioner_input_scale)
+                        ),
+                        matrix_free_global_krylov_tangent_regularization_factor=float(factor),
+                        matrix_free_global_krylov_allow_negative_alphas=True,
+                        matrix_free_global_krylov_max_alpha=matrix_free_global_krylov_max_alpha,
+                        matrix_free_global_krylov_alpha_values=(
+                            matrix_free_global_krylov_alpha_values
+                        ),
+                        matrix_free_global_krylov_min_relative_improvement=(
+                            matrix_free_global_krylov_min_relative_improvement
+                        ),
+                    )
+                child_runtime_seconds = float(time.perf_counter() - child_started)
+                krylov = child_payload.get("matrix_free_global_krylov")
+                krylov = krylov if isinstance(krylov, dict) else {}
+                best = _best_global_candidate(child_payload)
+                component_flags = _accepted_component_flags(child_payload)
+                base_residual = _get_direct_residual(child_payload, "base_direct_residual")
+                final_residual = _get_direct_residual(child_payload, "final_direct_residual")
+                final_improvement = (
+                    base_residual - final_residual
+                    if base_residual is not None and final_residual is not None
+                    else None
+                )
+                final_relative_improvement = (
+                    final_improvement / max(base_residual, 1.0e-30)
+                    if final_improvement is not None and base_residual is not None
+                    else None
+                )
+                child_promoted = bool(
+                    final_relative_improvement is not None
+                    and final_relative_improvement
+                    >= matrix_free_global_krylov_min_relative_improvement
+                    and any(component_flags.values())
+                )
+                row = {
+                    "step_index": int(step_index + 1),
+                    "tangent_regularization_factor": float(factor),
+                    "preconditioner_input_scale": float(preconditioner_input_scale),
+                    "child_receipt_path": str(child_json),
+                    "child_checkpoint_path": str(child_checkpoint),
+                    "status": child_payload.get("status"),
+                    "accepted": child_promoted,
+                    "stop_reason": krylov.get("stop_reason"),
+                    "base_direct_residual_inf_n": base_residual,
+                    "final_direct_residual_inf_n": final_residual,
+                    "final_relative_improvement": final_relative_improvement,
+                    "component_acceptance": component_flags,
+                    "best_candidate_direct_residual_inf_n": best.get(
+                        "direct_residual_inf_n"
+                    ),
+                    "best_candidate_relative_improvement": best.get(
+                        "relative_improvement"
+                    ),
+                    "best_candidate_alpha": best.get("alpha"),
+                    "best_candidate_alpha_source": best.get("alpha_source"),
+                    "relative_increment_gate_passed": best.get(
+                        "relative_increment_gate_passed"
+                    ),
+                    "residual_gate_passed": best.get("residual_gate_passed"),
+                    "matvec_count": krylov.get("matvec_count"),
+                    "residual_only_matvec_count": krylov.get("residual_only_matvec_count"),
+                    "full_assembly_matvec_count": krylov.get("full_assembly_matvec_count"),
+                    "residual_only_trial_count": krylov.get("residual_only_trial_count"),
+                    "full_assembly_trial_count": krylov.get("full_assembly_trial_count"),
+                    "preconditioner_solve_count": krylov.get("preconditioner_solve_count"),
+                    "preconditioner_regularization": krylov.get(
+                        "preconditioner_regularization"
+                    ),
+                    "child_runtime_seconds": child_runtime_seconds,
+                    "runtime_budget_seconds": runtime_budget_seconds,
+                    "child_timeout_seconds": (
+                        None
+                        if child_timeout_seconds is None
+                        else float(child_timeout_seconds)
+                    ),
+                    **child_subprocess_meta,
+                }
+                controller_rows.append(row)
+                if bool(row.get("subprocess_timeout")):
+                    runtime_budget_exceeded = True
+                    stop_reason = "child_timeout_seconds_exceeded"
+                if (
+                    runtime_budget_seconds is not None
+                    and time.perf_counter() - started >= runtime_budget_seconds
+                ):
+                    runtime_budget_exceeded = True
+                if child_promoted:
+                    promotion_count += 1
+                    current_checkpoint = child_checkpoint
+                    final_checkpoint = child_checkpoint
+                    final_residual_inf_n = row["final_direct_residual_inf_n"]
+                    step_promoted = True
+                    break
+                if runtime_budget_exceeded:
+                    if stop_reason != "child_timeout_seconds_exceeded":
+                        stop_reason = "runtime_budget_exceeded"
+                    break
             if (
                 runtime_budget_seconds is not None
                 and time.perf_counter() - started >= runtime_budget_seconds
@@ -344,174 +542,7 @@ def run_adaptive_preconditioned_global_newton(
                 runtime_budget_exceeded = True
                 stop_reason = "runtime_budget_exceeded"
                 break
-            label = _factor_label(float(factor))
-            child_json = child_output_dir / (
-                f"{output_json.stem}_step{step_index + 1}_reg{label}.json"
-            )
-            child_checkpoint = child_output_dir / (
-                f"{output_json.stem}_step{step_index + 1}_reg{label}_final_checkpoint.npz"
-            )
-            child_started = time.perf_counter()
-            child_subprocess_meta: dict[str, Any] = {}
-            if child_timeout_seconds is not None and float(child_timeout_seconds) > 0.0:
-                child_payload, child_subprocess_meta = _run_child_subprocess(
-                    mgt_path=mgt_path,
-                    checkpoint_npz=current_checkpoint,
-                    child_json=child_json,
-                    child_checkpoint=child_checkpoint,
-                    factor=float(factor),
-                    residual_tolerance_n=residual_tolerance_n,
-                    relative_increment_tolerance=relative_increment_tolerance,
-                    matrix_free_global_krylov_max_iterations=(
-                        matrix_free_global_krylov_max_iterations
-                    ),
-                    matrix_free_global_krylov_probe_epsilon=(
-                        matrix_free_global_krylov_probe_epsilon
-                    ),
-                    matrix_free_global_krylov_probe_max_step=(
-                        matrix_free_global_krylov_probe_max_step
-                    ),
-                    matrix_free_global_krylov_alpha_values=(
-                        matrix_free_global_krylov_alpha_values
-                    ),
-                    matrix_free_global_krylov_max_alpha=(
-                        matrix_free_global_krylov_max_alpha
-                    ),
-                    matrix_free_global_krylov_min_relative_improvement=(
-                        matrix_free_global_krylov_min_relative_improvement
-                    ),
-                    enable_secant_family_seed=bool(enable_secant_family_seed),
-                    max_secant_family_promotions=max_secant_family_promotions,
-                    secant_family_window_sizes=secant_family_window_sizes,
-                    secant_family_ridge_factors=secant_family_ridge_factors,
-                    secant_family_alpha_values=secant_family_alpha_values,
-                    secant_family_min_relative_improvement=(
-                        secant_family_min_relative_improvement
-                    ),
-                    child_timeout_seconds=float(child_timeout_seconds),
-                )
-            else:
-                child_payload = run_mgt_direct_residual_newton_probe(
-                    mgt_path=mgt_path,
-                    checkpoint_npz=current_checkpoint,
-                    output_json=child_json,
-                    output_final_checkpoint_npz=child_checkpoint,
-                    residual_tolerance_n=residual_tolerance_n,
-                    relative_increment_tolerance=relative_increment_tolerance,
-                    max_trust_iterations=0,
-                    enable_secant_subspace_globalization=False,
-                    enable_secant_family_globalization=bool(enable_secant_family_seed),
-                    max_secant_family_promotions=max_secant_family_promotions,
-                    secant_family_window_sizes=secant_family_window_sizes,
-                    secant_family_ridge_factors=secant_family_ridge_factors,
-                    secant_family_alpha_values=secant_family_alpha_values,
-                    secant_family_min_relative_improvement=(
-                        secant_family_min_relative_improvement
-                    ),
-                    enable_matrix_free_jacobian_subspace=False,
-                    enable_matrix_free_global_krylov=True,
-                    matrix_free_global_krylov_max_iterations=(
-                        matrix_free_global_krylov_max_iterations
-                    ),
-                    matrix_free_global_krylov_probe_epsilon=(
-                        matrix_free_global_krylov_probe_epsilon
-                    ),
-                    matrix_free_global_krylov_probe_max_step=(
-                        matrix_free_global_krylov_probe_max_step
-                    ),
-                    matrix_free_global_krylov_scaling_mode="residual_diagonal_displacement",
-                    matrix_free_global_krylov_preconditioner_mode="current_tangent",
-                    matrix_free_global_krylov_preconditioner_input_scale=1.0,
-                    matrix_free_global_krylov_tangent_regularization_factor=float(factor),
-                    matrix_free_global_krylov_allow_negative_alphas=True,
-                    matrix_free_global_krylov_max_alpha=matrix_free_global_krylov_max_alpha,
-                    matrix_free_global_krylov_alpha_values=(
-                        matrix_free_global_krylov_alpha_values
-                    ),
-                    matrix_free_global_krylov_min_relative_improvement=(
-                        matrix_free_global_krylov_min_relative_improvement
-                    ),
-                )
-            child_runtime_seconds = float(time.perf_counter() - child_started)
-            krylov = child_payload.get("matrix_free_global_krylov")
-            krylov = krylov if isinstance(krylov, dict) else {}
-            best = _best_global_candidate(child_payload)
-            component_flags = _accepted_component_flags(child_payload)
-            base_residual = _get_direct_residual(child_payload, "base_direct_residual")
-            final_residual = _get_direct_residual(child_payload, "final_direct_residual")
-            final_improvement = (
-                base_residual - final_residual
-                if base_residual is not None and final_residual is not None
-                else None
-            )
-            final_relative_improvement = (
-                final_improvement / max(base_residual, 1.0e-30)
-                if final_improvement is not None and base_residual is not None
-                else None
-            )
-            child_promoted = bool(
-                final_relative_improvement is not None
-                and final_relative_improvement
-                >= matrix_free_global_krylov_min_relative_improvement
-                and any(component_flags.values())
-            )
-            row = {
-                "step_index": int(step_index + 1),
-                "tangent_regularization_factor": float(factor),
-                "child_receipt_path": str(child_json),
-                "child_checkpoint_path": str(child_checkpoint),
-                "status": child_payload.get("status"),
-                "accepted": child_promoted,
-                "stop_reason": krylov.get("stop_reason"),
-                "base_direct_residual_inf_n": base_residual,
-                "final_direct_residual_inf_n": final_residual,
-                "final_relative_improvement": final_relative_improvement,
-                "component_acceptance": component_flags,
-                "best_candidate_direct_residual_inf_n": best.get(
-                    "direct_residual_inf_n"
-                ),
-                "best_candidate_relative_improvement": best.get(
-                    "relative_improvement"
-                ),
-                "best_candidate_alpha": best.get("alpha"),
-                "best_candidate_alpha_source": best.get("alpha_source"),
-                "relative_increment_gate_passed": best.get(
-                    "relative_increment_gate_passed"
-                ),
-                "residual_gate_passed": best.get("residual_gate_passed"),
-                "matvec_count": krylov.get("matvec_count"),
-                "preconditioner_solve_count": krylov.get("preconditioner_solve_count"),
-                "preconditioner_regularization": krylov.get(
-                    "preconditioner_regularization"
-                ),
-                "child_runtime_seconds": child_runtime_seconds,
-                "runtime_budget_seconds": runtime_budget_seconds,
-                "child_timeout_seconds": (
-                    None
-                    if child_timeout_seconds is None
-                    else float(child_timeout_seconds)
-                ),
-                **child_subprocess_meta,
-            }
-            controller_rows.append(row)
-            if bool(row.get("subprocess_timeout")):
-                runtime_budget_exceeded = True
-                stop_reason = "child_timeout_seconds_exceeded"
-            if (
-                runtime_budget_seconds is not None
-                and time.perf_counter() - started >= runtime_budget_seconds
-            ):
-                runtime_budget_exceeded = True
-            if child_promoted:
-                promotion_count += 1
-                current_checkpoint = child_checkpoint
-                final_checkpoint = child_checkpoint
-                final_residual_inf_n = row["final_direct_residual_inf_n"]
-                step_promoted = True
-                break
-            if runtime_budget_exceeded:
-                if stop_reason != "child_timeout_seconds_exceeded":
-                    stop_reason = "runtime_budget_exceeded"
+            if step_promoted or runtime_budget_exceeded:
                 break
         if runtime_budget_exceeded:
             if final_residual_inf_n is None and controller_rows:
@@ -560,6 +591,14 @@ def run_adaptive_preconditioned_global_newton(
             ),
             "matrix_free_global_krylov_alpha_values": [
                 float(value) for value in matrix_free_global_krylov_alpha_values
+            ],
+            "matrix_free_global_krylov_preconditioner_input_scales": [
+                float(value)
+                for value in (
+                    matrix_free_global_krylov_preconditioner_input_scales
+                    or (1.0,)
+                )
+                if float(value) > 0.0
             ],
             "matrix_free_global_krylov_max_alpha": float(
                 matrix_free_global_krylov_max_alpha
@@ -625,6 +664,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--matrix-free-global-krylov-alpha-values",
         default="8,4,2,1,0.5,0.25",
+    )
+    parser.add_argument(
+        "--matrix-free-global-krylov-preconditioner-input-scales",
+        default="1.0",
+        help=(
+            "Comma-separated force-like input scales applied before the "
+            "current-tangent right preconditioner."
+        ),
     )
     parser.add_argument("--matrix-free-global-krylov-max-alpha", type=float, default=8.0)
     parser.add_argument(
@@ -698,6 +745,9 @@ def main(argv: list[str] | None = None) -> int:
         matrix_free_global_krylov_probe_max_step=args.matrix_free_global_krylov_probe_max_step,
         matrix_free_global_krylov_alpha_values=_parse_float_csv(
             args.matrix_free_global_krylov_alpha_values
+        ),
+        matrix_free_global_krylov_preconditioner_input_scales=_parse_float_csv(
+            args.matrix_free_global_krylov_preconditioner_input_scales
         ),
         matrix_free_global_krylov_max_alpha=args.matrix_free_global_krylov_max_alpha,
         matrix_free_global_krylov_min_relative_improvement=(

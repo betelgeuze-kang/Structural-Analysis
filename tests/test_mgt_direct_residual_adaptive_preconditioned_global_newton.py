@@ -64,9 +64,14 @@ def test_adaptive_global_newton_child_timeout_writes_receipt(
     assert row["subprocess_stderr"] == "partial stderr"
     assert "--allow-cpu-diagnostic" in row["subprocess_command"]
     assert "--enable-matrix-free-global-krylov" in row["subprocess_command"]
+    assert "--matrix-free-global-krylov-preconditioner-input-scale" in row[
+        "subprocess_command"
+    ]
+    assert row["preconditioner_input_scale"] == 1.0
 
     child_receipt = json.loads(Path(row["child_receipt_path"]).read_text())
     assert child_receipt["status"] == "timeout"
+    assert child_receipt["preconditioner_input_scale"] == 1.0
     assert child_receipt["output_final_checkpoint_written"] is False
     assert child_receipt["matrix_free_global_krylov"]["stop_reason"] == (
         "child_timeout_seconds_exceeded"
@@ -137,6 +142,7 @@ def test_adaptive_global_newton_child_subprocess_reads_completed_receipt(
         max_controller_steps=1,
         matrix_free_global_krylov_max_iterations=1,
         matrix_free_global_krylov_alpha_values=(1.0,),
+        matrix_free_global_krylov_preconditioner_input_scales=(0.5, 2.0),
         matrix_free_global_krylov_min_relative_improvement=1.0e-6,
         child_timeout_seconds=0.01,
     )
@@ -146,6 +152,10 @@ def test_adaptive_global_newton_child_subprocess_reads_completed_receipt(
     assert row["subprocess_returncode"] == 0
     assert row["subprocess_stdout"] == "completed stdout"
     assert row["accepted"] is True
+    assert row["preconditioner_input_scale"] == 0.5
+    assert payload["controller"][
+        "matrix_free_global_krylov_preconditioner_input_scales"
+    ] == [0.5, 2.0]
     assert payload["promoted_rows"] == [row]
     assert payload["final_direct_residual_inf_n"] == 1.0
     assert payload["controller"]["stop_reason"] == "max_controller_steps_reached"

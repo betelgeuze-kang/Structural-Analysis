@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T16:38:09.106874+00:00",
+  "generated_at": "2026-06-13T17:05:31.800544+00:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -84,7 +84,10 @@
       "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e7_probe.json",
       "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_repeat_probe.json",
       "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e4_probe.json"
-    ]
+    ],
+    "latest_global_krylov_input_scale_sweep_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe.json",
+    "latest_global_krylov_input_scale_sweep_promotions": 0,
+    "latest_global_krylov_input_scale_sweep_best_residual_inf_n": 0.2803795696042434
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -1170,7 +1173,7 @@
     "latest_local_probe_runtime_s": 61.82685814899742,
     "rocm_hip_decision": "Residual-only matvec/trial routing is the current G1 acceleration win: it avoids repeated full tangent assembly during global Krylov matvecs and line-search trials while preserving direct physical residual replay. This CPU path promoted the frontier twice before any HIP port, so ROCm/HIP work should now target batched residual-only JVP matvecs and sparse preconditioner solves for this global operator, not local LSTSQ polishing.",
     "rust_decision": "The Rust/HIP runtime path remains useful for existing nonlinear-frame/NDTHA contracts, but it is not connected to the current MGT full 3D frame+shell residual/Jacobian assembly. Wiring it now would be integration work before algorithmic closure evidence, not a quick gate-closing path.",
-    "next_g1_step": "Continue from the reg1e-5 residual-only global Krylov checkpoint. Sweep Krylov restart depth and preconditioner input scale under child-timeout receipts; promote only residual-descent checkpoints. The residual gate remains open by about 0.279379 N, so consistent shell/frame residual-Jacobian coupling and material/full-load Newton state remain required for closure.",
+    "next_g1_step": "Continue from the reg1e-5 residual-only global Krylov checkpoint, but input-scale-only sweep at scales 0.3, 3.0, and 1.0 did not descend. The next useful controller branch should vary Krylov restart depth or pair regularization with a different residual/Jacobian consistency model; promote only residual-descent checkpoints. The residual gate remains open by about 0.279379 N.",
     "latest_adaptive_global_krylov_timeout_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_child_timeout_smoke.json",
     "latest_adaptive_global_krylov_timeout_status": "child_timeout_receipt_written_after_45s_without_progress_claim",
     "latest_adaptive_global_krylov_child_timeout_seconds": 45.0,
@@ -1179,7 +1182,8 @@
     "latest_cached_jvp_top_row_counter_evidence": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_top_frontier_rows4_support24_alpha_wide_probe.json",
     "latest_global_krylov_residual_only_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_probe.json",
     "latest_global_krylov_residual_only_followup_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_probe.json",
-    "latest_global_krylov_residual_only_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_probe_final_checkpoint.npz"
+    "latest_global_krylov_residual_only_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_probe_final_checkpoint.npz",
+    "latest_global_krylov_input_scale_counter_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe.json"
   },
   "global_krylov_residual_only_frontier_evidence": {
     "schema_version": "g1-global-krylov-residual-only-frontier-evidence.v2",
@@ -1312,6 +1316,72 @@
         "checkpoint": null
       }
     ],
-    "assessment": "Residual-only finite-difference matvecs and residual-only alpha trials moved the active G1 frontier twice: 0.28037931296242474 -> 0.28037924622609695 -> 0.28037907020613034 N. Every recorded global Krylov run used 2/2 residual-only matvecs and 30/30 residual-only trials with zero full-assembly trial/matvec calls. At the new frontier, repeat reg1e-5 and reg1e-4 did not descend; reg1e-6 and reg1e-7 also failed from the intermediate frontier. The next productive branch is a controlled sweep over Krylov restart depth/preconditioner input scale or a multi-step adaptive controller, not another identical single-restart run."
+    "assessment": "Residual-only finite-difference matvecs and residual-only alpha trials moved the active G1 frontier twice: 0.28037931296242474 -> 0.28037924622609695 -> 0.28037907020613034 N. Every recorded global Krylov run used 2/2 residual-only matvecs and 30/30 residual-only trials with zero full-assembly trial/matvec calls. At the new frontier, repeat reg1e-5 and reg1e-4 did not descend; reg1e-6 and reg1e-7 also failed from the intermediate frontier. The next productive branch is a controlled sweep over Krylov restart depth/preconditioner input scale or a multi-step adaptive controller, not another identical single-restart run.",
+    "input_scale_counter_sweep": {
+      "schema_version": "g1-global-krylov-input-scale-counter-sweep.v1",
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe.json",
+      "controller_stop_reason": "no_regularization_factor_promoted",
+      "promotion_count": 0,
+      "input_scales": [
+        0.3,
+        3.0,
+        1.0
+      ],
+      "tangent_regularization_factors": [
+        1e-05
+      ],
+      "final_residual_inf_n": 0.28037907020613034,
+      "rows": [
+        {
+          "preconditioner_input_scale": 0.3,
+          "tangent_regularization_factor": 1e-05,
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_children/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe_step1_reg1em05_scale3em01.json",
+          "accepted": false,
+          "stop_reason": "no_residual_descent",
+          "base_residual_inf_n": 0.28037907020613034,
+          "best_candidate_residual_inf_n": 0.2803795696042434,
+          "best_candidate_relative_improvement": -1.7811533245421323e-06,
+          "best_alpha": -0.0001,
+          "best_alpha_source": "matrix_free_global_krylov_negative",
+          "matvec_count": 2,
+          "residual_only_matvec_count": 2,
+          "residual_only_trial_count": 30,
+          "child_runtime_seconds": 50.65213850500004
+        },
+        {
+          "preconditioner_input_scale": 3.0,
+          "tangent_regularization_factor": 1e-05,
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_children/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe_step1_reg1em05_scale3e00.json",
+          "accepted": false,
+          "stop_reason": "no_residual_descent",
+          "base_residual_inf_n": 0.28037907020613034,
+          "best_candidate_residual_inf_n": 0.2803795696042434,
+          "best_candidate_relative_improvement": -1.7811533245421323e-06,
+          "best_alpha": -0.0001,
+          "best_alpha_source": "matrix_free_global_krylov_negative",
+          "matvec_count": 2,
+          "residual_only_matvec_count": 2,
+          "residual_only_trial_count": 30,
+          "child_runtime_seconds": 50.508574001000056
+        },
+        {
+          "preconditioner_input_scale": 1.0,
+          "tangent_regularization_factor": 1e-05,
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_children/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe_step1_reg1em05_scale1e00.json",
+          "accepted": false,
+          "stop_reason": "no_residual_descent",
+          "base_residual_inf_n": 0.28037907020613034,
+          "best_candidate_residual_inf_n": 0.2803795696042434,
+          "best_candidate_relative_improvement": -1.7811533245421323e-06,
+          "best_alpha": -0.0001,
+          "best_alpha_source": "matrix_free_global_krylov_negative",
+          "matvec_count": 2,
+          "residual_only_matvec_count": 2,
+          "residual_only_trial_count": 30,
+          "child_runtime_seconds": 50.58890052000004
+        }
+      ],
+      "assessment": "At the current reg1e-5 residual-only global Krylov frontier, preconditioner input scales 0.3, 3.0, and 1.0 all replayed with residual-only matvec/trial evidence but did not produce residual descent."
+    }
   }
 }
