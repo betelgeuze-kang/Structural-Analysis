@@ -2763,6 +2763,53 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup34_probe_final_checkpoint.npz"
     )
+    direct_post_frame_support64_translation_support128_followup35 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup35"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup34[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "final_direct_residual_inf_n"
+        ]
+        == 4824.1381575766845
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 350
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup35[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup35_probe_final_checkpoint.npz"
+    )
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"
@@ -7972,6 +8019,18 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == 9
     )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_direct_download_review_closes_expected_file_type_count"
+        ]
+        == 2
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_direct_download_review_requires_derivation_or_replacement_count"
+        ]
+        == 3
+    )
     assert set(
         rows["G7"]["evidence"]["operator_direct_download_review_source_ids"]
     ) == {
@@ -7984,6 +8043,20 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     direct_review = rows["G7"]["evidence"]["operator_direct_download_review"]
     assert direct_review["raw_download_policy"] == (
         "no_automatic_http_downloads_without_document_level_rights_review"
+    )
+    assert (
+        direct_review["direct_downloads"][0]["download_artifact_role"]
+        == "source_document_for_mgt_replacement_or_pdf_derived_mgt"
+    )
+    assert (
+        direct_review["direct_downloads"][0][
+            "direct_download_closes_expected_file_type"
+        ]
+        is False
+    )
+    assert (
+        direct_review["direct_downloads"][0]["source_native_artifact_candidate"]
+        is False
     )
     assert direct_review["direct_downloads"][0]["rights_confirmed"] is False
     assert (

@@ -593,8 +593,12 @@ def test_operator_direct_download_review_preserves_rights_boundary(
     assert review["status"] == "pending_rights_review"
     assert review["specific_remote_download_action_count"] == 1
     assert review["portal_landing_action_count"] == 1
+    assert review["direct_download_closes_expected_file_type_count"] == 1
+    assert review["direct_download_requires_derivation_or_replacement_count"] == 0
     assert review["direct_download_source_ids"] == ["direct_pdf"]
     direct = review["direct_downloads"][0]
+    assert direct["download_artifact_role"] == "source_native_expected_artifact"
+    assert direct["direct_download_closes_expected_file_type"] is True
     assert direct["source_native_artifact_candidate"] is True
     assert direct["rights_confirmed"] is False
     assert direct["raw_redistribution_allowed"] is False
@@ -603,6 +607,7 @@ def test_operator_direct_download_review_preserves_rights_boundary(
     assert prefill["source_id"] == "direct_pdf"
     assert prefill["rights_confirmed"] is False
     assert prefill["source_native_artifact"] is False
+    assert prefill["direct_download_closes_expected_file_type"] is True
 
 
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(

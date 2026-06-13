@@ -35,6 +35,30 @@ def _is_specific_remote_download(url_text: str) -> bool:
     return bool(parsed.query) or "." in Path(path).name
 
 
+def _download_url_suffix(url_text: str) -> str:
+    parsed = urlparse(str(url_text or "").strip())
+    return Path(parsed.path.rstrip("/")).suffix.lower()
+
+
+def _direct_download_closes_expected_file_type(row: dict[str, Any]) -> bool:
+    file_type = str(row.get("file_type") or "").lower()
+    suffix = _download_url_suffix(str(row.get("download_url") or ""))
+    if file_type in {".pdf", ".zip", ".ifc"}:
+        return True
+    if file_type == ".mgt":
+        return suffix == ".mgt"
+    return False
+
+
+def _direct_download_role(row: dict[str, Any]) -> str:
+    file_type = str(row.get("file_type") or "").lower()
+    if _direct_download_closes_expected_file_type(row):
+        return "source_native_expected_artifact"
+    if file_type == ".mgt":
+        return "source_document_for_mgt_replacement_or_pdf_derived_mgt"
+    return "source_document_requires_operator_mapping"
+
+
 def build_operator_direct_download_review(
     *,
     queue_path: Path = build_operator_attachment_manifest_queue.DEFAULT_QUEUE_OUT,
@@ -58,13 +82,20 @@ def build_operator_direct_download_review(
             "source_id": str(row.get("source_id") or ""),
             "action_type": str(row.get("action_type") or ""),
             "file_type": str(row.get("file_type") or ""),
+            "download_url_suffix": _download_url_suffix(str(row.get("download_url") or "")),
             "download_url": str(row.get("download_url") or ""),
             "provenance_url": str(row.get("provenance_url") or ""),
             "license_hint": str(row.get("license_hint") or ""),
             "local_path": str(row.get("local_path") or ""),
             "target_directory": str(row.get("target_directory") or ""),
             "acceptance_checks": list(row.get("acceptance_checks") or []),
-            "source_native_artifact_candidate": True,
+            "download_artifact_role": _direct_download_role(row),
+            "direct_download_closes_expected_file_type": (
+                _direct_download_closes_expected_file_type(row)
+            ),
+            "source_native_artifact_candidate": (
+                _direct_download_closes_expected_file_type(row)
+            ),
             "rights_confirmed": False,
             "raw_redistribution_allowed": False,
             "countable_after_operator_manifest": False,
@@ -81,10 +112,14 @@ def build_operator_direct_download_review(
             "source_native_artifact": False,
             "provenance_url": row["provenance_url"],
             "license_hint": row["license_hint"],
+            "direct_download_closes_expected_file_type": row[
+                "direct_download_closes_expected_file_type"
+            ],
             "operator_note": (
                 "Specific official download URL exists. Do not set rights_confirmed "
                 "or source_native_artifact until the artifact is downloaded, matched "
-                "to this source, and document-level rights review is complete."
+                "to this source and expected file type, and document-level rights "
+                "review is complete."
             ),
         }
         for row in direct_downloads
@@ -96,6 +131,12 @@ def build_operator_direct_download_review(
         "status": status,
         "specific_remote_download_action_count": int(len(direct_downloads)),
         "portal_landing_action_count": int(len(portal_rows)),
+        "direct_download_closes_expected_file_type_count": sum(
+            1 for row in direct_downloads if row["direct_download_closes_expected_file_type"]
+        ),
+        "direct_download_requires_derivation_or_replacement_count": sum(
+            1 for row in direct_downloads if not row["direct_download_closes_expected_file_type"]
+        ),
         "direct_download_source_ids": [row["source_id"] for row in direct_downloads],
         "direct_downloads": direct_downloads,
         "operator_manifest_prefill_rows": operator_manifest_prefill_rows,

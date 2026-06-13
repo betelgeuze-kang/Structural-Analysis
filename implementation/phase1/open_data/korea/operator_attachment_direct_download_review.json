@@ -4,6 +4,8 @@
   "status": "pending_rights_review",
   "specific_remote_download_action_count": 5,
   "portal_landing_action_count": 9,
+  "direct_download_closes_expected_file_type_count": 2,
+  "direct_download_requires_derivation_or_replacement_count": 3,
   "direct_download_source_ids": [
     "koneps_goyang_changneung_powerplant_design_service",
     "lh_bucheon_yeokgok_a1_housing_competition",
@@ -16,6 +18,7 @@
       "source_id": "koneps_goyang_changneung_powerplant_design_service",
       "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
       "file_type": ".mgt",
+      "download_url_suffix": ".do",
       "download_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
       "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
       "license_hint": "public_attachment_check_terms",
@@ -27,7 +30,9 @@
         "sha256_differs_from_repo_benchmark_bridge",
         "roundtrip_parse_contract_pass_when_enabled"
       ],
-      "source_native_artifact_candidate": true,
+      "download_artifact_role": "source_document_for_mgt_replacement_or_pdf_derived_mgt",
+      "direct_download_closes_expected_file_type": false,
+      "source_native_artifact_candidate": false,
       "rights_confirmed": false,
       "raw_redistribution_allowed": false,
       "countable_after_operator_manifest": false,
@@ -37,6 +42,7 @@
       "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
       "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
       "file_type": ".pdf",
+      "download_url_suffix": ".es",
       "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "license_hint": "competition_material_check_terms",
@@ -47,6 +53,8 @@
         "derived_mgt_header_valid_if_mgt_attached",
         "artifact_not_metadata_only"
       ],
+      "download_artifact_role": "source_native_expected_artifact",
+      "direct_download_closes_expected_file_type": true,
       "source_native_artifact_candidate": true,
       "rights_confirmed": false,
       "raw_redistribution_allowed": false,
@@ -57,6 +65,7 @@
       "source_id": "lh_happy_city_5_1_design_competition",
       "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
       "file_type": ".pdf",
+      "download_url_suffix": ".es",
       "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "license_hint": "competition_material_check_terms",
@@ -67,6 +76,8 @@
         "derived_mgt_header_valid_if_mgt_attached",
         "artifact_not_metadata_only"
       ],
+      "download_artifact_role": "source_native_expected_artifact",
+      "direct_download_closes_expected_file_type": true,
       "source_native_artifact_candidate": true,
       "rights_confirmed": false,
       "raw_redistribution_allowed": false,
@@ -77,6 +88,7 @@
       "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
       "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
       "file_type": ".mgt",
+      "download_url_suffix": ".es",
       "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "license_hint": "competition_material_check_terms",
@@ -88,7 +100,9 @@
         "sha256_differs_from_repo_benchmark_bridge",
         "roundtrip_parse_contract_pass_when_enabled"
       ],
-      "source_native_artifact_candidate": true,
+      "download_artifact_role": "source_document_for_mgt_replacement_or_pdf_derived_mgt",
+      "direct_download_closes_expected_file_type": false,
+      "source_native_artifact_candidate": false,
       "rights_confirmed": false,
       "raw_redistribution_allowed": false,
       "countable_after_operator_manifest": false,
@@ -98,6 +112,7 @@
       "source_id": "lh_happy_city_5_1_native_baseline",
       "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
       "file_type": ".mgt",
+      "download_url_suffix": ".es",
       "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "license_hint": "competition_material_check_terms",
@@ -109,7 +124,9 @@
         "sha256_differs_from_repo_benchmark_bridge",
         "roundtrip_parse_contract_pass_when_enabled"
       ],
-      "source_native_artifact_candidate": true,
+      "download_artifact_role": "source_document_for_mgt_replacement_or_pdf_derived_mgt",
+      "direct_download_closes_expected_file_type": false,
+      "source_native_artifact_candidate": false,
       "rights_confirmed": false,
       "raw_redistribution_allowed": false,
       "countable_after_operator_manifest": false,
@@ -125,7 +142,8 @@
       "source_native_artifact": false,
       "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
       "license_hint": "public_attachment_check_terms",
-      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source, and document-level rights review is complete."
+      "direct_download_closes_expected_file_type": false,
+      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source and expected file type, and document-level rights review is complete."
     },
     {
       "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
@@ -135,7 +153,8 @@
       "source_native_artifact": false,
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "license_hint": "competition_material_check_terms",
-      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source, and document-level rights review is complete."
+      "direct_download_closes_expected_file_type": true,
+      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source and expected file type, and document-level rights review is complete."
     },
     {
       "source_id": "lh_happy_city_5_1_design_competition",
@@ -145,7 +164,8 @@
       "source_native_artifact": false,
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "license_hint": "competition_material_check_terms",
-      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source, and document-level rights review is complete."
+      "direct_download_closes_expected_file_type": true,
+      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source and expected file type, and document-level rights review is complete."
     },
     {
       "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
@@ -155,7 +175,8 @@
       "source_native_artifact": false,
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
       "license_hint": "competition_material_check_terms",
-      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source, and document-level rights review is complete."
+      "direct_download_closes_expected_file_type": false,
+      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source and expected file type, and document-level rights review is complete."
     },
     {
       "source_id": "lh_happy_city_5_1_native_baseline",
@@ -165,7 +186,8 @@
       "source_native_artifact": false,
       "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
       "license_hint": "competition_material_check_terms",
-      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source, and document-level rights review is complete."
+      "direct_download_closes_expected_file_type": false,
+      "operator_note": "Specific official download URL exists. Do not set rights_confirmed or source_native_artifact until the artifact is downloaded, matched to this source and expected file type, and document-level rights review is complete."
     }
   ],
   "raw_download_policy": "no_automatic_http_downloads_without_document_level_rights_review",
