@@ -1482,6 +1482,100 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup7_probe_final_checkpoint.npz"
     )
+    direct_post_frame_support64_translation_support128_followup8 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup8"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup7[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "final_direct_residual_inf_n"
+        ]
+        == 5174.9582084160365
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 339
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup8[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup8_probe_final_checkpoint.npz"
+    )
+    direct_post_frame_support64_translation_support128_followup9 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup9"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128_followup8[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "final_direct_residual_inf_n"
+        ]
+        == 5161.434029345523
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 346
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup9[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup9_probe_final_checkpoint.npz"
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]
