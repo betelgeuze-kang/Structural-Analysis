@@ -91,6 +91,7 @@ def assemble_physical_internal_force_components(
     apply_material_stress_axial_correction: bool = False,
     use_force_based_frame: bool = True,
     split_shell_components: bool = False,
+    shell_operator_cache: dict[str, Any] | None = None,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     """Assemble component-wise F_int(u), separated for residual diagnostics."""
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -130,6 +131,7 @@ def assemble_physical_internal_force_components(
             conn_idx=conn_idx,
             material_props=material_props,
             plate_thickness_props=plate_thickness_props,
+            shell_operator_cache=shell_operator_cache,
         )
         f_shell = np.zeros(int(node_xyz.shape[0]) * DOF_PER_NODE, dtype=np.float64)
         for values in shell_components.values():
@@ -145,6 +147,7 @@ def assemble_physical_internal_force_components(
             conn_idx=conn_idx,
             material_props=material_props,
             plate_thickness_props=plate_thickness_props,
+            shell_operator_cache=shell_operator_cache,
         )
         shell_components = {"shell": np.asarray(f_shell, dtype=np.float64)}
     f_spring = np.asarray(spring_stiffness @ u, dtype=np.float64)
@@ -222,6 +225,7 @@ def assemble_physical_internal_forces(
     use_force_based_frame: bool = True,
     include_component_forces: bool = False,
     split_shell_components: bool | None = None,
+    shell_operator_cache: dict[str, Any] | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Assemble F_int(u) from equilibrium operators, not Newton tangent operators."""
     split_shell = bool(include_component_forces) if split_shell_components is None else bool(split_shell_components)
@@ -244,6 +248,7 @@ def assemble_physical_internal_forces(
         apply_material_stress_axial_correction=apply_material_stress_axial_correction,
         use_force_based_frame=use_force_based_frame,
         split_shell_components=split_shell,
+        shell_operator_cache=shell_operator_cache,
     )
     f_int = np.zeros_like(np.asarray(u, dtype=np.float64))
     component_inf = {}

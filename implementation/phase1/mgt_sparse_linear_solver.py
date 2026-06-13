@@ -430,7 +430,7 @@ def solve_host_ilu_device_gmres(
     scale = np.ones(n, dtype=np.float64)
     equilibration_meta: dict[str, Any] = {"applied": False}
     if equilibrate:
-        k_mat, rhs_work, scale, equilibration_meta = symmetric_sqrt_diagonal_scaling(csr, rhs_np)
+        k_mat, rhs_work, scale, equilibration_meta = symmetric_sqrt_diagonal_scaling(k_mat, rhs_np)
     base_row: dict[str, Any] = {
         "backend": "rocm_torch_sparse_host_ilu_device_gmres",
         "device": str(device),

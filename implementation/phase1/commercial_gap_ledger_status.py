@@ -329,6 +329,17 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
     )
     first_trial_rows = first_iteration.get("trial_rows")
     first_trial_rows = first_trial_rows if isinstance(first_trial_rows, list) else []
+    all_trial_rows = [
+        trial
+        for iteration in iterations
+        if isinstance(iteration, dict)
+        for trial in (
+            iteration.get("trial_rows")
+            if isinstance(iteration.get("trial_rows"), list)
+            else []
+        )
+        if isinstance(trial, dict)
+    ]
     output_checkpoint = payload.get("output_final_checkpoint")
     output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
     runtime = payload.get("runtime_metrics")
@@ -394,6 +405,26 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
             1
             for row in first_trial_rows
             if isinstance(row, dict) and bool(row.get("residual_only_assembly"))
+        ),
+        "first_iteration_shell_cache_hit_trial_count": sum(
+            1
+            for row in first_trial_rows
+            if isinstance(row, dict)
+            and bool(row.get("shell_internal_force_cache_hit"))
+        ),
+        "first_iteration_shell_cache_enabled_trial_count": sum(
+            1
+            for row in first_trial_rows
+            if isinstance(row, dict)
+            and bool(row.get("shell_internal_force_cache_enabled"))
+        ),
+        "newton_iteration_count": len(iterations),
+        "total_trial_count": len(all_trial_rows),
+        "total_residual_only_trial_count": sum(
+            1 for row in all_trial_rows if bool(row.get("residual_only_assembly"))
+        ),
+        "total_shell_cache_hit_trial_count": sum(
+            1 for row in all_trial_rows if bool(row.get("shell_internal_force_cache_hit"))
         ),
         "output_final_checkpoint_path": output_checkpoint.get("path"),
         "blockers": payload.get("blockers"),
@@ -1259,6 +1290,22 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_focused_residual_only_fastpath = _load(
         productization
         / "mgt_equilibrium_newton_focused_residual_only_fastpath_smoke_probe.json"
+    )
+    equilibrium_newton_focused_regdirect_cached_shell_fastpath = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_regdirect_cached_shell_fastpath_probe.json"
+    )
+    equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter_probe.json"
+    )
+    equilibrium_newton_focused_regdirect_cached_shell_signed_alpha = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_probe.json"
+    )
+    equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json"
     )
     equilibrium_newton_focused_ultralow_reg = _load(
         productization / "mgt_equilibrium_newton_focused_ultralow_reg_probe.json"
@@ -3970,6 +4017,26 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "equilibrium_newton_focused_residual_only_fastpath": (
                     _equilibrium_newton_probe_summary(
                         equilibrium_newton_focused_residual_only_fastpath
+                    )
+                ),
+                "equilibrium_newton_focused_regdirect_cached_shell_fastpath": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_regdirect_cached_shell_fastpath
+                    )
+                ),
+                "equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter
+                    )
+                ),
+                "equilibrium_newton_focused_regdirect_cached_shell_signed_alpha": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_regdirect_cached_shell_signed_alpha
+                    )
+                ),
+                "equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup
                     )
                 ),
                 "equilibrium_newton_focused_ultralow_reg": (

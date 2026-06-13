@@ -252,6 +252,60 @@ def test_shell_internal_force_component_split_sums_to_shell_force() -> None:
     assert split_meta["shell_membrane_stiffness_nnz"] > 0
 
 
+def test_shell_internal_forces_reuse_operator_cache() -> None:
+    node_xyz = np.asarray(
+        [
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            [0.0, 1.5, 0.0],
+        ],
+        dtype=np.float64,
+    )
+    elem_type_code = np.asarray([2], dtype=np.int32)
+    elem_section_id = np.asarray([1], dtype=np.int32)
+    elem_material_id = np.asarray([1], dtype=np.int32)
+    conn_ptr = np.asarray([0, 3], dtype=np.int64)
+    conn_idx = np.asarray([0, 1, 2], dtype=np.int64)
+    material_props = {1: {"E_kN_per_m2": 210000000.0, "poisson": 0.25}}
+    plate_thickness_props = {1: {"effective_thickness_m": 0.18}}
+    u = np.zeros(18, dtype=np.float64)
+    u[0] = 0.002
+    u[2] = -0.001
+    u[8] = 0.003
+    cache: dict[str, object] = {}
+
+    f_first, first_meta = assemble_shell_internal_forces(
+        u=u,
+        node_xyz=node_xyz,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        shell_operator_cache=cache,
+    )
+    f_second, second_meta = assemble_shell_internal_forces(
+        u=u,
+        node_xyz=node_xyz,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        shell_operator_cache=cache,
+    )
+
+    assert first_meta["shell_internal_force_cache_enabled"] is True
+    assert first_meta["shell_internal_force_cache_hit"] is False
+    assert second_meta["shell_internal_force_cache_hit"] is True
+    assert sorted(cache) == ["shell_full_membrane_bending"]
+    np.testing.assert_allclose(f_second, f_first, rtol=1.0e-12, atol=1.0e-12)
+
+
 def test_assemble_physical_residual_reports_nonzero_imbalance() -> None:
     u = np.asarray([0.1], dtype=np.float64)
     f_ext = np.asarray([1.0], dtype=np.float64)

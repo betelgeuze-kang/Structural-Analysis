@@ -44,6 +44,44 @@ def test_symmetric_scaling_reduces_diagonal_spread() -> None:
     np.testing.assert_allclose(unscale_solution(x_scaled, scale), x_true, rtol=1.0e-9, atol=1.0e-12)
 
 
+def test_host_ilu_device_gmres_equilibrates_regularized_matrix(monkeypatch) -> None:
+    class StopAfterScaling(RuntimeError):
+        pass
+
+    class FakeCuda:
+        @staticmethod
+        def is_available() -> bool:
+            return True
+
+    class FakeTorch:
+        cuda = FakeCuda()
+
+        @staticmethod
+        def device(name: str) -> str:
+            return name
+
+    captured: dict[str, np.ndarray] = {}
+
+    def fake_scaling(k_mat, rhs):
+        captured["diag"] = np.asarray(k_mat.diagonal(), dtype=np.float64)
+        raise StopAfterScaling()
+
+    monkeypatch.setitem(sys.modules, "torch", FakeTorch())
+    monkeypatch.setattr(solver_module, "symmetric_sqrt_diagonal_scaling", fake_scaling)
+
+    k = coo_matrix(([0.0, 2.0], ([0, 1], [0, 1])), shape=(2, 2)).tocsr()
+    rhs = np.ones(2, dtype=np.float64)
+    with pytest.raises(StopAfterScaling):
+        solver_module.solve_host_ilu_device_gmres(
+            k,
+            rhs,
+            regularization_factor=0.5,
+            equilibrate=True,
+        )
+
+    np.testing.assert_allclose(captured["diag"], [0.5, 2.5], rtol=1.0e-12)
+
+
 def _random_block_spd_matrix(n_nodes: int, seed: int = 7):
     """Random block-sparse SPD-ish matrix with 6x6 nodal diagonal blocks."""
     rng = np.random.default_rng(seed)

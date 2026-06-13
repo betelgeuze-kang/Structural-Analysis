@@ -78,6 +78,11 @@ def test_equilibrium_newton_uses_residual_only_line_search_when_supported() -> N
         rhs = np.asarray([f_full[0]], dtype=np.float64)
         return stiffness_out, f_full.copy(), free.copy(), residual, rhs, {
             "residual_only_assembly": bool(residual_only),
+            "shell_operator_cache_size": 1,
+            "shell_meta": {
+                "shell_internal_force_cache_enabled": True,
+                "shell_internal_force_cache_hit": bool(residual_only),
+            },
         }
 
     assemble_residual.supports_residual_only = True  # type: ignore[attr-defined]
@@ -98,6 +103,14 @@ def test_equilibrium_newton_uses_residual_only_line_search_when_supported() -> N
     assert residual_only_calls == 2
     assert all(
         trial["residual_only_assembly"]
+        for trial in result["iterations"][0]["trial_rows"]
+    )
+    assert all(
+        trial["shell_internal_force_cache_hit"]
+        for trial in result["iterations"][0]["trial_rows"]
+    )
+    assert all(
+        trial["shell_operator_cache_size"] == 1
         for trial in result["iterations"][0]["trial_rows"]
     )
     np.testing.assert_allclose(result["final_u"], [u_star], rtol=1.0e-6, atol=1.0e-9)

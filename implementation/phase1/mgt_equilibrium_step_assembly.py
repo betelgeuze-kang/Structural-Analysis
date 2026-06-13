@@ -40,6 +40,7 @@ def build_equilibrium_step_assembler(
 ]:
     """Build R(u)=F_int(u)-F_ext with F_ext frozen at u=0 for the load step."""
     reference_holder: dict[str, np.ndarray] = {}
+    shell_operator_cache: dict[str, Any] = {}
     n_dof = int(node_xyz.shape[0]) * DOF_PER_NODE
 
     def assemble_residual(
@@ -82,6 +83,7 @@ def build_equilibrium_step_assembler(
                 frame_gravity_load_scale=frame_gravity_load_scale,
                 load_scale=load_scale,
                 include_component_forces=include_component_forces,
+                shell_operator_cache=shell_operator_cache,
             )
             residual, rhs = assemble_physical_residual(
                 u=u,
@@ -95,6 +97,7 @@ def build_equilibrium_step_assembler(
                 "residual_only_free_override": bool(free_override is not None),
                 "free_dof_count": int(free.size),
                 "frozen_external_load": bool("reference_f_ext" in reference_holder),
+                "shell_operator_cache_size": int(len(shell_operator_cache)),
             }
         stiffness, assembled_f_ext, tangent_meta = assemble_equilibrium_operator_stiffness(
             u=u,
@@ -132,6 +135,7 @@ def build_equilibrium_step_assembler(
             frame_gravity_load_scale=frame_gravity_load_scale,
             load_scale=load_scale,
             include_component_forces=include_component_forces,
+            shell_operator_cache=shell_operator_cache,
         )
         if external_load_override is not None:
             f_ext = np.asarray(external_load_override, dtype=np.float64)
@@ -151,6 +155,7 @@ def build_equilibrium_step_assembler(
             "active_dof_count": int(_active.size),
             "free_dof_count": int(free.size),
             "frozen_external_load": bool("reference_f_ext" in reference_holder),
+            "shell_operator_cache_size": int(len(shell_operator_cache)),
         }
 
     _reference_stiffness, reference_f_ext, _reference_free, _reference_residual, _reference_rhs, _ = (

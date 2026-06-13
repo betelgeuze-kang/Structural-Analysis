@@ -1,0 +1,147 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-13T09:19:02.816069+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_checkpoint_probe_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 2,
+    "accepted_residual_history_count": 2,
+    "residual_inf_n": 0.28069128830492984,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 6.2959040639301955
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 0.28069128830492984,
+  "initial_residual_inf_n": 0.28069128830492984,
+  "final_residual_inf_n": 0.2806900297534375,
+  "accepted_newton_iteration_count": 1,
+  "allow_negative_alphas": false,
+  "linear_solver_profile": "regularized_direct",
+  "direct_regularization_factor": null,
+  "state_scale_line_search_values": [],
+  "state_scale_only": false,
+  "line_search_alphas": [
+    0.05,
+    0.04,
+    0.035,
+    0.032,
+    0.03125,
+    0.03,
+    0.028,
+    0.026,
+    0.024,
+    0.02,
+    0.015,
+    0.01
+  ],
+  "displacement_cap_m": null,
+  "max_newton_translation_increment_m": null,
+  "residual_tolerance_n": 0.0005,
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": true,
+      "alpha": 0.03125,
+      "start_residual_inf_n": 0.28069128830492984,
+      "best_residual_inf_n": 0.2806900297534375,
+      "relative_increment": 0.02631281104721354,
+      "trial_rows": [
+        {
+          "alpha": 0.05,
+          "residual_inf_n": 0.2806922312908645,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.04,
+          "residual_inf_n": 0.28069251953520136,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.035,
+          "residual_inf_n": 0.2806902794643028,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.032,
+          "residual_inf_n": 0.28069313145051267,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.2806900297534375,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.03,
+          "residual_inf_n": 0.2806904235864712,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.028,
+          "residual_inf_n": 0.2806929606983394,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.026,
+          "residual_inf_n": 0.2806935906871294,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.024,
+          "residual_inf_n": 0.2806923131017319,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.02,
+          "residual_inf_n": 0.2806945265280737,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.015,
+          "residual_inf_n": 0.28069133278285874,
+          "residual_only_assembly": true
+        },
+        {
+          "alpha": 0.01,
+          "residual_inf_n": 0.28069100006786896,
+          "residual_only_assembly": true
+        }
+      ],
+      "allow_negative_alphas": false,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 0.28069012144505534,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.2129779659881024,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.28069128830492984
+    }
+  ],
+  "line_search_residual_only_supported": true,
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_narrow_alpha_fastpath_probe_final_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 0.2806900297534375,
+    "direct_relative_residual_inf": 3.235195125840733e-05,
+    "max_translation_m": 6.466043695497257,
+    "accepted_history_count": 3,
+    "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_checkpoint_probe_final_checkpoint.npz"
+  },
+  "runtime_metrics": {
+    "total_seconds": 127.6160819769866
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

@@ -175,13 +175,27 @@ def select_residual_descent_alpha(
             _k, _f, _free, trial_residual, _rhs, _meta = assemble_residual(candidate)
             used_residual_only = False
         trial_inf = float(np.max(np.abs(trial_residual))) if trial_residual.size else float("inf")
-        trial_rows.append(
-            {
-                "alpha": float(alpha),
-                "residual_inf_n": trial_inf,
-                "residual_only_assembly": bool(used_residual_only),
-            }
-        )
+        trial_row: dict[str, Any] = {
+            "alpha": float(alpha),
+            "residual_inf_n": trial_inf,
+            "residual_only_assembly": bool(used_residual_only),
+        }
+        if isinstance(_meta, dict):
+            if "shell_operator_cache_size" in _meta:
+                trial_row["shell_operator_cache_size"] = int(
+                    _meta.get("shell_operator_cache_size") or 0
+                )
+            shell_meta = _meta.get("shell_meta")
+            if isinstance(shell_meta, dict):
+                if "shell_internal_force_cache_hit" in shell_meta:
+                    trial_row["shell_internal_force_cache_hit"] = bool(
+                        shell_meta.get("shell_internal_force_cache_hit")
+                    )
+                if "shell_internal_force_cache_enabled" in shell_meta:
+                    trial_row["shell_internal_force_cache_enabled"] = bool(
+                        shell_meta.get("shell_internal_force_cache_enabled")
+                    )
+        trial_rows.append(trial_row)
         if trial_inf < best_residual_inf:
             best_residual_inf = trial_inf
             best_alpha = float(alpha)

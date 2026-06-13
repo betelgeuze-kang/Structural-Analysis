@@ -3057,6 +3057,57 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert fastpath["first_iteration_residual_only_trial_count"] == 6
     assert fastpath["final_residual_inf_n"] < fastpath["base_residual_inf_n"]
     assert fastpath["final_residual_inf_n"] > 5.0e-4
+    cached_shell_fastpath = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_regdirect_cached_shell_fastpath"
+    ]
+    assert cached_shell_fastpath["status"] == "partial"
+    assert cached_shell_fastpath["line_search_residual_only_supported"] is True
+    assert cached_shell_fastpath["first_iteration_trial_count"] == 12
+    assert cached_shell_fastpath["first_iteration_residual_only_trial_count"] == 12
+    assert cached_shell_fastpath["first_iteration_shell_cache_enabled_trial_count"] == 12
+    assert cached_shell_fastpath["first_iteration_shell_cache_hit_trial_count"] == 12
+    assert cached_shell_fastpath["final_residual_inf_n"] == fastpath[
+        "final_residual_inf_n"
+    ]
+    assert cached_shell_fastpath["runtime_total_seconds"] < fastpath[
+        "runtime_total_seconds"
+    ]
+    assert cached_shell_fastpath["output_final_checkpoint_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "mgt_equilibrium_newton_focused_regdirect_cached_shell_fastpath_probe_final_checkpoint.npz"
+    )
+    cached_shell_3iter = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter"
+    ]
+    assert cached_shell_3iter["newton_iteration_count"] == 2
+    assert cached_shell_3iter["accepted_newton_iteration_count"] == 1
+    assert cached_shell_3iter["total_trial_count"] == 24
+    assert cached_shell_3iter["total_shell_cache_hit_trial_count"] == 24
+    assert cached_shell_3iter["first_iteration_stop_reason"] is None
+    assert cached_shell_3iter["final_residual_inf_n"] == cached_shell_fastpath[
+        "final_residual_inf_n"
+    ]
+    signed_alpha = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_regdirect_cached_shell_signed_alpha"
+    ]
+    assert signed_alpha["accepted_newton_iteration_count"] == 2
+    assert signed_alpha["total_trial_count"] == 48
+    assert signed_alpha["total_shell_cache_hit_trial_count"] == 48
+    assert signed_alpha["final_residual_inf_n"] < cached_shell_fastpath[
+        "final_residual_inf_n"
+    ]
+    signed_followup = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup"
+    ]
+    assert signed_followup["accepted_newton_iteration_count"] == 5
+    assert signed_followup["newton_iteration_count"] == 6
+    assert signed_followup["total_trial_count"] == 144
+    assert signed_followup["total_residual_only_trial_count"] == 144
+    assert signed_followup["total_shell_cache_hit_trial_count"] == 144
+    assert signed_followup["final_residual_inf_n"] < signed_alpha[
+        "final_residual_inf_n"
+    ]
+    assert signed_followup["final_residual_inf_n"] > 5.0e-4
     ultralow_reg = rows["G1"]["evidence"][
         "equilibrium_newton_focused_ultralow_reg"
     ]
