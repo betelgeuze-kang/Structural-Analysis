@@ -874,6 +874,65 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         direct_followup56_block_lstsq_followup2["output_final_checkpoint_path"]
         is None
     )
+    direct_followup56_frame_block_lstsq = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32"
+    ]
+    assert direct_followup56_frame_block_lstsq["status"] == "partial"
+    assert (
+        direct_followup56_frame_block_lstsq["base_direct_residual_inf_n"]
+        == direct_followup56_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_frame_block_lstsq["final_direct_residual_inf_n"]
+        == 5409.285290648932
+    )
+    assert direct_followup56_frame_block_lstsq["promoted_to_final_state"] is True
+    assert direct_followup56_frame_block_lstsq["promotion_mode"] == "block_lstsq"
+    assert direct_followup56_frame_block_lstsq["promotion_count"] == 1
+    assert direct_followup56_frame_block_lstsq["max_promotions"] == 2
+    assert (
+        direct_followup56_frame_block_lstsq["stop_reason"]
+        == "max_wall_seconds_exceeded"
+    )
+    assert (
+        direct_followup56_frame_block_lstsq[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "frame"
+    )
+    assert direct_followup56_frame_block_lstsq[
+        "frame_hotspot_block_lstsq_support_size"
+    ] == 267
+    assert (
+        direct_followup56_frame_block_lstsq["output_final_checkpoint_path"]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support32_probe_final_checkpoint.npz"
+    )
+    direct_followup56_frame_block_lstsq_followup2 = rows["G1"]["evidence"][
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32_followup2"
+    ]
+    assert (
+        direct_followup56_frame_block_lstsq_followup2["base_direct_residual_inf_n"]
+        == direct_followup56_frame_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_followup56_frame_block_lstsq_followup2["final_direct_residual_inf_n"]
+        == direct_followup56_frame_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert direct_followup56_frame_block_lstsq_followup2["promotion_count"] == 0
+    assert (
+        direct_followup56_frame_block_lstsq_followup2["stop_reason"]
+        == "max_wall_seconds_exceeded"
+    )
+    assert (
+        direct_followup56_frame_block_lstsq_followup2[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "frame"
+    )
+    assert (
+        direct_followup56_frame_block_lstsq_followup2["output_final_checkpoint_path"]
+        is None
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]
@@ -5797,6 +5856,52 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert attachment_queue["attachment_count"] == rows["G7"]["evidence"][
         "operator_action_queue_count"
     ]
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_queue_autofill_candidate_status"
+        ]
+        == "blocked_no_exact_clean_repo_candidate"
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_queue_auto_promotable_repo_candidate_count"
+        ]
+        == 0
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_queue_minimum_operator_real_mgt_needed"
+        ]
+        == 4
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_queue_source_mapping_blocked_action_count"
+        ]
+        == rows["G7"]["evidence"]["operator_action_queue_count"]
+    )
+    assert (
+        rows["G7"]["evidence"][
+            "operator_attachment_manifest_queue_rights_blocked_private_candidate_action_count"
+        ]
+        == 5
+    )
+    assert rows["G7"]["evidence"][
+        "operator_attachment_manifest_queue_priority_batches"
+    ][0]["batch_id"] == "replace_benchmark_bridge_mgt"
+    assert (
+        attachment_queue["autofill_candidate_status"]
+        == "blocked_no_exact_clean_repo_candidate"
+    )
+    assert attachment_queue["auto_promotable_repo_candidate_count"] == 0
+    assert attachment_queue["minimum_operator_real_mgt_needed"] == 4
+    assert attachment_queue["source_mapping_blocked_action_count"] == rows["G7"][
+        "evidence"
+    ]["operator_action_queue_count"]
+    assert attachment_queue["rights_blocked_private_candidate_action_count"] == 5
+    assert attachment_queue["priority_batches"][0]["batch_id"] == (
+        "replace_benchmark_bridge_mgt"
+    )
     assert attachment_queue["attachments"][0]["rights_confirmed"] is False
     assert attachment_queue["attachments"][0]["source_native_artifact"] is False
     assert (

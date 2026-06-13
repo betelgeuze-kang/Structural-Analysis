@@ -486,6 +486,31 @@ def test_operator_attachment_manifest_queue_builder_preserves_action_context(
             {
                 "schema_version": "korean_medium_large_ingest_receipt.v1",
                 "operator_action_queue": [action],
+                "operator_action_packet": {
+                    "candidate_matrix_summary": {
+                        "candidate_action_count": 1,
+                        "candidate_match_count": 1,
+                        "exact_clean_repo_candidate_count": 0,
+                        "actions_with_candidate_blockers_count": 1,
+                    },
+                    "operator_resolution_plan": {
+                        "schema_version": "korean-medium-large-operator-resolution-plan.v1",
+                        "status": "pending",
+                        "minimum_operator_real_mgt_needed": 4,
+                        "auto_promotable_repo_candidate_count": 0,
+                        "source_mapping_blocked_action_count": 1,
+                        "rights_blocked_private_candidate_action_count": 0,
+                        "priority_batches": [
+                            {
+                                "batch_id": "replace_benchmark_bridge_mgt",
+                                "objective": "replace benchmark bridge",
+                                "source_ids": ["bridge_mgt"],
+                                "source_count": 1,
+                                "closes_operator_real_mgt_target": False,
+                            }
+                        ],
+                    },
+                },
             }
         ),
         encoding="utf-8",
@@ -507,6 +532,16 @@ def test_operator_attachment_manifest_queue_builder_preserves_action_context(
     assert row["source_native_artifact"] is False
     assert row["action_type"] == action["action_type"]
     assert row["current_attach_provenance"] == "repo_benchmark_bridge"
+    assert queue["autofill_candidate_status"] == "blocked_no_exact_clean_repo_candidate"
+    assert queue["auto_promotable_repo_candidate_count"] == 0
+    assert queue["minimum_operator_real_mgt_needed"] == 4
+    assert queue["source_mapping_blocked_action_count"] == 1
+    assert queue["candidate_matrix_summary"]["candidate_action_count"] == 1
+    assert queue["priority_batches"][0]["batch_id"] == "replace_benchmark_bridge_mgt"
+    assert (
+        queue["operator_resolution_plan"]["schema_version"]
+        == "korean-medium-large-operator-resolution-plan.v1"
+    )
 
 
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(

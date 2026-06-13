@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-13T02:01:31.364175+00:00",
+  "generated_at": "2026-06-13T02:21:55.100071+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -9615,6 +9615,194 @@
           },
           "frame_hotspot_block_lstsq_support_size": 318,
           "frame_hotspot_block_lstsq_correction_inf_m": 2.823390295694222e-07,
+          "trust_region_accepted": null,
+          "trust_region_accepted_iteration_count": null,
+          "trust_region_best_candidate_direct_residual_inf_n": null,
+          "trust_region_best_candidate_relative_increment": null,
+          "trust_region_best_candidate_residual_gate_passed": null,
+          "trust_region_best_candidate_relative_increment_gate_passed": null,
+          "trust_region_gate_limited_alpha": null,
+          "trust_region_best_gate_eligible_candidate_direct_residual_inf_n": null,
+          "trust_region_best_gate_eligible_candidate_alpha": null,
+          "trust_region_best_gate_eligible_candidate_alpha_source": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment": null,
+          "trust_region_best_gate_eligible_candidate_residual_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_free_dof_set_stable": null,
+          "current_tangent_residual_row_correction_enabled": null,
+          "current_tangent_residual_row_correction_accepted": null,
+          "current_tangent_residual_row_promotion_count": null,
+          "current_tangent_residual_row_stop_reason": null,
+          "current_tangent_residual_row_target_mode": null,
+          "current_tangent_residual_row_element_neighbor_depth": null,
+          "current_tangent_residual_row_jacobian_mode": null,
+          "current_tangent_residual_row_fd_max_support_columns": null,
+          "current_tangent_residual_row_svd_max_condition": null,
+          "matrix_free_global_krylov_enabled": null,
+          "matrix_free_global_krylov_attempted": null,
+          "matrix_free_global_krylov_accepted": null,
+          "matrix_free_global_krylov_stop_reason": null,
+          "matrix_free_global_krylov_scaling_mode": null,
+          "matrix_free_global_krylov_preconditioner_mode": null,
+          "matrix_free_global_krylov_preconditioner_regularization": null,
+          "matrix_free_global_krylov_preconditioner_solve_count": null,
+          "matrix_free_global_krylov_preconditioner_solve_seconds": null,
+          "matrix_free_global_krylov_column_scale_units": null,
+          "matrix_free_global_krylov_minimum_relative_improvement": null,
+          "matrix_free_global_krylov_allow_negative_alphas": null,
+          "matrix_free_global_krylov_max_alpha": null,
+          "matrix_free_global_krylov_row_scale_inf": null,
+          "matrix_free_global_krylov_column_scale_inf_m": null,
+          "matrix_free_global_krylov_matvec_count": null,
+          "matrix_free_global_krylov_unstable_free_dof_probe_count": null,
+          "matrix_free_global_krylov_correction_inf_m": null,
+          "matrix_free_global_krylov_best_candidate_direct_residual_inf_n": null,
+          "matrix_free_global_krylov_best_candidate_relative_improvement": null,
+          "best_candidate_direct_residual_inf_n": null,
+          "best_candidate_improvement_inf_n": null,
+          "best_candidate_relative_improvement": null,
+          "best_candidate_target_row_count": null,
+          "best_candidate_configured_target_count": null,
+          "best_candidate_support_column_count": null,
+          "best_candidate_support_size": null,
+          "best_candidate_alpha": null,
+          "best_candidate_residual_gate_passed": null,
+          "best_candidate_relative_increment_gate_passed": null,
+          "output_final_checkpoint_written": null,
+          "output_final_checkpoint_path": null,
+          "output_final_checkpoint_reason": null,
+          "blockers": [
+            "direct_residual_gate_not_closed",
+            "global_consistent_newton_or_load_path_required",
+            "frontier_probe_wall_time_exceeded"
+          ]
+        },
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32": {
+          "schema_version": "mgt-frame-hotspot-diagonal-newton-probe.v1",
+          "status": "partial",
+          "ready": false,
+          "base_direct_residual_inf_n": 5439.563146990605,
+          "final_direct_residual_inf_n": 5409.285290648932,
+          "promoted_to_final_state": true,
+          "promotion_mode": "block_lstsq",
+          "promotion_count": 1,
+          "max_promotions": 2,
+          "stop_reason": "max_wall_seconds_exceeded",
+          "promotion_candidate_direct_residual_inf_n": 5409.285290648932,
+          "promotion_candidate_alpha": 0.005566229405466924,
+          "promotion_candidate_step_m": null,
+          "promotion_candidate_relative_increment": 9.999999999990003e-05,
+          "promotion_candidate_residual_gate_passed": false,
+          "promotion_candidate_relative_increment_gate_passed": true,
+          "promotion_pass_base_direct_residual_inf_n": [
+            5439.563146990605
+          ],
+          "promotion_pass_actual_direct_residual_inf_n": [
+            5409.285290648932
+          ],
+          "promotion_pass_relative_increment_gate_passed": [
+            true
+          ],
+          "frame_hotspot_diagonal_newton_selected_count": null,
+          "frame_hotspot_diagonal_newton_correction_inf_m": null,
+          "frame_hotspot_block_lstsq_selected_count": 20,
+          "frame_hotspot_block_lstsq_component_filter": "frame",
+          "frame_hotspot_block_lstsq_selected_component_counts": {
+            "frame": 20
+          },
+          "frame_hotspot_block_lstsq_support_size": 267,
+          "frame_hotspot_block_lstsq_correction_inf_m": 1.2970907174029682e-07,
+          "trust_region_accepted": null,
+          "trust_region_accepted_iteration_count": null,
+          "trust_region_best_candidate_direct_residual_inf_n": null,
+          "trust_region_best_candidate_relative_increment": null,
+          "trust_region_best_candidate_residual_gate_passed": null,
+          "trust_region_best_candidate_relative_increment_gate_passed": null,
+          "trust_region_gate_limited_alpha": null,
+          "trust_region_best_gate_eligible_candidate_direct_residual_inf_n": null,
+          "trust_region_best_gate_eligible_candidate_alpha": null,
+          "trust_region_best_gate_eligible_candidate_alpha_source": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment": null,
+          "trust_region_best_gate_eligible_candidate_residual_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_relative_increment_gate_passed": null,
+          "trust_region_best_gate_eligible_candidate_free_dof_set_stable": null,
+          "current_tangent_residual_row_correction_enabled": null,
+          "current_tangent_residual_row_correction_accepted": null,
+          "current_tangent_residual_row_promotion_count": null,
+          "current_tangent_residual_row_stop_reason": null,
+          "current_tangent_residual_row_target_mode": null,
+          "current_tangent_residual_row_element_neighbor_depth": null,
+          "current_tangent_residual_row_jacobian_mode": null,
+          "current_tangent_residual_row_fd_max_support_columns": null,
+          "current_tangent_residual_row_svd_max_condition": null,
+          "matrix_free_global_krylov_enabled": null,
+          "matrix_free_global_krylov_attempted": null,
+          "matrix_free_global_krylov_accepted": null,
+          "matrix_free_global_krylov_stop_reason": null,
+          "matrix_free_global_krylov_scaling_mode": null,
+          "matrix_free_global_krylov_preconditioner_mode": null,
+          "matrix_free_global_krylov_preconditioner_regularization": null,
+          "matrix_free_global_krylov_preconditioner_solve_count": null,
+          "matrix_free_global_krylov_preconditioner_solve_seconds": null,
+          "matrix_free_global_krylov_column_scale_units": null,
+          "matrix_free_global_krylov_minimum_relative_improvement": null,
+          "matrix_free_global_krylov_allow_negative_alphas": null,
+          "matrix_free_global_krylov_max_alpha": null,
+          "matrix_free_global_krylov_row_scale_inf": null,
+          "matrix_free_global_krylov_column_scale_inf_m": null,
+          "matrix_free_global_krylov_matvec_count": null,
+          "matrix_free_global_krylov_unstable_free_dof_probe_count": null,
+          "matrix_free_global_krylov_correction_inf_m": null,
+          "matrix_free_global_krylov_best_candidate_direct_residual_inf_n": null,
+          "matrix_free_global_krylov_best_candidate_relative_improvement": null,
+          "best_candidate_direct_residual_inf_n": null,
+          "best_candidate_improvement_inf_n": null,
+          "best_candidate_relative_improvement": null,
+          "best_candidate_target_row_count": null,
+          "best_candidate_configured_target_count": null,
+          "best_candidate_support_column_count": null,
+          "best_candidate_support_size": null,
+          "best_candidate_alpha": null,
+          "best_candidate_residual_gate_passed": null,
+          "best_candidate_relative_increment_gate_passed": null,
+          "output_final_checkpoint_written": null,
+          "output_final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support32_probe_final_checkpoint.npz",
+          "output_final_checkpoint_reason": null,
+          "blockers": [
+            "direct_residual_gate_not_closed",
+            "global_consistent_newton_or_load_path_required",
+            "frontier_probe_wall_time_exceeded"
+          ]
+        },
+        "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32_followup2": {
+          "schema_version": "mgt-frame-hotspot-diagonal-newton-probe.v1",
+          "status": "partial",
+          "ready": false,
+          "base_direct_residual_inf_n": 5409.285290648932,
+          "final_direct_residual_inf_n": 5409.285290648932,
+          "promoted_to_final_state": false,
+          "promotion_mode": "block_lstsq",
+          "promotion_count": 0,
+          "max_promotions": 2,
+          "stop_reason": "max_wall_seconds_exceeded",
+          "promotion_candidate_direct_residual_inf_n": null,
+          "promotion_candidate_alpha": null,
+          "promotion_candidate_step_m": null,
+          "promotion_candidate_relative_increment": null,
+          "promotion_candidate_residual_gate_passed": null,
+          "promotion_candidate_relative_increment_gate_passed": null,
+          "promotion_pass_base_direct_residual_inf_n": [],
+          "promotion_pass_actual_direct_residual_inf_n": [],
+          "promotion_pass_relative_increment_gate_passed": [],
+          "frame_hotspot_diagonal_newton_selected_count": null,
+          "frame_hotspot_diagonal_newton_correction_inf_m": null,
+          "frame_hotspot_block_lstsq_selected_count": 20,
+          "frame_hotspot_block_lstsq_component_filter": "frame",
+          "frame_hotspot_block_lstsq_selected_component_counts": {
+            "frame": 20
+          },
+          "frame_hotspot_block_lstsq_support_size": 270,
+          "frame_hotspot_block_lstsq_correction_inf_m": 1.2948702446373977e-07,
           "trust_region_accepted": null,
           "trust_region_accepted_iteration_count": null,
           "trust_region_best_candidate_direct_residual_inf_n": null,
@@ -41334,6 +41522,212 @@
         },
         "operator_attachment_manifest_queue_status": "pending_operator_fill",
         "operator_attachment_manifest_queue_attachment_count": 14,
+        "operator_attachment_manifest_queue_autofill_candidate_status": "blocked_no_exact_clean_repo_candidate",
+        "operator_attachment_manifest_queue_auto_promotable_repo_candidate_count": 0,
+        "operator_attachment_manifest_queue_minimum_operator_real_mgt_needed": 4,
+        "operator_attachment_manifest_queue_source_mapping_blocked_action_count": 14,
+        "operator_attachment_manifest_queue_rights_blocked_private_candidate_action_count": 5,
+        "operator_attachment_manifest_queue_priority_batches": [
+          {
+            "batch_id": "replace_benchmark_bridge_mgt",
+            "objective": "Replace the four repo-benchmark bridge MGTs with source-native operator-attached MGT files that pass header and sha256 checks.",
+            "source_ids": [
+              "koneps_goyang_changneung_powerplant_design_service",
+              "lh_bucheon_yeokgok_a1_housing_native_baseline",
+              "lh_happy_city_5_1_native_baseline",
+              "lh_newtown_highrise_block_competition"
+            ],
+            "source_count": 4,
+            "closes_operator_real_mgt_target": true,
+            "target_directories": [
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_newtown_highrise_block_competition"
+            ],
+            "acceptance_checks": [
+              "file_size_gt_500_bytes",
+              "mgt_header_contains_VERSION_or_UNIT",
+              "roundtrip_parse_contract_pass_when_enabled",
+              "sha256_differs_from_repo_benchmark_bridge"
+            ],
+            "candidate_blockers": {
+              "koneps_goyang_changneung_powerplant_design_service": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_happy_city_5_1_native_baseline": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_newtown_highrise_block_competition": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              }
+            }
+          },
+          {
+            "batch_id": "fetch_specific_remote_downloads",
+            "objective": "Fetch direct official download URLs first; these have the lowest portal search ambiguity.",
+            "source_ids": [
+              "koneps_goyang_changneung_powerplant_design_service",
+              "lh_bucheon_yeokgok_a1_housing_competition",
+              "lh_happy_city_5_1_design_competition",
+              "lh_bucheon_yeokgok_a1_housing_native_baseline",
+              "lh_happy_city_5_1_native_baseline"
+            ],
+            "source_count": 5,
+            "closes_operator_real_mgt_target": false,
+            "target_directories": [
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline"
+            ],
+            "acceptance_checks": [
+              "artifact_not_metadata_only",
+              "derived_mgt_header_valid_if_mgt_attached",
+              "file_size_gt_500_bytes",
+              "mgt_header_contains_VERSION_or_UNIT",
+              "roundtrip_parse_contract_pass_when_enabled",
+              "sha256_differs_from_repo_benchmark_bridge",
+              "source_artifact_exists_or_pdf_derived_mgt_exists"
+            ],
+            "candidate_blockers": {
+              "koneps_goyang_changneung_powerplant_design_service": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_bucheon_yeokgok_a1_housing_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_happy_city_5_1_design_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_happy_city_5_1_native_baseline": {
+                "catalog_source_unmatched_candidate": 10,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              }
+            }
+          },
+          {
+            "batch_id": "resolve_metadata_only_sources",
+            "objective": "Attach PDF/ZIP/IFC/MGT artifacts for remaining metadata-only sources, then rerun this ingest receipt.",
+            "source_ids": [
+              "lh_bucheon_yeokgok_a1_housing_competition",
+              "lh_happy_city_5_1_design_competition",
+              "kci_concrete_building_design_examples_2e",
+              "lh_yeongjong_international_city_block_competition",
+              "lh_cheongna_international_city_tower_competition",
+              "koneps_public_highrise_design_service_g2b_portal",
+              "koneps_mixed_use_tower_design_attachment_lane",
+              "ifc_public_buildingsmart_korea_awards_hub",
+              "ifc_public_buildingsmart_2025_megaproject_lane"
+            ],
+            "source_count": 9,
+            "closes_operator_real_mgt_target": false,
+            "target_directories": [
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_yeongjong_international_city_block_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_cheongna_international_city_tower_competition",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_public_highrise_design_service_g2b_portal",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_mixed_use_tower_design_attachment_lane",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_korea_awards_hub",
+              "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_2025_megaproject_lane"
+            ],
+            "acceptance_checks": [
+              "artifact_not_metadata_only",
+              "curated_local_ifc_reference_exists_when_required",
+              "derived_mgt_header_valid_if_mgt_attached",
+              "file_size_gt_500_bytes",
+              "ifc_file_exists",
+              "ifc_not_metadata_only",
+              "mgt_header_contains_VERSION_or_UNIT",
+              "roundtrip_parse_contract_pass_when_enabled",
+              "sha256_differs_from_repo_benchmark_bridge",
+              "source_artifact_exists_or_pdf_derived_mgt_exists"
+            ],
+            "candidate_blockers": {
+              "lh_bucheon_yeokgok_a1_housing_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_happy_city_5_1_design_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "kci_concrete_building_design_examples_2e": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_yeongjong_international_city_block_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "lh_cheongna_international_city_tower_competition": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "koneps_public_highrise_design_service_g2b_portal": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "not_catalog_source_matched": 2,
+                "raw_redistribution_not_allowed": 2,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "koneps_mixed_use_tower_design_attachment_lane": {
+                "catalog_source_unmatched_candidate": 12,
+                "mgt_file_too_small": 4,
+                "repo_benchmark_bridge_mgt": 8
+              },
+              "ifc_public_buildingsmart_korea_awards_hub": {
+                "catalog_source_unmatched_candidate": 10
+              },
+              "ifc_public_buildingsmart_2025_megaproject_lane": {
+                "catalog_source_unmatched_candidate": 10
+              }
+            }
+          }
+        ],
         "operator_attachment_manifest_queue": {
           "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
           "source_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_medium_large_ingest_receipt.json",
@@ -41613,7 +42007,429 @@
               "current_attach_provenance": ""
             }
           ],
-          "claim_boundary": "This queue is a fill-in manifest. Rows are intentionally not accepted until the operator attaches the artifact and confirms rights/source-native provenance."
+          "autofill_candidate_status": "blocked_no_exact_clean_repo_candidate",
+          "auto_promotable_repo_candidate_count": 0,
+          "minimum_operator_real_mgt_needed": 4,
+          "source_mapping_blocked_action_count": 14,
+          "rights_blocked_private_candidate_action_count": 5,
+          "candidate_matrix_summary": {
+            "candidate_action_count": 14,
+            "candidate_match_count": 174,
+            "exact_clean_repo_candidate_count": 0,
+            "actions_with_candidate_blockers_count": 14
+          },
+          "priority_batches": [
+            {
+              "batch_id": "replace_benchmark_bridge_mgt",
+              "objective": "Replace the four repo-benchmark bridge MGTs with source-native operator-attached MGT files that pass header and sha256 checks.",
+              "source_ids": [
+                "koneps_goyang_changneung_powerplant_design_service",
+                "lh_bucheon_yeokgok_a1_housing_native_baseline",
+                "lh_happy_city_5_1_native_baseline",
+                "lh_newtown_highrise_block_competition"
+              ],
+              "source_count": 4,
+              "closes_operator_real_mgt_target": true,
+              "target_directories": [
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_newtown_highrise_block_competition"
+              ],
+              "acceptance_checks": [
+                "file_size_gt_500_bytes",
+                "mgt_header_contains_VERSION_or_UNIT",
+                "roundtrip_parse_contract_pass_when_enabled",
+                "sha256_differs_from_repo_benchmark_bridge"
+              ],
+              "candidate_blockers": {
+                "koneps_goyang_changneung_powerplant_design_service": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_happy_city_5_1_native_baseline": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_newtown_highrise_block_competition": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                }
+              }
+            },
+            {
+              "batch_id": "fetch_specific_remote_downloads",
+              "objective": "Fetch direct official download URLs first; these have the lowest portal search ambiguity.",
+              "source_ids": [
+                "koneps_goyang_changneung_powerplant_design_service",
+                "lh_bucheon_yeokgok_a1_housing_competition",
+                "lh_happy_city_5_1_design_competition",
+                "lh_bucheon_yeokgok_a1_housing_native_baseline",
+                "lh_happy_city_5_1_native_baseline"
+              ],
+              "source_count": 5,
+              "closes_operator_real_mgt_target": false,
+              "target_directories": [
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline"
+              ],
+              "acceptance_checks": [
+                "artifact_not_metadata_only",
+                "derived_mgt_header_valid_if_mgt_attached",
+                "file_size_gt_500_bytes",
+                "mgt_header_contains_VERSION_or_UNIT",
+                "roundtrip_parse_contract_pass_when_enabled",
+                "sha256_differs_from_repo_benchmark_bridge",
+                "source_artifact_exists_or_pdf_derived_mgt_exists"
+              ],
+              "candidate_blockers": {
+                "koneps_goyang_changneung_powerplant_design_service": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_bucheon_yeokgok_a1_housing_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_happy_city_5_1_design_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_happy_city_5_1_native_baseline": {
+                  "catalog_source_unmatched_candidate": 10,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                }
+              }
+            },
+            {
+              "batch_id": "resolve_metadata_only_sources",
+              "objective": "Attach PDF/ZIP/IFC/MGT artifacts for remaining metadata-only sources, then rerun this ingest receipt.",
+              "source_ids": [
+                "lh_bucheon_yeokgok_a1_housing_competition",
+                "lh_happy_city_5_1_design_competition",
+                "kci_concrete_building_design_examples_2e",
+                "lh_yeongjong_international_city_block_competition",
+                "lh_cheongna_international_city_tower_competition",
+                "koneps_public_highrise_design_service_g2b_portal",
+                "koneps_mixed_use_tower_design_attachment_lane",
+                "ifc_public_buildingsmart_korea_awards_hub",
+                "ifc_public_buildingsmart_2025_megaproject_lane"
+              ],
+              "source_count": 9,
+              "closes_operator_real_mgt_target": false,
+              "target_directories": [
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_yeongjong_international_city_block_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_cheongna_international_city_tower_competition",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_public_highrise_design_service_g2b_portal",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_mixed_use_tower_design_attachment_lane",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_korea_awards_hub",
+                "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_2025_megaproject_lane"
+              ],
+              "acceptance_checks": [
+                "artifact_not_metadata_only",
+                "curated_local_ifc_reference_exists_when_required",
+                "derived_mgt_header_valid_if_mgt_attached",
+                "file_size_gt_500_bytes",
+                "ifc_file_exists",
+                "ifc_not_metadata_only",
+                "mgt_header_contains_VERSION_or_UNIT",
+                "roundtrip_parse_contract_pass_when_enabled",
+                "sha256_differs_from_repo_benchmark_bridge",
+                "source_artifact_exists_or_pdf_derived_mgt_exists"
+              ],
+              "candidate_blockers": {
+                "lh_bucheon_yeokgok_a1_housing_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_happy_city_5_1_design_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "kci_concrete_building_design_examples_2e": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_yeongjong_international_city_block_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "lh_cheongna_international_city_tower_competition": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "koneps_public_highrise_design_service_g2b_portal": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "not_catalog_source_matched": 2,
+                  "raw_redistribution_not_allowed": 2,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "koneps_mixed_use_tower_design_attachment_lane": {
+                  "catalog_source_unmatched_candidate": 12,
+                  "mgt_file_too_small": 4,
+                  "repo_benchmark_bridge_mgt": 8
+                },
+                "ifc_public_buildingsmart_korea_awards_hub": {
+                  "catalog_source_unmatched_candidate": 10
+                },
+                "ifc_public_buildingsmart_2025_megaproject_lane": {
+                  "catalog_source_unmatched_candidate": 10
+                }
+              }
+            }
+          ],
+          "operator_resolution_plan": {
+            "schema_version": "korean-medium-large-operator-resolution-plan.v1",
+            "status": "pending",
+            "minimum_operator_real_mgt_needed": 4,
+            "auto_promotable_repo_candidate_count": 0,
+            "source_mapping_blocked_action_count": 14,
+            "rights_blocked_private_candidate_action_count": 5,
+            "priority_batches": [
+              {
+                "batch_id": "replace_benchmark_bridge_mgt",
+                "objective": "Replace the four repo-benchmark bridge MGTs with source-native operator-attached MGT files that pass header and sha256 checks.",
+                "source_ids": [
+                  "koneps_goyang_changneung_powerplant_design_service",
+                  "lh_bucheon_yeokgok_a1_housing_native_baseline",
+                  "lh_happy_city_5_1_native_baseline",
+                  "lh_newtown_highrise_block_competition"
+                ],
+                "source_count": 4,
+                "closes_operator_real_mgt_target": true,
+                "target_directories": [
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_newtown_highrise_block_competition"
+                ],
+                "acceptance_checks": [
+                  "file_size_gt_500_bytes",
+                  "mgt_header_contains_VERSION_or_UNIT",
+                  "roundtrip_parse_contract_pass_when_enabled",
+                  "sha256_differs_from_repo_benchmark_bridge"
+                ],
+                "candidate_blockers": {
+                  "koneps_goyang_changneung_powerplant_design_service": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_happy_city_5_1_native_baseline": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_newtown_highrise_block_competition": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  }
+                }
+              },
+              {
+                "batch_id": "fetch_specific_remote_downloads",
+                "objective": "Fetch direct official download URLs first; these have the lowest portal search ambiguity.",
+                "source_ids": [
+                  "koneps_goyang_changneung_powerplant_design_service",
+                  "lh_bucheon_yeokgok_a1_housing_competition",
+                  "lh_happy_city_5_1_design_competition",
+                  "lh_bucheon_yeokgok_a1_housing_native_baseline",
+                  "lh_happy_city_5_1_native_baseline"
+                ],
+                "source_count": 5,
+                "closes_operator_real_mgt_target": false,
+                "target_directories": [
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline"
+                ],
+                "acceptance_checks": [
+                  "artifact_not_metadata_only",
+                  "derived_mgt_header_valid_if_mgt_attached",
+                  "file_size_gt_500_bytes",
+                  "mgt_header_contains_VERSION_or_UNIT",
+                  "roundtrip_parse_contract_pass_when_enabled",
+                  "sha256_differs_from_repo_benchmark_bridge",
+                  "source_artifact_exists_or_pdf_derived_mgt_exists"
+                ],
+                "candidate_blockers": {
+                  "koneps_goyang_changneung_powerplant_design_service": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_bucheon_yeokgok_a1_housing_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_happy_city_5_1_design_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_bucheon_yeokgok_a1_housing_native_baseline": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_happy_city_5_1_native_baseline": {
+                    "catalog_source_unmatched_candidate": 10,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  }
+                }
+              },
+              {
+                "batch_id": "resolve_metadata_only_sources",
+                "objective": "Attach PDF/ZIP/IFC/MGT artifacts for remaining metadata-only sources, then rerun this ingest receipt.",
+                "source_ids": [
+                  "lh_bucheon_yeokgok_a1_housing_competition",
+                  "lh_happy_city_5_1_design_competition",
+                  "kci_concrete_building_design_examples_2e",
+                  "lh_yeongjong_international_city_block_competition",
+                  "lh_cheongna_international_city_tower_competition",
+                  "koneps_public_highrise_design_service_g2b_portal",
+                  "koneps_mixed_use_tower_design_attachment_lane",
+                  "ifc_public_buildingsmart_korea_awards_hub",
+                  "ifc_public_buildingsmart_2025_megaproject_lane"
+                ],
+                "source_count": 9,
+                "closes_operator_real_mgt_target": false,
+                "target_directories": [
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_yeongjong_international_city_block_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_cheongna_international_city_tower_competition",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_public_highrise_design_service_g2b_portal",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_mixed_use_tower_design_attachment_lane",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_korea_awards_hub",
+                  "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_2025_megaproject_lane"
+                ],
+                "acceptance_checks": [
+                  "artifact_not_metadata_only",
+                  "curated_local_ifc_reference_exists_when_required",
+                  "derived_mgt_header_valid_if_mgt_attached",
+                  "file_size_gt_500_bytes",
+                  "ifc_file_exists",
+                  "ifc_not_metadata_only",
+                  "mgt_header_contains_VERSION_or_UNIT",
+                  "roundtrip_parse_contract_pass_when_enabled",
+                  "sha256_differs_from_repo_benchmark_bridge",
+                  "source_artifact_exists_or_pdf_derived_mgt_exists"
+                ],
+                "candidate_blockers": {
+                  "lh_bucheon_yeokgok_a1_housing_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_happy_city_5_1_design_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "kci_concrete_building_design_examples_2e": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_yeongjong_international_city_block_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "lh_cheongna_international_city_tower_competition": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "koneps_public_highrise_design_service_g2b_portal": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "not_catalog_source_matched": 2,
+                    "raw_redistribution_not_allowed": 2,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "koneps_mixed_use_tower_design_attachment_lane": {
+                    "catalog_source_unmatched_candidate": 12,
+                    "mgt_file_too_small": 4,
+                    "repo_benchmark_bridge_mgt": 8
+                  },
+                  "ifc_public_buildingsmart_korea_awards_hub": {
+                    "catalog_source_unmatched_candidate": 10
+                  },
+                  "ifc_public_buildingsmart_2025_megaproject_lane": {
+                    "catalog_source_unmatched_candidate": 10
+                  }
+                }
+              }
+            ],
+            "claim_boundary": "This plan is an execution manifest for closing G7 with real attached artifacts. It does not count candidates as evidence until the files are attached and acceptance checks pass."
+          },
+          "claim_boundary": "This queue is a fill-in manifest. Rows are intentionally not accepted until the operator attaches the artifact and confirms rights/source-native provenance. Repo-local candidates are not auto-filled when no exact clean candidate exists or when source mapping, rights, or benchmark-bridge checks remain open."
         },
         "operator_attachment_manifest_validation_ready_for_collection_overlay": false,
         "operator_attachment_manifest_validation_accepted_source_count": 0,

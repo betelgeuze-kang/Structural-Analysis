@@ -1400,6 +1400,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_followup56_rowcorr_support32_followup2_probe.json"
     )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support32_probe.json"
+    )
+    direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32_followup2 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support32_followup2_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2381,6 +2389,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2": (
                     _direct_residual_probe_summary(
                         direct_residual_newton_followup56_post_rowcorr_block_lstsq_translation_support32_followup2
+                    )
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32
+                    )
+                ),
+                "direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32_followup2": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_post_rowcorr_block_lstsq_frame_support32_followup2
                     )
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
@@ -4030,6 +4048,30 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "operator_attachment_manifest_queue_attachment_count": (
                     korea_operator_attachment_queue.get("attachment_count")
+                ),
+                "operator_attachment_manifest_queue_autofill_candidate_status": (
+                    korea_operator_attachment_queue.get("autofill_candidate_status")
+                ),
+                "operator_attachment_manifest_queue_auto_promotable_repo_candidate_count": (
+                    korea_operator_attachment_queue.get(
+                        "auto_promotable_repo_candidate_count"
+                    )
+                ),
+                "operator_attachment_manifest_queue_minimum_operator_real_mgt_needed": (
+                    korea_operator_attachment_queue.get("minimum_operator_real_mgt_needed")
+                ),
+                "operator_attachment_manifest_queue_source_mapping_blocked_action_count": (
+                    korea_operator_attachment_queue.get(
+                        "source_mapping_blocked_action_count"
+                    )
+                ),
+                "operator_attachment_manifest_queue_rights_blocked_private_candidate_action_count": (
+                    korea_operator_attachment_queue.get(
+                        "rights_blocked_private_candidate_action_count"
+                    )
+                ),
+                "operator_attachment_manifest_queue_priority_batches": (
+                    korea_operator_attachment_queue.get("priority_batches")
                 ),
                 "operator_attachment_manifest_queue": korea_operator_attachment_queue,
                 "operator_attachment_manifest_validation_ready_for_collection_overlay": (
