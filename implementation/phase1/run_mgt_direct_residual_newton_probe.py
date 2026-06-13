@@ -629,12 +629,61 @@ def run_mgt_direct_residual_newton_probe(
             section_props=section_props,
             material_props=material_props,
         )
+        shell_operator_cache: dict[str, Any] = {}
 
         def assemble_residual(
             u: np.ndarray,
             *,
             external_load_override: np.ndarray | None = None,
+            include_component_forces: bool = False,
+            residual_only: bool = False,
+            free_override: np.ndarray | None = None,
         ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+            if (
+                residual_only
+                and external_load_override is not None
+                and free_override is not None
+            ):
+                f_int, physical_meta = assemble_physical_internal_forces(
+                    u=u,
+                    node_xyz=node_xyz,
+                    frame_elements=frame_elements,
+                    elem_type_code=elem_type_code,
+                    elem_section_id=elem_section_id,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    section_props=section_props,
+                    material_props=material_props,
+                    plate_thickness_props=plate_thickness_props,
+                    spring_stiffness=spring_stiffness,
+                    base_axial_forces=base_axial_forces,
+                    frame_gravity_load_scale=frame_gravity_load_scale,
+                    load_scale=load_scale,
+                    include_component_forces=include_component_forces,
+                    shell_operator_cache=shell_operator_cache,
+                )
+                f_ext = np.asarray(external_load_override, dtype=np.float64)
+                free = np.asarray(free_override, dtype=np.int64)
+                residual, rhs = assemble_physical_residual(
+                    u=u,
+                    f_ext=f_ext,
+                    free=free,
+                    f_int=f_int,
+                )
+                return None, f_ext, free, residual, rhs, {
+                    **physical_meta,
+                    "residual_only_assembly": True,
+                    "residual_only_free_override": True,
+                    "free_dof_count": int(free.size),
+                    "shell_operator_cache_size": int(len(shell_operator_cache)),
+                    "physical_internal_force_inf_n": float(np.max(np.abs(f_int[free])))
+                    if free.size
+                    else 0.0,
+                    "external_load_source": "reference_configuration",
+                    "assembled_external_load_inf_n": None,
+                    "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+                }
             translations = np.asarray(u, dtype=np.float64).reshape((-1, DOF_PER_NODE))[:, :3]
             deformed_xyz = node_xyz + translations
             axial_forces = {
@@ -682,6 +731,8 @@ def run_mgt_direct_residual_newton_probe(
                 base_axial_forces=base_axial_forces,
                 frame_gravity_load_scale=frame_gravity_load_scale,
                 load_scale=load_scale,
+                include_component_forces=include_component_forces,
+                shell_operator_cache=shell_operator_cache,
             )
             f_ext = (
                 np.asarray(external_load_override, dtype=np.float64)
@@ -714,7 +765,10 @@ def run_mgt_direct_residual_newton_probe(
                 if assembled_f_ext.size
                 else 0.0,
                 "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+                "residual_only_assembly": False,
+                "shell_operator_cache_size": int(len(shell_operator_cache)),
             }
+        assemble_residual.supports_residual_only = True  # type: ignore[attr-defined]
 
         assembly_started = time.perf_counter()
         (
@@ -2284,6 +2338,10 @@ def run_mgt_direct_residual_newton_probe(
             preconditioner_solve_seconds = 0.0
             preconditioner_regularization = 0.0
             preconditioner_matrix = None
+            residual_only_matvec_count = 0
+            full_assembly_matvec_count = 0
+            residual_only_trial_count = 0
+            full_assembly_trial_count = 0
             if preconditioner_mode == "current_tangent":
                 preconditioner_k_ff = current_stiffness[current_free, :][:, current_free].tocsc()
                 preconditioner_diag = np.asarray(preconditioner_k_ff.diagonal(), dtype=np.float64)
@@ -2306,6 +2364,7 @@ def run_mgt_direct_residual_newton_probe(
 
             def _global_residual_jvp_physical(vector: np.ndarray) -> np.ndarray:
                 nonlocal matvec_count, unstable_probe_count
+                nonlocal residual_only_matvec_count, full_assembly_matvec_count
                 matvec_count += 1
                 direction = np.asarray(vector, dtype=np.float64)
                 direction_inf = float(np.max(np.abs(direction))) if direction.size else 0.0
@@ -2326,7 +2385,17 @@ def run_mgt_direct_residual_newton_probe(
                 ) = assemble_residual(
                     probe_u,
                     external_load_override=reference_f_ext,
+                    residual_only=True,
+                    free_override=base_free_for_krylov,
                 )
+                used_residual_only = bool(
+                    isinstance(_probe_meta, dict)
+                    and _probe_meta.get("residual_only_assembly")
+                )
+                if used_residual_only:
+                    residual_only_matvec_count += 1
+                else:
+                    full_assembly_matvec_count += 1
                 free_is_stable = bool(
                     probe_free.shape == base_free_for_krylov.shape
                     and np.array_equal(probe_free, base_free_for_krylov)
@@ -2340,6 +2409,7 @@ def run_mgt_direct_residual_newton_probe(
                     "effective_probe_scale": float(scale),
                     "probe_step_inf_m": float(scale * direction_inf),
                     "free_dof_set_stable": free_is_stable,
+                    "residual_only_assembly": bool(used_residual_only),
                     "probe_direct_residual_inf_n": probe_residual_inf,
                 }
                 if not free_is_stable:
@@ -2451,11 +2521,21 @@ def run_mgt_direct_residual_newton_probe(
                     _free,
                     candidate_residual,
                     candidate_rhs,
-                    _meta,
+                    candidate_meta,
                 ) = assemble_residual(
                     candidate_u,
                     external_load_override=reference_f_ext,
+                    residual_only=True,
+                    free_override=base_free_for_krylov,
                 )
+                used_residual_only = bool(
+                    isinstance(candidate_meta, dict)
+                    and candidate_meta.get("residual_only_assembly")
+                )
+                if used_residual_only:
+                    residual_only_trial_count += 1
+                else:
+                    full_assembly_trial_count += 1
                 residual_inf = (
                     float(np.max(np.abs(candidate_residual)))
                     if candidate_residual.size
@@ -2476,6 +2556,7 @@ def run_mgt_direct_residual_newton_probe(
                 row = {
                     "alpha_source": str(alpha_source),
                     "alpha": float(alpha),
+                    "residual_only_assembly": bool(used_residual_only),
                     "direct_residual_inf_n": residual_inf,
                     "improvement_inf_n": float(improvement_inf),
                     "relative_improvement": float(relative_improvement),
@@ -2554,6 +2635,10 @@ def run_mgt_direct_residual_newton_probe(
                     "linear_solve_seconds": float(solve_seconds),
                     "preconditioner_solve_count": int(preconditioner_solve_count),
                     "preconditioner_solve_seconds": float(preconditioner_solve_seconds),
+                    "residual_only_matvec_count": int(residual_only_matvec_count),
+                    "full_assembly_matvec_count": int(full_assembly_matvec_count),
+                    "residual_only_trial_count": int(residual_only_trial_count),
+                    "full_assembly_trial_count": int(full_assembly_trial_count),
                     "correction_inf_m": correction_inf,
                     "correction_scaled_inf": correction_scaled_inf,
                     "gate_limited_alpha": float(gate_limited_alpha),
