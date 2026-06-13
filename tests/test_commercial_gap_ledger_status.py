@@ -933,6 +933,35 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         direct_followup56_frame_block_lstsq_followup2["output_final_checkpoint_path"]
         is None
     )
+    direct_post_frame_translation_block_lstsq = rows["G1"]["evidence"][
+        "direct_residual_post_frame_block_lstsq_translation_support32"
+    ]
+    assert (
+        direct_post_frame_translation_block_lstsq["base_direct_residual_inf_n"]
+        == direct_followup56_frame_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert (
+        direct_post_frame_translation_block_lstsq["final_direct_residual_inf_n"]
+        == direct_followup56_frame_block_lstsq["final_direct_residual_inf_n"]
+    )
+    assert direct_post_frame_translation_block_lstsq["promotion_count"] == 0
+    assert (
+        direct_post_frame_translation_block_lstsq["stop_reason"]
+        == "max_wall_seconds_exceeded"
+    )
+    assert (
+        direct_post_frame_translation_block_lstsq[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert direct_post_frame_translation_block_lstsq[
+        "frame_hotspot_block_lstsq_support_size"
+    ] == 332
+    assert (
+        direct_post_frame_translation_block_lstsq["output_final_checkpoint_path"]
+        is None
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]
