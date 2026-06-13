@@ -21,6 +21,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     _skipped_output_final_checkpoint_meta,
     _truncated_svd_lstsq,
     _unique_positive_alphas,
+    parse_args,
 )
 
 
@@ -59,6 +60,21 @@ def test_parse_matrix_free_basis_sources_normalizes_aliases() -> None:
         "history",
         "current_newton",
     )
+
+
+def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
+    default_args = parse_args([])
+    assert default_args.current_tangent_residual_row_use_residual_only_assembly is False
+    assert default_args.current_tangent_residual_row_allow_negative_alphas is False
+
+    enabled_args = parse_args(
+        [
+            "--current-tangent-residual-row-use-residual-only-assembly",
+            "--current-tangent-residual-row-allow-negative-alphas",
+        ]
+    )
+    assert enabled_args.current_tangent_residual_row_use_residual_only_assembly is True
+    assert enabled_args.current_tangent_residual_row_allow_negative_alphas is True
 
 
 def test_truncated_svd_lstsq_drops_ill_conditioned_direction() -> None:

@@ -535,6 +535,8 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_svd_relative_cutoff: float = 0.0,
     current_tangent_residual_row_svd_max_condition: float = 0.0,
     current_tangent_residual_row_directional_probe_alpha: float = 0.0,
+    current_tangent_residual_row_use_residual_only_assembly: bool = False,
+    current_tangent_residual_row_allow_negative_alphas: bool = False,
     current_tangent_residual_row_alpha_values: tuple[float, ...] = (
         0.03125,
         0.015625,
@@ -2692,6 +2694,14 @@ def run_mgt_direct_residual_newton_probe(
             "directional_probe_alpha": float(
                 current_tangent_residual_row_directional_probe_alpha
             ),
+            "use_residual_only_assembly": bool(
+                current_tangent_residual_row_use_residual_only_assembly
+            ),
+            "allow_negative_alphas": bool(
+                current_tangent_residual_row_allow_negative_alphas
+            ),
+            "residual_only_eval_count": 0,
+            "full_assembly_eval_count": 0,
             "configured_alpha_values": [
                 float(value)
                 for value in current_tangent_residual_row_alpha_values
@@ -2751,6 +2761,35 @@ def run_mgt_direct_residual_newton_probe(
             row_svd_truncation_enabled = bool(
                 row_svd_relative_cutoff > 0.0 or row_svd_max_condition > 0.0
             )
+            use_row_residual_only = bool(
+                current_tangent_residual_row_use_residual_only_assembly
+            )
+            row_residual_only_eval_count = 0
+            row_full_assembly_eval_count = 0
+
+            def evaluate_row_candidate(
+                candidate_u: np.ndarray,
+            ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+                nonlocal row_residual_only_eval_count, row_full_assembly_eval_count
+                if use_row_residual_only:
+                    result = assemble_residual(
+                        candidate_u,
+                        external_load_override=reference_f_ext,
+                        residual_only=True,
+                        free_override=current_free,
+                    )
+                else:
+                    result = assemble_residual(
+                        candidate_u,
+                        external_load_override=reference_f_ext,
+                    )
+                meta = result[5] if len(result) >= 6 and isinstance(result[5], dict) else {}
+                if bool(meta.get("residual_only_assembly")):
+                    row_residual_only_eval_count += 1
+                else:
+                    row_full_assembly_eval_count += 1
+                return result
+
             for row_pass in range(1, max_row_promotions + 1):
                 previous_residual_inf = (
                     float(np.max(np.abs(current_residual))) if current_residual.size else 0.0
@@ -2933,10 +2972,7 @@ def run_mgt_direct_residual_newton_probe(
                                         fd_residual,
                                         _fd_rhs,
                                         _fd_meta,
-                                    ) = assemble_residual(
-                                        probe_u,
-                                        external_load_override=reference_f_ext,
-                                    )
+                                    ) = evaluate_row_candidate(probe_u)
                                     if not (
                                         fd_free.shape == current_free.shape
                                         and np.array_equal(fd_free, current_free)
@@ -3100,10 +3136,7 @@ def run_mgt_direct_residual_newton_probe(
                                 probe_residual,
                                 _probe_rhs,
                                 _probe_meta,
-                            ) = assemble_residual(
-                                probe_u,
-                                external_load_override=reference_f_ext,
-                            )
+                            ) = evaluate_row_candidate(probe_u)
                             free_is_stable_probe = bool(
                                 probe_free.shape == current_free.shape
                                 and np.array_equal(probe_free, current_free)
@@ -3229,6 +3262,11 @@ def run_mgt_direct_residual_newton_probe(
                             (source, alpha, -1.0)
                             for source, alpha in reverse_row_alpha_rows
                         ]
+                        if current_tangent_residual_row_allow_negative_alphas:
+                            signed_row_alpha_rows.extend(
+                                (f"{source}_negative", alpha, -1.0)
+                                for source, alpha in row_alpha_rows
+                            )
                         directional_probe_meta["candidate_alphas"] = [
                             {
                                 "source": source,
@@ -3248,11 +3286,8 @@ def run_mgt_direct_residual_newton_probe(
                                 candidate_free,
                                 candidate_residual,
                                 candidate_rhs,
-                                _meta,
-                            ) = assemble_residual(
-                                candidate_u,
-                                external_load_override=reference_f_ext,
-                            )
+                                candidate_meta,
+                            ) = evaluate_row_candidate(candidate_u)
                             residual_inf = (
                                 float(np.max(np.abs(candidate_residual)))
                                 if candidate_residual.size
@@ -3308,6 +3343,9 @@ def run_mgt_direct_residual_newton_probe(
                                     increment / max_abs <= relative_increment_tolerance
                                 ),
                                 "free_dof_set_stable": free_is_stable,
+                                "residual_only_assembly": bool(
+                                    candidate_meta.get("residual_only_assembly")
+                                ),
                             }
                             trial_rows.append(trial_row)
                             trial_vectors.append(candidate_u)
@@ -3476,6 +3514,8 @@ def run_mgt_direct_residual_newton_probe(
                     "trial_rows": all_trial_rows,
                     "best_candidate": best_candidate_row,
                     "best_gate_eligible_candidate": best_gate_candidate_row,
+                    "residual_only_eval_count": int(row_residual_only_eval_count),
+                    "full_assembly_eval_count": int(row_full_assembly_eval_count),
                     "residual_descent": bool(
                         best_candidate_row
                         and float(best_candidate_row["direct_residual_inf_n"])
@@ -4047,6 +4087,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-use-residual-only-assembly",
+        action="store_true",
+        help=(
+            "Use the residual-only assembly fast path for residual-row finite-difference "
+            "columns and trial replays. Accepted-state tangent refreshes still use the full "
+            "assembly path."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-allow-negative-alphas",
+        action="store_true",
+        help=(
+            "Also replay negative signed alpha candidates for the current-tangent "
+            "residual-row correction direction."
+        ),
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-alpha-values",
         default="0.03125,0.015625",
         help="Comma-separated base alpha candidates for current-tangent residual-row correction.",
@@ -4265,6 +4322,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_directional_probe_alpha=(
             args.current_tangent_residual_row_directional_probe_alpha
+        ),
+        current_tangent_residual_row_use_residual_only_assembly=(
+            args.current_tangent_residual_row_use_residual_only_assembly
+        ),
+        current_tangent_residual_row_allow_negative_alphas=(
+            args.current_tangent_residual_row_allow_negative_alphas
         ),
         current_tangent_residual_row_alpha_values=(
             current_tangent_residual_row_alpha_values or (0.03125, 0.015625)
