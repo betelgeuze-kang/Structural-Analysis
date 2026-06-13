@@ -1196,6 +1196,57 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_probe_final_checkpoint.npz"
     )
+    direct_post_frame_support64_translation_support128_followup2 = rows["G1"][
+        "evidence"
+    ][
+        "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup2"
+    ]
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "base_direct_residual_inf_n"
+        ]
+        == direct_post_frame_support64_translation_support128[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "final_direct_residual_inf_n"
+        ]
+        == 5252.107838989317
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "promotion_count"
+        ]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2["max_promotions"]
+        == 1
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2["stop_reason"]
+        == "max_promotions_exhausted"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "frame_hotspot_block_lstsq_component_filter"
+        ]
+        == "translation"
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "frame_hotspot_block_lstsq_support_size"
+        ]
+        == 339
+    )
+    assert (
+        direct_post_frame_support64_translation_support128_followup2[
+            "output_final_checkpoint_path"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup2_probe_final_checkpoint.npz"
+    )
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
     ]
