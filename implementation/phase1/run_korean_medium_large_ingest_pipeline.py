@@ -26,6 +26,7 @@ KOREA_DIR = REPO_ROOT / "implementation" / "phase1" / "open_data" / "korea"
 DEFAULT_CATALOG = KOREA_DIR / "korean_source_catalog.json"
 DEFAULT_COLLECTION_REPORT = KOREA_DIR / "korean_public_structure_collection_report.json"
 DEFAULT_RECEIPT = KOREA_DIR / "korean_medium_large_ingest_receipt.json"
+DEFAULT_OPERATOR_ATTACHMENT_MANIFEST = KOREA_DIR / "operator_attachment_manifest.json"
 ARTIFACT_ROOT = KOREA_DIR / "collected" / "artifacts"
 CURATED_ROOT = KOREA_DIR / "curated"
 MGT_HEADER_MARKERS = ("*VERSION", "*UNIT")
@@ -102,6 +103,87 @@ def _run_collector(*, catalog_path: Path, skip_collect: bool) -> dict[str, Any]:
         check=True,
     )
     return _load_json(DEFAULT_COLLECTION_REPORT)
+
+
+def _operator_attachment_manifest_rows(
+    *,
+    manifest_path: Path,
+    catalog_source_ids: set[str],
+) -> dict[str, Any]:
+    empty_summary = {
+        "operator_attachment_manifest_present": False,
+        "operator_attachment_manifest_row_count": 0,
+        "operator_attachment_manifest_accepted_count": 0,
+        "operator_attachment_manifest_rejected_count": 0,
+        "operator_attachment_manifest_rejection_counts": {},
+    }
+    if not manifest_path.is_file():
+        return {"summary": empty_summary, "rows": [], "accepted_by_source_id": {}}
+    payload = _load_json(manifest_path)
+    attachments = payload.get("attachments")
+    if not isinstance(attachments, list):
+        attachments = []
+    rows: list[dict[str, Any]] = []
+    for item in attachments:
+        if not isinstance(item, dict):
+            continue
+        source_id = str(item.get("source_id") or "").strip()
+        local_path_text = str(item.get("local_path") or "").strip()
+        resolved = _resolve_repo_path(local_path_text)
+        exists = bool(resolved is not None and resolved.is_file())
+        blockers: list[str] = []
+        if not source_id:
+            blockers.append("source_id_missing")
+        elif source_id not in catalog_source_ids:
+            blockers.append("catalog_source_unmatched")
+        if not local_path_text:
+            blockers.append("local_path_missing")
+        elif not exists:
+            blockers.append("artifact_missing")
+        if not bool(item.get("rights_confirmed")):
+            blockers.append("rights_not_confirmed")
+        if not bool(item.get("source_native_artifact")):
+            blockers.append("source_native_artifact_not_confirmed")
+        accepted = not blockers
+        rows.append(
+            {
+                "source_id": source_id,
+                "local_path": str(resolved) if resolved is not None else local_path_text,
+                "file_type": (
+                    str(item.get("file_type") or Path(local_path_text).suffix).lower()
+                ),
+                "rights_confirmed": bool(item.get("rights_confirmed")),
+                "source_native_artifact": bool(item.get("source_native_artifact")),
+                "provenance_url": str(item.get("provenance_url") or ""),
+                "license_hint": str(item.get("license_hint") or ""),
+                "operator_note": str(item.get("operator_note") or ""),
+                "accepted_for_collection_overlay": bool(accepted),
+                "promotion_blockers": blockers,
+            }
+        )
+    rejection_counts: dict[str, int] = {}
+    for row in rows:
+        for blocker in row["promotion_blockers"]:
+            rejection_counts[blocker] = rejection_counts.get(blocker, 0) + 1
+    accepted_by_source_id = {
+        str(row["source_id"]): row
+        for row in rows
+        if row["accepted_for_collection_overlay"] and row["source_id"]
+    }
+    summary = {
+        "operator_attachment_manifest_present": True,
+        "operator_attachment_manifest_row_count": int(len(rows)),
+        "operator_attachment_manifest_accepted_count": int(len(accepted_by_source_id)),
+        "operator_attachment_manifest_rejected_count": int(
+            len(rows) - len(accepted_by_source_id)
+        ),
+        "operator_attachment_manifest_rejection_counts": dict(sorted(rejection_counts.items())),
+    }
+    return {
+        "summary": summary,
+        "rows": rows,
+        "accepted_by_source_id": accepted_by_source_id,
+    }
 
 
 def _find_mgt_artifact(source_id: str) -> Path | None:
@@ -897,6 +979,7 @@ def run_korean_medium_large_ingest_pipeline(
     catalog_path: Path = DEFAULT_CATALOG,
     collection_report_path: Path = DEFAULT_COLLECTION_REPORT,
     receipt_path: Path = DEFAULT_RECEIPT,
+    operator_attachment_manifest_path: Path = DEFAULT_OPERATOR_ATTACHMENT_MANIFEST,
     skip_regenerate: bool = False,
     skip_collect: bool = False,
     run_roundtrip_parse: bool = False,
@@ -908,6 +991,16 @@ def run_korean_medium_large_ingest_pipeline(
     rows = catalog.get("source_records")
     if not isinstance(rows, list):
         raise ValueError("catalog missing source_records")
+    catalog_source_ids = {
+        str(row.get("source_id") or "")
+        for row in rows
+        if isinstance(row, dict) and row.get("source_id")
+    }
+    operator_attachment_manifest = _operator_attachment_manifest_rows(
+        manifest_path=operator_attachment_manifest_path,
+        catalog_source_ids=catalog_source_ids,
+    )
+    operator_manifest_by_source = operator_attachment_manifest["accepted_by_source_id"]
 
     collection_by_id = {
         str(row.get("source_id") or ""): row
@@ -941,6 +1034,21 @@ def run_korean_medium_large_ingest_pipeline(
         source_id = str(record.get("source_id") or "")
         source_format = str(record.get("format") or "").lower()
         collection_row = collection_by_id.get(source_id, {})
+        operator_manifest_row = operator_manifest_by_source.get(source_id)
+        if isinstance(operator_manifest_row, dict):
+            collection_row = {
+                **collection_row,
+                "source_id": source_id,
+                "status": "collected",
+                "local_path": str(operator_manifest_row.get("local_path") or ""),
+                "operator_attachment_manifest_overlay": True,
+                "operator_attachment_manifest_provenance_url": str(
+                    operator_manifest_row.get("provenance_url") or ""
+                ),
+                "operator_attachment_manifest_license_hint": str(
+                    operator_manifest_row.get("license_hint") or ""
+                ),
+            }
         collected_path = str(collection_row.get("local_path") or "").strip()
         status = str(collection_row.get("status") or "")
         artifact_mgt_path = _find_mgt_artifact(source_id) if source_format == "mgt" else None
@@ -971,6 +1079,11 @@ def run_korean_medium_large_ingest_pipeline(
             "mgt_header_ok": False,
             "blockers": [],
         }
+        if isinstance(operator_manifest_row, dict):
+            entry["operator_attachment_manifest_overlay"] = True
+            entry["operator_attachment_manifest_path"] = str(
+                operator_attachment_manifest_path
+            )
 
         if source_format == "mgt" and attached:
             mgt_attached_count += 1
@@ -1138,12 +1251,15 @@ def run_korean_medium_large_ingest_pipeline(
             "operator_attached_real_mgt_header_ok_remaining": (
                 operator_attached_real_mgt_header_ok_remaining
             ),
+            **operator_attachment_manifest["summary"],
             **local_private_candidate_summary,
             **private_candidate_matches["summary"],
             **repo_public_candidates["summary"],
             **repo_candidate_matches["summary"],
         },
         "per_source": per_source,
+        "operator_attachment_manifest_path": str(operator_attachment_manifest_path),
+        "operator_attachment_manifest_candidates": operator_attachment_manifest["rows"],
         "local_private_candidate_artifacts": local_private_candidates["rows"],
         "operator_action_private_candidate_matches": private_candidate_matches["rows"],
         "repo_public_candidate_artifacts": repo_public_candidates["rows"],
@@ -1168,6 +1284,16 @@ def main() -> int:
     parser.add_argument("--catalog", type=Path, default=DEFAULT_CATALOG)
     parser.add_argument("--collection-report", type=Path, default=DEFAULT_COLLECTION_REPORT)
     parser.add_argument("--receipt-out", type=Path, default=DEFAULT_RECEIPT)
+    parser.add_argument(
+        "--operator-attachment-manifest",
+        type=Path,
+        default=DEFAULT_OPERATOR_ATTACHMENT_MANIFEST,
+        help=(
+            "Optional manifest of operator-attached source-native artifacts. "
+            "Rows are counted only when source_id, local_path, rights, and "
+            "source-native confirmations are valid."
+        ),
+    )
     parser.add_argument("--skip-regenerate", action="store_true")
     parser.add_argument("--skip-collect", action="store_true")
     parser.add_argument(
@@ -1181,6 +1307,7 @@ def main() -> int:
         catalog_path=args.catalog,
         collection_report_path=args.collection_report,
         receipt_path=args.receipt_out,
+        operator_attachment_manifest_path=args.operator_attachment_manifest,
         skip_regenerate=args.skip_regenerate,
         skip_collect=args.skip_collect,
         run_roundtrip_parse=args.run_roundtrip_parse,

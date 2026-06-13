@@ -252,6 +252,160 @@ def test_ingest_pipeline_splits_mgt_provenance_and_curated_ifc(tmp_path: Path, m
     assert rows["curated_ifc"]["attach_provenance"] == "operator_attached"
 
 
+def test_ingest_pipeline_counts_confirmed_operator_attachment_manifest(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    benchmark = tmp_path / "benchmark.mgt"
+    benchmark.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "0" * 800, encoding="utf-8")
+    operator_mgt = tmp_path / "native_source.mgt"
+    operator_mgt.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "1" * 800, encoding="utf-8")
+    manifest = tmp_path / "operator_attachment_manifest.json"
+    source_id = "operator_manifest_mgt"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+                "attachments": [
+                    {
+                        "source_id": source_id,
+                        "local_path": str(operator_mgt),
+                        "file_type": ".mgt",
+                        "rights_confirmed": True,
+                        "source_native_artifact": True,
+                        "provenance_url": "https://example.test/source",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    catalog = tmp_path / "korean_source_catalog.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean_source_catalog.v1",
+                "source_records": [
+                    {
+                        "source_id": source_id,
+                        "storey_band": "20_30",
+                        "format": "mgt",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ingest, "ARTIFACT_ROOT", tmp_path / "collected" / "artifacts")
+    monkeypatch.setattr(ingest, "BENCHMARK_MGT", benchmark)
+    monkeypatch.setattr(ingest, "_regenerate_catalog", lambda *, skip_regenerate: None)
+    monkeypatch.setattr(
+        ingest,
+        "_run_collector",
+        lambda *, catalog_path, skip_collect: {
+            "records": [{"source_id": source_id, "status": "", "local_path": ""}]
+        },
+    )
+
+    receipt = ingest.run_korean_medium_large_ingest_pipeline(
+        catalog_path=catalog,
+        collection_report_path=tmp_path / "collection.json",
+        receipt_path=tmp_path / "receipt.json",
+        operator_attachment_manifest_path=manifest,
+    )
+
+    summary = receipt["summary"]
+    assert summary["attached_count"] == 1
+    assert summary["metadata_only_count"] == 0
+    assert summary["mgt_header_ok_count"] == 1
+    assert summary["operator_attached_real_mgt_header_ok_count"] == 1
+    assert summary["operator_attachment_manifest_present"] is True
+    assert summary["operator_attachment_manifest_accepted_count"] == 1
+    assert summary["operator_attachment_manifest_rejected_count"] == 0
+    assert summary["operator_action_queue_count"] == 0
+    row = receipt["per_source"][0]
+    assert row["operator_attachment_manifest_overlay"] is True
+    assert row["mgt_path"] == str(operator_mgt)
+    assert row["attach_provenance"] == "operator_attached"
+
+
+def test_ingest_pipeline_rejects_unconfirmed_operator_attachment_manifest(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    benchmark = tmp_path / "benchmark.mgt"
+    benchmark.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "0" * 800, encoding="utf-8")
+    operator_mgt = tmp_path / "native_source.mgt"
+    operator_mgt.write_text("*VERSION\n9.5\n*UNIT\nKN, M\n" + "1" * 800, encoding="utf-8")
+    manifest = tmp_path / "operator_attachment_manifest.json"
+    source_id = "unconfirmed_manifest_mgt"
+    manifest.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+                "attachments": [
+                    {
+                        "source_id": source_id,
+                        "local_path": str(operator_mgt),
+                        "file_type": ".mgt",
+                        "rights_confirmed": False,
+                        "source_native_artifact": True,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    catalog = tmp_path / "korean_source_catalog.json"
+    catalog.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean_source_catalog.v1",
+                "source_records": [
+                    {
+                        "source_id": source_id,
+                        "storey_band": "20_30",
+                        "format": "mgt",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(ingest, "ARTIFACT_ROOT", tmp_path / "collected" / "artifacts")
+    monkeypatch.setattr(ingest, "BENCHMARK_MGT", benchmark)
+    monkeypatch.setattr(ingest, "_regenerate_catalog", lambda *, skip_regenerate: None)
+    monkeypatch.setattr(
+        ingest,
+        "_run_collector",
+        lambda *, catalog_path, skip_collect: {
+            "records": [{"source_id": source_id, "status": "", "local_path": ""}]
+        },
+    )
+
+    receipt = ingest.run_korean_medium_large_ingest_pipeline(
+        catalog_path=catalog,
+        collection_report_path=tmp_path / "collection.json",
+        receipt_path=tmp_path / "receipt.json",
+        operator_attachment_manifest_path=manifest,
+    )
+
+    summary = receipt["summary"]
+    assert summary["attached_count"] == 0
+    assert summary["metadata_only_count"] == 1
+    assert summary["operator_attachment_manifest_accepted_count"] == 0
+    assert summary["operator_attachment_manifest_rejected_count"] == 1
+    assert summary["operator_attachment_manifest_rejection_counts"] == {
+        "rights_not_confirmed": 1
+    }
+    assert receipt["operator_attachment_manifest_candidates"][0][
+        "accepted_for_collection_overlay"
+    ] is False
+    assert receipt["operator_action_queue"][0]["action_type"] == "attach_operator_real_mgt"
+
+
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(
     tmp_path: Path,
     monkeypatch,

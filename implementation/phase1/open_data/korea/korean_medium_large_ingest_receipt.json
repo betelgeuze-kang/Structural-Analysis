@@ -1,6 +1,6 @@
 {
   "schema_version": "korean_medium_large_ingest_receipt.v1",
-  "generated_at_utc": "2026-06-13T01:12:28.808331+00:00",
+  "generated_at_utc": "2026-06-13T01:26:33.371700+00:00",
   "catalog_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_source_catalog.json",
   "collection_report_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_public_structure_collection_report.json",
   "summary": {
@@ -76,6 +76,11 @@
     },
     "operator_attached_real_mgt_header_ok_target": 4,
     "operator_attached_real_mgt_header_ok_remaining": 4,
+    "operator_attachment_manifest_present": false,
+    "operator_attachment_manifest_row_count": 0,
+    "operator_attachment_manifest_accepted_count": 0,
+    "operator_attachment_manifest_rejected_count": 0,
+    "operator_attachment_manifest_rejection_counts": {},
     "local_private_candidate_count": 20,
     "existing_local_private_candidate_count": 20,
     "kr_local_private_candidate_count": 2,
@@ -367,6 +372,8 @@
       "curated_local_ifc_exists": false
     }
   ],
+  "operator_attachment_manifest_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/operator_attachment_manifest.json",
+  "operator_attachment_manifest_candidates": [],
   "local_private_candidate_artifacts": [
     {
       "project_id": "cbist_digital_innovation_center_interior_20241013484",
