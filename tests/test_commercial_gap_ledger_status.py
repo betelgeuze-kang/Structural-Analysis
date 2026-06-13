@@ -3064,6 +3064,18 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert ultralow_reg["final_residual_inf_n"] < regdirect_checkpoint[
         "final_residual_inf_n"
     ]
+    capped_ultralow = rows["G1"]["evidence"][
+        "equilibrium_newton_focused_ultralow_reg_capped"
+    ]
+    assert capped_ultralow["direct_regularization_factor"] == 1.0e-15
+    assert capped_ultralow["displacement_cap_m"] == 8.0
+    assert capped_ultralow["max_newton_translation_increment_m"] == 0.5
+    assert capped_ultralow["accepted_newton_iteration_count"] == 0
+    assert capped_ultralow["first_iteration_trial_count"] == 2
+    assert capped_ultralow["first_iteration_residual_only_trial_count"] == 2
+    assert capped_ultralow["final_residual_inf_n"] == capped_ultralow[
+        "base_residual_inf_n"
+    ]
     focused_component = rows["G1"]["evidence"][
         "residual_jacobian_focused_regdirect_checkpoint_component_breakdown"
     ]

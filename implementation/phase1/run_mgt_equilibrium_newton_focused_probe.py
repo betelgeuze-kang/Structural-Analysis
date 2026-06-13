@@ -160,6 +160,16 @@ def run_mgt_equilibrium_newton_focused_probe(
     direct_regularization_factor: float | None = None,
     state_scale_line_search_values: tuple[float, ...] = (),
     state_scale_only: bool = False,
+    line_search_alphas: tuple[float, ...] = (
+        1.0,
+        0.5,
+        0.25,
+        0.125,
+        0.0625,
+        0.03125,
+    ),
+    displacement_cap_m: float | None = None,
+    max_newton_translation_increment_m: float | None = None,
     output_final_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
@@ -178,7 +188,11 @@ def run_mgt_equilibrium_newton_focused_probe(
         initial_assembly=initial_assembly,
         max_newton_iterations=max_newton_iterations,
         residual_tolerance_n=residual_tolerance_n,
+        line_search_alphas=line_search_alphas,
         prefer_host_ilu=prefer_host_ilu,
+        displacement_cap_m=displacement_cap_m,
+        max_newton_translation_increment_m=max_newton_translation_increment_m,
+        node_xyz=setup_meta.get("_node_xyz"),
         allow_negative_alphas=bool(allow_negative_alphas),
         linear_solver_profile=str(linear_solver_profile or "production"),
         direct_regularization_factor=direct_regularization_factor,
@@ -234,6 +248,15 @@ def run_mgt_equilibrium_newton_focused_probe(
             float(value) for value in state_scale_line_search_values
         ],
         "state_scale_only": bool(state_scale_only),
+        "line_search_alphas": [float(value) for value in line_search_alphas],
+        "displacement_cap_m": (
+            None if displacement_cap_m is None else float(displacement_cap_m)
+        ),
+        "max_newton_translation_increment_m": (
+            None
+            if max_newton_translation_increment_m is None
+            else float(max_newton_translation_increment_m)
+        ),
         "residual_tolerance_n": float(residual_tolerance_n),
         "newton_iterations": newton.get("iterations"),
         "line_search_residual_only_supported": bool(
@@ -311,10 +334,32 @@ def main() -> int:
         action="store_true",
         help="Evaluate state-scale candidates and skip the Newton linear solve.",
     )
+    parser.add_argument(
+        "--line-search-alphas",
+        default="1,0.5,0.25,0.125,0.0625,0.03125",
+        help="Comma-separated Newton line-search alpha candidates.",
+    )
+    parser.add_argument(
+        "--displacement-cap-m",
+        type=float,
+        default=None,
+        help="Optional max translation cap for trust-region line search.",
+    )
+    parser.add_argument(
+        "--max-newton-translation-increment-m",
+        type=float,
+        default=None,
+        help="Optional per-Newton-step translation increment cap.",
+    )
     args = parser.parse_args()
     state_scale_line_search_values = tuple(
         float(value.strip())
         for value in str(args.state_scale_line_search_values).split(",")
+        if value.strip()
+    )
+    line_search_alphas = tuple(
+        float(value.strip())
+        for value in str(args.line_search_alphas).split(",")
         if value.strip()
     )
     payload = run_mgt_equilibrium_newton_focused_probe(
@@ -327,6 +372,9 @@ def main() -> int:
         direct_regularization_factor=args.direct_regularization_factor,
         state_scale_line_search_values=state_scale_line_search_values,
         state_scale_only=bool(args.state_scale_only),
+        line_search_alphas=line_search_alphas,
+        displacement_cap_m=args.displacement_cap_m,
+        max_newton_translation_increment_m=args.max_newton_translation_increment_m,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
     )
     print(

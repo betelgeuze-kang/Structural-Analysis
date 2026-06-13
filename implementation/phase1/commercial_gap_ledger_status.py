@@ -353,6 +353,11 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
         "state_scale_line_search_values": payload.get(
             "state_scale_line_search_values"
         ),
+        "line_search_alphas": payload.get("line_search_alphas"),
+        "displacement_cap_m": _float_or_none(payload.get("displacement_cap_m")),
+        "max_newton_translation_increment_m": _float_or_none(
+            payload.get("max_newton_translation_increment_m")
+        ),
         "line_search_residual_only_supported": payload.get(
             "line_search_residual_only_supported"
         ),
@@ -1257,6 +1262,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     )
     equilibrium_newton_focused_ultralow_reg = _load(
         productization / "mgt_equilibrium_newton_focused_ultralow_reg_probe.json"
+    )
+    equilibrium_newton_focused_ultralow_reg_capped = _load(
+        productization / "mgt_equilibrium_newton_focused_ultralow_reg_capped_probe.json"
     )
     equilibrium_newton_support128_followup42_host_ilu_device_gmres = _load(
         productization
@@ -3967,6 +3975,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "equilibrium_newton_focused_ultralow_reg": (
                     _equilibrium_newton_probe_summary(
                         equilibrium_newton_focused_ultralow_reg
+                    )
+                ),
+                "equilibrium_newton_focused_ultralow_reg_capped": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_focused_ultralow_reg_capped
                     )
                 ),
                 "residual_jacobian_focused_regdirect_checkpoint_component_status": (
