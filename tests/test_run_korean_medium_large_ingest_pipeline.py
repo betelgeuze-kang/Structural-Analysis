@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from implementation.phase1 import run_korean_medium_large_ingest_pipeline as ingest
+from implementation.phase1.open_data.korea import build_operator_attachment_manifest_queue
 from implementation.phase1.open_data.korea import validate_operator_attachment_manifest
 
 
@@ -457,6 +458,55 @@ def test_operator_attachment_manifest_validator_reports_overlay_readiness(
     assert report["accepted_source_count"] == 1
     assert report["rejected_source_count"] == 0
     assert report["rows"][0]["accepted_for_collection_overlay"] is True
+
+
+def test_operator_attachment_manifest_queue_builder_preserves_action_context(
+    tmp_path: Path,
+) -> None:
+    receipt = tmp_path / "receipt.json"
+    target_dir = tmp_path / "artifacts" / "bridge_mgt"
+    action = {
+        "source_id": "bridge_mgt",
+        "format": "mgt",
+        "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+        "target_directory": str(target_dir),
+        "expected_artifacts": ["bridge_mgt.mgt"],
+        "provenance_url": "https://example.test/source",
+        "download_url": "https://example.test/download",
+        "license_hint": "public_attachment_check_terms",
+        "acceptance_checks": [
+            "file_size_gt_500_bytes",
+            "mgt_header_contains_VERSION_or_UNIT",
+            "sha256_differs_from_repo_benchmark_bridge",
+        ],
+        "current_attach_provenance": "repo_benchmark_bridge",
+    }
+    receipt.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean_medium_large_ingest_receipt.v1",
+                "operator_action_queue": [action],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    queue = (
+        build_operator_attachment_manifest_queue.build_operator_attachment_manifest_queue(
+            receipt_path=receipt,
+        )
+    )
+
+    assert queue["status"] == "pending_operator_fill"
+    assert queue["attachment_count"] == 1
+    row = queue["attachments"][0]
+    assert row["source_id"] == "bridge_mgt"
+    assert row["local_path"] == str(target_dir / "bridge_mgt.mgt")
+    assert row["file_type"] == ".mgt"
+    assert row["rights_confirmed"] is False
+    assert row["source_native_artifact"] is False
+    assert row["action_type"] == action["action_type"]
+    assert row["current_attach_provenance"] == "repo_benchmark_bridge"
 
 
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(

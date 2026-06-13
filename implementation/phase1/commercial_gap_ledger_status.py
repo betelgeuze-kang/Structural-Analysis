@@ -1384,6 +1384,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2_probe.json"
     )
+    direct_residual_newton_followup56_rowcorr_largest_rows_support8 = _load(
+        productization
+        / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support8_probe.json"
+    )
+    direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout = _load(
+        productization
+        / "mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout_diagnostic.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2342,6 +2350,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                     _direct_residual_probe_summary(
                         direct_residual_newton_followup56_rowcorr_largest_rows_support4_followup2
                     )
+                ),
+                "direct_residual_newton_followup56_rowcorr_largest_rows_support8": (
+                    _direct_residual_probe_summary(
+                        direct_residual_newton_followup56_rowcorr_largest_rows_support8
+                    )
+                ),
+                "direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout": (
+                    direct_residual_newton_followup56_rowcorr_largest_rows_support4_directional_timeout
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
                     "status"

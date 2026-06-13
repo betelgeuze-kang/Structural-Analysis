@@ -1,0 +1,281 @@
+{
+  "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+  "source_receipt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/korean_medium_large_ingest_receipt.json",
+  "status": "pending_operator_fill",
+  "attachment_count": 14,
+  "attachments": [
+    {
+      "source_id": "koneps_goyang_changneung_powerplant_design_service",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service/koneps_goyang_changneung_powerplant_design_service.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
+      "license_hint": "public_attachment_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+      "download_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_goyang_changneung_powerplant_design_service",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": "repo_benchmark_bridge"
+    },
+    {
+      "source_id": "lh_bucheon_yeokgok_a1_housing_competition",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition/lh_bucheon_yeokgok_a1_housing_competition.pdf",
+      "file_type": ".pdf",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+      "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_competition",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "lh_happy_city_5_1_design_competition",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition/lh_happy_city_5_1_design_competition.pdf",
+      "file_type": ".pdf",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+      "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_design_competition",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline/lh_bucheon_yeokgok_a1_housing_native_baseline.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+      "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_bucheon_yeokgok_a1_housing_native_baseline",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": "repo_benchmark_bridge"
+    },
+    {
+      "source_id": "lh_happy_city_5_1_native_baseline",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline/lh_happy_city_5_1_native_baseline.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+      "download_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_happy_city_5_1_native_baseline",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": "repo_benchmark_bridge"
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e/kci_concrete_building_design_examples_2e.pdf",
+      "file_type": ".pdf",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "license_hint": "society_example_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+      "download_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e_native_baseline/kci_concrete_building_design_examples_2e_native_baseline.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "license_hint": "society_example_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "replace_placeholder_mgt_with_operator_real_mgt",
+      "download_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/kci_concrete_building_design_examples_2e_native_baseline",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": "operator_attached"
+    },
+    {
+      "source_id": "lh_yeongjong_international_city_block_competition",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_yeongjong_international_city_block_competition/lh_yeongjong_international_city_block_competition.zip",
+      "file_type": ".zip",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_zip_or_pdf_derived_mgt",
+      "download_url": "https://www.lh.or.kr/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_yeongjong_international_city_block_competition",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "lh_cheongna_international_city_tower_competition",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_cheongna_international_city_tower_competition/lh_cheongna_international_city_tower_competition.pdf",
+      "file_type": ".pdf",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+      "download_url": "https://www.lh.or.kr/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_cheongna_international_city_tower_competition",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "lh_newtown_highrise_block_competition",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_newtown_highrise_block_competition/lh_newtown_highrise_block_competition.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.lh.or.kr/",
+      "license_hint": "competition_material_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt",
+      "download_url": "https://www.lh.or.kr/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/lh_newtown_highrise_block_competition",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": "repo_benchmark_bridge"
+    },
+    {
+      "source_id": "koneps_public_highrise_design_service_g2b_portal",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_public_highrise_design_service_g2b_portal/koneps_public_highrise_design_service_g2b_portal.pdf",
+      "file_type": ".pdf",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.g2b.go.kr/",
+      "license_hint": "public_attachment_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+      "download_url": "https://www.g2b.go.kr/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_public_highrise_design_service_g2b_portal",
+      "acceptance_checks": [
+        "source_artifact_exists_or_pdf_derived_mgt_exists",
+        "derived_mgt_header_valid_if_mgt_attached",
+        "artifact_not_metadata_only"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "koneps_mixed_use_tower_design_attachment_lane",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_mixed_use_tower_design_attachment_lane/koneps_mixed_use_tower_design_attachment_lane.mgt",
+      "file_type": ".mgt",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://www.g2b.go.kr/",
+      "license_hint": "public_attachment_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_mgt",
+      "download_url": "https://www.g2b.go.kr/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/koneps_mixed_use_tower_design_attachment_lane",
+      "acceptance_checks": [
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "sha256_differs_from_repo_benchmark_bridge",
+        "roundtrip_parse_contract_pass_when_enabled"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_korea_awards_hub",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_korea_awards_hub/ifc_public_buildingsmart_korea_awards_hub.ifc",
+      "file_type": ".ifc",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://event.buildingsmart.or.kr/Awards/",
+      "license_hint": "bim_award_archive_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_ifc",
+      "download_url": "https://event.buildingsmart.or.kr/Awards/",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_korea_awards_hub",
+      "acceptance_checks": [
+        "ifc_file_exists",
+        "ifc_not_metadata_only",
+        "curated_local_ifc_reference_exists_when_required"
+      ],
+      "current_attach_provenance": ""
+    },
+    {
+      "source_id": "ifc_public_buildingsmart_2025_megaproject_lane",
+      "local_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_2025_megaproject_lane/ifc_public_buildingsmart_2025_megaproject_lane.ifc",
+      "file_type": ".ifc",
+      "rights_confirmed": false,
+      "source_native_artifact": false,
+      "provenance_url": "https://event.buildingsmart.or.kr/Awards/2025",
+      "license_hint": "bim_award_archive_check_terms",
+      "operator_note": "Fill this path with the source-native artifact for this source, then set rights_confirmed and source_native_artifact to true.",
+      "action_type": "attach_operator_real_ifc",
+      "download_url": "https://event.buildingsmart.or.kr/Awards/2025",
+      "target_directory": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/korea/collected/artifacts/ifc_public_buildingsmart_2025_megaproject_lane",
+      "acceptance_checks": [
+        "ifc_file_exists",
+        "ifc_not_metadata_only",
+        "curated_local_ifc_reference_exists_when_required"
+      ],
+      "current_attach_provenance": ""
+    }
+  ],
+  "claim_boundary": "This queue is a fill-in manifest. Rows are intentionally not accepted until the operator attaches the artifact and confirms rights/source-native provenance."
+}

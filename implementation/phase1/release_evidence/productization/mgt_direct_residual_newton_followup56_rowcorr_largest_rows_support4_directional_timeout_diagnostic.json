@@ -1,0 +1,29 @@
+{
+  "schema_version": "mgt-direct-residual-newton-timeout-diagnostic.v1",
+  "generated_at_utc": "2026-06-13T01:51:35Z",
+  "status": "timeout",
+  "ready": false,
+  "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_probe_final_checkpoint.npz",
+  "source_checkpoint_direct_residual_inf_n": 5451.435161912128,
+  "timeout_seconds": 180,
+  "attempted_mode": {
+    "target_mode": "largest_rows",
+    "support_column_count": 4,
+    "jacobian_mode": "current_tangent",
+    "directional_probe_alpha": 0.001,
+    "alpha_values": [
+      0.03125,
+      0.015625,
+      0.0078125,
+      0.00390625,
+      0.001953125
+    ]
+  },
+  "output_json_written": false,
+  "output_final_checkpoint_written": false,
+  "blockers": [
+    "directional_row_correction_timed_out_before_receipt",
+    "direct_residual_gate_not_closed",
+    "consistent_jacobian_or_globalization_required"
+  ]
+}
