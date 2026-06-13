@@ -1,11 +1,11 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T14:16:16Z",
+  "generated_at": "2026-06-13T14:23:14Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
     "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe_final_checkpoint.npz",
-    "direct_residual_inf_n": 0.28037969424867326,
+    "direct_residual_inf_n": 0.2803796855757318,
     "residual_gate_n": 0.001,
     "previous_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
     "previous_cached_shell_newton_final_residual_inf_n": 0.280685596708914,
@@ -21,10 +21,10 @@
     "latest_shell_bending_jvp_row_count": 8,
     "latest_shell_bending_jvp_max_relative_inf_error": 6.093677723807544e-10,
     "latest_shell_bending_jvp_total_runtime_s": 34.227873127005296,
-    "latest_conditioned_block_lstsq_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_column_equilibrated_probe.json",
-    "latest_conditioned_block_lstsq_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_column_equilibrated_probe_final_checkpoint.npz",
-    "latest_conditioned_block_lstsq_final_residual_inf_n": 0.28037969424867326,
-    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 5.949259502861181e-07
+    "latest_conditioned_block_lstsq_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_wide16_support128_probe.json",
+    "latest_conditioned_block_lstsq_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_wide16_support128_probe_final_checkpoint.npz",
+    "latest_conditioned_block_lstsq_final_residual_inf_n": 0.2803796855757318,
+    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 6.035988917622247e-07
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -221,7 +221,36 @@
       "correction_inf_m": 1.4811680979384299e-15,
       "accepted": true
     },
-    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent path. It advances the frontier by 5.95e-7 N from the prior 0.280380289 N checkpoint, then decays to 1e-8 to 1e-9 N improvements; it should be used as a polishing component, not as the sole route to the 1e-3 N residual gate."
+    "row_column_wide16_support128_polish": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_wide16_support128_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_wide16_support128_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "base_residual_inf_n": 0.28037969424867326,
+      "final_residual_inf_n": 0.2803796855757318,
+      "improvement_inf_n": 8.672941476106644e-09,
+      "promotion_count": 1,
+      "component_top_count": 24,
+      "support_size": 40,
+      "selected_hotspot_row_count": 8,
+      "accepted": true,
+      "note": "Requested max_rows=16/support128, but the pre-existing top-row list only exposed eight shell-bending rows before component_top_count was added."
+    },
+    "row_column_top64_wide16_support128_no_descent": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_probe.json",
+      "tiny_alpha_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_tinyalpha_probe.json",
+      "equilibration": "row_column",
+      "base_residual_inf_n": 0.2803796855757318,
+      "final_residual_inf_n": 0.2803796855757318,
+      "component_top_count": 64,
+      "support_size": 282,
+      "selected_hotspot_row_count": 16,
+      "correction_inf_m": 5530.8341120312125,
+      "best_tiny_alpha": -1e-13,
+      "best_tiny_alpha_residual_inf_n": 1.6692884442867522,
+      "accepted": false,
+      "assessment": "After component_top_count exposed 16 shell-bending rows, the unregularized row-column LSTSQ direction became physically unusable; even tiny alphas increased residual."
+    },
+    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent path. It advances the frontier by 6.04e-7 N from the prior 0.280380289 N checkpoint, then decays to 1e-8 to 1e-9 N improvements. Widening to 16 shell rows without stronger regularization produces a 5530 m correction and no descent, so the next useful implementation should be ridge/trust-region regularized block correction rather than raw wider LSTSQ."
   },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
@@ -254,7 +283,8 @@
       "The latest shell-bending tangent follow-up improved only 6.98e-7 N, and the wider translation tangent probe produced no descent from 0.28038028917462354 N.",
       "Current global and shell-bending hotspot JVP checks are finite-difference consistent at roughly 1e-10 relative error, so the active blocker is not a simple tangent sign/scale mismatch.",
       "A low-regularization direct Newton attempt, including signed alphas, found no residual descent from the current frontier.",
-      "Conditioned block LSTSQ produced accepted descent to 0.28037969424867326 N, but the improvement decayed from 5.54e-7 N to 6.30e-9 N across follow-ups.",
+      "Conditioned block LSTSQ produced accepted descent to 0.2803796855757318 N, but the improvement decayed from 5.54e-7 N to 8.67e-9 N across follow-ups.",
+      "After exposing top64 residual rows, the 16-row shell-bending LSTSQ correction was too ill-conditioned to descend even under tiny alpha search.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."

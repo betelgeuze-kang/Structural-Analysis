@@ -532,6 +532,67 @@ def test_frame_hotspot_block_lstsq_equilibration_recovers_ill_scaled_system(
     assert sweep["linear_solve"]["linear_residual_inf_n_unscaled"] <= 1.0e-12
 
 
+def test_frame_hotspot_block_lstsq_honors_component_top_count(
+    monkeypatch,
+) -> None:
+    free = np.asarray([node * 6 for node in range(30)], dtype=np.int64)
+    dof_count = int(free[-1]) + 1
+    stiffness = coo_matrix(
+        (np.full(free.size, 10.0), (free, free)),
+        shape=(dof_count, dof_count),
+    ).tocsc()
+    u0 = np.zeros(dof_count, dtype=np.float64)
+    rhs = np.linspace(30.0, 1.0, num=free.size, dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal_global = np.asarray(stiffness @ u, dtype=np.float64)
+            residual = internal_global[free] - rhs
+            meta = {}
+            if include_component_forces:
+                meta["component_forces"] = {"frame": internal_global.copy()}
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=16,
+        max_promotions=1,
+        component_top_count=30,
+        relative_increment_tolerance=1.0e13,
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["component_top_count"] == 30
+    assert len(payload["component_breakdown"]["top_rows"]) == 30
+    assert sweep["selected_hotspot_row_count"] == 16
+    assert sweep["support_size"] >= 16
+
+
 def test_frame_hotspot_block_lstsq_can_promote_negative_alpha(
     monkeypatch,
 ) -> None:

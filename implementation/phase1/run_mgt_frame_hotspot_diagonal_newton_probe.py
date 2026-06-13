@@ -688,6 +688,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_operator_source: str = "tangent",
     block_lstsq_finite_difference_step_m: float = 1.0e-6,
     block_lstsq_equilibration: str = "none",
+    component_top_count: int = 24,
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
 ) -> dict[str, Any]:
@@ -753,6 +754,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             free=free_idx,
             residual=residual,
             rhs=rhs,
+            top_count=int(component_top_count),
         )
         latest_residual = residual.copy()
         latest_rhs = rhs.copy()
@@ -1003,6 +1005,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             free=previous_free,
             residual=np.asarray(initial_residual, dtype=np.float64),
             rhs=np.asarray(initial_rhs, dtype=np.float64),
+            top_count=int(component_top_count),
         )
         last_component_breakdown = initial_component_breakdown
     if latest_residual.size:
@@ -1097,6 +1100,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
             last_sweep if promotion_mode == "block_lstsq" else {}
         ),
         "promotion_mode": promotion_mode,
+        "component_top_count": int(component_top_count),
         "promoted_to_final_state": promoted,
         "promotion_count": len(promotion_passes),
         "max_promotions": int(max_promotions),
@@ -1145,6 +1149,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--alpha-values", default="1,0.5,0.25,0.1,0.05,0.01,0.001")
     parser.add_argument("--step-values", default="1e-10,3e-10,1e-9")
     parser.add_argument("--max-rows", type=int, default=8)
+    parser.add_argument("--component-top-count", type=int, default=24)
     parser.add_argument("--max-promotions", type=int, default=1)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--block-lstsq-support-columns-per-row", type=int, default=8)
@@ -1205,6 +1210,7 @@ def main(argv: list[str] | None = None) -> int:
         max_rows=int(args.max_rows),
         max_promotions=int(args.max_promotions),
         promotion_mode=str(args.promotion_mode),
+        component_top_count=int(args.component_top_count),
         relative_increment_tolerance=float(args.relative_increment_tolerance),
         block_lstsq_support_columns_per_row=int(
             args.block_lstsq_support_columns_per_row
