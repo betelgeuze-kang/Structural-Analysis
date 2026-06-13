@@ -149,6 +149,176 @@ def _component_breakdown(
     }
 
 
+def _scalar_load_balance_diagnostics(
+    *,
+    top_rows: list[dict[str, Any]],
+    shell_component_names: tuple[str, ...] = ("shell_bending_drilling", "shell_membrane", "shell"),
+) -> dict[str, Any]:
+    selected = [
+        row
+        for row in top_rows
+        if str(row.get("dominant_component") or "") in set(shell_component_names)
+    ]
+    if not selected:
+        return {
+            "evaluated": False,
+            "reason": "no_shell_dominant_top_rows",
+            "row_count": 0,
+            "rows": [],
+        }
+    external = np.asarray([float(row.get("external_load_n") or 0.0) for row in selected], dtype=np.float64)
+    internal = np.asarray([float(row.get("internal_sum_n") or 0.0) for row in selected], dtype=np.float64)
+    residual = internal - external
+    denom = float(np.dot(external, external))
+    best_scale = float(np.dot(external, internal) / denom) if denom > 1.0e-30 else 0.0
+    scaled_residual = internal - best_scale * external
+    nonzero = np.abs(external) > 1.0e-30
+    required_scales = internal[nonzero] / external[nonzero] if np.any(nonzero) else np.asarray([], dtype=np.float64)
+    rows: list[dict[str, Any]] = []
+    for row, ext, fint, res in zip(selected, external.tolist(), internal.tolist(), residual.tolist()):
+        component_values = row.get("component_values_n") if isinstance(row.get("component_values_n"), dict) else {}
+        shell_sum = sum(float(component_values.get(name, 0.0)) for name in shell_component_names)
+        rows.append(
+            {
+                "free_row": int(row.get("free_row", -1)),
+                "global_dof": int(row.get("global_dof", -1)),
+                "node_index": int(row.get("node_index", -1)),
+                "dof": str(row.get("dof") or ""),
+                "dominant_component": str(row.get("dominant_component") or ""),
+                "external_load_n": float(ext),
+                "internal_sum_n": float(fint),
+                "shell_component_sum_n": float(shell_sum),
+                "residual_n": float(res),
+                "required_external_scale_for_zero_row_residual": (
+                    float(fint / ext) if abs(float(ext)) > 1.0e-30 else None
+                ),
+            }
+        )
+    rounded_external_counts: dict[str, int] = {}
+    for value in external.tolist():
+        key = f"{float(value):.12g}"
+        rounded_external_counts[key] = rounded_external_counts.get(key, 0) + 1
+    return {
+        "evaluated": True,
+        "row_count": int(len(selected)),
+        "base_residual_inf_n": _max_abs(residual),
+        "external_load_inf_n": _max_abs(external),
+        "internal_sum_inf_n": _max_abs(internal),
+        "best_l2_external_scale": best_scale,
+        "best_l2_scaled_residual_inf_n": _max_abs(scaled_residual),
+        "best_l2_scaled_residual_l2_n": float(np.linalg.norm(scaled_residual)) if scaled_residual.size else 0.0,
+        "required_external_scale_min": float(np.min(required_scales)) if required_scales.size else None,
+        "required_external_scale_median": float(np.median(required_scales)) if required_scales.size else None,
+        "required_external_scale_max": float(np.max(required_scales)) if required_scales.size else None,
+        "rounded_external_load_counts": rounded_external_counts,
+        "rows": rows,
+        "claim_boundary": (
+            "Diagnostic only: fits a scalar multiplier on the displayed top-row external loads. "
+            "It does not prove that the full load path should be rescaled."
+        ),
+    }
+
+
+def _local_row_projection_diagnostics(
+    *,
+    stiffness: Any,
+    free: np.ndarray,
+    residual: np.ndarray,
+    top_rows: list[dict[str, Any]],
+    max_rows: int = 8,
+    support_strongest_per_row: int = 0,
+    node_block_support: bool = False,
+    component_filter: tuple[str, ...] = ("shell_bending_drilling", "shell_membrane", "shell"),
+) -> dict[str, Any]:
+    selected = [
+        row
+        for row in top_rows
+        if str(row.get("dominant_component") or "") in set(component_filter)
+    ][: max(int(max_rows), 0)]
+    if not selected:
+        return {
+            "evaluated": False,
+            "reason": "no_matching_top_rows",
+            "selected_row_count": 0,
+        }
+    free_idx = np.asarray(free, dtype=np.int64)
+    residual_np = np.asarray(residual, dtype=np.float64)
+    k_ff = stiffness[free_idx, :][:, free_idx].tocsr()
+    target_rows = np.asarray([int(row["free_row"]) for row in selected], dtype=np.int64)
+    support: set[int] = set(int(row) for row in target_rows.tolist())
+    strongest_per_row = max(int(support_strongest_per_row), 0)
+    if strongest_per_row > 0:
+        for target_row in target_rows.tolist():
+            start = int(k_ff.indptr[int(target_row)])
+            end = int(k_ff.indptr[int(target_row) + 1])
+            cols = k_ff.indices[start:end]
+            vals = np.abs(k_ff.data[start:end])
+            if cols.size:
+                take = min(strongest_per_row, int(cols.size))
+                strongest = np.argpartition(vals, -take)[-take:]
+                support.update(int(cols[int(index)]) for index in strongest.tolist())
+    if node_block_support:
+        selected_nodes = {
+            int(free_idx[int(row)]) // 6
+            for row in support
+            if 0 <= int(row) < int(free_idx.size)
+        }
+        support.update(
+            int(local_col)
+            for local_col, global_dof in enumerate(free_idx.tolist())
+            if int(global_dof) // 6 in selected_nodes
+        )
+    support_cols = np.asarray(sorted(support), dtype=np.int64)
+    submatrix = k_ff[target_rows, :][:, support_cols].toarray()
+    rhs_rows = -residual_np[target_rows]
+    try:
+        coeffs, residual_sum, rank, singular_values = np.linalg.lstsq(submatrix, rhs_rows, rcond=None)
+        solve_error = ""
+    except np.linalg.LinAlgError as exc:
+        coeffs = np.zeros(int(support_cols.size), dtype=np.float64)
+        residual_sum = np.asarray([], dtype=np.float64)
+        rank = 0
+        singular_values = np.asarray([], dtype=np.float64)
+        solve_error = str(exc)
+    projected = np.asarray(submatrix @ coeffs, dtype=np.float64) if submatrix.size else np.asarray([], dtype=np.float64)
+    projection_residual = projected - rhs_rows
+    rhs_inf = _max_abs(rhs_rows)
+    projection_residual_inf = _max_abs(projection_residual)
+    rows = [
+        {
+            "free_row": int(row.get("free_row", -1)),
+            "global_dof": int(row.get("global_dof", -1)),
+            "node_index": int(row.get("node_index", -1)),
+            "dof": str(row.get("dof") or ""),
+            "dominant_component": str(row.get("dominant_component") or ""),
+            "residual_n": float(row.get("residual_n") or 0.0),
+        }
+        for row in selected
+    ]
+    return {
+        "evaluated": True,
+        "selected_row_count": int(target_rows.size),
+        "support_size": int(support_cols.size),
+        "support_strongest_per_row": int(strongest_per_row),
+        "node_block_support": bool(node_block_support),
+        "rank": int(rank),
+        "rhs_inf_n": rhs_inf,
+        "projected_action_inf_n": _max_abs(projected),
+        "projection_residual_inf_n": projection_residual_inf,
+        "relative_projection_residual_inf": projection_residual_inf / max(rhs_inf, 1.0e-30),
+        "coefficient_linf": _max_abs(coeffs),
+        "coefficient_l2": float(np.linalg.norm(coeffs)) if coeffs.size else 0.0,
+        "singular_values": [float(value) for value in singular_values.tolist()],
+        "linear_least_squares_residual_sum": [float(value) for value in residual_sum.tolist()],
+        "solve_error": solve_error,
+        "selected_rows": rows,
+        "claim_boundary": (
+            "Diagnostic only: measures whether selected residual rows can be represented by "
+            "the current tangent submatrix on a local support."
+        ),
+    }
+
+
 def _local_shell_basis(points: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
     pts = np.asarray(points, dtype=np.float64)
     if pts.shape != (3, 3):
@@ -977,6 +1147,29 @@ def run_mgt_residual_jacobian_consistency_probe(
         rhs=np.asarray(rhs, dtype=np.float64),
         top_count=int(top_residual_count),
     )
+    shell_load_balance = _scalar_load_balance_diagnostics(
+        top_rows=residual_component_breakdown.get("top_rows", []),
+    )
+    shell_local_projection = {
+        "self_rows": _local_row_projection_diagnostics(
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            top_rows=residual_component_breakdown.get("top_rows", []),
+            max_rows=8,
+            support_strongest_per_row=0,
+            node_block_support=False,
+        ),
+        "node_block_strongest8": _local_row_projection_diagnostics(
+            stiffness=stiffness,
+            free=np.asarray(free, dtype=np.int64),
+            residual=np.asarray(residual, dtype=np.float64),
+            top_rows=residual_component_breakdown.get("top_rows", []),
+            max_rows=8,
+            support_strongest_per_row=8,
+            node_block_support=True,
+        ),
+    }
     shell_membrane_hotspots = _shell_membrane_hotspot_diagnostics(
         top_rows=residual_component_breakdown.get("top_rows", []),
         u=u0,
@@ -1087,6 +1280,8 @@ def run_mgt_residual_jacobian_consistency_probe(
         "free_dof_count": int(np.asarray(free).size),
         "top_residual_count": int(top_residual_count),
         "residual_component_breakdown": residual_component_breakdown,
+        "residual_shell_load_balance": shell_load_balance,
+        "residual_shell_local_projection": shell_local_projection,
         "residual_hotspot_shell_membrane_diagnostics": shell_membrane_hotspots,
         "residual_hotspot_frame_diagnostics": frame_hotspots,
         "residual_hotspot_signed_displacement_sweep": hotspot_signed_sweep,

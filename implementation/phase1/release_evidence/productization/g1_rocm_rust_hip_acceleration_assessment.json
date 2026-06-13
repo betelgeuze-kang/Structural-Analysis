@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T17:13:54.638644+00:00",
+  "generated_at": "2026-06-14T03:58:13+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -1496,5 +1496,63 @@
     "hotspot_jvp_min_action_cosine": 0.9999999999999998,
     "all_hotspot_jvp_residual_only": true,
     "assessment": "At the latest residual-only global Krylov frontier, tangent-vs-finite-difference JVP consistency is strong on the dominant hotspots. The top residual field is shell dominated, and the first 8 hotspot JVP rows are all shell_bending_drilling uz DOFs with max relative inf error below 1e-9. This makes repeated line-search/preconditioner polishing less attractive; the next closure work should address shell bending/full-load/material state modeling or continuation, not basic tangent/FD mismatch."
+  },
+  "current_acceleration_decision_2026_06_14": {
+    "status": "rocm_runtime_available_but_g1_gate_not_backend_throughput_limited",
+    "generated_at": "2026-06-14T03:58:13+09:00",
+    "device_observation": {
+      "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
+      "gfx_target": "gfx1030",
+      "compute_units": 80,
+      "hipcc_on_path": false
+    },
+    "latest_frontier": {
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_geometry_normal_row_support8_probe_final_checkpoint.npz",
+      "direct_residual_inf_n": 0.2803783945661925,
+      "residual_gate_n": 0.001,
+      "remaining_gate_gap_n": 0.2793783945661925,
+      "top96_dominant_component_counts": {
+        "shell_bending_drilling": 53,
+        "shell_membrane": 32,
+        "frame": 11
+      }
+    },
+    "latest_shell_load_projection_diagnosis": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_shell_load_projection_frontier_probe.json",
+      "shell_dominant_top_row_count": 85,
+      "best_l2_external_load_scale": 1.000066460873031,
+      "best_l2_scaled_residual_inf_n": 0.2804032402241758,
+      "top_row_required_external_scale_examples": [
+        0.25000203679675903,
+        0.2500022901442482,
+        -0.49255404143039416,
+        0.2500028666912769,
+        -0.49255267618578846,
+        -0.507507846757726,
+        0.25000482040777544,
+        -0.5075035735295769
+      ],
+      "local_tangent_projection": {
+        "self_rows_relative_projection_residual_inf": 0.9999986579550844,
+        "node_block_strongest8_relative_projection_residual_inf": 0.9999986579550845,
+        "node_block_strongest8_support_size": 48,
+        "node_block_strongest8_rank": 6,
+        "node_block_strongest8_coefficient_linf": 2.1132329430538995e-16
+      },
+      "assessment": "The current tangent local support cannot represent the dominant shell residual rows: the projection residual is effectively the same size as the target residual. The leading shell rows also show row-scale load/internal balance patterns around 0.25 and -0.5, while a whole-set scalar external-load fit does not reduce the max residual. This points at shell load/internal consistency or full-load path state before raw engine acceleration."
+    },
+    "decision": {
+      "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
+      "use_rust_for_next_g1_push": "not_until_full_3d_mgt_frame_shell_assembly_is_wired",
+      "use_hip_custom_kernel_for_next_g1_push": "blocked_as_quick_path_by_missing_hipcc_and_algorithmic_mismatch",
+      "recommended_next_step": "First fix or falsify shell external-load/internal-force consistency at the full-load frontier, then move the corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
+      "why": [
+        "ROCm runtime sees the RX 6900 XT, but the existing full G1 Newton swap to host-ILU/device-GMRES timed out beyond the 240 second budget.",
+        "Existing shell sparse GPU solve evidence converges but is slow for shell-dominant systems because Krylov iterations saturate.",
+        "Rust nonlinear-frame and NDTHA contracts are not wired to the current MGT full 3D frame-shell residual/Jacobian assembly.",
+        "The latest local tangent projection diagnostic shows almost no representable descent direction for the dominant shell residual rows.",
+        "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
+      ]
+    }
   }
 }

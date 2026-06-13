@@ -17,6 +17,8 @@ from run_mgt_residual_jacobian_consistency_probe import (  # noqa: E402
     _hotspot_diagonal_newton_sweep,
     _hotspot_signed_displacement_sweep,
     _hotspot_tangent_fd_jvp_rows,
+    _local_row_projection_diagnostics,
+    _scalar_load_balance_diagnostics,
     _shell_membrane_hotspot_diagnostics,
     _state_scale_sweep,
     evaluate_residual_jacobian_direction,
@@ -99,6 +101,78 @@ def test_component_breakdown_identifies_dominant_top_residual_component() -> Non
     assert row["top_rows"][0]["free_row"] == 1
     assert row["top_rows"][0]["dominant_component"] == "shell"
     assert row["top_row_dominant_component_counts"] == {"shell": 1}
+
+
+def test_scalar_load_balance_diagnostics_fits_shell_top_row_external_scale() -> None:
+    row = _scalar_load_balance_diagnostics(
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 0,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_bending_drilling",
+                "external_load_n": 4.0,
+                "internal_sum_n": 1.0,
+                "component_values_n": {"shell_bending_drilling": 1.0},
+            },
+            {
+                "free_row": 1,
+                "global_dof": 1,
+                "node_index": 0,
+                "dof": "uz",
+                "dominant_component": "shell_membrane",
+                "external_load_n": 2.0,
+                "internal_sum_n": 0.5,
+                "component_values_n": {"shell_membrane": 0.5},
+            },
+        ]
+    )
+
+    assert row["evaluated"] is True
+    assert row["row_count"] == 2
+    assert row["best_l2_external_scale"] == 0.25
+    assert row["best_l2_scaled_residual_inf_n"] <= 1.0e-12
+    assert row["required_external_scale_median"] == 0.25
+
+
+def test_local_row_projection_diagnostics_reports_representable_rows() -> None:
+    stiffness = coo_matrix(
+        ([2.0, 3.0], ([0, 1], [0, 1])),
+        shape=(2, 2),
+    ).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+    residual = np.asarray([4.0, 9.0], dtype=np.float64)
+    row = _local_row_projection_diagnostics(
+        stiffness=stiffness,
+        free=free,
+        residual=residual,
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 0,
+                "node_index": 0,
+                "dof": "ux",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": 4.0,
+            },
+            {
+                "free_row": 1,
+                "global_dof": 1,
+                "node_index": 0,
+                "dof": "uy",
+                "dominant_component": "shell_membrane",
+                "residual_n": 9.0,
+            },
+        ],
+    )
+
+    assert row["evaluated"] is True
+    assert row["selected_row_count"] == 2
+    assert row["support_size"] == 2
+    assert row["rank"] == 2
+    assert row["projection_residual_inf_n"] <= 1.0e-12
+    assert row["coefficient_linf"] == 3.0
 
 
 def test_state_scale_sweep_reports_residual_growth() -> None:
