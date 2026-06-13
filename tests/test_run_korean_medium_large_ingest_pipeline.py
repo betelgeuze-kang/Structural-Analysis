@@ -5,6 +5,7 @@ from pathlib import Path
 
 from implementation.phase1 import run_korean_medium_large_ingest_pipeline as ingest
 from implementation.phase1.open_data.korea import build_operator_attachment_manifest_queue
+from implementation.phase1.open_data.korea import build_operator_direct_download_review
 from implementation.phase1.open_data.korea import validate_operator_attachment_manifest
 
 
@@ -542,6 +543,66 @@ def test_operator_attachment_manifest_queue_builder_preserves_action_context(
         queue["operator_resolution_plan"]["schema_version"]
         == "korean-medium-large-operator-resolution-plan.v1"
     )
+
+
+def test_operator_direct_download_review_preserves_rights_boundary(
+    tmp_path: Path,
+) -> None:
+    queue_path = tmp_path / "operator_attachment_manifest.queue.json"
+    queue_path.write_text(
+        json.dumps(
+            {
+                "schema_version": "korean-medium-large-operator-attachment-manifest.v1",
+                "attachments": [
+                    {
+                        "source_id": "direct_pdf",
+                        "local_path": str(tmp_path / "direct_pdf.pdf"),
+                        "file_type": ".pdf",
+                        "rights_confirmed": False,
+                        "source_native_artifact": False,
+                        "provenance_url": "https://example.test/source",
+                        "license_hint": "public_attachment_check_terms",
+                        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+                        "download_url": "https://example.test/download?id=1",
+                        "target_directory": str(tmp_path),
+                        "acceptance_checks": ["artifact_not_metadata_only"],
+                    },
+                    {
+                        "source_id": "portal_pdf",
+                        "local_path": str(tmp_path / "portal_pdf.pdf"),
+                        "file_type": ".pdf",
+                        "rights_confirmed": False,
+                        "source_native_artifact": False,
+                        "provenance_url": "https://example.test/",
+                        "license_hint": "competition_material_check_terms",
+                        "action_type": "attach_operator_real_pdf_or_pdf_derived_mgt",
+                        "download_url": "https://example.test/",
+                        "target_directory": str(tmp_path),
+                        "acceptance_checks": ["artifact_not_metadata_only"],
+                    },
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    review = build_operator_direct_download_review.build_operator_direct_download_review(
+        queue_path=queue_path,
+    )
+
+    assert review["status"] == "pending_rights_review"
+    assert review["specific_remote_download_action_count"] == 1
+    assert review["portal_landing_action_count"] == 1
+    assert review["direct_download_source_ids"] == ["direct_pdf"]
+    direct = review["direct_downloads"][0]
+    assert direct["source_native_artifact_candidate"] is True
+    assert direct["rights_confirmed"] is False
+    assert direct["raw_redistribution_allowed"] is False
+    assert direct["countable_after_operator_manifest"] is False
+    prefill = review["operator_manifest_prefill_rows"][0]
+    assert prefill["source_id"] == "direct_pdf"
+    assert prefill["rights_confirmed"] is False
+    assert prefill["source_native_artifact"] is False
 
 
 def test_ingest_pipeline_reports_local_private_candidates_without_counting_them(

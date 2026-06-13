@@ -1579,6 +1579,14 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         productization
         / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup31_probe.json"
     )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup32 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup32_probe.json"
+    )
+    direct_residual_post_frame_support64_block_lstsq_translation_support128_followup33 = _load(
+        productization
+        / "mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup33_probe.json"
+    )
     direct_residual_row_element_block_target = _load(
         productization / "mgt_direct_residual_row_element_block_target_smoke.json"
     )
@@ -2221,6 +2229,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     korea_operator_attachment_queue = _load(
         KOREA_OPEN_DATA / "operator_attachment_manifest.queue.json"
     )
+    korea_operator_direct_download_review = _load(
+        KOREA_OPEN_DATA / "operator_attachment_direct_download_review.json"
+    )
     korea_operator_attachment_queue_validation = _load(
         KOREA_OPEN_DATA / "operator_attachment_manifest.queue.validation_report.json"
     )
@@ -2765,6 +2776,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup31": (
                     _direct_residual_probe_summary(
                         direct_residual_post_frame_support64_block_lstsq_translation_support128_followup31
+                    )
+                ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup32": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup32
+                    )
+                ),
+                "direct_residual_post_frame_support64_block_lstsq_translation_support128_followup33": (
+                    _direct_residual_probe_summary(
+                        direct_residual_post_frame_support64_block_lstsq_translation_support128_followup33
                     )
                 ),
                 "residual_jacobian_consistency_status": residual_jacobian_consistency.get(
@@ -4530,6 +4551,30 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                     korea_operator_attachment_queue.get("priority_batches")
                 ),
                 "operator_attachment_manifest_queue": korea_operator_attachment_queue,
+                "operator_direct_download_review_status": (
+                    korea_operator_direct_download_review.get("status")
+                ),
+                "operator_direct_download_review_specific_remote_download_action_count": (
+                    korea_operator_direct_download_review.get(
+                        "specific_remote_download_action_count"
+                    )
+                ),
+                "operator_direct_download_review_portal_landing_action_count": (
+                    korea_operator_direct_download_review.get(
+                        "portal_landing_action_count"
+                    )
+                ),
+                "operator_direct_download_review_source_ids": (
+                    korea_operator_direct_download_review.get(
+                        "direct_download_source_ids"
+                    )
+                ),
+                "operator_direct_download_review_prefill_rows": (
+                    korea_operator_direct_download_review.get(
+                        "operator_manifest_prefill_rows"
+                    )
+                ),
+                "operator_direct_download_review": korea_operator_direct_download_review,
                 "operator_attachment_manifest_validation_ready_for_collection_overlay": (
                     korea_operator_attachment_queue_validation.get(
                         "ready_for_collection_overlay"
