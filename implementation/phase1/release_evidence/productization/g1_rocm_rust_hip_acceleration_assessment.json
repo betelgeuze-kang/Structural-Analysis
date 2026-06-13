@@ -1,11 +1,11 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T14:29:36Z",
+  "generated_at": "2026-06-13T14:41:13Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
-    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe_final_checkpoint.npz",
-    "direct_residual_inf_n": 0.2803796771428969,
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.2803796687027861,
     "residual_gate_n": 0.001,
     "previous_cached_shell_newton_evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe.json",
     "previous_cached_shell_newton_final_residual_inf_n": 0.280685596708914,
@@ -21,10 +21,10 @@
     "latest_shell_bending_jvp_row_count": 8,
     "latest_shell_bending_jvp_max_relative_inf_error": 6.093677723807544e-10,
     "latest_shell_bending_jvp_total_runtime_s": 34.227873127005296,
-    "latest_conditioned_block_lstsq_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_probe.json",
-    "latest_conditioned_block_lstsq_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_probe_final_checkpoint.npz",
-    "latest_conditioned_block_lstsq_final_residual_inf_n": 0.2803796771428969,
-    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 6.120317266370633e-07
+    "latest_conditioned_block_lstsq_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe.json",
+    "latest_conditioned_block_lstsq_checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
+    "latest_conditioned_block_lstsq_final_residual_inf_n": 0.2803796687027861,
+    "latest_conditioned_block_lstsq_total_improvement_from_prior_frontier_inf_n": 6.204718374333096e-07
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -269,7 +269,67 @@
       "accepted": true,
       "assessment": "Ridge plus near-null column scale-floor protection converted the same top64/16-row support from no-descent correction blow-up into a small accepted polishing step."
     },
-    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent path. It advances the frontier by 6.12e-7 N from the prior 0.280380289 N checkpoint, then decays to 1e-8 to 1e-9 N improvements. Widening to 16 shell rows requires ridge/trust-region protection and near-null column scale-flooring; without that, the correction explodes and no descent is possible."
+    "row_column_top64_wide16_support128_ridge1e2_followup2": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_followup2_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_followup2_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.01,
+      "base_residual_inf_n": 0.2803796771428969,
+      "final_residual_inf_n": 0.28037967433437727,
+      "improvement_inf_n": 2.8085196390748024e-09,
+      "promotion_count": 3,
+      "best_alpha": 1e-06,
+      "component_top_count": 64,
+      "support_size": 282,
+      "selected_hotspot_row_count": 16,
+      "accepted": true
+    },
+    "row_column_top64_wide16_support128_ridge_factor_comparison": {
+      "ridge1e1_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e1_probe.json",
+      "ridge1em3_evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e3_probe.json",
+      "base_residual_inf_n": 0.28037967433437727,
+      "ridge1e1_final_residual_inf_n": 0.2803796736286094,
+      "ridge1em3_final_residual_inf_n": 0.2803796736286094,
+      "ridge1e1_improvement_inf_n": 7.057678885757923e-10,
+      "ridge1em3_improvement_inf_n": 7.057678885757923e-10,
+      "best_alpha": 1e-06,
+      "assessment": "At the coarse alpha grid, ridge factors 1e-1 and 1e-3 gave the same accepted residual; line-search resolution dominated this local polishing step."
+    },
+    "row_column_top64_wide16_support128_ridge1em3_alpha_fine": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.001,
+      "base_residual_inf_n": 0.28037967433437727,
+      "final_residual_inf_n": 0.28037967011432186,
+      "improvement_inf_n": 4.220055416226387e-09,
+      "promotion_count": 1,
+      "best_alpha": 5e-06,
+      "component_top_count": 64,
+      "support_size": 282,
+      "selected_hotspot_row_count": 16,
+      "accepted": true
+    },
+    "row_column_top64_wide16_support128_ridge1em3_alpha_fine_followup2": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
+      "equilibration": "row_column",
+      "solve_method": "ridge",
+      "ridge_factor": 0.001,
+      "base_residual_inf_n": 0.28037967011432186,
+      "final_residual_inf_n": 0.2803796687027861,
+      "improvement_inf_n": 1.4115357771515846e-09,
+      "promotion_count": 1,
+      "best_alpha": 1.5e-06,
+      "component_top_count": 64,
+      "support_size": 282,
+      "selected_hotspot_row_count": 16,
+      "accepted": true,
+      "stop_reason": "no_gate_eligible_descent_after_first_promotion"
+    },
+    "assessment": "Conditioning-aware block LSTSQ is a real but saturating descent path. It advances the frontier by 6.20e-7 N from the prior 0.280380289 N checkpoint, then decays to 1e-8 to 1e-9 N improvements. Widening to 16 shell rows requires ridge/trust-region protection and near-null column scale-flooring; fine alpha search improves the polishing step but does not change the closure picture."
   },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
@@ -302,9 +362,10 @@
       "The latest shell-bending tangent follow-up improved only 6.98e-7 N, and the wider translation tangent probe produced no descent from 0.28038028917462354 N.",
       "Current global and shell-bending hotspot JVP checks are finite-difference consistent at roughly 1e-10 relative error, so the active blocker is not a simple tangent sign/scale mismatch.",
       "A low-regularization direct Newton attempt, including signed alphas, found no residual descent from the current frontier.",
-      "Conditioned block LSTSQ produced accepted descent to 0.2803796771428969 N, but the improvement decayed from 5.54e-7 N to 8.43e-9 N across follow-ups.",
+      "Conditioned block LSTSQ produced accepted descent to 0.2803796687027861 N, but the improvement decayed from 5.54e-7 N to 1.41e-9 N across follow-ups.",
       "After exposing top64 residual rows, the 16-row shell-bending LSTSQ correction was too ill-conditioned to descend even under tiny alpha search.",
       "Ridge regularization plus near-null column scale-floor protection converted the top64/16-row path into a controlled polishing step instead of a 5530 m correction blow-up.",
+      "Fine alpha search improved the ridge-polish branch, but the branch is now at nanonewton-scale descent and not a credible path to the 1e-3 N gate by itself.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."
