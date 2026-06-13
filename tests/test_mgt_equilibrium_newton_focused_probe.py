@@ -75,3 +75,73 @@ def test_equilibrium_newton_focused_writes_resumable_checkpoint(
     assert residual_history is not None
     assert state_history.shape[0] == 2
     assert residual_history.shape[0] == 2
+
+
+def test_equilibrium_newton_focused_state_scale_only_skips_linear_solve(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsc()
+    free = np.asarray([0], dtype=np.int64)
+    u0 = np.asarray([0.3], dtype=np.float64)
+    checkpoint = tmp_path / "input_checkpoint.npz"
+    np.savez_compressed(
+        checkpoint,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        load_scale=np.asarray(1.0, dtype=np.float64),
+        displacement_u=u0,
+        residual_inf_n=np.asarray(2.0, dtype=np.float64),
+        max_translation_m=np.asarray(0.3, dtype=np.float64),
+        accepted_state_history_u=np.vstack([u0]),
+        accepted_residual_history=np.vstack([np.asarray([2.0], dtype=np.float64)]),
+    )
+
+    assemble_calls: list[np.ndarray] = []
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray):
+            assemble_calls.append(np.asarray(u, dtype=np.float64).copy())
+            internal = np.asarray(stiffness @ u, dtype=np.float64)
+            rhs = np.asarray([1.0], dtype=np.float64)
+            residual = internal - rhs
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), {}
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": str(checkpoint)},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    output_checkpoint = tmp_path / "state_scale_checkpoint.npz"
+    payload = probe_module.run_mgt_equilibrium_newton_focused_probe(
+        checkpoint_npz=checkpoint,
+        output_json=None,
+        output_final_checkpoint_npz=output_checkpoint,
+        max_newton_iterations=1,
+        residual_tolerance_n=1.0e-12,
+        linear_solver_profile="regularized_direct",
+        state_scale_line_search_values=(0.5,),
+        state_scale_only=True,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["state_scale_only"] is True
+    assert payload["accepted_newton_iteration_count"] == 1
+    assert payload["final_residual_inf_n"] == 0.5
+    assert payload["newton_iterations"][0]["update_mode"] == "state_scale_line_search"
+    assert payload["newton_iterations"][0]["stop_reason"] == "state_scale_only_accepted"
+    assert payload["output_final_checkpoint"]["written"] is True
+    assert payload["output_final_checkpoint"]["path"] == str(output_checkpoint)
+    assert len(assemble_calls) == 2
+    assert np.allclose(assemble_calls[0], u0)
+    assert np.allclose(assemble_calls[1], np.asarray([0.15], dtype=np.float64))
+
+    meta, u, _state_history, _residual_history = _load_checkpoint(output_checkpoint)
+    assert meta["residual_inf_n"] == 0.5
+    assert np.allclose(u, np.asarray([0.15], dtype=np.float64))

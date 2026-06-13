@@ -329,6 +329,8 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
     )
     output_checkpoint = payload.get("output_final_checkpoint")
     output_checkpoint = output_checkpoint if isinstance(output_checkpoint, dict) else {}
+    runtime = payload.get("runtime_metrics")
+    runtime = runtime if isinstance(runtime, dict) else {}
     return {
         "schema_version": payload.get("schema_version"),
         "status": payload.get("status"),
@@ -342,7 +344,19 @@ def _equilibrium_newton_probe_summary(payload: dict[str, Any]) -> dict[str, Any]
             "accepted_newton_iteration_count"
         ),
         "linear_solver_profile": payload.get("linear_solver_profile"),
+        "state_scale_only": payload.get("state_scale_only"),
+        "state_scale_line_search_values": payload.get(
+            "state_scale_line_search_values"
+        ),
+        "runtime_total_seconds": _float_or_none(runtime.get("total_seconds")),
         "first_iteration_accepted": first_iteration.get("accepted"),
+        "first_iteration_update_mode": first_iteration.get("update_mode"),
+        "first_iteration_state_scale": _float_or_none(
+            first_iteration.get("state_scale")
+        ),
+        "first_iteration_best_residual_inf_n": _float_or_none(
+            first_iteration.get("best_residual_inf_n")
+        ),
         "first_iteration_stop_reason": first_iteration.get("stop_reason"),
         "first_iteration_linear_solver_backend": first_iteration.get(
             "linear_solver_backend"
@@ -1223,6 +1237,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_support128_followup42_host_ilu_device_gmres = _load(
         productization
         / "mgt_equilibrium_newton_support128_followup42_host_ilu_device_gmres_probe.json"
+    )
+    equilibrium_newton_support128_followup42_state_scale_only = _load(
+        productization
+        / "mgt_equilibrium_newton_support128_followup42_state_scale_only_probe.json"
     )
     translation_frontier_followup57_timeout_diagnostic = _load(
         productization
@@ -3895,6 +3913,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "equilibrium_newton_support128_followup42_host_ilu_device_gmres": (
                     _equilibrium_newton_probe_summary(
                         equilibrium_newton_support128_followup42_host_ilu_device_gmres
+                    )
+                ),
+                "equilibrium_newton_support128_followup42_state_scale_only": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_support128_followup42_state_scale_only
                     )
                 ),
                 "equilibrium_newton_state_scale_status": equilibrium_newton_state_scale.get(

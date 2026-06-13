@@ -100,6 +100,7 @@ def run_equilibrium_newton(
     *,
     u0: np.ndarray,
     assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
+    initial_assembly: tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None = None,
     max_newton_iterations: int = 12,
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
@@ -119,6 +120,7 @@ def run_equilibrium_newton(
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
     state_scale_line_search_values: tuple[float, ...] = (),
+    state_scale_only: bool = False,
 ) -> dict[str, Any]:
     from mgt_sparse_linear_solver import solve_newton_correction
     from run_mgt_coupled_frame_surface_sparse_equilibrium import _translation_metrics
@@ -138,8 +140,15 @@ def run_equilibrium_newton(
     iterations: list[dict[str, Any]] = []
     converged = False
     initial_residual_inf = float("nan")
+    latest_assembly: tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None = None
+    latest_assembly_u: np.ndarray | None = None
     for iteration in range(1, int(max_newton_iterations) + 1):
-        stiffness, _f_ext, free, residual, _rhs, meta = assemble_residual(u)
+        if iteration == 1 and initial_assembly is not None:
+            stiffness, _f_ext, free, residual, _rhs, meta = initial_assembly
+        else:
+            stiffness, _f_ext, free, residual, _rhs, meta = assemble_residual(u)
+        latest_assembly = (stiffness, _f_ext, free, residual, _rhs, meta)
+        latest_assembly_u = np.asarray(u, dtype=np.float64).copy()
         residual_inf = float(np.max(np.abs(residual))) if residual.size else 0.0
         if iteration == 1:
             initial_residual_inf = residual_inf
@@ -161,12 +170,13 @@ def run_equilibrium_newton(
         best_state_scale = 1.0
         best_state_scale_residual = residual_inf
         best_state_scale_u = u
+        best_state_scale_assembly = latest_assembly
         for state_scale in state_scale_line_search_values:
             scale = float(state_scale)
             if not np.isfinite(scale) or abs(scale - 1.0) <= 1.0e-15:
                 continue
             candidate = scale * u
-            _scale_k, _scale_f, scale_free, scale_residual, _scale_rhs, _scale_meta = assemble_residual(
+            scale_k, scale_f, scale_free, scale_residual, scale_rhs, scale_meta = assemble_residual(
                 candidate
             )
             free_stable = bool(
@@ -187,6 +197,14 @@ def run_equilibrium_newton(
                 best_state_scale = scale
                 best_state_scale_residual = scale_residual_inf
                 best_state_scale_u = candidate
+                best_state_scale_assembly = (
+                    scale_k,
+                    scale_f,
+                    scale_free,
+                    scale_residual,
+                    scale_rhs,
+                    scale_meta,
+                )
         if abs(best_state_scale - 1.0) > 1.0e-15 and best_state_scale_residual < residual_inf:
             increment_inf = (
                 float(np.max(np.abs(best_state_scale_u - u))) if best_state_scale_u.size else 0.0
@@ -194,6 +212,8 @@ def run_equilibrium_newton(
             max_abs = max(float(np.max(np.abs(best_state_scale_u))) if best_state_scale_u.size else 0.0, 1.0e-9)
             relative_increment = increment_inf / max_abs
             u = np.asarray(best_state_scale_u, dtype=np.float64)
+            latest_assembly = best_state_scale_assembly
+            latest_assembly_u = np.asarray(u, dtype=np.float64).copy()
             iterations.append(
                 {
                     "iteration": iteration,
@@ -204,13 +224,37 @@ def run_equilibrium_newton(
                     "best_residual_inf_n": best_state_scale_residual,
                     "relative_increment": relative_increment,
                     "trial_rows": state_scale_rows,
+                    "state_scale_only": bool(state_scale_only),
                     "allow_negative_alphas": bool(allow_negative_alphas),
+                    **(
+                        {"stop_reason": "state_scale_only_accepted"}
+                        if state_scale_only
+                        else {}
+                    ),
                 }
             )
             if best_state_scale_residual <= float(residual_tolerance_n):
                 converged = True
                 break
+            if state_scale_only:
+                break
             continue
+        if state_scale_only:
+            iterations.append(
+                {
+                    "iteration": iteration,
+                    "accepted": False,
+                    "update_mode": "state_scale_line_search",
+                    "stop_reason": "state_scale_only_no_residual_descent",
+                    "start_residual_inf_n": residual_inf,
+                    "best_residual_inf_n": best_state_scale_residual,
+                    "relative_increment": 0.0,
+                    "trial_rows": state_scale_rows,
+                    "state_scale_only": True,
+                    "allow_negative_alphas": bool(allow_negative_alphas),
+                }
+            )
+            break
         k_ff = stiffness[free, :][:, free].tocsc()
         delta_free, solver_meta = solve_newton_correction(
             k_ff,
@@ -305,7 +349,15 @@ def run_equilibrium_newton(
             if final_inf <= float(residual_tolerance_n):
                 converged = True
                 break
-    final_stiffness, _f_ext, final_free, final_residual, final_rhs, final_meta = assemble_residual(u)
+    if (
+        latest_assembly is not None
+        and latest_assembly_u is not None
+        and latest_assembly_u.shape == np.asarray(u, dtype=np.float64).shape
+        and np.array_equal(latest_assembly_u, np.asarray(u, dtype=np.float64))
+    ):
+        final_stiffness, _f_ext, final_free, final_residual, final_rhs, final_meta = latest_assembly
+    else:
+        final_stiffness, _f_ext, final_free, final_residual, final_rhs, final_meta = assemble_residual(u)
     final_residual_inf = float(np.max(np.abs(final_residual))) if final_residual.size else 0.0
     return {
         "converged": converged,
@@ -317,6 +369,9 @@ def run_equilibrium_newton(
         "accepted_newton_iteration_count": sum(1 for row in iterations if bool(row.get("accepted"))),
         "iterations": iterations,
         "final_u": u,
+        "final_residual": final_residual,
+        "final_rhs": final_rhs,
+        "final_free": final_free,
         "final_meta": final_meta,
         "residual_tolerance_n": float(residual_tolerance_n),
         "relative_increment_tolerance": float(relative_increment_tolerance),
@@ -326,4 +381,5 @@ def run_equilibrium_newton(
         "state_scale_line_search_values": [
             float(value) for value in state_scale_line_search_values
         ],
+        "state_scale_only": bool(state_scale_only),
     }

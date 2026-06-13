@@ -3015,6 +3015,30 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         is True
     )
+    state_scale_only = rows["G1"]["evidence"][
+        "equilibrium_newton_support128_followup42_state_scale_only"
+    ]
+    assert state_scale_only["status"] == "partial"
+    assert state_scale_only["ready"] is False
+    assert state_scale_only["state_scale_only"] is True
+    assert state_scale_only["state_scale_line_search_values"] == [0.999]
+    assert state_scale_only["base_residual_inf_n"] == (
+        direct_post_frame_support64_translation_support128_followup42[
+            "final_direct_residual_inf_n"
+        ]
+    )
+    assert state_scale_only["final_residual_inf_n"] < state_scale_only[
+        "base_residual_inf_n"
+    ]
+    assert state_scale_only["first_iteration_update_mode"] == "state_scale_line_search"
+    assert state_scale_only["first_iteration_state_scale"] == 0.999
+    assert state_scale_only["first_iteration_stop_reason"] == (
+        "state_scale_only_accepted"
+    )
+    assert state_scale_only["output_final_checkpoint_path"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "mgt_equilibrium_newton_support128_followup42_state_scale_only_probe_final_checkpoint.npz"
+    )
     assert rows["G1"]["evidence"][
         "residual_jacobian_support128_followup11_component_status"
     ] == "partial"

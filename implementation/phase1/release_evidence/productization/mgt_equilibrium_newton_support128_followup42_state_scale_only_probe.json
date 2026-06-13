@@ -1,0 +1,69 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-13T08:16:46.587860+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 198,
+    "accepted_residual_history_count": 198,
+    "residual_inf_n": 4791.522794380646,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 7.2199044927738195e-06
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 4791.522794380646,
+  "initial_residual_inf_n": 4791.522794380646,
+  "final_residual_inf_n": 4789.999288562507,
+  "accepted_newton_iteration_count": 1,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "regularized_direct",
+  "state_scale_line_search_values": [
+    0.999
+  ],
+  "state_scale_only": true,
+  "residual_tolerance_n": 0.0005,
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": true,
+      "update_mode": "state_scale_line_search",
+      "state_scale": 0.999,
+      "start_residual_inf_n": 4791.522794380646,
+      "best_residual_inf_n": 4789.999288562507,
+      "relative_increment": 0.0010010010010010305,
+      "trial_rows": [
+        {
+          "state_scale": 0.999,
+          "residual_inf_n": 4789.999288562507,
+          "free_dof_set_stable": true
+        }
+      ],
+      "state_scale_only": true,
+      "allow_negative_alphas": true,
+      "stop_reason": "state_scale_only_accepted"
+    }
+  ],
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_support128_followup42_state_scale_only_probe_final_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 4789.999288562507,
+    "direct_relative_residual_inf": 0.5520888064585137,
+    "max_translation_m": 7.2126845882810455e-06,
+    "accepted_history_count": 199,
+    "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe_final_checkpoint.npz"
+  },
+  "runtime_metrics": {
+    "total_seconds": 50.769113853995805
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

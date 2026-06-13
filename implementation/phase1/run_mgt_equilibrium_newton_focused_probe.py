@@ -158,6 +158,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
     state_scale_line_search_values: tuple[float, ...] = (),
+    state_scale_only: bool = False,
     output_final_checkpoint_npz: Path | None = None,
 ) -> dict[str, Any]:
     started = time.perf_counter()
@@ -167,17 +168,20 @@ def run_mgt_equilibrium_newton_focused_probe(
         checkpoint_npz=checkpoint_npz,
     )
     u0 = np.asarray(setup_meta["u0"])
-    _stiffness, _f_ext, _free, base_residual, _rhs, _meta = assemble_residual(u0)
+    initial_assembly = assemble_residual(u0)
+    _stiffness, _f_ext, _free, base_residual, _rhs, _meta = initial_assembly
     base_residual_inf = float(np.max(np.abs(base_residual))) if base_residual.size else 0.0
     newton = run_equilibrium_newton(
         u0=u0,
         assemble_residual=assemble_residual,
+        initial_assembly=initial_assembly,
         max_newton_iterations=max_newton_iterations,
         residual_tolerance_n=residual_tolerance_n,
         prefer_host_ilu=prefer_host_ilu,
         allow_negative_alphas=bool(allow_negative_alphas),
         linear_solver_profile=str(linear_solver_profile or "production"),
         state_scale_line_search_values=state_scale_line_search_values,
+        state_scale_only=bool(state_scale_only),
     )
     output_checkpoint_meta: dict[str, Any] | None = None
     if output_final_checkpoint_npz is not None and float(newton.get("final_residual_inf_n") or 0.0) < base_residual_inf:
@@ -185,9 +189,15 @@ def run_mgt_equilibrium_newton_focused_probe(
             checkpoint_npz
         )
         final_u = np.asarray(newton["final_u"], dtype=np.float64)
-        _final_k, _final_f, _final_free, final_residual, final_rhs, _final_meta = assemble_residual(
-            final_u
-        )
+        final_residual_value = newton.get("final_residual")
+        final_rhs_value = newton.get("final_rhs")
+        if isinstance(final_residual_value, np.ndarray) and isinstance(final_rhs_value, np.ndarray):
+            final_residual = np.asarray(final_residual_value, dtype=np.float64)
+            final_rhs = np.asarray(final_rhs_value, dtype=np.float64)
+        else:
+            _final_k, _final_f, _final_free, final_residual, final_rhs, _final_meta = assemble_residual(
+                final_u
+            )
         output_checkpoint_meta = _write_equilibrium_checkpoint(
             path=output_final_checkpoint_npz,
             source_checkpoint_npz=checkpoint_npz,
@@ -216,6 +226,7 @@ def run_mgt_equilibrium_newton_focused_probe(
         "state_scale_line_search_values": [
             float(value) for value in state_scale_line_search_values
         ],
+        "state_scale_only": bool(state_scale_only),
         "residual_tolerance_n": float(residual_tolerance_n),
         "newton_iterations": newton.get("iterations"),
         "output_final_checkpoint": output_checkpoint_meta,
@@ -276,6 +287,11 @@ def main() -> int:
             "Useful for diagnosing/rescuing incompatible checkpoint states."
         ),
     )
+    parser.add_argument(
+        "--state-scale-only",
+        action="store_true",
+        help="Evaluate state-scale candidates and skip the Newton linear solve.",
+    )
     args = parser.parse_args()
     state_scale_line_search_values = tuple(
         float(value.strip())
@@ -290,6 +306,7 @@ def main() -> int:
         allow_negative_alphas=bool(args.allow_negative_alphas),
         linear_solver_profile=str(args.linear_solver_profile),
         state_scale_line_search_values=state_scale_line_search_values,
+        state_scale_only=bool(args.state_scale_only),
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
     )
     print(
