@@ -593,7 +593,14 @@ def _hotspot_tangent_fd_jvp_rows(
     assemble_residual: Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
     fd_step: float,
     max_rows: int = 6,
+    component_filter: str = "frame",
 ) -> list[dict[str, Any]]:
+    component_filter = str(component_filter or "frame")
+    if component_filter not in {"frame", "shell_bending_drilling", "shell_membrane", "translation", "all"}:
+        raise ValueError(
+            "hotspot_jvp_component_filter must be one of frame, shell_bending_drilling, "
+            "shell_membrane, translation, or all"
+        )
     free_idx = np.asarray(free, dtype=np.int64)
     base_residual = np.asarray(residual, dtype=np.float64)
     base_u = np.asarray(u, dtype=np.float64)
@@ -604,7 +611,8 @@ def _hotspot_tangent_fd_jvp_rows(
     selected_rows: list[dict[str, Any]] = []
     seen: set[int] = set()
     for row in top_rows:
-        if str(row.get("dominant_component") or "") != "frame":
+        dominant = str(row.get("dominant_component") or "")
+        if component_filter not in {"translation", "all"} and dominant != component_filter:
             continue
         if str(row.get("dof") or "") not in {"ux", "uy", "uz"}:
             continue
@@ -622,9 +630,18 @@ def _hotspot_tangent_fd_jvp_rows(
         direction = np.zeros_like(base_u)
         direction[global_dof] = 1.0
         trial_u = base_u + float(fd_step) * direction
-        _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(
-            trial_u
-        )
+        used_residual_only = False
+        try:
+            _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(
+                trial_u,
+                residual_only=True,
+                free_override=free_idx,
+            )
+            used_residual_only = True
+        except TypeError:
+            _trial_k, _trial_f, trial_free, trial_residual, _trial_rhs, trial_meta = assemble_residual(
+                trial_u
+            )
         trial_free_idx = np.asarray(trial_free, dtype=np.int64)
         free_stable = bool(
             trial_free_idx.shape == free_idx.shape
@@ -677,7 +694,13 @@ def _hotspot_tangent_fd_jvp_rows(
                     if isinstance(row.get("component_values_n"), dict)
                     else None
                 ),
+                "component_value_n": (
+                    row.get("component_values_n", {}).get(str(row.get("dominant_component") or ""))
+                    if isinstance(row.get("component_values_n"), dict)
+                    else None
+                ),
                 "free_dof_set_stable": True,
+                "residual_only_assembly": bool(used_residual_only),
                 "selected_row_tangent_action_n_per_m": selected_tangent,
                 "selected_row_fd_action_n_per_m": selected_fd,
                 "selected_row_diff_n_per_m": selected_diff,
@@ -922,6 +945,7 @@ def run_mgt_residual_jacobian_consistency_probe(
     hotspot_sweep_step_values: tuple[float, ...] = (1.0e-10, 3.0e-10, 1.0e-9),
     hotspot_jvp: bool = False,
     hotspot_jvp_max_rows: int = 6,
+    hotspot_jvp_component_filter: str = "frame",
     hotspot_diagonal_newton_sweep: bool = False,
     hotspot_diagonal_newton_alpha_values: tuple[float, ...] = (
         1.0,
@@ -983,6 +1007,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             assemble_residual=assemble_residual,
             fd_step=float(fd_step),
             max_rows=int(hotspot_jvp_max_rows),
+            component_filter=str(hotspot_jvp_component_filter),
         )
         if hotspot_jvp
         else []
@@ -1064,6 +1089,9 @@ def run_mgt_residual_jacobian_consistency_probe(
         "residual_hotspot_frame_diagnostics": frame_hotspots,
         "residual_hotspot_signed_displacement_sweep": hotspot_signed_sweep,
         "residual_hotspot_tangent_fd_jvp_rows": hotspot_jvp_rows,
+        "residual_hotspot_tangent_fd_jvp_component_filter": str(
+            hotspot_jvp_component_filter
+        ),
         "residual_hotspot_diagonal_newton_sweep": hotspot_diagonal_sweep,
         "fd_step": float(fd_step),
         "relative_error_threshold": float(relative_error_threshold),
@@ -1139,7 +1167,13 @@ def main(argv: list[str] | None = None) -> int:
         "--hotspot-jvp-max-rows",
         type=int,
         default=6,
-        help="Maximum frame-dominant hotspot DOFs to evaluate for --hotspot-jvp.",
+        help="Maximum hotspot DOFs to evaluate for --hotspot-jvp.",
+    )
+    parser.add_argument(
+        "--hotspot-jvp-component-filter",
+        choices=("frame", "shell_bending_drilling", "shell_membrane", "translation", "all"),
+        default="frame",
+        help="Dominant component filter for --hotspot-jvp rows.",
     )
     parser.add_argument(
         "--hotspot-diagonal-newton-sweep",
@@ -1175,6 +1209,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
         hotspot_jvp=bool(args.hotspot_jvp),
         hotspot_jvp_max_rows=int(args.hotspot_jvp_max_rows),
+        hotspot_jvp_component_filter=str(args.hotspot_jvp_component_filter),
         hotspot_diagonal_newton_sweep=bool(args.hotspot_diagonal_newton_sweep),
         hotspot_diagonal_newton_alpha_values=tuple(
             float(value.strip())

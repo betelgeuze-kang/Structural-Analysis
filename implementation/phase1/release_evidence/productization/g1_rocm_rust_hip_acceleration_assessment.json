@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-13T13:51:33Z",
+  "generated_at": "2026-06-13T14:05:00Z",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_g1_frontier": {
@@ -15,7 +15,12 @@
     "latest_shell_bending_followup_runtime_s": 56.315339715001755,
     "latest_shell_bending_followup_residual_only_trials": 18,
     "latest_shell_bending_followup_improvement_inf_n": 6.980729597150237e-07,
-    "latest_shell_bending_followup_final_residual_inf_n": 0.28038028917462354
+    "latest_shell_bending_followup_final_residual_inf_n": 0.28038028917462354,
+    "latest_shell_bending_jvp_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_current_frontier_shell_bending_jvp_probe.json",
+    "latest_shell_bending_jvp_status": "partial_component_only_diagnostic",
+    "latest_shell_bending_jvp_row_count": 8,
+    "latest_shell_bending_jvp_max_relative_inf_error": 6.093677723807544e-10,
+    "latest_shell_bending_jvp_total_runtime_s": 34.227873127005296
   },
   "rocm_runtime": {
     "sandbox_device_access": "blocked_without_escalation_dev_kfd_missing",
@@ -123,6 +128,56 @@
     },
     "assessment": "The latest local tangent probes indicate the current frontier is direction-quality limited, not raw evaluation-throughput limited."
   },
+  "current_frontier_jvp_and_lowreg_counter_evidence": {
+    "global_direction_jvp": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_current_frontier_lowreg_direction_jvp_probe.json",
+      "status": "ready",
+      "top_residual_sign_relative_inf_error": 5.1685388976799353e-11,
+      "deterministic_free_sample_relative_inf_error": 8.684478115362625e-15,
+      "top_residual_sign_action_cosine": 1.0,
+      "runtime_s": 129.84916587501357,
+      "assessment": "Current assembled tangent action is finite-difference consistent for global diagnostic directions, so raw tangent mismatch is not the active G1 blocker."
+    },
+    "shell_bending_hotspot_tangent_fd_jvp": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_current_frontier_shell_bending_jvp_probe.json",
+      "component_filter": "shell_bending_drilling",
+      "selected_hotspot_row_count": 8,
+      "all_rows_evaluated": true,
+      "all_rows_used_residual_only_assembly": true,
+      "max_selected_row_relative_error": 6.093677723807544e-10,
+      "max_relative_inf_error": 6.093677723807544e-10,
+      "tangent_action_abs_min_n_per_m": 1973584229.220335,
+      "tangent_action_abs_max_n_per_m": 2006788933.0642095,
+      "runtime_s": 34.227873127005296,
+      "assessment": "The dominant shell-bending hotspot rows are also tangent/FD consistent; the remaining 0.28038 N residual is not explained by a shell-bending Jacobian sign or scale error."
+    },
+    "low_regularization_global_newton": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_lowreg1e15_frontier_probe.json",
+      "linear_solver_profile": "regularized_direct",
+      "direct_regularization_factor": 1e-15,
+      "linear_solver_regularization": 5.155506255517143e-05,
+      "linear_solver_residual_inf_n": 0.2824914260879231,
+      "line_search_alpha_count": 8,
+      "best_trial_residual_inf_n": 0.28038197127595027,
+      "base_residual_inf_n": 0.28038028917462354,
+      "accepted": false,
+      "assessment": "Lowering the direct regularization floor did not produce descent; all positive line-search trials remained above the current frontier."
+    },
+    "signed_low_regularization_global_newton": {
+      "evidence": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_lowreg1e15_signed_frontier_probe.json",
+      "linear_solver_profile": "regularized_direct",
+      "direct_regularization_factor": 1e-15,
+      "linear_solver_regularization": 5.155506255517143e-05,
+      "linear_solver_residual_inf_n": 0.2824914260879231,
+      "line_search_alpha_count": 16,
+      "best_signed_trial_alpha": -0.001,
+      "best_signed_trial_residual_inf_n": 0.2803811543035701,
+      "base_residual_inf_n": 0.28038028917462354,
+      "accepted": false,
+      "assessment": "Allowing negative alphas still did not find descent, so a faster sparse solve alone is unlikely to close the G1 residual gate without a better correction model."
+    },
+    "assessment": "The newest evidence strengthens the acceleration decision: ROCm/HIP can reduce diagnostic and assembly wall time, but the current frontier is dominated by solve conditioning and correction-direction effectiveness rather than by raw residual-evaluation throughput."
+  },
   "finite_difference_residual_only_counter_evidence": {
     "shell_bending_fd_block_lstsq": {
       "evidence": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_fd_block_lstsq_cached_signed_followup_probe.json",
@@ -148,10 +203,12 @@
     "use_rocm_for_g1_fast_push_now": false,
     "use_rust_for_g1_fast_push_now": false,
     "use_hip_sparse_directly_for_g1_fast_push_now": false,
-    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration alone. Keep the cached residual-only path, but focus on shell-dominant residual/Jacobian consistency, external-load/internal-force reconciliation, or a broader global/coarse correction that changes the direction quality.",
+    "recommended_g1_path": "Do not spend the next G1 push on raw engine acceleration alone. Keep the cached residual-only path and use ROCm/HIP selectively for repeated sparse/JVP diagnostics, but focus implementation on conditioning-aware global/coarse correction and residual-row balancing that changes the correction direction quality.",
     "why": [
       "The current residual decay is limited by correction direction quality, not only by per-evaluation speed.",
       "The latest shell-bending tangent follow-up improved only 6.98e-7 N, and the wider translation tangent probe produced no descent from 0.28038028917462354 N.",
+      "Current global and shell-bending hotspot JVP checks are finite-difference consistent at roughly 1e-10 relative error, so the active blocker is not a simple tangent sign/scale mismatch.",
+      "A low-regularization direct Newton attempt, including signed alphas, found no residual descent from the current frontier.",
       "ROCm host-ILU/device-GMRES is fast on the favorable coupled sparse matrix but slow on shell-dominant systems and too slow when directly inserted into the current G1 Newton profile.",
       "Rust/HIP runtime assets are not connected to the current MGT full 3D residual/Jacobian assembly.",
       "Finite-difference residual-only local corrections can be evaluated without full assemblies, but their best candidates do not reduce the frontier residual."

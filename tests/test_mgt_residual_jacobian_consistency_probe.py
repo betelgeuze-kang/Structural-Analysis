@@ -200,6 +200,76 @@ def test_hotspot_tangent_fd_jvp_rows_match_linear_fixture() -> None:
     assert rows[0]["relative_l2_error"] <= 1.0e-8
 
 
+def test_hotspot_tangent_fd_jvp_rows_can_target_shell_bending_fast_path() -> None:
+    stiffness = coo_matrix(
+        ([4.0, 2.5], ([0, 1], [0, 1])),
+        shape=(2, 2),
+    ).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+    f_ext = np.asarray([0.5, -1.0], dtype=np.float64)
+    calls = {"residual_only": 0, "full": 0}
+
+    def assemble_residual(
+        u: np.ndarray,
+        *,
+        residual_only: bool = False,
+        free_override: np.ndarray | None = None,
+    ):
+        if residual_only:
+            calls["residual_only"] += 1
+        else:
+            calls["full"] += 1
+        trial_free = free if free_override is None else np.asarray(free_override, dtype=np.int64)
+        residual = np.asarray(stiffness @ u - f_ext, dtype=np.float64)[trial_free]
+        return stiffness, f_ext, trial_free, residual, f_ext[trial_free], {
+            "physical_internal_force_model": "linear_fixture"
+        }
+
+    u0 = np.asarray([0.2, -0.4], dtype=np.float64)
+    _k, _f, _free, residual, _rhs, _meta = assemble_residual(u0)
+    rows = _hotspot_tangent_fd_jvp_rows(
+        u=u0,
+        stiffness=stiffness,
+        free=free,
+        residual=residual,
+        top_rows=[
+            {
+                "free_row": 0,
+                "global_dof": 0,
+                "node_index": 0,
+                "dof": "ux",
+                "dominant_component": "frame",
+                "residual_n": float(residual[0]),
+                "component_values_n": {"frame": float(residual[0])},
+            },
+            {
+                "free_row": 1,
+                "global_dof": 1,
+                "node_index": 0,
+                "dof": "uy",
+                "dominant_component": "shell_bending_drilling",
+                "residual_n": float(residual[1]),
+                "component_values_n": {"shell_bending_drilling": 7.25},
+            },
+        ],
+        assemble_residual=assemble_residual,
+        fd_step=1.0e-7,
+        max_rows=1,
+        component_filter="shell_bending_drilling",
+    )
+
+    assert len(rows) == 1
+    assert rows[0]["evaluated"] is True
+    assert rows[0]["dominant_component"] == "shell_bending_drilling"
+    assert rows[0]["global_dof"] == 1
+    assert rows[0]["component_value_n"] == 7.25
+    assert rows[0]["residual_only_assembly"] is True
+    assert rows[0]["selected_row_tangent_action_n_per_m"] == 2.5
+    assert abs(rows[0]["selected_row_fd_action_n_per_m"] - 2.5) <= 1.0e-8
+    assert rows[0]["relative_inf_error"] <= 1.0e-8
+    assert calls == {"residual_only": 1, "full": 1}
+
+
 def test_hotspot_diagonal_newton_sweep_reduces_linear_hotspot_residual() -> None:
     stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsc()
     free = np.asarray([0], dtype=np.int64)
