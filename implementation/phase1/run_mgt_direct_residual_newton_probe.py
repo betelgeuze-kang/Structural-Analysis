@@ -266,18 +266,77 @@ def _select_residual_node_block_rows(
     }
 
 
+def _local_shell_basis(points: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
+    pts = np.asarray(points, dtype=np.float64)
+    if pts.shape != (3, 3):
+        return None
+    v1 = pts[1] - pts[0]
+    v2 = pts[2] - pts[0]
+    normal = np.cross(v1, v2)
+    normal_norm = float(np.linalg.norm(normal))
+    v1_norm = float(np.linalg.norm(v1))
+    if normal_norm <= 1.0e-10 or v1_norm <= 1.0e-12:
+        return None
+    e1 = v1 / v1_norm
+    e3 = normal / normal_norm
+    e2 = np.cross(e3, e1)
+    e2 /= max(float(np.linalg.norm(e2)), 1.0e-12)
+    return e1, e2, e3
+
+
+def _triangulate_shell_conn(conn: list[int]) -> list[tuple[int, int, int]]:
+    if len(conn) == 3:
+        return [(conn[0], conn[1], conn[2])]
+    if len(conn) == 4:
+        return [(conn[0], conn[1], conn[2]), (conn[0], conn[2], conn[3])]
+    return []
+
+
+def _shell_geometry_normal_translation_dofs_by_node(
+    *,
+    nodes: list[int],
+    node_xyz: np.ndarray,
+    participation_threshold: float,
+) -> dict[int, set[int]]:
+    xyz = np.asarray(node_xyz, dtype=np.float64)
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        return {}
+    axis_by_dof = (
+        np.asarray([1.0, 0.0, 0.0], dtype=np.float64),
+        np.asarray([0.0, 1.0, 0.0], dtype=np.float64),
+        np.asarray([0.0, 0.0, 1.0], dtype=np.float64),
+    )
+    threshold = max(float(participation_threshold), 0.0)
+    selected: dict[int, set[int]] = {int(node): set() for node in nodes}
+    for tri in _triangulate_shell_conn([int(node) for node in nodes]):
+        if any(node < 0 or node >= int(xyz.shape[0]) for node in tri):
+            continue
+        basis = _local_shell_basis(np.asarray([xyz[node] for node in tri], dtype=np.float64))
+        if basis is None:
+            continue
+        _e1, _e2, e3 = basis
+        for dof_index, axis in enumerate(axis_by_dof):
+            if abs(float(np.dot(axis, e3))) >= threshold:
+                for node in tri:
+                    selected.setdefault(int(node), set()).add(int(dof_index))
+    return selected
+
+
 def _select_residual_element_block_rows(
     residual: np.ndarray,
     current_free: np.ndarray,
     *,
     conn_ptr: np.ndarray,
     conn_idx: np.ndarray,
+    node_xyz: np.ndarray | None = None,
     elem_id: np.ndarray | None = None,
     elem_type_code: np.ndarray | None = None,
     target_element_count: int,
     neighbor_depth: int = 0,
     allowed_element_type_codes: set[int] | None = None,
     target_dof_indices: set[int] | None = None,
+    target_shell_geometry_normal_translation_rows: bool = False,
+    shell_normal_participation_threshold: float = 0.7071067811865476,
     dof_per_node: int = DOF_PER_NODE,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     if (
@@ -314,6 +373,7 @@ def _select_residual_element_block_rows(
         if target_dof_indices is not None
         else None
     )
+    use_shell_geometry_normals = bool(target_shell_geometry_normal_translation_rows)
     for element_index in range(element_count):
         start = int(conn_ptr[element_index])
         end = int(conn_ptr[element_index + 1])
@@ -327,6 +387,13 @@ def _select_residual_element_block_rows(
         if allowed_types is not None and element_type not in allowed_types:
             continue
         nodes = sorted({int(node) for node in conn_idx[start:end].tolist()})
+        shell_normal_dofs_by_node: dict[int, set[int]] = {}
+        if use_shell_geometry_normals and node_xyz is not None:
+            shell_normal_dofs_by_node = _shell_geometry_normal_translation_dofs_by_node(
+                nodes=nodes,
+                node_xyz=node_xyz,
+                participation_threshold=shell_normal_participation_threshold,
+            )
         rows = sorted(
             {
                 row
@@ -336,6 +403,16 @@ def _select_residual_element_block_rows(
                 or int(current_free[int(row)]) % int(dof_per_node) in target_dofs
             }
         )
+        if use_shell_geometry_normals:
+            rows = [
+                int(row)
+                for row in rows
+                if int(current_free[int(row)]) % int(dof_per_node)
+                in shell_normal_dofs_by_node.get(
+                    int(current_free[int(row)]) // int(dof_per_node),
+                    set(),
+                )
+            ]
         if not rows:
             continue
         score = float(np.sum(np.abs(residual[np.asarray(rows, dtype=np.int64)])))
@@ -416,6 +493,10 @@ def _select_residual_element_block_rows(
         "selected_element_type_counts": selected_element_type_counts,
         "allowed_element_type_codes": sorted(allowed_types) if allowed_types is not None else None,
         "target_dof_indices": sorted(target_dofs) if target_dofs is not None else None,
+        "target_shell_geometry_normal_translation_rows": use_shell_geometry_normals,
+        "shell_normal_participation_threshold": (
+            float(shell_normal_participation_threshold) if use_shell_geometry_normals else None
+        ),
     }
 
 
@@ -550,6 +631,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_svd_relative_cutoff: float = 0.0,
     current_tangent_residual_row_svd_max_condition: float = 0.0,
     current_tangent_residual_row_directional_probe_alpha: float = 0.0,
+    current_tangent_residual_row_shell_normal_participation_threshold: float = 0.7071067811865476,
     current_tangent_residual_row_use_residual_only_assembly: bool = False,
     current_tangent_residual_row_allow_negative_alphas: bool = False,
     current_tangent_residual_row_alpha_values: tuple[float, ...] = (
@@ -2742,6 +2824,7 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_element_blocks",
                 "residual_frame_element_blocks",
                 "residual_shell_normal_rows",
+                "residual_shell_geometry_normal_rows",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
@@ -2843,12 +2926,14 @@ def run_mgt_direct_residual_newton_probe(
                         "residual_element_blocks",
                         "residual_frame_element_blocks",
                         "residual_shell_normal_rows",
+                        "residual_shell_geometry_normal_rows",
                     }:
                         target_rows, target_meta = _select_residual_element_block_rows(
                             current_residual,
                             current_free,
                             conn_ptr=conn_ptr,
                             conn_idx=conn_idx,
+                            node_xyz=node_xyz,
                             elem_id=elem_id,
                             elem_type_code=elem_type_code,
                             target_element_count=int(target_row_count),
@@ -2857,12 +2942,21 @@ def run_mgt_direct_residual_newton_probe(
                                 {1}
                                 if target_mode == "residual_frame_element_blocks"
                                 else {2}
-                                if target_mode == "residual_shell_normal_rows"
+                                if target_mode
+                                in {"residual_shell_normal_rows", "residual_shell_geometry_normal_rows"}
                                 else None
                             ),
                             target_dof_indices={2}
                             if target_mode == "residual_shell_normal_rows"
+                            else {0, 1, 2}
+                            if target_mode == "residual_shell_geometry_normal_rows"
                             else None,
+                            target_shell_geometry_normal_translation_rows=(
+                                target_mode == "residual_shell_geometry_normal_rows"
+                            ),
+                            shell_normal_participation_threshold=(
+                                current_tangent_residual_row_shell_normal_participation_threshold
+                            ),
                             dof_per_node=DOF_PER_NODE,
                         )
                         actual_target_count = int(target_rows.size)
@@ -4001,6 +4095,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_element_blocks",
             "residual_frame_element_blocks",
             "residual_shell_normal_rows",
+            "residual_shell_geometry_normal_rows",
         ),
         default="largest_rows",
         help=(
@@ -4010,7 +4105,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "mesh elements and targets every free DOF row on their connected nodes; "
             "residual_frame_element_blocks restricts element seeds to frame elements; "
             "residual_shell_normal_rows restricts element seeds to shell elements and targets "
-            "their normal translation rows."
+            "their global-z normal translation rows; residual_shell_geometry_normal_rows "
+            "uses shell element geometry to target global translation rows aligned with "
+            "the local shell normal."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-shell-normal-participation-threshold",
+        type=float,
+        default=0.7071067811865476,
+        help=(
+            "Minimum |dot(global translation axis, shell normal)| for "
+            "residual_shell_geometry_normal_rows target selection."
         ),
     )
     parser.add_argument(
@@ -4349,6 +4455,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_directional_probe_alpha=(
             args.current_tangent_residual_row_directional_probe_alpha
+        ),
+        current_tangent_residual_row_shell_normal_participation_threshold=(
+            args.current_tangent_residual_row_shell_normal_participation_threshold
         ),
         current_tangent_residual_row_use_residual_only_assembly=(
             args.current_tangent_residual_row_use_residual_only_assembly
