@@ -136,9 +136,26 @@
           "stop_reason": "no_residual_descent",
           "runtime_seconds": 156.31258243999946,
           "assessment": "Node-score block targeting selected nodes 2202 and 2379, not the largest scalar row at node 2380, and did not descend from the latest frontier."
+        },
+        {
+          "generated_at": "2026-06-14T06:09:27+09:00",
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_expand1_followup_probe.json",
+          "target_mode": "largest_rows",
+          "target_counts": [
+            4,
+            8
+          ],
+          "support_expansion_depth": 1,
+          "base_residual_inf_n": 0.04180495793067962,
+          "best_candidate_residual_inf_n": 0.04213155916519895,
+          "best_candidate_improvement_inf_n": -0.0003266012345193303,
+          "promoted_to_final_state": false,
+          "stop_reason": "no_residual_descent",
+          "runtime_seconds": 142.70735955599957,
+          "assessment": "Repeating the exact largest-row expand1 family from the new frontier reversed the prior accepted descent; the single-step family is saturated at 0.0418049579 N."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, but direct largest-row targeting with one-hop/node-block support reopened a 3.29e-4 N descent to 0.0418049579 N. The next G1 push should continue from the largest-row checkpoint and test whether that family remains live before switching selector families again."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, and direct largest-row targeting with one-hop/node-block support produced one strong 3.29e-4 N descent before the identical follow-up saturated at 0.0418049579 N. The next G1 push should change the largest-row alpha/support policy or target a refreshed coupled patch, rather than repeat the same expand1 configuration."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
