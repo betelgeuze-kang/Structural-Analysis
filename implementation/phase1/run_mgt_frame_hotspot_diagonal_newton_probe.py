@@ -262,6 +262,57 @@ def _truncated_svd_coefficients(
     }
 
 
+def _equilibrate_lstsq_system(
+    matrix: np.ndarray,
+    rhs: np.ndarray,
+    *,
+    mode: str = "none",
+    scale_floor: float = 1.0e-30,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+    mode = str(mode or "none")
+    if mode not in {"none", "row", "column", "row_column"}:
+        raise ValueError(
+            "block_lstsq_equilibration must be one of none, row, column, or row_column"
+        )
+    a = np.asarray(matrix, dtype=np.float64)
+    b = np.asarray(rhs, dtype=np.float64)
+    column_count = int(a.shape[1]) if a.ndim == 2 else 0
+    if mode == "none" or a.ndim != 2 or b.ndim != 1 or a.shape[0] != b.shape[0]:
+        return a, b, np.ones(column_count, dtype=np.float64), {
+            "mode": mode,
+            "enabled": False,
+        }
+    floor = max(float(scale_floor), np.finfo(np.float64).tiny)
+    scaled_a = a.copy()
+    scaled_b = b.copy()
+    row_scales = np.ones(int(a.shape[0]), dtype=np.float64)
+    column_scales = np.ones(column_count, dtype=np.float64)
+    if mode in {"row", "row_column"} and scaled_a.shape[0]:
+        row_norms = np.max(np.abs(scaled_a), axis=1)
+        safe_row_norms = np.where(row_norms > floor, row_norms, 1.0)
+        row_scales = 1.0 / safe_row_norms
+        scaled_a = scaled_a * row_scales[:, None]
+        scaled_b = scaled_b * row_scales
+    if mode in {"column", "row_column"} and column_count:
+        column_norms = np.max(np.abs(scaled_a), axis=0)
+        safe_column_norms = np.where(column_norms > floor, column_norms, 1.0)
+        column_scales = 1.0 / safe_column_norms
+        scaled_a = scaled_a * column_scales[None, :]
+    return scaled_a, scaled_b, column_scales, {
+        "mode": mode,
+        "enabled": True,
+        "scale_floor": float(floor),
+        "row_scale_min": float(np.min(row_scales)) if row_scales.size else 1.0,
+        "row_scale_max": float(np.max(row_scales)) if row_scales.size else 1.0,
+        "column_scale_min": float(np.min(column_scales)) if column_scales.size else 1.0,
+        "column_scale_max": float(np.max(column_scales)) if column_scales.size else 1.0,
+        "matrix_abs_inf_before": _max_abs(a),
+        "matrix_abs_inf_after": _max_abs(scaled_a),
+        "rhs_abs_inf_before": _max_abs(b),
+        "rhs_abs_inf_after": _max_abs(scaled_b),
+    }
+
+
 def _hotspot_block_lstsq_sweep(
     *,
     u: np.ndarray,
@@ -280,6 +331,7 @@ def _hotspot_block_lstsq_sweep(
     component_filter: str = "frame",
     operator_source: str = "tangent",
     finite_difference_step_m: float = 1.0e-6,
+    equilibration: str = "none",
 ) -> dict[str, Any]:
     operator_source = str(operator_source)
     if operator_source not in {"tangent", "finite_difference"}:
@@ -446,11 +498,27 @@ def _hotspot_block_lstsq_sweep(
             ) / fd_step
             submatrix[:, col_index] = trial_delta
     target_rhs = -np.asarray(base_residual, dtype=np.float64)[target_rows]
-    coeffs, solve_meta = _truncated_svd_coefficients(
+    scaled_submatrix, scaled_target_rhs, column_scales, equilibration_meta = _equilibrate_lstsq_system(
         submatrix,
         target_rhs,
+        mode=equilibration,
+    )
+    scaled_coeffs, solve_meta = _truncated_svd_coefficients(
+        scaled_submatrix,
+        scaled_target_rhs,
         max_condition=svd_max_condition,
     )
+    coeffs = np.asarray(scaled_coeffs, dtype=np.float64) * np.asarray(
+        column_scales, dtype=np.float64
+    )
+    unscaled_residual_vector = np.asarray(submatrix, dtype=np.float64) @ coeffs - target_rhs
+    solve_meta["equilibration"] = equilibration_meta
+    solve_meta["linear_residual_l2_n_unscaled"] = (
+        float(np.linalg.norm(unscaled_residual_vector))
+        if unscaled_residual_vector.size
+        else 0.0
+    )
+    solve_meta["linear_residual_inf_n_unscaled"] = _max_abs(unscaled_residual_vector)
     correction = np.zeros_like(base_u)
     support_corrections: list[dict[str, Any]] = []
     for local_col, coeff in zip(support_cols.tolist(), coeffs.tolist(), strict=False):
@@ -569,6 +637,7 @@ def _hotspot_block_lstsq_sweep(
         ),
         "component_filter": component_filter,
         "operator_source": operator_source,
+        "equilibration": str(equilibration),
         "finite_difference_step_m": (
             float(finite_difference_step_m)
             if operator_source == "finite_difference"
@@ -618,6 +687,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
     block_lstsq_component_filter: str = "frame",
     block_lstsq_operator_source: str = "tangent",
     block_lstsq_finite_difference_step_m: float = 1.0e-6,
+    block_lstsq_equilibration: str = "none",
     write_progress_artifacts: bool = False,
     max_wall_seconds: float | None = None,
 ) -> dict[str, Any]:
@@ -733,6 +803,7 @@ def run_mgt_frame_hotspot_diagonal_newton_probe(
                 component_filter=block_lstsq_component_filter,
                 operator_source=block_lstsq_operator_source,
                 finite_difference_step_m=block_lstsq_finite_difference_step_m,
+                equilibration=block_lstsq_equilibration,
             )
         last_sweep = sweep
         if _wall_time_exceeded():
@@ -1095,6 +1166,11 @@ def main(argv: list[str] | None = None) -> int:
         type=float,
         default=1.0e-6,
     )
+    parser.add_argument(
+        "--block-lstsq-equilibration",
+        choices=("none", "row", "column", "row_column"),
+        default="none",
+    )
     parser.add_argument("--write-progress-artifacts", action="store_true")
     parser.add_argument(
         "--max-wall-seconds",
@@ -1143,6 +1219,7 @@ def main(argv: list[str] | None = None) -> int:
         block_lstsq_finite_difference_step_m=float(
             args.block_lstsq_finite_difference_step_m
         ),
+        block_lstsq_equilibration=str(args.block_lstsq_equilibration),
         write_progress_artifacts=bool(args.write_progress_artifacts),
         max_wall_seconds=args.max_wall_seconds,
     )

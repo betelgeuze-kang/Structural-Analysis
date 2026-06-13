@@ -467,6 +467,71 @@ def test_frame_hotspot_block_lstsq_probe_exposes_support_and_svd_controls(
     assert len(sweep["candidate_rows"]) == 2
 
 
+def test_frame_hotspot_block_lstsq_equilibration_recovers_ill_scaled_system(
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(
+        ([1.0e12, 1.0], ([0, 1], [0, 1])),
+        shape=(2, 2),
+    ).tocsc()
+    free = np.asarray([0, 1], dtype=np.int64)
+    u0 = np.asarray([0.0, 0.0], dtype=np.float64)
+
+    def load_checkpoint(_checkpoint_npz: Path):
+        return (
+            {"load_scale": 1.0, "path": "fixture.npz"},
+            u0.copy(),
+            None,
+            None,
+        )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray, *, include_component_forces: bool = False):
+            internal = np.asarray(stiffness @ u, dtype=np.float64)
+            rhs = np.asarray([1.0e12, 1.0], dtype=np.float64)
+            residual = internal - rhs
+            meta = {}
+            if include_component_forces:
+                meta["component_forces"] = {"frame": internal.copy()}
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), meta
+
+        return assemble_residual, {
+            "u0": u0.copy(),
+            "checkpoint": {"path": "fixture.npz"},
+            "load_scale": 1.0,
+        }
+
+    monkeypatch.setattr(probe_module, "_load_checkpoint", load_checkpoint)
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+
+    payload = probe_module.run_mgt_frame_hotspot_diagonal_newton_probe(
+        checkpoint_npz=Path("fixture.npz"),
+        output_json=None,
+        output_final_checkpoint_npz=None,
+        promotion_mode="block_lstsq",
+        alpha_values=(1.0,),
+        max_rows=2,
+        max_promotions=1,
+        relative_increment_tolerance=1.0e13,
+        block_lstsq_svd_max_condition=10.0,
+        block_lstsq_equilibration="row_column",
+    )
+
+    sweep = payload["frame_hotspot_block_lstsq_sweep"]
+    assert payload["status"] == "ready"
+    assert payload["final_direct_residual"]["direct_residual_inf_n"] <= 1.0e-12
+    assert sweep["equilibration"] == "row_column"
+    assert sweep["linear_solve"]["rank"] == 2
+    assert sweep["linear_solve"]["equilibration"]["enabled"] is True
+    assert sweep["linear_solve"]["equilibration"]["matrix_abs_inf_before"] == 1.0e12
+    assert sweep["linear_solve"]["equilibration"]["matrix_abs_inf_after"] == 1.0
+    assert sweep["linear_solve"]["linear_residual_inf_n_unscaled"] <= 1.0e-12
+
+
 def test_frame_hotspot_block_lstsq_can_promote_negative_alpha(
     monkeypatch,
 ) -> None:
