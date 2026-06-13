@@ -44,6 +44,7 @@ from mgt_physical_residual_assembly import (
     assemble_physical_internal_forces,
     assemble_physical_residual,
 )
+from mgt_shell_load_path import surface_pressure_load_path_filter
 
 
 SCHEMA_VERSION = "mgt-direct-residual-newton-probe.v1"
@@ -566,6 +567,7 @@ def run_mgt_direct_residual_newton_probe(
     output_final_checkpoint_npz: Path | None = None,
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
+    shell_pressure_load_path_policy: str = "all_components",
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_trust_iterations: int = 6,
@@ -722,6 +724,17 @@ def run_mgt_direct_residual_newton_probe(
             dof_count=int(node_xyz.shape[0]) * DOF_PER_NODE,
             stiffness_scale_to_si=stiffness_scale_to_si,
         )
+        (
+            pressure_allowed_surface_elements,
+            pressure_load_path_meta,
+        ) = surface_pressure_load_path_filter(
+            frame_elements=frame_elements,
+            elem_type_code=elem_type_code,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
+            restrained=restrained,
+            policy=shell_pressure_load_path_policy,
+        )
         base_axial_forces = _component_gravity_axial_forces(
             elements=frame_elements,
             node_xyz=node_xyz,
@@ -776,6 +789,7 @@ def run_mgt_direct_residual_newton_probe(
                     "residual_only_free_override": True,
                     "free_dof_count": int(free.size),
                     "shell_operator_cache_size": int(len(shell_operator_cache)),
+                    "shell_pressure_load_path_meta": pressure_load_path_meta,
                     "physical_internal_force_inf_n": float(np.max(np.abs(f_int[free])))
                     if free.size
                     else 0.0,
@@ -813,6 +827,7 @@ def run_mgt_direct_residual_newton_probe(
                 load_scale=load_scale,
                 service_tangent_by_element=service_tangent_by_element,
                 service_material_meta=service_material_meta,
+                shell_pressure_load_allowed_surface_elements=pressure_allowed_surface_elements,
             )
             f_int, physical_meta = assemble_physical_internal_forces(
                 u=u,
@@ -865,6 +880,7 @@ def run_mgt_direct_residual_newton_probe(
                 else 0.0,
                 "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
                 "residual_only_assembly": False,
+                "shell_pressure_load_path_meta": pressure_load_path_meta,
                 "shell_operator_cache_size": int(len(shell_operator_cache)),
             }
         assemble_residual.supports_residual_only = True  # type: ignore[attr-defined]
@@ -3710,6 +3726,7 @@ def run_mgt_direct_residual_newton_probe(
                 dtype=np.int64,
             ),
             source_checkpoint_path=np.asarray(str(checkpoint_npz)),
+            shell_pressure_load_path_policy=np.asarray(str(shell_pressure_load_path_policy)),
         )
         output_final_checkpoint_meta = {
             "written": True,
@@ -3721,6 +3738,7 @@ def run_mgt_direct_residual_newton_probe(
             "max_translation_m": float(final_translation_metrics["max_translation_m"]),
             "accepted_history_count": int(accepted_state_history_array.shape[0]),
             "source_checkpoint_path": str(checkpoint_npz),
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         }
     elif output_final_checkpoint_npz is not None:
         output_final_checkpoint_meta = _skipped_output_final_checkpoint_meta(
@@ -3746,6 +3764,8 @@ def run_mgt_direct_residual_newton_probe(
             "regularization_used_only_for_linear_correction_direction": True,
             "external_load_vector_configuration": "reference",
             "external_load_vector_reassembled_with_displacement": False,
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "shell_pressure_load_path_meta": pressure_load_path_meta,
             "frame_geometric_equilibrium_included": True,
             "authored_support_restraints_included": True,
             "finite_elastic_link_springs_included": True,
@@ -3773,6 +3793,7 @@ def run_mgt_direct_residual_newton_probe(
             **frame_select_meta,
             "node_count": int(checkpoint_meta["dof_count"] // DOF_PER_NODE),
             "reference_external_load_meta": reference_meta,
+            "shell_pressure_load_path_meta": pressure_load_path_meta,
             **assembly_meta,
         },
         "boundary_summary": {
@@ -3876,6 +3897,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--frame-gravity-load-scale", type=float, default=0.01)
     parser.add_argument("--stiffness-scale-to-si", type=float, default=1000.0)
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=("all_components", "attached_components_only"),
+        default="all_components",
+        help=(
+            "Shell pressure load-path policy. all_components preserves legacy replay; "
+            "attached_components_only suppresses pressure on shell surface components "
+            "with no frame-connected node and no authored translational restraint."
+        ),
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--max-trust-iterations", type=int, default=6)
@@ -4331,6 +4362,7 @@ def main(argv: list[str] | None = None) -> int:
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
         frame_gravity_load_scale=args.frame_gravity_load_scale,
         stiffness_scale_to_si=args.stiffness_scale_to_si,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_trust_iterations=args.max_trust_iterations,

@@ -1499,7 +1499,7 @@
   },
   "current_acceleration_decision_2026_06_14": {
     "status": "rocm_runtime_available_but_g1_gate_not_backend_throughput_limited",
-    "generated_at": "2026-06-14T04:31:05+09:00",
+    "generated_at": "2026-06-14T04:52:00+09:00",
     "device_observation": {
       "rocminfo_gpu_name": "AMD Radeon RX 6900 XT",
       "gfx_target": "gfx1030",
@@ -1636,11 +1636,52 @@
       },
       "assessment": "A diagnostic replay that suppresses pressure on surface components with no frame/support attachment lowers the current checkpoint residual from 0.280378 N to 0.115243 N without changing shell stiffness. The remaining active residual moves to the large attached shell component, so the next G1 work should combine this load-path policy with state cleanup/relaxation of the two suppressed free components and then resume correction on the attached shell component."
     },
+    "attached_policy_correction_lane": {
+      "status": "partial_not_gate_closed",
+      "policy": "attached_components_only",
+      "cleanup_evidence": "implementation/phase1/release_evidence/productization/mgt_shell_free_component_state_cleanup_frontier_probe.json",
+      "cleanup_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_free_component_state_cleanup_frontier_checkpoint.npz",
+      "cleanup_free_pressure_surface_component_count": 2,
+      "cleanup_cleaned_surface_node_count": 8,
+      "cleanup_cleaned_dof_count": 48,
+      "cleanup_before_residual_inf_n": 0.11524294414354089,
+      "cleanup_after_residual_inf_n": 0.11524294414354089,
+      "first_row_correction_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_probe.json",
+      "first_row_correction_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_final_checkpoint.npz",
+      "first_row_correction_residual_inf_n": 0.05289276970159462,
+      "first_row_correction_absolute_reduction_n": 0.062350174441946266,
+      "first_row_correction_relative_reduction_from_cleanup": 0.5410324675867877,
+      "followup_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_followup_probe.json",
+      "followup_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_followup_final_checkpoint.npz",
+      "followup_residual_inf_n": 0.052882760779810356,
+      "followup_absolute_reduction_n": 0.000010008921784265823,
+      "rotation_element_block_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_element_block_rotation_probe.json",
+      "rotation_element_block_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_element_block_rotation_final_checkpoint.npz",
+      "rotation_element_block_residual_inf_n": 0.05288275788082397,
+      "latest_frontier_diagnostic_evidence": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_cleanup_followup_frontier_probe.json",
+      "latest_frontier_residual_inf_n": 0.052882760779810356,
+      "latest_frontier_relative_residual_inf": 0.000006095195118477439,
+      "latest_top96_dominant_component_counts": {
+        "shell_bending_drilling": 49,
+        "shell_membrane": 33,
+        "frame": 14
+      },
+      "next_active_residual": {
+        "raw_node_id": 2203,
+        "dof": "rx",
+        "residual_n": -0.052882760779810356,
+        "dominant_component": "shell_bending_drilling",
+        "frame_component_n": 0.4926072651037956,
+        "shell_bending_drilling_component_n": -0.545490025883606,
+        "external_load_n": 0
+      },
+      "assessment": "The diagnostic pressure policy has now been promoted into executable direct-residual correction evidence. Cleaning the two suppressed free shell components removed their stale displacement state, and a finite-difference residual-row correction on the large attached shell component reduced the frontier from 0.115243 N to 0.052893 N. Follow-up and rotation-inclusive element-block corrections then saturated near 0.052883 N, with the active top row shifting to an attached shell drilling/bending rx residual balanced against frame contribution. The gate is still not closed; the next correction needs a coupled attached-component shell bending/membrane/frame strategy, not raw ROCm/HIP throughput alone."
+    },
     "decision": {
       "use_rocm_for_next_g1_push": "selective_diagnostics_and_sparse_jvp_only",
       "use_rust_for_next_g1_push": "not_until_full_3d_mgt_frame_shell_assembly_is_wired",
       "use_hip_custom_kernel_for_next_g1_push": "blocked_as_quick_path_by_missing_hipcc_and_algorithmic_mismatch",
-      "recommended_next_step": "Promote the controlled shell load-path policy from diagnostic replay into the G1 correction lane, clean or relax the two suppressed free shell component states, and then resume residual correction on the large attached shell component. Only after that move corrected residual/Jacobian replay into a batched ROCm sparse/JVP path if repeated evaluations remain the bottleneck.",
+      "recommended_next_step": "Continue from the attached-policy correction checkpoint and replace narrow local row polishing with a coupled attached-component shell bending/membrane/frame correction. ROCm/HIP should be reserved for batching the now-correct residual/JVP replays or sparse preconditioner solves after this coupled direction is defined.",
       "why": [
         "ROCm runtime sees the RX 6900 XT, but the existing full G1 Newton swap to host-ILU/device-GMRES timed out beyond the 240 second budget.",
         "Existing shell sparse GPU solve evidence converges but is slow for shell-dominant systems because Krylov iterations saturate.",
@@ -1651,6 +1692,8 @@
         "A checkpoint-start global diagonal/node-block Jacobi counterprobe also produced no residual descent; the tested nonzero alpha worsened the current frontier.",
         "The top 8 shell hotspot rows are attached to one-element free pressure components with no frame-connected nodes and no restrained translational DOFs; each carries a nonzero pressure resultant.",
         "Suppressing pressure only on those unattached surface components lowers the current checkpoint residual by about 59%, from 0.280378 N to 0.115243 N, while leaving the large attached shell component loaded.",
+        "Promoting the policy into the direct-residual correction lane, cleaning the two suppressed free shell component states, and applying finite-difference residual-row correction reduced the frontier further to 0.052893 N.",
+        "A follow-up normal-row pass and a rotation-inclusive element-block pass saturated near 0.052883 N; the top active row is now an attached shell drilling/bending rx residual with a frame counter-contribution.",
         "Current residual-only routing is already the practical acceleration win; the faster route to the gate is a better physical correction model, then GPU batching."
       ]
     }

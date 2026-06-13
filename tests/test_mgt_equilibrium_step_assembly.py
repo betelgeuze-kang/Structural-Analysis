@@ -12,6 +12,7 @@ sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 from mgt_equilibrium_step_assembly import (  # noqa: E402
     _surface_pressure_load_path_filter,
     build_equilibrium_step_assembler,
+    surface_pressure_load_path_components,
 )
 from run_mgt_full_frame_6dof_sparse_equilibrium import FrameElement  # noqa: E402
 
@@ -87,6 +88,30 @@ def test_surface_pressure_load_path_filter_keeps_attached_components_only() -> N
     assert meta["attached_surface_component_count"] == 1
     assert meta["free_pressure_surface_component_count"] == 1
     assert meta["pressure_load_suppressed_surface_element_count"] == 1
+
+
+def test_surface_pressure_load_path_components_reports_free_component_nodes() -> None:
+    components = surface_pressure_load_path_components(
+        frame_elements=[
+            FrameElement(
+                elem_id=1,
+                node_i=0,
+                node_j=6,
+                section_id=1,
+                material_id=1,
+                length_m=3.0,
+            )
+        ],
+        elem_type_code=np.asarray([2, 2], dtype=np.int32),
+        conn_ptr=np.asarray([0, 3, 6], dtype=np.int64),
+        conn_idx=np.asarray([0, 1, 2, 3, 4, 5], dtype=np.int64),
+        restrained=set(),
+    )
+
+    assert [component["attached"] for component in components] == [True, False]
+    assert components[0]["surface_node_indices"] == [0, 1, 2]
+    assert components[1]["surface_node_indices"] == [3, 4, 5]
+    assert components[1]["surface_element_indices"] == [1]
 
 
 def test_surface_pressure_load_path_filter_keeps_restrained_shell_component() -> None:

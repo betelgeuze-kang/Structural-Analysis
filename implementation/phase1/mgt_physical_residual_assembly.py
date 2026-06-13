@@ -353,6 +353,7 @@ def assemble_newton_tangent_stiffness(
     load_scale: float,
     service_tangent_by_element: dict[int, float],
     service_material_meta: dict[str, Any],
+    shell_pressure_load_allowed_surface_elements: set[int] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any]]:
     """Assemble the regularized Newton tangent used only for correction directions."""
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -391,6 +392,7 @@ def assemble_newton_tangent_stiffness(
         conn_idx=conn_idx,
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
+        pressure_load_allowed_surface_elements=shell_pressure_load_allowed_surface_elements,
     )
     stiffness = frame_stiffness + shell_stiffness + spring_stiffness
     assembled_f_ext = (frame_f * float(frame_gravity_load_scale) + shell_f) * float(load_scale)

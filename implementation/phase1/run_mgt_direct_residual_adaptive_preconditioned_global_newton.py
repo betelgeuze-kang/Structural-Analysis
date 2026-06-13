@@ -116,6 +116,7 @@ def _run_child_subprocess(
     child_checkpoint: Path,
     factor: float,
     preconditioner_input_scale: float,
+    shell_pressure_load_path_policy: str,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
     matrix_free_global_krylov_max_iterations: int,
@@ -144,6 +145,8 @@ def _run_child_subprocess(
         str(child_json),
         "--output-final-checkpoint-npz",
         str(child_checkpoint),
+        "--shell-pressure-load-path-policy",
+        str(shell_pressure_load_path_policy),
         "--residual-tolerance-n",
         str(float(residual_tolerance_n)),
         "--relative-increment-tolerance",
@@ -314,6 +317,7 @@ def run_adaptive_preconditioned_global_newton(
         0.0625,
     ),
     secant_family_min_relative_improvement: float = 1.0e-6,
+    shell_pressure_load_path_policy: str = "all_components",
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_controller_runtime_seconds: float | None = None,
@@ -375,6 +379,7 @@ def run_adaptive_preconditioned_global_newton(
                         child_checkpoint=child_checkpoint,
                         factor=float(factor),
                         preconditioner_input_scale=float(preconditioner_input_scale),
+                        shell_pressure_load_path_policy=shell_pressure_load_path_policy,
                         residual_tolerance_n=residual_tolerance_n,
                         relative_increment_tolerance=relative_increment_tolerance,
                         matrix_free_global_krylov_max_iterations=(
@@ -411,6 +416,7 @@ def run_adaptive_preconditioned_global_newton(
                         checkpoint_npz=current_checkpoint,
                         output_json=child_json,
                         output_final_checkpoint_npz=child_checkpoint,
+                        shell_pressure_load_path_policy=shell_pressure_load_path_policy,
                         residual_tolerance_n=residual_tolerance_n,
                         relative_increment_tolerance=relative_increment_tolerance,
                         max_trust_iterations=0,
@@ -620,6 +626,7 @@ def run_adaptive_preconditioned_global_newton(
             "secant_family_minimum_relative_improvement": float(
                 secant_family_min_relative_improvement
             ),
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "runtime_budget_seconds": runtime_budget_seconds,
             "runtime_budget_exceeded": bool(runtime_budget_exceeded),
             "child_timeout_seconds": (
@@ -692,6 +699,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--secant-family-ridge-factors", default="0,1e-8")
     parser.add_argument("--secant-family-alpha-values", default="1,0.5,0.25,0.125,0.0625")
     parser.add_argument("--secant-family-min-relative-improvement", type=float, default=1.0e-6)
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=("all_components", "attached_components_only"),
+        default="all_components",
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument(
@@ -763,6 +775,7 @@ def main(argv: list[str] | None = None) -> int:
         secant_family_ridge_factors=_parse_float_csv(args.secant_family_ridge_factors),
         secant_family_alpha_values=_parse_float_csv(args.secant_family_alpha_values),
         secant_family_min_relative_improvement=args.secant_family_min_relative_improvement,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_controller_runtime_seconds=args.max_controller_runtime_seconds,
