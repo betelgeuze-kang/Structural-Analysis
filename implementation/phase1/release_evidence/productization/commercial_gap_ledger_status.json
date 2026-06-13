@@ -1,6 +1,6 @@
 {
   "schema_version": "commercial-gap-ledger-status.v1",
-  "generated_at": "2026-06-12T23:52:16.543353+00:00",
+  "generated_at": "2026-06-13T00:05:38.388108+00:00",
   "status": "open",
   "commercial_solver_gap_ready": false,
   "ai_engine_gap_ready": true,
@@ -35094,16 +35094,16 @@
         },
         "direct_residual_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup_series": {
           "series_schema": "mgt-translation-frontier-followup-series.v1",
-          "count": 11,
+          "count": 12,
           "strictly_decreasing_final_residual": true,
-          "latest_followup_index": 54,
-          "latest_final_direct_residual_inf_n": 5555.073010872516,
+          "latest_followup_index": 55,
+          "latest_final_direct_residual_inf_n": 5513.191125547644,
           "latest_component_inf_n": {
-            "frame": 3539.777606168417,
+            "frame": 3566.129349627833,
             "spring": 0.8387057679917196,
             "material_stress_correction": 0.0,
-            "shell_bending_drilling": 2151.2559607832814,
-            "shell_membrane": 2288.743356088593
+            "shell_bending_drilling": 2146.6775884874246,
+            "shell_membrane": 2247.5702958648576
           },
           "rows": [
             {
@@ -35570,6 +35570,51 @@
                 "material_stress_correction": 0.0,
                 "shell_bending_drilling": 2151.2559607832814,
                 "shell_membrane": 2288.743356088593
+              },
+              "top_row_dominant_component_counts": {
+                "shell_membrane": 1,
+                "frame": 20,
+                "shell_bending_drilling": 3
+              }
+            },
+            {
+              "followup_index": 55,
+              "probe_file": "mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup55_probe.json",
+              "component_probe_file": "mgt_residual_jacobian_post_block_rows21_support32_translation_followup55_component_probe.json",
+              "status": "partial",
+              "ready": false,
+              "base_direct_residual_inf_n": 5555.073010872516,
+              "final_direct_residual_inf_n": 5513.191125547644,
+              "promotion_count": 3,
+              "promotion_pass_actual_direct_residual_inf_n": [
+                5541.1123824308925,
+                5527.151753989267,
+                5513.191125547644
+              ],
+              "promotion_pass_relative_increment_gate_passed": [
+                true,
+                true,
+                true
+              ],
+              "promotion_candidate_alpha": 0.002525826874854259,
+              "promotion_candidate_relative_increment": 9.999999999990003e-05,
+              "promotion_candidate_relative_increment_gate_passed": true,
+              "frame_hotspot_block_lstsq_support_size": 323,
+              "frame_hotspot_block_lstsq_selected_component_counts": {
+                "shell_membrane": 1,
+                "frame": 18,
+                "shell_bending_drilling": 2
+              },
+              "output_final_checkpoint_path": "/tmp/g1_followup_progress_archive/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup55_probe_final_checkpoint.npz",
+              "component_status": "partial",
+              "component_only": true,
+              "component_base_residual_inf_n": 5513.191125547644,
+              "component_inf_n": {
+                "frame": 3566.129349627833,
+                "spring": 0.8387057679917196,
+                "material_stress_correction": 0.0,
+                "shell_bending_drilling": 2146.6775884874246,
+                "shell_membrane": 2247.5702958648576
               },
               "top_row_dominant_component_counts": {
                 "shell_membrane": 1,

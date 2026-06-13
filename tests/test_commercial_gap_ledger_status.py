@@ -5061,20 +5061,33 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert support32_translation_series["series_schema"] == (
         "mgt-translation-frontier-followup-series.v1"
     )
-    assert support32_translation_series["count"] == 11
+    assert support32_translation_series["count"] >= 11
     assert support32_translation_series["strictly_decreasing_final_residual"] is True
-    assert support32_translation_series["latest_followup_index"] == 54
+    series_rows = support32_translation_series["rows"]
+    assert support32_translation_series["count"] == len(series_rows)
+    assert (
+        support32_translation_series["latest_followup_index"]
+        == series_rows[-1]["followup_index"]
+    )
     assert (
         support32_translation_series["latest_final_direct_residual_inf_n"]
-        == 5555.073010872516
+        == series_rows[-1]["final_direct_residual_inf_n"]
     )
-    series_rows = support32_translation_series["rows"]
-    assert [row["followup_index"] for row in series_rows[-4:]] == [51, 52, 53, 54]
-    followup54 = series_rows[-1]
-    assert (
-        followup54["base_direct_residual_inf_n"]
-        == support32_translation_series["rows"][-2]["final_direct_residual_inf_n"]
+    assert support32_translation_series["latest_followup_index"] >= 54
+    assert support32_translation_series["latest_final_direct_residual_inf_n"] <= (
+        5555.073010872516
     )
+    assert series_rows[-1]["component_status"] == "partial"
+    assert series_rows[-1]["component_only"] is True
+    assert series_rows[-1]["component_base_residual_inf_n"] == series_rows[-1][
+        "final_direct_residual_inf_n"
+    ]
+    contiguous_rows = [row for row in series_rows if int(row["followup_index"]) >= 37]
+    assert all(
+        later["base_direct_residual_inf_n"] == earlier["final_direct_residual_inf_n"]
+        for earlier, later in zip(contiguous_rows, contiguous_rows[1:], strict=False)
+    )
+    followup54 = next(row for row in series_rows if row["followup_index"] == 54)
     assert followup54["final_direct_residual_inf_n"] == 5555.073010872516
     assert followup54["promotion_count"] == 3
     assert followup54["promotion_pass_actual_direct_residual_inf_n"] == [
