@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import subprocess
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +17,7 @@ from run_mgt_direct_residual_newton_probe import (
     DEFAULT_CHECKPOINT,
     DEFAULT_MGT,
     PRODUCTIZATION,
+    _load_checkpoint,
     run_mgt_direct_residual_newton_probe,
 )
 
@@ -63,6 +66,213 @@ def _accepted_component_flags(payload: dict[str, Any]) -> dict[str, bool]:
     }
 
 
+def _csv(values: tuple[float, ...] | tuple[int, ...]) -> str:
+    return ",".join(str(value) for value in values)
+
+
+def _child_launch_receipt(
+    *,
+    child_json: Path,
+    child_checkpoint: Path,
+    checkpoint_npz: Path,
+    tangent_regularization_factor: float,
+    child_timeout_seconds: float | None,
+    command: list[str],
+) -> dict[str, Any]:
+    return {
+        "schema_version": "mgt-direct-residual-adaptive-child-launch.v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "in_progress",
+        "checkpoint": str(checkpoint_npz),
+        "output_json": str(child_json),
+        "output_final_checkpoint_npz": str(child_checkpoint),
+        "tangent_regularization_factor": float(tangent_regularization_factor),
+        "child_timeout_seconds": (
+            None if child_timeout_seconds is None else float(child_timeout_seconds)
+        ),
+        "command": command,
+        "claim_boundary": (
+            "Controller launch receipt only. A completed or timeout child receipt must "
+            "replace this before claiming residual progress."
+        ),
+    }
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+        encoding="utf-8",
+    )
+
+
+def _run_child_subprocess(
+    *,
+    mgt_path: Path,
+    checkpoint_npz: Path,
+    child_json: Path,
+    child_checkpoint: Path,
+    factor: float,
+    residual_tolerance_n: float,
+    relative_increment_tolerance: float,
+    matrix_free_global_krylov_max_iterations: int,
+    matrix_free_global_krylov_probe_epsilon: float,
+    matrix_free_global_krylov_probe_max_step: float,
+    matrix_free_global_krylov_alpha_values: tuple[float, ...],
+    matrix_free_global_krylov_max_alpha: float,
+    matrix_free_global_krylov_min_relative_improvement: float,
+    enable_secant_family_seed: bool,
+    max_secant_family_promotions: int,
+    secant_family_window_sizes: tuple[int, ...],
+    secant_family_ridge_factors: tuple[float, ...],
+    secant_family_alpha_values: tuple[float, ...],
+    secant_family_min_relative_improvement: float,
+    child_timeout_seconds: float,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    script = Path(__file__).resolve().with_name("run_mgt_direct_residual_newton_probe.py")
+    cmd = [
+        sys.executable,
+        str(script),
+        "--mgt-path",
+        str(mgt_path),
+        "--checkpoint-npz",
+        str(checkpoint_npz),
+        "--output-json",
+        str(child_json),
+        "--output-final-checkpoint-npz",
+        str(child_checkpoint),
+        "--residual-tolerance-n",
+        str(float(residual_tolerance_n)),
+        "--relative-increment-tolerance",
+        str(float(relative_increment_tolerance)),
+        "--max-trust-iterations",
+        "0",
+        "--disable-secant-subspace-globalization",
+        "--disable-matrix-free-jacobian-subspace",
+        "--enable-matrix-free-global-krylov",
+        "--matrix-free-global-krylov-max-iterations",
+        str(int(matrix_free_global_krylov_max_iterations)),
+        "--matrix-free-global-krylov-probe-epsilon",
+        str(float(matrix_free_global_krylov_probe_epsilon)),
+        "--matrix-free-global-krylov-probe-max-step",
+        str(float(matrix_free_global_krylov_probe_max_step)),
+        "--matrix-free-global-krylov-scaling-mode",
+        "residual_diagonal_displacement",
+        "--matrix-free-global-krylov-preconditioner-mode",
+        "current_tangent",
+        "--matrix-free-global-krylov-preconditioner-input-scale",
+        "1.0",
+        "--matrix-free-global-krylov-tangent-regularization-factor",
+        str(float(factor)),
+        "--matrix-free-global-krylov-allow-negative-alphas",
+        "--matrix-free-global-krylov-max-alpha",
+        str(float(matrix_free_global_krylov_max_alpha)),
+        "--matrix-free-global-krylov-alpha-values",
+        _csv(matrix_free_global_krylov_alpha_values),
+        "--matrix-free-global-krylov-min-relative-improvement",
+        str(float(matrix_free_global_krylov_min_relative_improvement)),
+        "--allow-cpu-diagnostic",
+    ]
+    if enable_secant_family_seed:
+        cmd.extend(
+            [
+                "--enable-secant-family-globalization",
+                "--max-secant-family-promotions",
+                str(int(max_secant_family_promotions)),
+                "--secant-family-window-sizes",
+                _csv(secant_family_window_sizes),
+                "--secant-family-ridge-factors",
+                _csv(secant_family_ridge_factors),
+                "--secant-family-alpha-values",
+                _csv(secant_family_alpha_values),
+                "--secant-family-min-relative-improvement",
+                str(float(secant_family_min_relative_improvement)),
+            ]
+        )
+    _write_json(
+        child_json,
+        _child_launch_receipt(
+            child_json=child_json,
+            child_checkpoint=child_checkpoint,
+            checkpoint_npz=checkpoint_npz,
+            tangent_regularization_factor=factor,
+            child_timeout_seconds=child_timeout_seconds,
+            command=cmd,
+        ),
+    )
+    try:
+        completed = subprocess.run(
+            cmd,
+            cwd=Path(__file__).resolve().parents[2],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=float(child_timeout_seconds),
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        checkpoint_meta, _u, _state_history, _residual_history = _load_checkpoint(
+            checkpoint_npz
+        )
+        timeout_payload = {
+            "schema_version": "mgt-direct-residual-adaptive-child-timeout.v1",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "status": "timeout",
+            "checkpoint": str(checkpoint_npz),
+            "base_direct_residual": {
+                "direct_residual_inf_n": checkpoint_meta.get("residual_inf_n"),
+            },
+            "matrix_free_global_krylov": {
+                "enabled": True,
+                "attempted": True,
+                "accepted": False,
+                "stop_reason": "child_timeout_seconds_exceeded",
+            },
+            "child_timeout_seconds": float(child_timeout_seconds),
+            "command": cmd,
+            "stdout": exc.stdout or "",
+            "stderr": exc.stderr or "",
+            "output_final_checkpoint_written": False,
+            "claim_boundary": (
+                "Timeout receipt only. No residual descent is claimed because the child "
+                "probe did not finish and no final checkpoint was written."
+            ),
+        }
+        _write_json(child_json, timeout_payload)
+        return timeout_payload, {
+            "subprocess_returncode": None,
+            "subprocess_timeout": True,
+            "subprocess_stdout": exc.stdout or "",
+            "subprocess_stderr": exc.stderr or "",
+            "subprocess_command": cmd,
+        }
+    if not child_json.is_file():
+        child_payload = {
+            "schema_version": "mgt-direct-residual-adaptive-child-missing-output.v1",
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "status": "blocked",
+            "matrix_free_global_krylov": {
+                "enabled": True,
+                "attempted": True,
+                "accepted": False,
+                "stop_reason": "child_output_json_missing",
+            },
+            "command": cmd,
+        }
+        _write_json(child_json, child_payload)
+    else:
+        child_payload = json.loads(child_json.read_text(encoding="utf-8"))
+        if not isinstance(child_payload, dict):
+            child_payload = {"status": "blocked", "reason": "child_payload_not_object"}
+    return child_payload, {
+        "subprocess_returncode": int(completed.returncode),
+        "subprocess_timeout": False,
+        "subprocess_stdout": completed.stdout,
+        "subprocess_stderr": completed.stderr,
+        "subprocess_command": cmd,
+    }
+
+
 def run_adaptive_preconditioned_global_newton(
     *,
     mgt_path: Path = DEFAULT_MGT,
@@ -100,6 +310,7 @@ def run_adaptive_preconditioned_global_newton(
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_controller_runtime_seconds: float | None = None,
+    child_timeout_seconds: float | None = None,
 ) -> dict[str, Any]:
     generated_at = datetime.now(timezone.utc).isoformat()
     started = time.perf_counter()
@@ -141,47 +352,86 @@ def run_adaptive_preconditioned_global_newton(
                 f"{output_json.stem}_step{step_index + 1}_reg{label}_final_checkpoint.npz"
             )
             child_started = time.perf_counter()
-            child_payload = run_mgt_direct_residual_newton_probe(
-                mgt_path=mgt_path,
-                checkpoint_npz=current_checkpoint,
-                output_json=child_json,
-                output_final_checkpoint_npz=child_checkpoint,
-                residual_tolerance_n=residual_tolerance_n,
-                relative_increment_tolerance=relative_increment_tolerance,
-                max_trust_iterations=0,
-                enable_secant_subspace_globalization=False,
-                enable_secant_family_globalization=bool(enable_secant_family_seed),
-                max_secant_family_promotions=max_secant_family_promotions,
-                secant_family_window_sizes=secant_family_window_sizes,
-                secant_family_ridge_factors=secant_family_ridge_factors,
-                secant_family_alpha_values=secant_family_alpha_values,
-                secant_family_min_relative_improvement=(
-                    secant_family_min_relative_improvement
-                ),
-                enable_matrix_free_jacobian_subspace=False,
-                enable_matrix_free_global_krylov=True,
-                matrix_free_global_krylov_max_iterations=(
-                    matrix_free_global_krylov_max_iterations
-                ),
-                matrix_free_global_krylov_probe_epsilon=(
-                    matrix_free_global_krylov_probe_epsilon
-                ),
-                matrix_free_global_krylov_probe_max_step=(
-                    matrix_free_global_krylov_probe_max_step
-                ),
-                matrix_free_global_krylov_scaling_mode="residual_diagonal_displacement",
-                matrix_free_global_krylov_preconditioner_mode="current_tangent",
-                matrix_free_global_krylov_preconditioner_input_scale=1.0,
-                matrix_free_global_krylov_tangent_regularization_factor=float(factor),
-                matrix_free_global_krylov_allow_negative_alphas=True,
-                matrix_free_global_krylov_max_alpha=matrix_free_global_krylov_max_alpha,
-                matrix_free_global_krylov_alpha_values=(
-                    matrix_free_global_krylov_alpha_values
-                ),
-                matrix_free_global_krylov_min_relative_improvement=(
-                    matrix_free_global_krylov_min_relative_improvement
-                ),
-            )
+            child_subprocess_meta: dict[str, Any] = {}
+            if child_timeout_seconds is not None and float(child_timeout_seconds) > 0.0:
+                child_payload, child_subprocess_meta = _run_child_subprocess(
+                    mgt_path=mgt_path,
+                    checkpoint_npz=current_checkpoint,
+                    child_json=child_json,
+                    child_checkpoint=child_checkpoint,
+                    factor=float(factor),
+                    residual_tolerance_n=residual_tolerance_n,
+                    relative_increment_tolerance=relative_increment_tolerance,
+                    matrix_free_global_krylov_max_iterations=(
+                        matrix_free_global_krylov_max_iterations
+                    ),
+                    matrix_free_global_krylov_probe_epsilon=(
+                        matrix_free_global_krylov_probe_epsilon
+                    ),
+                    matrix_free_global_krylov_probe_max_step=(
+                        matrix_free_global_krylov_probe_max_step
+                    ),
+                    matrix_free_global_krylov_alpha_values=(
+                        matrix_free_global_krylov_alpha_values
+                    ),
+                    matrix_free_global_krylov_max_alpha=(
+                        matrix_free_global_krylov_max_alpha
+                    ),
+                    matrix_free_global_krylov_min_relative_improvement=(
+                        matrix_free_global_krylov_min_relative_improvement
+                    ),
+                    enable_secant_family_seed=bool(enable_secant_family_seed),
+                    max_secant_family_promotions=max_secant_family_promotions,
+                    secant_family_window_sizes=secant_family_window_sizes,
+                    secant_family_ridge_factors=secant_family_ridge_factors,
+                    secant_family_alpha_values=secant_family_alpha_values,
+                    secant_family_min_relative_improvement=(
+                        secant_family_min_relative_improvement
+                    ),
+                    child_timeout_seconds=float(child_timeout_seconds),
+                )
+            else:
+                child_payload = run_mgt_direct_residual_newton_probe(
+                    mgt_path=mgt_path,
+                    checkpoint_npz=current_checkpoint,
+                    output_json=child_json,
+                    output_final_checkpoint_npz=child_checkpoint,
+                    residual_tolerance_n=residual_tolerance_n,
+                    relative_increment_tolerance=relative_increment_tolerance,
+                    max_trust_iterations=0,
+                    enable_secant_subspace_globalization=False,
+                    enable_secant_family_globalization=bool(enable_secant_family_seed),
+                    max_secant_family_promotions=max_secant_family_promotions,
+                    secant_family_window_sizes=secant_family_window_sizes,
+                    secant_family_ridge_factors=secant_family_ridge_factors,
+                    secant_family_alpha_values=secant_family_alpha_values,
+                    secant_family_min_relative_improvement=(
+                        secant_family_min_relative_improvement
+                    ),
+                    enable_matrix_free_jacobian_subspace=False,
+                    enable_matrix_free_global_krylov=True,
+                    matrix_free_global_krylov_max_iterations=(
+                        matrix_free_global_krylov_max_iterations
+                    ),
+                    matrix_free_global_krylov_probe_epsilon=(
+                        matrix_free_global_krylov_probe_epsilon
+                    ),
+                    matrix_free_global_krylov_probe_max_step=(
+                        matrix_free_global_krylov_probe_max_step
+                    ),
+                    matrix_free_global_krylov_scaling_mode="residual_diagonal_displacement",
+                    matrix_free_global_krylov_preconditioner_mode="current_tangent",
+                    matrix_free_global_krylov_preconditioner_input_scale=1.0,
+                    matrix_free_global_krylov_tangent_regularization_factor=float(factor),
+                    matrix_free_global_krylov_allow_negative_alphas=True,
+                    matrix_free_global_krylov_max_alpha=matrix_free_global_krylov_max_alpha,
+                    matrix_free_global_krylov_alpha_values=(
+                        matrix_free_global_krylov_alpha_values
+                    ),
+                    matrix_free_global_krylov_min_relative_improvement=(
+                        matrix_free_global_krylov_min_relative_improvement
+                    ),
+                )
             child_runtime_seconds = float(time.perf_counter() - child_started)
             krylov = child_payload.get("matrix_free_global_krylov")
             krylov = krylov if isinstance(krylov, dict) else {}
@@ -236,8 +486,17 @@ def run_adaptive_preconditioned_global_newton(
                 ),
                 "child_runtime_seconds": child_runtime_seconds,
                 "runtime_budget_seconds": runtime_budget_seconds,
+                "child_timeout_seconds": (
+                    None
+                    if child_timeout_seconds is None
+                    else float(child_timeout_seconds)
+                ),
+                **child_subprocess_meta,
             }
             controller_rows.append(row)
+            if bool(row.get("subprocess_timeout")):
+                runtime_budget_exceeded = True
+                stop_reason = "child_timeout_seconds_exceeded"
             if (
                 runtime_budget_seconds is not None
                 and time.perf_counter() - started >= runtime_budget_seconds
@@ -251,7 +510,8 @@ def run_adaptive_preconditioned_global_newton(
                 step_promoted = True
                 break
             if runtime_budget_exceeded:
-                stop_reason = "runtime_budget_exceeded"
+                if stop_reason != "child_timeout_seconds_exceeded":
+                    stop_reason = "runtime_budget_exceeded"
                 break
         if runtime_budget_exceeded:
             if final_residual_inf_n is None and controller_rows:
@@ -323,6 +583,9 @@ def run_adaptive_preconditioned_global_newton(
             ),
             "runtime_budget_seconds": runtime_budget_seconds,
             "runtime_budget_exceeded": bool(runtime_budget_exceeded),
+            "child_timeout_seconds": (
+                None if child_timeout_seconds is None else float(child_timeout_seconds)
+            ),
         },
         "initial_checkpoint_path": str(initial_checkpoint),
         "final_checkpoint_path": str(final_checkpoint),
@@ -395,6 +658,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--child-timeout-seconds",
+        type=float,
+        default=None,
+        help=(
+            "Optional hard timeout for each child probe. When set, the controller "
+            "launches child probes in a subprocess and writes a timeout receipt "
+            "instead of waiting indefinitely."
+        ),
+    )
+    parser.add_argument(
         "--allow-cpu-diagnostic",
         action="store_true",
         help="Acknowledge this controller orchestrates CPU-diagnostic residual-JVP receipts.",
@@ -443,6 +716,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_controller_runtime_seconds=args.max_controller_runtime_seconds,
+        child_timeout_seconds=args.child_timeout_seconds,
     )
     controller = payload["controller"]
     print(
