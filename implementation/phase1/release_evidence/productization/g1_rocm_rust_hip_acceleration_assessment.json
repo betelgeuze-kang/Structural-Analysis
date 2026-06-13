@@ -38,11 +38,11 @@
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
     "post_reassessment_frontier_advances": {
-      "generated_at": "2026-06-14T06:42:45+09:00",
-      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_rowstrong_followup6_final_checkpoint.npz",
-      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_largest_rows_rowstrong_followup6_frontier_probe.json",
-      "latest_direct_residual_inf_n": 0.03730058294078731,
-      "latest_direct_relative_residual_inf": 4.2992144832167926e-06,
+      "generated_at": "2026-06-14T06:48:37+09:00",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_followup7_final_checkpoint.npz",
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_node_block_followup7_frontier_probe.json",
+      "latest_direct_residual_inf_n": 0.03729955020614284,
+      "latest_direct_relative_residual_inf": 4.299095451625574e-06,
       "advances": [
         {
           "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
@@ -158,6 +158,19 @@
           "improvement_inf_n": 9.420898550160928e-08,
           "runtime_seconds": 183.7782940750003,
           "assessment": "Switching the broadened largest-row support selection from residual_weighted to row_strongest still produced only a near-zero accepted descent, confirming the largest-row support family is saturated at this frontier."
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_followup7_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_followup7_final_checkpoint.npz",
+          "target_mode": "residual_node_blocks",
+          "support_expansion_depth": 0,
+          "target_row_count": 24,
+          "support_size": 96,
+          "base_residual_inf_n": 0.03730058294078731,
+          "final_residual_inf_n": 0.03729955020614284,
+          "improvement_inf_n": 1.0327346444682917e-06,
+          "runtime_seconds": 197.73494160799964,
+          "assessment": "Switching from largest-row targeting to node-block targeting produced a slightly larger but still micro-Newton-scale negative-alpha descent, so node blocks alone do not break the 2380/2202 cancellation frontier."
         }
       ],
       "latest_top_residual_summary": {
@@ -170,10 +183,10 @@
         "largest_row": {
           "node_index": 2380,
           "dof": "uz",
-          "residual_n": -0.03730058294078731,
+          "residual_n": -0.03729955020614284,
           "dominant_component": "shell_membrane",
           "frame_component_n": 361.32719634113454,
-          "shell_membrane_component_n": -361.9564320456017,
+          "shell_membrane_component_n": -361.95643101286703,
           "external_load_n": -0.5919351215263475
         }
       },
@@ -228,7 +241,7 @@
           "assessment": "Repeating the exact largest-row expand1 family from the new frontier reversed the prior accepted descent; the single-step family is saturated at 0.0418049579 N."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family and switching support selection both tapered to sub-micro-Newton descents. The next G1 push should keep residual-only execution but leave largest-row targeting for a coupled residual_node_blocks or residual_element_blocks patch around the persistent 2380/2202 hotspot."
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. The next G1 push should keep residual-only execution but move to residual_element_blocks or neighbor-expanded coupled patches around the persistent 2380/2202 hotspot."
     },
     "current_rocm_probe_refresh": {
       "hardware": {
