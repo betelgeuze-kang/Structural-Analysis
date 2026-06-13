@@ -1,0 +1,50 @@
+{
+  "schema_version": "mgt-preconditioned-checkpoint-standardization.v1",
+  "generated_at": "2026-06-13T01:08:43.847897+00:00",
+  "status": "ready",
+  "source_checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": null,
+    "accepted_state_history_count": 0,
+    "accepted_residual_history_count": 0,
+    "residual_inf_n": 7325.9547714166265,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": null
+  },
+  "output_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_standard_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "residual_inf_n": 7325.9547714166265,
+    "direct_residual_inf_n": 7325.9547714166265,
+    "direct_relative_residual_inf": 0.8443795880258363,
+    "max_translation_m": 7.220126197640542e-06,
+    "accepted_iteration_count": 0,
+    "accepted_history_count": 1,
+    "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_final_checkpoint.npz"
+  },
+  "reloaded_checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_standard_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 1,
+    "accepted_residual_history_count": 1,
+    "residual_inf_n": 7325.9547714166265,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 7.220126197640542e-06
+  },
+  "state_vector_equal": true,
+  "state_history_count": 1,
+  "residual_history_count": 1,
+  "runtime_metrics": {
+    "total_seconds": 30.205264534997696
+  },
+  "claim_boundary": "This receipt standardizes an already accepted preconditioned-equilibrium checkpoint into the direct-residual Newton checkpoint schema. It does not claim new residual descent or close the physical residual gate.",
+  "ready": true,
+  "blockers": []
+}

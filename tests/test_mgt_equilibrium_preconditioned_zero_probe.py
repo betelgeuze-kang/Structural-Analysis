@@ -14,8 +14,10 @@ from run_mgt_equilibrium_preconditioned_zero_probe import (  # noqa: E402
     diagonal_jacobi_correction,
     evaluate_correction_line_search,
     node_block_jacobi_correction,
+    run_mgt_equilibrium_preconditioned_zero_probe,
     run_iterative_preconditioned_search,
 )
+from run_mgt_direct_residual_newton_probe import _load_checkpoint  # noqa: E402
 
 
 def test_diagonal_jacobi_correction_solves_diagonal_fixture() -> None:
@@ -94,3 +96,62 @@ def test_run_iterative_preconditioned_search_accepts_descent_step() -> None:
     assert result["accepted_iteration_count"] == 1
     assert result["final_residual_inf_n"] == 0.0
     assert result["residual_gate_passed"] is True
+
+
+def test_preconditioned_zero_probe_writes_standard_checkpoint(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    stiffness = coo_matrix(([10.0], ([0], [0])), shape=(1, 1)).tocsr()
+    free = np.asarray([0], dtype=np.int64)
+    input_checkpoint = tmp_path / "input_checkpoint.npz"
+    np.savez_compressed(
+        input_checkpoint,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        load_scale=np.asarray(1.0, dtype=np.float64),
+        displacement_u=np.asarray([0.0], dtype=np.float64),
+        residual_inf_n=np.asarray(1.0, dtype=np.float64),
+    )
+
+    def build_direct_residual_assembler(**_kwargs):
+        def assemble_residual(u: np.ndarray):
+            rhs = np.asarray([1.0], dtype=np.float64)
+            residual = np.asarray(stiffness @ u - rhs, dtype=np.float64)
+            return stiffness, rhs.copy(), free.copy(), residual, rhs.copy(), {}
+
+        return assemble_residual, {
+            "u0": np.asarray([0.0], dtype=np.float64),
+            "checkpoint": {"path": str(input_checkpoint)},
+            "load_scale": 1.0,
+        }
+
+    import run_mgt_equilibrium_preconditioned_zero_probe as probe_module  # noqa: E402
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    output_checkpoint = tmp_path / "preconditioned_checkpoint.npz"
+
+    payload = run_mgt_equilibrium_preconditioned_zero_probe(
+        checkpoint_npz=input_checkpoint,
+        output_json=None,
+        output_final_checkpoint_npz=output_checkpoint,
+        start_mode="zero",
+        iterative_mode="diagonal_jacobi",
+        iterative_alpha_values=(0.0, 1.0),
+        max_iterative_corrections=1,
+    )
+
+    assert payload["output_final_checkpoint"]["written"] is True
+    assert payload["output_final_checkpoint"]["schema"] == "mgt-direct-residual-newton-state.v1"
+
+    meta, u, state_history, residual_history = _load_checkpoint(output_checkpoint)
+    assert meta["checkpoint_schema"] == "mgt-direct-residual-newton-state.v1"
+    assert meta["residual_inf_n"] <= 1.0e-12
+    np.testing.assert_allclose(u, np.asarray([0.1], dtype=np.float64))
+    assert state_history is not None
+    assert residual_history is not None
+    assert state_history.shape[0] == 2
+    assert residual_history.shape[0] == 2

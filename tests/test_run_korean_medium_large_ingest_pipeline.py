@@ -504,6 +504,17 @@ def test_ingest_pipeline_reports_repo_public_candidates_without_counting_them(
         "exact_clean_repo_candidate_count": 0,
         "actions_with_candidate_blockers_count": 2,
     }
+    resolution_plan = receipt["operator_action_packet"]["operator_resolution_plan"]
+    assert (
+        resolution_plan["schema_version"]
+        == "korean-medium-large-operator-resolution-plan.v1"
+    )
+    assert resolution_plan["auto_promotable_repo_candidate_count"] == 0
+    assert resolution_plan["source_mapping_blocked_action_count"] == 1
+    assert resolution_plan["priority_batches"][0]["batch_id"] == (
+        "replace_benchmark_bridge_mgt"
+    )
+    assert resolution_plan["priority_batches"][0]["source_ids"] == ["bridge_mgt"]
     assert candidate_matrix["bridge_mgt"]["candidate_promotion_blocker_counts"] == {
         "repo_benchmark_bridge_mgt": 1
     }

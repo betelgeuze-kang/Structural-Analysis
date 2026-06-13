@@ -1199,6 +1199,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     preconditioned_continuation = _load(
         productization / "mgt_equilibrium_preconditioned_continuation_probe.json"
     )
+    preconditioned_continuation_standardization = _load(
+        productization
+        / "mgt_equilibrium_preconditioned_continuation_checkpoint_standardization.json"
+    )
     direct_residual_preconditioned_zero_seed = _load(
         productization / "mgt_direct_residual_preconditioned_zero_seed_base.json"
     )
@@ -3215,6 +3219,18 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "equilibrium_preconditioned_continuation_output_final_checkpoint": (
                     preconditioned_continuation.get("output_final_checkpoint")
+                ),
+                "equilibrium_preconditioned_continuation_checkpoint_standardization_status": (
+                    preconditioned_continuation_standardization.get("status")
+                ),
+                "equilibrium_preconditioned_continuation_standard_checkpoint_ready": (
+                    preconditioned_continuation_standardization.get("ready")
+                ),
+                "equilibrium_preconditioned_continuation_standard_checkpoint": (
+                    preconditioned_continuation_standardization.get("output_checkpoint")
+                ),
+                "equilibrium_preconditioned_continuation_standard_reloaded_checkpoint": (
+                    preconditioned_continuation_standardization.get("reloaded_checkpoint")
                 ),
                 "direct_residual_preconditioned_continuation_seed_status": (
                     direct_residual_preconditioned_continuation_seed.get("status")

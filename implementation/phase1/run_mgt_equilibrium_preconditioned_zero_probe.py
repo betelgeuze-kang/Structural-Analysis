@@ -19,7 +19,11 @@ if str(PHASE1) not in sys.path:
     sys.path.insert(0, str(PHASE1))
 
 from mgt_sparse_linear_solver import build_node_block_jacobi_preconditioner  # noqa: E402
-from run_mgt_direct_residual_newton_probe import DEFAULT_CHECKPOINT, PRODUCTIZATION  # noqa: E402
+from run_mgt_direct_residual_newton_probe import (  # noqa: E402
+    DEFAULT_CHECKPOINT,
+    PRODUCTIZATION,
+    _load_checkpoint,
+)
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
 from run_mgt_uncoarsened_boundary_global_equilibrium import DEFAULT_MGT  # noqa: E402
 
@@ -42,6 +46,120 @@ def _float_or_inf(value: Any) -> float:
     except (TypeError, ValueError):
         return float("inf")
     return number if np.isfinite(number) else float("inf")
+
+
+def _translation_metrics(u: np.ndarray) -> dict[str, float]:
+    arr = np.asarray(u, dtype=np.float64)
+    if arr.size % 6 != 0:
+        return {"max_translation_m": _max_abs(arr)}
+    translations = arr.reshape((-1, 6))[:, :3]
+    return {
+        "max_translation_m": float(np.max(np.linalg.norm(translations, axis=1)))
+        if translations.size
+        else 0.0
+    }
+
+
+def _same_state_exact(left: np.ndarray, right: np.ndarray) -> bool:
+    return bool(
+        np.array_equal(
+            np.asarray(left, dtype=np.float64),
+            np.asarray(right, dtype=np.float64),
+        )
+    )
+
+
+def write_preconditioned_checkpoint(
+    *,
+    path: Path,
+    source_checkpoint_npz: Path,
+    source_checkpoint_meta: dict[str, Any],
+    start_u: np.ndarray,
+    final_u: np.ndarray,
+    start_residual: np.ndarray,
+    final_residual: np.ndarray,
+    final_rhs: np.ndarray,
+    loaded_state_history: np.ndarray | None,
+    loaded_residual_history: np.ndarray | None,
+    accepted_iteration_count: int,
+) -> dict[str, Any]:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    start_np = np.asarray(start_u, dtype=np.float64)
+    final_np = np.asarray(final_u, dtype=np.float64)
+    start_residual_np = np.asarray(start_residual, dtype=np.float64)
+    final_residual_np = np.asarray(final_residual, dtype=np.float64)
+    final_rhs_np = np.asarray(final_rhs, dtype=np.float64)
+
+    state_rows: list[np.ndarray] = []
+    if (
+        loaded_state_history is not None
+        and loaded_state_history.ndim == 2
+        and loaded_state_history.shape[1] == final_np.size
+    ):
+        state_rows = [
+            np.asarray(row, dtype=np.float64).copy() for row in loaded_state_history
+        ]
+    if not state_rows or not _same_state_exact(state_rows[-1], start_np):
+        state_rows.append(start_np.copy())
+    if not _same_state_exact(state_rows[-1], final_np):
+        state_rows.append(final_np.copy())
+
+    residual_rows: list[np.ndarray] = []
+    if (
+        loaded_residual_history is not None
+        and loaded_residual_history.ndim == 2
+        and loaded_residual_history.shape[1] == final_residual_np.size
+    ):
+        residual_rows = [
+            np.asarray(row, dtype=np.float64).copy()
+            for row in loaded_residual_history
+        ]
+    while len(residual_rows) < max(len(state_rows) - 1, 0):
+        residual_rows.append(start_residual_np.copy())
+    if len(residual_rows) < len(state_rows):
+        residual_rows.append(final_residual_np.copy())
+    else:
+        residual_rows[-1] = final_residual_np.copy()
+
+    state_history = np.vstack(state_rows)
+    residual_history = np.vstack(residual_rows)
+    final_residual_inf = _max_abs(final_residual_np)
+    rhs_inf = _max_abs(final_rhs_np)
+    translation = _translation_metrics(final_np)
+    load_scale = float(source_checkpoint_meta.get("load_scale") or 0.0)
+    np.savez_compressed(
+        path,
+        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
+        source_schema_version=np.asarray(SCHEMA_VERSION),
+        load_scale=np.asarray(load_scale, dtype=np.float64),
+        displacement_u=final_np,
+        residual_inf_n=np.asarray(final_residual_inf, dtype=np.float64),
+        direct_residual_inf_n=np.asarray(final_residual_inf, dtype=np.float64),
+        direct_relative_residual_inf=np.asarray(
+            final_residual_inf / max(rhs_inf, 1.0),
+            dtype=np.float64,
+        ),
+        max_translation_m=np.asarray(translation["max_translation_m"], dtype=np.float64),
+        accepted_state_history_u=state_history,
+        accepted_residual_history=residual_history,
+        accepted_history_count=np.asarray(state_history.shape[0], dtype=np.int64),
+        accepted_iteration_count=np.asarray(int(accepted_iteration_count), dtype=np.int64),
+        source_checkpoint_path=np.asarray(str(source_checkpoint_npz)),
+    )
+    return {
+        "written": True,
+        "path": str(path),
+        "schema": "mgt-direct-residual-newton-state.v1",
+        "load_scale": load_scale,
+        "dof_count": int(final_np.size),
+        "residual_inf_n": final_residual_inf,
+        "direct_residual_inf_n": final_residual_inf,
+        "direct_relative_residual_inf": final_residual_inf / max(rhs_inf, 1.0),
+        "max_translation_m": translation["max_translation_m"],
+        "accepted_iteration_count": int(accepted_iteration_count),
+        "accepted_history_count": int(state_history.shape[0]),
+        "source_checkpoint_path": str(source_checkpoint_npz),
+    }
 
 
 def diagonal_jacobi_correction(
@@ -258,6 +376,9 @@ def run_mgt_equilibrium_preconditioned_zero_probe(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
     )
+    checkpoint_meta, _loaded_u, loaded_state_history, loaded_residual_history = _load_checkpoint(
+        checkpoint_npz
+    )
     u0 = np.asarray(setup_meta["u0"], dtype=np.float64)
     _k_bad, _f_bad, _free_bad, bad_residual, _rhs_bad, _bad_meta = assemble_residual(u0)
     mode = str(start_mode or "zero").strip().lower()
@@ -325,26 +446,23 @@ def run_mgt_equilibrium_preconditioned_zero_probe(
     overall_gate_passed = bool(overall_best_residual <= 5.0e-4)
     final_checkpoint_row: dict[str, Any] = {"written": False}
     if output_final_checkpoint_npz is not None and bool(iterative_search.get("enabled")):
-        output_final_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
         final_u_np = np.asarray(iterative_final_u, dtype=np.float64)
-        np.savez_compressed(
-            output_final_checkpoint_npz,
-            u=final_u_np,
-            displacement_u=final_u_np,
-            load_scale=np.asarray(float(setup_meta.get("load_scale") or 0.0), dtype=np.float64),
-            residual_inf_n=np.asarray(iterative_final, dtype=np.float64),
-            accepted_iteration_count=np.asarray(
-                int(iterative_search.get("accepted_iteration_count") or 0),
-                dtype=np.int64,
-            ),
-            schema_version=np.asarray(SCHEMA_VERSION),
+        _k_final, _f_final, _free_final, final_residual, final_rhs, _final_meta = (
+            assemble_residual(final_u_np)
         )
-        final_checkpoint_row = {
-            "written": True,
-            "path": str(output_final_checkpoint_npz),
-            "residual_inf_n": iterative_final,
-            "accepted_iteration_count": int(iterative_search.get("accepted_iteration_count") or 0),
-        }
+        final_checkpoint_row = write_preconditioned_checkpoint(
+            path=output_final_checkpoint_npz,
+            source_checkpoint_npz=checkpoint_npz,
+            source_checkpoint_meta=checkpoint_meta,
+            start_u=start_u,
+            final_u=final_u_np,
+            start_residual=np.asarray(residual, dtype=np.float64),
+            final_residual=np.asarray(final_residual, dtype=np.float64),
+            final_rhs=np.asarray(final_rhs, dtype=np.float64),
+            loaded_state_history=loaded_state_history,
+            loaded_residual_history=loaded_residual_history,
+            accepted_iteration_count=int(iterative_search.get("accepted_iteration_count") or 0),
+        )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,

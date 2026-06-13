@@ -406,6 +406,30 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     ]["written"] is True
     assert (
         rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_checkpoint_standardization_status"
+        ]
+        == "ready"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_standard_checkpoint_ready"
+        ]
+        is True
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_standard_checkpoint"
+        ]["schema"]
+        == "mgt-direct-residual-newton-state.v1"
+    )
+    assert (
+        rows["G1"]["evidence"][
+            "equilibrium_preconditioned_continuation_standard_reloaded_checkpoint"
+        ]["checkpoint_schema"]
+        == "mgt-direct-residual-newton-state.v1"
+    )
+    assert (
+        rows["G1"]["evidence"][
             "direct_residual_preconditioned_continuation_seed_base_residual_inf_n"
         ]
         == rows["G1"]["evidence"][
@@ -5557,6 +5581,19 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert operator_action_packet["next_actions"][0]["download_url"].startswith(
         "https://www.g2b.go.kr/"
     )
+    resolution_plan = operator_action_packet["operator_resolution_plan"]
+    assert (
+        resolution_plan["schema_version"]
+        == "korean-medium-large-operator-resolution-plan.v1"
+    )
+    assert resolution_plan["minimum_operator_real_mgt_needed"] == 4
+    assert resolution_plan["auto_promotable_repo_candidate_count"] == 0
+    assert resolution_plan["priority_batches"][0]["batch_id"] == (
+        "replace_benchmark_bridge_mgt"
+    )
+    assert resolution_plan["priority_batches"][0][
+        "closes_operator_real_mgt_target"
+    ] is True
     assert (
         rows["G7"]["evidence"]["operator_action_type_counts"][
             "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt"

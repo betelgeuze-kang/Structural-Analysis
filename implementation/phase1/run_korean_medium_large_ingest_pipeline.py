@@ -317,12 +317,138 @@ def _operator_action_packet(
             operator_attached_real_mgt_header_ok_remaining
         ),
         "candidate_matrix_summary": candidate_matrix_summary,
+        "operator_resolution_plan": _operator_resolution_plan(
+            operator_action_queue=rows,
+            candidate_blocker_matrix=candidate_blocker_matrix,
+            operator_attached_real_mgt_header_ok_remaining=(
+                operator_attached_real_mgt_header_ok_remaining
+            ),
+        ),
         "candidate_blocker_matrix": candidate_blocker_matrix,
         "next_actions": next_actions,
         "claim_boundary": (
             "This packet is an operator action checklist. It does not count local "
             "or repo candidate files as G7 evidence until each source is matched, "
             "rights are cleared where required, and the acceptance checks pass."
+        ),
+    }
+
+
+def _operator_resolution_plan(
+    *,
+    operator_action_queue: list[dict[str, Any]],
+    candidate_blocker_matrix: list[dict[str, Any]],
+    operator_attached_real_mgt_header_ok_remaining: int,
+) -> dict[str, Any]:
+    rows = [row for row in operator_action_queue if isinstance(row, dict)]
+    matrix_by_source = {
+        str(row.get("source_id") or ""): row
+        for row in candidate_blocker_matrix
+        if isinstance(row, dict)
+    }
+    benchmark_replacements = [
+        row
+        for row in rows
+        if str(row.get("action_type") or "")
+        == "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt"
+    ]
+    direct_downloads = [row for row in rows if bool(row.get("specific_remote_download"))]
+    metadata_only = [
+        row
+        for row in rows
+        if str(row.get("action_type") or "").startswith("attach_operator_real_")
+    ]
+
+    def _batch(
+        *,
+        batch_id: str,
+        objective: str,
+        source_rows: list[dict[str, Any]],
+        closes_operator_real_mgt_target: bool = False,
+    ) -> dict[str, Any]:
+        source_ids = [str(row.get("source_id") or "") for row in source_rows]
+        return {
+            "batch_id": batch_id,
+            "objective": objective,
+            "source_ids": source_ids,
+            "source_count": int(len(source_ids)),
+            "closes_operator_real_mgt_target": bool(closes_operator_real_mgt_target),
+            "target_directories": [
+                str(row.get("target_directory") or "") for row in source_rows
+            ],
+            "acceptance_checks": sorted(
+                {
+                    str(check)
+                    for row in source_rows
+                    for check in row.get("acceptance_checks", [])
+                    if check
+                }
+            ),
+            "candidate_blockers": {
+                source_id: matrix_by_source.get(source_id, {}).get(
+                    "candidate_promotion_blocker_counts", {}
+                )
+                for source_id in source_ids
+            },
+        }
+
+    priority_batches = [
+        _batch(
+            batch_id="replace_benchmark_bridge_mgt",
+            objective=(
+                "Replace the four repo-benchmark bridge MGTs with source-native "
+                "operator-attached MGT files that pass header and sha256 checks."
+            ),
+            source_rows=benchmark_replacements,
+            closes_operator_real_mgt_target=(
+                len(benchmark_replacements)
+                >= int(operator_attached_real_mgt_header_ok_remaining)
+            ),
+        ),
+        _batch(
+            batch_id="fetch_specific_remote_downloads",
+            objective=(
+                "Fetch direct official download URLs first; these have the lowest "
+                "portal search ambiguity."
+            ),
+            source_rows=direct_downloads,
+        ),
+        _batch(
+            batch_id="resolve_metadata_only_sources",
+            objective=(
+                "Attach PDF/ZIP/IFC/MGT artifacts for remaining metadata-only "
+                "sources, then rerun this ingest receipt."
+            ),
+            source_rows=metadata_only,
+        ),
+    ]
+    return {
+        "schema_version": "korean-medium-large-operator-resolution-plan.v1",
+        "status": "pending" if rows else "ready",
+        "minimum_operator_real_mgt_needed": int(
+            operator_attached_real_mgt_header_ok_remaining
+        ),
+        "auto_promotable_repo_candidate_count": sum(
+            int(row.get("exact_clean_repo_candidate_count") or 0)
+            for row in candidate_blocker_matrix
+        ),
+        "source_mapping_blocked_action_count": sum(
+            1
+            for row in candidate_blocker_matrix
+            if "catalog_source_unmatched_candidate"
+            in row.get("candidate_promotion_blocker_counts", {})
+        ),
+        "rights_blocked_private_candidate_action_count": sum(
+            1
+            for row in candidate_blocker_matrix
+            if "raw_redistribution_not_allowed"
+            in row.get("candidate_promotion_blocker_counts", {})
+        ),
+        "priority_batches": priority_batches,
+        "claim_boundary": (
+            "This plan is an execution manifest for closing G7 with real attached "
+            "artifacts. It does not count candidates as evidence until the files are "
+            "attached and acceptance checks pass."
         ),
     }
 
