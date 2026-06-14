@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T12:19:18+09:00",
+  "generated_at": "2026-06-14T12:25:44+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -161,8 +161,11 @@
       "followup49_refresh_final_residual_inf_n": 0.033808627722457074,
       "followup50_refresh_final_residual_inf_n": 0.03364664105529991,
       "followup51_refresh_accepted": false,
+      "followup52_residual_node_blocks_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_nodeblock_refresh_followup52_probe.json",
+      "followup52_residual_node_blocks_accepted": false,
+      "followup52_best_improvement_inf_n": 2.842170943040401e-14,
       "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
-      "assessment": "Coupled largest-row node-block current-tangent correction is the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, so the next pass needs another target/support/globalization refresh rather than a static repeat."
+      "assessment": "Coupled largest-row node-block current-tangent correction is the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, and followup52 residual-node-block retargeting only found 2.84e-14 N numerical-noise improvement, so the next pass needs a shell/element target family or FD row-submatrix check rather than a static repeat."
     }
   },
   "engine_state": {
@@ -340,6 +343,9 @@
       "coupled_row_nodeblock_refresh_followup50_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
       "coupled_row_nodeblock_refresh_followup50_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
       "coupled_row_nodeblock_refresh_followup51_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup51_probe.json",
+      "nodeblock_refresh_followup52_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_nodeblock_refresh_followup52_probe.json",
+      "nodeblock_refresh_followup52_accepted": false,
+      "nodeblock_refresh_followup52_best_improvement_inf_n": 2.842170943040401e-14,
       "coupled_row_nodeblock_total_followup47_to_50_improvement_inf_n": 0.0003828290785964916,
       "coupled_row_nodeblock_refresh_followup50_residual_inf_n": 0.03364664105529991
     },
@@ -506,6 +512,20 @@
         "best_support_size": 186,
         "best_alpha": 0.002,
         "assessment": "Second broad refresh chunk accepted two promotions and improved the residual by 1.62e-4 N; followup51 then no-descended, requiring another adaptive retargeting strategy."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_nodeblock_refresh_followup52_probe.json",
+        "base_residual_inf_n": 0.03364664105529991,
+        "final_residual_inf_n": 0.03364664105529991,
+        "accepted": false,
+        "best_improvement_inf_n": 2.842170943040401e-14,
+        "residual_only_eval_count": 168,
+        "target_mode": "residual_node_blocks",
+        "best_target_row_count": 6,
+        "best_support_column_count": 8,
+        "best_support_size": 36,
+        "checkpoint_written": false,
+        "assessment": "Residual-node-block retargeting after followup51 produced only numerical-noise improvement and wrote no checkpoint. The next G1 probe should change to shell element/physics-coupled targets or use FD row-submatrix checks on a refreshed support."
       }
     ],
     "latest_frontier_pattern": {
@@ -565,6 +585,8 @@
       "latest_coupled_row_nodeblock_total_followup47_to_50_improvement_n": 0.0003828290785964916,
       "latest_coupled_row_nodeblock_followup50_chunk_improvement_n": 0.0001619866671571657,
       "latest_coupled_row_nodeblock_followup51_accepted": false,
+      "latest_nodeblock_refresh_followup52_accepted": false,
+      "latest_nodeblock_refresh_followup52_best_improvement_n": 2.842170943040401e-14,
       "steps_needed_at_followup50_chunk_improvement": 201.53906261695525
     }
   },
@@ -580,7 +602,7 @@
     "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
     "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn.",
     "Promote the coupled row-nodeblock lane from one-off CLI probes into an adaptive controller that refreshes target rows/support after every accepted frontier move.",
-    "After followup51 no-descent, switch the coupled row-nodeblock controller to a different target family such as residual_node_blocks or shell element blocks, or add FD residual-row submatrix checks only on the refreshed support."
+    "After followup51 and followup52 no-descent, skip plain residual_node_blocks retargeting and switch to shell element/physics-coupled target families or FD residual-row submatrix checks only on the refreshed support."
   ],
   "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels; batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics; adaptive material/shell/frame Newton, full-load path closure, and production ROCm/HIP full residual gate closure remain open."
 }
