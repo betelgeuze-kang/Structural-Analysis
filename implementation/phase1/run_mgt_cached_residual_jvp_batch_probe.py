@@ -520,6 +520,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
     include_gate_limited_alpha: bool = False,
     max_dynamic_alpha: float = 1.0,
     min_relative_improvement: float = 0.0,
+    min_checkpoint_improvement_inf_n: float = 0.0,
     enable_component_block_basis: bool = False,
     component_block_basis_key_mode: str = "dominant_component",
     component_block_basis_normalization: str = "linf",
@@ -1014,6 +1015,8 @@ def run_mgt_cached_residual_jvp_batch_probe(
             if bool(row.get("free_dof_set_stable"))
             and bool(row.get("relative_increment_gate_passed"))
             and float(row.get("improvement_inf_n", 0.0)) > 0.0
+            and float(row.get("improvement_inf_n", 0.0))
+            >= max(float(min_checkpoint_improvement_inf_n), 0.0)
             and float(row.get("relative_improvement", 0.0))
             >= max(float(min_relative_improvement), 0.0)
         ),
@@ -1021,6 +1024,28 @@ def run_mgt_cached_residual_jvp_batch_probe(
         default=(None, {}),
     )
     best_gate_candidate_index, best_gate_candidate_row = best_gate_candidate
+    best_gate_candidate_without_checkpoint_floor = min(
+        (
+            (index, row)
+            for index, row in enumerate(candidate_rows)
+            if bool(row.get("free_dof_set_stable"))
+            and bool(row.get("relative_increment_gate_passed"))
+            and float(row.get("improvement_inf_n", 0.0)) > 0.0
+            and float(row.get("relative_improvement", 0.0))
+            >= max(float(min_relative_improvement), 0.0)
+        ),
+        key=lambda item: float(item[1]["direct_residual_inf_n"]),
+        default=(None, {}),
+    )
+    best_gate_without_floor_index, best_gate_without_floor_row = (
+        best_gate_candidate_without_checkpoint_floor
+    )
+    checkpoint_candidate_below_floor = (
+        best_gate_candidate_index is None
+        and best_gate_without_floor_index is not None
+        and float(best_gate_without_floor_row.get("improvement_inf_n", 0.0))
+        < max(float(min_checkpoint_improvement_inf_n), 0.0)
+    )
     output_final_checkpoint: dict[str, Any] = {
         "written": False,
         "path": str(output_final_checkpoint_npz)
@@ -1031,9 +1056,18 @@ def run_mgt_cached_residual_jvp_batch_probe(
             if output_final_checkpoint_npz is None
             else "promote_gate_eligible_disabled"
             if not promote_gate_eligible
+            else "checkpoint_improvement_below_floor"
+            if checkpoint_candidate_below_floor
             else "no_gate_eligible_candidate"
         ),
     }
+    if checkpoint_candidate_below_floor:
+        output_final_checkpoint["best_gate_candidate_improvement_inf_n"] = float(
+            best_gate_without_floor_row.get("improvement_inf_n") or 0.0
+        )
+        output_final_checkpoint["minimum_checkpoint_improvement_inf_n"] = float(
+            min_checkpoint_improvement_inf_n
+        )
     if (
         promote_gate_eligible
         and output_final_checkpoint_npz is not None
@@ -1101,6 +1135,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         "output_npz": str(output_npz) if output_npz is not None else None,
         "output_final_checkpoint": output_final_checkpoint,
         "promoted_to_final_state": bool(output_final_checkpoint.get("written")),
+        "minimum_checkpoint_improvement_inf_n": float(min_checkpoint_improvement_inf_n),
         "base_direct_residual": {
             "direct_residual_inf_n": _max_abs(base_residual_np),
             "direct_relative_residual_inf": _max_abs(base_residual_np)
@@ -1216,6 +1251,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "promotion. Defaults to the legacy >0 behavior."
         ),
     )
+    parser.add_argument(
+        "--min-checkpoint-improvement-inf-n",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum absolute infinity-norm residual improvement required before "
+            "writing a final checkpoint. Use this to keep weak-step diagnostics "
+            "JSON-only instead of creating large NPZ checkpoints."
+        ),
+    )
     parser.add_argument("--enable-component-block-basis", action="store_true")
     parser.add_argument(
         "--component-block-basis-key-mode",
@@ -1327,6 +1372,7 @@ def main(argv: list[str] | None = None) -> int:
         include_gate_limited_alpha=bool(args.include_gate_limited_alpha),
         max_dynamic_alpha=args.max_dynamic_alpha,
         min_relative_improvement=args.min_relative_improvement,
+        min_checkpoint_improvement_inf_n=args.min_checkpoint_improvement_inf_n,
         enable_component_block_basis=bool(args.enable_component_block_basis),
         component_block_basis_key_mode=args.component_block_basis_key_mode,
         component_block_basis_normalization=args.component_block_basis_normalization,

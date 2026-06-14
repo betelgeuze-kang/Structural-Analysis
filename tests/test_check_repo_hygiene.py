@@ -87,6 +87,27 @@ def test_inventory_reports_large_files_above_threshold(tmp_path: Path, monkeypat
     }
 
 
+def test_github_hard_limit_uses_git_blob_size_for_lfs_smudged_files(tmp_path: Path, monkeypatch) -> None:
+    path = "implementation/phase1/release_evidence/productization/frontier_checkpoint.npz"
+    file_path = tmp_path / path
+    file_path.parent.mkdir(parents=True)
+    file_path.write_bytes(b"x" * (check_repo_hygiene.MAX_GIT_BLOB_BYTES + 1))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(check_repo_hygiene, "_git_blob_size", lambda checked: 132 if checked == path else None)
+
+    assert check_repo_hygiene.check_tracked_files([path]) == []
+
+
+def test_github_hard_limit_falls_back_to_worktree_size(monkeypatch) -> None:
+    path = "implementation/phase1/src/large.bin"
+    monkeypatch.setattr(check_repo_hygiene, "_git_blob_size", lambda checked: None)
+    monkeypatch.setattr(check_repo_hygiene, "_path_size", lambda checked: check_repo_hygiene.MAX_GIT_BLOB_BYTES + 1)
+
+    assert check_repo_hygiene.check_tracked_files([path]) == [
+        f"file exceeds GitHub hard limit ({check_repo_hygiene.MAX_GIT_BLOB_BYTES + 1} bytes): {path}"
+    ]
+
+
 def test_allowed_release_manifest_is_not_blocked() -> None:
     assert check_repo_hygiene.check_tracked_files(["implementation/phase1/release_artifacts_manifest.json"]) == []
 

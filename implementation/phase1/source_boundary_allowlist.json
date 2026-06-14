@@ -105,6 +105,11 @@
       "path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
       "classification": "source_required",
       "rationale": "Benchmark-bridge MGT roundtrip NPZ payload retained for solver/calibration reproducibility; large only because the source bridge is intentionally MGT-parity."
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+      "classification": "source_required",
+      "rationale": "Sole retained LFS-tracked G1 nonlinear continuation checkpoint for the 13,047-node / 78,282-DOF MIDAS33 frontier at load scale 0.656; historical binary checkpoints are pruned and documented in g1_checkpoint_retention_manifest.json."
     }
   ]
 }

@@ -51,6 +51,22 @@ def _path_size(path: str) -> int | None:
     return file_path.stat().st_size
 
 
+def _git_blob_size(path: str) -> int | None:
+    result = subprocess.run(
+        ["git", "cat-file", "-s", f":{path}"],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+    try:
+        return int(result.stdout.strip())
+    except ValueError:
+        return None
+
+
 def _git_files() -> list[str]:
     raw = subprocess.check_output(["git", "ls-files", "-z"])
     return [item for item in raw.decode("utf-8", "replace").split("\0") if item]
@@ -85,13 +101,18 @@ def check_tracked_files(files: list[str], *, strict_source_boundary: bool = Fals
         if _is_private_pem(path):
             errors.append(f"private signing key is tracked: {path}")
 
-        size = _path_size(path)
-        if size is None:
-            continue
-        if size > MAX_GIT_BLOB_BYTES:
-            errors.append(f"file exceeds GitHub hard limit ({size} bytes): {path}")
-        if size > MAX_RAW_DATA_BYTES and _is_raw_data_path(path) and path.endswith(RAW_DATA_SUFFIXES):
-            errors.append(f"large raw data artifact must be externalized ({size} bytes): {path}")
+        worktree_size = _path_size(path)
+        blob_size = _git_blob_size(path)
+        github_size = blob_size if blob_size is not None else worktree_size
+        if github_size is not None and github_size > MAX_GIT_BLOB_BYTES:
+            errors.append(f"file exceeds GitHub hard limit ({github_size} bytes): {path}")
+        if (
+            worktree_size is not None
+            and worktree_size > MAX_RAW_DATA_BYTES
+            and _is_raw_data_path(path)
+            and path.endswith(RAW_DATA_SUFFIXES)
+        ):
+            errors.append(f"large raw data artifact must be externalized ({worktree_size} bytes): {path}")
     return errors
 
 

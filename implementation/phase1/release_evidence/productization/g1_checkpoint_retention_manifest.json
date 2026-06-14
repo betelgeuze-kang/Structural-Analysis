@@ -1,0 +1,2387 @@
+{
+  "schema_version": "g1-checkpoint-retention-manifest.v1",
+  "generated_at": "2026-06-14T21:50:47+09:00",
+  "policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "reason": "The workspace is disk constrained. Historical binary continuation checkpoints are not required to resume the current G1 run; their JSON probe receipts and this manifest preserve the decision record.",
+    "checkpoint_write_gate": {
+      "minimum_absolute_improvement_inf_n": 6e-07,
+      "effect": "Future weak descent probes are retained as JSON diagnostics only and must not write a final checkpoint unless they clear this floor."
+    }
+  },
+  "current_g1_frontier": {
+    "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "nodes": 13047,
+    "dof": 78282,
+    "load_scale": 0.656,
+    "direct_residual_inf_n": 0.033276947944316015,
+    "residual_gate_n": 0.001,
+    "remaining_margin_to_gate_n": 0.032276947944316015,
+    "retained_checkpoint_npz": {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+      "size_bytes": 191033620,
+      "lfs_tracked": true
+    },
+    "retained_probe_json": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_probe.json",
+    "retained_component_frontier_probe_json": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup190_component_frontier_probe.json",
+    "component_frontier_top_rows_sample": [
+      {
+        "free_row": 10706,
+        "global_dof": 13322,
+        "node_index": 2220,
+        "dof": "uz",
+        "residual_n": -0.033276947944316015,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 10520,
+        "global_dof": 13136,
+        "node_index": 2189,
+        "dof": "uz",
+        "residual_n": -0.03327680756180129,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 10599,
+        "global_dof": 13215,
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.0332764643850571,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 14401,
+        "global_dof": 17077,
+        "node_index": 2846,
+        "dof": "uy",
+        "residual_n": 0.033276397273820646,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 11612,
+        "global_dof": 14264,
+        "node_index": 2377,
+        "dof": "uz",
+        "residual_n": -0.03327639260453452,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 39354,
+        "global_dof": 52296,
+        "node_index": 8716,
+        "dof": "ux",
+        "residual_n": -0.03327631654899344,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 12390,
+        "global_dof": 15066,
+        "node_index": 2511,
+        "dof": "ux",
+        "residual_n": -0.03327609140326795,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 13332,
+        "global_dof": 16008,
+        "node_index": 2668,
+        "dof": "ux",
+        "residual_n": 0.03327557950518778,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10712,
+        "global_dof": 13328,
+        "node_index": 2221,
+        "dof": "uz",
+        "residual_n": -0.03327487866818046,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 10597,
+        "global_dof": 13213,
+        "node_index": 2202,
+        "dof": "uy",
+        "residual_n": -0.033274253995471514,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 13382,
+        "global_dof": 16058,
+        "node_index": 2676,
+        "dof": "uz",
+        "residual_n": -0.03327261333786142,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 21907,
+        "global_dof": 24583,
+        "node_index": 4097,
+        "dof": "uy",
+        "residual_n": -0.03327258871990859,
+        "dominant_component": "shell_membrane"
+      }
+    ]
+  },
+  "retained_supporting_evidence": [
+    "implementation/phase1/release_evidence/productization/g1_current_frontier_engine_acceleration_assessment.json",
+    "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_followup191_199_plateau_diagnostic.json",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup200_guarded_diagnostics.json",
+    "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_followup200_guard_probe.json",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_followup200_guard_summary.json",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_followup200_guard_children/mgt_direct_residual_adaptive_global_krylov_followup200_guard_summary_step1_reg1em06_scale1e00.json",
+    "implementation/phase1/release_evidence/productization/mgt_shell_free_component_state_cleanup_frontier_probe.json",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_replay_probe.json",
+    "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_probe.json"
+  ],
+  "cleanup_scope": {
+    "deleted_checkpoint_pattern": "implementation/phase1/release_evidence/productization/**/*_final_checkpoint.npz except current frontier, plus superseded non-final cleanup checkpoint mgt_shell_free_component_state_cleanup_frontier_checkpoint.npz",
+    "candidate_count": 448,
+    "candidate_total_bytes": 24634744998,
+    "retained_final_checkpoint_count": 1,
+    "retained_final_checkpoint_total_bytes": 191033620
+  },
+  "documented_deleted_checkpoint_candidates": [
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_batch_component_dof_frontier_rows4_support12_probe_final_checkpoint.npz",
+      "size_bytes": 24532960,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_support2_followup151_final_checkpoint.npz",
+      "size_bytes": 158708810,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_replay_component_dof_frontier_rows4_support12_alpha_wide_probe_final_checkpoint.npz",
+      "size_bytes": 24532968,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_shell_bending_support3_followup153_final_checkpoint.npz",
+      "size_bytes": 160366631,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_shell_bending_support3_followup176_refresh_final_checkpoint.npz",
+      "size_bytes": 179429783,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_shell_bending_support3_from151_final_checkpoint.npz",
+      "size_bytes": 159537887,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup87_final_checkpoint.npz",
+      "size_bytes": 109814232,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup88_final_checkpoint.npz",
+      "size_bytes": 110642767,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_final_checkpoint.npz",
+      "size_bytes": 111471478,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup100_final_checkpoint.npz",
+      "size_bytes": 116443205,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup101_final_checkpoint.npz",
+      "size_bytes": 117271824,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup102_final_checkpoint.npz",
+      "size_bytes": 118100273,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup103_final_checkpoint.npz",
+      "size_bytes": 118928867,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup104_final_checkpoint.npz",
+      "size_bytes": 119757539,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup105_final_checkpoint.npz",
+      "size_bytes": 120586377,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup106_final_checkpoint.npz",
+      "size_bytes": 121415086,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup107_final_checkpoint.npz",
+      "size_bytes": 122243678,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup108_final_checkpoint.npz",
+      "size_bytes": 123072232,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup109_final_checkpoint.npz",
+      "size_bytes": 123900876,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup110_final_checkpoint.npz",
+      "size_bytes": 124729673,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup111_final_checkpoint.npz",
+      "size_bytes": 125558567,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup112_final_checkpoint.npz",
+      "size_bytes": 126387124,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup113_final_checkpoint.npz",
+      "size_bytes": 127215781,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup114_final_checkpoint.npz",
+      "size_bytes": 128044335,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup115_final_checkpoint.npz",
+      "size_bytes": 128873041,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup116_final_checkpoint.npz",
+      "size_bytes": 129701852,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup117_final_checkpoint.npz",
+      "size_bytes": 130530781,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup118_final_checkpoint.npz",
+      "size_bytes": 131359329,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup119_final_checkpoint.npz",
+      "size_bytes": 132188053,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup120_final_checkpoint.npz",
+      "size_bytes": 133016696,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup121_final_checkpoint.npz",
+      "size_bytes": 133845513,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup122_final_checkpoint.npz",
+      "size_bytes": 134674380,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup123_final_checkpoint.npz",
+      "size_bytes": 135503354,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup124_final_checkpoint.npz",
+      "size_bytes": 136331997,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup125_final_checkpoint.npz",
+      "size_bytes": 137160739,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup126_final_checkpoint.npz",
+      "size_bytes": 137989513,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup127_final_checkpoint.npz",
+      "size_bytes": 138818308,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup128_final_checkpoint.npz",
+      "size_bytes": 139647309,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup129_final_checkpoint.npz",
+      "size_bytes": 140476150,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup130_final_checkpoint.npz",
+      "size_bytes": 141304817,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup131_final_checkpoint.npz",
+      "size_bytes": 142133436,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup132_final_checkpoint.npz",
+      "size_bytes": 142962239,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup133_final_checkpoint.npz",
+      "size_bytes": 143791070,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup134_final_checkpoint.npz",
+      "size_bytes": 144620021,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup135_final_checkpoint.npz",
+      "size_bytes": 145448736,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup136_final_checkpoint.npz",
+      "size_bytes": 146277461,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup137_final_checkpoint.npz",
+      "size_bytes": 147106064,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup138_final_checkpoint.npz",
+      "size_bytes": 147934808,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup139_final_checkpoint.npz",
+      "size_bytes": 148763657,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup140_final_checkpoint.npz",
+      "size_bytes": 149592594,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup141_final_checkpoint.npz",
+      "size_bytes": 150421303,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup142_final_checkpoint.npz",
+      "size_bytes": 151249947,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup143_final_checkpoint.npz",
+      "size_bytes": 152078506,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup144_final_checkpoint.npz",
+      "size_bytes": 152907359,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup145_final_checkpoint.npz",
+      "size_bytes": 153736148,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup146_final_checkpoint.npz",
+      "size_bytes": 154565149,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup147_final_checkpoint.npz",
+      "size_bytes": 155393852,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup148_final_checkpoint.npz",
+      "size_bytes": 156222550,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup149_final_checkpoint.npz",
+      "size_bytes": 157051184,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup150_final_checkpoint.npz",
+      "size_bytes": 157880020,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup154_final_checkpoint.npz",
+      "size_bytes": 161195390,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup155_final_checkpoint.npz",
+      "size_bytes": 162024169,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup156_final_checkpoint.npz",
+      "size_bytes": 162853036,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup157_final_checkpoint.npz",
+      "size_bytes": 163681977,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup158_final_checkpoint.npz",
+      "size_bytes": 164510980,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup159_final_checkpoint.npz",
+      "size_bytes": 165339883,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup160_final_checkpoint.npz",
+      "size_bytes": 166168618,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup161_final_checkpoint.npz",
+      "size_bytes": 166997386,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup162_final_checkpoint.npz",
+      "size_bytes": 167826193,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup163_final_checkpoint.npz",
+      "size_bytes": 168655132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup164_final_checkpoint.npz",
+      "size_bytes": 169484101,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup165_final_checkpoint.npz",
+      "size_bytes": 170312945,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup166_final_checkpoint.npz",
+      "size_bytes": 171141579,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup167_final_checkpoint.npz",
+      "size_bytes": 171970351,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup168_final_checkpoint.npz",
+      "size_bytes": 172799096,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup169_final_checkpoint.npz",
+      "size_bytes": 173628042,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup170_final_checkpoint.npz",
+      "size_bytes": 174456982,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup171_final_checkpoint.npz",
+      "size_bytes": 175285830,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup172_final_checkpoint.npz",
+      "size_bytes": 176114494,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup173_final_checkpoint.npz",
+      "size_bytes": 176943225,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup174_final_checkpoint.npz",
+      "size_bytes": 177771910,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup175_final_checkpoint.npz",
+      "size_bytes": 178600907,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup177_final_checkpoint.npz",
+      "size_bytes": 180258700,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup178_final_checkpoint.npz",
+      "size_bytes": 181087377,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup179_final_checkpoint.npz",
+      "size_bytes": 181916159,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup180_final_checkpoint.npz",
+      "size_bytes": 182744882,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup181_final_checkpoint.npz",
+      "size_bytes": 183573797,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup182_final_checkpoint.npz",
+      "size_bytes": 184402767,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup183_final_checkpoint.npz",
+      "size_bytes": 185231713,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup184_final_checkpoint.npz",
+      "size_bytes": 186060384,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup185_final_checkpoint.npz",
+      "size_bytes": 186889197,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup186_final_checkpoint.npz",
+      "size_bytes": 187717958,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup187_final_checkpoint.npz",
+      "size_bytes": 188546959,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup188_final_checkpoint.npz",
+      "size_bytes": 189375953,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup189_final_checkpoint.npz",
+      "size_bytes": 190204841,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_final_checkpoint.npz",
+      "size_bytes": 112300206,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_final_checkpoint.npz",
+      "size_bytes": 113128662,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_final_checkpoint.npz",
+      "size_bytes": 113957124,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup98_final_checkpoint.npz",
+      "size_bytes": 114785677,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup99_final_checkpoint.npz",
+      "size_bytes": 115614425,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_component_dof_frontier_child_timeout_smoke_final_checkpoint.npz",
+      "size_bytes": 23705481,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_residual_only_input_scale_sweep_probe_final_checkpoint.npz",
+      "size_bytes": 26187987,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_runtime_budget_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_followup_2_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_followup_2_smoke_step1_reg1em06_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_followup_smoke_step1_reg1em06_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_secant_seed_smoke_step1_reg1em06_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg1em06_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_preconditioned_global_newton_smoke_step1_reg3em06_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_element_block_rotation_final_checkpoint.npz",
+      "size_bytes": 37771943,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_final_checkpoint.npz",
+      "size_bytes": 38598928,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_largest_rotation_row_followup_final_checkpoint.npz",
+      "size_bytes": 39426126,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_final_checkpoint.npz",
+      "size_bytes": 36117758,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_cleanup_row_correction_followup_final_checkpoint.npz",
+      "size_bytes": 36945018,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_smoke_final_checkpoint.npz",
+      "size_bytes": 77502864,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup48_final_checkpoint.npz",
+      "size_bytes": 78331319,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup49_final_checkpoint.npz",
+      "size_bytes": 79988089,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
+      "size_bytes": 81645260,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_final_checkpoint.npz",
+      "size_bytes": 68390617,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_final_checkpoint.npz",
+      "size_bytes": 69218562,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup37_final_checkpoint.npz",
+      "size_bytes": 70046601,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
+      "size_bytes": 70874893,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup15_final_checkpoint.npz",
+      "size_bytes": 58456043,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+      "size_bytes": 67562952,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup8_final_checkpoint.npz",
+      "size_bytes": 53489503,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_neighbor1_followup10_final_checkpoint.npz",
+      "size_bytes": 54317110,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_neighbor1_lowridge_followup11_final_checkpoint.npz",
+      "size_bytes": 55144612,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_final_checkpoint.npz",
+      "size_bytes": 44389210,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_frame_coupled_final_checkpoint.npz",
+      "size_bytes": 43562076,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
+      "size_bytes": 75017084,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+      "size_bytes": 89101743,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em3_followup45_smoke_attached_final_checkpoint.npz",
+      "size_bytes": 75845662,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em4_followup45_smoke_attached_final_checkpoint.npz",
+      "size_bytes": 75845461,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup45_smoke_attached_final_checkpoint.npz",
+      "size_bytes": 75845608,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
+      "size_bytes": 76674240,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup69_final_checkpoint.npz",
+      "size_bytes": 90758937,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup70_final_checkpoint.npz",
+      "size_bytes": 94072706,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup71_final_checkpoint.npz",
+      "size_bytes": 99043694,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+      "size_bytes": 105671517,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup73_final_checkpoint.npz",
+      "size_bytes": 108157384,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+      "size_bytes": 108985769,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_broad_followup4_final_checkpoint.npz",
+      "size_bytes": 50180131,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_broad_followup5_final_checkpoint.npz",
+      "size_bytes": 51007583,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup2_final_checkpoint.npz",
+      "size_bytes": 48525762,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup3_final_checkpoint.npz",
+      "size_bytes": 49352958,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_compact_followup_final_checkpoint.npz",
+      "size_bytes": 47698328,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_expand1_final_checkpoint.npz",
+      "size_bytes": 46871019,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_largest_rows_rowstrong_followup6_final_checkpoint.npz",
+      "size_bytes": 51835003,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_membrane_normal_row_final_checkpoint.npz",
+      "size_bytes": 42734960,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_alpha_fine_followup24_final_checkpoint.npz",
+      "size_bytes": 63423208,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_alpha_fine_followup25_final_checkpoint.npz",
+      "size_bytes": 64251241,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_control_followup23_final_checkpoint.npz",
+      "size_bytes": 62595495,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_followup18_final_checkpoint.npz",
+      "size_bytes": 59283852,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_followup19_final_checkpoint.npz",
+      "size_bytes": 60111590,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target12_followup26_final_checkpoint.npz",
+      "size_bytes": 65079242,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target16_followup29_final_checkpoint.npz",
+      "size_bytes": 65907229,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_wide_followup20_final_checkpoint.npz",
+      "size_bytes": 60939691,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_wider_followup21_final_checkpoint.npz",
+      "size_bytes": 61767661,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_coupled_final_checkpoint.npz",
+      "size_bytes": 40253395,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_coupled_followup_final_checkpoint.npz",
+      "size_bytes": 41080364,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_coupled_wide_final_checkpoint.npz",
+      "size_bytes": 41907623,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_node_block_followup7_final_checkpoint.npz",
+      "size_bytes": 52662222,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_final_checkpoint.npz",
+      "size_bytes": 73360337,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_followup42_final_checkpoint.npz",
+      "size_bytes": 74188675,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_fastpath_followup39_final_checkpoint.npz",
+      "size_bytes": 71703277,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_rows_followup12_final_checkpoint.npz",
+      "size_bytes": 55972283,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_rows_followup14_final_checkpoint.npz",
+      "size_bytes": 57628166,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup58_final_checkpoint.npz",
+      "size_bytes": 86616430,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup59_final_checkpoint.npz",
+      "size_bytes": 87444935,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup61_final_checkpoint.npz",
+      "size_bytes": 88273310,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup2_final_checkpoint.npz",
+      "size_bytes": 46043899,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_followup_final_checkpoint.npz",
+      "size_bytes": 45216598,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_refresh_followup55_final_checkpoint.npz",
+      "size_bytes": 82473849,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_refresh_followup56_final_checkpoint.npz",
+      "size_bytes": 84130638,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_refresh_followup57_final_checkpoint.npz",
+      "size_bytes": 85787732,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
+      "size_bytes": 72531865,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup13_final_checkpoint.npz",
+      "size_bytes": 56800075,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup31_final_checkpoint.npz",
+      "size_bytes": 66734961,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_checkpoint_row_continuation_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_frame_element_block_current_tangent_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_frame_element_block_fd_jacobian_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_single_largest_row_current_tangent_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_single_largest_row_current_tangent_followup_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_single_largest_row_fd_jacobian_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_checkpoint_trust_iteration_strict_gate_probe_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_post_block_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_post_signed_rows4_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_frontier_frame_block_current_tangent_narrow_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_current_frontier_frame_block_fd16_residual_weighted_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_followup_reg1e5_probe_final_checkpoint.npz",
+      "size_bytes": 26187987,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_residual_only_matvec_frontier_smoke_final_checkpoint.npz",
+      "size_bytes": 25360275,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_krylov_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_scaled_krylov_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_scaled_signed_krylov_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_broader_basis_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_floor_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_followup_2_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_followup_3_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_followup_4_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_2_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_3_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_4_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e6_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e7_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e7_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg1e9_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg3e6_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_alpha8_reg3e7_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_floor_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_matrix_free_tangent_preconditioned_krylov_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_element_tangent_row_correction_residual_only_signed_followup_probe_final_checkpoint.npz",
+      "size_bytes": 28670911,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_element_tangent_row_correction_residual_only_signed_smoke_final_checkpoint.npz",
+      "size_bytes": 27015426,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_geometry_normal_row_support8_probe_final_checkpoint.npz",
+      "size_bytes": 34464100,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_geometry_normal_row_target_probe_final_checkpoint.npz",
+      "size_bytes": 33636389,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_local_target_row_support_probe_final_checkpoint.npz",
+      "size_bytes": 29498357,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_normal_row_target_followup_probe_final_checkpoint.npz",
+      "size_bytes": 32808642,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_latest_frontier_shell_normal_row_target_narrow_probe_final_checkpoint.npz",
+      "size_bytes": 30325865,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_central_jvp_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_basis_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_capped_jvp_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_ridge_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha16_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha256_checkpoint_followup_2_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha256_checkpoint_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha256_floor_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha32_floor_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha_3pass_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_current_newton_signed_alpha_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_matrix_free_forward_jvp_comparison_smoke_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_followup48_rowcorr_largest_rows_support4_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_newton_followup56_rowcorr_largest_rows_support4_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_preconditioned_continuation_standard_rowcorr_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_active_set_zero_trust_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_active_subspace_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_active_subspace_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_aggressive_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_directional_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_element_block_fd32_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_element_block_target_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_element_patch_fd32_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_element_patch_target_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_expanded_support_continuation_2_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_expanded_support_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_expanded_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_broader_target_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_cached_sweep_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_cached_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_compact_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_compact_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_global_alpha_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_refreshed_target_sweep_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_refreshed_target_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_stable_target_broader_support_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_stable_target_widest_support_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_svd_truncation_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_very_wide_ridge_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_very_wide_target_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_wider_target_sweep_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fd_jacobian_winning_pattern_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_fine_alpha_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_node_block_compact_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_node_block_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_node_target_fine_alpha_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_node_target_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_residual_weighted_compact_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_residual_weighted_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_strongest_followup_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_widened_alpha_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_wider_alpha_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_row_wider_support_smoke_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_secant_family_frontier_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_secant_family_window4_continuation_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_fastpath_3iter_probe_final_checkpoint.npz",
+      "size_bytes": 3026348,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_fastpath_probe_final_checkpoint.npz",
+      "size_bytes": 3026348,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_followup_probe_final_checkpoint.npz",
+      "size_bytes": 3852986,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_cached_shell_signed_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 3026470,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_checkpoint_probe_final_checkpoint.npz",
+      "size_bytes": 2199823,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_regdirect_narrow_alpha_fastpath_probe_final_checkpoint.npz",
+      "size_bytes": 3026348,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_ultralow_reg_probe_final_checkpoint.npz",
+      "size_bytes": 3026448,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_support128_followup42_state_scale_only_probe_final_checkpoint.npz",
+      "size_bytes": 172592758,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_continuation_final_checkpoint.npz",
+      "size_bytes": 131,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_preconditioned_zero_final_checkpoint.npz",
+      "size_bytes": 131,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows12_support2_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 22878071,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support1_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 22050335,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 21222893,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support2_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 20395503,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support3_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 23705481,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 18740295,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 17913043,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_dof_rr_top64_rows24_support4_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 19567940,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_component_rr_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 17913058,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 17085456,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows16_support4_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 16257918,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 15430499,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_all_dof_nodeblock_top64_rows32_support8_ridge1em3_probe_final_checkpoint.npz",
+      "size_bytes": 14603129,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup4_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_gate_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_followup_rows8_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows12_support16_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows16_followup5_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup5_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup6_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows20_followup7_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_followup7_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup10_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup11_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup12_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup13_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup16_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup21_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup31_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup7_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup8_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows21_support16_followup9_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows24_followup5_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows24_followup6_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows32_followup6_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_block_rows8_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_diagonal_followup_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_diagonal_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_diagonal_rows8_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_signed_rows4_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_post_tangent_signed_rows4_support16_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_support16_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_support32_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_support8_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_batch_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_fine_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_batch_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_next_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_tiny_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide12_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide16_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide8_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide8_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_current_frontier_wide8_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support32_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_frame_frontier_post_followup56_rowcorr_support64_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support16_followup34_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup35_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup37_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup42_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup47_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support32_followup48_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_block_rows21_support64_followup36_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_followup56_rowcorr_support32_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup10_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup11_probe_final_checkpoint.npz",
+      "size_bytes": 148353185,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup12_probe_final_checkpoint.npz",
+      "size_bytes": 149218861,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup13_probe_final_checkpoint.npz",
+      "size_bytes": 150084529,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup14_probe_final_checkpoint.npz",
+      "size_bytes": 150950165,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup15_probe_final_checkpoint.npz",
+      "size_bytes": 151815844,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup16_probe_final_checkpoint.npz",
+      "size_bytes": 152681555,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup17_probe_final_checkpoint.npz",
+      "size_bytes": 153547389,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup18_probe_final_checkpoint.npz",
+      "size_bytes": 154413098,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup19_probe_final_checkpoint.npz",
+      "size_bytes": 155278926,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup20_probe_final_checkpoint.npz",
+      "size_bytes": 156144686,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup21_probe_final_checkpoint.npz",
+      "size_bytes": 157010423,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup22_probe_final_checkpoint.npz",
+      "size_bytes": 157875944,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup23_probe_final_checkpoint.npz",
+      "size_bytes": 158741674,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup24_probe_final_checkpoint.npz",
+      "size_bytes": 159607319,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup25_probe_final_checkpoint.npz",
+      "size_bytes": 160472956,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup26_probe_final_checkpoint.npz",
+      "size_bytes": 161338615,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup27_probe_final_checkpoint.npz",
+      "size_bytes": 162204343,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup28_probe_final_checkpoint.npz",
+      "size_bytes": 163070200,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup29_probe_final_checkpoint.npz",
+      "size_bytes": 163935984,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup30_probe_final_checkpoint.npz",
+      "size_bytes": 164801809,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup31_probe_final_checkpoint.npz",
+      "size_bytes": 165667570,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup32_probe_final_checkpoint.npz",
+      "size_bytes": 166533307,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup33_probe_final_checkpoint.npz",
+      "size_bytes": 167398841,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup34_probe_final_checkpoint.npz",
+      "size_bytes": 168264559,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup35_probe_final_checkpoint.npz",
+      "size_bytes": 169130193,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup36_probe_final_checkpoint.npz",
+      "size_bytes": 169995887,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup37_probe_final_checkpoint.npz",
+      "size_bytes": 170861471,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup42_probe_final_checkpoint.npz",
+      "size_bytes": 171727290,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup4_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup5_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup6_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup7_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup8_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_followup9_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_block_lstsq_translation_frontier_post_frame_support64_followup4_support128_probe_final_checkpoint.npz",
+      "size_bytes": 134,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_followup_probe_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_gate_alpha_multipass_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_gate_alpha_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_multipass_probe_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_block_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_block_rows16_followup5_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_block_rows20_followup6_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_block_rows4_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_block_rows8_followup3_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_diagonal_signed_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup2_signed_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_signed_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_post_tangent_signed_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_diagonal_newton_current_frontier_probe_final_checkpoint.npz",
+      "size_bytes": 132,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_column_equilibrated_probe_final_checkpoint.npz",
+      "size_bytes": 7987986,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_followup_probe_final_checkpoint.npz",
+      "size_bytes": 3853795,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_probe_final_checkpoint.npz",
+      "size_bytes": 3026860,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_equilibrated_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 7161013,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_equilibrated_probe_final_checkpoint.npz",
+      "size_bytes": 4680405,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e1_probe_final_checkpoint.npz",
+      "size_bytes": 12949169,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 12122223,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e2_probe_final_checkpoint.npz",
+      "size_bytes": 9641585,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1e3_probe_final_checkpoint.npz",
+      "size_bytes": 12949154,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 13775822,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_top64_wide16_support128_ridge1em3_alpha_fine_probe_final_checkpoint.npz",
+      "size_bytes": 12949147,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_shell_bending_block_lstsq_focused_regdirect_rowcol_wide16_support128_probe_final_checkpoint.npz",
+      "size_bytes": 8814669,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_post_diagonal_signed_followup_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_post_followup2_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_post_rows4_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_post_tangent_narrow_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_frame_hotspot_signed_displacement_current_frontier_probe_final_checkpoint.npz",
+      "size_bytes": 133,
+      "lfs_tracked": true
+    },
+    {
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_free_component_state_cleanup_frontier_checkpoint.npz",
+      "size_bytes": 35291808,
+      "lfs_tracked": true,
+      "reason": "superseded_cleanup_frontier_not_required_for_followup190_resume"
+    }
+  ]
+}

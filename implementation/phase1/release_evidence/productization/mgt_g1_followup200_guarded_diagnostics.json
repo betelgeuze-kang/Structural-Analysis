@@ -1,0 +1,51 @@
+{
+  "schema_version": "g1-followup200-guarded-diagnostics.v1",
+  "generated_at": "2026-06-14T21:39:33+09:00",
+  "source_frontier": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.033276947944316015,
+    "residual_gate_n": 0.001,
+    "remaining_residual_margin_to_gate_n": 0.032276947944316015
+  },
+  "capacity_guard": {
+    "implemented_code_paths": [
+      "implementation/phase1/run_mgt_cached_residual_jvp_batch_probe.py",
+      "implementation/phase1/run_mgt_cached_residual_jvp_multi_ridge_controller.py"
+    ],
+    "new_option": "--min-checkpoint-improvement-inf-n",
+    "guard_floor_inf_n": 6e-07,
+    "behavior": "Candidates below the absolute improvement floor remain JSON-only and do not write final checkpoint NPZ artifacts."
+  },
+  "component_block_guard_probe": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_followup200_guard_probe.json",
+    "base_direct_residual_inf_n": 0.033276947944316015,
+    "best_direct_residual_inf_n": 0.033276807561775534,
+    "best_improvement_inf_n": 1.4038254048109877e-07,
+    "best_direction_source": "component_block:frame:rx",
+    "best_alpha": 9.5367431640625e-07,
+    "promoted_to_final_state": false,
+    "checkpoint_written": false,
+    "checkpoint_skip_reason": "checkpoint_improvement_below_floor",
+    "minimum_checkpoint_improvement_inf_n": 6e-07
+  },
+  "adaptive_global_krylov_guard_probe": {
+    "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_followup200_guard_summary.json",
+    "child_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_adaptive_global_krylov_followup200_guard_children/mgt_direct_residual_adaptive_global_krylov_followup200_guard_summary_step1_reg1em06_scale1e00.json",
+    "promotion_count": 0,
+    "stop_reason": "no_regularization_factor_promoted",
+    "final_direct_residual_inf_n": 0.033276947944316015,
+    "best_direct_residual_inf_n": 0.03451699492256921,
+    "best_improvement_inf_n": -0.0012400469782531953,
+    "best_alpha": 0.0625,
+    "krylov_stop_reason": "no_residual_descent",
+    "matvec_count": 4,
+    "checkpoint_written": false,
+    "checkpoint_skip_reason": "no_residual_descent"
+  },
+  "assessment": "Followup200 adds a capacity-safe checkpoint floor and proves it on the retained followup190 frontier. The component-block frame:rx diagnostic again finds only a below-floor 1.40e-7 N improvement and writes no checkpoint. A one-factor current-tangent global Krylov guard no-descends: its best trial worsens the residual to 0.0345169949 N. The retained continuation frontier therefore remains followup190, while future G1 probes should require material descent before writing large NPZ state.",
+  "recommended_next_action": [
+    "Keep --min-checkpoint-improvement-inf-n at or above the weak-step floor for all exploratory cached-JVP probes.",
+    "Do not resume blind top96/top128 or the tested current-tangent global Krylov factor from followup190.",
+    "Next useful work is a new block-aware trust/globalization formulation that changes direction construction, not more replay of the same monolithic LS or global Krylov direction."
+  ]
+}

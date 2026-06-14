@@ -1,0 +1,373 @@
+{
+  "schema_version": "g1-cached-residual-jvp-plateau-diagnostic.v1",
+  "generated_at": "2026-06-14T21:01:24+09:00",
+  "model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "node_count": 13047,
+  "dof_count": 78282,
+  "load_scale": 0.656,
+  "residual_gate_n": 0.001,
+  "source_frontier": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+    "direct_residual_inf_n": 0.033276947944316015
+  },
+  "followup191_198": {
+    "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup191_198_post_refresh_controller_summary.json",
+    "promoted_steps": 8,
+    "total_improvement_inf_n": 3.5859374065694283e-06,
+    "weak_step_threshold_inf_n": 6e-07,
+    "last_two_improvements_inf_n": [
+      2.538579622068937e-07,
+      3.173244067511405e-08
+    ],
+    "two_consecutive_weak_steps": true,
+    "steps": [
+      {
+        "followup_index": 191,
+        "base_direct_residual_inf_n": 0.033276947944316015,
+        "final_direct_residual_inf_n": 0.0332764401787673,
+        "improvement_inf_n": 5.077659182006755e-07,
+        "direction_source": "all_target_rows_lstsq",
+        "alpha": 1.52587890625e-05,
+        "promoted": true
+      },
+      {
+        "followup_index": 192,
+        "base_direct_residual_inf_n": 0.0332764401787673,
+        "final_direct_residual_inf_n": 0.03327593242055138,
+        "improvement_inf_n": 5.07758358025967e-07,
+        "direction_source": "all_target_rows_lstsq_ridge_1e-05",
+        "alpha": 1.52587890625e-05,
+        "promoted": true
+      },
+      {
+        "followup_index": 193,
+        "base_direct_residual_inf_n": 0.03327593242055138,
+        "final_direct_residual_inf_n": 0.03327542466972511,
+        "improvement_inf_n": 5.07751025224934e-07,
+        "direction_source": "all_target_rows_lstsq_ridge_1e-07",
+        "alpha": 1.52587890625e-05,
+        "promoted": true
+      },
+      {
+        "followup_index": 194,
+        "base_direct_residual_inf_n": 0.03327542466972511,
+        "final_direct_residual_inf_n": 0.033275170798035214,
+        "improvement_inf_n": 2.538717751576769e-07,
+        "direction_source": "all_target_rows_lstsq_ridge_1e-07",
+        "alpha": 7.62939453125e-06,
+        "promoted": true
+      },
+      {
+        "followup_index": 195,
+        "base_direct_residual_inf_n": 0.033275170798035214,
+        "final_direct_residual_inf_n": 0.03327415532088218,
+        "improvement_inf_n": 1.0154775793580484e-06,
+        "direction_source": "all_target_rows_lstsq_ridge_0.0001",
+        "alpha": 3.0517578125e-05,
+        "promoted": true
+      },
+      {
+        "followup_index": 196,
+        "base_direct_residual_inf_n": 0.03327415532088218,
+        "final_direct_residual_inf_n": 0.03327364759739759,
+        "improvement_inf_n": 5.077239109141374e-07,
+        "direction_source": "all_target_rows_lstsq",
+        "alpha": 1.52587890625e-05,
+        "promoted": true
+      },
+      {
+        "followup_index": 197,
+        "base_direct_residual_inf_n": 0.03327364759739759,
+        "final_direct_residual_inf_n": 0.03327339373946381,
+        "improvement_inf_n": 2.538579622068937e-07,
+        "direction_source": "all_target_rows_lstsq",
+        "alpha": 7.62939453125e-06,
+        "promoted": true
+      },
+      {
+        "followup_index": 198,
+        "base_direct_residual_inf_n": 0.03327339373946381,
+        "final_direct_residual_inf_n": 0.033273362006909446,
+        "improvement_inf_n": 3.173244067511405e-08,
+        "direction_source": "all_target_rows_lstsq_ridge_1e-06",
+        "alpha": 9.5367431640625e-07,
+        "promoted": true
+      }
+    ]
+  },
+  "followup199_diagnostics": {
+    "shell_bending_support3_refresh": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_shell_bending_support3_followup199_refresh_probe.json",
+      "base_direct_residual_inf_n": 0.033273362006909446,
+      "best_direct_residual_inf_n": 0.03327336200702313,
+      "best_improvement_inf_n": -1.1368683772161603e-13,
+      "best_direction_source": "all_target_rows_lstsq",
+      "best_alpha": 5.960464477539063e-08,
+      "best_relative_increment": 1.4666014708466128e-14,
+      "best_max_increment_m": 5.157269948943155e-16,
+      "correction_inf_m": 8.652463110673585e-09,
+      "promoted_to_final_state": false,
+      "runtime_seconds": 31.375317849990097,
+      "target_selection": {
+        "top_residual_count": 256,
+        "max_rows": 64,
+        "component_filter": "shell_bending_drilling",
+        "selection_policy": "component_dof_round_robin",
+        "selected_hotspot_row_count": 64,
+        "selected_hotspot_dominant_component_counts": {
+          "shell_bending_drilling": 64
+        },
+        "selected_hotspot_dof_counts": {
+          "ux": 31,
+          "uy": 31,
+          "uz": 2
+        }
+      },
+      "support": {
+        "pre_node_block_support_size": 159,
+        "pre_trim_support_size": 318,
+        "support_size": 318,
+        "node_block_support": true,
+        "support_trimmed_by_limit": false,
+        "max_support_columns": 768
+      },
+      "component_block_basis": {
+        "enabled": false,
+        "ready": false,
+        "block_count": null,
+        "direction_count": null
+      }
+    },
+    "top128_expansion": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top128_followup199_diagnostic_probe.json",
+      "base_direct_residual_inf_n": 0.033273362006909446,
+      "best_direct_residual_inf_n": 0.033273358040176726,
+      "best_improvement_inf_n": 3.966732720073196e-09,
+      "best_direction_source": "all_target_rows_lstsq_ridge_0.001",
+      "best_alpha": 1.1920928955078125e-07,
+      "best_relative_increment": 9.90166112974197e-11,
+      "best_max_increment_m": 3.4818960981649157e-12,
+      "correction_inf_m": 0.0006414559854056325,
+      "promoted_to_final_state": false,
+      "runtime_seconds": 31.55885422299616,
+      "target_selection": {
+        "top_residual_count": 384,
+        "max_rows": 128,
+        "component_filter": "all",
+        "selection_policy": "component_dof_round_robin",
+        "selected_hotspot_row_count": 128,
+        "selected_hotspot_dominant_component_counts": {
+          "frame": 40,
+          "shell_membrane": 32,
+          "shell_bending_drilling": 56
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 27,
+          "rx": 16,
+          "uy": 29,
+          "ux": 25,
+          "rz": 14,
+          "ry": 17
+        }
+      },
+      "support": {
+        "pre_node_block_support_size": 232,
+        "pre_trim_support_size": 378,
+        "support_size": 378,
+        "node_block_support": true,
+        "support_trimmed_by_limit": false,
+        "max_support_columns": 512
+      },
+      "component_block_basis": {
+        "enabled": false,
+        "ready": false,
+        "block_count": null,
+        "direction_count": null
+      }
+    },
+    "component_dof_block_basis": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_followup199_diagnostic_probe.json",
+      "base_direct_residual_inf_n": 0.033273362006909446,
+      "best_direct_residual_inf_n": 0.03327322168928415,
+      "best_improvement_inf_n": 1.4031762529675973e-07,
+      "best_direction_source": "component_block:frame:rx",
+      "best_alpha": 9.5367431640625e-07,
+      "best_relative_increment": 3.611474970628135e-11,
+      "best_max_increment_m": 1.2699667706339568e-12,
+      "correction_inf_m": 1.4823390813015855e-05,
+      "promoted_to_final_state": false,
+      "runtime_seconds": 34.578321819004486,
+      "target_selection": {
+        "top_residual_count": 192,
+        "max_rows": 96,
+        "component_filter": "all",
+        "selection_policy": "component_dof_round_robin",
+        "selected_hotspot_row_count": 96,
+        "selected_hotspot_dominant_component_counts": {
+          "frame": 26,
+          "shell_membrane": 26,
+          "shell_bending_drilling": 44
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 20,
+          "rx": 12,
+          "uy": 22,
+          "ux": 21,
+          "rz": 10,
+          "ry": 11
+        }
+      },
+      "support": {
+        "pre_node_block_support_size": 190,
+        "pre_trim_support_size": 318,
+        "support_size": 318,
+        "node_block_support": true,
+        "support_trimmed_by_limit": false,
+        "max_support_columns": 512
+      },
+      "component_block_basis": {
+        "enabled": true,
+        "ready": true,
+        "block_count": 15,
+        "direction_count": 16
+      }
+    },
+    "frame_support3": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_frame_support3_followup199_diagnostic_probe.json",
+      "base_direct_residual_inf_n": 0.033273362006909446,
+      "best_direct_residual_inf_n": 0.03328100184319338,
+      "best_improvement_inf_n": -7.63983628393472e-06,
+      "best_direction_source": "all_target_rows_lstsq",
+      "best_alpha": 1e-08,
+      "best_relative_increment": 4.516367254722786e-11,
+      "best_max_increment_m": 1.5881700369308304e-12,
+      "correction_inf_m": 0.0001588170036931458,
+      "promoted_to_final_state": false,
+      "runtime_seconds": 30.595849991994328,
+      "target_selection": {
+        "top_residual_count": 256,
+        "max_rows": 64,
+        "component_filter": "frame",
+        "selection_policy": "component_dof_round_robin",
+        "selected_hotspot_row_count": 21,
+        "selected_hotspot_dominant_component_counts": {
+          "frame": 21
+        },
+        "selected_hotspot_dof_counts": {
+          "uz": 11,
+          "ux": 4,
+          "uy": 6
+        }
+      },
+      "support": {
+        "pre_node_block_support_size": 52,
+        "pre_trim_support_size": 102,
+        "support_size": 102,
+        "node_block_support": true,
+        "support_trimmed_by_limit": false,
+        "max_support_columns": 768
+      },
+      "component_block_basis": {
+        "enabled": false,
+        "ready": false,
+        "block_count": null,
+        "direction_count": null
+      }
+    }
+  },
+  "selected_row_linear_diagnostics": {
+    "top96_followup198": {
+      "shape": [
+        96,
+        252
+      ],
+      "rank": 96,
+      "condition_number": 1576966.0437832482,
+      "singular_value_max": 443778451862.0982,
+      "singular_value_min": 281412.81393570383,
+      "selected_row_projection_coverage_l2": 0.9999999999995974,
+      "selected_row_relative_linear_residual_l2": 1.6352688266081796e-11,
+      "target_rhs_linf_n": 0.03327339373946381,
+      "linear_residual_linf_n": 2.706758428505651e-12
+    },
+    "shell_bending_support3_followup199_refresh": {
+      "shape": [
+        64,
+        318
+      ],
+      "rank": 64,
+      "condition_number": 116.37851164533312,
+      "singular_value_max": 309002374537.7251,
+      "singular_value_min": 2655149736.571806,
+      "selected_row_projection_coverage_l2": 1.000000000000001,
+      "selected_row_relative_linear_residual_l2": 1.986325785481132e-14,
+      "target_rhs_linf_n": 0.033272730680822156,
+      "linear_residual_linf_n": 2.0886070650760757e-15
+    },
+    "top128_followup199_diagnostic": {
+      "shape": [
+        128,
+        378
+      ],
+      "rank": 128,
+      "condition_number": 8154252.653446489,
+      "singular_value_max": 468114963133.90405,
+      "singular_value_min": 57407.46369148249,
+      "selected_row_projection_coverage_l2": 1.0000000000018663,
+      "selected_row_relative_linear_residual_l2": 4.750912748751502e-11,
+      "target_rhs_linf_n": 0.033273362006909446,
+      "linear_residual_linf_n": 6.368079674690108e-12
+    },
+    "component_dof_block_basis_followup199_diagnostic": {
+      "shape": [
+        96,
+        318
+      ],
+      "rank": 96,
+      "condition_number": 7896247.283806805,
+      "singular_value_max": 468114332502.22437,
+      "singular_value_min": 59283.13991156379,
+      "selected_row_projection_coverage_l2": 0.9999999999999726,
+      "selected_row_relative_linear_residual_l2": 5.604122778698761e-11,
+      "target_rhs_linf_n": 0.033273362006909446,
+      "linear_residual_linf_n": 8.813838547894193e-12
+    }
+  },
+  "assessment": "Followup191-198 all promoted but only reduced the attached-policy direct residual by 3.58593740657e-06 N; followup197 and followup198 were consecutive weak steps below 6e-7 N. A shell_bending_drilling support3 refresh from followup198 no-promoted, top128 expansion worsened conditioning and only found a 4e-9 N diagnostic descent, and frame-only focus no-descended. The best followup199 diagnostic was component_dof block-basis, specifically component_block:frame:rx, but it still only found a 1.4e-7 N descent. Selected-row projection coverage is already near 1.0, so the bottleneck is not missing selected-row coverage; it is tiny accepted alpha / trust scaling, ill-conditioned broad LS directions, and a need for block-aware or global tangent globalization rather than blind top-k promotion. Large NPZ artifacts from followup191-199 were pruned after extracting these JSON diagnostics; the retained continuation checkpoint remains followup190.",
+  "recommended_next_action": [
+    "Do not continue blind broad top96/top128 promotion from followup198; the last two accepted top96 moves are weak and top128 increases condition number.",
+    "Use component/bucket diagnostics as the next controller gate: promote only if block-aware directions exceed the weak-step floor or improve trust-scaled alpha efficiency.",
+    "Prototype a block-aware ridge/trust step using mixed global rows plus dedicated frame:rx, shell_bending_drilling, and shell_membrane blocks instead of one monolithic LS direction.",
+    "For runtime, keep using CPU batch alpha replay for diagnostics; move to HIP/Rust only after the direction family produces material drops, because faster replay of sub-1e-7 N steps will not close the 0.001 N gate."
+  ],
+  "archived_continuation_frontier": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_probe.json",
+    "direct_residual_inf_n": 0.033276947944316015,
+    "remaining_residual_margin_to_gate_n": 0.032276947944316015,
+    "reason": "last retained NPZ continuation checkpoint; followup191-199 was weak-step/diagnostic evidence only"
+  },
+  "latest_computed_plateau_state": {
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup198_final_checkpoint.npz",
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup198_probe.json",
+    "direct_residual_inf_n": 0.033273362006909446,
+    "remaining_residual_margin_to_gate_n": 0.032273362006909445,
+    "checkpoint_retained": false,
+    "checkpoint_retention_reason": "pruned after JSON diagnostic extraction to avoid storing 1.5GB of weak-step intermediate NPZ artifacts"
+  },
+  "artifact_retention_policy": {
+    "retained": [
+      "g1_current_frontier_engine_acceleration_assessment.json",
+      "mgt_cached_residual_jvp_followup191_199_plateau_diagnostic.json",
+      "mgt_cached_residual_jvp_top96_multi_ridge_followup191_198_post_refresh_controller_summary.json",
+      "followup191-198 probe JSON files",
+      "followup199 diagnostic probe JSON files"
+    ],
+    "pruned": [
+      "followup191-198 final_checkpoint NPZ files",
+      "followup191-198 probe NPZ files",
+      "followup199 diagnostic probe NPZ files"
+    ],
+    "rationale": "The measured followup191-199 movement is plateau/strategy evidence, not a material new continuation state; JSON captures residuals, directions, alpha, conditioning, and selected-row diagnostics at negligible size."
+  }
+}

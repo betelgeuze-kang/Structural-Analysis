@@ -53,6 +53,7 @@ def run_controller(
     max_steps: int,
     output_summary_json: Path,
     min_relative_improvement: float,
+    min_checkpoint_improvement_inf_n: float,
     stop_after_no_promotion: bool,
     residual_tolerance_n: float,
     top_residual_count: int,
@@ -109,6 +110,7 @@ def run_controller(
             include_gate_limited_alpha=True,
             max_dynamic_alpha=1000000.0,
             min_relative_improvement=float(min_relative_improvement),
+            min_checkpoint_improvement_inf_n=float(min_checkpoint_improvement_inf_n),
             residual_tolerance_n=float(residual_tolerance_n),
             relative_increment_tolerance=1.0e-4,
             residual_batch_replay_backend=str(residual_batch_replay_backend),
@@ -180,6 +182,7 @@ def run_controller(
             "stop_reason": stop_reason,
             "stop_after_no_promotion": bool(stop_after_no_promotion),
             "min_relative_improvement": float(min_relative_improvement),
+            "min_checkpoint_improvement_inf_n": float(min_checkpoint_improvement_inf_n),
             "promoted_count": int(len(promoted_rows)),
             "total_promoted_improvement_inf_n": float(total_improvement),
             "runtime_seconds": float(time.perf_counter() - started),
@@ -219,6 +222,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-steps", type=int, default=1)
     parser.add_argument("--output-summary-json", type=Path, default=None)
     parser.add_argument("--min-relative-improvement", type=float, default=1.0e-8)
+    parser.add_argument(
+        "--min-checkpoint-improvement-inf-n",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum absolute infinity-norm residual improvement required before "
+            "a step writes a final checkpoint. This keeps plateau diagnostics "
+            "JSON-only when set above zero."
+        ),
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=1.0e-3)
     parser.add_argument("--top-residual-count", type=int, default=128)
     parser.add_argument("--max-rows", type=int, default=96)
@@ -287,6 +300,7 @@ def main(argv: list[str] | None = None) -> int:
         max_steps=args.max_steps,
         output_summary_json=output_summary_json,
         min_relative_improvement=args.min_relative_improvement,
+        min_checkpoint_improvement_inf_n=args.min_checkpoint_improvement_inf_n,
         stop_after_no_promotion=not bool(args.continue_after_no_promotion),
         residual_tolerance_n=args.residual_tolerance_n,
         top_residual_count=args.top_residual_count,
