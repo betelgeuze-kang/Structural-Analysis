@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
@@ -11,6 +12,7 @@ from mgt_equilibrium_geometry_contract import EQUILIBRIUM_GEOMETRY_CONTRACT
 from mgt_physical_residual_assembly import (
     assemble_equilibrium_operator_stiffness,
     assemble_physical_internal_forces,
+    assemble_physical_internal_forces_batch,
     assemble_physical_residual,
 )
 from mgt_shell_load_path import (
@@ -18,6 +20,7 @@ from mgt_shell_load_path import (
     surface_pressure_load_path_filter,
 )
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
+from mgt_shell_force_based_assembly import _cached_shell_operator
 from run_mgt_direct_residual_newton_probe import _active_free
 from run_mgt_full_frame_6dof_sparse_equilibrium import DOF_PER_NODE, FrameElement
 
@@ -87,6 +90,7 @@ def build_equilibrium_step_assembler(
         element_axial_forces=axial_forces,
         include_geometric=True,
     )
+    hip_backend_holder: dict[str, Any] = {}
 
     def assemble_residual(
         u: np.ndarray,
@@ -231,6 +235,124 @@ def build_equilibrium_step_assembler(
             free_override=free_override,
         )
     assemble_with_frozen_external_load.supports_residual_only = True  # type: ignore[attr-defined]
+
+    def evaluate_residual_batch(
+        states: np.ndarray,
+        *,
+        external_load_override: np.ndarray | None = None,
+        free_override: np.ndarray | None = None,
+        backend: str = "cpu",
+        hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+        force_rebuild_hip: bool = False,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+        state_batch = np.asarray(states, dtype=np.float64)
+        if state_batch.ndim != 2:
+            raise ValueError("states must be a 2D array shaped (batch, n_dof)")
+        if int(state_batch.shape[1]) != int(n_dof):
+            raise ValueError(f"state n_dof {state_batch.shape[1]} does not match {n_dof}")
+        f_ext = (
+            np.asarray(external_load_override, dtype=np.float64)
+            if external_load_override is not None
+            else np.asarray(reference_holder["reference_f_ext"], dtype=np.float64)
+        )
+        free = (
+            np.asarray(free_override, dtype=np.int64)
+            if free_override is not None
+            else np.asarray(reference_holder["reference_free"], dtype=np.int64)
+        )
+        backend_name = str(backend or "cpu")
+        if backend_name == "hip_full_residual":
+            from mgt_hip_full_residual_backend import HipFullResidualBatchBackend
+
+            holder_key = f"{Path(hipcc)}:{bool(force_rebuild_hip)}"
+            hip_backend = hip_backend_holder.get(holder_key)
+            if hip_backend is None:
+                reference_u = (
+                    state_batch[0]
+                    if int(state_batch.shape[0])
+                    else np.zeros(int(n_dof), dtype=np.float64)
+                )
+                shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
+                    u=reference_u,
+                    node_xyz=node_xyz,
+                    elem_type_code=elem_type_code,
+                    elem_section_id=elem_section_id,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    material_props=material_props,
+                    plate_thickness_props=plate_thickness_props,
+                    include_membrane=True,
+                    shell_operator_cache=shell_operator_cache,
+                )
+                hip_backend = HipFullResidualBatchBackend.prepare(
+                    frame_dofs=frame_force_cache.dofs,
+                    frame_stiffness=frame_force_cache.element_stiffness,
+                    shell_csr=shell_stiffness.tocsr(),
+                    spring_csr=spring_stiffness.tocsr(),
+                    f_ext=f_ext,
+                    free=free,
+                    hipcc=Path(hipcc),
+                    force_rebuild=bool(force_rebuild_hip),
+                )
+                hip_backend_holder[holder_key] = hip_backend
+            residual_batch, batch_meta = hip_backend.evaluate(state_batch, reps=1)
+            rhs = np.asarray(f_ext[free], dtype=np.float64)
+            return (
+                np.asarray(residual_batch, dtype=np.float64),
+                free,
+                rhs,
+                {
+                    **batch_meta,
+                    "residual_batch_backend": "hip_full_residual",
+                    "hip_full_residual_batch_replay": True,
+                    "residual_only_assembly": True,
+                    "residual_only_free_override": bool(free_override is not None),
+                    "shell_operator_cache_size": int(len(shell_operator_cache)),
+                    "external_load_source": "reference_configuration",
+                    "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+                },
+            )
+        f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
+            u_batch=state_batch,
+            node_xyz=node_xyz,
+            frame_elements=frame_elements,
+            elem_type_code=elem_type_code,
+            elem_section_id=elem_section_id,
+            elem_material_id=elem_material_id,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
+            section_props=section_props,
+            material_props=material_props,
+            plate_thickness_props=plate_thickness_props,
+            spring_stiffness=spring_stiffness,
+            base_axial_forces=base_axial_forces,
+            frame_gravity_load_scale=frame_gravity_load_scale,
+            load_scale=load_scale,
+            shell_operator_cache=shell_operator_cache,
+            frame_force_cache=frame_force_cache,
+        )
+        residual_batch = np.asarray(f_int_batch[:, free] - f_ext[free], dtype=np.float64)
+        rhs = np.asarray(f_ext[free], dtype=np.float64)
+        return (
+            residual_batch,
+            free,
+            rhs,
+            {
+                **batch_meta,
+                "residual_batch_backend": "cpu_physical_internal_force_batch",
+                "hip_full_residual_batch_replay": False,
+                "residual_only_assembly": True,
+                "residual_only_free_override": bool(free_override is not None),
+                "shell_operator_cache_size": int(len(shell_operator_cache)),
+                "external_load_source": "reference_configuration",
+                "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+            },
+        )
+
+    assemble_with_frozen_external_load.evaluate_residual_batch = evaluate_residual_batch  # type: ignore[attr-defined]
+    assemble_with_frozen_external_load.supports_residual_batch = True  # type: ignore[attr-defined]
+    assemble_with_frozen_external_load.supports_hip_full_residual_batch = True  # type: ignore[attr-defined]
 
     setup_meta = {
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,

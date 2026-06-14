@@ -60,6 +60,12 @@ def run_controller(
     max_support_columns: int,
     alpha_values: tuple[float, ...],
     extra_ridge_factors: tuple[float, ...],
+    residual_batch_replay_backend: str,
+    residual_batch_replay_chunk_size: int,
+    enable_batch_jvp_replay: bool,
+    enable_batch_alpha_replay: bool,
+    hipcc: Path,
+    force_rebuild_hip: bool,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     current_checkpoint = Path(start_checkpoint_npz)
@@ -105,6 +111,12 @@ def run_controller(
             min_relative_improvement=float(min_relative_improvement),
             residual_tolerance_n=float(residual_tolerance_n),
             relative_increment_tolerance=1.0e-4,
+            residual_batch_replay_backend=str(residual_batch_replay_backend),
+            residual_batch_replay_chunk_size=int(residual_batch_replay_chunk_size),
+            enable_batch_jvp_replay=bool(enable_batch_jvp_replay),
+            enable_batch_alpha_replay=bool(enable_batch_alpha_replay),
+            hipcc=hipcc,
+            force_rebuild_hip=bool(force_rebuild_hip),
         )
         base_residual = float(
             payload.get("base_direct_residual", {}).get("direct_residual_inf_n")
@@ -178,6 +190,12 @@ def run_controller(
             "max_support_columns": int(max_support_columns),
             "alpha_values": [float(value) for value in alpha_values],
             "extra_ridge_factors": [float(value) for value in extra_ridge_factors],
+            "residual_batch_replay_backend": str(residual_batch_replay_backend),
+            "residual_batch_replay_chunk_size": int(residual_batch_replay_chunk_size),
+            "enable_batch_jvp_replay": bool(enable_batch_jvp_replay),
+            "enable_batch_alpha_replay": bool(enable_batch_alpha_replay),
+            "hipcc": _display_path(hipcc),
+            "force_rebuild_hip": bool(force_rebuild_hip),
         },
         "steps": step_rows,
         "claim_boundary": (
@@ -219,6 +237,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--extra-ridge-factors",
         default="1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1",
     )
+    parser.add_argument(
+        "--residual-batch-replay-backend",
+        choices=("single", "cpu", "hip_full_residual"),
+        default="single",
+        help="Batch residual replay backend passed to each cached residual/JVP probe.",
+    )
+    parser.add_argument(
+        "--residual-batch-replay-chunk-size",
+        type=int,
+        default=1,
+        help="Chunk size for residual batch replay. Values <=1 preserve legacy single replay.",
+    )
+    parser.add_argument(
+        "--enable-batch-jvp-replay",
+        action="store_true",
+        help="Use batch replay for finite-difference JVP columns as well as alpha candidates.",
+    )
+    parser.add_argument(
+        "--disable-batch-alpha-replay",
+        action="store_true",
+        help="Keep alpha candidate replay on the single-state residual path.",
+    )
+    parser.add_argument("--hipcc", type=Path, default=Path("/opt/rocm/bin/hipcc"))
+    parser.add_argument("--force-rebuild-hip", action="store_true")
     parser.add_argument("--continue-after-no-promotion", action="store_true")
     parser.add_argument(
         "--allow-cpu-diagnostic",
@@ -252,6 +294,12 @@ def main(argv: list[str] | None = None) -> int:
         max_support_columns=args.max_support_columns,
         alpha_values=_parse_float_csv(args.alpha_values),
         extra_ridge_factors=_parse_float_csv(args.extra_ridge_factors),
+        residual_batch_replay_backend=args.residual_batch_replay_backend,
+        residual_batch_replay_chunk_size=args.residual_batch_replay_chunk_size,
+        enable_batch_jvp_replay=bool(args.enable_batch_jvp_replay),
+        enable_batch_alpha_replay=not bool(args.disable_batch_alpha_replay),
+        hipcc=args.hipcc,
+        force_rebuild_hip=bool(args.force_rebuild_hip),
     )
     print(
         "multi-ridge-controller: "

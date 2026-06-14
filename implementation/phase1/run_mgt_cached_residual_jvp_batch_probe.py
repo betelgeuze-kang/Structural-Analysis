@@ -530,6 +530,12 @@ def run_mgt_cached_residual_jvp_batch_probe(
     residual_tolerance_n: float = 1.0e-3,
     relative_increment_tolerance: float = 1.0e-4,
     enable_torch_rocm_lstsq: bool = False,
+    residual_batch_replay_backend: str = "single",
+    residual_batch_replay_chunk_size: int = 1,
+    enable_batch_jvp_replay: bool = False,
+    enable_batch_alpha_replay: bool = True,
+    hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+    force_rebuild_hip: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
@@ -576,6 +582,35 @@ def run_mgt_cached_residual_jvp_batch_probe(
         node_block_support=bool(node_block_support),
         max_support_columns=int(max_support_columns),
     )
+    batch_backend = str(residual_batch_replay_backend or "single").strip()
+    if batch_backend not in {"single", "cpu", "hip_full_residual"}:
+        batch_backend = "single"
+    batch_chunk_size = max(int(residual_batch_replay_chunk_size), 1)
+    batch_residual_evaluator = getattr(assemble_residual, "evaluate_residual_batch", None)
+    batch_evaluator_available = callable(batch_residual_evaluator)
+    batch_replay_available = bool(
+        batch_evaluator_available and batch_backend != "single" and batch_chunk_size > 1
+    )
+    batch_jvp_replay_enabled = bool(batch_replay_available and enable_batch_jvp_replay)
+    batch_alpha_replay_enabled = bool(batch_replay_available and enable_batch_alpha_replay)
+    residual_batch_replay_meta: dict[str, Any] = {
+        "backend_requested": batch_backend,
+        "chunk_size": int(batch_chunk_size),
+        "batch_evaluator_available": bool(batch_evaluator_available),
+        "enabled": bool(batch_jvp_replay_enabled or batch_alpha_replay_enabled),
+        "jvp_enabled": bool(batch_jvp_replay_enabled),
+        "alpha_enabled": bool(batch_alpha_replay_enabled),
+        "jvp_default_disabled_reason": (
+            "finite_difference_lstsq_is_sensitive_to_batch_roundoff"
+            if batch_replay_available and not bool(enable_batch_jvp_replay)
+            else None
+        ),
+        "alpha_batch_count": 0,
+        "alpha_batch_state_count": 0,
+        "alpha_batch_seconds": 0.0,
+        "alpha_batch_fallback_count": 0,
+        "backend_error": "",
+    }
     cache = ResidualJvpBatchCache(
         assemble_residual=assemble_residual,
         base_u=base_u,
@@ -583,6 +618,10 @@ def run_mgt_cached_residual_jvp_batch_probe(
         base_residual=np.asarray(residual, dtype=np.float64),
         reference_f_ext=np.asarray(f_ext, dtype=np.float64),
         prefer_residual_only=True,
+        batch_residual_evaluator=batch_residual_evaluator if batch_jvp_replay_enabled else None,
+        batch_replay_backend=batch_backend,
+        hipcc=hipcc,
+        force_rebuild_hip=bool(force_rebuild_hip),
     )
     jvp_started = time.perf_counter()
     fd_submatrix, jvp_rows, cache_summary = build_fd_jvp_submatrix(
@@ -591,6 +630,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         target_rows=target_rows,
         support_cols=support_cols,
         epsilon=float(finite_difference_epsilon_m),
+        batch_chunk_size=batch_chunk_size if batch_jvp_replay_enabled else 1,
     )
     jvp_seconds = float(time.perf_counter() - jvp_started)
     base_residual_np = np.asarray(residual, dtype=np.float64)
@@ -652,22 +692,33 @@ def run_mgt_cached_residual_jvp_batch_probe(
                 "meta": direction_meta,
             }
         )
+        alpha_candidate_values: list[float] = []
+        alpha_candidate_us: list[np.ndarray] = []
         for alpha in sweep_alpha_values:
             alpha_float = float(alpha)
-            candidate_u = base_u + alpha_float * direction_arr
-            trial_started = time.perf_counter()
-            _k, _f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
-                candidate_u,
-                residual_only=True,
-                free_override=free_idx,
-                external_load_override=f_ext,
-            )
-            trial_seconds = float(time.perf_counter() - trial_started)
+            alpha_candidate_values.append(alpha_float)
+            alpha_candidate_us.append(base_u + alpha_float * direction_arr)
+
+        def append_candidate_row(
+            *,
+            alpha_float: float,
+            candidate_u: np.ndarray,
+            trial_free: np.ndarray,
+            trial_residual: np.ndarray,
+            trial_rhs: np.ndarray,
+            trial_seconds: float,
+            batch_meta: dict[str, Any] | None = None,
+            batch_index: int | None = None,
+        ) -> None:
+            batch_meta = batch_meta if isinstance(batch_meta, dict) else {}
+            trial_free_idx = np.asarray(trial_free, dtype=np.int64)
+            trial_residual_np = np.asarray(trial_residual, dtype=np.float64)
+            trial_rhs_np = np.asarray(trial_rhs, dtype=np.float64)
             free_stable = bool(
-                np.asarray(trial_free, dtype=np.int64).shape == free_idx.shape
-                and np.array_equal(np.asarray(trial_free, dtype=np.int64), free_idx)
+                trial_free_idx.shape == free_idx.shape
+                and np.array_equal(trial_free_idx, free_idx)
             )
-            residual_inf = _max_abs(np.asarray(trial_residual, dtype=np.float64))
+            residual_inf = _max_abs(trial_residual_np)
             increment = _max_abs(candidate_u - base_u)
             max_abs_candidate = max(_max_abs(candidate_u), max_abs_u, 1.0e-12)
             metrics = _translation_metrics(candidate_u)
@@ -678,10 +729,20 @@ def run_mgt_cached_residual_jvp_batch_probe(
                     "alpha": alpha_float,
                     "free_dof_set_stable": free_stable,
                     "residual_only_assembly": True,
+                    "residual_batch_replay": bool(batch_meta),
+                    "residual_batch_backend": (
+                        batch_meta.get("residual_batch_backend")
+                        if batch_meta
+                        else "single_assemble_residual"
+                    ),
+                    "hip_full_residual_batch_replay": bool(
+                        batch_meta.get("hip_full_residual_batch_replay", False)
+                    ),
+                    "batch_replay_index": batch_index,
                     "assembly_seconds": trial_seconds,
                     "direct_residual_inf_n": residual_inf,
                     "direct_relative_residual_inf": residual_inf
-                    / max(_max_abs(np.asarray(trial_rhs, dtype=np.float64)), rhs_inf, 1.0),
+                    / max(_max_abs(trial_rhs_np), rhs_inf, 1.0),
                     "improvement_inf_n": base_residual_inf - residual_inf,
                     "relative_improvement": (base_residual_inf - residual_inf)
                     / max(base_residual_inf, 1.0),
@@ -694,6 +755,84 @@ def run_mgt_cached_residual_jvp_batch_probe(
                 }
             )
             candidate_vectors.append(np.asarray(candidate_u, dtype=np.float64).copy())
+
+        def append_single_candidate(alpha_float: float, candidate_u: np.ndarray) -> None:
+            trial_started = time.perf_counter()
+            _k, _f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+                candidate_u,
+                residual_only=True,
+                free_override=free_idx,
+                external_load_override=f_ext,
+            )
+            trial_seconds = float(time.perf_counter() - trial_started)
+            append_candidate_row(
+                alpha_float=alpha_float,
+                candidate_u=candidate_u,
+                trial_free=np.asarray(trial_free, dtype=np.int64),
+                trial_residual=np.asarray(trial_residual, dtype=np.float64),
+                trial_rhs=np.asarray(trial_rhs, dtype=np.float64),
+                trial_seconds=trial_seconds,
+            )
+
+        if batch_alpha_replay_enabled and len(alpha_candidate_us) > 1:
+            for chunk_start in range(0, len(alpha_candidate_us), batch_chunk_size):
+                chunk_us = alpha_candidate_us[chunk_start : chunk_start + batch_chunk_size]
+                chunk_alphas = alpha_candidate_values[chunk_start : chunk_start + batch_chunk_size]
+                batch_started = time.perf_counter()
+                try:
+                    trial_residual_batch, trial_free, trial_rhs, batch_meta = batch_residual_evaluator(
+                        np.asarray(chunk_us, dtype=np.float64),
+                        external_load_override=f_ext,
+                        free_override=free_idx,
+                        backend=batch_backend,
+                        hipcc=hipcc,
+                        force_rebuild_hip=bool(force_rebuild_hip),
+                    )
+                except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                    residual_batch_replay_meta["backend_error"] = str(exc)
+                    residual_batch_replay_meta["alpha_batch_fallback_count"] = int(
+                        residual_batch_replay_meta["alpha_batch_fallback_count"]
+                    ) + len(chunk_us)
+                    for alpha_float, candidate_u in zip(chunk_alphas, chunk_us, strict=False):
+                        append_single_candidate(
+                            float(alpha_float),
+                            np.asarray(candidate_u, dtype=np.float64),
+                        )
+                    continue
+                batch_seconds = float(time.perf_counter() - batch_started)
+                residual_batch_replay_meta["alpha_batch_count"] = int(
+                    residual_batch_replay_meta["alpha_batch_count"]
+                ) + 1
+                residual_batch_replay_meta["alpha_batch_state_count"] = int(
+                    residual_batch_replay_meta["alpha_batch_state_count"]
+                ) + len(chunk_us)
+                residual_batch_replay_meta["alpha_batch_seconds"] = float(
+                    residual_batch_replay_meta["alpha_batch_seconds"]
+                ) + batch_seconds
+                residual_rows = np.asarray(trial_residual_batch, dtype=np.float64)
+                for local_index, (alpha_float, candidate_u) in enumerate(
+                    zip(chunk_alphas, chunk_us, strict=False)
+                ):
+                    append_candidate_row(
+                        alpha_float=float(alpha_float),
+                        candidate_u=np.asarray(candidate_u, dtype=np.float64),
+                        trial_free=np.asarray(trial_free, dtype=np.int64),
+                        trial_residual=np.asarray(residual_rows[local_index], dtype=np.float64),
+                        trial_rhs=np.asarray(trial_rhs, dtype=np.float64),
+                        trial_seconds=batch_seconds / max(len(chunk_us), 1),
+                        batch_meta=batch_meta if isinstance(batch_meta, dict) else {},
+                        batch_index=int(local_index),
+                    )
+        else:
+            for alpha_float, candidate_u in zip(
+                alpha_candidate_values,
+                alpha_candidate_us,
+                strict=False,
+            ):
+                append_single_candidate(
+                    float(alpha_float),
+                    np.asarray(candidate_u, dtype=np.float64),
+                )
 
     if fd_submatrix is not None and fd_submatrix.size and support_cols.size:
         scaled_submatrix, scaled_target_rhs, column_scales, equilibration_meta = (
@@ -1001,6 +1140,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         "best_candidate": best_candidate_row,
         "best_gate_eligible_candidate": best_gate_candidate_row,
         "torch_rocm_lstsq_probe": torch_rocm_probe,
+        "residual_batch_replay": residual_batch_replay_meta,
         "base_assembly_seconds": base_assembly_seconds,
         "runtime_seconds": float(time.perf_counter() - started),
         "claim_boundary": (
@@ -1125,6 +1265,33 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--enable-torch-rocm-lstsq", action="store_true")
     parser.add_argument(
+        "--residual-batch-replay-backend",
+        choices=("single", "cpu", "hip_full_residual"),
+        default="single",
+        help="Batch residual replay backend for finite-difference JVP and alpha candidates.",
+    )
+    parser.add_argument(
+        "--residual-batch-replay-chunk-size",
+        type=int,
+        default=1,
+        help="Chunk size for residual batch replay. Values <=1 preserve single-state replay.",
+    )
+    parser.add_argument(
+        "--enable-batch-jvp-replay",
+        action="store_true",
+        help=(
+            "Also use residual batch replay for finite-difference JVP columns. "
+            "Disabled by default because the active LS system is roundoff-sensitive."
+        ),
+    )
+    parser.add_argument(
+        "--disable-batch-alpha-replay",
+        action="store_true",
+        help="Keep alpha candidate replay on the single-state residual path.",
+    )
+    parser.add_argument("--hipcc", type=Path, default=Path("/opt/rocm/bin/hipcc"))
+    parser.add_argument("--force-rebuild-hip", action="store_true")
+    parser.add_argument(
         "--allow-cpu-diagnostic",
         action="store_true",
         help="Acknowledge this probe is diagnostic and does not close G1 by itself.",
@@ -1170,6 +1337,12 @@ def main(argv: list[str] | None = None) -> int:
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         enable_torch_rocm_lstsq=bool(args.enable_torch_rocm_lstsq),
+        residual_batch_replay_backend=args.residual_batch_replay_backend,
+        residual_batch_replay_chunk_size=args.residual_batch_replay_chunk_size,
+        enable_batch_jvp_replay=bool(args.enable_batch_jvp_replay),
+        enable_batch_alpha_replay=not bool(args.disable_batch_alpha_replay),
+        hipcc=args.hipcc,
+        force_rebuild_hip=bool(args.force_rebuild_hip),
     )
     print(
         "cached-residual-jvp-batch: "
