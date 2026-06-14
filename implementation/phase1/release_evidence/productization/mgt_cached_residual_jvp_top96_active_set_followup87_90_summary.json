@@ -1,0 +1,69 @@
+{
+  "schema_version": "mgt-cached-residual-jvp-top96-active-set-summary.v1",
+  "generated_at": "2026-06-14T17:18:49+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "residual_gate_n": 0.001,
+  "configuration": {
+    "script": "implementation/phase1/run_mgt_cached_residual_jvp_batch_probe.py",
+    "top_residual_count": 128,
+    "max_rows": 96,
+    "selection_policy": "top",
+    "support_columns_per_row": 1,
+    "node_block_support": true,
+    "max_support_columns": 384,
+    "finite_difference_epsilon_m": 1e-07,
+    "ridge_factor": 1e-08,
+    "min_relative_improvement": 1e-08
+  },
+  "followup87": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup87_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup87_probe.npz",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup87_final_checkpoint.npz",
+    "promoted": true,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.03346544934809992,
+    "improvement_inf_n": 3.1915874387777876e-08,
+    "alpha": 9.5367431640625e-07
+  },
+  "followup88": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup88_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup88_probe.npz",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup88_final_checkpoint.npz",
+    "promoted": true,
+    "base_direct_residual_inf_n": 0.03346544934809992,
+    "final_direct_residual_inf_n": 0.033464983579506224,
+    "improvement_inf_n": 4.6576859369373835e-07,
+    "alpha": 1.52587890625e-05
+  },
+  "followup89": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_probe.npz",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_final_checkpoint.npz",
+    "promoted": true,
+    "base_direct_residual_inf_n": 0.033464983579506224,
+    "final_direct_residual_inf_n": 0.03346490679193459,
+    "improvement_inf_n": 7.678757163454009e-08,
+    "alpha": 9.5367431640625e-07
+  },
+  "followup90": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup90_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup90_probe.npz",
+    "promoted": false,
+    "base_direct_residual_inf_n": 0.03346490679193459,
+    "best_direct_residual_inf_n": 0.03346489881322179,
+    "best_improvement_inf_n": 7.978712801559595e-09,
+    "stop_reason": "below_min_relative_improvement_floor"
+  },
+  "accepted_promotion_count": 3,
+  "total_accepted_improvement_inf_n": 5.7447203971512e-07,
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.03346490679193459,
+    "remaining_residual_margin_to_gate_n": 0.03246490679193459,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_final_checkpoint.npz"
+  },
+  "assessment": "Broad top96 active-set cached residual/JVP correction reopens a small live descent after component-block basis saturation. Three promotions reduce the attached-policy direct residual by 5.74e-7 N, then followup90 drops below the 1e-8 promotion floor. This is progress, but the rate is far too slow for gate closure without a stronger active-set/minimax formulation.",
+  "next_solver_step": "Build on the top96 active-set lane with a refreshed minimax/Chebyshev residual objective, larger top-row active sets, or better row scaling across mixed frame/shell cancellation rows; do not return to narrow component-block-only directions.",
+  "claim_boundary": "Incremental active-set residual descent evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

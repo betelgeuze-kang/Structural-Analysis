@@ -1,0 +1,46 @@
+{
+  "schema_version": "mgt-residual-jacobian-physical-audit-summary.v1",
+  "generated_at": "2026-06-14T17:18:49+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "followup85_component_cancellation_audit": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_component_cancellation_followup85_probe.json",
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "top_residual_count": 128,
+    "top_row_dominant_component_counts": {
+      "frame": 19,
+      "shell_membrane": 55,
+      "shell_bending_drilling": 54
+    },
+    "component_inf_n": {
+      "frame": 156794.12661397827,
+      "spring": 0.00011238162708417099,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 156852.14355913326,
+      "shell_membrane": 47414.69161618969
+    },
+    "shell_internal_reconstruction_inf_n": 1.4996004438216914e-11,
+    "self_row_projection_relative_inf": 1.2440702808813864e-14,
+    "node_block_projection_relative_inf": 3.6492728239187333e-14,
+    "stiffness_unit_warning": true,
+    "assessment": "The plateau is a broad mixed frame/shell cancellation state, not a missing local tangent row. Component force reconstruction and local tangent projection are internally consistent, while component stiffness scales remain extremely separated."
+  },
+  "followup86_hotspot_jvp_audit": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hotspot_jvp_followup86_probe.json",
+    "status": "ready",
+    "residual_jacobian_consistency_ready": true,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "fd_step": 1e-07,
+    "top_residual_sign_relative_l2_error": 6.837849876946488e-13,
+    "deterministic_sample_relative_l2_error": 4.036820756877719e-14,
+    "hotspot_rows_checked": 12,
+    "assessment": "For the checked global and hotspot directions, assembled tangent actions match finite-difference physical residual JVPs to near machine precision. The active blocker is not a first-order tangent/FD mismatch in these directions."
+  },
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.033465481263974306,
+    "remaining_residual_margin_to_gate_n": 0.032465481263974305
+  },
+  "next_solver_step": "Use refreshed broad active-set correction rather than repeating narrow component-block basis directions. If that saturates, move to minimax/Chebyshev residual reduction or better scaling across the mixed frame/shell cancellation rows.",
+  "claim_boundary": "Physical residual/Jacobian audit evidence only. It does not claim residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}
