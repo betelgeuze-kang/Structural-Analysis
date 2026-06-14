@@ -1,14 +1,14 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T11:30:54+09:00",
+  "generated_at": "2026-06-14T11:41:13+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_followup42_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_fd_followup42_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.03405771417294601,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.0340299725191926,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.03305771417294601
+    "remaining_residual_margin_to_gate_n": 0.033029972519192596
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -102,6 +102,24 @@
       "batch_alpha_replay_state_count": 288,
       "batch_alpha_replay_seconds": 0.6313031660029083,
       "assessment": "The row-correction driver now batches finite-difference support-column perturbations as well as alpha candidates. FD replay was reduced to 12 batches / 627 states with cache reuse across support sweeps, but the accepted descent collapsed to 1.30e-7 N, proving that this residual-row correction family is no longer a practical path to the gate by repetition."
+    },
+    "followup43_global_krylov": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_probe.json",
+      "accepted_improvement_inf_n": 0.00002774165375341031,
+      "runtime_seconds": 42.551498077998986,
+      "initial_assembly_seconds": 24.037004093996075,
+      "matrix_free_global_krylov_matvec_count": 3,
+      "preconditioner_solve_count": 4,
+      "preconditioner_solve_seconds": 2.1290210459992522,
+      "best_alpha": 0.02734375,
+      "assessment": "A current-tangent-preconditioned global Krylov direction with wide alpha search reopened descent after row-correction saturation. The accepted improvement is 2.77e-5 N, over 200x larger than followup42's FD-batched row correction."
+    },
+    "followup44_global_krylov_no_descent": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup44_probe.json",
+      "accepted": false,
+      "base_residual_inf_n": 0.0340299725191926,
+      "best_candidate_residual_inf_n": 0.03403767840852834,
+      "assessment": "Repeating the same global Krylov configuration after the followup43 hotspot shift did not descend. The next pass needs retuned scaling/preconditioning or a shell-membrane/coupled material direction rather than blind repetition."
     }
   },
   "engine_state": {
@@ -160,7 +178,7 @@
     "row_correction_driver": {
       "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
       "current_shape": "finite-difference support columns and alpha candidates both replay through the residual-only batch internal-force path",
-      "acceleration_target": "move the batched FD/JVP replay into a persistent Rust/HIP worker and use it to test stronger coupled shell/frame/material Newton directions"
+      "acceleration_target": "move the batch residual/JVP replay and current-tangent-preconditioned global Krylov lane into a persistent Rust/HIP worker, then retune around the shell-membrane hotspot that appears after followup43"
     }
   },
   "implemented_followup": {
@@ -239,15 +257,26 @@
       "row_correction_batch_fd_state_count": 627,
       "row_correction_batch_fd_seconds": 2.1073477210084093,
       "row_correction_batch_fd_residual_only_eval_count": 924,
-      "row_correction_batch_fd_accepted_improvement_inf_n": 0.00000012992035058889684
+      "row_correction_batch_fd_accepted_improvement_inf_n": 0.00000012992035058889684,
+      "global_krylov_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_smoke_followup43_probe.json",
+      "global_krylov_wide_alpha_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_wide_alpha_smoke_followup43_probe.json",
+      "global_krylov_followup43_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_probe.json",
+      "global_krylov_followup43_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
+      "global_krylov_followup43_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
+      "global_krylov_followup43_accepted_improvement_inf_n": 0.00002774165375341031,
+      "global_krylov_followup43_best_alpha": 0.02734375,
+      "global_krylov_followup43_matvec_count": 3,
+      "global_krylov_followup43_preconditioner_solve_count": 4,
+      "global_krylov_followup44_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup44_probe.json",
+      "global_krylov_followup44_accepted": false
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, and followup42 wires finite-difference support-column replay into the same batch path. The remaining high-impact work is no longer more CPU row-correction batching; it is a stronger coupled shell/frame/material Newton direction, executed through a persistent Rust/HIP residual/JVP worker."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_followup42_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_fd_followup42_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.03405771417294601,
-    "latest_direct_relative_residual_inf": 0.000003925445837402153,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.0340299725191926,
+    "latest_direct_relative_residual_inf": 0.0000039222483721026325,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
@@ -349,28 +378,41 @@
         "batch_alpha_replay_state_count": 288,
         "batch_alpha_replay_seconds": 0.6313031660029083,
         "assessment": "Batch FD replay is now integrated and proven in the row-correction driver, with cache reuse reducing later support sweeps to mostly cache hits. The accepted descent fell to 1.30e-7 N, so the next G1 work must change the coupled correction direction rather than widen this row-correction family."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
+        "base_residual_inf_n": 0.03405771417294601,
+        "final_residual_inf_n": 0.0340299725191926,
+        "improvement_inf_n": 0.00002774165375341031,
+        "runtime_seconds": 42.551498077998986,
+        "matrix_free_global_krylov_matvec_count": 3,
+        "preconditioner_solve_count": 4,
+        "best_alpha": 0.02734375,
+        "assessment": "Current-tangent-preconditioned global Krylov with a wider alpha search reopened useful residual descent after row-correction saturation. It moved the frontier hotspot from node 2202 rx shell bending/drilling to node 2377 uz shell membrane."
       }
     ],
     "latest_frontier_pattern": {
       "top_row_dominant_component_counts": {
+        "shell_membrane": 45,
         "shell_bending_drilling": 39,
-        "shell_membrane": 44,
-        "frame": 13
+        "frame": 12
       },
       "top_hotspot": {
-        "node_index": 2202,
-        "dof": "rx",
-        "residual_n": -0.03405771417294601,
-        "dominant_component": "shell_bending_drilling"
+        "node_index": 2377,
+        "dof": "uz",
+        "residual_n": -0.0340299725191926,
+        "dominant_component": "shell_membrane"
       },
-      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup42. Top-96 dominance remains shell_bending_drilling=39, shell_membrane=44, frame=13. The replay bottleneck is now instrumented well enough; the blocker is the physical correction direction at the shell/frame cancellation hotspot."
+      "assessment": "After followup43, the top residual moved from the node 2202 rx shell-bending/drilling hotspot to a node 2377 uz shell-membrane dominated hotspot. Top-96 dominance is now shell_membrane=45, shell_bending_drilling=39, frame=12. Followup44 showed that blindly repeating the same Krylov configuration from this new frontier does not descend, so the next pass should retune around shell membrane/frame coupling."
     }
   },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame plus shell replay are now proven, but the gate still needs a better coupled physical correction direction. Because followup41 and followup42 already batch alpha replay and FD support-column replay, the next milestone is not another CPU replay wrapper; it is a coupled shell/frame/material Newton direction executed through the proven batch backend.",
+    "reason": "The row-correction family is algorithmically saturated, but followup43 proves a current-tangent-preconditioned global Krylov direction can still produce a much larger accepted physical residual descent. Because followup44 did not descend after the hotspot shifted to shell membrane, the next milestone is an adaptive coupled shell/frame/material direction that retunes scaling/preconditioning after each frontier transition.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -379,12 +421,12 @@
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
     },
     "rough_extrapolation_from_latest_fastpath_followups": {
-      "latest_remaining_gate_gap_n": 0.03305771417294601,
-      "average_improvement_followup41_42_n": 0.0000005846574707424335,
-      "average_runtime_followup41_42_seconds": 45.32505424300325,
-      "steps_needed_at_same_improvement": 56542.01960503014,
-      "wall_time_hours_at_same_runtime": 711.8805848908179,
-      "assessment": "The latest batched row-correction passes show that brute-force repetition is now an obviously bad lane: more than fifty thousand similar accepted probes would be needed. Backend acceleration is still useful, but only if it enables a stronger shell/frame/material Newton direction, not another sweep over the same row-correction family."
+      "latest_remaining_gate_gap_n": 0.033029972519192596,
+      "latest_global_krylov_improvement_followup43_n": 0.00002774165375341031,
+      "latest_global_krylov_runtime_followup43_seconds": 42.551498077998986,
+      "steps_needed_at_same_improvement": 1190.6273797802046,
+      "wall_time_hours_at_same_runtime": 14.073049628425096,
+      "assessment": "Followup43 improves the extrapolation by about 47x versus the saturated row-correction lane, but brute repetition is still not a closure strategy because followup44 no longer descends after the hotspot shift. The useful path is adaptive retuning of the global/coupled direction, not a fixed-alpha loop."
     }
   },
   "recommended_next_path": [
@@ -393,8 +435,9 @@
     "Treat native HIP frame replay as proven for GPU-device executions: followup40 shows 129x kernel-level speedup over CPU frame batch with 7.1e-12 relative force error.",
     "Treat native HIP shell CSR replay as proven for GPU-device executions: followup40 shows 2.69x kernel-level speedup over CPU shell batch with 4.7e-15 relative force error on the 1.90M-nnz shell matrix.",
     "The row-correction driver now batches both support-column perturbations and alpha candidates; do not spend the next G1 push on another CPU replay wrapper.",
-    "Use the faster backend to test a stronger shell-bending/membrane/frame coupled physical correction direction, not to repeat the current tiny-alpha row correction thousands of times.",
+    "Use followup43's current-tangent-preconditioned global Krylov lane as the next live direction family, but retune it around the shell-membrane hotspot exposed by followup44.",
+    "Use the faster backend to test adaptive shell-bending/membrane/frame coupled physical correction directions, not to repeat a fixed tiny-alpha row correction thousands of times.",
     "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching and FD support-column batching are integrated; a stronger coupled physical Newton direction and full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching and FD support-column batching are integrated; followup43 proves a live global Krylov physical residual descent; adaptive coupled material/shell/frame Newton and full residual gate closure remain open."
 }
