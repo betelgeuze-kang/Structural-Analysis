@@ -126,6 +126,50 @@
     },
     "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery. It preserves the attached-policy direct residual at the current frontier and removes the Python frame-element loop from residual-only FD/JVP replay. Shell matvec and initial tangent assembly remain the next runtime targets."
   },
+  "fastpath_frontier_advances": {
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup36_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.03407848452263246,
+    "latest_direct_relative_residual_inf": 0.00000392783979967173,
+    "advances": [
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_final_checkpoint.npz",
+        "base_residual_inf_n": 0.03410235276851825,
+        "final_residual_inf_n": 0.03408530158557471,
+        "improvement_inf_n": 0.000017051182943539356,
+        "runtime_seconds": 42.622074427999905,
+        "finite_difference_columns": 360,
+        "finite_difference_seconds": 1.2152491170018038,
+        "assessment": "The fastpath made a 360-column element-block finite-difference row correction cheap enough to run, reopening descent beyond the prior support168 no-descent probe."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_final_checkpoint.npz",
+        "base_residual_inf_n": 0.03408530158557471,
+        "final_residual_inf_n": 0.03407848452263246,
+        "improvement_inf_n": 0.0000068170629422548146,
+        "runtime_seconds": 42.67202692700084,
+        "finite_difference_columns": 360,
+        "finite_difference_seconds": 1.223592665999604,
+        "assessment": "A second fastpath wide element-block pass still descended but with a smaller accepted alpha, indicating useful but tapering residual reduction."
+      }
+    ],
+    "latest_frontier_pattern": {
+      "top_row_dominant_component_counts": {
+        "shell_bending_drilling": 42,
+        "shell_membrane": 41,
+        "frame": 13
+      },
+      "top_hotspot": {
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.03407848452263246,
+        "dominant_component": "shell_bending_drilling"
+      },
+      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup36; the faster element-block lane helps exploration but has not closed the residual gate."
+    }
+  },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",
