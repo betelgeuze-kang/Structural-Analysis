@@ -1,14 +1,14 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T11:04:22+09:00",
+  "generated_at": "2026-06-14T11:20:30+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.03405888348788749,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_alpha_followup41_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.034057844093296596,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.03305888348788749
+    "remaining_residual_margin_to_gate_n": 0.033057844093296596
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -75,6 +75,18 @@
       "finite_difference_columns": 600,
       "finite_difference_seconds_max": 2.107082746002561,
       "assessment": "Targeting shell-normal rows produced only a 1.06e-6 N accepted descent, confirming that the current residual-row correction family is tapering too hard to reach the gate by repetition."
+    },
+    "followup41_shell_bending_batch_alpha": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
+      "accepted_improvement_inf_n": 0.00000103939459089597,
+      "runtime_seconds": 45.564931464003166,
+      "initial_assembly_seconds": 24.61096264900698,
+      "residual_only_eval_count": 936,
+      "finite_difference_columns": 600,
+      "batch_alpha_replay_batch_count": 9,
+      "batch_alpha_replay_state_count": 300,
+      "batch_alpha_replay_seconds": 0.8261558019876247,
+      "assessment": "The row-correction driver now reuses the residual-only batch path for alpha replay. It removed the duplicate per-alpha residual evaluation path, but the accepted descent stayed near 1.04e-6 N and wall time is still dominated by initial assembly plus finite-difference support-column work."
     }
   },
   "engine_state": {
@@ -132,8 +144,8 @@
     },
     "row_correction_driver": {
       "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-      "current_shape": "finite-difference support columns are evaluated sequentially through evaluate_row_candidate(), then alpha candidates are replayed sequentially",
-      "acceleration_target": "batch all FD perturbations and alpha candidates through one residual replay engine and return only target rows plus residual inf metrics"
+      "current_shape": "finite-difference support columns are still evaluated through residual-only probes, while alpha candidates now replay through the batch internal-force path",
+      "acceleration_target": "batch FD perturbations through one residual replay/JVP engine and return only target rows plus residual inf metrics"
     }
   },
   "implemented_followup": {
@@ -196,15 +208,24 @@
       "native_hip_shell_csr_batch_speedup_vs_cpu": 2.6884263721387205,
       "native_hip_shell_csr_batch_max_abs_difference_n": 0.000000000739305505703669,
       "native_hip_shell_csr_batch_relative_difference_inf": 0.0000000000000047133911524429465,
-      "native_hip_shell_csr_batch_assessment": "The native HIP shell CSR batch bridge now validates the dominant shell path directly on followup40. The kernel is 2.69x faster than SciPy CSR batch matvec for 64 states with 4.7e-15 relative force error. Subprocess and host-copy overhead still dominate, so the next engineering step is in-process residual replay batching or a persistent Rust/HIP worker rather than one subprocess per candidate batch."
+      "native_hip_shell_csr_batch_assessment": "The native HIP shell CSR batch bridge now validates the dominant shell path directly on followup40. The kernel is 2.69x faster than SciPy CSR batch matvec for 64 states with 4.7e-15 relative force error. Subprocess and host-copy overhead still dominate, so the next engineering step is in-process residual replay batching or a persistent Rust/HIP worker rather than one subprocess per candidate batch.",
+      "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
+      "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
+      "row_correction_batch_alpha_trial_rows": 300,
+      "row_correction_batch_alpha_trial_rows_marked_batched": 300,
+      "row_correction_batch_alpha_batch_count": 9,
+      "row_correction_batch_alpha_state_count": 300,
+      "row_correction_batch_alpha_seconds": 0.8261558019876247,
+      "row_correction_batch_alpha_residual_only_eval_count": 936,
+      "row_correction_batch_alpha_accepted_improvement_inf_n": 0.00000103939459089597
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. The remaining high-impact work is to wire these kernels into the residual-row correction driver so FD perturbations and alpha candidates are submitted as persistent batches instead of one CPU/subprocess replay at a time."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires the row-correction alpha replay path into the batch internal-force evaluator, eliminating duplicate per-alpha residual replays for 300 candidates. The remaining high-impact work is to batch finite-difference support-column/JVP construction through the same backend and then move the shell/frame replay into a persistent Rust/HIP worker."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.03405888348788749,
-    "latest_direct_relative_residual_inf": 0.000003925580611052738,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_alpha_followup41_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.034057844093296596,
+    "latest_direct_relative_residual_inf": 0.000003925460811845148,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
@@ -275,6 +296,20 @@
         "finite_difference_columns": 600,
         "finite_difference_seconds": 2.107082746002561,
         "assessment": "Shell-normal targeting descended by only 1.06e-6 N, so the latest pattern is too slow for brute-force repeated CPU probes."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_alpha_followup41_frontier_probe.json",
+        "base_residual_inf_n": 0.03405888348788749,
+        "final_residual_inf_n": 0.034057844093296596,
+        "improvement_inf_n": 0.00000103939459089597,
+        "runtime_seconds": 45.564931464003166,
+        "finite_difference_columns": 600,
+        "batch_alpha_replay_batch_count": 9,
+        "batch_alpha_replay_state_count": 300,
+        "batch_alpha_replay_seconds": 0.8261558019876247,
+        "assessment": "Batch alpha replay is now integrated and proven in the row-correction driver, but the residual descent remained tiny. The next speed target is FD support-column/JVP batching, not more alpha replay tuning."
       }
     ],
     "latest_frontier_pattern": {
@@ -286,17 +321,17 @@
       "top_hotspot": {
         "node_index": 2202,
         "dof": "rx",
-        "residual_n": -0.03405888348788749,
+        "residual_n": -0.034057844093296596,
         "dominant_component": "shell_bending_drilling"
       },
-      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup40; the faster element-block lane helps exploration but has not closed the residual gate. Top-96 dominance remains shell_bending_drilling=39, shell_membrane=44, frame=13, so shell replay is the main acceleration target."
+      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup41. Top-96 dominance remains shell_bending_drilling=39, shell_membrane=44, frame=13, so shell replay plus coupled shell/frame support-column JVP batching is the main acceleration target."
     }
   },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame plus shell replay are now proven, but the gate still needs a better coupled physical correction direction. Because the latest top residual rows are mostly shell bending/drilling and shell membrane, the next backend milestone is not another isolated kernel; it is driver integration that batches FD perturbations and alpha candidates through the proven frame/shell replay lanes.",
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame plus shell replay are now proven, but the gate still needs a better coupled physical correction direction. Because the latest top residual rows are mostly shell bending/drilling and shell membrane, the next backend milestone is FD perturbation/JVP batching through the proven frame/shell replay lanes; alpha replay batching is already integrated in followup41.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -305,12 +340,12 @@
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
     },
     "rough_extrapolation_from_latest_fastpath_followups": {
-      "latest_remaining_gate_gap_n": 0.03305888348788749,
-      "average_improvement_followup39_40_n": 0.0000030833235654392777,
-      "average_runtime_followup39_40_seconds": 44.803854208497796,
-      "steps_needed_at_same_improvement": 10721.834016527431,
-      "wall_time_hours_at_same_runtime": 133.43874670116872,
-      "assessment": "The latest shell-targeted passes show that brute-force repetition is now an obviously bad lane: more than ten thousand similar accepted probes would be needed. Backend acceleration is still useful, but only if it enables larger batched searches and stronger shell/frame coupled directions."
+      "latest_remaining_gate_gap_n": 0.033057844093296596,
+      "average_improvement_followup40_41_n": 0.0000010481421151009584,
+      "average_runtime_followup40_41_seconds": 45.04467562900027,
+      "steps_needed_at_same_improvement": 31539.46742242336,
+      "wall_time_hours_at_same_runtime": 394.63474432068926,
+      "assessment": "The latest shell-targeted passes show that brute-force repetition is now an obviously bad lane: more than thirty thousand similar accepted probes would be needed. Backend acceleration is still useful, but only if it enables larger batched searches and stronger shell/frame coupled directions."
     }
   },
   "recommended_next_path": [
@@ -318,9 +353,9 @@
     "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
     "Treat native HIP frame replay as proven for GPU-device executions: followup40 shows 129x kernel-level speedup over CPU frame batch with 7.1e-12 relative force error.",
     "Treat native HIP shell CSR replay as proven for GPU-device executions: followup40 shows 2.69x kernel-level speedup over CPU shell batch with 4.7e-15 relative force error on the 1.90M-nnz shell matrix.",
-    "Modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface instead of sequential CPU residual replay.",
+    "Modify the row-correction driver to submit support-column perturbations through the batch interface; alpha candidates are already batched in followup41.",
     "Use the faster backend to test larger shell-bending/membrane/frame coupled target sets, not to repeat the current tiny-alpha row correction thousands of times.",
     "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction driver integration and full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching is integrated; FD support-column batching and full residual gate closure remain open."
 }

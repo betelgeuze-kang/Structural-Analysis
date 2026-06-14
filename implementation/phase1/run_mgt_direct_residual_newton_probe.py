@@ -42,6 +42,7 @@ from run_mgt_uncoarsened_boundary_global_equilibrium import (
 from mgt_physical_residual_assembly import (
     assemble_newton_tangent_stiffness,
     assemble_physical_internal_forces,
+    assemble_physical_internal_forces_batch,
     assemble_physical_residual,
 )
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
@@ -636,6 +637,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_directional_probe_alpha: float = 0.0,
     current_tangent_residual_row_shell_normal_participation_threshold: float = 0.7071067811865476,
     current_tangent_residual_row_use_residual_only_assembly: bool = False,
+    current_tangent_residual_row_batch_alpha_replay: bool = False,
     current_tangent_residual_row_allow_negative_alphas: bool = False,
     current_tangent_residual_row_alpha_values: tuple[float, ...] = (
         0.03125,
@@ -2825,11 +2827,17 @@ def run_mgt_direct_residual_newton_probe(
             "use_residual_only_assembly": bool(
                 current_tangent_residual_row_use_residual_only_assembly
             ),
+            "batch_alpha_replay": bool(
+                current_tangent_residual_row_batch_alpha_replay
+            ),
             "allow_negative_alphas": bool(
                 current_tangent_residual_row_allow_negative_alphas
             ),
             "residual_only_eval_count": 0,
             "full_assembly_eval_count": 0,
+            "batch_alpha_replay_batch_count": 0,
+            "batch_alpha_replay_state_count": 0,
+            "batch_alpha_replay_seconds": 0.0,
             "configured_alpha_values": [
                 float(value)
                 for value in current_tangent_residual_row_alpha_values
@@ -2896,8 +2904,24 @@ def run_mgt_direct_residual_newton_probe(
             use_row_residual_only = bool(
                 current_tangent_residual_row_use_residual_only_assembly
             )
+            row_batch_alpha_replay_requested = bool(
+                current_tangent_residual_row_batch_alpha_replay
+            )
+            row_batch_alpha_replay = bool(
+                row_batch_alpha_replay_requested and use_row_residual_only
+            )
+            current_tangent_residual_row_correction["batch_alpha_replay_enabled"] = (
+                row_batch_alpha_replay
+            )
+            if row_batch_alpha_replay_requested and not use_row_residual_only:
+                current_tangent_residual_row_correction[
+                    "batch_alpha_replay_disabled_reason"
+                ] = "requires_residual_only_assembly"
             row_residual_only_eval_count = 0
             row_full_assembly_eval_count = 0
+            row_batch_alpha_replay_batch_count = 0
+            row_batch_alpha_replay_state_count = 0
+            row_batch_alpha_replay_seconds = 0.0
 
             def evaluate_row_candidate(
                 candidate_u: np.ndarray,
@@ -2921,6 +2945,89 @@ def run_mgt_direct_residual_newton_probe(
                 else:
                     row_full_assembly_eval_count += 1
                 return result
+
+            def evaluate_row_candidates_batch(
+                candidate_us: list[np.ndarray],
+            ) -> list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]]:
+                nonlocal row_residual_only_eval_count
+                nonlocal row_full_assembly_eval_count
+                nonlocal row_batch_alpha_replay_batch_count
+                nonlocal row_batch_alpha_replay_state_count
+                nonlocal row_batch_alpha_replay_seconds
+                if not candidate_us:
+                    return []
+                if not row_batch_alpha_replay:
+                    return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                states = np.asarray(candidate_us, dtype=np.float64)
+                if states.ndim != 2:
+                    return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                batch_started = time.perf_counter()
+                f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
+                    u_batch=states,
+                    node_xyz=node_xyz,
+                    frame_elements=frame_elements,
+                    elem_type_code=elem_type_code,
+                    elem_section_id=elem_section_id,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    section_props=section_props,
+                    material_props=material_props,
+                    plate_thickness_props=plate_thickness_props,
+                    spring_stiffness=spring_stiffness,
+                    base_axial_forces=base_axial_forces,
+                    frame_gravity_load_scale=frame_gravity_load_scale,
+                    load_scale=load_scale,
+                    shell_operator_cache=shell_operator_cache,
+                    frame_force_cache=frame_force_cache,
+                )
+                elapsed = float(time.perf_counter() - batch_started)
+                f_ext = np.asarray(reference_f_ext, dtype=np.float64)
+                free = np.asarray(current_free, dtype=np.int64)
+                residual_batch = np.asarray(
+                    f_int_batch[:, free] - f_ext[free],
+                    dtype=np.float64,
+                )
+                rhs = np.asarray(f_ext[free], dtype=np.float64)
+                row_residual_only_eval_count += int(states.shape[0])
+                row_batch_alpha_replay_batch_count += 1
+                row_batch_alpha_replay_state_count += int(states.shape[0])
+                row_batch_alpha_replay_seconds += elapsed
+                meta_base = {
+                    **batch_meta,
+                    "residual_only_assembly": True,
+                    "residual_only_free_override": True,
+                    "batch_alpha_replay": True,
+                    "residual_row_batch_alpha_replay": True,
+                    "batch_alpha_replay_seconds": elapsed,
+                    "batch_size": int(states.shape[0]),
+                    "free_dof_count": int(free.size),
+                    "shell_operator_cache_size": int(len(shell_operator_cache)),
+                    "physical_internal_force_inf_n": float(
+                        np.max(np.abs(f_int_batch[:, free]))
+                    )
+                    if free.size and f_int_batch.size
+                    else 0.0,
+                    "external_load_source": "reference_configuration",
+                    "assembled_external_load_inf_n": None,
+                    "used_external_load_inf_n": float(np.max(np.abs(f_ext)))
+                    if f_ext.size
+                    else 0.0,
+                }
+                return [
+                    (
+                        None,
+                        f_ext,
+                        free,
+                        np.asarray(residual_batch[index], dtype=np.float64),
+                        rhs,
+                        {
+                            **meta_base,
+                            "batch_alpha_replay_index": int(index),
+                        },
+                    )
+                    for index in range(int(states.shape[0]))
+                ]
 
             for row_pass in range(1, max_row_promotions + 1):
                 previous_residual_inf = (
@@ -3436,10 +3543,37 @@ def run_mgt_direct_residual_newton_probe(
                             for source, alpha, direction_sign in signed_row_alpha_rows
                         ]
                         candidate_start = len(trial_rows)
+                        candidate_eval_inputs: list[tuple[str, float, float, np.ndarray]] = []
                         for alpha_source, alpha, direction_sign in signed_row_alpha_rows:
-                            candidate_u = current_u + (
-                                float(direction_sign) * float(alpha) * candidate_delta_u
+                            candidate_eval_inputs.append(
+                                (
+                                    alpha_source,
+                                    float(alpha),
+                                    float(direction_sign),
+                                    current_u
+                                    + (
+                                        float(direction_sign)
+                                        * float(alpha)
+                                        * candidate_delta_u
+                                    ),
+                                )
                             )
+                        candidate_eval_results = evaluate_row_candidates_batch(
+                            [
+                                np.asarray(candidate_u, dtype=np.float64)
+                                for _alpha_source, _alpha, _direction_sign, candidate_u
+                                in candidate_eval_inputs
+                            ]
+                        )
+                        for (
+                            alpha_source,
+                            alpha,
+                            direction_sign,
+                            candidate_u,
+                        ), candidate_result in zip(
+                            candidate_eval_inputs,
+                            candidate_eval_results,
+                        ):
                             (
                                 _k,
                                 _f,
@@ -3447,7 +3581,7 @@ def run_mgt_direct_residual_newton_probe(
                                 candidate_residual,
                                 candidate_rhs,
                                 candidate_meta,
-                            ) = evaluate_row_candidate(candidate_u)
+                            ) = candidate_result
                             residual_inf = (
                                 float(np.max(np.abs(candidate_residual)))
                                 if candidate_residual.size
@@ -3505,6 +3639,11 @@ def run_mgt_direct_residual_newton_probe(
                                 "free_dof_set_stable": free_is_stable,
                                 "residual_only_assembly": bool(
                                     candidate_meta.get("residual_only_assembly")
+                                ),
+                                "batch_alpha_replay": bool(
+                                    candidate_meta.get(
+                                        "residual_row_batch_alpha_replay"
+                                    )
                                 ),
                             }
                             trial_rows.append(trial_row)
@@ -3676,6 +3815,13 @@ def run_mgt_direct_residual_newton_probe(
                     "best_gate_eligible_candidate": best_gate_candidate_row,
                     "residual_only_eval_count": int(row_residual_only_eval_count),
                     "full_assembly_eval_count": int(row_full_assembly_eval_count),
+                    "batch_alpha_replay_batch_count": int(
+                        row_batch_alpha_replay_batch_count
+                    ),
+                    "batch_alpha_replay_state_count": int(
+                        row_batch_alpha_replay_state_count
+                    ),
+                    "batch_alpha_replay_seconds": float(row_batch_alpha_replay_seconds),
                     "residual_descent": bool(
                         best_candidate_row
                         and float(best_candidate_row["direct_residual_inf_n"])
@@ -4292,6 +4438,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-batch-alpha-replay",
+        action="store_true",
+        help=(
+            "Batch replay residual-row alpha candidates through the residual-only physical "
+            "internal-force batch path. Requires --current-tangent-residual-row-use-residual-only-assembly."
+        ),
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-allow-negative-alphas",
         action="store_true",
         help=(
@@ -4525,6 +4679,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_use_residual_only_assembly=(
             args.current_tangent_residual_row_use_residual_only_assembly
+        ),
+        current_tangent_residual_row_batch_alpha_replay=(
+            args.current_tangent_residual_row_batch_alpha_replay
         ),
         current_tangent_residual_row_allow_negative_alphas=(
             args.current_tangent_residual_row_allow_negative_alphas
