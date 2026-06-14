@@ -1,0 +1,87 @@
+{
+  "schema_version": "mgt-direct-residual-attached-policy-post-shell-saturation-summary.v1",
+  "generated_at": "2026-06-14T12:57:58+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup58_final_checkpoint.npz",
+  "source_direct_residual_inf_n": 0.033638743914140234,
+  "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+  "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
+  "latest_direct_residual_inf_n": 0.03363847854424884,
+  "total_improvement_inf_n": 2.653698913942751e-07,
+  "residual_gate_n": 0.001,
+  "remaining_residual_margin_to_gate_n": 0.03263847854424884,
+  "probes": [
+    {
+      "name": "followup59_coupled_shell_fine_alpha",
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup59_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup59_final_checkpoint.npz",
+      "accepted": true,
+      "base_residual_inf_n": 0.033638743914140234,
+      "final_residual_inf_n": 0.03363849218337245,
+      "improvement_inf_n": 2.5173076778628456e-07,
+      "assessment": "Fine-alpha coupled shell row correction still descended, but improvement tapered."
+    },
+    {
+      "name": "followup60_coupled_shell_fd_row_submatrix",
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_fd_refresh_followup60_probe.json",
+      "accepted": false,
+      "base_residual_inf_n": 0.03363849218337245,
+      "final_residual_inf_n": 0.03363849218337245,
+      "finite_difference_state_count": 77,
+      "finite_difference_seconds": 0.2028044780017808,
+      "assessment": "Finite-difference residual-row submatrix on the same coupled support did not descend."
+    },
+    {
+      "name": "followup61_coupled_shell_broad_refresh",
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup61_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup61_final_checkpoint.npz",
+      "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_geometry_normal_bending_refresh_followup61_frontier_probe.json",
+      "accepted": true,
+      "base_residual_inf_n": 0.03363849218337245,
+      "final_residual_inf_n": 0.03363849211925307,
+      "improvement_inf_n": 6.411937647499144e-11,
+      "residual_only_eval_count": 1038,
+      "assessment": "Broad current-tangent coupled shell refresh found only numerical-floor descent."
+    },
+    {
+      "name": "followup62_post_shell_global_krylov",
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_probe.json",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+      "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
+      "accepted": true,
+      "base_residual_inf_n": 0.03363849211925307,
+      "final_residual_inf_n": 0.03363847854424884,
+      "improvement_inf_n": 1.3575004231825005e-08,
+      "matrix_free_global_krylov_matvec_count": 5,
+      "preconditioner_solve_count": 6,
+      "best_alpha": 0.125,
+      "assessment": "Scaled-floor global Krylov after the coupled shell frontier descended only 1.36e-8 N. This confirms the immediate blocker is now higher-level coupled shell/material globalization rather than local row-correction or the previous Krylov configuration."
+    }
+  ],
+  "latest_frontier_pattern": {
+    "top_row_dominant_component_counts": {
+      "shell_membrane": 45,
+      "shell_bending_drilling": 39,
+      "frame": 12
+    },
+    "top_hotspot": {
+      "node_index": 2379,
+      "dof": "uz",
+      "residual_n": -0.03363847854424884,
+      "dominant_component": "shell_membrane"
+    },
+    "second_hotspot": {
+      "node_index": 2676,
+      "dof": "uz",
+      "residual_n": -0.03363811641199705,
+      "dominant_component": "shell_membrane"
+    },
+    "third_hotspot": {
+      "node_index": 2202,
+      "dof": "rx",
+      "residual_n": -0.033633035991319615,
+      "dominant_component": "shell_bending_drilling"
+    }
+  },
+  "claim_boundary": "This summary records saturation evidence after the coupled shell target lane. It advances the attached-policy direct residual frontier but does not close the 0.001 N residual gate."
+}
