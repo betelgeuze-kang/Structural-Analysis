@@ -1,0 +1,129 @@
+{
+  "schema_version": "mgt-cached-residual-jvp-linf-multi-ridge-summary.v1",
+  "generated_at": "2026-06-14T17:37:46+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "residual_gate_n": 0.001,
+  "code_update": {
+    "script": "implementation/phase1/run_mgt_cached_residual_jvp_batch_probe.py",
+    "added_linf_active_set_direction": true,
+    "added_linf_active_set_equilibration_mode": true,
+    "added_extra_ridge_factor_direction_sweep": true,
+    "assessment": "The probe can now test Chebyshev/minimax selected-row directions and multiple ridge-regularized LS directions against one cached FD/JVP matrix."
+  },
+  "linf_active_set_negative_evidence": {
+    "followup91": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup91_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup91_probe.npz",
+      "promoted": false,
+      "base_direct_residual_inf_n": 0.03346490679193459,
+      "best_direct_residual_inf_n": 0.03346489881322179,
+      "best_improvement_inf_n": 7.978712801559595e-09,
+      "linf_equilibration": "row_column",
+      "linf_linear_residual_inf_n_unscaled": 537.523829916874,
+      "assessment": "Row-weighted minimax can drive the scaled objective to zero while producing a physically huge unscaled selected-row residual; it is not a valid physical residual infinity-norm objective."
+    },
+    "followup92": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup92_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup92_probe.npz",
+      "promoted": false,
+      "base_direct_residual_inf_n": 0.03346490679193459,
+      "best_direct_residual_inf_n": 0.03346489881322179,
+      "best_improvement_inf_n": 7.978712801559595e-09,
+      "linf_equilibration": "column",
+      "linf_physical_linf_objective": true,
+      "linf_linear_residual_inf_n_unscaled": 3.4769266979428615e-10,
+      "linf_best_global_residual_inf_n": 0.1325659568181381,
+      "assessment": "Physical selected-row minimax solves the active-row linear system almost exactly, but its nonlinear global residual candidates worsen badly, indicating off-active-row or globalization blow-up."
+    },
+    "followup93": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top128_linf_active_set_followup93_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top128_linf_active_set_followup93_probe.npz",
+      "promoted": false,
+      "base_direct_residual_inf_n": 0.03346490679193459,
+      "best_direct_residual_inf_n": 0.09342660082333298,
+      "best_improvement_inf_n": -0.059961694031398394,
+      "max_rows": 128,
+      "max_support_columns": 512,
+      "assessment": "Expanding the selected active set to top128 does not fix the minimax/globalization mismatch; both LS and minimax directions worsen the full residual in this wider configuration."
+    },
+    "followup94": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_bounded_linf_active_set_followup94_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_bounded_linf_active_set_followup94_probe.npz",
+      "promoted": false,
+      "base_direct_residual_inf_n": 0.03346490679193459,
+      "best_direct_residual_inf_n": 0.03346489881322179,
+      "best_improvement_inf_n": 7.978712801559595e-09,
+      "linf_equilibration": "none",
+      "linf_coefficient_bound": 1e-05,
+      "assessment": "A physically bounded Chebyshev solve still worsens full residual candidates, so the immediate live path is not pure selected-row minimax."
+    }
+  },
+  "multi_ridge_active_set_positive_evidence": {
+    "configuration": {
+      "top_residual_count": 128,
+      "max_rows": 96,
+      "selection_policy": "top",
+      "support_columns_per_row": 1,
+      "node_block_support": true,
+      "max_support_columns": 384,
+      "finite_difference_epsilon_m": 1e-07,
+      "base_ridge_factor": 1e-08,
+      "extra_ridge_factors": [
+        1e-07,
+        1e-06,
+        1e-05,
+        0.0001,
+        0.001,
+        0.01,
+        0.1
+      ],
+      "min_relative_improvement": 1e-08
+    },
+    "followup95": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_probe.npz",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_final_checkpoint.npz",
+      "promoted": true,
+      "base_direct_residual_inf_n": 0.03346490679193459,
+      "final_direct_residual_inf_n": 0.03346439615835117,
+      "improvement_inf_n": 5.10633583417075e-07,
+      "direction_source": "all_target_rows_lstsq_ridge_1e-07",
+      "alpha": 1.52587890625e-05,
+      "accepted_history_count": 135
+    },
+    "followup96": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_probe.npz",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_final_checkpoint.npz",
+      "promoted": true,
+      "base_direct_residual_inf_n": 0.03346439615835117,
+      "final_direct_residual_inf_n": 0.03346388553198687,
+      "improvement_inf_n": 5.106263643028797e-07,
+      "direction_source": "all_target_rows_lstsq_ridge_1e-06",
+      "alpha": 1.52587890625e-05,
+      "accepted_history_count": 136
+    },
+    "followup97": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_probe.npz",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_final_checkpoint.npz",
+      "promoted": true,
+      "base_direct_residual_inf_n": 0.03346388553198687,
+      "final_direct_residual_inf_n": 0.033463396544561874,
+      "improvement_inf_n": 4.889874249958126e-07,
+      "direction_source": "all_target_rows_lstsq_ridge_1e-07",
+      "alpha": 1.52587890625e-05,
+      "accepted_history_count": 137
+    },
+    "accepted_promotion_count": 3,
+    "total_accepted_improvement_inf_n": 1.5102473727157673e-06,
+    "latest_direct_residual_inf_n": 0.033463396544561874,
+    "remaining_residual_margin_to_gate_n": 0.03246339654456187,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_final_checkpoint.npz"
+  },
+  "assessment": "Pure selected-row minimax is currently the wrong globalization tool: it can satisfy the local linear active rows while making the nonlinear global residual worse. Multi-ridge LS direction sweep reopens a small but repeatable top96 active-set descent lane, adding three accepted promotions and lowering the attached-policy residual to 0.0334633965 N. The rate is still far too slow for gate closure by repetition.",
+  "next_solver_step": "Continue from followup97 with adaptive ridge scheduling and a stronger off-active-row guard/globalization, rather than pure Chebyshev active-row cancellation. The production ROCm/HIP lane should batch these multi-ridge candidate replays once the direction family is stabilized.",
+  "claim_boundary": "Incremental cached residual/JVP active-set descent evidence only. This does not claim residual gate closure, full-load path closure, material Newton closure, or production in-process ROCm/HIP residency."
+}

@@ -388,6 +388,114 @@ def _torch_rocm_lstsq_probe(
     return payload
 
 
+def _linf_minimax_coefficients(
+    matrix: np.ndarray,
+    rhs: np.ndarray,
+    *,
+    coefficient_bound: float = 0.0,
+    equilibration: str = "column",
+) -> tuple[np.ndarray, dict[str, Any]]:
+    a = np.asarray(matrix, dtype=np.float64)
+    b = np.asarray(rhs, dtype=np.float64)
+    column_count = int(a.shape[1]) if a.ndim == 2 else 0
+    if a.ndim != 2 or b.ndim != 1 or a.shape[0] != b.shape[0] or column_count == 0:
+        return np.zeros(column_count, dtype=np.float64), {
+            "enabled": True,
+            "ready": False,
+            "solve_method": "linf_minimax_linprog",
+            "reason": "invalid_or_empty_system",
+        }
+    try:
+        from scipy.optimize import linprog  # type: ignore
+    except Exception as exc:  # pragma: no cover - environment dependent
+        return np.zeros(column_count, dtype=np.float64), {
+            "enabled": True,
+            "ready": False,
+            "solve_method": "linf_minimax_linprog",
+            "reason": f"scipy_linprog_unavailable:{type(exc).__name__}",
+        }
+
+    equilibration_mode = str(equilibration or "column")
+    if equilibration_mode not in {"none", "column", "row_column"}:
+        equilibration_mode = "column"
+    scaled_a, scaled_b, column_scales, equilibration_meta = _equilibrate_lstsq_system(
+        a,
+        b,
+        mode=equilibration_mode,
+    )
+    row_count = int(scaled_a.shape[0])
+    objective = np.zeros(column_count + 1, dtype=np.float64)
+    objective[-1] = 1.0
+    minus_t = -np.ones((row_count, 1), dtype=np.float64)
+    a_ub = np.vstack(
+        [
+            np.hstack([scaled_a, minus_t]),
+            np.hstack([-scaled_a, minus_t]),
+        ]
+    )
+    b_ub = np.concatenate([scaled_b, -scaled_b])
+    bound = float(coefficient_bound)
+    coefficient_bounds: list[tuple[float | None, float | None]]
+    if np.isfinite(bound) and bound > 0.0:
+        coefficient_bounds = [(-bound, bound)] * column_count
+    else:
+        coefficient_bounds = [(None, None)] * column_count
+    variable_bounds = coefficient_bounds + [(0.0, None)]
+    started = time.perf_counter()
+    try:
+        result = linprog(
+            objective,
+            A_ub=a_ub,
+            b_ub=b_ub,
+            bounds=variable_bounds,
+            method="highs",
+        )
+    except Exception as exc:  # pragma: no cover - solver dependent
+        return np.zeros(column_count, dtype=np.float64), {
+            "enabled": True,
+            "ready": False,
+            "solve_method": "linf_minimax_linprog",
+            "reason": f"linprog_exception:{type(exc).__name__}:{exc}",
+            "equilibration": equilibration_meta,
+        }
+    solve_seconds = float(time.perf_counter() - started)
+    if not bool(result.success):
+        return np.zeros(column_count, dtype=np.float64), {
+            "enabled": True,
+            "ready": False,
+            "solve_method": "linf_minimax_linprog",
+            "reason": "linprog_failed",
+            "status": int(result.status),
+            "message": str(result.message),
+            "solve_seconds": solve_seconds,
+            "coefficient_bound_scaled": bound if bound > 0.0 else None,
+            "equilibration": equilibration_meta,
+        }
+    scaled_coeffs = np.asarray(result.x[:column_count], dtype=np.float64)
+    coeffs = scaled_coeffs * np.asarray(column_scales, dtype=np.float64)
+    residual_vector = a @ coeffs - b
+    scaled_residual_vector = scaled_a @ scaled_coeffs - scaled_b
+    return coeffs, {
+        "enabled": True,
+        "ready": True,
+        "solve_method": "linf_minimax_linprog",
+        "status": int(result.status),
+        "message": str(result.message),
+        "solve_seconds": solve_seconds,
+        "objective_linf_scaled": float(result.fun),
+        "coefficient_bound_scaled": bound if bound > 0.0 else None,
+        "coefficient_linf_scaled": _max_abs(scaled_coeffs),
+        "coefficient_linf_unscaled": _max_abs(coeffs),
+        "linear_residual_inf_n_unscaled": _max_abs(residual_vector),
+        "linear_residual_l2_n_unscaled": float(np.linalg.norm(residual_vector))
+        if residual_vector.size
+        else 0.0,
+        "linear_residual_inf_scaled": _max_abs(scaled_residual_vector),
+        "physical_linf_objective": bool(equilibration_mode in {"none", "column"}),
+        "equilibration": equilibration_meta,
+    }
+
+
 def run_mgt_cached_residual_jvp_batch_probe(
     *,
     mgt_path: Path = DEFAULT_MGT,
@@ -406,6 +514,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
     max_support_columns: int = 48,
     finite_difference_epsilon_m: float = 1.0e-7,
     ridge_factor: float = 1.0e-3,
+    extra_ridge_factors: tuple[float, ...] = (),
     alpha_values: tuple[float, ...] = (1.0e-6, 3.0e-7, 1.0e-7, 3.0e-8, 1.0e-8),
     allow_negative_alphas: bool = False,
     include_gate_limited_alpha: bool = False,
@@ -415,6 +524,9 @@ def run_mgt_cached_residual_jvp_batch_probe(
     component_block_basis_key_mode: str = "dominant_component",
     component_block_basis_normalization: str = "linf",
     component_block_basis_ridge_factor: float | None = None,
+    enable_linf_active_set: bool = False,
+    linf_active_set_coeff_bound: float = 0.0,
+    linf_active_set_equilibration: str = "column",
     residual_tolerance_n: float = 1.0e-3,
     relative_increment_tolerance: float = 1.0e-4,
     enable_torch_rocm_lstsq: bool = False,
@@ -491,6 +603,10 @@ def run_mgt_cached_residual_jvp_batch_probe(
     torch_rocm_probe: dict[str, Any] = {"attempted": False}
     component_block_basis_meta: dict[str, Any] = {
         "enabled": bool(enable_component_block_basis),
+        "ready": False,
+    }
+    linf_active_set_meta: dict[str, Any] = {
+        "enabled": bool(enable_linf_active_set),
         "ready": False,
     }
     base_residual_inf = _max_abs(base_residual_np)
@@ -614,6 +730,82 @@ def run_mgt_cached_residual_jvp_batch_probe(
                 "linear_solve": solve_meta,
             },
         )
+        evaluated_ridge_factors = {float(ridge_factor)}
+        for extra_ridge in extra_ridge_factors:
+            extra_ridge_float = float(extra_ridge)
+            if (
+                not np.isfinite(extra_ridge_float)
+                or extra_ridge_float < 0.0
+                or extra_ridge_float in evaluated_ridge_factors
+            ):
+                continue
+            evaluated_ridge_factors.add(extra_ridge_float)
+            extra_scaled_coeffs, extra_solve_meta = _ridge_coefficients(
+                scaled_submatrix,
+                scaled_target_rhs,
+                ridge_factor=extra_ridge_float,
+            )
+            extra_solve_meta["equilibration"] = equilibration_meta
+            extra_coeffs = np.asarray(extra_scaled_coeffs, dtype=np.float64) * np.asarray(
+                column_scales,
+                dtype=np.float64,
+            )
+            extra_residual_vector = (
+                np.asarray(fd_submatrix, dtype=np.float64) @ extra_coeffs
+                - target_rhs
+            )
+            extra_solve_meta["evaluated"] = True
+            extra_solve_meta["linear_residual_inf_n_unscaled"] = _max_abs(
+                extra_residual_vector
+            )
+            extra_solve_meta["linear_residual_l2_n_unscaled"] = (
+                float(np.linalg.norm(extra_residual_vector))
+                if extra_residual_vector.size
+                else 0.0
+            )
+            extra_correction = np.zeros_like(base_u)
+            for local_col, coeff in zip(
+                support_cols.tolist(),
+                extra_coeffs.tolist(),
+                strict=False,
+            ):
+                extra_correction[int(free_idx[int(local_col)])] = float(coeff)
+            evaluate_direction_candidates(
+                direction_source=f"all_target_rows_lstsq_ridge_{extra_ridge_float:g}",
+                direction=extra_correction,
+                direction_meta={
+                    "direction_kind": "all_target_rows_lstsq_extra_ridge",
+                    "target_row_count": int(target_rows.size),
+                    "support_size": int(support_cols.size),
+                    "ridge_factor": float(extra_ridge_float),
+                    "linear_solve": extra_solve_meta,
+                },
+            )
+        if enable_linf_active_set:
+            linf_coeffs, linf_active_set_meta = _linf_minimax_coefficients(
+                fd_submatrix,
+                target_rhs,
+                coefficient_bound=float(linf_active_set_coeff_bound),
+                equilibration=str(linf_active_set_equilibration),
+            )
+            if bool(linf_active_set_meta.get("ready")):
+                linf_correction = np.zeros_like(base_u)
+                for local_col, coeff in zip(
+                    support_cols.tolist(),
+                    np.asarray(linf_coeffs, dtype=np.float64).tolist(),
+                    strict=False,
+                ):
+                    linf_correction[int(free_idx[int(local_col)])] = float(coeff)
+                evaluate_direction_candidates(
+                    direction_source="all_target_rows_linf_minimax",
+                    direction=linf_correction,
+                    direction_meta={
+                        "direction_kind": "all_target_rows_linf_minimax",
+                        "target_row_count": int(target_rows.size),
+                        "support_size": int(support_cols.size),
+                        "linear_solve": linf_active_set_meta,
+                    },
+                )
         if enable_component_block_basis:
             basis_ridge_factor = (
                 float(component_block_basis_ridge_factor)
@@ -799,9 +991,11 @@ def run_mgt_cached_residual_jvp_batch_probe(
         "correction_inf_m": correction_inf,
         "correction_directions": correction_direction_rows,
         "component_block_basis": component_block_basis_meta,
+        "linf_active_set": linf_active_set_meta,
         "allow_negative_alphas": bool(allow_negative_alphas),
         "include_gate_limited_alpha": bool(include_gate_limited_alpha),
         "max_dynamic_alpha": float(max_dynamic_alpha),
+        "extra_ridge_factors": [float(value) for value in extra_ridge_factors],
         "minimum_relative_improvement": float(max(min_relative_improvement, 0.0)),
         "candidate_rows": candidate_rows,
         "best_candidate": best_candidate_row,
@@ -849,6 +1043,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-support-columns", type=int, default=48)
     parser.add_argument("--finite-difference-epsilon-m", type=float, default=1.0e-7)
     parser.add_argument("--ridge-factor", type=float, default=1.0e-3)
+    parser.add_argument(
+        "--extra-ridge-factors",
+        default="",
+        help=(
+            "Optional comma-separated ridge factors to evaluate as extra LS "
+            "directions against the same cached JVP matrix."
+        ),
+    )
     parser.add_argument("--alpha-values", default="1e-6,3e-7,1e-7,3e-8,1e-8")
     parser.add_argument("--allow-negative-alphas", action="store_true")
     parser.add_argument(
@@ -893,6 +1095,32 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Optional ridge factor for component-block basis solves; defaults to --ridge-factor.",
     )
+    parser.add_argument(
+        "--enable-linf-active-set",
+        action="store_true",
+        help=(
+            "Add a Chebyshev/minimax direction that minimizes the selected "
+            "active-row linear residual infinity norm."
+        ),
+    )
+    parser.add_argument(
+        "--linf-active-set-coeff-bound",
+        type=float,
+        default=0.0,
+        help=(
+            "Optional bound on scaled minimax coefficients. Non-positive means "
+            "unbounded coefficients."
+        ),
+    )
+    parser.add_argument(
+        "--linf-active-set-equilibration",
+        choices=("none", "column", "row_column"),
+        default="column",
+        help=(
+            "Scaling mode for minimax solve. Use none/column for physical "
+            "residual infinity-norm objective; row_column is row-weighted."
+        ),
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=1.0e-3)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--enable-torch-rocm-lstsq", action="store_true")
@@ -926,6 +1154,7 @@ def main(argv: list[str] | None = None) -> int:
         max_support_columns=args.max_support_columns,
         finite_difference_epsilon_m=args.finite_difference_epsilon_m,
         ridge_factor=args.ridge_factor,
+        extra_ridge_factors=_parse_float_csv(args.extra_ridge_factors),
         alpha_values=_parse_float_csv(args.alpha_values),
         allow_negative_alphas=bool(args.allow_negative_alphas),
         include_gate_limited_alpha=bool(args.include_gate_limited_alpha),
@@ -935,6 +1164,9 @@ def main(argv: list[str] | None = None) -> int:
         component_block_basis_key_mode=args.component_block_basis_key_mode,
         component_block_basis_normalization=args.component_block_basis_normalization,
         component_block_basis_ridge_factor=args.component_block_basis_ridge_factor,
+        enable_linf_active_set=bool(args.enable_linf_active_set),
+        linf_active_set_coeff_bound=args.linf_active_set_coeff_bound,
+        linf_active_set_equilibration=args.linf_active_set_equilibration,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         enable_torch_rocm_lstsq=bool(args.enable_torch_rocm_lstsq),

@@ -1,15 +1,15 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T17:18:49+09:00",
+  "generated_at": "2026-06-14T17:37:46+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_active_set_followup89_probe.json",
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_probe.json",
     "latest_attached_policy_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.03346490679193459,
+    "latest_attached_policy_direct_residual_inf_n": 0.033463396544561874,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.03246490679193459
+    "remaining_residual_margin_to_gate_n": 0.03246339654456187
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -453,6 +453,22 @@
       "post_shell_cached_top96_active_set_followup90_accepted": false,
       "post_shell_cached_top96_active_set_followup90_best_improvement_inf_n": 7.978712801559595e-09,
       "post_shell_cached_top96_active_set_followup87_90_assessment": "Broad top96 active-set cached residual/JVP correction reopens a small live descent after component-block basis saturation. Followup87-89 accept three promotions and lower the attached-policy residual to 0.0334649068 N, while followup90 drops below the 1e-8 promotion floor. The next solver move should be a minimax/Chebyshev active-set objective, larger active sets, or better scaling across mixed frame/shell cancellation rows.",
+      "post_shell_cached_linf_multi_ridge_followup91_97_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_linf_multi_ridge_followup91_97_summary.json",
+      "post_shell_cached_linf_followup91_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup91_probe.json",
+      "post_shell_cached_linf_followup92_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_linf_active_set_followup92_probe.json",
+      "post_shell_cached_linf_followup93_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top128_linf_active_set_followup93_probe.json",
+      "post_shell_cached_linf_followup94_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_bounded_linf_active_set_followup94_probe.json",
+      "post_shell_cached_linf_followup91_94_accepted": false,
+      "post_shell_cached_multi_ridge_followup95_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_probe.json",
+      "post_shell_cached_multi_ridge_followup95_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup95_final_checkpoint.npz",
+      "post_shell_cached_multi_ridge_followup96_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_probe.json",
+      "post_shell_cached_multi_ridge_followup96_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup96_final_checkpoint.npz",
+      "post_shell_cached_multi_ridge_followup97_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_probe.json",
+      "post_shell_cached_multi_ridge_followup97_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup97_final_checkpoint.npz",
+      "post_shell_cached_multi_ridge_followup95_97_accepted_count": 3,
+      "post_shell_cached_multi_ridge_followup95_97_total_improvement_inf_n": 1.5102473727157673e-06,
+      "post_shell_cached_multi_ridge_followup97_final_residual_inf_n": 0.033463396544561874,
+      "post_shell_cached_multi_ridge_followup91_97_assessment": "Followup91-94 show pure selected-row Chebyshev/minimax cancellation is not a safe globalization path at this frontier: it can satisfy local linear active rows while worsening the nonlinear global residual. Followup95-97 add multi-ridge LS direction sweep against the same cached JVP matrix and reopen a repeatable descent lane, lowering the residual by 1.51e-6 N to 0.0334633965 N. The gate remains open and the rate is still too slow for closure by repetition.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
       "row_correction_batch_alpha_trial_rows": 300,
@@ -851,7 +867,9 @@
     "Followup82-84 implement and test attached-policy cached component-block residual/JVP basis construction; dominant-component, component+dof, and gate-limited-alpha variants only reach numerical-floor descent.",
     "Followup85-86 audit the followup75 plateau physically: component cancellation is broad and mixed across frame/shell rows, while hotspot tangent/JVP checks are consistent to near machine precision.",
     "Followup87-90 continue from that audit with a broad top96 active-set cached residual/JVP lane. Followup87-89 accept three promotions and lower the residual to 0.0334649068 N, but followup90 falls below the 1e-8 improvement floor.",
-    "Continue from followup89 with a stronger active-set formulation: minimax/Chebyshev residual reduction, larger top-row sets, or better row scaling across the mixed frame/shell cancellation rows."
+    "Followup91-94 show pure selected-row Chebyshev/minimax active-set cancellation is unsafe at this frontier: the active-row linear system can be solved while the nonlinear global residual worsens.",
+    "Followup95-97 show multi-ridge LS direction sweep against one cached JVP matrix reopens repeatable descent, lowering the residual to 0.0334633965 N.",
+    "Continue from followup97 with adaptive ridge scheduling and an off-active-row guard/globalization; then move this multi-ridge candidate replay lane into the production ROCm/HIP backend once direction stability is better."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, followup79-80 show component-magnitude equation scaling also no-descends, followup81 shows current scaled global Krylov is at numerical-floor descent, followup82-84 show current cached component-block residual/JVP basis construction is also numerical-floor only, followup85-86 show the plateau is a consistent mixed frame/shell cancellation state rather than a checked tangent/JVP mismatch, and followup87-90 show broad top96 active-set cached residual/JVP descent reopens only a small three-promotion improvement to 0.0334649068 N before saturating. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, coupled row-nodeblock descent, component-block JVP basis diagnostics, physical residual/Jacobian audit, and top96 active-set descent are integrated. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, followup79-80 show component-magnitude equation scaling also no-descends, followup81 shows current scaled global Krylov is at numerical-floor descent, followup82-84 show current cached component-block residual/JVP basis construction is also numerical-floor only, followup85-86 show the plateau is a consistent mixed frame/shell cancellation state rather than a checked tangent/JVP mismatch, followup87-90 show broad top96 active-set cached residual/JVP descent reopens only a small three-promotion improvement to 0.0334649068 N before saturating, followup91-94 show selected-row Chebyshev/minimax cancellation is not a safe globalization path, and followup95-97 show multi-ridge active-set descent lowers the residual to 0.0334633965 N. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, coupled row-nodeblock descent, component-block JVP basis diagnostics, physical residual/Jacobian audit, top96 active-set descent, minimax negative evidence, and multi-ridge positive evidence are integrated. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
 }
