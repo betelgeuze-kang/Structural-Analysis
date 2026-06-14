@@ -1,0 +1,112 @@
+{
+  "schema_version": "mgt-direct-residual-hip-largest-rows-saturation-summary.v1",
+  "generated_at": "2026-06-14T16:31:30+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+  "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup73_final_checkpoint.npz",
+  "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json",
+  "residual_gate_n": 0.001,
+  "followup73_support1_tail": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup73_probe.json",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup73_final_checkpoint.npz",
+    "accepted": true,
+    "base_direct_residual_inf_n": 0.03346743594923307,
+    "final_direct_residual_inf_n": 0.03346553206631597,
+    "accepted_improvement_inf_n": 1.9038829170980875e-6,
+    "promotion_count": 3,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 200,
+    "target_mode": "largest_rows",
+    "support_column_counts": [
+      1
+    ],
+    "batch_replay_backend": "hip_full_residual",
+    "batch_fd_replay_seconds": 5.382775259007758,
+    "batch_alpha_replay_seconds": 5.743876157008344,
+    "total_seconds": 72.49692629600031,
+    "best_candidate": {
+      "target_row_count": 10,
+      "support_column_count": 1,
+      "support_size": 11,
+      "alpha": 0.000015625,
+      "direct_residual_inf_n": 0.03346557882628076,
+      "improvement_inf_n": 4.896892278338782e-7
+    }
+  },
+  "followup74_support4_8_branch": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_support4_8_followup74_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.03346553206631597,
+    "final_direct_residual_inf_n": 0.03346553206631597,
+    "accepted_improvement_inf_n": 0,
+    "promotion_count": 0,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 86,
+    "target_mode": "largest_rows",
+    "support_column_counts": [
+      4,
+      8
+    ],
+    "batch_replay_backend": "hip_full_residual",
+    "batch_fd_replay_seconds": 2.641828148996865,
+    "batch_alpha_replay_seconds": 2.880136918000062,
+    "total_seconds": 33.220525559001544,
+    "best_candidate": {
+      "target_row_count": 4,
+      "support_column_count": 4,
+      "support_size": 15,
+      "alpha": 0.00000390625,
+      "direct_residual_inf_n": 0.03480195322234303,
+      "improvement_inf_n": -0.0013364211560270567
+    }
+  },
+  "latest_frontier": {
+    "base_direct_residual_inf_n": 0.03346553206631597,
+    "top_row_dominant_component_counts": {
+      "frame": 14,
+      "shell_membrane": 44,
+      "shell_bending_drilling": 38
+    },
+    "top_hotspots": [
+      {
+        "node_index": 2221,
+        "dof": "uz",
+        "residual_n": -0.03346553206631597,
+        "dominant_component": "frame"
+      },
+      {
+        "node_index": 2846,
+        "dof": "uy",
+        "residual_n": 0.03346550864389536,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "node_index": 2220,
+        "dof": "uz",
+        "residual_n": -0.03346542715631551,
+        "dominant_component": "frame"
+      },
+      {
+        "node_index": 2380,
+        "dof": "uz",
+        "residual_n": -0.03346542674748321,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.033465338403682154,
+        "dominant_component": "shell_bending_drilling"
+      }
+    ]
+  },
+  "cumulative_from_followup69": {
+    "base_direct_residual_inf_n": 0.033617517624279225,
+    "final_direct_residual_inf_n": 0.03346553206631597,
+    "accepted_improvement_inf_n": 0.00015198555796325532,
+    "remaining_residual_margin_to_gate_n": 0.03246553206631597
+  },
+  "assessment": "Followup73 squeezes only 1.90e-6 N from the narrowed support=1 largest_rows tail and then stops with no_residual_descent. Followup74 tests wider support 4/8 from that state and no-descends immediately, with the best candidate worsening the residual to 0.034802 N. The latest frontier is still a flat mixed frame/shell_membrane/shell_bending_drilling plateau around 0.0334655 N, so plain largest_rows row correction is saturated.",
+  "next_solver_step": "Switch from scalar largest_rows repetition to a coupled node/shell/frame controller seeded by nodes 2221, 2846, 2220, 2380, and 2202, or implement the persistent Rust/HIP residual/JVP worker before another broad adaptive search.",
+  "claim_boundary": "Residual descent and saturation evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}
