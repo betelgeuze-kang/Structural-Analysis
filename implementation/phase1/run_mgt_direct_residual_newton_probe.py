@@ -3530,6 +3530,11 @@ def run_mgt_direct_residual_newton_probe(
                                     "finite_difference_batch_replay": bool(
                                         row_batch_fd_replay
                                     ),
+                                    "finite_difference_batch_replay_backend": (
+                                        row_batch_backend
+                                        if row_batch_fd_replay
+                                        else "disabled"
+                                    ),
                                     "finite_difference_batch_chunk_size": int(
                                         row_batch_fd_replay_chunk_size
                                     ),
@@ -3909,6 +3914,29 @@ def run_mgt_direct_residual_newton_probe(
                                     candidate_meta.get(
                                         "residual_row_batch_alpha_replay"
                                     )
+                                ),
+                                "residual_batch_backend": str(
+                                    candidate_meta.get("residual_batch_backend") or ""
+                                ),
+                                "hip_full_residual_batch_replay": bool(
+                                    candidate_meta.get(
+                                        "hip_full_residual_batch_replay"
+                                    )
+                                ),
+                                "hip_kernel_mean_seconds": (
+                                    float(candidate_meta["hip_kernel_mean_seconds"])
+                                    if candidate_meta.get("hip_kernel_mean_seconds")
+                                    is not None
+                                    else None
+                                ),
+                                "hip_subprocess_seconds": (
+                                    float(candidate_meta["hip_subprocess_seconds"])
+                                    if candidate_meta.get("hip_subprocess_seconds")
+                                    is not None
+                                    else None
+                                ),
+                                "single_subprocess_boundary": bool(
+                                    candidate_meta.get("single_subprocess_boundary")
                                 ),
                             }
                             trial_rows.append(trial_row)
