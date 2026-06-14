@@ -1,14 +1,14 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T11:58:48+09:00",
+  "generated_at": "2026-06-14T12:19:18+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.0340294701338964,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.03364664105529991,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.0330294701338964
+    "remaining_residual_margin_to_gate_n": 0.03264664105529991
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -140,6 +140,29 @@
       "diagonal_newton_best_direct_residual_inf_n": 0.03507111525232176,
       "diagonal_newton_best_improvement_inf_n": -0.0010416451184253606,
       "assessment": "Followup46 hotspot tangent/FD JVP is consistent to numerical precision, while frame-diagonal Newton candidates worsen the residual. The blocker is coupled direction/globalization, not a local Jacobian mismatch."
+    },
+    "followup47_49_coupled_row_nodeblock": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_49_summary.json",
+      "followup47_improvement_inf_n": 3.403951409070016e-05,
+      "followup48_improvement_inf_n": 1.7001793827131628e-05,
+      "followup49_accepted": false,
+      "latest_direct_residual_inf_n": 0.033978428825978624,
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_followup48_frontier_probe.json",
+      "assessment": "Coupled largest-row node-block current-tangent correction reopened a stronger local lane: followup47 improved 3.40e-5 N and followup48 improved 1.70e-5 N from the followup46 frontier. A narrowed followup49 repeat with the same top-4/support16 shape did not descend, so the lane is live but needs adaptive retargeting/support refresh after each frontier transition."
+    },
+    "followup47_51_coupled_row_nodeblock": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_51_summary.json",
+      "source_direct_residual_inf_n": 0.0340294701338964,
+      "latest_direct_residual_inf_n": 0.03364664105529991,
+      "total_accepted_improvement_inf_n": 0.0003828290785964916,
+      "followup47_improvement_inf_n": 3.403951409070016e-05,
+      "followup48_improvement_inf_n": 1.7001793827131628e-05,
+      "followup49_narrow_accepted": false,
+      "followup49_refresh_final_residual_inf_n": 0.033808627722457074,
+      "followup50_refresh_final_residual_inf_n": 0.03364664105529991,
+      "followup51_refresh_accepted": false,
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
+      "assessment": "Coupled largest-row node-block current-tangent correction is the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, so the next pass needs another target/support/globalization refresh rather than a static repeat."
     }
   },
   "engine_state": {
@@ -301,15 +324,32 @@
       "global_krylov_scaled_floor_followup46_hotspot_jvp_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_hotspot_jvp_probe.json",
       "global_krylov_scaled_floor_followup46_hotspot_jvp_max_selected_row_relative_error": 1.6753322956839353e-11,
       "global_krylov_scaled_floor_followup46_direction_jvp_max_relative_inf_error": 5.400705114726038e-16,
-      "global_krylov_scaled_floor_followup46_frame_diagonal_best_improvement_inf_n": -0.0010416451184253606
+      "global_krylov_scaled_floor_followup46_frame_diagonal_best_improvement_inf_n": -0.0010416451184253606,
+      "coupled_row_nodeblock_followup47_49_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_49_summary.json",
+      "coupled_row_nodeblock_followup47_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_smoke.json",
+      "coupled_row_nodeblock_followup48_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup48_probe.json",
+      "coupled_row_nodeblock_followup48_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup48_final_checkpoint.npz",
+      "coupled_row_nodeblock_followup48_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_followup48_frontier_probe.json",
+      "coupled_row_nodeblock_followup49_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup49_probe.json",
+      "coupled_row_nodeblock_followup47_improvement_inf_n": 3.403951409070016e-05,
+      "coupled_row_nodeblock_followup48_improvement_inf_n": 1.7001793827131628e-05,
+      "coupled_row_nodeblock_followup49_accepted": false,
+      "coupled_row_nodeblock_followup47_51_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_51_summary.json",
+      "coupled_row_nodeblock_refresh_followup49_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup49_probe.json",
+      "coupled_row_nodeblock_refresh_followup50_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_probe.json",
+      "coupled_row_nodeblock_refresh_followup50_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
+      "coupled_row_nodeblock_refresh_followup50_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
+      "coupled_row_nodeblock_refresh_followup51_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup51_probe.json",
+      "coupled_row_nodeblock_total_followup47_to_50_improvement_inf_n": 0.0003828290785964916,
+      "coupled_row_nodeblock_refresh_followup50_residual_inf_n": 0.03364664105529991
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family. Followup45/46 add residual-scale-floor retuning for the global Krylov lane: it proves the followup44 no-descent state can be escaped, but the repeat improvement saturates immediately, leaving the next high-impact work in a coupled shell bending/membrane/frame or material Newton direction."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family. Followup45/46 add residual-scale-floor retuning for the global Krylov lane: it proves the followup44 no-descent state can be escaped, but the repeat improvement saturates immediately, leaving the next high-impact work in a coupled shell bending/membrane/frame or material Newton direction. Followup47/48 show that coupled largest-row node-block current-tangent correction can still produce useful direct-residual descent after scaled-floor Krylov saturation; followup49 shows fixed retargeting saturates and the next step is adaptive support/target refresh. Followup47-50 show coupled largest-row node-block correction with broad target/support refresh is now the strongest residual descent lane; followup51 no-descent shows it still needs adaptive retargeting/globalization rather than fixed repetition."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.0340294701338964,
-    "latest_direct_relative_residual_inf": 3.922190467856337e-06,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.03364664105529991,
+    "latest_direct_relative_residual_inf": 3.878066108676447e-06,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
@@ -437,34 +477,69 @@
         "row_scale_inf": 99999.99999999999,
         "best_alpha": 0.04,
         "assessment": "Repeat scaled-floor global Krylov accepted, but improvement collapsed to 6.78e-9 N; the lane is diagnostic and saturated."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup48_probe.json",
+        "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_49_summary.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup48_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_followup48_frontier_probe.json",
+        "base_residual_inf_n": 0.033995430619805644,
+        "final_residual_inf_n": 0.033978428825978624,
+        "improvement_inf_n": 1.7001793827131628e-05,
+        "target_row_count": 4,
+        "support_column_count": 16,
+        "support_size": 150,
+        "best_alpha": 0.0005,
+        "assessment": "Second accepted coupled row-nodeblock pass. Improvement remained live at 1.70e-5 N, but followup49 with the same narrowed support no longer descended."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_probe.json",
+        "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_followup47_51_summary.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_coupled_row_nodeblock_refresh_followup50_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_coupled_row_nodeblock_refresh_followup50_frontier_probe.json",
+        "base_residual_inf_n": 0.033808627722457074,
+        "final_residual_inf_n": 0.03364664105529991,
+        "improvement_inf_n": 0.0001619866671571657,
+        "promotion_count": 2,
+        "best_target_row_count": 8,
+        "best_support_column_count": 8,
+        "best_support_size": 186,
+        "best_alpha": 0.002,
+        "assessment": "Second broad refresh chunk accepted two promotions and improved the residual by 1.62e-4 N; followup51 then no-descended, requiring another adaptive retargeting strategy."
       }
     ],
     "latest_frontier_pattern": {
       "top_row_dominant_component_counts": {
-        "shell_bending_drilling": 39,
         "shell_membrane": 45,
+        "shell_bending_drilling": 39,
         "frame": 12
       },
       "top_hotspot": {
-        "node_index": 2202,
-        "dof": "rx",
-        "residual_n": -0.0340294701338964,
-        "dominant_component": "shell_bending_drilling"
-      },
-      "second_hotspot": {
-        "node_index": 2377,
+        "node_index": 2379,
         "dof": "uz",
-        "residual_n": -0.0340294585942047,
+        "residual_n": -0.03364664105529991,
         "dominant_component": "shell_membrane"
       },
-      "assessment": "After followup46 the top residual is again node 2202 rx shell_bending_drilling, with node 2377 uz shell_membrane only 1.15e-8 N lower. The frontier is a paired shell bending/membrane cancellation, not a single-row scaling problem."
+      "second_hotspot": {
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.033639742702592956,
+        "dominant_component": "shell_bending_drilling"
+      },
+      "third_hotspot": {
+        "node_index": 8624,
+        "dof": "uy",
+        "residual_n": -0.0336390772040806,
+        "dominant_component": "shell_membrane"
+      },
+      "assessment": "After followup50, the leading hotspot shifted to node 2379 uz shell_membrane, with node 2202 rx shell_bending_drilling and node 8624 uy shell_membrane nearly tied behind it. The top-96 count pattern remains shell_membrane=45, shell_bending_drilling=39, frame=12."
     }
   },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The row-correction family is saturated, followup43 proved a larger current-tangent-preconditioned global Krylov descent, and followup45/46 show row-scale floor retuning can escape a no-descent frontier but saturates almost immediately. The remaining milestone is an adaptive coupled shell bending/membrane/frame or material Newton direction with production residual/JVP replay, not another fixed global scaling loop. Followup46 hotspot JVP evidence shows the assembled tangent matches finite-difference residual action at the active shell/frame rows, so the next closure attempt should change the coupled Newton/globalization space rather than chase a tangent assembly bug.",
+    "reason": "Followup47-50 show the active G1 direction is coupled largest-row node-block correction with refreshed target/support sets, not single-row scaling or fixed Krylov repetition. The lane reduced the frontier by 3.83e-4 N from followup46, but followup51 no-descent means full closure still requires adaptive retargeting/globalization and production residual/JVP replay.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 8.328283857828023e-06,
       "accepted_probe_seconds": 236.25546567300262,
@@ -473,16 +548,24 @@
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
     },
     "rough_extrapolation_from_latest_fastpath_followups": {
-      "latest_remaining_gate_gap_n": 0.0330294701338964,
+      "latest_remaining_gate_gap_n": 0.03264664105529991,
       "latest_global_krylov_improvement_followup43_n": 2.774165375341031e-05,
       "latest_global_krylov_runtime_followup43_seconds": 42.551498077998986,
       "steps_needed_at_same_improvement": 1190.6273797802046,
       "wall_time_hours_at_same_runtime": 14.073049628425096,
-      "assessment": "Scaled-floor retuning is valuable because it escaped followup44 no-descent, but followup46 shows immediate saturation. Repetition would require tens of thousands to millions of accepted probes, so the next G1 push should build a coupled shell bending/membrane/frame or material-consistent Newton direction.",
+      "assessment": "The coupled row-nodeblock refresh lane is materially stronger than scaled-floor Krylov, but followup51 shows it still reaches local no-descent plateaus. Closure likely needs an adaptive controller that changes target/support family after no-descent and then ports residual replay to production ROCm/HIP.",
       "latest_scaled_floor_followup45_best_improvement_n": 4.956016265156293e-07,
       "latest_scaled_floor_followup46_repeat_improvement_n": 6.783669681542648e-09,
       "steps_needed_at_followup45_best_improvement": 66645.20123977998,
-      "steps_needed_at_followup46_repeat_improvement": 4868967.930995322
+      "steps_needed_at_followup46_repeat_improvement": 4868967.930995322,
+      "latest_coupled_row_nodeblock_followup47_improvement_n": 3.403951409070016e-05,
+      "latest_coupled_row_nodeblock_followup48_improvement_n": 1.7001793827131628e-05,
+      "latest_coupled_row_nodeblock_followup49_accepted": false,
+      "steps_needed_at_followup48_improvement": 1939.7029020168052,
+      "latest_coupled_row_nodeblock_total_followup47_to_50_improvement_n": 0.0003828290785964916,
+      "latest_coupled_row_nodeblock_followup50_chunk_improvement_n": 0.0001619866671571657,
+      "latest_coupled_row_nodeblock_followup51_accepted": false,
+      "steps_needed_at_followup50_chunk_improvement": 201.53906261695525
     }
   },
   "recommended_next_path": [
@@ -495,7 +578,9 @@
     "Use the faster backend to test adaptive shell-bending/membrane/frame coupled physical correction directions, not to repeat a fixed tiny-alpha row correction thousands of times.",
     "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine.",
     "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
-    "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn."
+    "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn.",
+    "Promote the coupled row-nodeblock lane from one-off CLI probes into an adaptive controller that refreshes target rows/support after every accepted frontier move.",
+    "After followup51 no-descent, switch the coupled row-nodeblock controller to a different target family such as residual_node_blocks or shell element blocks, or add FD residual-row submatrix checks only on the refreshed support."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching, FD support-column batching, global Krylov descent, and scaled-floor retuning are integrated diagnostics; adaptive coupled material/shell/frame Newton and full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels; batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics; adaptive material/shell/frame Newton, full-load path closure, and production ROCm/HIP full residual gate closure remain open."
 }

@@ -4850,11 +4850,23 @@ def main(argv: list[str] | None = None) -> int:
         alpha_values=alpha_values,
     )
     base = payload.get("base_direct_residual") if isinstance(payload.get("base_direct_residual"), dict) else {}
-    best = (
-        payload.get("trust_region_line_search", {}).get("best_candidate")
-        if isinstance(payload.get("trust_region_line_search"), dict)
-        else {}
-    )
+    best = {}
+    for component_name in (
+        "trust_region_line_search",
+        "secant_subspace_globalization",
+        "secant_family_globalization",
+        "matrix_free_consistent_jacobian_subspace",
+        "matrix_free_global_krylov",
+        "current_tangent_residual_row_correction",
+    ):
+        component = payload.get(component_name)
+        if not isinstance(component, dict):
+            continue
+        candidate = component.get("best_gate_eligible_candidate") or component.get(
+            "best_candidate"
+        )
+        if isinstance(candidate, dict) and candidate.get("direct_residual_inf_n") is not None:
+            best = candidate
     print(
         "mgt-direct-residual-newton: "
         f"{payload['status']} base={base.get('direct_residual_inf_n')} "
