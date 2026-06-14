@@ -1,0 +1,42 @@
+{
+  "schema_version": "mgt-direct-residual-global-krylov-post-component-summary.v1",
+  "generated_at": "2026-06-14T16:53:30+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "residual_gate_n": 0.001,
+  "followup81_global_krylov": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_component_followup81_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.033465481263974306,
+    "accepted_improvement_inf_n": 0,
+    "stop_reason": "relative_improvement_floor_not_met",
+    "residual_descent": true,
+    "best_candidate": {
+      "alpha": 0.25,
+      "direct_residual_inf_n": 0.03346548121247417,
+      "improvement_inf_n": 5.150013748789206e-11,
+      "relative_improvement": 1.5389032382848806e-9,
+      "relative_increment": 9.656050504221161e-12
+    },
+    "matrix_free_global_krylov": {
+      "matvec_count": 5,
+      "preconditioner_solve_count": 6,
+      "trial_row_count": 16,
+      "jvp_row_count": 5,
+      "correction_inf_m": 1.3582110790889579e-12,
+      "row_scale_inf": 99999.99999999999,
+      "row_scale_min": 29.881536503600294,
+      "linear_solve_seconds": 3.1520923529969878,
+      "preconditioner_solve_seconds": 3.7524145360075636
+    },
+    "total_seconds": 31.147924124001293
+  },
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.033465481263974306,
+    "remaining_residual_margin_to_gate_n": 0.032465481263974305
+  },
+  "assessment": "Current-tangent-preconditioned global Krylov with residual-diagonal displacement scaling finds only a 5.15e-11 N numerical-floor descent and does not promote. Together with followup75-80, this closes the current local row and current global Krylov variants at the 0.03346548 N plateau.",
+  "next_solver_step": "Do not spend more cycles on current row least-squares or current scaled global Krylov. Build a new component-block residual/JVP basis or persistent in-process Rust/HIP resident worker for wider signed subspace searches.",
+  "claim_boundary": "Global Krylov saturation evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

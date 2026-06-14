@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T16:50:30+09:00",
+  "generated_at": "2026-06-14T16:53:30+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -417,6 +417,12 @@
       "post_shell_hip_frontier_component_scaled_followup79_accepted": false,
       "post_shell_hip_frontier_component_scaled_followup80_accepted": false,
       "post_shell_hip_frontier_component_scaled_followup79_80_assessment": "Followup79 adds dominant-component row-equation scaling and followup80 adds total-component row-equation scaling for frontier_component_rows. Both no-descend from the followup75 checkpoint. Component-balanced target selection plus component-magnitude equation scaling is still not enough to reopen descent at the mixed frame/shell plateau.",
+      "post_shell_global_krylov_post_component_followup81_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_global_krylov_post_component_followup81_summary.json",
+      "post_shell_global_krylov_post_component_followup81_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_component_followup81_probe.json",
+      "post_shell_global_krylov_post_component_followup81_accepted": false,
+      "post_shell_global_krylov_post_component_followup81_best_improvement_inf_n": 5.150013748789206e-11,
+      "post_shell_global_krylov_post_component_followup81_stop_reason": "relative_improvement_floor_not_met",
+      "post_shell_global_krylov_post_component_followup81_assessment": "Followup81 retries current-tangent-preconditioned global Krylov with residual-diagonal displacement scaling from the followup75 checkpoint. It finds only a 5.15e-11 N numerical-floor descent and does not promote, so the current scaled global Krylov variant is also saturated at this plateau.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
       "row_correction_batch_alpha_trial_rows": 300,
@@ -811,7 +817,8 @@
     "Followup75-76 show the existing node-block and element-block row-target modes do not reopen material descent: node-block adds only 5.08e-8 N, and element-block no-descends even with signed alphas.",
     "Followup77-78 add and validate a frontier_component_rows controller hook, but the first component-balanced and SVD-capped variants no-descend.",
     "Followup79-80 add component-magnitude row-equation scaling for that hook; dominant and total component scaling both no-descend.",
-    "Continue from followup75 by moving beyond local row least-squares into component-block residual/JVP basis construction, or implement persistent in-process Rust/HIP residual/JVP residency before another broad adaptive search."
+    "Followup81 retries current scaled global Krylov and only gets a 5.15e-11 N numerical-floor descent.",
+    "Continue from followup75 by moving beyond current local row least-squares and current global Krylov into component-block residual/JVP basis construction, or implement persistent in-process Rust/HIP residual/JVP residency before another broad adaptive search."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, and followup79-80 show component-magnitude equation scaling also no-descends. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, followup79-80 show component-magnitude equation scaling also no-descends, and followup81 shows current scaled global Krylov is at numerical-floor descent. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
 }
