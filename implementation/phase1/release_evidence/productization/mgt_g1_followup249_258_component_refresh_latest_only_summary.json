@@ -1,0 +1,271 @@
+{
+  "schema_version": "mgt-g1-followup249-258-component-refresh-latest-only-summary.v1",
+  "generated_at": "2026-06-14T14:19:40.177389+00:00",
+  "status": "partial",
+  "claim_boundary": "Continuation evidence only. This advances the restartable G1 frontier but does not close the 0.001 N residual gate or prove production ROCm/HIP residency.",
+  "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "nodes": 13047,
+  "dof": 78282,
+  "load_scale": 0.656,
+  "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+  "retained_latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz",
+  "start_direct_residual_inf_n": 0.03320039013145526,
+  "latest_direct_residual_inf_n": 0.033195802619418464,
+  "latest_direct_relative_residual_inf": 3.826103083428044e-06,
+  "total_improvement_inf_n": 4.587512036795249e-06,
+  "residual_gate_n": 0.001,
+  "remaining_residual_margin_to_gate_n": 0.032195802619418463,
+  "accepted_history_count": 288,
+  "max_translation_m": 0.03516476734648784,
+  "component_frontier_refresh": {
+    "followup248_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup248_component_frontier_probe.json",
+    "followup249_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup249_component_frontier_probe.json",
+    "followup258_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup258_component_frontier_probe.json",
+    "followup258_top_row_dominant_component_counts": {
+      "shell_bending_drilling": 51,
+      "shell_membrane": 59,
+      "frame": 18
+    },
+    "followup258_component_inf_n": {
+      "frame": 156794.12661397827,
+      "spring": 0.00011238162708417099,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 156852.14355913326,
+      "shell_membrane": 47414.69161618969
+    },
+    "followup258_top_rows_sample": [
+      {
+        "free_row": 39354,
+        "global_dof": 52296,
+        "node_index": 8716,
+        "dof": "ux",
+        "residual_n": -0.033195802619432675,
+        "external_load_n": 0.05117346666666956,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 130.02398964620068,
+          "shell_membrane": -130.00601198215344
+        },
+        "internal_sum_n": 0.017977664047236885,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10520,
+        "global_dof": 13136,
+        "node_index": 2189,
+        "dof": "uz",
+        "residual_n": -0.033195788808850324,
+        "external_load_n": 6.589204136000003,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -261.05174753972824,
+          "shell_membrane": 267.6077558869194
+        },
+        "internal_sum_n": 6.5560083471911526,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 11612,
+        "global_dof": 14264,
+        "node_index": 2377,
+        "dof": "uz",
+        "residual_n": -0.03319565014737691,
+        "external_load_n": -735.7751463917341,
+        "component_values_n": {
+          "frame": 171.96520059297177,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -1.4924275000434368e-15,
+          "shell_membrane": -907.7735426348532
+        },
+        "internal_sum_n": -735.8083420418815,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 10599,
+        "global_dof": 13215,
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.03319544842030442,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.4926191028588335,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -0.5258145512791379,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -0.03319544842030442,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10712,
+        "global_dof": 13328,
+        "node_index": 2221,
+        "dof": "uz",
+        "residual_n": -0.03319514530790002,
+        "external_load_n": -736.5045135207649,
+        "component_values_n": {
+          "frame": -736.5377086660728,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -736.5377086660728,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 13332,
+        "global_dof": 16008,
+        "node_index": 2668,
+        "dof": "ux",
+        "residual_n": 0.03319503663675216,
+        "external_load_n": 0.18254566666666738,
+        "component_values_n": {
+          "frame": -1.065673065403052,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 1.4930087272726098,
+          "shell_membrane": -0.2115949585661383
+        },
+        "internal_sum_n": 0.21574070330341955,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 12390,
+        "global_dof": 15066,
+        "node_index": 2511,
+        "dof": "ux",
+        "residual_n": -0.03319395237675062,
+        "external_load_n": -0.04475100799999796,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -0.04302069144212539,
+          "shell_membrane": -0.03492426893462319
+        },
+        "internal_sum_n": -0.07794496037674858,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10706,
+        "global_dof": 13322,
+        "node_index": 2220,
+        "dof": "uz",
+        "residual_n": -0.03319383905879669,
+        "external_load_n": -1.9117578912414641,
+        "component_values_n": {
+          "frame": -1.9449517303002608,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -1.9449517303002608,
+        "dominant_component": "frame"
+      }
+    ]
+  },
+  "component_fd_refresh_steps": [
+    {
+      "followup_index": 249,
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_probe.json",
+      "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+      "output_checkpoint_pruned_after_broad_followup258": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_final_checkpoint.npz",
+      "base_direct_residual_inf_n": 0.03320039013145526,
+      "final_direct_residual_inf_n": 0.03319998472291454,
+      "improvement_inf_n": 4.054085407170782e-07,
+      "relative_improvement": 1.2210957133692817e-05,
+      "target_mode": "frontier_component_rows",
+      "configured_target_count": 3,
+      "support_column_count": 8,
+      "support_size": 25,
+      "jacobian_mode": "finite_difference",
+      "alpha": 1.5625e-05,
+      "direction_sign": 1.0,
+      "batch_fd_state_count": 96,
+      "batch_alpha_state_count": 174
+    },
+    {
+      "followup_index": 250,
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_probe.json",
+      "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_final_checkpoint.npz",
+      "output_checkpoint_pruned_after_broad_followup258": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_final_checkpoint.npz",
+      "base_direct_residual_inf_n": 0.03319998472291454,
+      "final_direct_residual_inf_n": 0.03319976017783811,
+      "improvement_inf_n": 2.2454507643543398e-07,
+      "relative_improvement": 6.763409028934087e-06,
+      "target_mode": "frontier_component_rows",
+      "configured_target_count": 3,
+      "support_column_count": 4,
+      "support_size": 13,
+      "jacobian_mode": "finite_difference",
+      "alpha": 6.25e-05,
+      "direction_sign": 1.0,
+      "batch_fd_state_count": 95,
+      "batch_alpha_state_count": 174
+    }
+  ],
+  "component_fd_total_improvement_inf_n": 6.299536171525122e-07,
+  "cached_broad_followup251_258": {
+    "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup251_258_after_component_fd_latest_only_controller_summary.json",
+    "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_final_checkpoint.npz",
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz",
+    "start_direct_residual_inf_n": 0.03319976017785232,
+    "latest_direct_residual_inf_n": 0.033195802619418464,
+    "accepted_step_count": 8,
+    "total_promoted_improvement_inf_n": 3.957558533329575e-06,
+    "runtime_seconds": 360.22222927899566,
+    "retained_latest_checkpoint_only": true,
+    "pruned_intermediate_checkpoint_count": 7,
+    "checkpoint_prune_error_count": 0,
+    "last_step": {
+      "followup_index": 258,
+      "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_probe.json",
+      "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_probe.npz",
+      "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz",
+      "checkpoint_retained": true,
+      "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup257_final_checkpoint.npz",
+      "promoted": true,
+      "base_direct_residual_inf_n": 0.03319782885402967,
+      "final_or_best_direct_residual_inf_n": 0.033195802619418464,
+      "improvement_inf_n": 2.0262346112076557e-06,
+      "direction_source": "all_target_rows_lstsq_ridge_1e-06",
+      "alpha": 6.103515625e-05,
+      "accepted_history_count": 288
+    }
+  },
+  "throughput_comparison": {
+    "component_fd_improvement_per_step_inf_n": 3.149768085762561e-07,
+    "cached_broad_improvement_per_step_inf_n": 4.946948166661969e-07,
+    "assessment": "Component-frontier finite-difference correction reopened descent from followup248 but was slower per step; broad top96 cached multi-ridge replay was the faster post-refresh lane from followup250 to followup258."
+  },
+  "checkpoint_retention": {
+    "mode": "latest_restart_frontier_only",
+    "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz",
+    "retained_checkpoint_size_bytes": 239104974,
+    "superseded_checkpoints_pruned_or_to_prune": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup251-257_final_checkpoint.npz"
+    ],
+    "probe_receipts_pruned_or_to_prune": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup251-258_probe.{json,npz}"
+    ],
+    "retained_small_json_evidence": [
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup248_component_frontier_probe.json",
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup249_component_frontier_probe.json",
+      "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup258_component_frontier_probe.json",
+      "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_probe.json",
+      "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_probe.json",
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup251_258_after_component_fd_latest_only_controller_summary.json"
+    ]
+  }
+}

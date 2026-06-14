@@ -1,0 +1,334 @@
+{
+  "schema_version": "mgt-g1-followup362-365-attached-equilibrium-newton-gate-summary.v1",
+  "generated_at": "2026-06-15T12:29:42.199372+00:00",
+  "status": "partial",
+  "claim_boundary": "The attached-policy physical direct residual gate is replayed below 0.001 N. Full G1 remains partial until the increment/globalization gate, full-load-path production policy, material Newton, and production ROCm/HIP solver lane are closed.",
+  "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "nodes": 13047,
+  "dof": 78282,
+  "free_dof_count": 58998,
+  "load_scale": 0.656,
+  "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+  "retained_latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+  "retained_latest_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup365_gate_component_probe.json",
+  "start_direct_residual_inf_n": 0.033136466982157,
+  "latest_direct_residual_inf_n": 1.787703126865381e-06,
+  "latest_direct_relative_residual_inf": 2.06048232192839e-10,
+  "total_improvement_inf_n": 0.03313467927903013,
+  "residual_gate_n": 0.001,
+  "direct_residual_gate_passed": true,
+  "remaining_residual_margin_to_gate_n": -0.0009982122968731346,
+  "accepted_history_count": 390,
+  "max_translation_m": 0.03516277106084248,
+  "contract_mismatch_diagnostics_pruned": [
+    {
+      "followup_index": 362,
+      "probe": null,
+      "probe_before_prune": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup362_host_ilu_device_gmres_probe.json",
+      "status": "partial",
+      "equilibrium_newton_ready": false,
+      "shell_pressure_load_path_policy": null,
+      "base_residual_inf_n": 0.37383887466666776,
+      "final_residual_inf_n": 0.37383887466666776,
+      "accepted_newton_iteration_count": 0,
+      "linear_solver_profile": "host_ilu_device_gmres",
+      "linear_solver_backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "linear_solver_converged": false,
+      "linear_solver_breakdown": "host_ilu_device_gmres_unavailable",
+      "linear_solver_error_excerpt": "RuntimeError('No HIP GPUs are available')",
+      "alpha": null,
+      "relative_increment": null,
+      "output_final_checkpoint": null,
+      "blockers": [
+        "equilibrium_newton_gate_not_closed"
+      ],
+      "contract_note": "Generated before focused probe exposed shell_pressure_load_path_policy; uses all_components and is not the current attached-policy frontier contract."
+    },
+    {
+      "followup_index": 363,
+      "probe": null,
+      "probe_before_prune": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup363_regularized_direct_probe.json",
+      "status": "partial",
+      "equilibrium_newton_ready": false,
+      "shell_pressure_load_path_policy": null,
+      "base_residual_inf_n": 0.37383887466666776,
+      "final_residual_inf_n": 0.2806904887353957,
+      "accepted_newton_iteration_count": 1,
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_converged": true,
+      "linear_solver_breakdown": null,
+      "linear_solver_error_excerpt": null,
+      "alpha": 1.0,
+      "relative_increment": 1.0,
+      "output_final_checkpoint": {
+        "written": true,
+        "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup363_regularized_direct_final_checkpoint.npz",
+        "schema": "mgt-direct-residual-newton-state.v1",
+        "load_scale": 0.656,
+        "dof_count": 78282,
+        "direct_residual_inf_n": 0.2806904887353957,
+        "direct_relative_residual_inf": 3.235200416004389e-05,
+        "max_translation_m": 5.44446806135512,
+        "accepted_history_count": 390,
+        "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+      },
+      "blockers": [
+        "equilibrium_newton_gate_not_closed"
+      ],
+      "contract_note": "Generated before focused probe exposed shell_pressure_load_path_policy; residual improved in all_components contract but the checkpoint is not retained as the G1 frontier."
+    }
+  ],
+  "attached_policy_equilibrium_newton": {
+    "host_ilu_device_gmres": {
+      "followup_index": 364,
+      "probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup364_attached_host_ilu_device_gmres_probe.json",
+      "probe_before_prune": null,
+      "status": "partial",
+      "equilibrium_newton_ready": false,
+      "shell_pressure_load_path_policy": "attached_components_only",
+      "base_residual_inf_n": 0.033136466982157,
+      "final_residual_inf_n": 0.033136466982157,
+      "accepted_newton_iteration_count": 0,
+      "linear_solver_profile": "host_ilu_device_gmres",
+      "linear_solver_backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "linear_solver_converged": false,
+      "linear_solver_breakdown": "host_ilu_device_gmres_unavailable",
+      "linear_solver_error_excerpt": "RuntimeError('No HIP GPUs are available')",
+      "alpha": null,
+      "relative_increment": null,
+      "output_final_checkpoint": null,
+      "blockers": [
+        "equilibrium_newton_gate_not_closed"
+      ],
+      "contract_note": null
+    },
+    "regularized_direct": {
+      "followup_index": 365,
+      "probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_probe.json",
+      "probe_before_prune": null,
+      "status": "ready",
+      "equilibrium_newton_ready": true,
+      "shell_pressure_load_path_policy": "attached_components_only",
+      "base_residual_inf_n": 0.033136466982157,
+      "final_residual_inf_n": 1.787703126865381e-06,
+      "accepted_newton_iteration_count": 1,
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_converged": true,
+      "linear_solver_breakdown": null,
+      "linear_solver_error_excerpt": null,
+      "alpha": 1.0,
+      "relative_increment": 0.00029624101604524574,
+      "output_final_checkpoint": {
+        "written": true,
+        "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+        "schema": "mgt-direct-residual-newton-state.v1",
+        "load_scale": 0.656,
+        "dof_count": 78282,
+        "direct_residual_inf_n": 1.787703126865381e-06,
+        "direct_relative_residual_inf": 2.06048232192839e-10,
+        "max_translation_m": 0.03516277106084248,
+        "accepted_history_count": 390,
+        "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+      },
+      "blockers": [],
+      "contract_note": null
+    }
+  },
+  "direct_residual_gate_replay": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
+    "status": "partial",
+    "direct_residual_newton_ready": false,
+    "base_direct_residual_inf_n": 1.787703126865381e-06,
+    "final_direct_residual_inf_n": 1.787703126865381e-06,
+    "gate_assessment": {
+      "residual_tolerance_n": 0.001,
+      "direct_residual_gate_passed": true,
+      "relative_increment_tolerance": 0.0001,
+      "relative_increment_gate_verified": false,
+      "relative_increment_gate_passed": false,
+      "direct_residual_newton_ready_requires_increment_gate": true
+    },
+    "blockers": [
+      "relative_increment_gate_not_closed_or_not_verified",
+      "consistent_jacobian_or_globalization_required",
+      "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+    ]
+  },
+  "component_frontier_refresh": {
+    "followup365_retained_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup365_gate_component_probe.json",
+    "followup365_top_row_dominant_component_counts": {
+      "frame": 71,
+      "shell_bending_drilling": 54,
+      "shell_membrane": 3
+    },
+    "followup365_component_inf_n": {
+      "frame": 156794.1212852504,
+      "spring": 1.2277145006460606e-09,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 156852.13822824837,
+      "shell_membrane": 47414.68002981109
+    },
+    "followup365_top_rows_sample": [
+      {
+        "free_row": 54224,
+        "global_dof": 68648,
+        "node_index": 11441,
+        "dof": "uz",
+        "residual_n": 1.787703126865381e-06,
+        "external_load_n": -18.306367754500002,
+        "component_values_n": {
+          "frame": -18.306365966796875,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -18.306365966796875,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 56540,
+        "global_dof": 74216,
+        "node_index": 12369,
+        "dof": "uz",
+        "residual_n": 1.787703126865381e-06,
+        "external_load_n": -18.306367754500002,
+        "component_values_n": {
+          "frame": -18.306365966796875,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -18.306365966796875,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 1778,
+        "global_dof": 1922,
+        "node_index": 320,
+        "dof": "uz",
+        "residual_n": -1.7876978368747132e-06,
+        "external_load_n": -18.846114766570228,
+        "component_values_n": {
+          "frame": 18.306365966796875,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -37.15248252129777,
+          "shell_membrane": 2.3283064365386963e-10
+        },
+        "internal_sum_n": -18.846116554268065,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 7358,
+        "global_dof": 8516,
+        "node_index": 1419,
+        "dof": "uz",
+        "residual_n": -1.7874589666178053e-06,
+        "external_load_n": -18.825801461360317,
+        "component_values_n": {
+          "frame": 18.306365966796875,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -37.13216921538333,
+          "shell_membrane": -2.3283064365386963e-10
+        },
+        "internal_sum_n": -18.825803248819284,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10712,
+        "global_dof": 13328,
+        "node_index": 2221,
+        "dof": "uz",
+        "residual_n": -7.079233910189942e-08,
+        "external_load_n": -736.5045135207649,
+        "component_values_n": {
+          "frame": -736.5045135915573,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -736.5045135915573,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 11612,
+        "global_dof": 14264,
+        "node_index": 2377,
+        "dof": "uz",
+        "residual_n": 7.07912022335222e-08,
+        "external_load_n": -735.7751463917341,
+        "component_values_n": {
+          "frame": 171.95305601836867,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -1.4925136475195598e-15,
+          "shell_membrane": -907.7282023393116
+        },
+        "internal_sum_n": -735.7751463209429,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 1792,
+        "global_dof": 1936,
+        "node_index": 322,
+        "dof": "ry",
+        "residual_n": 6.973311883484712e-08,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": -340.1048244726844,
+          "spring": 1.7628374889577147e-11,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 340.1048245423999,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 6.973311883484712e-08,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 5866,
+        "global_dof": 6922,
+        "node_index": 1153,
+        "dof": "ry",
+        "residual_n": -6.548270903294906e-08,
+        "external_load_n": 3268.016976242454,
+        "component_values_n": {
+          "frame": 2418.309799713916,
+          "spring": 1.9132038592883168e-12,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 849.7071764630532,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": 3268.016976176971,
+        "dominant_component": "frame"
+      }
+    ]
+  },
+  "lane_assessment": {
+    "breakthrough": "Once focused equilibrium Newton is run under attached_components_only, a single regularized-direct Newton step lowers the current attached-policy residual from 0.033136466982157 N to 1.787703126865381e-06 N, passing the 0.001 N residual gate.",
+    "production_rocm_gap": "The attached-policy host_ilu_device_gmres profile still fails before solving because Torch ROCm reports no HIP GPUs available. Native HIP residual replay exists, but this solver lane is not production-closed.",
+    "remaining_g1_gaps": [
+      "relative_increment_gate_not_closed_or_not_verified_in_direct_residual_replay",
+      "production_rocm_hip_newton_solver_lane_not_closed",
+      "full_load_path_policy_still_attached_components_only_not_all_components",
+      "material_newton_consistency_not_proven_as_final_production_contract"
+    ]
+  },
+  "checkpoint_retention": {
+    "mode": "latest_restart_frontier_only",
+    "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "retained_checkpoint_size_bytes": 323475127,
+    "superseded_checkpoints_pruned_or_to_prune": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup363_regularized_direct_final_checkpoint.npz"
+    ],
+    "retained_compact_summaries": [
+      "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
+    ]
+  }
+}

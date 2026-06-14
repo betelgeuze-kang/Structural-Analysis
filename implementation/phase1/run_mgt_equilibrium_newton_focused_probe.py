@@ -154,6 +154,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     output_json: Path | None = DEFAULT_OUT,
     max_newton_iterations: int = 8,
     residual_tolerance_n: float = 5.0e-4,
+    shell_pressure_load_path_policy: str = "all_components",
     prefer_host_ilu: bool = True,
     allow_negative_alphas: bool = False,
     linear_solver_profile: str = "production",
@@ -177,6 +178,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
+        shell_pressure_load_path_policy=shell_pressure_load_path_policy,
     )
     u0 = np.asarray(setup_meta["u0"])
     initial_assembly = assemble_residual(u0)
@@ -258,6 +260,7 @@ def run_mgt_equilibrium_newton_focused_probe(
             else float(max_newton_translation_increment_m)
         ),
         "residual_tolerance_n": float(residual_tolerance_n),
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "newton_iterations": newton.get("iterations"),
         "line_search_residual_only_supported": bool(
             newton.get("line_search_residual_only_supported")
@@ -291,6 +294,15 @@ def main() -> int:
         help="Write a resumable mgt-direct-residual-newton-state checkpoint when the Newton state improves the residual.",
     )
     parser.add_argument("--max-newton-iterations", type=int, default=8)
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=("all_components", "attached_components_only"),
+        default="all_components",
+        help=(
+            "Shell pressure load-path policy for the focused residual assembler. "
+            "Use attached_components_only to match the current G1 attached-policy frontier."
+        ),
+    )
     parser.add_argument(
         "--allow-negative-alphas",
         action="store_true",
@@ -367,6 +379,7 @@ def main() -> int:
         checkpoint_npz=args.checkpoint_npz,
         output_json=args.output_json,
         max_newton_iterations=args.max_newton_iterations,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         allow_negative_alphas=bool(args.allow_negative_alphas),
         linear_solver_profile=str(args.linear_solver_profile),
         direct_regularization_factor=args.direct_regularization_factor,

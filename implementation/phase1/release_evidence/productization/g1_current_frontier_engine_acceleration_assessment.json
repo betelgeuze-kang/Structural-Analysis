@@ -1,15 +1,21 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T21:50:47+09:00",
+  "generated_at": "2026-06-15T12:29:42.199372+00:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_probe.json",
-    "latest_attached_policy_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup190_component_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.033276947944316015,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
+    "latest_attached_policy_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup365_gate_component_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 1.787703126865381e-06,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.032276947944316015
+    "remaining_residual_margin_to_gate_n": -0.0009982122968731346,
+    "latest_attached_policy_frontier_probe_retention": {
+      "mode": "probe_retained",
+      "source": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
+      "scalar_receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
+    },
+    "direct_residual_gate_passed": true
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -181,6 +187,41 @@
       "secant_family_post_shell_followup63_best_improvement_inf_n": -5.372919988289038e-05,
       "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
       "assessment": "Coupled largest-row node-block current-tangent correction remains the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, followup52 residual-node-block retargeting only found numerical-noise improvement, and followup53/54 showed shell element blocks and shell rotation-only rows do not descend. Followup55-57 geometry-normal shell translation retargeting reopened descent, and followup58 adds a new coupled geometry-normal plus bending/drilling target mode. Followup59 still descended, followup60 finite-difference row-submatrix did not, followup61 broad retargeting only found numerical-floor descent, followup62 scaled-floor global Krylov improved only 1.36e-8 N, and followup63 secant-family history globalization worsened the residual. The latest frontier is shell_membrane-dominant again, so the next pass needs a higher-level coupled shell/material formulation or production backend lane rather than more local row-correction/Krylov/secant repetition."
+    },
+    "followup342_361_total_scaled_component_fd_hip_latest_only": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup342_361_total_scaled_component_fd_hip_latest_only_summary.json",
+      "start_direct_residual_inf_n": 0.03313916796721994,
+      "latest_direct_residual_inf_n": 0.033136466982157,
+      "total_improvement_inf_n": 2.7009850629422516e-06,
+      "component_fd_total_scaled_total_improvement_inf_n": 6.059744626085717e-07,
+      "cached_broad_total_improvement_inf_n": 2.09501060033368e-06,
+      "no_descent_target_modes": [
+        "residual_node_blocks",
+        "residual_shell_geometry_normal_bending_rows"
+      ],
+      "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+      "retained_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup361_component_frontier_probe.json",
+      "assessment": "Residual-node-block and shell-geometry-normal+bending retargets no-descended from followup341. Total-component-magnitude scaling reopened two small component-FD descents, and HIP full residual broad top96 replay remained positive, but the 342-361 sequence only removed about 2.70e-6 N. This lane is useful as a numerically safe frontier extender, not a practical gate-closure strategy by repetition."
+    },
+    "followup362_365_attached_equilibrium_newton_gate": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json",
+      "start_direct_residual_inf_n": 0.033136466982157,
+      "latest_direct_residual_inf_n": 1.787703126865381e-06,
+      "direct_residual_gate_passed": true,
+      "equilibrium_newton_focused_ready": true,
+      "direct_residual_replay_ready": false,
+      "direct_residual_replay_gate_assessment": {
+        "residual_tolerance_n": 0.001,
+        "direct_residual_gate_passed": true,
+        "relative_increment_tolerance": 0.0001,
+        "relative_increment_gate_verified": false,
+        "relative_increment_gate_passed": false,
+        "direct_residual_newton_ready_requires_increment_gate": true
+      },
+      "host_ilu_device_gmres_ready": false,
+      "host_ilu_device_gmres_blocker": "RuntimeError('No HIP GPUs are available')",
+      "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+      "assessment": "Once focused equilibrium Newton is run under attached_components_only, a single regularized-direct Newton step lowers the current attached-policy residual from 0.033136466982157 N to 1.787703126865381e-06 N, passing the 0.001 N residual gate."
     }
   },
   "engine_state": {
@@ -1088,6 +1129,130 @@
         "dominant_component": "shell_bending_drilling"
       },
       "assessment": "The last component frontier probe before HIP-backed row descent is followup62: node 2379 uz and node 2676 uz shell_membrane rows lead, with node 2202 rx shell_bending_drilling close behind. Followup69 has since lowered the scalar residual through HIP-backed largest-row correction; a refreshed component frontier probe is the next diagnostic before choosing the next target family."
+    },
+    "latest_only_followup201_248": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_followup201_248_latest_only_continuation_summary.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.033276947944316015,
+      "latest_direct_residual_inf_n": 0.03320039013145526,
+      "total_improvement_inf_n": 7.65578128607558e-05,
+      "accepted_step_count": 48,
+      "run_summaries": [
+        "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup201_216_latest_only_controller_summary.json",
+        "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup217_232_latest_only_controller_summary.json",
+        "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup233_248_latest_only_controller_summary.json"
+      ],
+      "latest_probe": null,
+      "latest_probe_cpu_batch_alpha_replay_count": 8,
+      "latest_probe_cpu_batch_state_count": 368,
+      "hip_backend_note": "HIP full-residual backend was requested in followup201-232 but this sandbox reported no ROCm-capable device, so those probes fell back to single residual replay. followup233-248 used CPU batch alpha replay with zero fallback.",
+      "latest_probe_retention": {
+        "mode": "values_extracted_probe_files_pruned",
+        "latest_probe_source_before_prune": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_probe.json",
+        "scalar_receipt": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_followup201_248_latest_only_continuation_summary.json"
+      },
+      "currently_retained": false,
+      "superseded_by_followup249_258": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz"
+    },
+    "component_refresh_followup249_258": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup249_258_component_refresh_latest_only_summary.json",
+      "component_fd_followup249_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup249_frontier_component_fd_probe.json",
+      "component_fd_followup250_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup250_frontier_component_fd_probe.json",
+      "component_frontier_followup258_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup258_component_frontier_probe.json",
+      "cached_broad_controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup251_258_after_component_fd_latest_only_controller_summary.json",
+      "start_direct_residual_inf_n": 0.03320039013145526,
+      "latest_direct_residual_inf_n": 0.033195802619418464,
+      "total_improvement_inf_n": 4.587512036795249e-06,
+      "component_fd_total_improvement_inf_n": 6.299536171525122e-07,
+      "cached_broad_total_improvement_inf_n": 3.957558533329575e-06,
+      "assessment": "Followup249-250 component-frontier finite-difference correction reopened descent but weakened quickly; followup251-258 broad top96 cached multi-ridge replay was faster and advanced the retained frontier to followup258.",
+      "currently_retained": false,
+      "superseded_by_followup259_274": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup274_final_checkpoint.npz"
+    },
+    "latest_only_followup259_274": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup259_274_latest_only_continuation_summary.json",
+      "controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup259_274_latest_only_controller_summary.json",
+      "component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup274_component_frontier_probe.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup258_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup274_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.033195802619432675,
+      "latest_direct_residual_inf_n": 0.03318563383450746,
+      "total_improvement_inf_n": 1.0168784925213004e-05,
+      "accepted_step_count": 16,
+      "runtime_seconds": 733.6957428349997,
+      "assessment": "Followup259-274 broad top96 cached multi-ridge replay remained live and advanced the retained frontier by 1.02e-5 N. The current frontier remains a mixed shell_membrane/shell_bending/frame cancellation state and the residual gate remains open.",
+      "currently_retained": false,
+      "superseded_by_followup275_290": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup290_final_checkpoint.npz"
+    },
+    "latest_only_followup275_290": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup275_290_latest_only_continuation_summary.json",
+      "controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup275_290_latest_only_controller_summary.json",
+      "component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup290_component_frontier_probe.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup274_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup290_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.03318563383452167,
+      "latest_direct_residual_inf_n": 0.03317278683326331,
+      "total_improvement_inf_n": 1.2847001258364799e-05,
+      "accepted_step_count": 16,
+      "runtime_seconds": 743.2389357189968,
+      "assessment": "Followup275-290 broad top96 cached multi-ridge replay remained live and advanced the retained frontier by 1.28e-5 N, with 2e-6 N-class recovery steps after weak moves. The current frontier remains a mixed shell_membrane/shell_bending/frame cancellation state and the residual gate remains open.",
+      "currently_retained": false,
+      "superseded_by_followup291_306": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup306_final_checkpoint.npz"
+    },
+    "latest_only_followup291_306": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup291_306_latest_only_continuation_summary.json",
+      "controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup291_306_latest_only_controller_summary.json",
+      "component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup306_component_frontier_probe.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup290_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup306_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.03317278683327752,
+      "latest_direct_residual_inf_n": 0.03316082234110363,
+      "total_improvement_inf_n": 1.1964492173888175e-05,
+      "accepted_step_count": 16,
+      "runtime_seconds": 752.7737643680011,
+      "assessment": "Followup291-306 broad top96 cached multi-ridge replay advanced the retained frontier by 1.20e-5 N. Early 2e-6 N-class moves show the lane still works, but the weak followup306 tail suggests another component refresh if the next continuation starts weak.",
+      "currently_retained": false,
+      "superseded_by_followup307_322": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup322_final_checkpoint.npz"
+    },
+    "latest_only_followup307_322": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup307_322_latest_only_continuation_summary.json",
+      "controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup307_322_latest_only_controller_summary.json",
+      "component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup322_component_frontier_probe.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup306_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup322_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.03316082234111784,
+      "latest_direct_residual_inf_n": 0.03315771337284568,
+      "total_improvement_inf_n": 3.108968272158563e-06,
+      "accepted_step_count": 16,
+      "runtime_seconds": 780.9457274260058,
+      "assessment": "Followup307-322 broad top96 cached multi-ridge replay remained positive but weakened to only 3.11e-6 N total improvement. The next G1 step should use the refreshed followup322 component frontier for component/frontier FD refresh rather than another long blind broad continuation.",
+      "currently_retained": false,
+      "superseded_by_followup323_341": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup341_final_checkpoint.npz"
+    },
+    "component_fd_hip_followup323_341": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup323_341_component_fd_hip_latest_only_summary.json",
+      "component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup341_component_frontier_probe.json",
+      "component_fd_followup323_probe_before_prune": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup323_frontier_component_fd_hip_probe.json",
+      "component_fd_followup324_probe_before_prune": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup324_frontier_component_fd_hip_probe.json",
+      "component_fd_followup333_probe_before_prune": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup333_frontier_component_fd_hip_probe.json",
+      "cached_broad_followup325_332_controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup325_332_after_component_fd_hip_latest_only_controller_summary.json",
+      "cached_broad_followup334_341_controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup334_341_after_component_fd_hip_latest_only_controller_summary.json",
+      "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup322_final_checkpoint.npz",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup341_final_checkpoint.npz",
+      "start_direct_residual_inf_n": 0.03315771337284568,
+      "latest_direct_residual_inf_n": 0.03313916796721994,
+      "total_improvement_inf_n": 1.8545405625743083e-05,
+      "component_fd_total_improvement_inf_n": 2.188667587894877e-06,
+      "cached_broad_total_improvement_inf_n": 1.6356738596623455e-05,
+      "accepted_step_count": 19,
+      "hip_full_residual_batch_replay": true,
+      "latest_component_top_row_dominant_component_counts": {
+        "shell_membrane": 62,
+        "frame": 15,
+        "shell_bending_drilling": 51
+      },
+      "assessment": "Followup323 component-frontier finite-difference correction with HIP full-residual batch replay reopened a useful 1.96e-6 N descent. Followup324 and followup333 weakened below 1.3e-7 N. The followup325-332 broad cached multi-ridge replay was the strongest post-refresh lane at 1.49e-5 N, while followup334-341 tapered to 1.50e-6 N. The next G1 step should not keep blindly extending broad top96; it should use the retained followup341 component frontier to test a different block/global tangent lane or retuned target family."
     }
   },
   "decision": {
@@ -1131,68 +1296,15 @@
       "steps_needed_at_followup50_chunk_improvement": 201.53906261695525
     }
   },
-  "recommended_next_path": [
-    "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
-    "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
-    "Treat native HIP frame replay as proven for GPU-device executions: followup40 shows 129x kernel-level speedup over CPU frame batch with 7.1e-12 relative force error.",
-    "Treat native HIP shell CSR replay as proven for GPU-device executions: followup40 shows 2.69x kernel-level speedup over CPU shell batch with 4.7e-15 relative force error on the 1.90M-nnz shell matrix.",
-    "The row-correction driver now batches both support-column perturbations and alpha candidates; do not spend the next G1 push on another CPU replay wrapper.",
-    "Use followup43's current-tangent-preconditioned global Krylov lane as the next live direction family, but retune it around the shell-membrane hotspot exposed by followup44.",
-    "Use the faster backend to test adaptive shell-bending/membrane/frame coupled physical correction directions, not to repeat a fixed tiny-alpha row correction thousands of times.",
-    "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine.",
-    "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
-    "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn.",
-    "Promote the coupled row-nodeblock lane from one-off CLI probes into an adaptive controller that refreshes target rows/support after every accepted frontier move.",
-    "After followup60-63, stop repeating local coupled shell row-correction, current scaled-floor global Krylov, and accepted-history secant-family sweeps. Promote the coupled shell membrane-normal plus bending/drilling idea into a higher-level shell material/globalization formulation or production residual/JVP backend lane.",
-    "Followup64 proves the latest frontier still satisfies the CPU residual batch replay contract and native HIP shell/frame component replay contracts.",
-    "Followup65 proves a composed full residual/JVP batch contract from native HIP frame+shell plus the spring term.",
-    "Followup66 proves a single native HIP subprocess boundary for frame+shell+spring+external-load full residual/JVP replay.",
-    "Followup67 proves that backend can serve the direct residual Newton row-correction FD/alpha batch replay boundary.",
-    "Followup68 shows the broad shell geometry-normal+bending row family remains no-descent under the HIP backend.",
-    "Followup69 reopens descent with HIP-backed largest-row finite-difference correction and writes a checkpoint.",
-    "Followup70-72 show the refreshed HIP-backed largest-row lane remains live: three chained probes accept 18 more promotions and lower the attached-policy direct residual to 0.0334674359 N.",
-    "Followup73-74 mark the current largest_rows branch as saturated: support=1 only adds 1.90e-6 N before no-descent, and support 4/8 worsens immediately.",
-    "Followup75-76 show the existing node-block and element-block row-target modes do not reopen material descent: node-block adds only 5.08e-8 N, and element-block no-descends even with signed alphas.",
-    "Followup77-78 add and validate a frontier_component_rows controller hook, but the first component-balanced and SVD-capped variants no-descend.",
-    "Followup79-80 add component-magnitude row-equation scaling for that hook; dominant and total component scaling both no-descend.",
-    "Followup81 retries current scaled global Krylov and only gets a 5.15e-11 N numerical-floor descent.",
-    "Followup82-84 implement and test attached-policy cached component-block residual/JVP basis construction; dominant-component, component+dof, and gate-limited-alpha variants only reach numerical-floor descent.",
-    "Followup85-86 audit the followup75 plateau physically: component cancellation is broad and mixed across frame/shell rows, while hotspot tangent/JVP checks are consistent to near machine precision.",
-    "Followup87-90 continue from that audit with a broad top96 active-set cached residual/JVP lane. Followup87-89 accept three promotions and lower the residual to 0.0334649068 N, but followup90 falls below the 1e-8 improvement floor.",
-    "Followup91-94 show pure selected-row Chebyshev/minimax active-set cancellation is unsafe at this frontier: the active-row linear system can be solved while the nonlinear global residual worsens.",
-    "Followup95-97 show multi-ridge LS direction sweep against one cached JVP matrix reopens repeatable descent, lowering the residual to 0.0334633965 N.",
-    "Followup98-101 continue that multi-ridge lane and lower the residual further to 0.0334587801 N, with followup99 and followup101 recovering 2e-6 N-class descents after a floor-near followup98.",
-    "Followup102-105 continue the same lane to 0.0334556552 N; the sawtooth pattern persists, with floor-near followup104 followed by a recovered followup105 descent.",
-    "Followup106-108 validate the new multi-ridge controller and lower the residual to 0.0334510584 N without manual per-step command construction.",
-    "Followup109-111 continue through the controller to 0.0334470050 N, with followup110 and followup111 retaining 1.5e-6 to 2.0e-6 N-class descent.",
-    "Followup112-114 continue through the controller to 0.0334447940 N; best ridge and alpha choices vary by frontier, including a negative-alpha ridge=0.1 step at followup112.",
-    "Followup115-117 continue through the controller to 0.0334422339 N; best ridge and alpha choices still vary by frontier.",
-    "Followup118-120 use a denser alpha grid and lower the residual to 0.0334382717 N; denser alpha sampling helps but is still only an incremental controller improvement.",
-    "Followup121 wires residual batch replay into cached residual/JVP probes. HIP backend invocation is now wired, but this workstation reports no ROCm-capable device; CPU batch alpha replay is valid, while batch-JVP replay is opt-in because tiny batch roundoff destabilizes the current ill-conditioned LS direction.",
-    "Followup121-126 use safe alpha-only CPU batch replay and lower the residual to 0.0334167342 N.",
-    "Followup127-134 continue the same safe alpha-batch lane to 0.0334045911 N.",
-    "Followup135-142 continue it to 0.0333918104 N.",
-    "Followup143-150 continue it to 0.0333785854 N, but the last three moves weaken to sub-5e-7 N.",
-    "Followup151 proves component-dof redistribution alone is only a floor-near move, and shell_membrane-only support3 from that checkpoint no-promotes.",
-    "Followup152-153 reopen descent through a shell_bending_drilling support3 perturbation, then followup154-165 show broad top96 multi-ridge replay recovers repeated larger steps down to 0.0333391507 N.",
-    "Followup166-173 continue the same post-shell-bending broad top96 replay to 0.0333244006 N.",
-    "Followup174-175 confirm the weak-step guard, followup176 refreshes shell_bending_drilling, and followup177-180 recover broad top96 descent to 0.0333015220 N.",
-    "Followup181-190 continue broad top96 to 0.0332769479 N; followup188 is weak but followup189-190 recover above the weak-step threshold. Continue from followup190 with broad top96 until two consecutive sub-6e-7 N moves recur, then refresh shell_bending_drilling again.",
-    "Followup191-198 continue broad top96 to 0.0332733620 N, but followup197 and followup198 are two consecutive weak steps below 6e-7 N; treat the broad top96 lane as saturated at this frontier.",
-    "Followup199 diagnostics: shell_bending_drilling support3 refresh no-promotes, top128 expansion only finds a 3.97e-9 N diagnostic descent with worse conditioning, frame-only focus no-descends, and component_dof block-basis finds the best but still weak 1.40e-7 N frame:rx direction. Stop blind top-k promotion and move to block-aware ridge/trust/global tangent diagnostics.",
-    "Capacity policy after followup199: do not archive every weak-step checkpoint. Keep the followup190 continuation checkpoint, retain followup191-199 as JSON plateau diagnostics, and only write new NPZ checkpoints for material descents or a new accepted continuation frontier.",
-    "Followup200 implements and validates --min-checkpoint-improvement-inf-n so weak exploratory moves remain JSON-only; the component-block guard repeats the frame:rx 1.40e-7 N below-floor move and writes no checkpoint.",
-    "Followup200 current-tangent global Krylov guard no-descends from followup190: best trial worsens to 0.0345169949 N, so do not spend the next G1 pass repeating that factor/scale lane."
-  ],
+  "recommended_next_path": "Close the remaining G1 proof gap by recording/verifying the followup365 increment gate or adding a focused increment-gate receipt, then port the attached-policy Newton solve off CPU regularized_direct into the native ROCm/HIP production lane; G7 remains next after G1 evidence hardening.",
   "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, followup79-80 show component-magnitude equation scaling also no-descends, followup81 shows current scaled global Krylov is at numerical-floor descent, followup82-84 show current cached component-block residual/JVP basis construction is also numerical-floor only, followup85-86 show the plateau is a consistent mixed frame/shell cancellation state rather than a checked tangent/JVP mismatch, followup87-90 show broad top96 active-set cached residual/JVP descent reopens only a small three-promotion improvement to 0.0334649068 N before saturating, followup91-94 show selected-row Chebyshev/minimax cancellation is not a safe globalization path, followup95-97 show multi-ridge active-set descent lowers the residual to 0.0334633965 N, followup98-101 extend the same lane to 0.0334587801 N, followup102-105 extend it to 0.0334556552 N, followup106-108 validate the controller path down to 0.0334510584 N, followup109-111 continue it to 0.0334470050 N, followup112-114 continue it to 0.0334447940 N, followup115-117 continue it to 0.0334422339 N, followup118-120 continue it with dense alpha sampling to 0.0334382717 N, followup121-126 continue it with safe alpha-batch replay to 0.0334167342 N, followup127-134 continue it to 0.0334045911 N, followup135-142 continue it to 0.0333918104 N, followup143-150 continue it to 0.0333785854 N, followup151-165 continue it through a shell_bending_drilling refresh plus broad top96 replay to 0.0333391507 N, followup166-173 continue the same lane to 0.0333244006 N, followup174-180 validate weak-step refresh and lower it to 0.0333015220 N, and followup181-190 continue broad top96 replay to 0.0332769479 N. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, coupled row-nodeblock descent, component-block JVP basis diagnostics, physical residual/Jacobian audit, top96 active-set descent, minimax negative evidence, multi-ridge positive evidence, multi-ridge controller automation, weak-step shell_bending refresh, and cached residual/JVP alpha-batch replay are integrated. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, batch-JVP equivalence guarding, and production in-process ROCm/HIP residual/JVP residency remain open.",
   "checkpoint_retention_policy": {
     "manifest": "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json",
-    "mode": "document_essential_data_no_temp_relocation",
-    "retained_checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
-    "documented_deleted_checkpoint_candidate_count": 448,
-    "documented_deleted_checkpoint_candidate_total_bytes": 24634744998,
-    "minimum_checkpoint_improvement_inf_n": 6e-07,
-    "note": "Historical final checkpoint NPZ files are no longer treated as required working-tree evidence; JSON probe receipts and this manifest carry the audit trail.",
-    "additional_non_final_checkpoint_pruned": "implementation/phase1/release_evidence/productization/mgt_shell_free_component_state_cleanup_frontier_checkpoint.npz"
+    "mode": "document_essential_data_no_temp_relocation_latest_restart_frontier_only",
+    "retained_checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "superseded_tracked_checkpoint_removed": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup322_final_checkpoint.npz",
+    "latest_only_continuation_summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json",
+    "minimum_checkpoint_improvement_inf_n": 0.0,
+    "note": "Followup365 keeps only the attached-policy residual-gate checkpoint. The all-components diagnostic checkpoint and superseded followup361 checkpoint are pruned after compact scalar extraction."
   }
 }

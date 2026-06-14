@@ -1,0 +1,208 @@
+{
+  "schema_version": "mgt-g1-followup275-290-latest-only-continuation-summary.v1",
+  "generated_at": "2026-06-14T14:55:55.207727+00:00",
+  "status": "partial",
+  "claim_boundary": "Continuation evidence only. This advances the restartable G1 frontier but does not close the 0.001 N residual gate or prove production ROCm/HIP residency.",
+  "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "nodes": 13047,
+  "dof": 78282,
+  "load_scale": 0.656,
+  "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup274_final_checkpoint.npz",
+  "retained_latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup290_final_checkpoint.npz",
+  "start_direct_residual_inf_n": 0.03318563383452167,
+  "latest_direct_residual_inf_n": 0.03317278683326331,
+  "latest_direct_relative_residual_inf": 3.823450315203538e-06,
+  "total_improvement_inf_n": 1.2847001258364799e-05,
+  "residual_gate_n": 0.001,
+  "remaining_residual_margin_to_gate_n": 0.03217278683326331,
+  "accepted_history_count": 320,
+  "max_translation_m": 0.03516476734887846,
+  "controller_summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup275_290_latest_only_controller_summary.json",
+  "controller": {
+    "start_followup_index": 275,
+    "max_steps": 16,
+    "stop_reason": "max_steps_exhausted",
+    "stop_after_no_promotion": true,
+    "min_relative_improvement": 0.0,
+    "min_checkpoint_improvement_inf_n": 0.0,
+    "promoted_count": 16,
+    "total_promoted_improvement_inf_n": 1.284700147152762e-05,
+    "runtime_seconds": 743.2389357189968,
+    "retained_latest_checkpoint_only": true,
+    "pruned_intermediate_checkpoint_count": 15,
+    "checkpoint_prune_error_count": 0
+  },
+  "step_pattern": {
+    "weak_step_followup275_improvement_inf_n": 3.164861084314907e-08,
+    "recovered_followup276_improvement_inf_n": 2.025488825552202e-06,
+    "weak_step_followup289_improvement_inf_n": 1.2655233661007514e-07,
+    "recovered_followup290_improvement_inf_n": 2.024830124014443e-06,
+    "assessment": "The broad top96 cached lane remained live through followup290: weak followup275/289 steps were followed by recovered 2e-6 N-class followup276/290 descents."
+  },
+  "component_frontier": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup290_component_frontier_probe.json",
+    "base_direct_residual_inf_n": 0.03317278683327752,
+    "top_row_dominant_component_counts": {
+      "shell_bending_drilling": 49,
+      "shell_membrane": 62,
+      "frame": 17
+    },
+    "component_inf_n": {
+      "frame": 156794.12661397827,
+      "spring": 0.00011238162708417099,
+      "material_stress_correction": 0.0,
+      "shell_bending_drilling": 156852.14355913326,
+      "shell_membrane": 47414.69161618969
+    },
+    "top_rows_sample": [
+      {
+        "free_row": 39354,
+        "global_dof": 52296,
+        "node_index": 8716,
+        "dof": "ux",
+        "residual_n": -0.03317278683327752,
+        "external_load_n": 0.05117346666666956,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 130.02400385967928,
+          "shell_membrane": -130.0060031798459
+        },
+        "internal_sum_n": 0.01800067983339204,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10520,
+        "global_dof": 13136,
+        "node_index": 2189,
+        "dof": "uz",
+        "residual_n": -0.03317277312728706,
+        "external_load_n": 6.589204136000003,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -261.05131428028653,
+          "shell_membrane": 267.60734564315925
+        },
+        "internal_sum_n": 6.556031362872716,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 11612,
+        "global_dof": 14264,
+        "node_index": 2377,
+        "dof": "uz",
+        "residual_n": -0.033172597966654394,
+        "external_load_n": -735.7751463917341,
+        "component_values_n": {
+          "frame": 171.96516721418243,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -1.4924252862559795e-15,
+          "shell_membrane": -907.7734862038832
+        },
+        "internal_sum_n": -735.8083189897008,
+        "dominant_component": "shell_membrane"
+      },
+      {
+        "free_row": 10599,
+        "global_dof": 13215,
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.0331724328846395,
+        "external_load_n": 0.0,
+        "component_values_n": {
+          "frame": 0.49261855110025937,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -0.5257909839848989,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -0.0331724328846395,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10712,
+        "global_dof": 13328,
+        "node_index": 2221,
+        "dof": "uz",
+        "residual_n": -0.033172167467228064,
+        "external_load_n": -736.5045135207649,
+        "component_values_n": {
+          "frame": -736.5376856882322,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -736.5376856882322,
+        "dominant_component": "frame"
+      },
+      {
+        "free_row": 13332,
+        "global_dof": 16008,
+        "node_index": 2668,
+        "dof": "ux",
+        "residual_n": 0.033172021384790806,
+        "external_load_n": 0.18254566666666738,
+        "component_values_n": {
+          "frame": -1.0656900923855206,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 1.4929812933602307,
+          "shell_membrane": -0.21157351292325188
+        },
+        "internal_sum_n": 0.2157176880514582,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 12390,
+        "global_dof": 15066,
+        "node_index": 2511,
+        "dof": "ux",
+        "residual_n": -0.03317093787093663,
+        "external_load_n": -0.04475100799999796,
+        "component_values_n": {
+          "frame": 0.0,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": -0.043216963906888006,
+          "shell_membrane": -0.03470498196404659
+        },
+        "internal_sum_n": -0.0779219458709346,
+        "dominant_component": "shell_bending_drilling"
+      },
+      {
+        "free_row": 10706,
+        "global_dof": 13322,
+        "node_index": 2220,
+        "dof": "uz",
+        "residual_n": -0.03317082463608778,
+        "external_load_n": -1.9117578912414641,
+        "component_values_n": {
+          "frame": -1.944928715877552,
+          "spring": 0.0,
+          "material_stress_correction": 0.0,
+          "shell_bending_drilling": 0.0,
+          "shell_membrane": 0.0
+        },
+        "internal_sum_n": -1.944928715877552,
+        "dominant_component": "frame"
+      }
+    ]
+  },
+  "checkpoint_retention": {
+    "mode": "latest_restart_frontier_only",
+    "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup290_final_checkpoint.npz",
+    "retained_checkpoint_size_bytes": 265626834,
+    "superseded_checkpoints_pruned_or_to_prune": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup274_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup275-289_final_checkpoint.npz"
+    ],
+    "probe_receipts_pruned_or_to_prune": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup275-290_probe.{json,npz}"
+    ]
+  }
+}

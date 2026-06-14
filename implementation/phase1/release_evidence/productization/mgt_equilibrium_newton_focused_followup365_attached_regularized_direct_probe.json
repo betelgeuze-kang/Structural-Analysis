@@ -1,0 +1,397 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-15T12:22:32.515536+00:00",
+  "status": "ready",
+  "equilibrium_newton_ready": true,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 389,
+    "accepted_residual_history_count": 389,
+    "residual_inf_n": 0.033136466982157,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 0.03516476735254909
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 0.033136466982157,
+  "initial_residual_inf_n": 0.033136466982157,
+  "final_residual_inf_n": 1.787703126865381e-06,
+  "accepted_newton_iteration_count": 1,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "regularized_direct",
+  "direct_regularization_factor": null,
+  "state_scale_line_search_values": [],
+  "state_scale_only": false,
+  "line_search_alphas": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625,
+    0.03125,
+    0.015625,
+    0.0078125,
+    0.00390625,
+    0.001953125,
+    0.0009765625,
+    0.00048828125,
+    0.000244140625,
+    6.103515625e-05,
+    1.52587890625e-05,
+    3.814697265625e-06,
+    9.5367431640625e-07,
+    2.384185791015625e-07,
+    5.960464477539063e-08
+  ],
+  "displacement_cap_m": null,
+  "max_newton_translation_increment_m": null,
+  "residual_tolerance_n": 0.0005,
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": true,
+      "alpha": 1.0,
+      "start_residual_inf_n": 0.033136466982157,
+      "best_residual_inf_n": 1.787703126865381e-06,
+      "relative_increment": 0.00029624101604524574,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 1.787703126865381e-06,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 0.016568233491725204,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 0.02485235023674215,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 0.028994408609307465,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 0.031065437795618545,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.03210095238937094,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.015625,
+          "residual_inf_n": 0.03261870968576397,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0078125,
+          "residual_inf_n": 0.03287758833458576,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00390625,
+          "residual_inf_n": 0.033007027657945054,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.001953125,
+          "residual_inf_n": 0.033071747320363665,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0009765625,
+          "residual_inf_n": 0.03310410715145928,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00048828125,
+          "residual_inf_n": 0.03312028706658077,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.000244140625,
+          "residual_inf_n": 0.03312837702485205,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 6.103515625e-05,
+          "residual_inf_n": 0.03313447069626818,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 1.52587890625e-05,
+          "residual_inf_n": 0.03313596135994623,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 3.814697265625e-06,
+          "residual_inf_n": 0.033136340576604306,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 9.5367431640625e-07,
+          "residual_inf_n": 0.03313643538085409,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 2.384185791015625e-07,
+          "residual_inf_n": 0.033136459081888114,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 5.960464477539063e-08,
+          "residual_inf_n": 0.033136465007075566,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.0,
+          "residual_inf_n": 0.06627293396472589,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 0.04970470047355513,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.25,
+          "residual_inf_n": 0.04142058372757185,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.125,
+          "residual_inf_n": 0.037278525355404435,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 0.03520749616886598,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.03125,
+          "residual_inf_n": 0.03417198157551149,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.015625,
+          "residual_inf_n": 0.03365422427911846,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0078125,
+          "residual_inf_n": 0.033395345630410356,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00390625,
+          "residual_inf_n": 0.033265906306596316,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.001953125,
+          "residual_inf_n": 0.03320118664423455,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0009765625,
+          "residual_inf_n": 0.03316882681359368,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00048828125,
+          "residual_inf_n": 0.03315264689835851,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.000244140625,
+          "residual_inf_n": 0.03314455693991669,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -6.103515625e-05,
+          "residual_inf_n": 0.03313848947162534,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.52587890625e-05,
+          "residual_inf_n": 0.03313697260448145,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -3.814697265625e-06,
+          "residual_inf_n": 0.03313659338770969,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -9.5367431640625e-07,
+          "residual_inf_n": 0.03313649858385781,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -2.384185791015625e-07,
+          "residual_inf_n": 0.03313647488253957,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -5.960464477539063e-08,
+          "residual_inf_n": 0.03313646895769318,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        }
+      ],
+      "allow_negative_alphas": true,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 1.2277145006443665e-09,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.8344913150000366,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.033136466982157
+    }
+  ],
+  "line_search_residual_only_supported": true,
+  "output_final_checkpoint": {
+    "written": true,
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "direct_residual_inf_n": 1.787703126865381e-06,
+    "direct_relative_residual_inf": 2.06048232192839e-10,
+    "max_translation_m": 0.03516277106084248,
+    "accepted_history_count": 390,
+    "source_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+  },
+  "runtime_metrics": {
+    "total_seconds": 52.506610378999994
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": []
+}

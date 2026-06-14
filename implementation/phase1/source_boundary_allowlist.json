@@ -107,9 +107,10 @@
       "rationale": "Benchmark-bridge MGT roundtrip NPZ payload retained for solver/calibration reproducibility; large only because the source bridge is intentionally MGT-parity."
     },
     {
-      "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+      "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
       "classification": "source_required",
-      "rationale": "Sole retained LFS-tracked G1 nonlinear continuation checkpoint for the 13,047-node / 78,282-DOF MIDAS33 frontier at load scale 0.656; historical binary checkpoints are pruned and documented in g1_checkpoint_retention_manifest.json."
+      "rationale": "Sole retained LFS-tracked G1 attached-policy nonlinear equilibrium checkpoint for the 13,047-node / 78,282-DOF MIDAS33 frontier at load scale 0.656; focused regularized-direct Newton lowers the physical residual to 1.7877e-06 N and direct replay confirms the 0.001 N residual gate while remaining increment/production ROCm gaps are documented.",
+      "bytes": 323475127
     }
   ]
 }

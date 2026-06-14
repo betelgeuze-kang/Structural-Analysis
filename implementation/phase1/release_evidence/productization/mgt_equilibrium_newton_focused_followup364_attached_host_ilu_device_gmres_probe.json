@@ -1,0 +1,77 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-15T12:21:54.920724+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 389,
+    "accepted_residual_history_count": 389,
+    "residual_inf_n": 0.033136466982157,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 0.03516476735254909
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 0.033136466982157,
+  "initial_residual_inf_n": 0.033136466982157,
+  "final_residual_inf_n": 0.033136466982157,
+  "accepted_newton_iteration_count": 0,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "host_ilu_device_gmres",
+  "direct_regularization_factor": null,
+  "state_scale_line_search_values": [],
+  "state_scale_only": false,
+  "line_search_alphas": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625,
+    0.03125,
+    0.015625,
+    0.0078125,
+    0.00390625,
+    0.001953125,
+    0.0009765625,
+    0.00048828125,
+    0.000244140625,
+    6.103515625e-05,
+    1.52587890625e-05,
+    3.814697265625e-06,
+    9.5367431640625e-07,
+    2.384185791015625e-07,
+    5.960464477539063e-08
+  ],
+  "displacement_cap_m": null,
+  "max_newton_translation_increment_m": null,
+  "residual_tolerance_n": 0.0005,
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": false,
+      "stop_reason": "newton_linear_solve_non_finite",
+      "start_residual_inf_n": 0.033136466982157,
+      "linear_solver_backend": "rocm_torch_sparse_host_ilu_device_gmres",
+      "linear_solver_profile": "host_ilu_device_gmres",
+      "linear_solver_converged": false,
+      "linear_solver_breakdown": "host_ilu_device_gmres_unavailable",
+      "linear_solver_error_excerpt": "RuntimeError('No HIP GPUs are available')",
+      "linear_solver_rhs_inf_n": 0.033136466982157,
+      "linear_solver_gpu_first_profile": true,
+      "linear_solver_cpu_attempt_bypassed": true
+    }
+  ],
+  "line_search_residual_only_supported": true,
+  "output_final_checkpoint": null,
+  "runtime_metrics": {
+    "total_seconds": 25.228405484999996
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

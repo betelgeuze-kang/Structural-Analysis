@@ -1,0 +1,124 @@
+{
+  "schema_version": "mgt-cached-residual-jvp-latest-only-continuation-summary.v1",
+  "generated_at": "2026-06-14T13:59:54.757687+00:00",
+  "status": "partial",
+  "claim_boundary": "Continuation evidence only. This advances the restartable G1 frontier but does not close the 0.001 N residual gate or prove full production ROCm/HIP residency.",
+  "start_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+  "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+  "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "nodes": 13047,
+  "dof": 78282,
+  "load_scale": 0.656,
+  "start_direct_residual_inf_n": 0.033276947944316015,
+  "latest_direct_residual_inf_n": 0.03320039013145526,
+  "total_improvement_inf_n": 7.65578128607558e-05,
+  "residual_gate_n": 0.001,
+  "remaining_residual_margin_to_gate_n": 0.03220039013145526,
+  "accepted_step_count": 48,
+  "run_summaries": [
+    "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup201_216_latest_only_controller_summary.json",
+    "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup217_232_latest_only_controller_summary.json",
+    "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup233_248_latest_only_controller_summary.json"
+  ],
+  "run_summary": [
+    {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup201_216_latest_only_controller_summary.json",
+      "start_followup_index": 201,
+      "max_steps": 16,
+      "promoted_count": 16,
+      "total_promoted_improvement_inf_n": 2.0591155589499976e-05,
+      "runtime_seconds": 720.8277833000029,
+      "latest_direct_residual_inf_n": 0.033256356788726515,
+      "retained_latest_checkpoint_only": true,
+      "pruned_intermediate_checkpoint_count": 15,
+      "checkpoint_prune_error_count": 0,
+      "residual_batch_replay_backend": "hip_full_residual"
+    },
+    {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup217_232_latest_only_controller_summary.json",
+      "start_followup_index": 217,
+      "max_steps": 16,
+      "promoted_count": 16,
+      "total_promoted_improvement_inf_n": 2.4762206749073812e-05,
+      "runtime_seconds": 723.8133051670011,
+      "latest_direct_residual_inf_n": 0.03323159458197744,
+      "retained_latest_checkpoint_only": true,
+      "pruned_intermediate_checkpoint_count": 15,
+      "checkpoint_prune_error_count": 0,
+      "residual_batch_replay_backend": "hip_full_residual"
+    },
+    {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup233_248_latest_only_controller_summary.json",
+      "start_followup_index": 233,
+      "max_steps": 16,
+      "promoted_count": 16,
+      "total_promoted_improvement_inf_n": 3.120445012427808e-05,
+      "runtime_seconds": 711.1199887480034,
+      "latest_direct_residual_inf_n": 0.03320039013145526,
+      "retained_latest_checkpoint_only": true,
+      "pruned_intermediate_checkpoint_count": 15,
+      "checkpoint_prune_error_count": 0,
+      "residual_batch_replay_backend": "cpu"
+    }
+  ],
+  "latest_probe": null,
+  "latest_probe_residual_batch_replay": {
+    "backend_requested": "cpu",
+    "chunk_size": 64,
+    "batch_evaluator_available": true,
+    "enabled": true,
+    "jvp_enabled": false,
+    "alpha_enabled": true,
+    "jvp_default_disabled_reason": "finite_difference_lstsq_is_sensitive_to_batch_roundoff",
+    "alpha_batch_count": 8,
+    "alpha_batch_state_count": 368,
+    "alpha_batch_seconds": 0.9499641160218744,
+    "alpha_batch_fallback_count": 0,
+    "backend_error": ""
+  },
+  "latest_step": {
+    "followup_index": 248,
+    "probe": null,
+    "basis_npz": null,
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+    "checkpoint_retained": true,
+    "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup247_final_checkpoint.npz",
+    "promoted": true,
+    "base_direct_residual_inf_n": 0.033200896736943486,
+    "final_or_best_direct_residual_inf_n": 0.03320039013145526,
+    "improvement_inf_n": 5.066055450697604e-07,
+    "direction_source": "all_target_rows_lstsq_ridge_1e-07",
+    "alpha": 1.52587890625e-05,
+    "accepted_history_count": 278,
+    "probe_retention": "probe_json_and_basis_npz_pruned_after_scalar_extraction"
+  },
+  "checkpoint_retention": {
+    "mode": "latest_restart_frontier_only",
+    "superseded_checkpoints_pruned_this_turn": [
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup216_final_checkpoint.npz",
+      "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup232_final_checkpoint.npz"
+    ],
+    "superseded_tracked_checkpoint_removed": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup190_final_checkpoint.npz",
+    "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup248_final_checkpoint.npz",
+    "probe_receipts_pruned_this_turn": {
+      "followup_range": "201-248",
+      "file_count": 96,
+      "policy": "Do not retain per-step probe JSON/NPZ receipts when compact continuation summaries preserve scalar audit data."
+    }
+  },
+  "latest_probe_retention": {
+    "mode": "values_extracted_probe_files_pruned",
+    "reason": "Disk-constrained G1 retention keeps the latest restart checkpoint and compact scalar audit data only.",
+    "pruned_probe_json_pattern": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup201-248_probe.json",
+    "pruned_probe_npz_pattern": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup201-248_probe.npz",
+    "pruned_probe_file_count": 96,
+    "retained_scalar_fields": [
+      "start_direct_residual_inf_n",
+      "latest_direct_residual_inf_n",
+      "total_improvement_inf_n",
+      "accepted_step_count",
+      "latest_probe_residual_batch_replay",
+      "latest_step"
+    ]
+  }
+}

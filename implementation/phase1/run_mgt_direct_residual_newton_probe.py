@@ -4369,10 +4369,15 @@ def run_mgt_direct_residual_newton_probe(
     final_direct_residual_inf = (
         float(np.max(np.abs(current_residual))) if current_residual.size else base_residual_inf
     )
+    direct_residual_gate_passed = bool(final_direct_residual_inf <= residual_tolerance_n)
+    relative_increment_gate_verified = bool(final_gate_candidate)
+    relative_increment_gate_passed = bool(
+        final_gate_candidate.get("relative_increment_gate_passed")
+    )
     converged = bool(
         best_improved
-        and final_direct_residual_inf <= residual_tolerance_n
-        and bool(final_gate_candidate.get("relative_increment_gate_passed"))
+        and direct_residual_gate_passed
+        and relative_increment_gate_passed
     )
     output_final_checkpoint_meta: dict[str, Any] | None = None
     final_state_improved = final_direct_residual_inf < base_residual_inf
@@ -4502,6 +4507,7 @@ def run_mgt_direct_residual_newton_probe(
             "direct_residual_inf_n": final_direct_residual_inf,
             "direct_relative_residual_inf": final_direct_residual_inf
             / max(float(np.max(np.abs(current_rhs))) if current_rhs.size else rhs_inf, 1.0),
+            "residual_gate_passed": direct_residual_gate_passed,
             "accepted_trust_region_iteration_count": int(accepted_count),
             "secant_subspace_globalization_accepted": bool(
                 secant_subspace_globalization.get("accepted")
@@ -4516,6 +4522,14 @@ def run_mgt_direct_residual_newton_probe(
                 matrix_free_global_krylov.get("accepted")
             ),
             "improvement_factor": base_residual_inf / max(final_direct_residual_inf, 1.0e-30),
+        },
+        "gate_assessment": {
+            "residual_tolerance_n": float(residual_tolerance_n),
+            "direct_residual_gate_passed": direct_residual_gate_passed,
+            "relative_increment_tolerance": float(relative_increment_tolerance),
+            "relative_increment_gate_verified": relative_increment_gate_verified,
+            "relative_increment_gate_passed": relative_increment_gate_passed,
+            "direct_residual_newton_ready_requires_increment_gate": True,
         },
         "newton_direction": {
             "linearized_tangent": "current service-material frame tangent plus frame geometric delta plus shell tangent plus finite springs",
@@ -4556,7 +4570,12 @@ def run_mgt_direct_residual_newton_probe(
         "blockers": []
         if converged
         else [
-            "direct_residual_gate_not_closed",
+            *([] if direct_residual_gate_passed else ["direct_residual_gate_not_closed"]),
+            *(
+                []
+                if relative_increment_gate_passed
+                else ["relative_increment_gate_not_closed_or_not_verified"]
+            ),
             "consistent_jacobian_or_globalization_required",
             "regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
         ],
