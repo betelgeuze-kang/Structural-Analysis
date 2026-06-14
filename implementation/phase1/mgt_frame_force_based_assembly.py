@@ -47,6 +47,36 @@ class PrepackedFrameForceBasedAssembly:
             "frame_force_based_prepacked_element_count": int(self.dofs.shape[0]),
         }
 
+    def assemble_batch(self, u_batch: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
+        states = np.asarray(u_batch, dtype=np.float64)
+        if states.ndim != 2:
+            raise ValueError("u_batch must be a 2D array shaped (batch, n_dof)")
+        if int(states.shape[1]) != int(self.n_dof):
+            raise ValueError(
+                f"u_batch second dimension {states.shape[1]} does not match n_dof {self.n_dof}"
+            )
+        gathered = states[:, self.dofs]
+        element_forces = np.einsum(
+            "eij,bej->bei",
+            self.element_stiffness,
+            gathered,
+            optimize=True,
+        )
+        f_int = np.zeros((int(states.shape[0]), int(self.n_dof)), dtype=np.float64)
+        flat = f_int.ravel()
+        flat_indices = (
+            np.arange(int(states.shape[0]), dtype=np.int64)[:, None, None] * int(self.n_dof)
+            + self.dofs[None, :, :]
+        ).ravel()
+        np.add.at(flat, flat_indices, element_forces.ravel())
+        return f_int, {
+            **self.meta,
+            "frame_force_based_fastpath": True,
+            "frame_force_based_batch_fastpath": True,
+            "frame_force_based_batch_size": int(states.shape[0]),
+            "frame_force_based_prepacked_element_count": int(self.dofs.shape[0]),
+        }
+
 
 def _frame_12_transform(rotation: np.ndarray) -> np.ndarray:
     transform = np.zeros((12, 12), dtype=np.float64)
@@ -230,4 +260,41 @@ def assemble_frame_force_based_f_int(
         "min_chord_length_m": float(min_chord_length_m if frame_elements else 0.0),
         "max_chord_length_ratio": float(max_chord_length_ratio),
         "element_count": int(len(frame_elements)),
+    }
+
+
+def assemble_frame_force_based_f_int_batch(
+    *,
+    u_batch: np.ndarray,
+    node_xyz: np.ndarray,
+    frame_elements: list[FrameElement],
+    section_props: dict[int, dict[str, Any]],
+    material_props: dict[int, dict[str, Any]],
+    element_axial_forces: dict[int, float] | None = None,
+    include_geometric: bool = True,
+    prepacked: PrepackedFrameForceBasedAssembly | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Batch assemble frame F_int for repeated residual/JVP replay."""
+    states = np.asarray(u_batch, dtype=np.float64)
+    if states.ndim != 2:
+        raise ValueError("u_batch must be a 2D array shaped (batch, n_dof)")
+    if prepacked is not None:
+        return prepacked.assemble_batch(states)
+    rows: list[np.ndarray] = []
+    meta: dict[str, Any] = {}
+    for state in states:
+        f_int, meta = assemble_frame_force_based_f_int(
+            u=state,
+            node_xyz=node_xyz,
+            frame_elements=frame_elements,
+            section_props=section_props,
+            material_props=material_props,
+            element_axial_forces=element_axial_forces,
+            include_geometric=include_geometric,
+        )
+        rows.append(np.asarray(f_int, dtype=np.float64))
+    return np.vstack(rows) if rows else np.zeros((0, int(node_xyz.shape[0]) * 6)), {
+        **meta,
+        "frame_force_based_batch_fastpath": False,
+        "frame_force_based_batch_size": int(states.shape[0]),
     }

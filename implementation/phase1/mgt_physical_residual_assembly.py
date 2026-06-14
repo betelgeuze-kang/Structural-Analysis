@@ -27,10 +27,15 @@ from mgt_equilibrium_geometry_contract import (
     assembly_node_xyz,
 )
 from mgt_coupled_stiffness_unit_audit import audit_coupled_stiffness_diagonals
-from mgt_frame_force_based_assembly import assemble_frame_force_based_f_int
+from mgt_frame_force_based_assembly import (
+    assemble_frame_force_based_f_int,
+    assemble_frame_force_based_f_int_batch,
+)
 from mgt_shell_force_based_assembly import (
     assemble_shell_internal_force_components,
+    assemble_shell_internal_force_components_batch,
     assemble_shell_internal_forces,
+    assemble_shell_internal_forces_batch,
 )
 
 
@@ -203,6 +208,127 @@ def assemble_physical_internal_force_components(
         "frame_equilibrium_meta": frame_meta,
         "shell_meta": shell_meta,
         "stress_corrected_element_count": int(stress_corrected_element_count),
+    }
+
+
+def assemble_physical_internal_forces_batch(
+    *,
+    u_batch: np.ndarray,
+    node_xyz: np.ndarray,
+    frame_elements: list[FrameElement],
+    elem_type_code: np.ndarray,
+    elem_section_id: np.ndarray,
+    elem_material_id: np.ndarray,
+    conn_ptr: np.ndarray,
+    conn_idx: np.ndarray,
+    section_props: dict[int, dict[str, Any]],
+    material_props: dict[int, dict[str, Any]],
+    plate_thickness_props: dict[int, dict[str, Any]],
+    spring_stiffness: Any,
+    base_axial_forces: dict[int, float],
+    frame_gravity_load_scale: float,
+    load_scale: float,
+    use_force_based_frame: bool = True,
+    split_shell_components: bool = False,
+    shell_operator_cache: dict[str, Any] | None = None,
+    frame_force_cache: Any | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Batch assemble F_int(U) for residual-only JVP and alpha replay."""
+    states = np.asarray(u_batch, dtype=np.float64)
+    if states.ndim != 2:
+        raise ValueError("u_batch must be a 2D array shaped (batch, n_dof)")
+    axial_forces = {
+        int(elem_id): float(force) * float(frame_gravity_load_scale) * float(load_scale)
+        for elem_id, force in base_axial_forces.items()
+    }
+    if use_force_based_frame:
+        f_frame_batch, frame_meta = assemble_frame_force_based_f_int_batch(
+            u_batch=states,
+            node_xyz=node_xyz,
+            frame_elements=frame_elements,
+            section_props=section_props,
+            material_props=material_props,
+            element_axial_forces=axial_forces,
+            include_geometric=True,
+            prepacked=frame_force_cache,
+        )
+        frame_equilibrium_stiffness_nnz = 0
+    else:
+        frame_rows: list[np.ndarray] = []
+        frame_meta = {}
+        for state in states:
+            frame_equilibrium_stiffness, _frame_f, frame_meta = _assemble_sparse_frame(
+                elements=frame_elements,
+                node_xyz=assembly_node_xyz(node_xyz=node_xyz, u=state),
+                section_props=section_props,
+                material_props=material_props,
+                element_axial_forces=axial_forces,
+                include_geometric=True,
+            )
+            frame_rows.append(np.asarray(frame_equilibrium_stiffness @ state, dtype=np.float64))
+        f_frame_batch = (
+            np.vstack(frame_rows)
+            if frame_rows
+            else np.zeros((0, int(node_xyz.shape[0]) * DOF_PER_NODE), dtype=np.float64)
+        )
+        frame_equilibrium_stiffness_nnz = int(frame_equilibrium_stiffness.nnz) if states.size else 0
+    if split_shell_components:
+        shell_components_batch, shell_meta = assemble_shell_internal_force_components_batch(
+            u_batch=states,
+            node_xyz=node_xyz,
+            elem_type_code=elem_type_code,
+            elem_section_id=elem_section_id,
+            elem_material_id=elem_material_id,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
+            material_props=material_props,
+            plate_thickness_props=plate_thickness_props,
+            shell_operator_cache=shell_operator_cache,
+        )
+        f_shell_batch = np.zeros_like(f_frame_batch)
+        for values in shell_components_batch.values():
+            f_shell_batch = f_shell_batch + np.asarray(values, dtype=np.float64)
+    else:
+        f_shell_batch, shell_meta = assemble_shell_internal_forces_batch(
+            u_batch=states,
+            node_xyz=node_xyz,
+            elem_type_code=elem_type_code,
+            elem_section_id=elem_section_id,
+            elem_material_id=elem_material_id,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
+            material_props=material_props,
+            plate_thickness_props=plate_thickness_props,
+            shell_operator_cache=shell_operator_cache,
+        )
+    f_spring_batch = np.asarray(spring_stiffness @ states.T, dtype=np.float64).T
+    f_int_batch = np.asarray(f_frame_batch + f_shell_batch + f_spring_batch, dtype=np.float64)
+    component_inf = {
+        "frame_inf_n": float(np.max(np.abs(f_frame_batch))) if f_frame_batch.size else 0.0,
+        "shell_inf_n": float(np.max(np.abs(f_shell_batch))) if f_shell_batch.size else 0.0,
+        "spring_inf_n": float(np.max(np.abs(f_spring_batch))) if f_spring_batch.size else 0.0,
+    }
+    frame_model = (
+        frame_meta.get("frame_internal_force_model", "quasi_tangent_k_eq_at_u")
+        if use_force_based_frame
+        else "elastic_frame_geometric_plus_linear_shell_plus_springs"
+    )
+    return f_int_batch, {
+        "physical_internal_force_model": (
+            frame_model + "_plus_force_consistent_shell_plus_springs_batch"
+        ),
+        "use_force_based_frame": bool(use_force_based_frame),
+        "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,
+        "batch_size": int(states.shape[0]),
+        "frame_equilibrium_stiffness_nnz": int(frame_equilibrium_stiffness_nnz),
+        "shell_stiffness_nnz": int(shell_meta.get("shell_stiffness_nnz") or 0),
+        "spring_stiffness_nnz": int(spring_stiffness.nnz),
+        "component_internal_force_inf_n": component_inf,
+        "shell_internal_force_model": shell_meta.get("shell_internal_force_model"),
+        "split_shell_components": bool(split_shell_components),
+        "frame_equilibrium_meta": frame_meta,
+        "shell_meta": shell_meta,
+        "stress_corrected_element_count": 0,
     }
 
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T10:18:20+09:00",
+  "generated_at": "2026-06-14T10:26:51+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -123,9 +123,11 @@
     "code_paths": [
       "implementation/phase1/mgt_frame_force_based_assembly.py",
       "implementation/phase1/mgt_physical_residual_assembly.py",
+      "implementation/phase1/mgt_shell_force_based_assembly.py",
       "implementation/phase1/mgt_equilibrium_step_assembly.py",
       "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-      "implementation/phase1/run_mgt_frame_force_fastpath_probe.py"
+      "implementation/phase1/run_mgt_frame_force_fastpath_probe.py",
+      "implementation/phase1/run_mgt_residual_batch_replay_probe.py"
     ],
     "validation": {
       "frame_force_fastpath_probe": "implementation/phase1/release_evidence/productization/mgt_frame_force_fastpath_followup32_probe.json",
@@ -140,9 +142,16 @@
       "cached_jvp_total_seconds_after": 28.470995087998745,
       "cached_jvp_fd_jvp_seconds_before": 11.80182786200021,
       "cached_jvp_fd_jvp_seconds_after": 0.05893149500116124,
-      "cached_jvp_residual_only_eval_seconds_after": 0.0029493990004993975
+      "cached_jvp_residual_only_eval_seconds_after": 0.0029493990004993975,
+      "batch_residual_replay_probe": "implementation/phase1/release_evidence/productization/mgt_residual_batch_replay_followup38_probe.json",
+      "batch_residual_replay_status": "pass",
+      "batch_residual_replay_batch_size": 64,
+      "batch_residual_replay_max_abs_difference_n": 0.00000005681070547325362,
+      "batch_residual_replay_sequential_mean_seconds": 0.19852020833301745,
+      "batch_residual_replay_batch_mean_seconds": 0.17049725999944107,
+      "batch_residual_replay_speedup_factor": 1.1643601095622782
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery. It preserves the attached-policy direct residual at the current frontier and removes the Python frame-element loop from residual-only FD/JVP replay. Shell matvec and initial tangent assembly remain the next runtime targets."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The CPU batch path is only 1.16x faster on a 64-state followup38 probe, so it is mainly the host-side contract for a Rust/HIP backend rather than the final acceleration answer."
   },
   "fastpath_frontier_advances": {
     "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
@@ -216,7 +225,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction.",
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction. The new CPU batch replay contract is numerically valid but only modestly faster, which keeps the priority on a native HIP/Rust implementation of the same interface.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -235,9 +244,9 @@
   },
   "recommended_next_path": [
     "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
-    "First build a narrow Rust/HIP residual replay prototype for the frame force-based element loop, because that is Python element-loop dominated and maps cleanly to element-parallel kernels.",
-    "Keep shell operator caching, then add batched shell CSR matvec/JVP extraction after the frame path is validated.",
-    "Modify the row-correction driver to submit a batch of support-column perturbations and alpha candidates, so one engine call replaces hundreds of Python residual-only evaluations.",
+    "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
+    "Implement the HIP backend first for prepacked frame force recovery and shell CSR batch matvec, then compare it against mgt_residual_batch_replay_followup38_probe.json.",
+    "After the backend is faster than sequential replay, modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface.",
     "In parallel, keep searching for a better G1 coupled shell-bending/membrane/frame correction direction; faster replay alone will not cure a saturated descent model."
   ],
   "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure, and the cached-JVP speed probe is diagnostic only because it does not use the attached-policy residual evaluator."

@@ -113,6 +113,73 @@ def assemble_shell_internal_force_components(
     }
 
 
+def assemble_shell_internal_force_components_batch(
+    *,
+    u_batch: np.ndarray,
+    node_xyz: np.ndarray,
+    elem_type_code: np.ndarray,
+    elem_section_id: np.ndarray,
+    elem_material_id: np.ndarray,
+    conn_ptr: np.ndarray,
+    conn_idx: np.ndarray,
+    material_props: dict[int, dict[str, Any]],
+    plate_thickness_props: dict[int, dict[str, Any]],
+    shell_operator_cache: dict[str, Any] | None = None,
+) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+    """Batch recover additive shell resisting-force components."""
+    states = np.asarray(u_batch, dtype=np.float64)
+    if states.ndim != 2:
+        raise ValueError("u_batch must be a 2D array shaped (batch, n_dof)")
+    reference_u = states[0] if states.shape[0] else np.zeros(int(node_xyz.shape[0]) * 6)
+    shell_full, full_meta, full_cache_hit = _cached_shell_operator(
+        u=reference_u,
+        node_xyz=node_xyz,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        include_membrane=True,
+        shell_operator_cache=shell_operator_cache,
+    )
+    shell_bending, bending_meta, bending_cache_hit = _cached_shell_operator(
+        u=reference_u,
+        node_xyz=node_xyz,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        include_membrane=False,
+        shell_operator_cache=shell_operator_cache,
+    )
+    f_full = np.asarray(shell_full @ states.T, dtype=np.float64).T
+    f_bending = np.asarray(shell_bending @ states.T, dtype=np.float64).T
+    f_membrane = np.asarray(f_full - f_bending, dtype=np.float64)
+    return {
+        "shell_bending_drilling": f_bending,
+        "shell_membrane": f_membrane,
+    }, {
+        "shell_internal_force_model": (
+            "membrane_bending_drilling_force_consistent_reference_geometry_split"
+        ),
+        "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,
+        "shell_stiffness_nnz": int(shell_full.nnz),
+        "shell_bending_drilling_stiffness_nnz": int(shell_bending.nnz),
+        "shell_membrane_stiffness_nnz": int((shell_full - shell_bending).nnz),
+        "shell_internal_force_cache_enabled": shell_operator_cache is not None,
+        "shell_full_operator_cache_hit": bool(full_cache_hit),
+        "shell_bending_operator_cache_hit": bool(bending_cache_hit),
+        "shell_batch_size": int(states.shape[0]),
+        "shell_meta": full_meta,
+        "shell_bending_drilling_meta": bending_meta,
+    }
+
+
 def assemble_shell_internal_forces(
     *,
     u: np.ndarray,
@@ -147,5 +214,48 @@ def assemble_shell_internal_forces(
         "shell_stiffness_nnz": int(shell_stiffness.nnz),
         "shell_internal_force_cache_enabled": shell_operator_cache is not None,
         "shell_internal_force_cache_hit": bool(cache_hit),
+        "shell_meta": shell_meta,
+    }
+
+
+def assemble_shell_internal_forces_batch(
+    *,
+    u_batch: np.ndarray,
+    node_xyz: np.ndarray,
+    elem_type_code: np.ndarray,
+    elem_section_id: np.ndarray,
+    elem_material_id: np.ndarray,
+    conn_ptr: np.ndarray,
+    conn_idx: np.ndarray,
+    material_props: dict[int, dict[str, Any]],
+    plate_thickness_props: dict[int, dict[str, Any]],
+    shell_operator_cache: dict[str, Any] | None = None,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Batch recover shell resisting forces as K_shell(reference) @ U."""
+    states = np.asarray(u_batch, dtype=np.float64)
+    if states.ndim != 2:
+        raise ValueError("u_batch must be a 2D array shaped (batch, n_dof)")
+    reference_u = states[0] if states.shape[0] else np.zeros(int(node_xyz.shape[0]) * 6)
+    shell_stiffness, shell_meta, cache_hit = _cached_shell_operator(
+        u=reference_u,
+        node_xyz=node_xyz,
+        elem_type_code=elem_type_code,
+        elem_section_id=elem_section_id,
+        elem_material_id=elem_material_id,
+        conn_ptr=conn_ptr,
+        conn_idx=conn_idx,
+        material_props=material_props,
+        plate_thickness_props=plate_thickness_props,
+        include_membrane=True,
+        shell_operator_cache=shell_operator_cache,
+    )
+    f_shell = np.asarray(shell_stiffness @ states.T, dtype=np.float64).T
+    return f_shell, {
+        "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry",
+        "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,
+        "shell_stiffness_nnz": int(shell_stiffness.nnz),
+        "shell_internal_force_cache_enabled": shell_operator_cache is not None,
+        "shell_internal_force_cache_hit": bool(cache_hit),
+        "shell_batch_size": int(states.shape[0]),
         "shell_meta": shell_meta,
     }

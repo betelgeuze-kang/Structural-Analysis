@@ -153,6 +153,7 @@ def build_direct_residual_assembler(
         "_material_props": material_props,
         "_plate_thickness_props": plate_thickness_props,
         "_base_axial_forces": base_axial_forces,
+        "_spring_stiffness": spring_stiffness,
         "_temp_dir": temp_dir,
     }
     return assemble_with_frozen_external_load, setup_meta
