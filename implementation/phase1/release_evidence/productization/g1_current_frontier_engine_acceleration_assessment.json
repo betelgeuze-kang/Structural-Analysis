@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T10:53:18+09:00",
+  "generated_at": "2026-06-14T11:04:22+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -146,7 +146,9 @@
       "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
       "implementation/phase1/run_mgt_frame_force_fastpath_probe.py",
       "implementation/phase1/hip_frame_force_batch_replay.cpp",
+      "implementation/phase1/hip_shell_csr_batch_replay.cpp",
       "implementation/phase1/run_mgt_hip_frame_force_batch_probe.py",
+      "implementation/phase1/run_mgt_hip_shell_csr_batch_probe.py",
       "implementation/phase1/run_mgt_residual_batch_replay_probe.py"
     ],
     "validation": {
@@ -182,9 +184,21 @@
       "native_hip_frame_force_batch_speedup_vs_cpu": 129.183674694377,
       "native_hip_frame_force_batch_max_abs_difference_n": 0.0000011620006930002091,
       "native_hip_frame_force_batch_relative_difference_inf": 0.000000000007086246274218062,
-      "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now runs when the process has GPU device access. It provides a 129x kernel-level speedup over the CPU prepacked frame batch on followup40 with relative force error 7.1e-12. This is real but insufficient by itself because the latest residual frontier is dominated by shell bending/drilling and shell membrane rows."
+      "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now runs when the process has GPU device access. It provides a 129x kernel-level speedup over the CPU prepacked frame batch on followup40 with relative force error 7.1e-12. This is real but insufficient by itself because the latest residual frontier is dominated by shell bending/drilling and shell membrane rows.",
+      "native_hip_shell_csr_batch_probe": "implementation/phase1/release_evidence/productization/mgt_hip_shell_csr_batch_followup40_probe.json",
+      "native_hip_shell_csr_batch_binary": "implementation/phase1/release_evidence/productization/bin/hip_shell_csr_batch_replay",
+      "native_hip_shell_csr_batch_status": "pass",
+      "native_hip_shell_csr_batch_device": "AMD Radeon RX 6900 XT",
+      "native_hip_shell_csr_batch_batch_size": 64,
+      "native_hip_shell_csr_batch_shell_nnz": 1901664,
+      "native_hip_shell_csr_batch_cpu_mean_seconds": 0.041560889950415,
+      "native_hip_shell_csr_batch_kernel_mean_seconds": 0.015459188461,
+      "native_hip_shell_csr_batch_speedup_vs_cpu": 2.6884263721387205,
+      "native_hip_shell_csr_batch_max_abs_difference_n": 0.000000000739305505703669,
+      "native_hip_shell_csr_batch_relative_difference_inf": 0.0000000000000047133911524429465,
+      "native_hip_shell_csr_batch_assessment": "The native HIP shell CSR batch bridge now validates the dominant shell path directly on followup40. The kernel is 2.69x faster than SciPy CSR batch matvec for 64 states with 4.7e-15 relative force error. Subprocess and host-copy overhead still dominate, so the next engineering step is in-process residual replay batching or a persistent Rust/HIP worker rather than one subprocess per candidate batch."
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The CPU batch path is only 1.16x faster for full residual replay, so the remaining high-impact backend work is a HIP/rocSPARSE shell CSR batch matvec behind the same residual replay contract."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. The remaining high-impact work is to wire these kernels into the residual-row correction driver so FD perturbations and alpha candidates are submitted as persistent batches instead of one CPU/subprocess replay at a time."
   },
   "fastpath_frontier_advances": {
     "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
@@ -282,7 +296,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame replay is now proven fast, but the gate still needs a better coupled physical correction direction. Because the latest top residual rows are mostly shell bending/drilling and shell membrane, the next backend milestone is shell CSR batch replay on HIP/rocSPARSE rather than more frame-only acceleration.",
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame plus shell replay are now proven, but the gate still needs a better coupled physical correction direction. Because the latest top residual rows are mostly shell bending/drilling and shell membrane, the next backend milestone is not another isolated kernel; it is driver integration that batches FD perturbations and alpha candidates through the proven frame/shell replay lanes.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -303,10 +317,10 @@
     "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
     "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
     "Treat native HIP frame replay as proven for GPU-device executions: followup40 shows 129x kernel-level speedup over CPU frame batch with 7.1e-12 relative force error.",
-    "Implement shell CSR batch matvec behind the same batch contract and compare it against mgt_residual_batch_replay_followup38_probe.json and the latest followup40 frontier.",
-    "After the backend is faster than sequential replay, modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface.",
+    "Treat native HIP shell CSR replay as proven for GPU-device executions: followup40 shows 2.69x kernel-level speedup over CPU shell batch with 4.7e-15 relative force error on the 1.90M-nnz shell matrix.",
+    "Modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface instead of sequential CPU residual replay.",
     "Use the faster backend to test larger shell-bending/membrane/frame coupled target sets, not to repeat the current tiny-alpha row correction thousands of times.",
-    "Keep the Rust layer as an orchestration/FFI boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
+    "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay is validated only for frame internal-force batch replay; shell CSR batch replay and full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction driver integration and full residual gate closure remain open."
 }
