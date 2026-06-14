@@ -2875,6 +2875,7 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_shell_bending_drilling_rows",
                 "residual_shell_normal_rows",
                 "residual_shell_geometry_normal_rows",
+                "residual_shell_geometry_normal_bending_rows",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
@@ -3132,45 +3133,97 @@ def run_mgt_direct_residual_newton_probe(
                         "residual_shell_bending_drilling_rows",
                         "residual_shell_normal_rows",
                         "residual_shell_geometry_normal_rows",
+                        "residual_shell_geometry_normal_bending_rows",
                     }:
-                        target_rows, target_meta = _select_residual_element_block_rows(
-                            current_residual,
-                            current_free,
-                            conn_ptr=conn_ptr,
-                            conn_idx=conn_idx,
-                            node_xyz=node_xyz,
-                            elem_id=elem_id,
-                            elem_type_code=elem_type_code,
-                            target_element_count=int(target_row_count),
-                            neighbor_depth=element_neighbor_depth,
-                            allowed_element_type_codes=(
-                                {1}
-                                if target_mode == "residual_frame_element_blocks"
+                        if target_mode == "residual_shell_geometry_normal_bending_rows":
+                            normal_rows, normal_meta = _select_residual_element_block_rows(
+                                current_residual,
+                                current_free,
+                                conn_ptr=conn_ptr,
+                                conn_idx=conn_idx,
+                                node_xyz=node_xyz,
+                                elem_id=elem_id,
+                                elem_type_code=elem_type_code,
+                                target_element_count=int(target_row_count),
+                                neighbor_depth=element_neighbor_depth,
+                                allowed_element_type_codes={2},
+                                target_dof_indices={0, 1, 2},
+                                target_shell_geometry_normal_translation_rows=True,
+                                shell_normal_participation_threshold=(
+                                    current_tangent_residual_row_shell_normal_participation_threshold
+                                ),
+                                dof_per_node=DOF_PER_NODE,
+                            )
+                            bending_rows, bending_meta = _select_residual_element_block_rows(
+                                current_residual,
+                                current_free,
+                                conn_ptr=conn_ptr,
+                                conn_idx=conn_idx,
+                                node_xyz=node_xyz,
+                                elem_id=elem_id,
+                                elem_type_code=elem_type_code,
+                                target_element_count=int(target_row_count),
+                                neighbor_depth=element_neighbor_depth,
+                                allowed_element_type_codes={2},
+                                target_dof_indices={3, 4, 5},
+                                target_shell_geometry_normal_translation_rows=False,
+                                shell_normal_participation_threshold=(
+                                    current_tangent_residual_row_shell_normal_participation_threshold
+                                ),
+                                dof_per_node=DOF_PER_NODE,
+                            )
+                            target_rows = np.unique(
+                                np.concatenate([normal_rows, bending_rows])
+                            ).astype(np.int64)
+                            target_rows = target_rows[
+                                np.argsort(current_free[target_rows], kind="stable")
+                            ]
+                            target_meta = {
+                                "target_mode": target_mode,
+                                "geometry_normal_rows": normal_meta,
+                                "bending_drilling_rows": bending_meta,
+                                "geometry_normal_row_count": int(normal_rows.size),
+                                "bending_drilling_row_count": int(bending_rows.size),
+                            }
+                        else:
+                            target_rows, target_meta = _select_residual_element_block_rows(
+                                current_residual,
+                                current_free,
+                                conn_ptr=conn_ptr,
+                                conn_idx=conn_idx,
+                                node_xyz=node_xyz,
+                                elem_id=elem_id,
+                                elem_type_code=elem_type_code,
+                                target_element_count=int(target_row_count),
+                                neighbor_depth=element_neighbor_depth,
+                                allowed_element_type_codes=(
+                                    {1}
+                                    if target_mode == "residual_frame_element_blocks"
+                                    else {2}
+                                    if target_mode
+                                    in {
+                                        "residual_shell_element_blocks",
+                                        "residual_shell_bending_drilling_rows",
+                                        "residual_shell_normal_rows",
+                                        "residual_shell_geometry_normal_rows",
+                                    }
+                                    else None
+                                ),
+                                target_dof_indices={3, 4, 5}
+                                if target_mode == "residual_shell_bending_drilling_rows"
                                 else {2}
-                                if target_mode
-                                in {
-                                    "residual_shell_element_blocks",
-                                    "residual_shell_bending_drilling_rows",
-                                    "residual_shell_normal_rows",
-                                    "residual_shell_geometry_normal_rows",
-                                }
-                                else None
-                            ),
-                            target_dof_indices={3, 4, 5}
-                            if target_mode == "residual_shell_bending_drilling_rows"
-                            else {2}
-                            if target_mode == "residual_shell_normal_rows"
-                            else {0, 1, 2}
-                            if target_mode == "residual_shell_geometry_normal_rows"
-                            else None,
-                            target_shell_geometry_normal_translation_rows=(
-                                target_mode == "residual_shell_geometry_normal_rows"
-                            ),
-                            shell_normal_participation_threshold=(
-                                current_tangent_residual_row_shell_normal_participation_threshold
-                            ),
-                            dof_per_node=DOF_PER_NODE,
-                        )
+                                if target_mode == "residual_shell_normal_rows"
+                                else {0, 1, 2}
+                                if target_mode == "residual_shell_geometry_normal_rows"
+                                else None,
+                                target_shell_geometry_normal_translation_rows=(
+                                    target_mode == "residual_shell_geometry_normal_rows"
+                                ),
+                                shell_normal_participation_threshold=(
+                                    current_tangent_residual_row_shell_normal_participation_threshold
+                                ),
+                                dof_per_node=DOF_PER_NODE,
+                            )
                         actual_target_count = int(target_rows.size)
                     else:
                         actual_target_count = min(int(target_row_count), int(current_residual.size))
@@ -4434,6 +4487,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_shell_bending_drilling_rows",
             "residual_shell_normal_rows",
             "residual_shell_geometry_normal_rows",
+            "residual_shell_geometry_normal_bending_rows",
         ),
         default="largest_rows",
         help=(
@@ -4449,7 +4503,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_shell_normal_rows restricts element seeds to shell elements and targets "
             "their global-z normal translation rows; residual_shell_geometry_normal_rows "
             "uses shell element geometry to target global translation rows aligned with "
-            "the local shell normal."
+            "the local shell normal; residual_shell_geometry_normal_bending_rows unions "
+            "geometry-normal translation rows with shell rx/ry/rz bending/drilling rows."
         ),
     )
     parser.add_argument(
