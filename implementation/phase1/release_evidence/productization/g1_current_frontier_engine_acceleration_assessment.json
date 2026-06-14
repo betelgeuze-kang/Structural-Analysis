@@ -1,0 +1,124 @@
+{
+  "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
+  "generated_at": "2026-06-14T10:34:00+09:00",
+  "status": "partial",
+  "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
+  "current_g1_frontier": {
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_followup32_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.03410235276851836,
+    "residual_gate_n": 0.001,
+    "remaining_residual_margin_to_gate_n": 0.03310235276851836
+  },
+  "runtime_bottleneck_evidence": {
+    "followup32": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_probe.json",
+      "accepted_improvement_inf_n": 0.000008328283857828023,
+      "runtime_seconds": 236.25546567300262,
+      "residual_only_eval_count": 299,
+      "finite_difference_columns": 144,
+      "finite_difference_seconds": 93.72649505499794,
+      "assessment": "A live but tiny descent was obtained. Most wall time is residual-only replay for finite-difference JVP columns and alpha candidates."
+    },
+    "followup34": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_support168_followup34_probe.json",
+      "accepted": false,
+      "runtime_seconds": 265.3524063730001,
+      "residual_only_eval_count": 360,
+      "finite_difference_columns": 168,
+      "finite_difference_seconds": 110.73057324699766,
+      "assessment": "Wider local support increased runtime and did not descend, so repeated CPU support widening is not the right next acceleration path."
+    },
+    "current_cached_jvp_speed_probe": {
+      "probe": "implementation/phase1/release_evidence/productization/g1_current_frontier_cached_jvp_rocm_speed_probe.json",
+      "scope": "speed diagnostic only; this script uses the generic direct residual assembler and is not comparable to attached-policy residual closure",
+      "base_direct_residual_inf_n": 0.37383887466666776,
+      "runtime_seconds": 47.73595101599858,
+      "base_assembly_seconds": 12.229785483999876,
+      "support_size": 18,
+      "jvp_seconds": 11.80182786200021,
+      "residual_only_assembly_count": 18,
+      "best_improvement_inf_n": -0.0000009496883164872294
+    }
+  },
+  "engine_state": {
+    "rocm_runtime": {
+      "rocminfo_available": true,
+      "gpu": "AMD Radeon RX 6900 XT",
+      "isa": "amdgcn-amd-amdhsa--gfx1030",
+      "compute_units": 80
+    },
+    "torch_rocm": {
+      "torch_version": "2.6.0+rocm6.1",
+      "torch_hip_version": "6.1.40091-a8dbc0c19",
+      "torch_cuda_is_available": false,
+      "torch_cuda_device_count": 0,
+      "hsa_override_gfx_10_3_0_device_count": 0,
+      "assessment": "Torch ROCm is installed but does not currently expose the RX 6900 XT as a cuda device, so Torch sparse/lstsq is not a usable acceleration path in this environment without runtime repair."
+    },
+    "native_hip_smokes": {
+      "beam_element_kernel": {
+        "ok": true,
+        "n": 1048576,
+        "reps": 20,
+        "elapsed_ms": 0.986971,
+        "bandwidth_gbps": 594.954206
+      },
+      "axpy_kernel": {
+        "ok": true,
+        "n": 1048576,
+        "reps": 20,
+        "elapsed_ms": 0.523425,
+        "bandwidth_gbps": 480.791418
+      },
+      "assessment": "Native HIP kernel execution is available and fast enough to justify a custom residual/JVP replay engine."
+    },
+    "rust_engine_scope": {
+      "existing_paths": [
+        "implementation/phase1/rust_hip_md3bead_hook/src/lib.rs",
+        "implementation/phase1/gpu_newton_core.py"
+      ],
+      "current_scope": "story-level nonlinear frame / hook and GPU Newton contract support",
+      "g1_full_residual_engine_ready": false,
+      "assessment": "Rust is useful as the stable FFI/orchestration layer, but the existing Rust path is not yet the full MGT frame-shell residual replay engine."
+    }
+  },
+  "code_bottleneck": {
+    "frame_internal_force": {
+      "path": "implementation/phase1/mgt_frame_force_based_assembly.py",
+      "current_shape": "Python loop over frame_elements with per-element 12x12 force recovery and scatter-add",
+      "acceleration_target": "prepacked element arrays plus Rust/HIP element-parallel force recovery and deterministic scatter/reduction"
+    },
+    "shell_internal_force": {
+      "path": "implementation/phase1/mgt_shell_force_based_assembly.py",
+      "current_shape": "cached shell operator followed by CSR matvec K_shell @ u",
+      "acceleration_target": "batched CSR matvec for multiple perturbed/candidate u vectors, or sparse target-row JVP extraction without full residual replay"
+    },
+    "row_correction_driver": {
+      "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+      "current_shape": "finite-difference support columns are evaluated sequentially through evaluate_row_candidate(), then alpha candidates are replayed sequentially",
+      "acceleration_target": "batch all FD perturbations and alpha candidates through one residual replay engine and return only target rows plus residual inf metrics"
+    }
+  },
+  "decision": {
+    "can_rocm_rust_hip_help": true,
+    "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",
+    "raw_backend_acceleration_is_not_enough": true,
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction.",
+    "rough_extrapolation_from_followup32": {
+      "improvement_per_accepted_probe_n": 0.000008328283857828023,
+      "accepted_probe_seconds": 236.25546567300262,
+      "steps_needed_at_same_improvement": 3974.688409071494,
+      "wall_time_days_at_same_runtime": 10.87302457660119,
+      "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
+    }
+  },
+  "recommended_next_path": [
+    "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
+    "First build a narrow Rust/HIP residual replay prototype for the frame force-based element loop, because that is Python element-loop dominated and maps cleanly to element-parallel kernels.",
+    "Keep shell operator caching, then add batched shell CSR matvec/JVP extraction after the frame path is validated.",
+    "Modify the row-correction driver to submit a batch of support-column perturbations and alpha candidates, so one engine call replaces hundreds of Python residual-only evaluations.",
+    "In parallel, keep searching for a better G1 coupled shell-bending/membrane/frame correction direction; faster replay alone will not cure a saturated descent model."
+  ],
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure, and the cached-JVP speed probe is diagnostic only because it does not use the attached-policy residual evaluator."
+}
