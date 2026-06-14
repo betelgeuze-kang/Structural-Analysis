@@ -1,0 +1,45 @@
+{
+  "schema_version": "mgt-rocm-backend-newton-row-integration-summary.v1",
+  "generated_at": "2026-06-14T15:58:36+09:00",
+  "status": "partial",
+  "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+  "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_row_backend_followup67_smoke.json",
+  "backend_source": {
+    "module": "implementation/phase1/mgt_hip_full_residual_backend.py",
+    "direct_newton_driver": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+    "hip_binary": "implementation/phase1/release_evidence/productization/bin/hip_full_residual_batch_replay"
+  },
+  "configuration": {
+    "target_mode": "largest_rows",
+    "target_counts": [1],
+    "support_column_counts": [1],
+    "jacobian_mode": "finite_difference",
+    "fd_max_support_columns": 2,
+    "batch_replay_backend": "hip_full_residual",
+    "batch_alpha_replay": true,
+    "batch_fd_replay": true,
+    "alpha_values": [0.0005],
+    "max_promotions": 1
+  },
+  "result": {
+    "status": "partial",
+    "base_direct_residual_inf_n": 0.03363847854424884,
+    "final_direct_residual_inf_n": 0.03363811641199705,
+    "best_candidate_direct_residual_inf_n": 0.03363811641346828,
+    "accepted": true,
+    "residual_gate_passed": false,
+    "accepted_improvement_inf_n": 3.6213225178740065e-7,
+    "best_candidate_improvement_inf_n": 3.621307805568019e-7,
+    "relative_improvement": 1.0765373353032202e-5,
+    "batch_fd_replay_batch_count": 1,
+    "batch_fd_replay_state_count": 1,
+    "batch_fd_replay_seconds": 0.29192562800017186,
+    "batch_alpha_replay_batch_count": 1,
+    "batch_alpha_replay_state_count": 2,
+    "batch_alpha_replay_seconds": 0.26377936199423857
+  },
+  "assessment": "Followup67 wires the followup66 native HIP full residual batch backend into the direct residual Newton row-correction FD/alpha replay boundary. This proves the backend can serve an actual correction driver path, not only an isolated replay probe. The small largest-row smoke accepted a 3.62e-7 N residual improvement, but the physical residual gate remains open at 0.0336381164 N.",
+  "next_backend_step": "Keep this backend path and promote it from subprocess-backed batches to a persistent in-process Rust/HIP worker with resident operator buffers.",
+  "next_solver_step": "Use the connected backend for broader adaptive coupled shell membrane/bending/frame material-globalization searches instead of repeating the tiny largest-row smoke shape.",
+  "claim_boundary": "Integration evidence only. This does not claim full 3D nonlinear equilibrium closure, residual gate pass, or production in-process ROCm/HIP residency."
+}

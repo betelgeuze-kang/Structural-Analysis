@@ -46,6 +46,8 @@ from mgt_physical_residual_assembly import (
     assemble_physical_residual,
 )
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
+from mgt_hip_full_residual_backend import HipFullResidualBatchBackend
+from mgt_shell_force_based_assembly import _cached_shell_operator
 from mgt_shell_load_path import surface_pressure_load_path_filter
 
 
@@ -640,6 +642,9 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_batch_alpha_replay: bool = False,
     current_tangent_residual_row_batch_fd_replay: bool = False,
     current_tangent_residual_row_batch_fd_replay_chunk_size: int = 64,
+    current_tangent_residual_row_batch_replay_backend: str = "cpu",
+    current_tangent_residual_row_hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+    current_tangent_residual_row_force_rebuild_hip: bool = False,
     current_tangent_residual_row_allow_negative_alphas: bool = False,
     current_tangent_residual_row_alpha_values: tuple[float, ...] = (
         0.03125,
@@ -2930,6 +2935,11 @@ def run_mgt_direct_residual_newton_probe(
                 int(current_tangent_residual_row_batch_fd_replay_chunk_size),
                 1,
             )
+            row_batch_backend = str(
+                current_tangent_residual_row_batch_replay_backend
+            ).strip()
+            if row_batch_backend not in {"cpu", "hip_full_residual"}:
+                row_batch_backend = "cpu"
             current_tangent_residual_row_correction["batch_alpha_replay_enabled"] = (
                 row_batch_alpha_replay
             )
@@ -2938,6 +2948,9 @@ def run_mgt_direct_residual_newton_probe(
             )
             current_tangent_residual_row_correction["batch_fd_replay_chunk_size"] = (
                 row_batch_fd_replay_chunk_size
+            )
+            current_tangent_residual_row_correction["batch_replay_backend"] = (
+                row_batch_backend
             )
             if row_batch_alpha_replay_requested and not use_row_residual_only:
                 current_tangent_residual_row_correction[
@@ -2955,6 +2968,48 @@ def run_mgt_direct_residual_newton_probe(
             row_batch_fd_replay_batch_count = 0
             row_batch_fd_replay_state_count = 0
             row_batch_fd_replay_seconds = 0.0
+            row_hip_backend: HipFullResidualBatchBackend | None = None
+            row_hip_backend_error = ""
+
+            def row_hip_residual_backend() -> HipFullResidualBatchBackend | None:
+                nonlocal row_hip_backend, row_hip_backend_error
+                if row_batch_backend != "hip_full_residual":
+                    return None
+                if row_hip_backend is not None:
+                    return row_hip_backend
+                try:
+                    shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
+                        u=current_u,
+                        node_xyz=node_xyz,
+                        elem_type_code=elem_type_code,
+                        elem_section_id=elem_section_id,
+                        elem_material_id=elem_material_id,
+                        conn_ptr=conn_ptr,
+                        conn_idx=conn_idx,
+                        material_props=material_props,
+                        plate_thickness_props=plate_thickness_props,
+                        include_membrane=True,
+                        shell_operator_cache=shell_operator_cache,
+                    )
+                    row_hip_backend = HipFullResidualBatchBackend.prepare(
+                        frame_dofs=frame_force_cache.dofs,
+                        frame_stiffness=frame_force_cache.element_stiffness,
+                        shell_csr=shell_stiffness.tocsr(),
+                        spring_csr=spring_stiffness.tocsr(),
+                        f_ext=reference_f_ext,
+                        free=current_free,
+                        hipcc=current_tangent_residual_row_hipcc,
+                        force_rebuild=bool(
+                            current_tangent_residual_row_force_rebuild_hip
+                        ),
+                    )
+                except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                    row_hip_backend_error = str(exc)
+                    current_tangent_residual_row_correction[
+                        "batch_replay_backend_error"
+                    ] = row_hip_backend_error
+                    return None
+                return row_hip_backend
 
             def evaluate_row_candidate(
                 candidate_u: np.ndarray,
@@ -3006,32 +3061,55 @@ def run_mgt_direct_residual_newton_probe(
                 if states.ndim != 2:
                     return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
                 batch_started = time.perf_counter()
-                f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
-                    u_batch=states,
-                    node_xyz=node_xyz,
-                    frame_elements=frame_elements,
-                    elem_type_code=elem_type_code,
-                    elem_section_id=elem_section_id,
-                    elem_material_id=elem_material_id,
-                    conn_ptr=conn_ptr,
-                    conn_idx=conn_idx,
-                    section_props=section_props,
-                    material_props=material_props,
-                    plate_thickness_props=plate_thickness_props,
-                    spring_stiffness=spring_stiffness,
-                    base_axial_forces=base_axial_forces,
-                    frame_gravity_load_scale=frame_gravity_load_scale,
-                    load_scale=load_scale,
-                    shell_operator_cache=shell_operator_cache,
-                    frame_force_cache=frame_force_cache,
-                )
+                hip_backend = row_hip_residual_backend()
                 elapsed = float(time.perf_counter() - batch_started)
                 f_ext = np.asarray(reference_f_ext, dtype=np.float64)
                 free = np.asarray(current_free, dtype=np.int64)
-                residual_batch = np.asarray(
-                    f_int_batch[:, free] - f_ext[free],
-                    dtype=np.float64,
-                )
+                f_int_batch: np.ndarray | None = None
+                if hip_backend is not None:
+                    try:
+                        residual_batch, batch_meta = hip_backend.evaluate(states, reps=1)
+                        elapsed = float(time.perf_counter() - batch_started)
+                        batch_meta = {
+                            **batch_meta,
+                            "residual_batch_backend": "hip_full_residual",
+                            "hip_full_residual_batch_replay": True,
+                        }
+                    except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                        current_tangent_residual_row_correction[
+                            "batch_replay_backend_error"
+                        ] = str(exc)
+                        return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                else:
+                    f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
+                        u_batch=states,
+                        node_xyz=node_xyz,
+                        frame_elements=frame_elements,
+                        elem_type_code=elem_type_code,
+                        elem_section_id=elem_section_id,
+                        elem_material_id=elem_material_id,
+                        conn_ptr=conn_ptr,
+                        conn_idx=conn_idx,
+                        section_props=section_props,
+                        material_props=material_props,
+                        plate_thickness_props=plate_thickness_props,
+                        spring_stiffness=spring_stiffness,
+                        base_axial_forces=base_axial_forces,
+                        frame_gravity_load_scale=frame_gravity_load_scale,
+                        load_scale=load_scale,
+                        shell_operator_cache=shell_operator_cache,
+                        frame_force_cache=frame_force_cache,
+                    )
+                    elapsed = float(time.perf_counter() - batch_started)
+                    residual_batch = np.asarray(
+                        f_int_batch[:, free] - f_ext[free],
+                        dtype=np.float64,
+                    )
+                    batch_meta = {
+                        **batch_meta,
+                        "residual_batch_backend": "cpu_physical_internal_force_batch",
+                        "hip_full_residual_batch_replay": False,
+                    }
                 rhs = np.asarray(f_ext[free], dtype=np.float64)
                 row_residual_only_eval_count += int(states.shape[0])
                 if replay_role == "finite_difference":
@@ -3062,11 +3140,15 @@ def run_mgt_direct_residual_newton_probe(
                     "batch_size": int(states.shape[0]),
                     "free_dof_count": int(free.size),
                     "shell_operator_cache_size": int(len(shell_operator_cache)),
-                    "physical_internal_force_inf_n": float(
-                        np.max(np.abs(f_int_batch[:, free]))
-                    )
-                    if free.size and f_int_batch.size
-                    else 0.0,
+                    "physical_internal_force_inf_n": (
+                        float(np.max(np.abs(f_int_batch[:, free])))
+                        if (
+                            f_int_batch is not None
+                            and free.size
+                            and f_int_batch.size
+                        )
+                        else None
+                    ),
                     "external_load_source": "reference_configuration",
                     "assembled_external_load_inf_n": None,
                     "used_external_load_inf_n": float(np.max(np.abs(f_ext)))
@@ -4598,6 +4680,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-batch-replay-backend",
+        choices=("cpu", "hip_full_residual"),
+        default="cpu",
+        help=(
+            "Backend for residual-row alpha/FD batch replay. hip_full_residual uses "
+            "the native HIP full residual bridge for free-DOF residual batches."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-hipcc",
+        type=Path,
+        default=Path("/opt/rocm/bin/hipcc"),
+        help="hipcc path used when building the residual-row HIP batch backend.",
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-force-rebuild-hip",
+        action="store_true",
+        help="Force rebuild of the residual-row HIP full residual batch backend.",
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-ridge-factor",
         type=float,
         default=0.0,
@@ -4894,6 +4996,13 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_batch_fd_replay_chunk_size=(
             args.current_tangent_residual_row_batch_fd_replay_chunk_size
+        ),
+        current_tangent_residual_row_batch_replay_backend=(
+            args.current_tangent_residual_row_batch_replay_backend
+        ),
+        current_tangent_residual_row_hipcc=args.current_tangent_residual_row_hipcc,
+        current_tangent_residual_row_force_rebuild_hip=(
+            args.current_tangent_residual_row_force_rebuild_hip
         ),
         current_tangent_residual_row_allow_negative_alphas=(
             args.current_tangent_residual_row_allow_negative_alphas
