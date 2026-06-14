@@ -1,0 +1,151 @@
+{
+  "schema_version": "mgt-residual-batch-replay-probe.v1",
+  "generated_at": "2026-06-14T04:11:21.064375+00:00",
+  "status": "pass",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "batch_size": 64,
+  "dof_count": 78282,
+  "free_dof_count": 58998,
+  "reps": 2,
+  "perturbation_scale": 1e-06,
+  "base_direct_residual_inf_n": 0.03363847854424884,
+  "rhs_inf_n": 8676.13911480824,
+  "sequential": {
+    "min_seconds": 0.205901122004434,
+    "mean_seconds": 0.20618203050253214,
+    "max_seconds": 0.20646293900063029
+  },
+  "batch": {
+    "min_seconds": 0.1678234880018863,
+    "mean_seconds": 0.17346646950318245,
+    "max_seconds": 0.17910945100447861
+  },
+  "speedup_factor": 1.1885987597087142,
+  "max_abs_residual_difference_n": 5.611204301203543e-08,
+  "max_abs_residual_inf_difference_n": 3.2378011383116245e-10,
+  "max_sequential_candidate_residual_inf_n": 135481.40970159828,
+  "min_sequential_candidate_residual_inf_n": 0.03363847854424884,
+  "max_batch_candidate_residual_inf_n": 135481.40970159828,
+  "min_batch_candidate_residual_inf_n": 0.03363847854404989,
+  "state_meta_sample": [
+    {
+      "kind": "checkpoint",
+      "global_dof": null,
+      "epsilon": 0.0
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 18,
+      "free_index": 0,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 1047,
+      "free_index": 951,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 2047,
+      "free_index": 1903,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 3148,
+      "free_index": 2854,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 4202,
+      "free_index": 3806,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 5303,
+      "free_index": 4757,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 6765,
+      "free_index": 5709,
+      "epsilon": 1e-06
+    }
+  ],
+  "base_meta_summary": {
+    "residual_only_assembly": false,
+    "shell_operator_cache_size": 1,
+    "free_dof_count": 58998
+  },
+  "batch_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_batch",
+    "use_force_based_frame": true,
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "batch_size": 64,
+    "frame_equilibrium_stiffness_nnz": 0,
+    "shell_stiffness_nnz": 1901664,
+    "spring_stiffness_nnz": 40608,
+    "component_internal_force_inf_n": {
+      "frame_inf_n": 163979.7218465487,
+      "shell_inf_n": 156852.14355913326,
+      "spring_inf_n": 1000.0000078423577
+    },
+    "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry",
+    "split_shell_components": false,
+    "frame_equilibrium_meta": {
+      "frame_internal_force_model": "corotational_force_based_6dof",
+      "real_section_material_element_count": 5485,
+      "geometric_element_count": 1946,
+      "min_chord_length_m": 0.31923032437409377,
+      "max_chord_length_ratio": 1.0,
+      "element_count": 5564,
+      "frame_force_based_fastpath_available": true,
+      "frame_force_based_fastpath": true,
+      "frame_force_based_batch_fastpath": true,
+      "frame_force_based_batch_size": 64,
+      "frame_force_based_prepacked_element_count": 5564
+    },
+    "shell_meta": {
+      "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry",
+      "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+      "shell_stiffness_nnz": 1901664,
+      "shell_internal_force_cache_enabled": true,
+      "shell_internal_force_cache_hit": true,
+      "shell_batch_size": 64,
+      "shell_meta": {
+        "surface_element_count": 7152,
+        "surface_quad_count": 6968,
+        "surface_tri_count": 184,
+        "assembled_triangle_count": 14120,
+        "assembled_membrane_triangle_count": 14120,
+        "include_membrane": true,
+        "shell_tangent_model": "mindlin_cst_bending_drilling_plus_cst_membrane",
+        "skipped_degenerate_triangle_count": 0,
+        "surface_node_count": 7894,
+        "surface_material_coverage_pct": 96.33668903803132,
+        "unique_surface_material_count": 20,
+        "unique_surface_section_count": 15,
+        "surface_total_area_m2": 11404.192103423085,
+        "surface_stiffness_nnz": 1901664,
+        "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+        "source_plate_thickness_coverage_count": 7152,
+        "source_plate_thickness_coverage_pct": 100.0,
+        "source_thickness_table_count": 25,
+        "thickness_min_m": 0.140625,
+        "thickness_max_m": 0.85,
+        "pressure_load_filter_enabled": false,
+        "pressure_loaded_triangle_count": 14120,
+        "pressure_suppressed_triangle_count": 0
+      }
+    },
+    "stress_corrected_element_count": 0
+  },
+  "runtime_seconds": 31.09327265200409,
+  "claim_boundary": "This validates a CPU batch residual-only replay interface for G1 JVP/alpha candidate evaluation. It is the host-side contract that a Rust/HIP backend can replace, but it does not claim full residual gate closure."
+}

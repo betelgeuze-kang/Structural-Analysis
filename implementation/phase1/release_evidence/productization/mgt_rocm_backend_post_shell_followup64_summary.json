@@ -1,0 +1,36 @@
+{
+  "schema_version": "mgt-rocm-backend-post-shell-summary.v1",
+  "generated_at": "2026-06-14T13:11:20+09:00",
+  "status": "partial",
+  "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+  "base_direct_residual_inf_n": 0.03363847854424884,
+  "probes": {
+    "residual_batch_replay": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_residual_batch_replay_post_shell_followup64_probe.json",
+      "status": "pass",
+      "batch_size": 64,
+      "max_abs_residual_difference_n": 5.611204301203543e-08,
+      "speedup_factor": 1.1885987597087142
+    },
+    "hip_shell_csr_batch": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_hip_shell_csr_batch_post_shell_followup64_probe.json",
+      "status": "pass",
+      "batch_size": 64,
+      "max_abs_shell_force_difference_n": 1.1192469173693098e-09,
+      "relative_shell_force_difference_inf": 7.135681361902164e-15,
+      "hip_shell_batch_kernel_speedup_vs_cpu_mean": 2.110246846864887,
+      "hip_shell_batch_kernel_mean_seconds": 0.015667155266
+    },
+    "hip_frame_force_batch": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_hip_frame_force_batch_post_shell_followup64_probe.json",
+      "status": "pass",
+      "batch_size": 64,
+      "max_abs_frame_force_difference_n": 1.1620006930002091e-06,
+      "relative_frame_force_difference_inf": 7.086246274326547e-12,
+      "hip_frame_batch_kernel_speedup_vs_cpu": 111.73553051625964,
+      "hip_frame_batch_kernel_mean_seconds": 0.0006000146269999999
+    }
+  },
+  "assessment": "The post-shell frontier still validates against the CPU residual batch replay contract and both native HIP component replay kernels. This supports the production residual/JVP backend lane, but it does not close the physical residual gate because full in-process frame+shell+spring residual/JVP replay and coupled shell material/globalization remain open.",
+  "claim_boundary": "Backend replay validation only. This does not claim full 3D nonlinear equilibrium closure or residual gate pass."
+}
