@@ -128,6 +128,18 @@
       "latest_direct_residual_inf_n": 0.0340294701338964,
       "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
       "assessment": "Residual row-scale floor retuning breaks the followup44 no-descent state, but the repeat pass collapses to 6.78e-9 N improvement. It is useful as a direction diagnostic, not as a gate-closure loop."
+    },
+    "followup46_hotspot_jvp_consistency": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_hotspot_jvp_probe.json",
+      "status": "ready",
+      "residual_jacobian_consistency_ready": true,
+      "base_residual_inf_n": 0.0340294701338964,
+      "direction_row_max_relative_inf_error": 5.400705114726038e-16,
+      "hotspot_unit_dof_max_selected_row_relative_error": 1.6753322956839353e-11,
+      "hotspot_unit_dof_count": 8,
+      "diagonal_newton_best_direct_residual_inf_n": 0.03507111525232176,
+      "diagonal_newton_best_improvement_inf_n": -0.0010416451184253606,
+      "assessment": "Followup46 hotspot tangent/FD JVP is consistent to numerical precision, while frame-diagonal Newton candidates worsen the residual. The blocker is coupled direction/globalization, not a local Jacobian mismatch."
     }
   },
   "engine_state": {
@@ -285,7 +297,11 @@
       "global_krylov_scaled_floor_followup46_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
       "global_krylov_scaled_floor_followup46_improvement_inf_n": 6.783669681542648e-09,
       "global_krylov_scaled_floor_followup46_residual_inf_n": 0.0340294701338964,
-      "adaptive_global_krylov_controller_residual_scale_floor_cli": "implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py --matrix-free-global-krylov-residual-scale-floor"
+      "adaptive_global_krylov_controller_residual_scale_floor_cli": "implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py --matrix-free-global-krylov-residual-scale-floor",
+      "global_krylov_scaled_floor_followup46_hotspot_jvp_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_hotspot_jvp_probe.json",
+      "global_krylov_scaled_floor_followup46_hotspot_jvp_max_selected_row_relative_error": 1.6753322956839353e-11,
+      "global_krylov_scaled_floor_followup46_direction_jvp_max_relative_inf_error": 5.400705114726038e-16,
+      "global_krylov_scaled_floor_followup46_frame_diagonal_best_improvement_inf_n": -0.0010416451184253606
     },
     "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family. Followup45/46 add residual-scale-floor retuning for the global Krylov lane: it proves the followup44 no-descent state can be escaped, but the repeat improvement saturates immediately, leaving the next high-impact work in a coupled shell bending/membrane/frame or material Newton direction."
   },
@@ -448,7 +464,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The row-correction family is saturated, followup43 proved a larger current-tangent-preconditioned global Krylov descent, and followup45/46 show row-scale floor retuning can escape a no-descent frontier but saturates almost immediately. The remaining milestone is an adaptive coupled shell bending/membrane/frame or material Newton direction with production residual/JVP replay, not another fixed global scaling loop.",
+    "reason": "The row-correction family is saturated, followup43 proved a larger current-tangent-preconditioned global Krylov descent, and followup45/46 show row-scale floor retuning can escape a no-descent frontier but saturates almost immediately. The remaining milestone is an adaptive coupled shell bending/membrane/frame or material Newton direction with production residual/JVP replay, not another fixed global scaling loop. Followup46 hotspot JVP evidence shows the assembled tangent matches finite-difference residual action at the active shell/frame rows, so the next closure attempt should change the coupled Newton/globalization space rather than chase a tangent assembly bug.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 8.328283857828023e-06,
       "accepted_probe_seconds": 236.25546567300262,
@@ -478,7 +494,8 @@
     "Use followup43's current-tangent-preconditioned global Krylov lane as the next live direction family, but retune it around the shell-membrane hotspot exposed by followup44.",
     "Use the faster backend to test adaptive shell-bending/membrane/frame coupled physical correction directions, not to repeat a fixed tiny-alpha row correction thousands of times.",
     "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine.",
-    "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition."
+    "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
+    "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn."
   ],
   "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching, FD support-column batching, global Krylov descent, and scaled-floor retuning are integrated diagnostics; adaptive coupled material/shell/frame Newton and full residual gate closure remain open."
 }
