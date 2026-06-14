@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T16:36:30+09:00",
+  "generated_at": "2026-06-14T16:42:30+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -402,6 +402,14 @@
       "post_shell_hip_elementblock_followup76_accepted": false,
       "post_shell_hip_elementblock_followup76_stop_reason": "no_residual_descent",
       "post_shell_hip_coupled_block_followup75_76_assessment": "Followup75 tests residual_node_blocks with node-block support after largest_rows saturation and only accepts a numerical-floor 5.08e-8 N improvement before no-descent. Followup76 tests residual_element_blocks with neighbor expansion, residual-weighted support, node-block support, and signed alphas; it also no-descends. The current row-target family is saturated for the mixed frame/shell_membrane/shell_bending_drilling plateau.",
+      "post_shell_hip_frontier_component_followup77_78_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_hip_frontier_component_followup77_78_summary.json",
+      "post_shell_hip_frontier_component_followup77_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_followup77_probe.json",
+      "post_shell_hip_frontier_component_svd_followup78_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_svd_followup78_probe.json",
+      "post_shell_hip_frontier_component_target_mode": "frontier_component_rows",
+      "post_shell_hip_frontier_component_code_path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+      "post_shell_hip_frontier_component_followup77_accepted": false,
+      "post_shell_hip_frontier_component_followup78_accepted": false,
+      "post_shell_hip_frontier_component_followup77_78_assessment": "A new frontier_component_rows target mode now loads residual_component_breakdown.top_rows from a frontier probe and component-balances frame, shell_membrane, and shell_bending_drilling target rows. Followup77 proves the hook works but no-descends. Followup78 adds SVD condition capping and also no-descends. The next step is not another target-row wrapper; it is component-scaled direction construction and/or persistent Rust/HIP residual/JVP replay for wider signed searches.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
       "row_correction_batch_alpha_trial_rows": 300,
@@ -794,7 +802,8 @@
     "Followup70-72 show the refreshed HIP-backed largest-row lane remains live: three chained probes accept 18 more promotions and lower the attached-policy direct residual to 0.0334674359 N.",
     "Followup73-74 mark the current largest_rows branch as saturated: support=1 only adds 1.90e-6 N before no-descent, and support 4/8 worsens immediately.",
     "Followup75-76 show the existing node-block and element-block row-target modes do not reopen material descent: node-block adds only 5.08e-8 N, and element-block no-descends even with signed alphas.",
-    "Continue from followup75 by implementing a new coupled component-frontier controller or persistent in-process Rust/HIP residual/JVP residency before another broad adaptive search."
+    "Followup77-78 add and validate a frontier_component_rows controller hook, but the first component-balanced and SVD-capped variants no-descend.",
+    "Continue from followup75 by extending the controller into component-scaled direction construction, or implement persistent in-process Rust/HIP residual/JVP residency before another broad adaptive search."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, and followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, and followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
 }

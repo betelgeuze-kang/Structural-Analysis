@@ -1,0 +1,82 @@
+{
+  "schema_version": "mgt-direct-residual-hip-frontier-component-summary.v1",
+  "generated_at": "2026-06-14T16:42:30+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json",
+  "residual_gate_n": 0.001,
+  "code_change": {
+    "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+    "target_mode": "frontier_component_rows",
+    "frontier_probe_argument": "--current-tangent-residual-row-frontier-probe-json",
+    "behavior": "Loads residual_component_breakdown.top_rows from a frontier probe and selects component-balanced target rows by round-robin over frame, shell_membrane, shell_bending_drilling, then fills from residual order."
+  },
+  "followup77_frontier_component_rows": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_followup77_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.033465481263974306,
+    "accepted_improvement_inf_n": 0,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 214,
+    "frontier_component_row_count": 96,
+    "batch_replay_backend": "hip_full_residual",
+    "best_candidate": {
+      "target_row_count": 6,
+      "support_column_count": 1,
+      "support_size": 36,
+      "alpha": 0.000001953125,
+      "direction_sign": -1,
+      "direct_residual_inf_n": 0.033465546626090026,
+      "improvement_inf_n": -6.536211571983586e-8
+    },
+    "first_selected_frontier_rows": [
+      {
+        "node_index": 2221,
+        "dof": "uz",
+        "dominant_component": "frame",
+        "residual_n": -0.03346553206631597
+      },
+      {
+        "node_index": 2846,
+        "dof": "uy",
+        "dominant_component": "shell_membrane",
+        "residual_n": 0.03346550864389536
+      },
+      {
+        "node_index": 2202,
+        "dof": "rx",
+        "dominant_component": "shell_bending_drilling",
+        "residual_n": -0.033465338403682154
+      }
+    ]
+  },
+  "followup78_frontier_component_svd": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_svd_followup78_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.033465481263974306,
+    "accepted_improvement_inf_n": 0,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 192,
+    "svd_max_condition": 100000,
+    "first_candidate_rank": 5,
+    "batch_replay_backend": "hip_full_residual",
+    "best_candidate": {
+      "target_row_count": 6,
+      "support_column_count": 8,
+      "support_size": 36,
+      "alpha": 0.000001953125,
+      "direction_sign": 1,
+      "direct_residual_inf_n": 0.033465487772900815,
+      "improvement_inf_n": -6.508926508885793e-9
+    }
+  },
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.033465481263974306,
+    "remaining_residual_margin_to_gate_n": 0.032465481263974305
+  },
+  "assessment": "The new frontier_component_rows hook works and records the intended mixed frame/shell_membrane/shell_bending_drilling target rows. However, the first component-balanced correction and the SVD-capped variant both no-descend. This means the next controller needs a stronger physical component scaling/material direction or a lower-overhead persistent residual/JVP worker; simply feeding mixed frontier rows into the existing row least-squares loop is not enough.",
+  "next_solver_step": "Extend the controller from target-row selection into direction construction: component-scaled frame/shell membrane/bending blocks, explicit per-component residual normalization, and persistent Rust/HIP replay to make wider signed subspace searches cheap.",
+  "claim_boundary": "Controller hook and no-descent evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

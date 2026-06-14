@@ -271,6 +271,113 @@ def _select_residual_node_block_rows(
     }
 
 
+def _load_frontier_component_top_rows(path: Path | None) -> list[dict[str, Any]]:
+    if path is None:
+        return []
+    probe_path = Path(path)
+    if not probe_path.is_file():
+        return []
+    try:
+        payload = json.loads(probe_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return []
+    breakdown = payload.get("residual_component_breakdown")
+    if not isinstance(breakdown, dict):
+        return []
+    rows = breakdown.get("top_rows")
+    if not isinstance(rows, list):
+        return []
+    clean_rows: list[dict[str, Any]] = []
+    for row in rows:
+        if not isinstance(row, dict) or row.get("global_dof") is None:
+            continue
+        try:
+            global_dof = int(row["global_dof"])
+        except (TypeError, ValueError):
+            continue
+        clean_rows.append(
+            {
+                **row,
+                "global_dof": global_dof,
+                "node_index": int(row.get("node_index", global_dof // DOF_PER_NODE)),
+                "dominant_component": str(row.get("dominant_component", "unknown")),
+                "residual_n": float(row.get("residual_n", 0.0)),
+            }
+        )
+    return clean_rows
+
+
+def _select_frontier_component_rows(
+    current_free: np.ndarray,
+    frontier_rows: list[dict[str, Any]],
+    *,
+    target_row_count: int,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    if current_free.size == 0 or target_row_count <= 0 or not frontier_rows:
+        return np.asarray([], dtype=np.int64), {
+            "target_frontier_row_count": 0,
+            "selected_frontier_rows": [],
+        }
+    free_lookup = {int(global_dof): int(index) for index, global_dof in enumerate(current_free.tolist())}
+    component_order = ("frame", "shell_membrane", "shell_bending_drilling")
+    grouped: dict[str, list[dict[str, Any]]] = {component: [] for component in component_order}
+    grouped["other"] = []
+    for row in frontier_rows:
+        component = str(row.get("dominant_component", "other"))
+        key = component if component in grouped else "other"
+        grouped[key].append(row)
+
+    selected: list[dict[str, Any]] = []
+    seen_global_dofs: set[int] = set()
+    max_count = int(target_row_count)
+    while len(selected) < max_count:
+        progressed = False
+        for component in (*component_order, "other"):
+            rows = grouped.get(component, [])
+            while rows:
+                row = rows.pop(0)
+                global_dof = int(row["global_dof"])
+                if global_dof in seen_global_dofs or global_dof not in free_lookup:
+                    continue
+                selected.append(row)
+                seen_global_dofs.add(global_dof)
+                progressed = True
+                break
+            if len(selected) >= max_count:
+                break
+        if not progressed:
+            break
+
+    if len(selected) < max_count:
+        for row in frontier_rows:
+            global_dof = int(row["global_dof"])
+            if global_dof in seen_global_dofs or global_dof not in free_lookup:
+                continue
+            selected.append(row)
+            seen_global_dofs.add(global_dof)
+            if len(selected) >= max_count:
+                break
+
+    target_rows = np.asarray(
+        [free_lookup[int(row["global_dof"])] for row in selected],
+        dtype=np.int64,
+    )
+    return target_rows, {
+        "target_frontier_row_count": int(len(selected)),
+        "configured_frontier_row_count": int(target_row_count),
+        "selected_frontier_rows": [
+            {
+                "global_dof": int(row["global_dof"]),
+                "node_index": int(row.get("node_index", int(row["global_dof"]) // DOF_PER_NODE)),
+                "dof": row.get("dof"),
+                "dominant_component": str(row.get("dominant_component", "unknown")),
+                "residual_n": float(row.get("residual_n", 0.0)),
+            }
+            for row in selected
+        ],
+    }
+
+
 def _local_shell_basis(points: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray] | None:
     pts = np.asarray(points, dtype=np.float64)
     if pts.shape != (3, 3):
@@ -625,6 +732,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_min_relative_improvement: float = 1.0e-5,
     current_tangent_residual_row_target_counts: tuple[int, ...] = (1, 2),
     current_tangent_residual_row_target_mode: str = "largest_rows",
+    current_tangent_residual_row_frontier_probe_json: Path | None = None,
     current_tangent_residual_row_element_neighbor_depth: int = 0,
     current_tangent_residual_row_support_column_counts: tuple[int, ...] = (4, 8),
     current_tangent_residual_row_support_expansion_depth: int = 0,
@@ -2881,9 +2989,23 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_shell_normal_rows",
                 "residual_shell_geometry_normal_rows",
                 "residual_shell_geometry_normal_bending_rows",
+                "frontier_component_rows",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
+            frontier_component_rows = _load_frontier_component_top_rows(
+                current_tangent_residual_row_frontier_probe_json
+            )
+            current_tangent_residual_row_correction[
+                "frontier_component_probe_json"
+            ] = (
+                str(current_tangent_residual_row_frontier_probe_json)
+                if current_tangent_residual_row_frontier_probe_json is not None
+                else None
+            )
+            current_tangent_residual_row_correction[
+                "frontier_component_row_count"
+            ] = int(len(frontier_component_rows))
             element_neighbor_depth = max(
                 int(current_tangent_residual_row_element_neighbor_depth),
                 0,
@@ -3206,6 +3328,13 @@ def run_mgt_direct_residual_newton_probe(
                             current_free,
                             target_node_count=int(target_row_count),
                             dof_per_node=DOF_PER_NODE,
+                        )
+                        actual_target_count = int(target_rows.size)
+                    elif target_mode == "frontier_component_rows":
+                        target_rows, target_meta = _select_frontier_component_rows(
+                            current_free,
+                            frontier_component_rows,
+                            target_row_count=int(target_row_count),
                         )
                         actual_target_count = int(target_rows.size)
                     elif target_mode in {
@@ -4598,6 +4727,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_shell_normal_rows",
             "residual_shell_geometry_normal_rows",
             "residual_shell_geometry_normal_bending_rows",
+            "frontier_component_rows",
         ),
         default="largest_rows",
         help=(
@@ -4614,7 +4744,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "their global-z normal translation rows; residual_shell_geometry_normal_rows "
             "uses shell element geometry to target global translation rows aligned with "
             "the local shell normal; residual_shell_geometry_normal_bending_rows unions "
-            "geometry-normal translation rows with shell rx/ry/rz bending/drilling rows."
+            "geometry-normal translation rows with shell rx/ry/rz bending/drilling rows; "
+            "frontier_component_rows loads component-balanced hotspot rows from a "
+            "residual/Jacobian frontier probe JSON."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-frontier-probe-json",
+        type=Path,
+        default=None,
+        help=(
+            "Frontier probe JSON used by frontier_component_rows target mode. "
+            "Rows are read from residual_component_breakdown.top_rows."
         ),
     )
     parser.add_argument(
@@ -4973,6 +5114,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_target_mode=(
             args.current_tangent_residual_row_target_mode
+        ),
+        current_tangent_residual_row_frontier_probe_json=(
+            args.current_tangent_residual_row_frontier_probe_json
         ),
         current_tangent_residual_row_element_neighbor_depth=(
             args.current_tangent_residual_row_element_neighbor_depth
