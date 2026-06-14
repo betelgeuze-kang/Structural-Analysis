@@ -1,14 +1,14 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T10:34:00+09:00",
+  "generated_at": "2026-06-14T10:18:20+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_followup32_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.03410235276851836,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.03406505013501837,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.03310235276851836
+    "remaining_residual_margin_to_gate_n": 0.03306505013501837
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -39,6 +39,24 @@
       "jvp_seconds": 11.80182786200021,
       "residual_only_assembly_count": 18,
       "best_improvement_inf_n": -0.0000009496883164872294
+    },
+    "followup37_fastpath": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup37_probe.json",
+      "accepted_improvement_inf_n": 0.000008322755447431884,
+      "runtime_seconds": 44.81506344900117,
+      "residual_only_eval_count": 1058,
+      "finite_difference_columns": 480,
+      "finite_difference_seconds_max": 1.3831595150004432,
+      "assessment": "The frame-force fastpath makes 480-column residual-only finite-difference correction cheap enough to keep exploring, but the accepted alpha remains tiny."
+    },
+    "followup38_fastpath": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_probe.json",
+      "accepted_improvement_inf_n": 0.000005111632166654445,
+      "runtime_seconds": 44.59951822400035,
+      "residual_only_eval_count": 921,
+      "finite_difference_columns": 600,
+      "finite_difference_seconds_max": 2.0304411809993326,
+      "assessment": "The 600-column correction still descends, but the improvement tapered again; most remaining wall time is now setup and repeated candidate residual replay, not finite-difference matrix construction."
     }
   },
   "engine_state": {
@@ -61,15 +79,15 @@
         "ok": true,
         "n": 1048576,
         "reps": 20,
-        "elapsed_ms": 0.986971,
-        "bandwidth_gbps": 594.954206
+        "elapsed_ms": 0.985336,
+        "bandwidth_gbps": 595.941442
       },
       "axpy_kernel": {
         "ok": true,
         "n": 1048576,
         "reps": 20,
-        "elapsed_ms": 0.523425,
-        "bandwidth_gbps": 480.791418
+        "elapsed_ms": 0.640956,
+        "bandwidth_gbps": 392.629519
       },
       "assessment": "Native HIP kernel execution is available and fast enough to justify a custom residual/JVP replay engine."
     },
@@ -127,10 +145,10 @@
     "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery. It preserves the attached-policy direct residual at the current frontier and removes the Python frame-element loop from residual-only FD/JVP replay. Shell matvec and initial tangent assembly remain the next runtime targets."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup36_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.03407848452263246,
-    "latest_direct_relative_residual_inf": 0.00000392783979967173,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.03406505013501837,
+    "latest_direct_relative_residual_inf": 0.000003926291370418082,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
@@ -153,21 +171,45 @@
         "finite_difference_columns": 360,
         "finite_difference_seconds": 1.223592665999604,
         "assessment": "A second fastpath wide element-block pass still descended but with a smaller accepted alpha, indicating useful but tapering residual reduction."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup37_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup37_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup37_frontier_probe.json",
+        "base_residual_inf_n": 0.03407848452263246,
+        "final_residual_inf_n": 0.034070161767185025,
+        "improvement_inf_n": 0.000008322755447431884,
+        "runtime_seconds": 44.81506344900117,
+        "finite_difference_columns": 480,
+        "finite_difference_seconds": 1.3831595150004432,
+        "assessment": "Expanding the element-block search to 480 support columns still produced a gate-eligible descent, but the top hotspot stayed on node 2202 rx."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
+        "base_residual_inf_n": 0.034070161767185025,
+        "final_residual_inf_n": 0.03406505013501837,
+        "improvement_inf_n": 0.000005111632166654445,
+        "runtime_seconds": 44.59951822400035,
+        "finite_difference_columns": 600,
+        "finite_difference_seconds": 2.0304411809993326,
+        "assessment": "A 600-column follow-up remained numerically useful but tapered further, confirming that engine speed helps iteration throughput while the correction family still needs a stronger coupled direction."
       }
     ],
     "latest_frontier_pattern": {
       "top_row_dominant_component_counts": {
-        "shell_bending_drilling": 42,
-        "shell_membrane": 41,
+        "shell_bending_drilling": 39,
+        "shell_membrane": 44,
         "frame": 13
       },
       "top_hotspot": {
         "node_index": 2202,
         "dof": "rx",
-        "residual_n": -0.03407848452263246,
+        "residual_n": -0.03406505013501837,
         "dominant_component": "shell_bending_drilling"
       },
-      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup36; the faster element-block lane helps exploration but has not closed the residual gate."
+      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup38; the faster element-block lane helps exploration but has not closed the residual gate."
     }
   },
   "decision": {
@@ -181,6 +223,14 @@
       "steps_needed_at_same_improvement": 3974.688409071494,
       "wall_time_days_at_same_runtime": 10.87302457660119,
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
+    },
+    "rough_extrapolation_from_latest_fastpath_followups": {
+      "latest_remaining_gate_gap_n": 0.03306505013501837,
+      "average_improvement_followup37_38_n": 0.000006717193807043165,
+      "average_runtime_followup37_38_seconds": 44.70729083650076,
+      "steps_needed_at_same_improvement": 4922.4499225180525,
+      "wall_time_hours_at_same_runtime": 61.13038897614589,
+      "assessment": "The fastpath changes the wall-clock economics from multi-day to multi-hour iteration sweeps, but the accepted residual decrement is still far too small to rely on repetition alone."
     }
   },
   "recommended_next_path": [
