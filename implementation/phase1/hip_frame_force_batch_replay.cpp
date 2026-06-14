@@ -131,13 +131,23 @@ int main(int argc, char** argv) {
     std::vector<double> h_out(state_count, 0.0);
 
     int device_count = 0;
-    check_hip(hipGetDeviceCount(&device_count), "hipGetDeviceCount");
-    if (device_count <= 0) {
+    hipError_t device_count_status = hipGetDeviceCount(&device_count);
+    bool device_count_query_ok = device_count_status == hipSuccess;
+    if (device_count_query_ok && device_count <= 0) {
       throw std::runtime_error("hipGetDeviceCount returned zero devices");
     }
-    check_hip(hipSetDevice(0), "hipSetDevice(0)");
+    // Some ROCm workstation sessions in this delivery environment dispatch
+    // kernels successfully even though hipGetDeviceCount returns
+    // hipErrorNoDevice. Match the working smoke-kernel path and let the real
+    // allocation/launch checks decide whether this process can use the GPU.
+    hipError_t set_device_status = hipSetDevice(0);
+    bool set_device_ok = set_device_status == hipSuccess;
     hipDeviceProp_t device_props{};
-    check_hip(hipGetDeviceProperties(&device_props, 0), "hipGetDeviceProperties(0)");
+    bool device_props_ok = false;
+    if (set_device_ok) {
+      check_hip(hipGetDeviceProperties(&device_props, 0), "hipGetDeviceProperties(0)");
+      device_props_ok = true;
+    }
 
     long long* d_dofs = nullptr;
     double* d_stiffness = nullptr;
@@ -199,7 +209,14 @@ int main(int argc, char** argv) {
               << "\"batch_size\":" << args.batch_size << ","
               << "\"reps\":" << args.reps << ","
               << "\"device_count\":" << device_count << ","
-              << "\"device_name\":\"" << device_props.name << "\","
+              << "\"device_count_query_ok\":" << (device_count_query_ok ? "true" : "false") << ","
+              << "\"device_count_query_error\":\""
+              << (device_count_query_ok ? "" : hipGetErrorString(device_count_status)) << "\","
+              << "\"set_device_ok\":" << (set_device_ok ? "true" : "false") << ","
+              << "\"set_device_error\":\""
+              << (set_device_ok ? "" : hipGetErrorString(set_device_status)) << "\","
+              << "\"device_props_ok\":" << (device_props_ok ? "true" : "false") << ","
+              << "\"device_name\":\"" << (device_props_ok ? device_props.name : "") << "\","
               << "\"kernel_elapsed_ms_total\":" << elapsed_ms << ","
               << "\"kernel_elapsed_ms_mean\":" << (elapsed_ms / static_cast<float>(args.reps)) << ","
               << "\"output_abs_sum\":" << static_cast<double>(output_abs_sum) << ","

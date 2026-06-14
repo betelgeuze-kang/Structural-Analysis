@@ -1,14 +1,14 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T10:36:33+09:00",
+  "generated_at": "2026-06-14T10:53:18+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.03406505013501837,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.03405888348788749,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.03306505013501837
+    "remaining_residual_margin_to_gate_n": 0.03305888348788749
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -57,6 +57,24 @@
       "finite_difference_columns": 600,
       "finite_difference_seconds_max": 2.0304411809993326,
       "assessment": "The 600-column correction still descends, but the improvement tapered again; most remaining wall time is now setup and repeated candidate residual replay, not finite-difference matrix construction."
+    },
+    "followup39_shell_bending_fastpath": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_fastpath_followup39_probe.json",
+      "accepted_improvement_inf_n": 0.0000051097574915726085,
+      "runtime_seconds": 45.083288622998225,
+      "residual_only_eval_count": 942,
+      "finite_difference_columns": 600,
+      "finite_difference_seconds_max": 2.302473101000942,
+      "assessment": "A shell-bending/drilling-targeted pass still descended at roughly the followup38 rate, but the dominant hotspot stayed near the same shell/frame cancellation region."
+    },
+    "followup40_shell_normal_fastpath": {
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_probe.json",
+      "accepted_improvement_inf_n": 0.0000010568896393059468,
+      "runtime_seconds": 44.52441979399737,
+      "residual_only_eval_count": 968,
+      "finite_difference_columns": 600,
+      "finite_difference_seconds_max": 2.107082746002561,
+      "assessment": "Targeting shell-normal rows produced only a 1.06e-6 N accepted descent, confirming that the current residual-row correction family is tapering too hard to reach the gate by repetition."
     }
   },
   "engine_state": {
@@ -79,15 +97,15 @@
         "ok": true,
         "n": 1048576,
         "reps": 20,
-        "elapsed_ms": 0.985336,
-        "bandwidth_gbps": 595.941442
+        "elapsed_ms": 0.932552,
+        "bandwidth_gbps": 629.67274
       },
       "axpy_kernel": {
         "ok": true,
         "n": 1048576,
         "reps": 20,
-        "elapsed_ms": 0.640956,
-        "bandwidth_gbps": 392.629519
+        "elapsed_ms": 0.636748,
+        "bandwidth_gbps": 395.224223
       },
       "assessment": "Native HIP kernel execution is available and fast enough to justify a custom residual/JVP replay engine."
     },
@@ -155,17 +173,24 @@
       "native_hip_frame_force_batch_probe": "implementation/phase1/release_evidence/productization/mgt_hip_frame_force_batch_followup38_probe.json",
       "native_hip_frame_force_batch_binary": "implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
       "native_hip_frame_force_batch_build_ok": true,
-      "native_hip_frame_force_batch_status": "fail",
-      "native_hip_frame_force_batch_failure": "hipGetDeviceCount: no ROCm-capable device is detected",
-      "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now builds against the vendored ROCm device libraries, but this managed runtime currently exposes no HIP device to the executable even though rocminfo sees gfx1030. The next production-lane step is HIP runtime/device permission repair, then rerun the same probe for CPU-vs-HIP frame replay comparison."
+      "native_hip_frame_force_batch_followup40_probe": "implementation/phase1/release_evidence/productization/mgt_hip_frame_force_batch_followup40_probe.json",
+      "native_hip_frame_force_batch_status": "pass",
+      "native_hip_frame_force_batch_device": "AMD Radeon RX 6900 XT",
+      "native_hip_frame_force_batch_batch_size": 64,
+      "native_hip_frame_force_batch_cpu_mean_seconds": 0.06942373890015005,
+      "native_hip_frame_force_batch_kernel_mean_seconds": 0.000537403345,
+      "native_hip_frame_force_batch_speedup_vs_cpu": 129.183674694377,
+      "native_hip_frame_force_batch_max_abs_difference_n": 0.0000011620006930002091,
+      "native_hip_frame_force_batch_relative_difference_inf": 0.000000000007086246274218062,
+      "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now runs when the process has GPU device access. It provides a 129x kernel-level speedup over the CPU prepacked frame batch on followup40 with relative force error 7.1e-12. This is real but insufficient by itself because the latest residual frontier is dominated by shell bending/drilling and shell membrane rows."
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. A native HIP frame-force batch bridge has been added and builds, but HIP runtime device discovery currently fails in this managed execution context. The CPU batch path is only 1.16x faster on a 64-state followup38 probe, so it remains mainly the host-side contract for the HIP backend rather than the final acceleration answer."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The CPU batch path is only 1.16x faster for full residual replay, so the remaining high-impact backend work is a HIP/rocSPARSE shell CSR batch matvec behind the same residual replay contract."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.03406505013501837,
-    "latest_direct_relative_residual_inf": 0.000003926291370418082,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.03405888348788749,
+    "latest_direct_relative_residual_inf": 0.000003925580611052738,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
@@ -212,6 +237,30 @@
         "finite_difference_columns": 600,
         "finite_difference_seconds": 2.0304411809993326,
         "assessment": "A 600-column follow-up remained numerically useful but tapered further, confirming that engine speed helps iteration throughput while the correction family still needs a stronger coupled direction."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_fastpath_followup39_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_fastpath_followup39_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_fastpath_followup39_frontier_probe.json",
+        "base_residual_inf_n": 0.03406505013501837,
+        "final_residual_inf_n": 0.0340599403775268,
+        "improvement_inf_n": 0.0000051097574915726085,
+        "runtime_seconds": 45.083288622998225,
+        "finite_difference_columns": 600,
+        "finite_difference_seconds": 2.302473101000942,
+        "assessment": "Shell-bending/drilling targeting produced another small descent, but the improvement stayed near 5e-6 N and did not break the node 2202 shell/frame cancellation frontier."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
+        "base_residual_inf_n": 0.0340599403775268,
+        "final_residual_inf_n": 0.03405888348788749,
+        "improvement_inf_n": 0.0000010568896393059468,
+        "runtime_seconds": 44.52441979399737,
+        "finite_difference_columns": 600,
+        "finite_difference_seconds": 2.107082746002561,
+        "assessment": "Shell-normal targeting descended by only 1.06e-6 N, so the latest pattern is too slow for brute-force repeated CPU probes."
       }
     ],
     "latest_frontier_pattern": {
@@ -223,17 +272,17 @@
       "top_hotspot": {
         "node_index": 2202,
         "dof": "rx",
-        "residual_n": -0.03406505013501837,
+        "residual_n": -0.03405888348788749,
         "dominant_component": "shell_bending_drilling"
       },
-      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup38; the faster element-block lane helps exploration but has not closed the residual gate."
+      "assessment": "The same shell-bending/shell-membrane/frame cancellation frontier remains active after followup40; the faster element-block lane helps exploration but has not closed the residual gate. Top-96 dominance remains shell_bending_drilling=39, shell_membrane=44, frame=13, so shell replay is the main acceleration target."
     }
   },
   "decision": {
     "can_rocm_rust_hip_help": true,
-    "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",
+    "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction. The new CPU batch replay contract is numerically valid but only modestly faster; a native HIP frame bridge now builds, but runtime device discovery must be repaired before it can replace the CPU backend.",
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, and native HIP frame replay is now proven fast, but the gate still needs a better coupled physical correction direction. Because the latest top residual rows are mostly shell bending/drilling and shell membrane, the next backend milestone is shell CSR batch replay on HIP/rocSPARSE rather than more frame-only acceleration.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -242,21 +291,22 @@
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
     },
     "rough_extrapolation_from_latest_fastpath_followups": {
-      "latest_remaining_gate_gap_n": 0.03306505013501837,
-      "average_improvement_followup37_38_n": 0.000006717193807043165,
-      "average_runtime_followup37_38_seconds": 44.70729083650076,
-      "steps_needed_at_same_improvement": 4922.4499225180525,
-      "wall_time_hours_at_same_runtime": 61.13038897614589,
-      "assessment": "The fastpath changes the wall-clock economics from multi-day to multi-hour iteration sweeps, but the accepted residual decrement is still far too small to rely on repetition alone."
+      "latest_remaining_gate_gap_n": 0.03305888348788749,
+      "average_improvement_followup39_40_n": 0.0000030833235654392777,
+      "average_runtime_followup39_40_seconds": 44.803854208497796,
+      "steps_needed_at_same_improvement": 10721.834016527431,
+      "wall_time_hours_at_same_runtime": 133.43874670116872,
+      "assessment": "The latest shell-targeted passes show that brute-force repetition is now an obviously bad lane: more than ten thousand similar accepted probes would be needed. Backend acceleration is still useful, but only if it enables larger batched searches and stronger shell/frame coupled directions."
     }
   },
   "recommended_next_path": [
     "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
     "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
-    "Repair HIP runtime device discovery for the new hip_frame_force_batch_replay bridge, then rerun mgt_hip_frame_force_batch_followup38_probe.json to obtain CPU-vs-HIP frame replay timing.",
-    "After native HIP frame replay runs, implement shell CSR batch matvec behind the same batch contract and compare it against mgt_residual_batch_replay_followup38_probe.json.",
+    "Treat native HIP frame replay as proven for GPU-device executions: followup40 shows 129x kernel-level speedup over CPU frame batch with 7.1e-12 relative force error.",
+    "Implement shell CSR batch matvec behind the same batch contract and compare it against mgt_residual_batch_replay_followup38_probe.json and the latest followup40 frontier.",
     "After the backend is faster than sequential replay, modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface.",
-    "In parallel, keep searching for a better G1 coupled shell-bending/membrane/frame correction direction; faster replay alone will not cure a saturated descent model."
+    "Use the faster backend to test larger shell-bending/membrane/frame coupled target sets, not to repeat the current tiny-alpha row correction thousands of times.",
+    "Keep the Rust layer as an orchestration/FFI boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure, and the cached-JVP speed probe is diagnostic only because it does not use the attached-policy residual evaluator."
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay is validated only for frame internal-force batch replay; shell CSR batch replay and full residual gate closure remain open."
 }

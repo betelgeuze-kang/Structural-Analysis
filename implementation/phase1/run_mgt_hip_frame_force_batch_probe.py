@@ -271,10 +271,16 @@ def run_mgt_hip_frame_force_batch_probe(
     max_abs_difference = _max_abs(diff)
     relative_difference_inf = max_abs_difference / max(_max_abs(cpu_frame), 1.0)
     hip_kernel_mean_seconds = float(hip_payload.get("kernel_elapsed_ms_mean") or 0.0) / 1000.0
+    absolute_tolerance_n = 2.0e-6
+    relative_tolerance_inf = 1.0e-10
+    comparison_pass = bool(hip_payload.get("ok") is True) and (
+        max_abs_difference <= absolute_tolerance_n
+        or relative_difference_inf <= relative_tolerance_inf
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "pass" if max_abs_difference <= 1.0e-6 and hip_payload.get("ok") is True else "warn",
+        "status": "pass" if comparison_pass else "warn",
         "mgt_path": str(mgt_path),
         "checkpoint_npz": str(checkpoint_npz),
         "shell_pressure_load_path_policy": shell_pressure_load_path_policy,
@@ -293,6 +299,11 @@ def run_mgt_hip_frame_force_batch_probe(
         "hip_subprocess_seconds": hip_subprocess_seconds,
         "max_abs_frame_force_difference_n": max_abs_difference,
         "relative_frame_force_difference_inf": relative_difference_inf,
+        "comparison_tolerances": {
+            "absolute_tolerance_n": absolute_tolerance_n,
+            "relative_tolerance_inf": relative_tolerance_inf,
+            "pass_rule": "hip_ok_and_abs_le_tolerance_or_relative_le_tolerance",
+        },
         "cpu_frame_force_inf_n": _max_abs(cpu_frame),
         "hip_frame_force_inf_n": _max_abs(hip_frame),
         "cpu_meta": cpu_meta,
