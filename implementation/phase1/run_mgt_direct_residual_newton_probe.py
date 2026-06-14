@@ -638,6 +638,8 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_shell_normal_participation_threshold: float = 0.7071067811865476,
     current_tangent_residual_row_use_residual_only_assembly: bool = False,
     current_tangent_residual_row_batch_alpha_replay: bool = False,
+    current_tangent_residual_row_batch_fd_replay: bool = False,
+    current_tangent_residual_row_batch_fd_replay_chunk_size: int = 64,
     current_tangent_residual_row_allow_negative_alphas: bool = False,
     current_tangent_residual_row_alpha_values: tuple[float, ...] = (
         0.03125,
@@ -2830,6 +2832,10 @@ def run_mgt_direct_residual_newton_probe(
             "batch_alpha_replay": bool(
                 current_tangent_residual_row_batch_alpha_replay
             ),
+            "batch_fd_replay": bool(current_tangent_residual_row_batch_fd_replay),
+            "batch_fd_replay_chunk_size": int(
+                current_tangent_residual_row_batch_fd_replay_chunk_size
+            ),
             "allow_negative_alphas": bool(
                 current_tangent_residual_row_allow_negative_alphas
             ),
@@ -2838,6 +2844,9 @@ def run_mgt_direct_residual_newton_probe(
             "batch_alpha_replay_batch_count": 0,
             "batch_alpha_replay_state_count": 0,
             "batch_alpha_replay_seconds": 0.0,
+            "batch_fd_replay_batch_count": 0,
+            "batch_fd_replay_state_count": 0,
+            "batch_fd_replay_seconds": 0.0,
             "configured_alpha_values": [
                 float(value)
                 for value in current_tangent_residual_row_alpha_values
@@ -2910,18 +2919,41 @@ def run_mgt_direct_residual_newton_probe(
             row_batch_alpha_replay = bool(
                 row_batch_alpha_replay_requested and use_row_residual_only
             )
+            row_batch_fd_replay_requested = bool(
+                current_tangent_residual_row_batch_fd_replay
+            )
+            row_batch_fd_replay = bool(
+                row_batch_fd_replay_requested and use_row_residual_only
+            )
+            row_batch_fd_replay_chunk_size = max(
+                int(current_tangent_residual_row_batch_fd_replay_chunk_size),
+                1,
+            )
             current_tangent_residual_row_correction["batch_alpha_replay_enabled"] = (
                 row_batch_alpha_replay
+            )
+            current_tangent_residual_row_correction["batch_fd_replay_enabled"] = (
+                row_batch_fd_replay
+            )
+            current_tangent_residual_row_correction["batch_fd_replay_chunk_size"] = (
+                row_batch_fd_replay_chunk_size
             )
             if row_batch_alpha_replay_requested and not use_row_residual_only:
                 current_tangent_residual_row_correction[
                     "batch_alpha_replay_disabled_reason"
+                ] = "requires_residual_only_assembly"
+            if row_batch_fd_replay_requested and not use_row_residual_only:
+                current_tangent_residual_row_correction[
+                    "batch_fd_replay_disabled_reason"
                 ] = "requires_residual_only_assembly"
             row_residual_only_eval_count = 0
             row_full_assembly_eval_count = 0
             row_batch_alpha_replay_batch_count = 0
             row_batch_alpha_replay_state_count = 0
             row_batch_alpha_replay_seconds = 0.0
+            row_batch_fd_replay_batch_count = 0
+            row_batch_fd_replay_state_count = 0
+            row_batch_fd_replay_seconds = 0.0
 
             def evaluate_row_candidate(
                 candidate_u: np.ndarray,
@@ -2948,15 +2980,26 @@ def run_mgt_direct_residual_newton_probe(
 
             def evaluate_row_candidates_batch(
                 candidate_us: list[np.ndarray],
+                *,
+                replay_role: str = "alpha",
             ) -> list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]]:
                 nonlocal row_residual_only_eval_count
                 nonlocal row_full_assembly_eval_count
                 nonlocal row_batch_alpha_replay_batch_count
                 nonlocal row_batch_alpha_replay_state_count
                 nonlocal row_batch_alpha_replay_seconds
+                nonlocal row_batch_fd_replay_batch_count
+                nonlocal row_batch_fd_replay_state_count
+                nonlocal row_batch_fd_replay_seconds
                 if not candidate_us:
                     return []
-                if not row_batch_alpha_replay:
+                replay_role = str(replay_role)
+                batch_enabled = (
+                    row_batch_fd_replay
+                    if replay_role == "finite_difference"
+                    else row_batch_alpha_replay
+                )
+                if not batch_enabled:
                     return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
                 states = np.asarray(candidate_us, dtype=np.float64)
                 if states.ndim != 2:
@@ -2990,16 +3033,31 @@ def run_mgt_direct_residual_newton_probe(
                 )
                 rhs = np.asarray(f_ext[free], dtype=np.float64)
                 row_residual_only_eval_count += int(states.shape[0])
-                row_batch_alpha_replay_batch_count += 1
-                row_batch_alpha_replay_state_count += int(states.shape[0])
-                row_batch_alpha_replay_seconds += elapsed
+                if replay_role == "finite_difference":
+                    row_batch_fd_replay_batch_count += 1
+                    row_batch_fd_replay_state_count += int(states.shape[0])
+                    row_batch_fd_replay_seconds += elapsed
+                else:
+                    row_batch_alpha_replay_batch_count += 1
+                    row_batch_alpha_replay_state_count += int(states.shape[0])
+                    row_batch_alpha_replay_seconds += elapsed
                 meta_base = {
                     **batch_meta,
                     "residual_only_assembly": True,
                     "residual_only_free_override": True,
-                    "batch_alpha_replay": True,
-                    "residual_row_batch_alpha_replay": True,
-                    "batch_alpha_replay_seconds": elapsed,
+                    "batch_alpha_replay": bool(replay_role == "alpha"),
+                    "batch_fd_replay": bool(replay_role == "finite_difference"),
+                    "residual_row_batch_alpha_replay": bool(replay_role == "alpha"),
+                    "residual_row_batch_fd_replay": bool(
+                        replay_role == "finite_difference"
+                    ),
+                    "residual_row_batch_replay_role": replay_role,
+                    "batch_alpha_replay_seconds": elapsed
+                    if replay_role == "alpha"
+                    else 0.0,
+                    "batch_fd_replay_seconds": elapsed
+                    if replay_role == "finite_difference"
+                    else 0.0,
                     "batch_size": int(states.shape[0]),
                     "free_dof_count": int(free.size),
                     "shell_operator_cache_size": int(len(shell_operator_cache)),
@@ -3023,7 +3081,12 @@ def run_mgt_direct_residual_newton_probe(
                         rhs,
                         {
                             **meta_base,
-                            "batch_alpha_replay_index": int(index),
+                            "batch_alpha_replay_index": int(index)
+                            if replay_role == "alpha"
+                            else None,
+                            "batch_fd_replay_index": int(index)
+                            if replay_role == "finite_difference"
+                            else None,
                         },
                     )
                     for index in range(int(states.shape[0]))
@@ -3221,6 +3284,12 @@ def run_mgt_direct_residual_newton_probe(
                             fd_stable = True
                             fd_cache_hits_before = fd_cache_hits
                             fd_cache_misses_before = fd_cache_misses
+                            fd_batch_count_before = row_batch_fd_replay_batch_count
+                            fd_batch_state_count_before = row_batch_fd_replay_state_count
+                            fd_batch_seconds_before = row_batch_fd_replay_seconds
+                            missing_fd_entries: list[
+                                tuple[int, int, float, np.ndarray]
+                            ] = []
                             for fd_col, support_col in enumerate(support_cols.tolist()):
                                 support_col = int(support_col)
                                 cached = fd_jvp_cache.get(support_col)
@@ -3232,6 +3301,39 @@ def run_mgt_direct_residual_newton_probe(
                                     )
                                     probe_u = np.asarray(current_u, dtype=np.float64).copy()
                                     probe_u[global_dof] += epsilon
+                                    missing_fd_entries.append(
+                                        (
+                                            int(fd_col),
+                                            int(support_col),
+                                            float(epsilon),
+                                            probe_u,
+                                        )
+                                    )
+                                else:
+                                    fd_cache_hits += 1
+                            for chunk_start in range(
+                                0,
+                                len(missing_fd_entries),
+                                row_batch_fd_replay_chunk_size,
+                            ):
+                                fd_chunk = missing_fd_entries[
+                                    chunk_start : chunk_start
+                                    + row_batch_fd_replay_chunk_size
+                                ]
+                                fd_chunk_results = evaluate_row_candidates_batch(
+                                    [
+                                        np.asarray(probe_u, dtype=np.float64)
+                                        for _fd_col, _support_col, _epsilon, probe_u
+                                        in fd_chunk
+                                    ],
+                                    replay_role="finite_difference",
+                                )
+                                for (
+                                    _fd_col,
+                                    support_col,
+                                    epsilon,
+                                    _probe_u,
+                                ), fd_result in zip(fd_chunk, fd_chunk_results):
                                     (
                                         _fd_k,
                                         _fd_f,
@@ -3239,7 +3341,7 @@ def run_mgt_direct_residual_newton_probe(
                                         fd_residual,
                                         _fd_rhs,
                                         _fd_meta,
-                                    ) = evaluate_row_candidate(probe_u)
+                                    ) = fd_result
                                     if not (
                                         fd_free.shape == current_free.shape
                                         and np.array_equal(fd_free, current_free)
@@ -3247,18 +3349,28 @@ def run_mgt_direct_residual_newton_probe(
                                         fd_stable = False
                                         break
                                     full_jvp = (fd_residual - current_residual) / epsilon
-                                    fd_jvp_cache[support_col] = (
+                                    fd_jvp_cache[int(support_col)] = (
                                         np.asarray(full_jvp, dtype=np.float64),
                                         float(epsilon),
                                     )
                                     fd_cache_misses += 1
-                                else:
+                                if not fd_stable:
+                                    break
+                            if fd_stable:
+                                for fd_col, support_col in enumerate(
+                                    support_cols.tolist()
+                                ):
+                                    cached = fd_jvp_cache.get(int(support_col))
+                                    if cached is None:
+                                        fd_stable = False
+                                        break
                                     full_jvp, epsilon = cached
-                                    fd_cache_hits += 1
-                                fd_submatrix[:, int(fd_col)] = (
-                                    np.asarray(full_jvp, dtype=np.float64)[target_rows]
-                                )
-                                fd_epsilons.append(float(epsilon))
+                                    fd_submatrix[:, int(fd_col)] = (
+                                        np.asarray(full_jvp, dtype=np.float64)[
+                                            target_rows
+                                        ]
+                                    )
+                                    fd_epsilons.append(float(epsilon))
                             jacobian_meta.update(
                                 {
                                     "source": "finite_difference_residual",
@@ -3280,6 +3392,24 @@ def run_mgt_direct_residual_newton_probe(
                                         fd_cache_misses - fd_cache_misses_before
                                     ),
                                     "finite_difference_cache_size": int(len(fd_jvp_cache)),
+                                    "finite_difference_batch_replay": bool(
+                                        row_batch_fd_replay
+                                    ),
+                                    "finite_difference_batch_chunk_size": int(
+                                        row_batch_fd_replay_chunk_size
+                                    ),
+                                    "finite_difference_batch_count": int(
+                                        row_batch_fd_replay_batch_count
+                                        - fd_batch_count_before
+                                    ),
+                                    "finite_difference_batch_state_count": int(
+                                        row_batch_fd_replay_state_count
+                                        - fd_batch_state_count_before
+                                    ),
+                                    "finite_difference_batch_seconds": float(
+                                        row_batch_fd_replay_seconds
+                                        - fd_batch_seconds_before
+                                    ),
                                 }
                             )
                             if not fd_stable or len(fd_epsilons) != int(support_cols.size):
@@ -3822,6 +3952,9 @@ def run_mgt_direct_residual_newton_probe(
                         row_batch_alpha_replay_state_count
                     ),
                     "batch_alpha_replay_seconds": float(row_batch_alpha_replay_seconds),
+                    "batch_fd_replay_batch_count": int(row_batch_fd_replay_batch_count),
+                    "batch_fd_replay_state_count": int(row_batch_fd_replay_state_count),
+                    "batch_fd_replay_seconds": float(row_batch_fd_replay_seconds),
                     "residual_descent": bool(
                         best_candidate_row
                         and float(best_candidate_row["direct_residual_inf_n"])
@@ -4392,6 +4525,24 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-batch-fd-replay",
+        action="store_true",
+        help=(
+            "Batch replay finite-difference residual-row support-column perturbations "
+            "through the residual-only physical internal-force batch path. Requires "
+            "--current-tangent-residual-row-use-residual-only-assembly."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-batch-fd-replay-chunk-size",
+        type=int,
+        default=64,
+        help=(
+            "Maximum finite-difference perturbation states per residual-row batch replay "
+            "chunk."
+        ),
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-ridge-factor",
         type=float,
         default=0.0,
@@ -4682,6 +4833,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_batch_alpha_replay=(
             args.current_tangent_residual_row_batch_alpha_replay
+        ),
+        current_tangent_residual_row_batch_fd_replay=(
+            args.current_tangent_residual_row_batch_fd_replay
+        ),
+        current_tangent_residual_row_batch_fd_replay_chunk_size=(
+            args.current_tangent_residual_row_batch_fd_replay_chunk_size
         ),
         current_tangent_residual_row_allow_negative_alphas=(
             args.current_tangent_residual_row_allow_negative_alphas
