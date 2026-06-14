@@ -1,0 +1,71 @@
+{
+  "schema_version": "mgt-direct-residual-hip-frontier-component-scaled-summary.v1",
+  "generated_at": "2026-06-14T16:50:30+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup73_frontier_probe.json",
+  "residual_gate_n": 0.001,
+  "code_change": {
+    "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+    "argument": "--current-tangent-residual-row-frontier-component-scale-mode",
+    "modes": [
+      "none",
+      "dominant_component_magnitude",
+      "total_component_magnitude"
+    ],
+    "behavior": "Optionally scales frontier_component_rows target equations by dominant or total component force magnitude before local least-squares direction construction."
+  },
+  "followup79_dominant_component_scaled": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_scaled_followup79_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.033465481263974306,
+    "accepted_improvement_inf_n": 0,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 192,
+    "frontier_component_scale_mode": "dominant_component_magnitude",
+    "row_equation_weight_range": {
+      "min_weight": 0.001357703239262657,
+      "max_weight": 1
+    },
+    "best_candidate": {
+      "target_row_count": 15,
+      "support_column_count": 1,
+      "support_size": 36,
+      "alpha": 0.00000390625,
+      "direction_sign": 1,
+      "direct_residual_inf_n": 0.033465487772900815,
+      "improvement_inf_n": -6.508926508885793e-9
+    }
+  },
+  "followup80_total_component_scaled": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_frontier_component_total_scaled_followup80_probe.json",
+    "accepted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "final_direct_residual_inf_n": 0.033465481263974306,
+    "accepted_improvement_inf_n": 0,
+    "stop_reason": "no_residual_descent",
+    "trial_row_count": 192,
+    "frontier_component_scale_mode": "total_component_magnitude",
+    "row_equation_weight_range": {
+      "min_weight": 0.001357703239262657,
+      "max_weight": 1
+    },
+    "best_candidate": {
+      "target_row_count": 15,
+      "support_column_count": 1,
+      "support_size": 36,
+      "alpha": 0.00000390625,
+      "direction_sign": 1,
+      "direct_residual_inf_n": 0.033465487772900815,
+      "improvement_inf_n": -6.508926508885793e-9
+    }
+  },
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.033465481263974306,
+    "remaining_residual_margin_to_gate_n": 0.032465481263974305
+  },
+  "assessment": "Dominant-component and total-component equation scaling both no-descend from the followup75 checkpoint. The new scaling metadata confirms that high-magnitude frame/shell cancellation rows were downweighted, but the existing local row least-squares direction still does not reduce the physical residual. Target selection and target-equation scaling are now insufficient for this plateau.",
+  "next_solver_step": "Move to a stronger direction constructor or engine step: component-block residual/JVP basis vectors with explicit per-component displacement normalization, or persistent Rust/HIP resident residual/JVP replay to make broader signed subspace searches practical.",
+  "claim_boundary": "Controller scaling and no-descent evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

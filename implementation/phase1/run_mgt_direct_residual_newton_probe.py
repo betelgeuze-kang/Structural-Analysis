@@ -372,9 +372,62 @@ def _select_frontier_component_rows(
                 "dof": row.get("dof"),
                 "dominant_component": str(row.get("dominant_component", "unknown")),
                 "residual_n": float(row.get("residual_n", 0.0)),
+                "component_values_n": row.get("component_values_n")
+                if isinstance(row.get("component_values_n"), dict)
+                else {},
             }
             for row in selected
         ],
+    }
+
+
+def _frontier_component_row_weights(
+    target_meta: dict[str, Any],
+    *,
+    mode: str,
+) -> tuple[np.ndarray | None, dict[str, Any]]:
+    scale_mode = str(mode).strip()
+    if scale_mode in {"", "none"}:
+        return None, {"mode": "none", "enabled": False}
+    selected_rows = target_meta.get("selected_frontier_rows")
+    if not isinstance(selected_rows, list) or not selected_rows:
+        return None, {
+            "mode": scale_mode,
+            "enabled": False,
+            "reason": "frontier_rows_unavailable",
+        }
+    weights: list[float] = []
+    denominators: list[float] = []
+    for row in selected_rows:
+        if not isinstance(row, dict):
+            denominators.append(1.0)
+            weights.append(1.0)
+            continue
+        component_values = row.get("component_values_n")
+        component = str(row.get("dominant_component", "unknown"))
+        if not isinstance(component_values, dict):
+            component_values = {}
+        if scale_mode == "dominant_component_magnitude":
+            denominator = abs(float(component_values.get(component, 0.0)))
+        elif scale_mode == "total_component_magnitude":
+            denominator = sum(abs(float(value)) for value in component_values.values())
+        else:
+            denominator = 1.0
+        denominator = max(float(denominator), 1.0)
+        denominators.append(denominator)
+        weights.append(1.0 / denominator)
+    if not weights:
+        return None, {
+            "mode": scale_mode,
+            "enabled": False,
+            "reason": "empty_weight_vector",
+        }
+    return np.asarray(weights, dtype=np.float64), {
+        "mode": scale_mode,
+        "enabled": True,
+        "min_weight": float(min(weights)),
+        "max_weight": float(max(weights)),
+        "denominators": [float(value) for value in denominators],
     }
 
 
@@ -733,6 +786,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_target_counts: tuple[int, ...] = (1, 2),
     current_tangent_residual_row_target_mode: str = "largest_rows",
     current_tangent_residual_row_frontier_probe_json: Path | None = None,
+    current_tangent_residual_row_frontier_component_scale_mode: str = "none",
     current_tangent_residual_row_element_neighbor_depth: int = 0,
     current_tangent_residual_row_support_column_counts: tuple[int, ...] = (4, 8),
     current_tangent_residual_row_support_expansion_depth: int = 0,
@@ -2915,6 +2969,9 @@ def run_mgt_direct_residual_newton_probe(
             ),
             "target_row_counts": [int(value) for value in current_tangent_residual_row_target_counts],
             "target_mode": str(current_tangent_residual_row_target_mode),
+            "frontier_component_scale_mode": str(
+                current_tangent_residual_row_frontier_component_scale_mode
+            ),
             "element_neighbor_depth": int(
                 current_tangent_residual_row_element_neighbor_depth
             ),
@@ -3006,6 +3063,18 @@ def run_mgt_direct_residual_newton_probe(
             current_tangent_residual_row_correction[
                 "frontier_component_row_count"
             ] = int(len(frontier_component_rows))
+            frontier_component_scale_mode = str(
+                current_tangent_residual_row_frontier_component_scale_mode
+            ).strip()
+            if frontier_component_scale_mode not in {
+                "none",
+                "dominant_component_magnitude",
+                "total_component_magnitude",
+            }:
+                frontier_component_scale_mode = "none"
+            current_tangent_residual_row_correction[
+                "frontier_component_scale_mode"
+            ] = frontier_component_scale_mode
             element_neighbor_depth = max(
                 int(current_tangent_residual_row_element_neighbor_depth),
                 0,
@@ -3685,32 +3754,48 @@ def run_mgt_direct_residual_newton_probe(
                                 continue
                             submatrix = fd_submatrix
                         rhs_rows = -current_residual[target_rows]
+                        row_equation_weights: np.ndarray | None = None
+                        row_equation_scale_meta: dict[str, Any] = {
+                            "mode": "none",
+                            "enabled": False,
+                        }
+                        if target_mode == "frontier_component_rows":
+                            (
+                                row_equation_weights,
+                                row_equation_scale_meta,
+                            ) = _frontier_component_row_weights(
+                                target_meta,
+                                mode=frontier_component_scale_mode,
+                            )
                         solve_started = time.perf_counter()
                         ridge_lambda = 0.0
                         solve_matrix = submatrix
                         solve_rhs = rhs_rows
+                        if row_equation_weights is not None:
+                            solve_matrix = submatrix * row_equation_weights[:, None]
+                            solve_rhs = rhs_rows * row_equation_weights
                         if row_ridge_factor > 0.0 and submatrix.size:
                             singular_probe = np.linalg.svd(
-                                submatrix,
+                                solve_matrix,
                                 compute_uv=False,
                             )
                             spectral_scale = (
                                 float(np.max(singular_probe))
                                 if singular_probe.size
-                                else float(np.linalg.norm(submatrix))
+                                else float(np.linalg.norm(solve_matrix))
                             )
                             ridge_lambda = row_ridge_factor * max(spectral_scale, 1.0)
                             if ridge_lambda > 0.0:
                                 solve_matrix = np.vstack(
                                     [
-                                        submatrix,
+                                        solve_matrix,
                                         np.eye(int(support_cols.size), dtype=np.float64)
                                         * ridge_lambda,
                                     ]
                                 )
                                 solve_rhs = np.concatenate(
                                     [
-                                        rhs_rows,
+                                        solve_rhs,
                                         np.zeros(int(support_cols.size), dtype=np.float64),
                                     ]
                                 )
@@ -4093,6 +4178,7 @@ def run_mgt_direct_residual_newton_probe(
                                     "pre_node_block_support_size": pre_node_block_support_size,
                                     "support_size": int(support_cols.size),
                                     "jacobian": jacobian_meta,
+                                    "row_equation_scale": row_equation_scale_meta,
                                     "ridge_factor": float(row_ridge_factor),
                                     "ridge_lambda": float(ridge_lambda),
                                     "ridge_augmented": bool(ridge_lambda > 0.0),
@@ -4759,6 +4845,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-frontier-component-scale-mode",
+        choices=("none", "dominant_component_magnitude", "total_component_magnitude"),
+        default="none",
+        help=(
+            "Optional row-equation scaling for frontier_component_rows. "
+            "The component magnitude modes divide each target equation by the "
+            "selected row's dominant or total component force scale."
+        ),
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-shell-normal-participation-threshold",
         type=float,
         default=0.7071067811865476,
@@ -5117,6 +5213,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_frontier_probe_json=(
             args.current_tangent_residual_row_frontier_probe_json
+        ),
+        current_tangent_residual_row_frontier_component_scale_mode=(
+            args.current_tangent_residual_row_frontier_component_scale_mode
         ),
         current_tangent_residual_row_element_neighbor_depth=(
             args.current_tangent_residual_row_element_neighbor_depth
