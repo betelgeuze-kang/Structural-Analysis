@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-rocm-rust-hip-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T09:25:44+09:00",
+  "generated_at": "2026-06-14T09:34:07+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP engines materially speed up the current G1 residual-gate push?",
   "current_attached_policy_frontier_reassessment": {
@@ -38,11 +38,11 @@
       "assessment": "FD-JVP and residual replay are material wall-time costs, but the accepted direction is micro-descent; backend throughput alone cannot make this correction family reach the 0.001 N gate quickly."
     },
     "post_reassessment_frontier_advances": {
-      "generated_at": "2026-06-14T09:25:44+09:00",
-      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup31_final_checkpoint.npz",
-      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_rows_followup31_frontier_probe.json",
-      "latest_direct_residual_inf_n": 0.03411068105237619,
-      "latest_direct_relative_residual_inf": 3.931550727921921e-06,
+      "generated_at": "2026-06-14T09:34:07+09:00",
+      "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_followup32_frontier_probe.json",
+      "latest_direct_residual_inf_n": 0.03410235276851836,
+      "latest_direct_relative_residual_inf": 3.930590821245965e-06,
       "advances": [
         {
           "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_patch_neighbor1_probe.json",
@@ -427,6 +427,23 @@
           "residual_only_eval_count": 358,
           "assessment": "Switching from saturated scalar largest rows and shell-bending rows to shell-normal rows produced a tiny accepted negative-alpha descent, confirming component-local correction is still monotonic but practically saturated at this frontier.",
           "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_rows_followup31_frontier_probe.json"
+        },
+        {
+          "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_probe.json",
+          "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+          "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_followup32_frontier_probe.json",
+          "target_mode": "residual_element_blocks",
+          "support_selection": "residual_weighted",
+          "support_expansion_depth": 0,
+          "target_row_count": 168,
+          "configured_target_count": 4,
+          "support_size": 144,
+          "base_residual_inf_n": 0.03411068105237619,
+          "final_residual_inf_n": 0.03410235276851836,
+          "improvement_inf_n": 8.328283857828023e-06,
+          "runtime_seconds": 236.25546567300262,
+          "residual_only_eval_count": 299,
+          "assessment": "After scalar largest-row and single-component shell selectors saturated, the coupled residual_element_blocks selector reopened a measurable descent with the same 144 FD support cap."
         }
       ],
       "latest_top_residual_summary": {
@@ -439,10 +456,10 @@
         "largest_row": {
           "node_index": 2202,
           "dof": "rx",
-          "residual_n": -0.03411068105237619,
+          "residual_n": -0.03410235276851836,
           "dominant_component": "shell_bending_drilling",
-          "frame_component_n": 0.4926244401461454,
-          "shell_bending_drilling_component_n": -0.5267351211985216,
+          "frame_component_n": 0.49262449182625245,
+          "shell_bending_drilling_component_n": -0.5267268445947708,
           "shell_membrane_component_n": 0.0,
           "external_load_n": 0.0
         }
@@ -628,7 +645,7 @@
           "assessment": "Shell-bending/drilling component rows, despite matching the top residual component, produced no residual descent and worsened even the best negative-alpha candidate."
         }
       ],
-      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; shell-bending/drilling and shell-normal targeted passes then lowered the frontier to 0.0369241239 N. Shell-only and frame-only element-block counterprobes both worsened residual, but scalar largest-row targets with one-hop residual-weighted mixed support reopened descent. Widening that lane to 12 target rows and 120 then 144 FD support DOFs advanced the frontier to 0.0348837471 N; over-expanding to 168 support DOFs failed, while returning to 144 support with an 8-row target and fine alpha sweep advanced the frontier to 0.0346521517 N. Switching row composition back to 12 largest rows at the same 144 support reopened a 5.41e-04 N descent to 0.0341107118 N, but followup27/28/29 and shell-bending/normal component probes show the local row-correction families are now practically saturated at 0.0341106811 N. The next G1 push should leave narrow local row polishing and move to a broader coupled membrane/frame/equilibrium correction or a batched residual-JVP implementation that can explore broader support without spending several minutes per no-descent probe.",
+      "assessment": "The newest evidence reinforces that target-family quality dominates raw backend throughput. Compact shell-normal and node-score block selectors saturated, direct largest-row targeting with one-hop/node-block support produced one strong descent then saturated, and compact largest-row support produced three accepted residual-only descents before tapering. Broadening the residual-only largest-row family to 16 rows and 72 support DOFs reopened a larger descent to 0.0373011565 N, but repeating the broadened family, switching support selection, and switching to residual_node_blocks all tapered to near-zero descents. Residual element-block targeting reopened descent to 0.0371004447 N; shell-bending/drilling and shell-normal targeted passes then lowered the frontier to 0.0369241239 N. Shell-only and frame-only element-block counterprobes both worsened residual, but scalar largest-row targets with one-hop residual-weighted mixed support reopened descent. Widening that lane to 12 target rows and 120 then 144 FD support DOFs advanced the frontier to 0.0348837471 N; over-expanding to 168 support DOFs failed, while returning to 144 support with an 8-row target and fine alpha sweep advanced the frontier to 0.0346521517 N. Switching row composition back to 12 largest rows at the same 144 support reopened a 5.41e-04 N descent to 0.0341107118 N, but followup27/28/29 and shell-bending/normal component probes showed the local row-correction families were practically saturated. Coupled residual_element_blocks then reopened an 8.33e-06 N descent to 0.0341023528 N. The next G1 push should continue coupled element-block correction and avoid narrow scalar/component repeats unless the frontier composition changes materially.",
       "speed_bottleneck_assessment": {
         "generated_at": "2026-06-14T09:02:07+09:00",
         "latest_successful_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target12_followup26_probe.json",
@@ -659,9 +676,9 @@
         "generated_at": "2026-06-14T09:25:44+09:00",
         "starting_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target12_followup26_final_checkpoint.npz",
         "starting_residual_inf_n": 0.03411071179650482,
-        "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup31_final_checkpoint.npz",
-        "latest_residual_inf_n": 0.03411068105237619,
-        "net_improvement_inf_n": 3.074412863179887e-08,
+        "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+        "latest_residual_inf_n": 0.03410235276851836,
+        "net_improvement_inf_n": 8.359027986459822e-06,
         "counterprobes": [
           "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target12_followup27_probe.json",
           "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target8_followup28_probe.json",
@@ -671,7 +688,29 @@
           "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_mixed_largest_rows_expand1_target16_followup29_probe.json",
           "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_rows_followup31_probe.json"
         ],
-        "assessment": "After the material followup26 drop, scalar largest-row row counts 12 and 8 produced no descent, target16 produced only 9.78e-10 N, shell-bending rows produced no descent, and shell-normal rows produced only 2.98e-08 N. The local FD row-correction families around support144 are now practically saturated at 0.0341106811 N."
+        "assessment": "After the material followup26 drop, scalar largest-row row counts 12 and 8 produced no descent, target16 produced only 9.78e-10 N, shell-bending rows produced no descent, and shell-normal rows produced only 2.98e-08 N. A coupled residual_element_blocks pass then reopened a measurable 8.33e-06 N descent to 0.0341023528 N, so the next practical lane is coupled element-block continuation rather than another scalar/component-local repeat.",
+        "coupled_element_block_reopened_evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_probe.json"
+      },
+      "post_followup32_element_block_reopen_assessment": {
+        "generated_at": "2026-06-14T09:34:07+09:00",
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_probe.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_followup32_frontier_probe.json",
+        "base_residual_inf_n": 0.03411068105237619,
+        "final_residual_inf_n": 0.03410235276851836,
+        "improvement_inf_n": 8.328283857828023e-06,
+        "runtime_seconds": 236.25546567300262,
+        "target_mode": "residual_element_blocks",
+        "target_row_count": 168,
+        "configured_target_count": 4,
+        "support_size": 144,
+        "best_alpha": 0.000244140625,
+        "top_row_dominant_component_counts": {
+          "shell_bending_drilling": 40,
+          "shell_membrane": 43,
+          "frame": 13
+        },
+        "assessment": "The top96 component mix stayed shell_membrane/shell_bending/frame, but coupled element blocks shifted the top shell-bending and membrane rows downward together. Continue this lane with careful alpha/support variation before attempting another narrow local selector."
       }
     },
     "current_rocm_probe_refresh": {
@@ -739,13 +778,13 @@
     "decision": {
       "short_answer": "Use ROCm/HIP for batched residual/JVP acceleration, but do not expect a simple sparse-solver or Rust backend swap to close G1.",
       "recommended_next_path": [
-        "Treat the followup26 scalar row lane as saturated after followup27/28/29 and component followup30/31.",
-        "Move next to a broader coupled residual_element_blocks or membrane/frame mixed selector rather than another narrow largest-row repeat.",
+        "Continue from the followup32 checkpoint at 0.0341023528 N with coupled residual_element_blocks.",
+        "Vary alpha/support around the successful configured_target_count=4, actual 168-row, support144 lane before returning to scalar largest rows.",
         "Keep finite-difference residual-JVP for direction quality, but prototype GPU batching before attempting substantially wider support sweeps.",
         "Do not promote hipSPARSE ILU0-BiCGStab for G1; prior focused evidence was unstable.",
         "Do not spend the immediate G1 push wiring Rust into full MGT 3D frame-shell residual assembly unless the goal changes to backend productization rather than residual-gate closure."
       ],
-      "overall_assessment": "At the current 0.0341106811 N frontier, local FD row-correction selectors are monotonic only at nano-Newton scale. The next credible G1 move is a broader coupled physical correction model, preferably with GPU-batched residual/JVP evaluation to avoid 140-275 second no-descent probes."
+      "overall_assessment": "At the current 0.0341023528 N frontier, the scalar largest-row and single-component shell selectors are saturated, but coupled residual_element_blocks remains live. The fastest path is to iterate that coupled physical correction while designing GPU-batched residual/JVP evaluation for broader sweeps."
     },
     "followup26_speedup_decision": {
       "generated_at": "2026-06-14T09:02:07+09:00",
