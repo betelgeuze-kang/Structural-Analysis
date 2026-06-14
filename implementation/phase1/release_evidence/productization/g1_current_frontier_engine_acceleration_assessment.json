@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T10:26:51+09:00",
+  "generated_at": "2026-06-14T10:36:33+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -127,6 +127,8 @@
       "implementation/phase1/mgt_equilibrium_step_assembly.py",
       "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
       "implementation/phase1/run_mgt_frame_force_fastpath_probe.py",
+      "implementation/phase1/hip_frame_force_batch_replay.cpp",
+      "implementation/phase1/run_mgt_hip_frame_force_batch_probe.py",
       "implementation/phase1/run_mgt_residual_batch_replay_probe.py"
     ],
     "validation": {
@@ -149,9 +151,15 @@
       "batch_residual_replay_max_abs_difference_n": 0.00000005681070547325362,
       "batch_residual_replay_sequential_mean_seconds": 0.19852020833301745,
       "batch_residual_replay_batch_mean_seconds": 0.17049725999944107,
-      "batch_residual_replay_speedup_factor": 1.1643601095622782
+      "batch_residual_replay_speedup_factor": 1.1643601095622782,
+      "native_hip_frame_force_batch_probe": "implementation/phase1/release_evidence/productization/mgt_hip_frame_force_batch_followup38_probe.json",
+      "native_hip_frame_force_batch_binary": "implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
+      "native_hip_frame_force_batch_build_ok": true,
+      "native_hip_frame_force_batch_status": "fail",
+      "native_hip_frame_force_batch_failure": "hipGetDeviceCount: no ROCm-capable device is detected",
+      "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now builds against the vendored ROCm device libraries, but this managed runtime currently exposes no HIP device to the executable even though rocminfo sees gfx1030. The next production-lane step is HIP runtime/device permission repair, then rerun the same probe for CPU-vs-HIP frame replay comparison."
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The CPU batch path is only 1.16x faster on a 64-state followup38 probe, so it is mainly the host-side contract for a Rust/HIP backend rather than the final acceleration answer."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. A native HIP frame-force batch bridge has been added and builds, but HIP runtime device discovery currently fails in this managed execution context. The CPU batch path is only 1.16x faster on a 64-state followup38 probe, so it remains mainly the host-side contract for the HIP backend rather than the final acceleration answer."
   },
   "fastpath_frontier_advances": {
     "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
@@ -225,7 +233,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction. The new CPU batch replay contract is numerically valid but only modestly faster, which keeps the priority on a native HIP/Rust implementation of the same interface.",
+    "reason": "The current accepted correction family is also algorithmically saturated. Engine throughput can shrink wall time, but the gate still needs a better coupled physical correction direction. The new CPU batch replay contract is numerically valid but only modestly faster; a native HIP frame bridge now builds, but runtime device discovery must be repaired before it can replace the CPU backend.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 0.000008328283857828023,
       "accepted_probe_seconds": 236.25546567300262,
@@ -245,7 +253,8 @@
   "recommended_next_path": [
     "Do not spend the next G1 push on wider CPU finite-difference support sweeps.",
     "Use the validated CPU batch residual replay contract as the boundary for a native Rust/HIP backend; CPU batching alone is only a modest acceleration.",
-    "Implement the HIP backend first for prepacked frame force recovery and shell CSR batch matvec, then compare it against mgt_residual_batch_replay_followup38_probe.json.",
+    "Repair HIP runtime device discovery for the new hip_frame_force_batch_replay bridge, then rerun mgt_hip_frame_force_batch_followup38_probe.json to obtain CPU-vs-HIP frame replay timing.",
+    "After native HIP frame replay runs, implement shell CSR batch matvec behind the same batch contract and compare it against mgt_residual_batch_replay_followup38_probe.json.",
     "After the backend is faster than sequential replay, modify the row-correction driver to submit support-column perturbations and alpha candidates through the batch interface.",
     "In parallel, keep searching for a better G1 coupled shell-bending/membrane/frame correction direction; faster replay alone will not cure a saturated descent model."
   ],

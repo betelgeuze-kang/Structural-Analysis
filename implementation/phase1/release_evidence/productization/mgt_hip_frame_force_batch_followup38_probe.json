@@ -1,0 +1,59 @@
+{
+  "schema_version": "mgt-hip-frame-force-batch-probe.v1",
+  "generated_at": "2026-06-14T01:37:42.786853+00:00",
+  "status": "fail",
+  "reason": "hip_frame_force_bridge_output_missing",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_final_checkpoint.npz",
+  "batch_size": 64,
+  "dof_count": 78282,
+  "frame_element_count": 5564,
+  "build": {
+    "attempted": true,
+    "ok": true,
+    "binary": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
+    "source": "/home/betelgeuze/건축구조분석/implementation/phase1/hip_frame_force_batch_replay.cpp",
+    "command": [
+      "/opt/rocm/bin/hipcc",
+      "-O3",
+      "-std=c++17",
+      "--offload-arch=gfx1030",
+      "--rocm-device-lib-path=/home/betelgeuze/건축구조분석/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/hip_frame_force_batch_replay.cpp",
+      "-o",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "",
+    "seconds": 1.3634779370004253
+  },
+  "hip": {
+    "command": [
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
+      "--dofs",
+      "/tmp/mgt_hip_frame_batch_vzses76i/dofs.i64",
+      "--stiffness",
+      "/tmp/mgt_hip_frame_batch_vzses76i/stiffness.f64",
+      "--states",
+      "/tmp/mgt_hip_frame_batch_vzses76i/states.f64",
+      "--output",
+      "/tmp/mgt_hip_frame_batch_vzses76i/hip_frame_force.f64",
+      "--element-count",
+      "5564",
+      "--n-dof",
+      "78282",
+      "--batch-size",
+      "64",
+      "--reps",
+      "20"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "{\"ok\":false,\"error\":\"hipGetDeviceCount: no ROCm-capable device is detected\"}\n",
+    "subprocess_seconds": 0.07999192799979937
+  },
+  "hip_subprocess_seconds": 0.07999192799979937,
+  "runtime_seconds": 26.954758547999518,
+  "claim_boundary": "HIP bridge execution failed before output comparison; no G1 gate claim."
+}
