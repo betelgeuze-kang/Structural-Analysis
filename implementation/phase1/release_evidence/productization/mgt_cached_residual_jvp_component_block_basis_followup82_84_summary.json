@@ -1,0 +1,65 @@
+{
+  "schema_version": "mgt-cached-residual-jvp-component-block-basis-summary.v1",
+  "generated_at": "2026-06-14T17:08:31+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_nodeblock_followup75_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "residual_gate_n": 0.001,
+  "code_change": {
+    "script": "implementation/phase1/run_mgt_cached_residual_jvp_batch_probe.py",
+    "features": [
+      "Adds an explicit shell_pressure_load_path_policy argument so cached residual/JVP probes can match the current attached-components G1 frontier contract.",
+      "Adds component-block residual/JVP basis directions grouped by dominant component, component+dof, or dof.",
+      "Adds per-direction gate-limited alpha generation and a minimum relative improvement filter to avoid checkpoint promotion on numerical-floor residual changes."
+    ]
+  },
+  "followup82_dominant_component_basis": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_block_basis_followup82_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_block_basis_followup82_probe.npz",
+    "promoted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "best_direct_residual_inf_n": 0.033465481263803776,
+    "best_improvement_inf_n": 1.7053025658242404e-13,
+    "best_direction_source": "component_block:shell_membrane",
+    "component_block_key_mode": "dominant_component",
+    "component_block_count": 3,
+    "direction_count": 5,
+    "assessment": "Valid attached-load-path rerun. Dominant-component basis only finds a numerical-floor 1.71e-13 N improvement, so no checkpoint is promoted."
+  },
+  "followup83_component_dof_basis": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_followup83_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_followup83_probe.npz",
+    "promoted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "best_direct_residual_inf_n": 0.03346548126238269,
+    "best_improvement_inf_n": 1.5916157281026244e-12,
+    "best_direction_source": "component_block:frame:rx",
+    "component_block_key_mode": "dominant_component_dof",
+    "component_block_count": 14,
+    "direction_count": 16,
+    "candidate_count": 680,
+    "assessment": "Component+dof basis with wider support and lower ridge also only reaches numerical-floor descent."
+  },
+  "followup84_component_dof_gate_alpha_basis": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_gate_alpha_followup84_probe.json",
+    "basis_npz": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_component_dof_block_basis_gate_alpha_followup84_probe.npz",
+    "promoted": false,
+    "base_direct_residual_inf_n": 0.033465481263974306,
+    "best_direct_residual_inf_n": 0.03346548126238269,
+    "best_improvement_inf_n": 1.5916157281026244e-12,
+    "best_direction_source": "component_block:frame:rx",
+    "component_block_key_mode": "dominant_component_dof",
+    "component_block_count": 14,
+    "direction_count": 16,
+    "candidate_count": 736,
+    "max_dynamic_alpha": 1000000.0,
+    "assessment": "Allowing gate-limited dynamic alphas up to 1e6 does not improve beyond followup83, confirming the issue is not merely alpha clipping."
+  },
+  "latest_residual_state": {
+    "direct_residual_inf_n": 0.033465481263974306,
+    "remaining_residual_margin_to_gate_n": 0.032465481263974305
+  },
+  "assessment": "Component-block residual/JVP basis construction is now implemented and validated against the current attached-components frontier checkpoint. Followup82-84 do not open a material descent path; every positive result is numerical-floor scale and below the promotion floor. The current local row, current global Krylov, and current cached component-block JVP basis families are all saturated at the 0.03346548 N plateau.",
+  "next_solver_step": "Stop spending cycles on wider variants of the same row/JVP basis family. Move to a physical residual/Jacobian consistency audit at the plateau: component force cancellation, shell pressure load-path consistency, material tangent/state update, and full-load path formulation before production HIP residency can close the actual residual gate.",
+  "claim_boundary": "This is component-block residual/JVP basis evidence only. It does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

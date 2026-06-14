@@ -118,6 +118,226 @@ def _select_support_columns(
     }
 
 
+def _component_block_key(row: dict[str, Any], *, key_mode: str) -> str:
+    dominant = str(row.get("dominant_component") or "none")
+    dof = str(row.get("dof") or "none")
+    mode = str(key_mode or "dominant_component")
+    if mode == "dominant_component_dof":
+        return f"{dominant}:{dof}"
+    if mode == "dof":
+        return dof
+    return dominant
+
+
+def _candidate_alpha_values(
+    *,
+    base_alpha_values: tuple[float, ...],
+    direction: np.ndarray,
+    base_u: np.ndarray,
+    allow_negative_alphas: bool,
+    include_gate_limited_alpha: bool,
+    relative_increment_tolerance: float,
+    max_dynamic_alpha: float,
+) -> list[float]:
+    values = [float(value) for value in base_alpha_values if np.isfinite(float(value))]
+    if include_gate_limited_alpha:
+        direction_inf = _max_abs(direction)
+        if direction_inf > 0.0:
+            max_abs_u = max(_max_abs(base_u), 1.0e-12)
+            gate_alpha = (
+                0.95
+                * float(relative_increment_tolerance)
+                * max_abs_u
+                / direction_inf
+            )
+            if np.isfinite(gate_alpha) and gate_alpha > 0.0:
+                limited_alpha = min(float(gate_alpha), max(float(max_dynamic_alpha), 1.0e-30))
+                values.extend([limited_alpha, 0.5 * limited_alpha, 0.1 * limited_alpha])
+    positive_values = sorted(
+        {
+            float(value)
+            for value in values
+            if np.isfinite(float(value)) and float(value) > 0.0
+        },
+        reverse=True,
+    )
+    if not allow_negative_alphas:
+        return positive_values
+    signed_values = positive_values + [-value for value in positive_values]
+    return sorted(set(signed_values), reverse=True)
+
+
+def _build_component_block_basis_directions(
+    *,
+    fd_submatrix: np.ndarray,
+    target_rhs: np.ndarray,
+    support_cols: np.ndarray,
+    free: np.ndarray,
+    selected_rows: list[dict[str, Any]],
+    key_mode: str,
+    ridge_factor: float,
+    normalization: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    matrix = np.asarray(fd_submatrix, dtype=np.float64)
+    rhs = np.asarray(target_rhs, dtype=np.float64)
+    supports = np.asarray(support_cols, dtype=np.int64)
+    free_idx = np.asarray(free, dtype=np.int64)
+    if (
+        matrix.ndim != 2
+        or rhs.ndim != 1
+        or matrix.shape[0] != rhs.size
+        or matrix.shape[1] != supports.size
+        or not selected_rows
+    ):
+        return [], {
+            "enabled": True,
+            "ready": False,
+            "reason": "invalid_or_empty_jvp_system",
+        }
+
+    row_count = min(int(matrix.shape[0]), len(selected_rows))
+    groups: dict[str, list[int]] = {}
+    for position, row in enumerate(selected_rows[:row_count]):
+        key = _component_block_key(row, key_mode=key_mode)
+        groups.setdefault(key, []).append(int(position))
+
+    block_rows: list[dict[str, Any]] = []
+    block_coefficients: list[np.ndarray] = []
+    block_actions: list[np.ndarray] = []
+    directions: list[dict[str, Any]] = []
+    normalize = str(normalization or "linf")
+    if normalize not in {"none", "linf"}:
+        normalize = "linf"
+
+    for key, positions in groups.items():
+        group_rows = np.asarray(positions, dtype=np.int64)
+        if group_rows.size == 0:
+            continue
+        block_matrix = matrix[group_rows, :]
+        block_rhs = rhs[group_rows]
+        scaled_matrix, scaled_rhs, column_scales, equilibration_meta = (
+            _equilibrate_lstsq_system(block_matrix, block_rhs, mode="row_column")
+        )
+        scaled_coeffs, solve_meta = _ridge_coefficients(
+            scaled_matrix,
+            scaled_rhs,
+            ridge_factor=float(ridge_factor),
+        )
+        coeffs = np.asarray(scaled_coeffs, dtype=np.float64) * np.asarray(
+            column_scales,
+            dtype=np.float64,
+        )
+        coeff_inf = _max_abs(coeffs)
+        if coeff_inf <= 0.0:
+            block_rows.append(
+                {
+                    "key": key,
+                    "row_count": int(group_rows.size),
+                    "ready": False,
+                    "reason": "zero_block_correction",
+                    "linear_solve": solve_meta,
+                    "equilibration": equilibration_meta,
+                }
+            )
+            continue
+        normalization_scale = coeff_inf if normalize == "linf" else 1.0
+        basis_coeffs = coeffs / normalization_scale
+        target_action = matrix @ basis_coeffs
+        block_index = len(block_coefficients)
+        block_coefficients.append(np.asarray(basis_coeffs, dtype=np.float64))
+        block_actions.append(np.asarray(target_action, dtype=np.float64))
+        selected_block_rows = [selected_rows[int(index)] for index in group_rows.tolist()]
+        block_meta = {
+            "key": key,
+            "row_count": int(group_rows.size),
+            "ready": True,
+            "basis_index": int(block_index),
+            "normalization": normalize,
+            "normalization_scale": float(normalization_scale),
+            "coefficient_linf_before_normalization": float(coeff_inf),
+            "basis_coefficient_linf": _max_abs(basis_coeffs),
+            "target_action_inf_n": _max_abs(target_action),
+            "linear_solve": solve_meta,
+            "equilibration": equilibration_meta,
+            "target_global_dofs": [
+                int(row.get("global_dof", -1)) for row in selected_block_rows
+            ],
+            "target_dofs": [str(row.get("dof") or "") for row in selected_block_rows],
+            "dominant_components": [
+                str(row.get("dominant_component") or "") for row in selected_block_rows
+            ],
+        }
+        block_rows.append(block_meta)
+        directions.append(
+            {
+                "source": f"component_block:{key}",
+                "support_coefficients": np.asarray(coeffs, dtype=np.float64),
+                "meta": {
+                    **block_meta,
+                    "direction_kind": "component_block_direct",
+                    "coefficient_linf": _max_abs(coeffs),
+                },
+            }
+        )
+
+    if block_coefficients:
+        basis_matrix = np.column_stack(block_actions)
+        scaled_basis, scaled_rhs, basis_column_scales, basis_equilibration = (
+            _equilibrate_lstsq_system(basis_matrix, rhs, mode="row_column")
+        )
+        scaled_gamma, basis_solve_meta = _ridge_coefficients(
+            scaled_basis,
+            scaled_rhs,
+            ridge_factor=float(ridge_factor),
+        )
+        gamma = np.asarray(scaled_gamma, dtype=np.float64) * np.asarray(
+            basis_column_scales,
+            dtype=np.float64,
+        )
+        combined_support_coeffs = np.zeros(int(supports.size), dtype=np.float64)
+        for value, coeffs in zip(gamma.tolist(), block_coefficients, strict=False):
+            combined_support_coeffs += float(value) * np.asarray(coeffs, dtype=np.float64)
+        combined_action = matrix @ combined_support_coeffs
+        combined_residual = combined_action - rhs
+        directions.append(
+            {
+                "source": "component_block_basis_combined_lstsq",
+                "support_coefficients": combined_support_coeffs,
+                "meta": {
+                    "direction_kind": "component_block_basis_combined",
+                    "basis_count": int(len(block_coefficients)),
+                    "basis_keys": [str(row["key"]) for row in block_rows if row.get("ready")],
+                    "basis_gamma": [float(value) for value in gamma.tolist()],
+                    "coefficient_linf": _max_abs(combined_support_coeffs),
+                    "target_action_inf_n": _max_abs(combined_action),
+                    "linear_residual_inf_n": _max_abs(combined_residual),
+                    "linear_residual_l2_n": float(np.linalg.norm(combined_residual))
+                    if combined_residual.size
+                    else 0.0,
+                    "linear_solve": basis_solve_meta,
+                    "equilibration": basis_equilibration,
+                },
+            }
+        )
+
+    metadata = {
+        "enabled": True,
+        "ready": bool(block_coefficients),
+        "key_mode": str(key_mode),
+        "normalization": normalize,
+        "ridge_factor": float(ridge_factor),
+        "target_row_count": int(row_count),
+        "support_size": int(supports.size),
+        "support_global_dofs": [
+            int(free_idx[int(col)]) for col in supports.tolist()
+        ],
+        "block_count": int(len(block_coefficients)),
+        "blocks": block_rows,
+        "direction_count": int(len(directions)),
+    }
+    return directions, metadata
+
+
 def _torch_rocm_lstsq_probe(
     matrix: np.ndarray,
     rhs: np.ndarray,
@@ -172,6 +392,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
     *,
     mgt_path: Path = DEFAULT_MGT,
     checkpoint_npz: Path = DEFAULT_CHECKPOINT,
+    shell_pressure_load_path_policy: str = "all_components",
     output_json: Path | None = DEFAULT_OUT,
     output_npz: Path | None = None,
     output_final_checkpoint_npz: Path | None = None,
@@ -187,6 +408,13 @@ def run_mgt_cached_residual_jvp_batch_probe(
     ridge_factor: float = 1.0e-3,
     alpha_values: tuple[float, ...] = (1.0e-6, 3.0e-7, 1.0e-7, 3.0e-8, 1.0e-8),
     allow_negative_alphas: bool = False,
+    include_gate_limited_alpha: bool = False,
+    max_dynamic_alpha: float = 1.0,
+    min_relative_improvement: float = 0.0,
+    enable_component_block_basis: bool = False,
+    component_block_basis_key_mode: str = "dominant_component",
+    component_block_basis_normalization: str = "linf",
+    component_block_basis_ridge_factor: float | None = None,
     residual_tolerance_n: float = 1.0e-3,
     relative_increment_tolerance: float = 1.0e-4,
     enable_torch_rocm_lstsq: bool = False,
@@ -196,6 +424,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
+        shell_pressure_load_path_policy=str(shell_pressure_load_path_policy),
     )
     base_u = np.asarray(setup_meta["u0"], dtype=np.float64)
     base_started = time.perf_counter()
@@ -256,9 +485,100 @@ def run_mgt_cached_residual_jvp_batch_probe(
     target_rhs = -base_residual_np[target_rows] if target_rows.size else np.asarray([], dtype=np.float64)
     candidate_rows: list[dict[str, Any]] = []
     candidate_vectors: list[np.ndarray] = []
+    correction_direction_rows: list[dict[str, Any]] = []
     solve_meta: dict[str, Any] = {"evaluated": False}
     correction = np.zeros_like(base_u)
     torch_rocm_probe: dict[str, Any] = {"attempted": False}
+    component_block_basis_meta: dict[str, Any] = {
+        "enabled": bool(enable_component_block_basis),
+        "ready": False,
+    }
+    base_residual_inf = _max_abs(base_residual_np)
+    rhs_inf = _max_abs(np.asarray(rhs, dtype=np.float64))
+    max_abs_u = max(_max_abs(base_u), 1.0e-12)
+
+    def evaluate_direction_candidates(
+        *,
+        direction_source: str,
+        direction: np.ndarray,
+        direction_meta: dict[str, Any],
+    ) -> None:
+        direction_arr = np.asarray(direction, dtype=np.float64)
+        correction_inf_local = _max_abs(direction_arr)
+        if correction_inf_local <= 0.0:
+            correction_direction_rows.append(
+                {
+                    "direction_source": str(direction_source),
+                    "evaluated": False,
+                    "reason": "zero_direction",
+                    "correction_inf_m": 0.0,
+                    "meta": direction_meta,
+                }
+            )
+            return
+        direction_index = len(correction_direction_rows)
+        sweep_alpha_values = _candidate_alpha_values(
+            base_alpha_values=alpha_values,
+            direction=direction_arr,
+            base_u=base_u,
+            allow_negative_alphas=bool(allow_negative_alphas),
+            include_gate_limited_alpha=bool(include_gate_limited_alpha),
+            relative_increment_tolerance=float(relative_increment_tolerance),
+            max_dynamic_alpha=float(max_dynamic_alpha),
+        )
+        correction_direction_rows.append(
+            {
+                "direction_source": str(direction_source),
+                "direction_index": int(direction_index),
+                "evaluated": bool(sweep_alpha_values),
+                "correction_inf_m": float(correction_inf_local),
+                "alpha_values": [float(value) for value in sweep_alpha_values],
+                "meta": direction_meta,
+            }
+        )
+        for alpha in sweep_alpha_values:
+            alpha_float = float(alpha)
+            candidate_u = base_u + alpha_float * direction_arr
+            trial_started = time.perf_counter()
+            _k, _f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
+                candidate_u,
+                residual_only=True,
+                free_override=free_idx,
+                external_load_override=f_ext,
+            )
+            trial_seconds = float(time.perf_counter() - trial_started)
+            free_stable = bool(
+                np.asarray(trial_free, dtype=np.int64).shape == free_idx.shape
+                and np.array_equal(np.asarray(trial_free, dtype=np.int64), free_idx)
+            )
+            residual_inf = _max_abs(np.asarray(trial_residual, dtype=np.float64))
+            increment = _max_abs(candidate_u - base_u)
+            max_abs_candidate = max(_max_abs(candidate_u), max_abs_u, 1.0e-12)
+            metrics = _translation_metrics(candidate_u)
+            candidate_rows.append(
+                {
+                    "direction_source": str(direction_source),
+                    "direction_index": int(direction_index),
+                    "alpha": alpha_float,
+                    "free_dof_set_stable": free_stable,
+                    "residual_only_assembly": True,
+                    "assembly_seconds": trial_seconds,
+                    "direct_residual_inf_n": residual_inf,
+                    "direct_relative_residual_inf": residual_inf
+                    / max(_max_abs(np.asarray(trial_rhs, dtype=np.float64)), rhs_inf, 1.0),
+                    "improvement_inf_n": base_residual_inf - residual_inf,
+                    "relative_improvement": (base_residual_inf - residual_inf)
+                    / max(base_residual_inf, 1.0),
+                    "relative_increment": increment / max_abs_candidate,
+                    "max_increment_m": increment,
+                    "max_translation_m": metrics["max_translation_m"],
+                    "residual_gate_passed": residual_inf <= float(residual_tolerance_n),
+                    "relative_increment_gate_passed": increment / max_abs_candidate
+                    <= float(relative_increment_tolerance),
+                }
+            )
+            candidate_vectors.append(np.asarray(candidate_u, dtype=np.float64).copy())
+
     if fd_submatrix is not None and fd_submatrix.size and support_cols.size:
         scaled_submatrix, scaled_target_rhs, column_scales, equilibration_meta = (
             _equilibrate_lstsq_system(fd_submatrix, target_rhs, mode="row_column")
@@ -284,55 +604,55 @@ def run_mgt_cached_residual_jvp_batch_probe(
         for local_col, coeff in zip(support_cols.tolist(), coeffs.tolist(), strict=False):
             correction[int(free_idx[int(local_col)])] = float(coeff)
         correction_inf = _max_abs(correction)
-        base_residual_inf = _max_abs(base_residual_np)
-        rhs_inf = _max_abs(np.asarray(rhs, dtype=np.float64))
-        max_abs_u = max(_max_abs(base_u), 1.0e-12)
-        sweep_alpha_values = [float(value) for value in alpha_values]
-        if allow_negative_alphas:
-            sweep_alpha_values.extend(
-                -float(value) for value in alpha_values if float(value) > 0.0
+        evaluate_direction_candidates(
+            direction_source="all_target_rows_lstsq",
+            direction=correction,
+            direction_meta={
+                "direction_kind": "all_target_rows_lstsq",
+                "target_row_count": int(target_rows.size),
+                "support_size": int(support_cols.size),
+                "linear_solve": solve_meta,
+            },
+        )
+        if enable_component_block_basis:
+            basis_ridge_factor = (
+                float(component_block_basis_ridge_factor)
+                if component_block_basis_ridge_factor is not None
+                else float(ridge_factor)
             )
-        sweep_alpha_values = sorted(set(sweep_alpha_values), reverse=True)
-        for alpha in sweep_alpha_values:
-            alpha_float = float(alpha)
-            candidate_u = base_u + alpha_float * correction
-            trial_started = time.perf_counter()
-            _k, _f, trial_free, trial_residual, trial_rhs, _trial_meta = assemble_residual(
-                candidate_u,
-                residual_only=True,
-                free_override=free_idx,
-                external_load_override=f_ext,
+            basis_directions, component_block_basis_meta = (
+                _build_component_block_basis_directions(
+                    fd_submatrix=np.asarray(fd_submatrix, dtype=np.float64),
+                    target_rhs=np.asarray(target_rhs, dtype=np.float64),
+                    support_cols=np.asarray(support_cols, dtype=np.int64),
+                    free=free_idx,
+                    selected_rows=selected_rows,
+                    key_mode=str(component_block_basis_key_mode),
+                    ridge_factor=max(basis_ridge_factor, 0.0),
+                    normalization=str(component_block_basis_normalization),
+                )
             )
-            trial_seconds = float(time.perf_counter() - trial_started)
-            free_stable = bool(
-                np.asarray(trial_free, dtype=np.int64).shape == free_idx.shape
-                and np.array_equal(np.asarray(trial_free, dtype=np.int64), free_idx)
-            )
-            residual_inf = _max_abs(np.asarray(trial_residual, dtype=np.float64))
-            increment = _max_abs(candidate_u - base_u)
-            max_abs_candidate = max(_max_abs(candidate_u), max_abs_u, 1.0e-12)
-            metrics = _translation_metrics(candidate_u)
-            candidate_rows.append(
-                {
-                    "alpha": alpha_float,
-                    "free_dof_set_stable": free_stable,
-                    "residual_only_assembly": True,
-                    "assembly_seconds": trial_seconds,
-                    "direct_residual_inf_n": residual_inf,
-                    "direct_relative_residual_inf": residual_inf
-                    / max(_max_abs(np.asarray(trial_rhs, dtype=np.float64)), rhs_inf, 1.0),
-                    "improvement_inf_n": base_residual_inf - residual_inf,
-                    "relative_improvement": (base_residual_inf - residual_inf)
-                    / max(base_residual_inf, 1.0),
-                    "relative_increment": increment / max_abs_candidate,
-                    "max_increment_m": increment,
-                    "max_translation_m": metrics["max_translation_m"],
-                    "residual_gate_passed": residual_inf <= float(residual_tolerance_n),
-                    "relative_increment_gate_passed": increment / max_abs_candidate
-                    <= float(relative_increment_tolerance),
-                }
-            )
-            candidate_vectors.append(np.asarray(candidate_u, dtype=np.float64).copy())
+            for direction_payload in basis_directions:
+                support_coefficients = np.asarray(
+                    direction_payload.get("support_coefficients"),
+                    dtype=np.float64,
+                )
+                if support_coefficients.size != support_cols.size:
+                    continue
+                basis_correction = np.zeros_like(base_u)
+                for local_col, coeff in zip(
+                    support_cols.tolist(),
+                    support_coefficients.tolist(),
+                    strict=False,
+                ):
+                    basis_correction[int(free_idx[int(local_col)])] = float(coeff)
+                evaluate_direction_candidates(
+                    direction_source=str(direction_payload.get("source") or "component_block"),
+                    direction=basis_correction,
+                    direction_meta=direction_payload.get("meta")
+                    if isinstance(direction_payload.get("meta"), dict)
+                    else {},
+                )
         if enable_torch_rocm_lstsq:
             torch_rocm_probe = _torch_rocm_lstsq_probe(
                 fd_submatrix,
@@ -363,6 +683,8 @@ def run_mgt_cached_residual_jvp_batch_probe(
             if bool(row.get("free_dof_set_stable"))
             and bool(row.get("relative_increment_gate_passed"))
             and float(row.get("improvement_inf_n", 0.0)) > 0.0
+            and float(row.get("relative_improvement", 0.0))
+            >= max(float(min_relative_improvement), 0.0)
         ),
         key=lambda item: float(item[1]["direct_residual_inf_n"]),
         default=(None, {}),
@@ -444,6 +766,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         "status": "partial",
         "cached_residual_jvp_batch_ready": bool(fd_submatrix is not None),
         "checkpoint": str(checkpoint_npz),
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         "output_npz": str(output_npz) if output_npz is not None else None,
         "output_final_checkpoint": output_final_checkpoint,
         "promoted_to_final_state": bool(output_final_checkpoint.get("written")),
@@ -474,7 +797,12 @@ def run_mgt_cached_residual_jvp_batch_probe(
         },
         "linear_solve": solve_meta,
         "correction_inf_m": correction_inf,
+        "correction_directions": correction_direction_rows,
+        "component_block_basis": component_block_basis_meta,
         "allow_negative_alphas": bool(allow_negative_alphas),
+        "include_gate_limited_alpha": bool(include_gate_limited_alpha),
+        "max_dynamic_alpha": float(max_dynamic_alpha),
+        "minimum_relative_improvement": float(max(min_relative_improvement, 0.0)),
         "candidate_rows": candidate_rows,
         "best_candidate": best_candidate_row,
         "best_gate_eligible_candidate": best_gate_candidate_row,
@@ -503,6 +831,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-path", type=Path, default=DEFAULT_MGT)
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
+    parser.add_argument(
+        "--shell-pressure-load-path-policy",
+        choices=("all_components", "attached_components_only"),
+        default="all_components",
+    )
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--output-npz", type=Path, default=None)
     parser.add_argument("--output-final-checkpoint-npz", type=Path, default=None)
@@ -518,6 +851,48 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--ridge-factor", type=float, default=1.0e-3)
     parser.add_argument("--alpha-values", default="1e-6,3e-7,1e-7,3e-8,1e-8")
     parser.add_argument("--allow-negative-alphas", action="store_true")
+    parser.add_argument(
+        "--include-gate-limited-alpha",
+        action="store_true",
+        help=(
+            "Also evaluate per-direction alpha values capped by the relative "
+            "increment gate."
+        ),
+    )
+    parser.add_argument(
+        "--max-dynamic-alpha",
+        type=float,
+        default=1.0,
+        help="Upper clamp for dynamically generated gate-limited alpha values.",
+    )
+    parser.add_argument(
+        "--min-relative-improvement",
+        type=float,
+        default=0.0,
+        help=(
+            "Minimum candidate relative improvement required for checkpoint "
+            "promotion. Defaults to the legacy >0 behavior."
+        ),
+    )
+    parser.add_argument("--enable-component-block-basis", action="store_true")
+    parser.add_argument(
+        "--component-block-basis-key-mode",
+        choices=("dominant_component", "dominant_component_dof", "dof"),
+        default="dominant_component",
+        help="Grouping key used to build component-block residual/JVP basis vectors.",
+    )
+    parser.add_argument(
+        "--component-block-basis-normalization",
+        choices=("none", "linf"),
+        default="linf",
+        help="Normalize each component-block basis vector before the basis LS solve.",
+    )
+    parser.add_argument(
+        "--component-block-basis-ridge-factor",
+        type=float,
+        default=None,
+        help="Optional ridge factor for component-block basis solves; defaults to --ridge-factor.",
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=1.0e-3)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument("--enable-torch-rocm-lstsq", action="store_true")
@@ -537,6 +912,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = run_mgt_cached_residual_jvp_batch_probe(
         mgt_path=args.mgt_path,
         checkpoint_npz=args.checkpoint_npz,
+        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         output_json=args.output_json,
         output_npz=args.output_npz,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
@@ -552,6 +928,13 @@ def main(argv: list[str] | None = None) -> int:
         ridge_factor=args.ridge_factor,
         alpha_values=_parse_float_csv(args.alpha_values),
         allow_negative_alphas=bool(args.allow_negative_alphas),
+        include_gate_limited_alpha=bool(args.include_gate_limited_alpha),
+        max_dynamic_alpha=args.max_dynamic_alpha,
+        min_relative_improvement=args.min_relative_improvement,
+        enable_component_block_basis=bool(args.enable_component_block_basis),
+        component_block_basis_key_mode=args.component_block_basis_key_mode,
+        component_block_basis_normalization=args.component_block_basis_normalization,
+        component_block_basis_ridge_factor=args.component_block_basis_ridge_factor,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         enable_torch_rocm_lstsq=bool(args.enable_torch_rocm_lstsq),
