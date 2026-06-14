@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T13:11:20+09:00",
+  "generated_at": "2026-06-14T15:02:23+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -304,6 +304,7 @@
       "native_hip_shell_csr_batch_relative_difference_inf": 4.7133911524429465e-15,
       "native_hip_shell_csr_batch_assessment": "The native HIP shell CSR batch bridge now validates the dominant shell path directly on followup40. The kernel is 2.69x faster than SciPy CSR batch matvec for 64 states with 4.7e-15 relative force error. Subprocess and host-copy overhead still dominate, so the next engineering step is in-process residual replay batching or a persistent Rust/HIP worker rather than one subprocess per candidate batch.",
       "post_shell_rocm_backend_followup64_summary": "implementation/phase1/release_evidence/productization/mgt_rocm_backend_post_shell_followup64_summary.json",
+      "post_shell_rocm_backend_followup64_65_summary": "implementation/phase1/release_evidence/productization/mgt_rocm_backend_post_shell_followup64_65_summary.json",
       "post_shell_batch_residual_replay_probe": "implementation/phase1/release_evidence/productization/mgt_residual_batch_replay_post_shell_followup64_probe.json",
       "post_shell_batch_residual_replay_status": "pass",
       "post_shell_batch_residual_replay_max_abs_difference_n": 5.611204301203543e-08,
@@ -318,6 +319,16 @@
       "post_shell_native_hip_frame_force_batch_speedup_vs_cpu": 111.73553051625964,
       "post_shell_native_hip_frame_force_batch_max_abs_difference_n": 1.1620006930002091e-06,
       "post_shell_native_hip_frame_force_batch_relative_difference_inf": 7.086246274326547e-12,
+      "post_shell_hip_full_residual_composed_probe": "implementation/phase1/release_evidence/productization/mgt_hip_full_residual_composed_post_shell_followup65_probe.json",
+      "post_shell_hip_full_residual_composed_status": "pass",
+      "post_shell_hip_full_residual_composed_base_residual_inf_n": 0.03363847854430568,
+      "post_shell_hip_full_residual_composed_gate_ready": false,
+      "post_shell_hip_full_residual_composed_max_abs_difference_n": 1.1620006930002091e-06,
+      "post_shell_hip_full_residual_composed_relative_difference_inf": 8.57682759250549e-12,
+      "post_shell_hip_full_residual_composed_max_abs_jvp_difference_n_per_unit": 0.00023245811462402344,
+      "post_shell_hip_full_residual_composed_relative_jvp_difference_inf": 1.715793444547372e-15,
+      "post_shell_hip_full_residual_composed_estimated_kernel_speedup_vs_cpu_batch": 5.431231404636352,
+      "post_shell_hip_full_residual_composed_assessment": "Followup65 composes native HIP frame-force and shell-CSR outputs with the CPU spring term into a full residual batch and residual-difference JVP contract at the post-shell frontier. It passes against the CPU batch residual with 1.162e-6 N absolute residual difference, 8.58e-12 relative residual difference, and 1.72e-15 relative JVP difference. The residual gate is still open because the composed base residual is 0.0336384785 N, and this remains subprocess-composed rather than a persistent in-process Rust/HIP worker.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
       "row_correction_batch_alpha_trial_rows": 300,
@@ -651,7 +662,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "Followup47-50 show the active G1 direction is coupled largest-row node-block correction with refreshed target/support sets, not single-row scaling or fixed Krylov repetition. Followup55-59 further show geometry-normal shell translation rows and a coupled shell geometry-normal plus bending/drilling target can reopen descent after nodeblock and shell-element no-descent. Followup60-63 show the local coupled row-correction, finite-difference row-submatrix, current scaled-floor global Krylov, and accepted-history secant variants have now saturated. Followup64 revalidates the production backend lane at the post-shell frontier: CPU residual batch replay, HIP shell CSR batch, and HIP frame-force batch all pass. Full closure still requires adaptive coupled shell material/globalization and production residual/JVP replay, not just component kernels.",
+    "reason": "Followup47-50 show the active G1 direction is coupled largest-row node-block correction with refreshed target/support sets, not single-row scaling or fixed Krylov repetition. Followup55-59 further show geometry-normal shell translation rows and a coupled shell geometry-normal plus bending/drilling target can reopen descent after nodeblock and shell-element no-descent. Followup60-63 show the local coupled row-correction, finite-difference row-submatrix, current scaled-floor global Krylov, and accepted-history secant variants have now saturated. Followup64 revalidates the production backend lane at the post-shell frontier: CPU residual batch replay, HIP shell CSR batch, and HIP frame-force batch all pass. Followup65 composes those HIP component outputs into a full residual/JVP contract with 1.162e-6 N residual difference, 8.58e-12 relative residual difference, 1.72e-15 relative JVP difference, and 5.43x estimated kernel speedup over CPU batch. Full closure still requires adaptive coupled shell material/globalization plus a persistent in-process Rust/HIP residual/JVP worker, not just subprocess component kernels.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 8.328283857828023e-06,
       "accepted_probe_seconds": 236.25546567300262,
@@ -700,9 +711,9 @@
     "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
     "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn.",
     "Promote the coupled row-nodeblock lane from one-off CLI probes into an adaptive controller that refreshes target rows/support after every accepted frontier move.",
-    "After followup60-63, stop repeating local coupled shell row-correction, current scaled-floor global Krylov, and accepted-history secant-family sweeps. Promote the coupled shell membrane-normal plus bending/drilling idea into a higher-level shell material/globalization formulation or production residual/JVP backend lane."
-    ,
-    "Followup64 proves the latest frontier still satisfies the CPU residual batch replay contract and native HIP shell/frame component replay contracts; the next backend step is in-process full residual/JVP replay, not another subprocess-only component smoke."
+    "After followup60-63, stop repeating local coupled shell row-correction, current scaled-floor global Krylov, and accepted-history secant-family sweeps. Promote the coupled shell membrane-normal plus bending/drilling idea into a higher-level shell material/globalization formulation or production residual/JVP backend lane.",
+    "Followup64 proves the latest frontier still satisfies the CPU residual batch replay contract and native HIP shell/frame component replay contracts.",
+    "Followup65 proves a composed full residual/JVP batch contract from native HIP frame+shell plus the spring term; the next backend step is a persistent in-process Rust/HIP worker with resident buffers, not another subprocess-only component smoke."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels; batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics; adaptive material/shell/frame Newton, full-load path closure, and production ROCm/HIP full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, and followup65 validates a subprocess-composed full residual/JVP batch contract; batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
 }

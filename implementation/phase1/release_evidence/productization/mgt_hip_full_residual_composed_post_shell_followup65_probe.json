@@ -1,0 +1,406 @@
+{
+  "schema_version": "mgt-hip-full-residual-composed-probe.v1",
+  "generated_at": "2026-06-14T06:01:51.195023+00:00",
+  "status": "pass",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
+  "shell_pressure_load_path_policy": "attached_components_only",
+  "batch_size": 64,
+  "dof_count": 78282,
+  "free_dof_count": 58998,
+  "reps": 3,
+  "perturbation_scale": 1e-06,
+  "residual_tolerance_n": 0.001,
+  "base_direct_residual_inf_n": 0.03363847854424884,
+  "base_cpu_batch_residual_inf_n": 0.03363847854404989,
+  "base_hip_composed_residual_inf_n": 0.03363847854430568,
+  "hip_composed_residual_gate_ready": false,
+  "rhs_inf_n": 8676.13911480824,
+  "frame_prepack_seconds": 0.6252091019996442,
+  "shell_operator_build_seconds": 6.080259176000254,
+  "shell_operator_cache_hit": false,
+  "cpu_full_residual_batch": {
+    "min_seconds": 0.17324917800578987,
+    "mean_seconds": 0.179860558998674,
+    "max_seconds": 0.18661592099670088
+  },
+  "hip_full_residual_estimated_kernel_mean_seconds": 0.03311598155164898,
+  "hip_full_residual_estimated_kernel_speedup_vs_cpu_batch_mean": 5.431231404636352,
+  "hip_component_subprocess_seconds": {
+    "frame": 0.8608755210007075,
+    "shell": 0.4129283970032702,
+    "total": 1.2738039180039777
+  },
+  "hip_component_kernel_mean_seconds": {
+    "frame": 0.000670921624,
+    "shell": 0.016017499924,
+    "spring_cpu": 0.016427560003648978
+  },
+  "max_abs_residual_difference_n": 1.1620006930002091e-06,
+  "relative_residual_difference_inf": 8.57682759250549e-12,
+  "comparison_tolerances": {
+    "absolute_tolerance_n": 2e-06,
+    "relative_tolerance_inf": 1e-10,
+    "pass_rule": "hip_components_ok_and_abs_le_tolerance_or_relative_le_tolerance"
+  },
+  "jvp_comparison": {
+    "candidate_count": 63,
+    "max_abs_jvp_difference_n_per_unit": 0.00023245811462402344,
+    "relative_jvp_difference_inf": 1.715793444547372e-15,
+    "sample": [
+      {
+        "state_index": 1,
+        "global_dof": 18,
+        "free_index": 0,
+        "epsilon": 1e-06,
+        "cpu_jvp_inf_n_per_unit": 89589270963.58209,
+        "hip_jvp_inf_n_per_unit": 89589270963.58209,
+        "abs_jvp_difference_inf_n_per_unit": 2.9103830456733704e-05
+      },
+      {
+        "state_index": 2,
+        "global_dof": 1047,
+        "free_index": 951,
+        "epsilon": -1e-06,
+        "cpu_jvp_inf_n_per_unit": 483733416.31528455,
+        "hip_jvp_inf_n_per_unit": 483733416.31516814,
+        "abs_jvp_difference_inf_n_per_unit": 0.00011640787124633789
+      },
+      {
+        "state_index": 3,
+        "global_dof": 2047,
+        "free_index": 1903,
+        "epsilon": 1e-06,
+        "cpu_jvp_inf_n_per_unit": 16887611553.785057,
+        "hip_jvp_inf_n_per_unit": 16887611553.78506,
+        "abs_jvp_difference_inf_n_per_unit": 4.3655745685100555e-05
+      },
+      {
+        "state_index": 4,
+        "global_dof": 3148,
+        "free_index": 2854,
+        "epsilon": -1e-06,
+        "cpu_jvp_inf_n_per_unit": 531286513.6877587,
+        "hip_jvp_inf_n_per_unit": 531286513.68776596,
+        "abs_jvp_difference_inf_n_per_unit": 5.8203935623168945e-05
+      },
+      {
+        "state_index": 5,
+        "global_dof": 4202,
+        "free_index": 3806,
+        "epsilon": 1e-06,
+        "cpu_jvp_inf_n_per_unit": 6851944190.91303,
+        "hip_jvp_inf_n_per_unit": 6851944190.913146,
+        "abs_jvp_difference_inf_n_per_unit": 0.0001163482666015625
+      },
+      {
+        "state_index": 6,
+        "global_dof": 5303,
+        "free_index": 4757,
+        "epsilon": -1e-06,
+        "cpu_jvp_inf_n_per_unit": 1089007.0782362134,
+        "hip_jvp_inf_n_per_unit": 1089007.0782362134,
+        "abs_jvp_difference_inf_n_per_unit": 2.9103830456733704e-05
+      },
+      {
+        "state_index": 7,
+        "global_dof": 6765,
+        "free_index": 5709,
+        "epsilon": 1e-06,
+        "cpu_jvp_inf_n_per_unit": 16861794697.261496,
+        "hip_jvp_inf_n_per_unit": 16861794697.2615,
+        "abs_jvp_difference_inf_n_per_unit": 0.000118255615234375
+      },
+      {
+        "state_index": 8,
+        "global_dof": 7818,
+        "free_index": 6660,
+        "epsilon": -1e-06,
+        "cpu_jvp_inf_n_per_unit": 13727809465.797691,
+        "hip_jvp_inf_n_per_unit": 13727809465.797691,
+        "abs_jvp_difference_inf_n_per_unit": 2.9103830456733704e-05
+      }
+    ]
+  },
+  "state_meta_sample": [
+    {
+      "kind": "checkpoint",
+      "global_dof": null,
+      "epsilon": 0.0
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 18,
+      "free_index": 0,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 1047,
+      "free_index": 951,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 2047,
+      "free_index": 1903,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 3148,
+      "free_index": 2854,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 4202,
+      "free_index": 3806,
+      "epsilon": 1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 5303,
+      "free_index": 4757,
+      "epsilon": -1e-06
+    },
+    {
+      "kind": "single_dof_fd_like_perturbation",
+      "global_dof": 6765,
+      "free_index": 5709,
+      "epsilon": 1e-06
+    }
+  ],
+  "component_force_inf_n": {
+    "hip_frame_inf_n": 163979.72184654867,
+    "hip_shell_inf_n": 156852.14355913328,
+    "cpu_spring_inf_n": 1000.0000078423577
+  },
+  "backend_contract": {
+    "full_residual_vector_composed": true,
+    "jvp_available_from_batch_residual_differences": true,
+    "uses_native_hip_frame_kernel": true,
+    "uses_native_hip_shell_kernel": true,
+    "uses_cpu_spring_matvec": true,
+    "persistent_in_process_worker": false,
+    "rust_ffi_worker": false
+  },
+  "base_meta_summary": {
+    "residual_only_assembly": false,
+    "shell_operator_cache_size": 1,
+    "free_dof_count": 58998
+  },
+  "cpu_batch_meta": {
+    "physical_internal_force_model": "corotational_force_based_6dof_plus_force_consistent_shell_plus_springs_batch",
+    "use_force_based_frame": true,
+    "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+    "batch_size": 64,
+    "frame_equilibrium_stiffness_nnz": 0,
+    "shell_stiffness_nnz": 1901664,
+    "spring_stiffness_nnz": 40608,
+    "component_internal_force_inf_n": {
+      "frame_inf_n": 163979.7218465487,
+      "shell_inf_n": 156852.14355913326,
+      "spring_inf_n": 1000.0000078423577
+    },
+    "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry",
+    "split_shell_components": false,
+    "frame_equilibrium_meta": {
+      "frame_internal_force_model": "corotational_force_based_6dof",
+      "real_section_material_element_count": 5485,
+      "geometric_element_count": 1946,
+      "min_chord_length_m": 0.31923032437409377,
+      "max_chord_length_ratio": 1.0,
+      "element_count": 5564,
+      "frame_force_based_fastpath_available": true,
+      "frame_force_based_fastpath": true,
+      "frame_force_based_batch_fastpath": true,
+      "frame_force_based_batch_size": 64,
+      "frame_force_based_prepacked_element_count": 5564
+    },
+    "shell_meta": {
+      "shell_internal_force_model": "membrane_bending_drilling_force_consistent_reference_geometry",
+      "equilibrium_geometry_contract": "reference_node_xyz_u_only",
+      "shell_stiffness_nnz": 1901664,
+      "shell_internal_force_cache_enabled": true,
+      "shell_internal_force_cache_hit": true,
+      "shell_batch_size": 64,
+      "shell_meta": {
+        "surface_element_count": 7152,
+        "surface_quad_count": 6968,
+        "surface_tri_count": 184,
+        "assembled_triangle_count": 14120,
+        "assembled_membrane_triangle_count": 14120,
+        "include_membrane": true,
+        "shell_tangent_model": "mindlin_cst_bending_drilling_plus_cst_membrane",
+        "skipped_degenerate_triangle_count": 0,
+        "surface_node_count": 7894,
+        "surface_material_coverage_pct": 96.33668903803132,
+        "unique_surface_material_count": 20,
+        "unique_surface_section_count": 15,
+        "surface_total_area_m2": 11404.192103423085,
+        "surface_stiffness_nnz": 1901664,
+        "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+        "source_plate_thickness_coverage_count": 7152,
+        "source_plate_thickness_coverage_pct": 100.0,
+        "source_thickness_table_count": 25,
+        "thickness_min_m": 0.140625,
+        "thickness_max_m": 0.85,
+        "pressure_load_filter_enabled": false,
+        "pressure_loaded_triangle_count": 14120,
+        "pressure_suppressed_triangle_count": 0
+      }
+    },
+    "stress_corrected_element_count": 0
+  },
+  "shell_meta": {
+    "surface_element_count": 7152,
+    "surface_quad_count": 6968,
+    "surface_tri_count": 184,
+    "assembled_triangle_count": 14120,
+    "assembled_membrane_triangle_count": 14120,
+    "include_membrane": true,
+    "shell_tangent_model": "mindlin_cst_bending_drilling_plus_cst_membrane",
+    "skipped_degenerate_triangle_count": 0,
+    "surface_node_count": 7894,
+    "surface_material_coverage_pct": 96.33668903803132,
+    "unique_surface_material_count": 20,
+    "unique_surface_section_count": 15,
+    "surface_total_area_m2": 11404.192103423085,
+    "surface_stiffness_nnz": 1901664,
+    "thickness_policy": "source_mgt_thickness_rows_by_plate_section_id",
+    "source_plate_thickness_coverage_count": 7152,
+    "source_plate_thickness_coverage_pct": 100.0,
+    "source_thickness_table_count": 25,
+    "thickness_min_m": 0.140625,
+    "thickness_max_m": 0.85,
+    "pressure_load_filter_enabled": false,
+    "pressure_loaded_triangle_count": 14120,
+    "pressure_suppressed_triangle_count": 0
+  },
+  "frame_build": {
+    "attempted": false,
+    "ok": true,
+    "binary": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
+    "source": "/home/betelgeuze/건축구조분석/implementation/phase1/hip_frame_force_batch_replay.cpp",
+    "command": [
+      "/opt/rocm/bin/hipcc",
+      "-O3",
+      "-std=c++17",
+      "--offload-arch=gfx1030",
+      "--rocm-device-lib-path=/home/betelgeuze/건축구조분석/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/hip_frame_force_batch_replay.cpp",
+      "-o",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay"
+    ],
+    "reason": "binary_current"
+  },
+  "shell_build": {
+    "attempted": false,
+    "ok": true,
+    "binary": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_shell_csr_batch_replay",
+    "source": "/home/betelgeuze/건축구조분석/implementation/phase1/hip_shell_csr_batch_replay.cpp",
+    "command": [
+      "/opt/rocm/bin/hipcc",
+      "-O3",
+      "-std=c++17",
+      "--offload-arch=gfx1030",
+      "--rocm-device-lib-path=/home/betelgeuze/건축구조분석/implementation/phase1/third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/hip_shell_csr_batch_replay.cpp",
+      "-o",
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_shell_csr_batch_replay"
+    ],
+    "reason": "binary_current"
+  },
+  "hip_frame": {
+    "ok": true,
+    "backend": "native_hip_frame_force_batch",
+    "element_count": 5564,
+    "n_dof": 78282,
+    "batch_size": 64,
+    "reps": 3,
+    "device_count": 1,
+    "device_count_query_ok": true,
+    "device_count_query_error": "",
+    "set_device_ok": true,
+    "set_device_error": "",
+    "device_props_ok": true,
+    "device_name": "AMD Radeon RX 6900 XT",
+    "kernel_elapsed_ms_total": 2.012764931,
+    "kernel_elapsed_ms_mean": 0.670921624,
+    "output_abs_sum": 562492662.222716,
+    "output_max_abs": 163979.721846549,
+    "command": [
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_frame_force_batch_replay",
+      "--dofs",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/frame_dofs.i64",
+      "--stiffness",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/frame_stiffness.f64",
+      "--states",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/states.f64",
+      "--output",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/hip_frame_force.f64",
+      "--element-count",
+      "5564",
+      "--n-dof",
+      "78282",
+      "--batch-size",
+      "64",
+      "--reps",
+      "3"
+    ],
+    "returncode": 0,
+    "stdout": "{\"ok\":true,\"backend\":\"native_hip_frame_force_batch\",\"element_count\":5564,\"n_dof\":78282,\"batch_size\":64,\"reps\":3,\"device_count\":1,\"device_count_query_ok\":true,\"device_count_query_error\":\"\",\"set_device_ok\":true,\"set_device_error\":\"\",\"device_props_ok\":true,\"device_name\":\"AMD Radeon RX 6900 XT\",\"kernel_elapsed_ms_total\":2.012764931,\"kernel_elapsed_ms_mean\":0.670921624,\"output_abs_sum\":562492662.222715974,\"output_max_abs\":163979.721846549}\n",
+    "stderr": "",
+    "subprocess_seconds": 0.8608755210007075
+  },
+  "hip_shell": {
+    "ok": true,
+    "backend": "native_hip_shell_csr_batch",
+    "n_rows": 78282,
+    "n_dof": 78282,
+    "nnz": 1901664,
+    "batch_size": 64,
+    "reps": 3,
+    "device_count": 1,
+    "device_count_query_ok": true,
+    "device_count_query_error": "",
+    "set_device_ok": true,
+    "set_device_error": "",
+    "device_props_ok": true,
+    "device_name": "AMD Radeon RX 6900 XT",
+    "kernel_elapsed_ms_total": 48.052497864,
+    "kernel_elapsed_ms_mean": 16.017499924,
+    "output_abs_sum": 529497812.03583246,
+    "output_max_abs": 156852.143559133,
+    "command": [
+      "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/bin/hip_shell_csr_batch_replay",
+      "--row-ptr",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/shell_row_ptr.i64",
+      "--col-idx",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/shell_col_idx.i64",
+      "--values",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/shell_values.f64",
+      "--states",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/states.f64",
+      "--output",
+      "/tmp/mgt_hip_full_residual_l3ilu_04/hip_shell_force.f64",
+      "--n-rows",
+      "78282",
+      "--n-dof",
+      "78282",
+      "--nnz",
+      "1901664",
+      "--batch-size",
+      "64",
+      "--reps",
+      "3"
+    ],
+    "returncode": 0,
+    "stdout": "{\"ok\":true,\"backend\":\"native_hip_shell_csr_batch\",\"n_rows\":78282,\"n_dof\":78282,\"nnz\":1901664,\"batch_size\":64,\"reps\":3,\"device_count\":1,\"device_count_query_ok\":true,\"device_count_query_error\":\"\",\"set_device_ok\":true,\"set_device_error\":\"\",\"device_props_ok\":true,\"device_name\":\"AMD Radeon RX 6900 XT\",\"kernel_elapsed_ms_total\":48.052497864,\"kernel_elapsed_ms_mean\":16.017499924,\"output_abs_sum\":529497812.035832465,\"output_max_abs\":156852.143559133}\n",
+    "stderr": "",
+    "subprocess_seconds": 0.4129283970032702
+  },
+  "runtime_seconds": 32.57062806299655,
+  "claim_boundary": "This composes native HIP frame-force and shell-CSR component outputs with the spring term into a full residual batch and residual-difference JVP contract at the latest G1 frontier. It is still a subprocess component composition, not a persistent in-process Rust/HIP worker, and it does not claim residual gate closure."
+}
