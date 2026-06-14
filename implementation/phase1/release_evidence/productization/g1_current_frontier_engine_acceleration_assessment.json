@@ -100,6 +100,32 @@
       "acceleration_target": "batch all FD perturbations and alpha candidates through one residual replay engine and return only target rows plus residual inf metrics"
     }
   },
+  "implemented_followup": {
+    "commit_scope": "prepacked_frame_force_based_residual_replay",
+    "code_paths": [
+      "implementation/phase1/mgt_frame_force_based_assembly.py",
+      "implementation/phase1/mgt_physical_residual_assembly.py",
+      "implementation/phase1/mgt_equilibrium_step_assembly.py",
+      "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+      "implementation/phase1/run_mgt_frame_force_fastpath_probe.py"
+    ],
+    "validation": {
+      "frame_force_fastpath_probe": "implementation/phase1/release_evidence/productization/mgt_frame_force_fastpath_followup32_probe.json",
+      "frame_force_fastpath_status": "pass",
+      "frame_force_max_abs_difference_n": 0.00000008009374141693115,
+      "frame_force_relative_difference_inf": 0.0000000000004884368659355103,
+      "frame_force_speedup_factor": 1273.6984002619572,
+      "attached_policy_direct_replay_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_fastpath_replay_followup32_probe.json",
+      "attached_policy_replayed_direct_residual_inf_n": 0.03410235276851825,
+      "cached_jvp_fastpath_speed_probe": "implementation/phase1/release_evidence/productization/g1_current_frontier_cached_jvp_frame_fastpath_speed_probe.json",
+      "cached_jvp_total_seconds_before": 47.73595101599858,
+      "cached_jvp_total_seconds_after": 28.470995087998745,
+      "cached_jvp_fd_jvp_seconds_before": 11.80182786200021,
+      "cached_jvp_fd_jvp_seconds_after": 0.05893149500116124,
+      "cached_jvp_residual_only_eval_seconds_after": 0.0029493990004993975
+    },
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery. It preserves the attached-policy direct residual at the current frontier and removes the Python frame-element loop from residual-only FD/JVP replay. Shell matvec and initial tangent assembly remain the next runtime targets."
+  },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, not another sparse solver or Torch least-squares wrapper",

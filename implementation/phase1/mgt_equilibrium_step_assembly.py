@@ -17,6 +17,7 @@ from mgt_shell_load_path import (
     surface_pressure_load_path_components,
     surface_pressure_load_path_filter,
 )
+from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
 from run_mgt_direct_residual_newton_probe import _active_free
 from run_mgt_full_frame_6dof_sparse_equilibrium import DOF_PER_NODE, FrameElement
 
@@ -74,6 +75,18 @@ def build_equilibrium_step_assembler(
         restrained=restrained,
         policy=shell_pressure_load_path_policy,
     )
+    axial_forces = {
+        int(elem_id): float(force) * float(frame_gravity_load_scale) * float(load_scale)
+        for elem_id, force in base_axial_forces.items()
+    }
+    frame_force_cache = prepack_frame_force_based_assembly(
+        node_xyz=node_xyz,
+        frame_elements=frame_elements,
+        section_props=section_props,
+        material_props=material_props,
+        element_axial_forces=axial_forces,
+        include_geometric=True,
+    )
 
     def assemble_residual(
         u: np.ndarray,
@@ -116,6 +129,7 @@ def build_equilibrium_step_assembler(
                 load_scale=load_scale,
                 include_component_forces=include_component_forces,
                 shell_operator_cache=shell_operator_cache,
+                frame_force_cache=frame_force_cache,
             )
             residual, rhs = assemble_physical_residual(
                 u=u,
@@ -170,6 +184,7 @@ def build_equilibrium_step_assembler(
             load_scale=load_scale,
             include_component_forces=include_component_forces,
             shell_operator_cache=shell_operator_cache,
+            frame_force_cache=frame_force_cache,
         )
         if external_load_override is not None:
             f_ext = np.asarray(external_load_override, dtype=np.float64)
@@ -223,5 +238,7 @@ def build_equilibrium_step_assembler(
         "reference_f_ext_inf_n": float(np.max(np.abs(reference_f_ext))) if reference_f_ext.size else 0.0,
         "free_dof_count": int(_reference_free.size),
         "shell_pressure_load_path_meta": pressure_load_path_meta,
+        "frame_force_fastpath_prepacked": True,
+        "frame_force_fastpath_element_count": int(len(frame_elements)),
     }
     return assemble_with_frozen_external_load, setup_meta

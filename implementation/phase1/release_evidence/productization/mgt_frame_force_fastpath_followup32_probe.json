@@ -1,0 +1,90 @@
+{
+  "schema_version": "mgt-frame-force-fastpath-probe.v1",
+  "generated_at": "2026-06-14T00:59:40.459506+00:00",
+  "status": "pass",
+  "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_final_checkpoint.npz",
+  "frame_element_count": 5564,
+  "dof_count": 78282,
+  "prepack_seconds": 0.6318031820010219,
+  "reps_per_state": 6,
+  "state_rows": [
+    {
+      "state": "checkpoint",
+      "max_abs_difference_n": 8.009374141693115e-08,
+      "l2_difference_n": 2.5845673826567344e-07,
+      "relative_difference_inf": 4.884368659355103e-13,
+      "original": {
+        "min_seconds": 0.6478418970000348,
+        "mean_seconds": 0.6520246624998739,
+        "max_seconds": 0.6551613320007164
+      },
+      "fastpath": {
+        "min_seconds": 0.000425911999627715,
+        "mean_seconds": 0.0005320858338867159,
+        "max_seconds": 0.0007109620019036811
+      },
+      "original_meta": {
+        "frame_internal_force_model": "corotational_force_based_6dof",
+        "real_section_material_element_count": 5485,
+        "geometric_element_count": 1946,
+        "min_chord_length_m": 0.31923032437409377,
+        "max_chord_length_ratio": 1.0,
+        "element_count": 5564
+      },
+      "fastpath_meta": {
+        "frame_internal_force_model": "corotational_force_based_6dof",
+        "real_section_material_element_count": 5485,
+        "geometric_element_count": 1946,
+        "min_chord_length_m": 0.31923032437409377,
+        "max_chord_length_ratio": 1.0,
+        "element_count": 5564,
+        "frame_force_based_fastpath_available": true,
+        "frame_force_based_fastpath": true,
+        "frame_force_based_prepacked_element_count": 5564
+      }
+    },
+    {
+      "state": "checkpoint_plus_micro_perturb",
+      "max_abs_difference_n": 8.009374141693115e-08,
+      "l2_difference_n": 2.5845673826567334e-07,
+      "relative_difference_inf": 4.884368659355103e-13,
+      "original": {
+        "min_seconds": 0.6491955819983559,
+        "mean_seconds": 0.650489679332774,
+        "max_seconds": 0.6514349569988553
+      },
+      "fastpath": {
+        "min_seconds": 0.00042528300036792643,
+        "mean_seconds": 0.0004905380004250522,
+        "max_seconds": 0.0006165390004753135
+      },
+      "original_meta": {
+        "frame_internal_force_model": "corotational_force_based_6dof",
+        "real_section_material_element_count": 5485,
+        "geometric_element_count": 1946,
+        "min_chord_length_m": 0.31923032437409377,
+        "max_chord_length_ratio": 1.0,
+        "element_count": 5564
+      },
+      "fastpath_meta": {
+        "frame_internal_force_model": "corotational_force_based_6dof",
+        "real_section_material_element_count": 5485,
+        "geometric_element_count": 1946,
+        "min_chord_length_m": 0.31923032437409377,
+        "max_chord_length_ratio": 1.0,
+        "element_count": 5564,
+        "frame_force_based_fastpath_available": true,
+        "frame_force_based_fastpath": true,
+        "frame_force_based_prepacked_element_count": 5564
+      }
+    }
+  ],
+  "max_abs_difference_n": 8.009374141693115e-08,
+  "max_l2_difference_n": 2.5845673826567344e-07,
+  "original_mean_seconds": 0.651257170916324,
+  "fastpath_mean_seconds": 0.0005113119171558841,
+  "speedup_factor": 1273.6984002619572,
+  "runtime_seconds": 24.7624940780006,
+  "claim_boundary": "Validates the prepacked frame force replay only. This does not close the full G1 residual gate; it reduces the residual replay cost that dominates finite-difference/JVP polishing."
+}

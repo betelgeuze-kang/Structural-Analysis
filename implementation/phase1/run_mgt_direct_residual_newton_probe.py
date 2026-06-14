@@ -44,6 +44,7 @@ from mgt_physical_residual_assembly import (
     assemble_physical_internal_forces,
     assemble_physical_residual,
 )
+from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
 from mgt_shell_load_path import surface_pressure_load_path_filter
 
 
@@ -742,6 +743,18 @@ def run_mgt_direct_residual_newton_probe(
             material_props=material_props,
         )
         shell_operator_cache: dict[str, Any] = {}
+        frame_force_axial_forces = {
+            int(elem_id): float(force) * float(frame_gravity_load_scale) * float(load_scale)
+            for elem_id, force in base_axial_forces.items()
+        }
+        frame_force_cache = prepack_frame_force_based_assembly(
+            node_xyz=node_xyz,
+            frame_elements=frame_elements,
+            section_props=section_props,
+            material_props=material_props,
+            element_axial_forces=frame_force_axial_forces,
+            include_geometric=True,
+        )
 
         def assemble_residual(
             u: np.ndarray,
@@ -774,6 +787,7 @@ def run_mgt_direct_residual_newton_probe(
                     load_scale=load_scale,
                     include_component_forces=include_component_forces,
                     shell_operator_cache=shell_operator_cache,
+                    frame_force_cache=frame_force_cache,
                 )
                 f_ext = np.asarray(external_load_override, dtype=np.float64)
                 free = np.asarray(free_override, dtype=np.int64)
@@ -847,6 +861,7 @@ def run_mgt_direct_residual_newton_probe(
                 load_scale=load_scale,
                 include_component_forces=include_component_forces,
                 shell_operator_cache=shell_operator_cache,
+                frame_force_cache=frame_force_cache,
             )
             f_ext = (
                 np.asarray(external_load_override, dtype=np.float64)
