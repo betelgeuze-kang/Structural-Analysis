@@ -1,0 +1,120 @@
+{
+  "schema_version": "mgt-direct-residual-hip-largest-rows-summary.v1",
+  "generated_at": "2026-06-14T16:24:30+09:00",
+  "status": "partial",
+  "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup69_final_checkpoint.npz",
+  "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+  "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json",
+  "residual_gate_n": 0.001,
+  "followup70_largest_rows_refresh": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup70_probe.json",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup70_final_checkpoint.npz",
+    "accepted": true,
+    "base_direct_residual_inf_n": 0.033617517624279225,
+    "final_direct_residual_inf_n": 0.03355466920495953,
+    "accepted_improvement_inf_n": 6.284841931969432e-5,
+    "promotion_count": 4,
+    "trial_row_count": 523,
+    "target_mode": "largest_rows",
+    "support_column_counts": [
+      1,
+      4,
+      8,
+      16
+    ],
+    "batch_replay_backend": "hip_full_residual",
+    "batch_fd_replay_seconds": 13.684125607011083,
+    "batch_alpha_replay_seconds": 18.01985298898944,
+    "total_seconds": 101.73062439799833,
+    "best_candidate": {
+      "target_row_count": 6,
+      "support_column_count": 1,
+      "support_size": 6,
+      "alpha": 0.000125,
+      "direct_residual_inf_n": 0.03355466920630956,
+      "improvement_inf_n": 4.047173144838823e-6
+    }
+  },
+  "followup71_largest_rows_refresh": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup71_probe.json",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup71_final_checkpoint.npz",
+    "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json",
+    "accepted": true,
+    "base_direct_residual_inf_n": 0.03355466920495953,
+    "final_direct_residual_inf_n": 0.03351098874557701,
+    "accepted_improvement_inf_n": 4.368045938252241e-5,
+    "promotion_count": 6,
+    "trial_row_count": 809,
+    "target_mode": "largest_rows",
+    "support_column_counts": [
+      1,
+      4,
+      8,
+      16
+    ],
+    "batch_replay_backend": "hip_full_residual",
+    "batch_fd_replay_seconds": 17.59360729699256,
+    "batch_alpha_replay_seconds": 27.168934776011156,
+    "total_seconds": 133.47180899200612,
+    "frontier_top_row_dominant_component_counts": {
+      "shell_membrane": 44,
+      "frame": 14,
+      "shell_bending_drilling": 38
+    },
+    "frontier_top_hotspot": {
+      "node_index": 2379,
+      "dof": "uz",
+      "residual_n": -0.03351098874557701,
+      "dominant_component": "shell_membrane"
+    },
+    "best_candidate": {
+      "target_row_count": 8,
+      "support_column_count": 4,
+      "support_size": 16,
+      "alpha": 0.001,
+      "direct_residual_inf_n": 0.0335109887454349,
+      "improvement_inf_n": 2.0328463948837694e-6
+    }
+  },
+  "followup72_largest_rows_refresh": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_probe.json",
+    "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+    "accepted": true,
+    "base_direct_residual_inf_n": 0.03351098874557701,
+    "final_direct_residual_inf_n": 0.03346743594923307,
+    "accepted_improvement_inf_n": 4.3552796343937494e-5,
+    "promotion_count": 8,
+    "trial_row_count": 736,
+    "target_mode": "largest_rows",
+    "support_column_counts": [
+      1,
+      4
+    ],
+    "batch_replay_backend": "hip_full_residual",
+    "batch_fd_replay_seconds": 20.09814968999126,
+    "batch_alpha_replay_seconds": 23.424470815007226,
+    "total_seconds": 150.96374123299756,
+    "best_candidate": {
+      "target_row_count": 6,
+      "support_column_count": 1,
+      "support_size": 7,
+      "alpha": 0.00003125,
+      "direct_residual_inf_n": 0.03346743594921886,
+      "improvement_inf_n": 7.122666455042226e-7
+    }
+  },
+  "cumulative": {
+    "base_direct_residual_inf_n": 0.033617517624279225,
+    "final_direct_residual_inf_n": 0.03346743594923307,
+    "accepted_improvement_inf_n": 0.00015008167504615422,
+    "remaining_residual_margin_to_gate_n": 0.03246743594923307,
+    "promotion_count": 18,
+    "trial_row_count": 2068,
+    "total_seconds": 386.166174622002,
+    "batch_fd_replay_seconds": 51.3758825939949,
+    "batch_alpha_replay_seconds": 68.61325858000782
+  },
+  "assessment": "Followup70-72 prove that refreshed HIP-backed largest-row finite-difference correction remains a live G1 descent lane after followup69. Three chained probes accepted 18 promotions and reduced the attached-policy direct residual from 0.0336175176 N to 0.0334674359 N, a 1.50e-4 N improvement. The latest frontier remains a coupled shell_membrane/shell_bending_drilling/frame cancellation pattern, so repetition alone is still too slow for gate closure without an adaptive controller and a lower-overhead persistent Rust/HIP residual/JVP worker.",
+  "next_solver_step": "Resume from the followup72 checkpoint. Continue narrowed largest_rows refresh while the last accepted improvement stays above numerical noise, then switch to a coupled node/shell/frame controller when the largest-row alpha collapses.",
+  "claim_boundary": "Residual descent evidence only. This does not claim final residual gate closure, full-load path closure, or production in-process ROCm/HIP residency."
+}

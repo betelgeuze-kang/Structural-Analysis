@@ -1,14 +1,15 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T16:04:37+09:00",
+  "generated_at": "2026-06-14T16:24:30+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup69_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup69_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.033617517624279225,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_probe.json",
+    "latest_attached_policy_component_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.03346743594923307,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.032617517624279224
+    "remaining_residual_margin_to_gate_n": 0.03246743594923307
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
@@ -368,6 +369,20 @@
       "post_shell_hip_largest_rows_followup69_batch_fd_state_count": 52,
       "post_shell_hip_largest_rows_followup69_batch_alpha_state_count": 131,
       "post_shell_hip_largest_rows_followup69_assessment": "Followup69 uses the connected HIP full-residual row backend on a broader largest-row finite-difference row-correction search. It accepts two promotions and reduces the attached-policy direct residual by 2.10e-5 N, from 0.0336384785 N to 0.0336175176 N. Followup68 shows the broader shell geometry-normal+bending target remains no-descent at this frontier.",
+      "post_shell_hip_largest_rows_followup70_72_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_hip_largest_rows_followup70_72_summary.json",
+      "post_shell_hip_largest_rows_followup70_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup70_probe.json",
+      "post_shell_hip_largest_rows_followup71_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup71_probe.json",
+      "post_shell_hip_largest_rows_followup72_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_probe.json",
+      "post_shell_hip_largest_rows_followup72_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_hip_largest_rows_followup72_final_checkpoint.npz",
+      "post_shell_hip_largest_rows_followup71_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_hip_largest_rows_followup71_frontier_probe.json",
+      "post_shell_hip_largest_rows_followup70_72_accepted": true,
+      "post_shell_hip_largest_rows_followup70_72_base_residual_inf_n": 0.033617517624279225,
+      "post_shell_hip_largest_rows_followup70_72_final_residual_inf_n": 0.03346743594923307,
+      "post_shell_hip_largest_rows_followup70_72_improvement_inf_n": 0.00015008167504615422,
+      "post_shell_hip_largest_rows_followup70_72_promotion_count": 18,
+      "post_shell_hip_largest_rows_followup70_72_trial_row_count": 2068,
+      "post_shell_hip_largest_rows_followup70_72_batch_replay_backend": "hip_full_residual",
+      "post_shell_hip_largest_rows_followup70_72_assessment": "Followup70-72 continue from the followup69 checkpoint with refreshed HIP-backed largest-row finite-difference row correction. They accept 18 promotions over three probes and reduce the attached-policy direct residual by 1.50e-4 N, from 0.0336175176 N to 0.0334674359 N. The followup71 component frontier remains mixed shell_membrane, shell_bending_drilling, and frame, so this is live descent evidence rather than final closure.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
       "row_correction_batch_alpha_trial_rows": 300,
@@ -756,7 +771,9 @@
     "Followup66 proves a single native HIP subprocess boundary for frame+shell+spring+external-load full residual/JVP replay.",
     "Followup67 proves that backend can serve the direct residual Newton row-correction FD/alpha batch replay boundary.",
     "Followup68 shows the broad shell geometry-normal+bending row family remains no-descent under the HIP backend.",
-    "Followup69 reopens descent with HIP-backed largest-row finite-difference correction and writes the latest checkpoint; the next backend step is a persistent in-process Rust/HIP worker with resident buffers, while the next solver step is refreshed frontier targeting from the followup69 state."
+    "Followup69 reopens descent with HIP-backed largest-row finite-difference correction and writes a checkpoint.",
+    "Followup70-72 show the refreshed HIP-backed largest-row lane remains live: three chained probes accept 18 more promotions and lower the attached-policy direct residual to 0.0334674359 N.",
+    "Continue from followup72 with narrowed largest-row refresh while accepted improvements remain above numerical noise, but treat this as a bridge to an adaptive coupled node/shell/frame controller plus persistent in-process Rust/HIP residual/JVP residency."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, and followup69 validates live descent through that backend. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, and followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, and production in-process ROCm/HIP residual/JVP residency remain open."
 }
