@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T12:57:58+09:00",
+  "generated_at": "2026-06-14T13:06:20+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -169,14 +169,17 @@
       "shell_geometry_normal_bending_followup61_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_geometry_normal_bending_refresh_followup61_frontier_probe.json",
       "shell_geometry_normal_bending_total_followup55_to_61_improvement_inf_n": 8.148936046836752e-06,
       "shell_geometry_normal_bending_followup61_residual_inf_n": 0.03363849211925307,
-      "post_shell_saturation_followup59_62_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_62_summary.json",
+      "post_shell_saturation_followup59_63_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_63_summary.json",
       "global_krylov_post_shell_followup62_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_probe.json",
       "global_krylov_post_shell_followup62_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
       "global_krylov_post_shell_followup62_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
       "global_krylov_post_shell_followup62_improvement_inf_n": 1.3575004231825005e-08,
       "global_krylov_post_shell_followup62_residual_inf_n": 0.03363847854424884,
+      "secant_family_post_shell_followup63_smoke": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_secant_family_post_shell_followup63_smoke.json",
+      "secant_family_post_shell_followup63_accepted": false,
+      "secant_family_post_shell_followup63_best_improvement_inf_n": -5.372919988289038e-05,
       "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
-      "assessment": "Coupled largest-row node-block current-tangent correction remains the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, followup52 residual-node-block retargeting only found numerical-noise improvement, and followup53/54 showed shell element blocks and shell rotation-only rows do not descend. Followup55-57 geometry-normal shell translation retargeting reopened descent, and followup58 adds a new coupled geometry-normal plus bending/drilling target mode. Followup59 still descended, followup60 finite-difference row-submatrix did not, followup61 broad retargeting only found numerical-floor descent, and followup62 scaled-floor global Krylov improved only 1.36e-8 N. The latest frontier is shell_membrane-dominant again, so the next pass needs a higher-level coupled shell/material globalization or production backend lane rather than more local row-correction/Krylov repetition."
+      "assessment": "Coupled largest-row node-block current-tangent correction remains the strongest live G1 lane in this sequence. It moved the attached-policy residual from 0.0340294701 to 0.0336466411 N. Narrow fixed support failed at followup49, but broad adaptive target/support refresh recovered large descent at refresh followup49 and followup50. Followup51 then no-descended, followup52 residual-node-block retargeting only found numerical-noise improvement, and followup53/54 showed shell element blocks and shell rotation-only rows do not descend. Followup55-57 geometry-normal shell translation retargeting reopened descent, and followup58 adds a new coupled geometry-normal plus bending/drilling target mode. Followup59 still descended, followup60 finite-difference row-submatrix did not, followup61 broad retargeting only found numerical-floor descent, followup62 scaled-floor global Krylov improved only 1.36e-8 N, and followup63 secant-family history globalization worsened the residual. The latest frontier is shell_membrane-dominant again, so the next pass needs a higher-level coupled shell/material formulation or production backend lane rather than more local row-correction/Krylov/secant repetition."
     }
   },
   "engine_state": {
@@ -378,12 +381,14 @@
       "shell_geometry_normal_bending_refresh_followup61_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_geometry_normal_bending_refresh_followup61_frontier_probe.json",
       "shell_geometry_normal_bending_total_followup55_to_61_improvement_inf_n": 8.148936046836752e-06,
       "shell_geometry_normal_bending_followup61_residual_inf_n": 0.03363849211925307,
-      "post_shell_saturation_followup59_62_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_62_summary.json",
+      "post_shell_saturation_followup59_63_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_63_summary.json",
       "global_krylov_post_shell_followup62_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_probe.json",
       "global_krylov_post_shell_followup62_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
       "global_krylov_post_shell_followup62_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
       "global_krylov_post_shell_followup62_improvement_inf_n": 1.3575004231825005e-08,
       "global_krylov_post_shell_followup62_residual_inf_n": 0.03363847854424884,
+      "secant_family_post_shell_followup63_smoke": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_secant_family_post_shell_followup63_smoke.json",
+      "secant_family_post_shell_followup63_accepted": false,
       "coupled_row_nodeblock_total_followup47_to_50_improvement_inf_n": 0.0003828290785964916,
       "coupled_row_nodeblock_refresh_followup50_residual_inf_n": 0.03364664105529991
     },
@@ -585,7 +590,7 @@
         "assessment": "Post-followup51 retargeting shows plain node blocks, shell element blocks, and isolated shell bending/drilling rows are not enough. Geometry-normal shell translation rows do descend, and the new coupled geometry-normal plus bending/drilling target mode also descended. Followup59 tapered, followup60 finite-difference row-submatrix did not descend, and followup61 found only numerical-floor improvement, so this local row-correction family is now saturated at 0.0336384921 N."
       },
       {
-        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_62_summary.json",
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_post_shell_saturation_followup59_63_summary.json",
         "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_post_shell_followup62_final_checkpoint.npz",
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_post_shell_followup62_frontier_probe.json",
         "base_residual_inf_n": 0.033638743914140234,
@@ -595,7 +600,9 @@
         "followup60_fd_row_submatrix_accepted": false,
         "followup61_coupled_shell_broad_improvement_inf_n": 6.411937647499144e-11,
         "followup62_global_krylov_improvement_inf_n": 1.3575004231825005e-08,
-        "assessment": "After the coupled shell lane tapered, finite-difference row-submatrix and scaled-floor global Krylov did not reopen a material descent. The next work should move the coupled shell membrane/bending correction into a higher-level globalization/material Newton path or a faster production residual/JVP backend, not repeat local row sweeps."
+        "followup63_secant_family_accepted": false,
+        "followup63_secant_family_best_improvement_inf_n": -5.372919988289038e-05,
+        "assessment": "After the coupled shell lane tapered, finite-difference row-submatrix, scaled-floor global Krylov, and accepted-history secant-family globalization did not reopen a material descent. The next work should move the coupled shell membrane/bending correction into a higher-level material/globalization formulation or a faster production residual/JVP backend, not repeat local row/history sweeps."
       }
     ],
     "latest_frontier_pattern": {
@@ -629,7 +636,7 @@
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "Followup47-50 show the active G1 direction is coupled largest-row node-block correction with refreshed target/support sets, not single-row scaling or fixed Krylov repetition. Followup55-59 further show geometry-normal shell translation rows and a coupled shell geometry-normal plus bending/drilling target can reopen descent after nodeblock and shell-element no-descent. Followup60-62 show the local coupled row-correction and current scaled-floor global Krylov variants have now saturated, so full closure still requires adaptive coupled shell bending/membrane/globalization and production residual/JVP replay.",
+    "reason": "Followup47-50 show the active G1 direction is coupled largest-row node-block correction with refreshed target/support sets, not single-row scaling or fixed Krylov repetition. Followup55-59 further show geometry-normal shell translation rows and a coupled shell geometry-normal plus bending/drilling target can reopen descent after nodeblock and shell-element no-descent. Followup60-63 show the local coupled row-correction, finite-difference row-submatrix, current scaled-floor global Krylov, and accepted-history secant variants have now saturated, so full closure still requires adaptive coupled shell material/globalization and production residual/JVP replay.",
     "rough_extrapolation_from_followup32": {
       "improvement_per_accepted_probe_n": 8.328283857828023e-06,
       "accepted_probe_seconds": 236.25546567300262,
@@ -662,6 +669,7 @@
       "latest_shell_geometry_normal_bending_followup60_fd_accepted": false,
       "latest_global_krylov_post_shell_followup62_improvement_n": 1.3575004231825005e-08,
       "latest_global_krylov_post_shell_followup62_residual_n": 0.03363847854424884,
+      "latest_secant_family_post_shell_followup63_accepted": false,
       "steps_needed_at_followup50_chunk_improvement": 201.53906261695525
     }
   },
@@ -677,7 +685,7 @@
     "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition.",
     "Use the followup46 hotspot JVP consistency result to focus the next attempt on a coupled shell_bending_drilling/shell_membrane/frame globalization space; frame-only diagonal Newton is a demonstrated wrong turn.",
     "Promote the coupled row-nodeblock lane from one-off CLI probes into an adaptive controller that refreshes target rows/support after every accepted frontier move.",
-    "After followup60-62, stop repeating local coupled shell row-correction and the current scaled-floor global Krylov sweeps. Promote the coupled shell membrane-normal plus bending/drilling idea into a higher-level globalization/material direction or production residual/JVP backend lane."
+    "After followup60-63, stop repeating local coupled shell row-correction, current scaled-floor global Krylov, and accepted-history secant-family sweeps. Promote the coupled shell membrane-normal plus bending/drilling idea into a higher-level shell material/globalization formulation or production residual/JVP backend lane."
   ],
   "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels; batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, and coupled row-nodeblock descent are integrated diagnostics; adaptive material/shell/frame Newton, full-load path closure, and production ROCm/HIP full residual gate closure remain open."
 }

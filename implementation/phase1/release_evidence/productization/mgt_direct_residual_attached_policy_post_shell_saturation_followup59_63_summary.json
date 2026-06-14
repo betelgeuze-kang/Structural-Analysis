@@ -1,6 +1,6 @@
 {
-  "schema_version": "mgt-direct-residual-attached-policy-post-shell-saturation-summary.v1",
-  "generated_at": "2026-06-14T12:57:58+09:00",
+  "schema_version": "mgt-direct-residual-attached-policy-post-shell-saturation-summary.v2",
+  "generated_at": "2026-06-14T13:06:20+09:00",
   "status": "partial",
   "source_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_geometry_normal_bending_refresh_followup58_final_checkpoint.npz",
   "source_direct_residual_inf_n": 0.033638743914140234,
@@ -56,6 +56,24 @@
       "preconditioner_solve_count": 6,
       "best_alpha": 0.125,
       "assessment": "Scaled-floor global Krylov after the coupled shell frontier descended only 1.36e-8 N. This confirms the immediate blocker is now higher-level coupled shell/material globalization rather than local row-correction or the previous Krylov configuration."
+    },
+    {
+      "name": "followup63_post_shell_secant_family_smoke",
+      "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_secant_family_post_shell_followup63_smoke.json",
+      "accepted": false,
+      "base_residual_inf_n": 0.03363847854424884,
+      "final_residual_inf_n": 0.03363847854424884,
+      "best_candidate_residual_inf_n": 0.03369220774413173,
+      "best_candidate_improvement_inf_n": -5.372919988289038e-05,
+      "window_size": 4,
+      "ridge_factor": 0.0,
+      "alpha_values": [
+        1.0,
+        0.25,
+        0.0625
+      ],
+      "checkpoint_written": false,
+      "assessment": "Accepted-history secant-family globalization worsened the residual even in a narrow window-4 smoke. This removes the remaining history-subspace fallback at the current post-shell frontier."
     }
   ],
   "latest_frontier_pattern": {
@@ -83,5 +101,5 @@
       "dominant_component": "shell_bending_drilling"
     }
   },
-  "claim_boundary": "This summary records saturation evidence after the coupled shell target lane. It advances the attached-policy direct residual frontier but does not close the 0.001 N residual gate."
+  "claim_boundary": "This summary records saturation evidence after the coupled shell target lane. It advances the attached-policy direct residual frontier through followup62, then records followup63 secant-family no-descent. It does not close the 0.001 N residual gate."
 }
