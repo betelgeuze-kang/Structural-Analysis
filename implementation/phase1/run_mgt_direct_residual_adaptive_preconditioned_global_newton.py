@@ -122,6 +122,7 @@ def _run_child_subprocess(
     matrix_free_global_krylov_max_iterations: int,
     matrix_free_global_krylov_probe_epsilon: float,
     matrix_free_global_krylov_probe_max_step: float,
+    matrix_free_global_krylov_residual_scale_floor: float,
     matrix_free_global_krylov_alpha_values: tuple[float, ...],
     matrix_free_global_krylov_max_alpha: float,
     matrix_free_global_krylov_min_relative_improvement: float,
@@ -164,6 +165,8 @@ def _run_child_subprocess(
         str(float(matrix_free_global_krylov_probe_max_step)),
         "--matrix-free-global-krylov-scaling-mode",
         "residual_diagonal_displacement",
+        "--matrix-free-global-krylov-residual-scale-floor",
+        str(float(matrix_free_global_krylov_residual_scale_floor)),
         "--matrix-free-global-krylov-preconditioner-mode",
         "current_tangent",
         "--matrix-free-global-krylov-preconditioner-input-scale",
@@ -294,6 +297,7 @@ def run_adaptive_preconditioned_global_newton(
     matrix_free_global_krylov_max_iterations: int = 3,
     matrix_free_global_krylov_probe_epsilon: float = 1.0e-6,
     matrix_free_global_krylov_probe_max_step: float = 1.0e-5,
+    matrix_free_global_krylov_residual_scale_floor: float = 1.0,
     matrix_free_global_krylov_preconditioner_input_scales: tuple[float, ...] = (1.0,),
     matrix_free_global_krylov_alpha_values: tuple[float, ...] = (
         8.0,
@@ -391,6 +395,9 @@ def run_adaptive_preconditioned_global_newton(
                         matrix_free_global_krylov_probe_max_step=(
                             matrix_free_global_krylov_probe_max_step
                         ),
+                        matrix_free_global_krylov_residual_scale_floor=(
+                            matrix_free_global_krylov_residual_scale_floor
+                        ),
                         matrix_free_global_krylov_alpha_values=(
                             matrix_free_global_krylov_alpha_values
                         ),
@@ -441,6 +448,9 @@ def run_adaptive_preconditioned_global_newton(
                             matrix_free_global_krylov_probe_max_step
                         ),
                         matrix_free_global_krylov_scaling_mode="residual_diagonal_displacement",
+                        matrix_free_global_krylov_residual_scale_floor=(
+                            matrix_free_global_krylov_residual_scale_floor
+                        ),
                         matrix_free_global_krylov_preconditioner_mode="current_tangent",
                         matrix_free_global_krylov_preconditioner_input_scale=(
                             float(preconditioner_input_scale)
@@ -606,6 +616,9 @@ def run_adaptive_preconditioned_global_newton(
                 )
                 if float(value) > 0.0
             ],
+            "matrix_free_global_krylov_residual_scale_floor": float(
+                matrix_free_global_krylov_residual_scale_floor
+            ),
             "matrix_free_global_krylov_max_alpha": float(
                 matrix_free_global_krylov_max_alpha
             ),
@@ -668,6 +681,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--matrix-free-global-krylov-max-iterations", type=int, default=3)
     parser.add_argument("--matrix-free-global-krylov-probe-epsilon", type=float, default=1.0e-6)
     parser.add_argument("--matrix-free-global-krylov-probe-max-step", type=float, default=1.0e-5)
+    parser.add_argument(
+        "--matrix-free-global-krylov-residual-scale-floor",
+        type=float,
+        default=1.0,
+        help=(
+            "Minimum residual magnitude for D_r row scaling passed to each child "
+            "global Krylov probe."
+        ),
+    )
     parser.add_argument(
         "--matrix-free-global-krylov-alpha-values",
         default="8,4,2,1,0.5,0.25",
@@ -755,6 +777,9 @@ def main(argv: list[str] | None = None) -> int:
         matrix_free_global_krylov_max_iterations=args.matrix_free_global_krylov_max_iterations,
         matrix_free_global_krylov_probe_epsilon=args.matrix_free_global_krylov_probe_epsilon,
         matrix_free_global_krylov_probe_max_step=args.matrix_free_global_krylov_probe_max_step,
+        matrix_free_global_krylov_residual_scale_floor=(
+            args.matrix_free_global_krylov_residual_scale_floor
+        ),
         matrix_free_global_krylov_alpha_values=_parse_float_csv(
             args.matrix_free_global_krylov_alpha_values
         ),

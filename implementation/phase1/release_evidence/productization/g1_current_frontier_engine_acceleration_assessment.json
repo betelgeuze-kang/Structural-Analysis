@@ -1,19 +1,19 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-14T11:41:13+09:00",
+  "generated_at": "2026-06-14T11:58:48+09:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
-    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
-    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
-    "latest_attached_policy_direct_residual_inf_n": 0.0340299725191926,
+    "latest_attached_policy_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
+    "latest_attached_policy_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
+    "latest_attached_policy_direct_residual_inf_n": 0.0340294701338964,
     "residual_gate_n": 0.001,
-    "remaining_residual_margin_to_gate_n": 0.033029972519192596
+    "remaining_residual_margin_to_gate_n": 0.0330294701338964
   },
   "runtime_bottleneck_evidence": {
     "followup32": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_followup32_probe.json",
-      "accepted_improvement_inf_n": 0.000008328283857828023,
+      "accepted_improvement_inf_n": 8.328283857828023e-06,
       "runtime_seconds": 236.25546567300262,
       "residual_only_eval_count": 299,
       "finite_difference_columns": 144,
@@ -38,11 +38,11 @@
       "support_size": 18,
       "jvp_seconds": 11.80182786200021,
       "residual_only_assembly_count": 18,
-      "best_improvement_inf_n": -0.0000009496883164872294
+      "best_improvement_inf_n": -9.496883164872294e-07
     },
     "followup37_fastpath": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup37_probe.json",
-      "accepted_improvement_inf_n": 0.000008322755447431884,
+      "accepted_improvement_inf_n": 8.322755447431884e-06,
       "runtime_seconds": 44.81506344900117,
       "residual_only_eval_count": 1058,
       "finite_difference_columns": 480,
@@ -51,7 +51,7 @@
     },
     "followup38_fastpath": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup38_probe.json",
-      "accepted_improvement_inf_n": 0.000005111632166654445,
+      "accepted_improvement_inf_n": 5.111632166654445e-06,
       "runtime_seconds": 44.59951822400035,
       "residual_only_eval_count": 921,
       "finite_difference_columns": 600,
@@ -60,7 +60,7 @@
     },
     "followup39_shell_bending_fastpath": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_fastpath_followup39_probe.json",
-      "accepted_improvement_inf_n": 0.0000051097574915726085,
+      "accepted_improvement_inf_n": 5.1097574915726085e-06,
       "runtime_seconds": 45.083288622998225,
       "residual_only_eval_count": 942,
       "finite_difference_columns": 600,
@@ -69,7 +69,7 @@
     },
     "followup40_shell_normal_fastpath": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_normal_fastpath_followup40_probe.json",
-      "accepted_improvement_inf_n": 0.0000010568896393059468,
+      "accepted_improvement_inf_n": 1.0568896393059468e-06,
       "runtime_seconds": 44.52441979399737,
       "residual_only_eval_count": 968,
       "finite_difference_columns": 600,
@@ -78,7 +78,7 @@
     },
     "followup41_shell_bending_batch_alpha": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
-      "accepted_improvement_inf_n": 0.00000103939459089597,
+      "accepted_improvement_inf_n": 1.03939459089597e-06,
       "runtime_seconds": 45.564931464003166,
       "initial_assembly_seconds": 24.61096264900698,
       "residual_only_eval_count": 936,
@@ -90,7 +90,7 @@
     },
     "followup42_shell_bending_batch_fd": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_followup42_probe.json",
-      "accepted_improvement_inf_n": 0.00000012992035058889684,
+      "accepted_improvement_inf_n": 1.2992035058889684e-07,
       "runtime_seconds": 45.085177022003336,
       "initial_assembly_seconds": 23.985165083999163,
       "residual_only_eval_count": 924,
@@ -105,7 +105,7 @@
     },
     "followup43_global_krylov": {
       "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_probe.json",
-      "accepted_improvement_inf_n": 0.00002774165375341031,
+      "accepted_improvement_inf_n": 2.774165375341031e-05,
       "runtime_seconds": 42.551498077998986,
       "initial_assembly_seconds": 24.037004093996075,
       "matrix_free_global_krylov_matvec_count": 3,
@@ -120,6 +120,14 @@
       "base_residual_inf_n": 0.0340299725191926,
       "best_candidate_residual_inf_n": 0.03403767840852834,
       "assessment": "Repeating the same global Krylov configuration after the followup43 hotspot shift did not descend. The next pass needs retuned scaling/preconditioning or a shell-membrane/coupled material direction rather than blind repetition."
+    },
+    "followup45_46_scaled_floor_global_krylov": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor_followup45_46_summary.json",
+      "best_followup45_improvement_inf_n": 4.956016265156293e-07,
+      "followup46_repeat_improvement_inf_n": 6.783669681542648e-09,
+      "latest_direct_residual_inf_n": 0.0340294701338964,
+      "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
+      "assessment": "Residual row-scale floor retuning breaks the followup44 no-descent state, but the repeat pass collapses to 6.78e-9 N improvement. It is useful as a direction diagnostic, not as a gate-closure loop."
     }
   },
   "engine_state": {
@@ -178,7 +186,8 @@
     "row_correction_driver": {
       "path": "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
       "current_shape": "finite-difference support columns and alpha candidates both replay through the residual-only batch internal-force path",
-      "acceleration_target": "move the batch residual/JVP replay and current-tangent-preconditioned global Krylov lane into a persistent Rust/HIP worker, then retune around the shell-membrane hotspot that appears after followup43"
+      "acceleration_target": "move the batch residual/JVP replay and current-tangent-preconditioned global Krylov lane into a persistent Rust/HIP worker, then retune around the shell-membrane hotspot that appears after followup43",
+      "adaptive_global_krylov_controller_update": "run_mgt_direct_residual_adaptive_preconditioned_global_newton.py now passes residual_scale_floor to child global Krylov probes so scaled-floor retuning can be swept without manual one-off commands."
     }
   },
   "implemented_followup": {
@@ -199,8 +208,8 @@
     "validation": {
       "frame_force_fastpath_probe": "implementation/phase1/release_evidence/productization/mgt_frame_force_fastpath_followup32_probe.json",
       "frame_force_fastpath_status": "pass",
-      "frame_force_max_abs_difference_n": 0.00000008009374141693115,
-      "frame_force_relative_difference_inf": 0.0000000000004884368659355103,
+      "frame_force_max_abs_difference_n": 8.009374141693115e-08,
+      "frame_force_relative_difference_inf": 4.884368659355103e-13,
       "frame_force_speedup_factor": 1273.6984002619572,
       "attached_policy_direct_replay_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_fastpath_replay_followup32_probe.json",
       "attached_policy_replayed_direct_residual_inf_n": 0.03410235276851825,
@@ -213,7 +222,7 @@
       "batch_residual_replay_probe": "implementation/phase1/release_evidence/productization/mgt_residual_batch_replay_followup38_probe.json",
       "batch_residual_replay_status": "pass",
       "batch_residual_replay_batch_size": 64,
-      "batch_residual_replay_max_abs_difference_n": 0.00000005681070547325362,
+      "batch_residual_replay_max_abs_difference_n": 5.681070547325362e-08,
       "batch_residual_replay_sequential_mean_seconds": 0.19852020833301745,
       "batch_residual_replay_batch_mean_seconds": 0.17049725999944107,
       "batch_residual_replay_speedup_factor": 1.1643601095622782,
@@ -227,8 +236,8 @@
       "native_hip_frame_force_batch_cpu_mean_seconds": 0.06942373890015005,
       "native_hip_frame_force_batch_kernel_mean_seconds": 0.000537403345,
       "native_hip_frame_force_batch_speedup_vs_cpu": 129.183674694377,
-      "native_hip_frame_force_batch_max_abs_difference_n": 0.0000011620006930002091,
-      "native_hip_frame_force_batch_relative_difference_inf": 0.000000000007086246274218062,
+      "native_hip_frame_force_batch_max_abs_difference_n": 1.1620006930002091e-06,
+      "native_hip_frame_force_batch_relative_difference_inf": 7.086246274218062e-12,
       "native_hip_frame_force_batch_assessment": "The native HIP frame-force batch bridge now runs when the process has GPU device access. It provides a 129x kernel-level speedup over the CPU prepacked frame batch on followup40 with relative force error 7.1e-12. This is real but insufficient by itself because the latest residual frontier is dominated by shell bending/drilling and shell membrane rows.",
       "native_hip_shell_csr_batch_probe": "implementation/phase1/release_evidence/productization/mgt_hip_shell_csr_batch_followup40_probe.json",
       "native_hip_shell_csr_batch_binary": "implementation/phase1/release_evidence/productization/bin/hip_shell_csr_batch_replay",
@@ -239,8 +248,8 @@
       "native_hip_shell_csr_batch_cpu_mean_seconds": 0.041560889950415,
       "native_hip_shell_csr_batch_kernel_mean_seconds": 0.015459188461,
       "native_hip_shell_csr_batch_speedup_vs_cpu": 2.6884263721387205,
-      "native_hip_shell_csr_batch_max_abs_difference_n": 0.000000000739305505703669,
-      "native_hip_shell_csr_batch_relative_difference_inf": 0.0000000000000047133911524429465,
+      "native_hip_shell_csr_batch_max_abs_difference_n": 7.39305505703669e-10,
+      "native_hip_shell_csr_batch_relative_difference_inf": 4.7133911524429465e-15,
       "native_hip_shell_csr_batch_assessment": "The native HIP shell CSR batch bridge now validates the dominant shell path directly on followup40. The kernel is 2.69x faster than SciPy CSR batch matvec for 64 states with 4.7e-15 relative force error. Subprocess and host-copy overhead still dominate, so the next engineering step is in-process residual replay batching or a persistent Rust/HIP worker rather than one subprocess per candidate batch.",
       "row_correction_batch_alpha_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_followup41_probe.json",
       "row_correction_batch_alpha_metadata_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_alpha_metadata_smoke_followup41_probe.json",
@@ -250,40 +259,48 @@
       "row_correction_batch_alpha_state_count": 300,
       "row_correction_batch_alpha_seconds": 0.8261558019876247,
       "row_correction_batch_alpha_residual_only_eval_count": 936,
-      "row_correction_batch_alpha_accepted_improvement_inf_n": 0.00000103939459089597,
+      "row_correction_batch_alpha_accepted_improvement_inf_n": 1.03939459089597e-06,
       "row_correction_batch_fd_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_followup42_probe.json",
       "row_correction_batch_fd_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_shell_bending_batch_fd_smoke_followup42_probe.json",
       "row_correction_batch_fd_batch_count": 12,
       "row_correction_batch_fd_state_count": 627,
       "row_correction_batch_fd_seconds": 2.1073477210084093,
       "row_correction_batch_fd_residual_only_eval_count": 924,
-      "row_correction_batch_fd_accepted_improvement_inf_n": 0.00000012992035058889684,
+      "row_correction_batch_fd_accepted_improvement_inf_n": 1.2992035058889684e-07,
       "global_krylov_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_smoke_followup43_probe.json",
       "global_krylov_wide_alpha_smoke_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_wide_alpha_smoke_followup43_probe.json",
       "global_krylov_followup43_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_probe.json",
       "global_krylov_followup43_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
       "global_krylov_followup43_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
-      "global_krylov_followup43_accepted_improvement_inf_n": 0.00002774165375341031,
+      "global_krylov_followup43_accepted_improvement_inf_n": 2.774165375341031e-05,
       "global_krylov_followup43_best_alpha": 0.02734375,
       "global_krylov_followup43_matvec_count": 3,
       "global_krylov_followup43_preconditioner_solve_count": 4,
       "global_krylov_followup44_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup44_probe.json",
-      "global_krylov_followup44_accepted": false
+      "global_krylov_followup44_accepted": false,
+      "global_krylov_scaled_floor_followup45_46_summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor_followup45_46_summary.json",
+      "global_krylov_scaled_floor_followup45_best_improvement_inf_n": 4.956016265156293e-07,
+      "global_krylov_scaled_floor_followup46_probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_probe.json",
+      "global_krylov_scaled_floor_followup46_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
+      "global_krylov_scaled_floor_followup46_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
+      "global_krylov_scaled_floor_followup46_improvement_inf_n": 6.783669681542648e-09,
+      "global_krylov_scaled_floor_followup46_residual_inf_n": 0.0340294701338964,
+      "adaptive_global_krylov_controller_residual_scale_floor_cli": "implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py --matrix-free-global-krylov-residual-scale-floor"
     },
-    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family."
+    "assessment": "The first practical G1 replay acceleration is implemented for reference-geometry frame force recovery, and a CPU batch residual-only replay contract now validates frame/shell/spring candidate replay against the sequential evaluator. The native HIP frame-force batch bridge now runs with GPU device access and gives about 129x kernel-level speedup over CPU frame replay on followup40. The native HIP shell CSR batch bridge also runs and gives 2.69x kernel-level speedup over CPU shell batch replay on the 1.90M-nnz followup40 shell matrix. Followup41 wires row-correction alpha replay into the batch internal-force evaluator, followup42 wires finite-difference support-column replay into the same batch path, and followup43 proves a stronger current-tangent-preconditioned global Krylov direction can still move the physical residual. The remaining high-impact work is to make that global/coupled lane persistent and retune it after hotspot transitions, not to keep widening the saturated row-correction family. Followup45/46 add residual-scale-floor retuning for the global Krylov lane: it proves the followup44 no-descent state can be escaped, but the repeat improvement saturates immediately, leaving the next high-impact work in a coupled shell bending/membrane/frame or material Newton direction."
   },
   "fastpath_frontier_advances": {
-    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_followup43_final_checkpoint.npz",
-    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
-    "latest_direct_residual_inf_n": 0.0340299725191926,
-    "latest_direct_relative_residual_inf": 0.0000039222483721026325,
+    "latest_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
+    "latest_frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
+    "latest_direct_residual_inf_n": 0.0340294701338964,
+    "latest_direct_relative_residual_inf": 3.922190467856337e-06,
     "advances": [
       {
         "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_probe.json",
         "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup35_final_checkpoint.npz",
         "base_residual_inf_n": 0.03410235276851825,
         "final_residual_inf_n": 0.03408530158557471,
-        "improvement_inf_n": 0.000017051182943539356,
+        "improvement_inf_n": 1.7051182943539356e-05,
         "runtime_seconds": 42.622074427999905,
         "finite_difference_columns": 360,
         "finite_difference_seconds": 1.2152491170018038,
@@ -294,7 +311,7 @@
         "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_element_block_fastpath_followup36_final_checkpoint.npz",
         "base_residual_inf_n": 0.03408530158557471,
         "final_residual_inf_n": 0.03407848452263246,
-        "improvement_inf_n": 0.0000068170629422548146,
+        "improvement_inf_n": 6.8170629422548146e-06,
         "runtime_seconds": 42.67202692700084,
         "finite_difference_columns": 360,
         "finite_difference_seconds": 1.223592665999604,
@@ -306,7 +323,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup37_frontier_probe.json",
         "base_residual_inf_n": 0.03407848452263246,
         "final_residual_inf_n": 0.034070161767185025,
-        "improvement_inf_n": 0.000008322755447431884,
+        "improvement_inf_n": 8.322755447431884e-06,
         "runtime_seconds": 44.81506344900117,
         "finite_difference_columns": 480,
         "finite_difference_seconds": 1.3831595150004432,
@@ -318,7 +335,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_element_block_fastpath_followup38_frontier_probe.json",
         "base_residual_inf_n": 0.034070161767185025,
         "final_residual_inf_n": 0.03406505013501837,
-        "improvement_inf_n": 0.000005111632166654445,
+        "improvement_inf_n": 5.111632166654445e-06,
         "runtime_seconds": 44.59951822400035,
         "finite_difference_columns": 600,
         "finite_difference_seconds": 2.0304411809993326,
@@ -330,7 +347,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_fastpath_followup39_frontier_probe.json",
         "base_residual_inf_n": 0.03406505013501837,
         "final_residual_inf_n": 0.0340599403775268,
-        "improvement_inf_n": 0.0000051097574915726085,
+        "improvement_inf_n": 5.1097574915726085e-06,
         "runtime_seconds": 45.083288622998225,
         "finite_difference_columns": 600,
         "finite_difference_seconds": 2.302473101000942,
@@ -342,7 +359,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_normal_fastpath_followup40_frontier_probe.json",
         "base_residual_inf_n": 0.0340599403775268,
         "final_residual_inf_n": 0.03405888348788749,
-        "improvement_inf_n": 0.0000010568896393059468,
+        "improvement_inf_n": 1.0568896393059468e-06,
         "runtime_seconds": 44.52441979399737,
         "finite_difference_columns": 600,
         "finite_difference_seconds": 2.107082746002561,
@@ -354,7 +371,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_alpha_followup41_frontier_probe.json",
         "base_residual_inf_n": 0.03405888348788749,
         "final_residual_inf_n": 0.034057844093296596,
-        "improvement_inf_n": 0.00000103939459089597,
+        "improvement_inf_n": 1.03939459089597e-06,
         "runtime_seconds": 45.564931464003166,
         "finite_difference_columns": 600,
         "batch_alpha_replay_batch_count": 9,
@@ -368,7 +385,7 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_shell_bending_batch_fd_followup42_frontier_probe.json",
         "base_residual_inf_n": 0.034057844093296596,
         "final_residual_inf_n": 0.03405771417294601,
-        "improvement_inf_n": 0.00000012992035058889684,
+        "improvement_inf_n": 1.2992035058889684e-07,
         "runtime_seconds": 45.085177022003336,
         "finite_difference_columns": 600,
         "batch_fd_replay_batch_count": 12,
@@ -385,48 +402,71 @@
         "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_followup43_frontier_probe.json",
         "base_residual_inf_n": 0.03405771417294601,
         "final_residual_inf_n": 0.0340299725191926,
-        "improvement_inf_n": 0.00002774165375341031,
+        "improvement_inf_n": 2.774165375341031e-05,
         "runtime_seconds": 42.551498077998986,
         "matrix_free_global_krylov_matvec_count": 3,
         "preconditioner_solve_count": 4,
         "best_alpha": 0.02734375,
         "assessment": "Current-tangent-preconditioned global Krylov with a wider alpha search reopened useful residual descent after row-correction saturation. It moved the frontier hotspot from node 2202 rx shell bending/drilling to node 2377 uz shell membrane."
+      },
+      {
+        "evidence": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_probe.json",
+        "summary": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor_followup45_46_summary.json",
+        "checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_global_krylov_scaled_floor1em5_followup46_final_checkpoint.npz",
+        "frontier_probe": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_global_krylov_scaled_floor1em5_followup46_frontier_probe.json",
+        "base_residual_inf_n": 0.03402947691756608,
+        "final_residual_inf_n": 0.0340294701338964,
+        "improvement_inf_n": 6.783669681542648e-09,
+        "residual_scale_floor_n": 1e-05,
+        "row_scale_inf": 99999.99999999999,
+        "best_alpha": 0.04,
+        "assessment": "Repeat scaled-floor global Krylov accepted, but improvement collapsed to 6.78e-9 N; the lane is diagnostic and saturated."
       }
     ],
     "latest_frontier_pattern": {
       "top_row_dominant_component_counts": {
-        "shell_membrane": 45,
         "shell_bending_drilling": 39,
+        "shell_membrane": 45,
         "frame": 12
       },
       "top_hotspot": {
+        "node_index": 2202,
+        "dof": "rx",
+        "residual_n": -0.0340294701338964,
+        "dominant_component": "shell_bending_drilling"
+      },
+      "second_hotspot": {
         "node_index": 2377,
         "dof": "uz",
-        "residual_n": -0.0340299725191926,
+        "residual_n": -0.0340294585942047,
         "dominant_component": "shell_membrane"
       },
-      "assessment": "After followup43, the top residual moved from the node 2202 rx shell-bending/drilling hotspot to a node 2377 uz shell-membrane dominated hotspot. Top-96 dominance is now shell_membrane=45, shell_bending_drilling=39, frame=12. Followup44 showed that blindly repeating the same Krylov configuration from this new frontier does not descend, so the next pass should retune around shell membrane/frame coupling."
+      "assessment": "After followup46 the top residual is again node 2202 rx shell_bending_drilling, with node 2377 uz shell_membrane only 1.15e-8 N lower. The frontier is a paired shell bending/membrane cancellation, not a single-row scaling problem."
     }
   },
   "decision": {
     "can_rocm_rust_hip_help": true,
     "expected_best_use": "custom HIP/Rust residual replay and batched JVP engine, especially shell CSR batch matvec plus target-row residual metrics, not another sparse solver or Torch least-squares wrapper",
     "raw_backend_acceleration_is_not_enough": true,
-    "reason": "The row-correction family is algorithmically saturated, but followup43 proves a current-tangent-preconditioned global Krylov direction can still produce a much larger accepted physical residual descent. Because followup44 did not descend after the hotspot shifted to shell membrane, the next milestone is an adaptive coupled shell/frame/material direction that retunes scaling/preconditioning after each frontier transition.",
+    "reason": "The row-correction family is saturated, followup43 proved a larger current-tangent-preconditioned global Krylov descent, and followup45/46 show row-scale floor retuning can escape a no-descent frontier but saturates almost immediately. The remaining milestone is an adaptive coupled shell bending/membrane/frame or material Newton direction with production residual/JVP replay, not another fixed global scaling loop.",
     "rough_extrapolation_from_followup32": {
-      "improvement_per_accepted_probe_n": 0.000008328283857828023,
+      "improvement_per_accepted_probe_n": 8.328283857828023e-06,
       "accepted_probe_seconds": 236.25546567300262,
       "steps_needed_at_same_improvement": 3974.688409071494,
       "wall_time_days_at_same_runtime": 10.87302457660119,
       "assessment": "This extrapolation is optimistic because followup34 already showed no descent; it shows why algorithmic direction and replay throughput both matter."
     },
     "rough_extrapolation_from_latest_fastpath_followups": {
-      "latest_remaining_gate_gap_n": 0.033029972519192596,
-      "latest_global_krylov_improvement_followup43_n": 0.00002774165375341031,
+      "latest_remaining_gate_gap_n": 0.0330294701338964,
+      "latest_global_krylov_improvement_followup43_n": 2.774165375341031e-05,
       "latest_global_krylov_runtime_followup43_seconds": 42.551498077998986,
       "steps_needed_at_same_improvement": 1190.6273797802046,
       "wall_time_hours_at_same_runtime": 14.073049628425096,
-      "assessment": "Followup43 improves the extrapolation by about 47x versus the saturated row-correction lane, but brute repetition is still not a closure strategy because followup44 no longer descends after the hotspot shift. The useful path is adaptive retuning of the global/coupled direction, not a fixed-alpha loop."
+      "assessment": "Scaled-floor retuning is valuable because it escaped followup44 no-descent, but followup46 shows immediate saturation. Repetition would require tens of thousands to millions of accepted probes, so the next G1 push should build a coupled shell bending/membrane/frame or material-consistent Newton direction.",
+      "latest_scaled_floor_followup45_best_improvement_n": 4.956016265156293e-07,
+      "latest_scaled_floor_followup46_repeat_improvement_n": 6.783669681542648e-09,
+      "steps_needed_at_followup45_best_improvement": 66645.20123977998,
+      "steps_needed_at_followup46_repeat_improvement": 4868967.930995322
     }
   },
   "recommended_next_path": [
@@ -437,7 +477,8 @@
     "The row-correction driver now batches both support-column perturbations and alpha candidates; do not spend the next G1 push on another CPU replay wrapper.",
     "Use followup43's current-tangent-preconditioned global Krylov lane as the next live direction family, but retune it around the shell-membrane hotspot exposed by followup44.",
     "Use the faster backend to test adaptive shell-bending/membrane/frame coupled physical correction directions, not to repeat a fixed tiny-alpha row correction thousands of times.",
-    "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine."
+    "Keep the Rust layer as an orchestration/FFI or persistent-worker boundary after the HIP shell/frame kernels are stable; the existing Rust crate is not yet the G1 full residual engine.",
+    "Treat followup45/46 scaled-floor Krylov as a diagnostic: it identifies the paired shell_bending_drilling/shell_membrane frontier but is too weak to close the residual gate by repetition."
   ],
-  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching and FD support-column batching are integrated; followup43 proves a live global Krylov physical residual descent; adaptive coupled material/shell/frame Newton and full residual gate closure remain open."
+  "claim_boundary": "This assessment proves engine availability and identifies the acceleration target. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated batch internal-force kernels; row-correction alpha replay batching, FD support-column batching, global Krylov descent, and scaled-floor retuning are integrated diagnostics; adaptive coupled material/shell/frame Newton and full residual gate closure remain open."
 }
