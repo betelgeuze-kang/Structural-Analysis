@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup362-365-attached-equilibrium-newton-gate-summary.v1",
-  "generated_at": "2026-06-15T12:45:36.179509+00:00",
+  "generated_at": "2026-06-15T12:51:26.890064+00:00",
   "status": "partial",
   "claim_boundary": "The attached-policy physical direct residual gate is replayed below 0.001 N. Full G1 remains partial until the increment/globalization gate, full-load-path production policy, material Newton, and production ROCm/HIP solver lane are closed.",
   "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
@@ -313,9 +313,9 @@
     "breakthrough": "Once focused equilibrium Newton is run under attached_components_only, a single regularized-direct Newton step lowers the current attached-policy residual from 0.033136466982157 N to 1.787703126865381e-06 N, passing the 0.001 N residual gate.",
     "production_rocm_gap": "Native HIP kernels work outside the sandbox and ROCm sees the RX 6900 XT, but Torch ROCm exposes no cuda/HIP device. The production Newton solver lane therefore needs the native HIP/Rust path rather than the current Torch device-GMRES profile.",
     "remaining_g1_gaps": [
+      "full_load_path_all_components_residual_gate_not_closed",
       "increment_gate_checkpoint_not_promoted_after_forced_followup366",
       "production_rocm_hip_newton_solver_lane_not_closed_torch_device_unavailable",
-      "full_load_path_policy_still_attached_components_only_not_all_components",
       "material_newton_consistency_not_proven_as_final_production_contract"
     ]
   },
@@ -350,5 +350,11 @@
       "equilibrium_newton_gate_not_closed"
     ],
     "assessment": "The followup365 residual-gate checkpoint is already below tolerance. Forcing an additional attached-policy Newton correction with relative-increment convergence required produced no residual descent, so no new increment-gate checkpoint is promoted."
+  },
+  "followup367_369_full_load_path_status": {
+    "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup367_369_full_load_path_status.json",
+    "all_components_replay_residual_inf_n": 0.37383887466666776,
+    "all_components_iter4_final_residual_inf_n": 0.28068243860497744,
+    "all_components_gate_passed": false
   }
 }

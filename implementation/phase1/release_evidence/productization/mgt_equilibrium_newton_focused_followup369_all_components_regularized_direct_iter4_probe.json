@@ -1,0 +1,1365 @@
+{
+  "schema_version": "mgt-equilibrium-newton-focused-probe.v1",
+  "generated_at": "2026-06-15T12:49:33.022603+00:00",
+  "status": "partial",
+  "equilibrium_newton_ready": false,
+  "checkpoint": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "checkpoint_schema": "mgt-direct-residual-newton-state.v1",
+    "accepted_state_history_count": 390,
+    "accepted_residual_history_count": 390,
+    "residual_inf_n": 1.787703126865381e-06,
+    "fixed_point_relative_increment": null,
+    "max_translation_m": 0.03516277106084248
+  },
+  "load_scale": 0.656,
+  "base_residual_inf_n": 0.37383887466666776,
+  "initial_residual_inf_n": 0.37383887466666776,
+  "final_residual_inf_n": 0.28068243860497744,
+  "accepted_newton_iteration_count": 4,
+  "allow_negative_alphas": true,
+  "linear_solver_profile": "regularized_direct",
+  "direct_regularization_factor": null,
+  "state_scale_line_search_values": [],
+  "state_scale_only": false,
+  "min_newton_iterations_before_residual_stop": 0,
+  "require_relative_increment_gate_for_convergence": false,
+  "line_search_alphas": [
+    1.0,
+    0.5,
+    0.25,
+    0.125,
+    0.0625,
+    0.03125,
+    0.015625,
+    0.0078125,
+    0.00390625,
+    0.001953125,
+    0.0009765625,
+    0.00048828125,
+    0.000244140625,
+    6.103515625e-05,
+    1.52587890625e-05,
+    3.814697265625e-06,
+    9.5367431640625e-07,
+    2.384185791015625e-07,
+    5.960464477539063e-08
+  ],
+  "displacement_cap_m": null,
+  "max_newton_translation_increment_m": null,
+  "residual_tolerance_n": 0.0005,
+  "shell_pressure_load_path_policy": "all_components",
+  "newton_iterations": [
+    {
+      "iteration": 1,
+      "accepted": true,
+      "alpha": 1.0,
+      "start_residual_inf_n": 0.37383887466666776,
+      "best_residual_inf_n": 0.2806904887353957,
+      "relative_increment": 1.0,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 0.2806904887353957,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 0.32726468170103173,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 0.35055177818384975,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 0.36219532642525876,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 0.36801710054596326,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.3709279876063155,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.015625,
+          "residual_inf_n": 0.37238343113649164,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0078125,
+          "residual_inf_n": 0.3731111529015797,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00390625,
+          "residual_inf_n": 0.37347501378412373,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.001953125,
+          "residual_inf_n": 0.37365694422539575,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0009765625,
+          "residual_inf_n": 0.37374790944603176,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00048828125,
+          "residual_inf_n": 0.37379339205634976,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.000244140625,
+          "residual_inf_n": 0.37381613336150876,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 6.103515625e-05,
+          "residual_inf_n": 0.373833189340378,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 1.52587890625e-05,
+          "residual_inf_n": 0.3738374533350953,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 3.814697265625e-06,
+          "residual_inf_n": 0.37383851933377465,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 9.5367431640625e-07,
+          "residual_inf_n": 0.3738387858334445,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 2.384185791015625e-07,
+          "residual_inf_n": 0.37383885245836196,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 5.960464477539063e-08,
+          "residual_inf_n": 0.3738388691145913,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.0,
+          "residual_inf_n": 0.4676085029884197,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 0.42072368882754374,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.25,
+          "residual_inf_n": 0.39728128174710575,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.125,
+          "residual_inf_n": 0.38556007820688676,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 0.37969947643677726,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.03125,
+          "residual_inf_n": 0.3767691755517225,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.015625,
+          "residual_inf_n": 0.37530402510919514,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0078125,
+          "residual_inf_n": 0.37457144988793145,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00390625,
+          "residual_inf_n": 0.3742051622772996,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.001953125,
+          "residual_inf_n": 0.3740220184719837,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0009765625,
+          "residual_inf_n": 0.3739304465693257,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00048828125,
+          "residual_inf_n": 0.37388466061799674,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.000244140625,
+          "residual_inf_n": 0.37386176764233225,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -6.103515625e-05,
+          "residual_inf_n": 0.3738445979105839,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.52587890625e-05,
+          "residual_inf_n": 0.3738403054776468,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -3.814697265625e-06,
+          "residual_inf_n": 0.3738392323694125,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -9.5367431640625e-07,
+          "residual_inf_n": 0.37383896409235395,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -2.384185791015625e-07,
+          "residual_inf_n": 0.3738388970230893,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -5.960464477539063e-08,
+          "residual_inf_n": 0.37383888025577316,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        }
+      ],
+      "allow_negative_alphas": true,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 0.2806904887353957,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.2054267070002425,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.37383887466666776
+    },
+    {
+      "iteration": 2,
+      "accepted": true,
+      "alpha": 0.03125,
+      "start_residual_inf_n": 0.2806904887353957,
+      "best_residual_inf_n": 0.2806880934101136,
+      "relative_increment": 0.030303081863068702,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 0.28069442003715805,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 0.2806922159604218,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 0.2806899218437101,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 0.2806923510604028,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 0.28069046622358285,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.2806880934101136,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.015625,
+          "residual_inf_n": 0.28069143671991326,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0078125,
+          "residual_inf_n": 0.2806916780998071,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00390625,
+          "residual_inf_n": 0.28069132172340316,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.001953125,
+          "residual_inf_n": 0.28068995167513633,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0009765625,
+          "residual_inf_n": 0.2806897434881611,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00048828125,
+          "residual_inf_n": 0.2806917848090015,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.000244140625,
+          "residual_inf_n": 0.28069018332707485,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 6.103515625e-05,
+          "residual_inf_n": 0.2806900545862808,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 1.52587890625e-05,
+          "residual_inf_n": 0.28069371829287404,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 3.814697265625e-06,
+          "residual_inf_n": 0.2806906999637212,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 9.5367431640625e-07,
+          "residual_inf_n": 0.2806894686606901,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 2.384185791015625e-07,
+          "residual_inf_n": 0.2806929755922246,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 5.960464477539063e-08,
+          "residual_inf_n": 0.2806894415213682,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.0,
+          "residual_inf_n": 0.28069074337893396,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 0.2806913838782711,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.25,
+          "residual_inf_n": 0.28069200930867366,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.125,
+          "residual_inf_n": 0.2806902953477183,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 0.280689319161589,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.03125,
+          "residual_inf_n": 0.2806933611306667,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.015625,
+          "residual_inf_n": 0.28068906391371995,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0078125,
+          "residual_inf_n": 0.2806912067196171,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00390625,
+          "residual_inf_n": 0.280691563103297,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.001953125,
+          "residual_inf_n": 0.28069054896577283,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0009765625,
+          "residual_inf_n": 0.28069218766422266,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00048828125,
+          "residual_inf_n": 0.2806896695062241,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.000244140625,
+          "residual_inf_n": 0.28069222465519117,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -6.103515625e-05,
+          "residual_inf_n": 0.28069187656610295,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.52587890625e-05,
+          "residual_inf_n": 0.28068916653382614,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -3.814697265625e-06,
+          "residual_inf_n": 0.28068884700287156,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -9.5367431640625e-07,
+          "residual_inf_n": 0.28069293932885186,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -2.384185791015625e-07,
+          "residual_inf_n": 0.28068943239731736,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -5.960464477539063e-08,
+          "residual_inf_n": 0.2806905822751068,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        }
+      ],
+      "allow_negative_alphas": true,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 0.2806896521312373,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.193543752000096,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.2806904887353957
+    },
+    {
+      "iteration": 3,
+      "accepted": true,
+      "alpha": 0.5,
+      "start_residual_inf_n": 0.2806880934101136,
+      "best_residual_inf_n": 0.28068512853742134,
+      "relative_increment": 0.32653032934000675,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 0.2806869317962045,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 0.28068512853742134,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 0.2806899487138216,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 0.28068782897271005,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 0.28068748412142297,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.2806906499051328,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.015625,
+          "residual_inf_n": 0.2806905636341034,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0078125,
+          "residual_inf_n": 0.28068742117711365,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00390625,
+          "residual_inf_n": 0.2806887108478767,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.001953125,
+          "residual_inf_n": 0.2806874483382634,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0009765625,
+          "residual_inf_n": 0.2806908704394081,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00048828125,
+          "residual_inf_n": 0.2806866207853963,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.000244140625,
+          "residual_inf_n": 0.28068950286496686,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 6.103515625e-05,
+          "residual_inf_n": 0.2806915451025779,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 1.52587890625e-05,
+          "residual_inf_n": 0.28068681056419875,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 3.814697265625e-06,
+          "residual_inf_n": 0.280690395304824,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 9.5367431640625e-07,
+          "residual_inf_n": 0.2806884304106424,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 2.384185791015625e-07,
+          "residual_inf_n": 0.2806902040417262,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 5.960464477539063e-08,
+          "residual_inf_n": 0.28069028994168177,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.0,
+          "residual_inf_n": 0.28068995506527783,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 0.28069010449935006,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.25,
+          "residual_inf_n": 0.28068933731510326,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.125,
+          "residual_inf_n": 0.28069098022633254,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 0.28069108665176457,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.03125,
+          "residual_inf_n": 0.2806883977052129,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.015625,
+          "residual_inf_n": 0.28069039132487517,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0078125,
+          "residual_inf_n": 0.28068924225471703,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00390625,
+          "residual_inf_n": 0.2806884294138362,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.001953125,
+          "residual_inf_n": 0.2806901687606077,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0009765625,
+          "residual_inf_n": 0.2806900845268464,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00048828125,
+          "residual_inf_n": 0.2806900426464344,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.000244140625,
+          "residual_inf_n": 0.2806890679082207,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -6.103515625e-05,
+          "residual_inf_n": 0.28068988670083483,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.52587890625e-05,
+          "residual_inf_n": 0.2806898530931866,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -3.814697265625e-06,
+          "residual_inf_n": 0.2806905596614305,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -9.5367431640625e-07,
+          "residual_inf_n": 0.2806872793468719,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -2.384185791015625e-07,
+          "residual_inf_n": 0.28068884356861956,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -5.960464477539063e-08,
+          "residual_inf_n": 0.28068875766866397,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        }
+      ],
+      "allow_negative_alphas": true,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 0.280686455184601,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.1956244819998574,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.2806880934101136
+    },
+    {
+      "iteration": 4,
+      "accepted": true,
+      "alpha": -1.0,
+      "start_residual_inf_n": 0.28068512853742134,
+      "best_residual_inf_n": 0.28068243860497744,
+      "relative_increment": 1.8823456842042894,
+      "trial_rows": [
+        {
+          "alpha": 1.0,
+          "residual_inf_n": 0.28069163328718416,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.5,
+          "residual_inf_n": 0.2806936258809364,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.25,
+          "residual_inf_n": 0.2806912847979183,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.125,
+          "residual_inf_n": 0.28069011354336537,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0625,
+          "residual_inf_n": 0.2806864294204351,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.03125,
+          "residual_inf_n": 0.28068482507178116,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.015625,
+          "residual_inf_n": 0.28068736121594695,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0078125,
+          "residual_inf_n": 0.28068505278015066,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00390625,
+          "residual_inf_n": 0.2806869980074188,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.001953125,
+          "residual_inf_n": 0.28068797062832884,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.0009765625,
+          "residual_inf_n": 0.28068798008707374,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.00048828125,
+          "residual_inf_n": 0.28068560041237645,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 0.000244140625,
+          "residual_inf_n": 0.2806903714906147,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 6.103515625e-05,
+          "residual_inf_n": 0.28068655848137125,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 1.52587890625e-05,
+          "residual_inf_n": 0.2806870358569503,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 3.814697265625e-06,
+          "residual_inf_n": 0.28068548616529,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 9.5367431640625e-07,
+          "residual_inf_n": 0.28068998619227925,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 2.384185791015625e-07,
+          "residual_inf_n": 0.28068550860434327,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": 5.960464477539063e-08,
+          "residual_inf_n": 0.2806861768719463,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.0,
+          "residual_inf_n": 0.28068243860497744,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.5,
+          "residual_inf_n": 0.28068569085980555,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.25,
+          "residual_inf_n": 0.28068660167145565,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.125,
+          "residual_inf_n": 0.28068729584874375,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0625,
+          "residual_inf_n": 0.280687165514515,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.03125,
+          "residual_inf_n": 0.2806882930260107,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.015625,
+          "residual_inf_n": 0.2806890947346764,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0078125,
+          "residual_inf_n": 0.2806885421475235,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00390625,
+          "residual_inf_n": 0.28068707375741353,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.001953125,
+          "residual_inf_n": 0.28068753165525406,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.0009765625,
+          "residual_inf_n": 0.28068561484787635,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.00048828125,
+          "residual_inf_n": 0.28068894819689005,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -0.000244140625,
+          "residual_inf_n": 0.28068465395581,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -6.103515625e-05,
+          "residual_inf_n": 0.28068655961642064,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -1.52587890625e-05,
+          "residual_inf_n": 0.280684651722091,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -3.814697265625e-06,
+          "residual_inf_n": 0.2806876319325019,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -9.5367431640625e-07,
+          "residual_inf_n": 0.2806840855725531,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -2.384185791015625e-07,
+          "residual_inf_n": 0.28069047051639784,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        },
+        {
+          "alpha": -5.960464477539063e-08,
+          "residual_inf_n": 0.28068741805572783,
+          "residual_only_assembly": true,
+          "shell_operator_cache_size": 1,
+          "shell_internal_force_cache_hit": true,
+          "shell_internal_force_cache_enabled": true
+        }
+      ],
+      "allow_negative_alphas": true,
+      "linear_solver_backend": "scipy_sparse_spsolve_cpu_regularized_refined",
+      "linear_solver_profile": "regularized_direct",
+      "linear_solver_regularization_factor": 1e-12,
+      "linear_solver_converged": true,
+      "linear_solver_residual_inf_n": 0.28068877202412834,
+      "linear_solver_regularization": 0.05155506255517142,
+      "linear_solver_seconds": 1.198800561999633,
+      "linear_solver_direct_profile_bypassed_iterative_attempts": true,
+      "linear_solver_iterative_refinement_enabled": true,
+      "linear_solver_rhs_inf_n": 0.28068512853742134
+    }
+  ],
+  "line_search_residual_only_supported": true,
+  "output_final_checkpoint": null,
+  "runtime_metrics": {
+    "total_seconds": 57.77584738999985
+  },
+  "claim_boundary": "Equilibrium Newton on the physical residual R=F_int-F_ext with tangent J delta_u=-R, host ILU + ROCm matvec GMRES when available, and residual-norm line search.",
+  "blockers": [
+    "equilibrium_newton_gate_not_closed"
+  ]
+}

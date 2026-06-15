@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-current-frontier-engine-acceleration-assessment.v1",
-  "generated_at": "2026-06-15T12:45:36.179509+00:00",
+  "generated_at": "2026-06-15T12:51:26.890064+00:00",
   "status": "partial",
   "question": "Can ROCm, Rust, and HIP materially speed up the current slow G1 residual-gate push?",
   "current_g1_frontier": {
@@ -233,6 +233,14 @@
       "torch_rocm_device_count": 0,
       "native_hip_unsandboxed_ok": true,
       "assessment": "The followup365 residual-gate checkpoint is already below tolerance. Forcing an additional attached-policy Newton correction with relative-increment convergence required produced no residual descent, so no new increment-gate checkpoint is promoted."
+    },
+    "followup367_369_full_load_path_status": {
+      "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup367_369_full_load_path_status.json",
+      "all_components_replay_residual_inf_n": 0.37383887466666776,
+      "all_components_iter4_final_residual_inf_n": 0.28068243860497744,
+      "all_components_gate_passed": false,
+      "attached_components_only_residual_inf_n": 1.787703126865381e-06,
+      "assessment": "Four regularized-direct all_components iterations reduce the residual only to 0.28068243860497744 N and remain far above the 0.001 N gate."
     }
   },
   "engine_state": {
@@ -1307,7 +1315,7 @@
       "steps_needed_at_followup50_chunk_improvement": 201.53906261695525
     }
   },
-  "recommended_next_path": "Keep followup365 as the retained residual-gate frontier, then close G1 by implementing a native HIP/Rust production Newton solve path or an increment-gate receipt that is not dependent on Torch ROCm device-GMRES; only after that move to G7 corpus expansion.",
+  "recommended_next_path": "Full-load all_components remains open after followup367-369; next G1 progress should target load-path formulation/material-consistent Newton or native HIP/Rust production Newton, while retaining followup365 as the attached-policy residual-gate frontier.",
   "claim_boundary": "This assessment proves engine availability and identifies active G1 descent lanes. It does not claim G1 residual closure. HIP frame replay and shell CSR replay are validated as isolated kernels, followup65 validates a subprocess-composed full residual/JVP batch contract, followup66 validates a single native HIP full residual/JVP subprocess boundary, followup67 validates direct Newton row-correction integration, followup69 validates live descent through that backend, followup70-72 validate continued refreshed largest-row descent to 0.0334674359 N, followup73-74 validate saturation of the plain largest_rows branch at 0.0334655321 N, followup75-76 validate saturation of the existing node/element block row-target family at 0.0334654813 N, followup77-78 validate the new frontier_component_rows hook while showing that target selection alone does not reopen descent, followup79-80 show component-magnitude equation scaling also no-descends, followup81 shows current scaled global Krylov is at numerical-floor descent, followup82-84 show current cached component-block residual/JVP basis construction is also numerical-floor only, followup85-86 show the plateau is a consistent mixed frame/shell cancellation state rather than a checked tangent/JVP mismatch, followup87-90 show broad top96 active-set cached residual/JVP descent reopens only a small three-promotion improvement to 0.0334649068 N before saturating, followup91-94 show selected-row Chebyshev/minimax cancellation is not a safe globalization path, followup95-97 show multi-ridge active-set descent lowers the residual to 0.0334633965 N, followup98-101 extend the same lane to 0.0334587801 N, followup102-105 extend it to 0.0334556552 N, followup106-108 validate the controller path down to 0.0334510584 N, followup109-111 continue it to 0.0334470050 N, followup112-114 continue it to 0.0334447940 N, followup115-117 continue it to 0.0334422339 N, followup118-120 continue it with dense alpha sampling to 0.0334382717 N, followup121-126 continue it with safe alpha-batch replay to 0.0334167342 N, followup127-134 continue it to 0.0334045911 N, followup135-142 continue it to 0.0333918104 N, followup143-150 continue it to 0.0333785854 N, followup151-165 continue it through a shell_bending_drilling refresh plus broad top96 replay to 0.0333391507 N, followup166-173 continue the same lane to 0.0333244006 N, followup174-180 validate weak-step refresh and lower it to 0.0333015220 N, and followup181-190 continue broad top96 replay to 0.0332769479 N. Batched row correction, global Krylov, scaled-floor retuning, hotspot JVP consistency, coupled row-nodeblock descent, component-block JVP basis diagnostics, physical residual/Jacobian audit, top96 active-set descent, minimax negative evidence, multi-ridge positive evidence, multi-ridge controller automation, weak-step shell_bending refresh, and cached residual/JVP alpha-batch replay are integrated. Adaptive material/shell/frame Newton, full-load path closure, residual gate pass, batch-JVP equivalence guarding, and production in-process ROCm/HIP residual/JVP residency remain open.",
   "checkpoint_retention_policy": {
     "manifest": "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json",

@@ -1,0 +1,93 @@
+{
+  "schema_version": "mgt-g1-followup367-369-full-load-path-status.v1",
+  "generated_at": "2026-06-15T12:51:26.890064+00:00",
+  "status": "partial",
+  "claim_boundary": "Full-load all_components evidence only. The retained followup365 checkpoint closes the attached_components_only residual gate, but all_components remains open and no new checkpoint is retained.",
+  "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+  "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+  "nodes": 13047,
+  "dof": 78282,
+  "load_scale": 0.656,
+  "residual_gate_n": 0.001,
+  "attached_components_only": {
+    "latest_direct_residual_inf_n": 1.787703126865381e-06,
+    "direct_residual_gate_passed": true,
+    "summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
+  },
+  "all_components_gate_replay": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_direct_residual_all_components_followup367_gate_replay_probe.json",
+    "direct_residual_inf_n": 0.37383887466666776,
+    "direct_residual_gate_passed": false,
+    "blockers": [
+      "direct_residual_gate_not_closed",
+      "relative_increment_gate_not_closed_or_not_verified",
+      "consistent_jacobian_or_globalization_required",
+      "regularized_fixed_point_residual_must_not_be_used_as_physical_residual"
+    ],
+    "shell_pressure_load_path_meta": {
+      "shell_pressure_load_path_policy": "all_components",
+      "pressure_load_filter_enabled": false
+    }
+  },
+  "all_components_regularized_direct": {
+    "followup368_probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup368_all_components_regularized_direct_probe.json",
+    "followup368_final_residual_inf_n": 0.2806904887353957,
+    "followup368_accepted_newton_iteration_count": 1,
+    "followup369_probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup369_all_components_regularized_direct_iter4_probe.json",
+    "followup369_final_residual_inf_n": 0.28068243860497744,
+    "followup369_accepted_newton_iteration_count": 4,
+    "followup369_iterations": [
+      {
+        "iteration": 1,
+        "accepted": true,
+        "start_residual_inf_n": 0.37383887466666776,
+        "best_residual_inf_n": 0.2806904887353957,
+        "alpha": 1.0,
+        "relative_increment": 1.0,
+        "stop_reason": null
+      },
+      {
+        "iteration": 2,
+        "accepted": true,
+        "start_residual_inf_n": 0.2806904887353957,
+        "best_residual_inf_n": 0.2806880934101136,
+        "alpha": 0.03125,
+        "relative_increment": 0.030303081863068702,
+        "stop_reason": null
+      },
+      {
+        "iteration": 3,
+        "accepted": true,
+        "start_residual_inf_n": 0.2806880934101136,
+        "best_residual_inf_n": 0.28068512853742134,
+        "alpha": 0.5,
+        "relative_increment": 0.32653032934000675,
+        "stop_reason": null
+      },
+      {
+        "iteration": 4,
+        "accepted": true,
+        "start_residual_inf_n": 0.28068512853742134,
+        "best_residual_inf_n": 0.28068243860497744,
+        "alpha": -1.0,
+        "relative_increment": 1.8823456842042894,
+        "stop_reason": null
+      }
+    ],
+    "total_improvement_from_all_components_replay_n": 0.09315643606169033,
+    "remaining_margin_to_residual_gate_n": 0.27968243860497743,
+    "gate_passed": false
+  },
+  "assessment": {
+    "attached_vs_full_load_gap_n": 0.3738370869635409,
+    "full_load_path_result": "all_components replay from the retained followup365 state is 0.37383887466666776 N, so attached-policy closure does not imply full-load closure.",
+    "newton_result": "Four regularized-direct all_components iterations reduce the residual only to 0.28068243860497744 N and remain far above the 0.001 N gate.",
+    "next_path": "Full-load closure needs load-path formulation or stronger production Newton/globalization work, not blind repetition of regularized_direct all_components iterations."
+  },
+  "remaining_g1_gaps": [
+    "full_load_path_all_components_residual_gate_not_closed",
+    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
+    "production_rocm_hip_newton_solver_lane_not_closed_torch_device_unavailable",
+    "material_newton_consistency_not_proven_as_final_production_contract"
+  ]
+}
