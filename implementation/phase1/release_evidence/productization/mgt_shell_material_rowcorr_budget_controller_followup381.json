@@ -1,0 +1,60 @@
+{
+  "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+  "generated_at": "2026-06-15T15:50:56.644471+00:00",
+  "status": "partial",
+  "shell_material_rowcorr_budget_controller_ready": true,
+  "direct_residual_gate_passed": false,
+  "seed_probe": {
+    "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
+    "available": true,
+    "status": "partial",
+    "base_direct_residual_inf_n": 18.969329986783087,
+    "final_direct_residual_inf_n": 14.90754179546407,
+    "direct_residual_improvement_inf_n": 4.0617881913190175,
+    "direct_residual_relative_improvement": 0.2141239671695877,
+    "row_correction_accepted": true,
+    "row_correction_promotion_count": 1,
+    "row_correction_stop_reason": "max_promotions_exhausted",
+    "residual_gate_passed": false
+  },
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "promotion_count": 0,
+    "max_candidates": 1,
+    "stop_reason": "runtime_budget_exceeded",
+    "row_target_counts": [
+      1
+    ],
+    "row_support_column_counts": [
+      4
+    ],
+    "row_alpha_values": [
+      0.015625
+    ],
+    "max_row_promotions_per_child": 1,
+    "row_min_relative_improvement": 0.0,
+    "controller_min_relative_improvement": 1e-07,
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "residual_tolerance_n": 0.0005,
+    "relative_increment_tolerance": 0.0001,
+    "runtime_budget_seconds": 0.0,
+    "runtime_budget_exceeded": true,
+    "child_timeout_seconds": 120.0
+  },
+  "initial_checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+  "final_checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz",
+  "initial_frontier_direct_residual_inf_n": 14.90754179546407,
+  "final_direct_residual_inf_n": 14.90754179546407,
+  "rows": [],
+  "promoted_rows": [],
+  "best_candidate_row": {},
+  "runtime_seconds": 0.005298897000102443,
+  "claim_boundary": {
+    "cpu_diagnostic_only": true,
+    "official_rocm_hip_closure_required": true,
+    "shell_material_tangent_required": true,
+    "child_receipts_are_source_of_residual_progress": true,
+    "timeouts_do_not_claim_descent": true
+  }
+}

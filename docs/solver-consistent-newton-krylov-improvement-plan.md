@@ -193,3 +193,16 @@ Budgeted continuation evidence:
 This keeps the controller route alive, but the improvement is tapering. The next
 material implementation should either alter the global residual/Jacobian operator
 or move the same controller concept toward the ROCm/HIP production lane.
+
+Shell-material row-correction budget surface:
+
+- Receipt: `mgt_shell_material_rowcorr_budget_controller_followup381.json`.
+- Seed receipt: `mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json`.
+- Seed residual movement: `18.969329986783087 -> 14.90754179546407 N`.
+- Runtime budget smoke: `0 s`; result `runtime_budget_exceeded=true`, child rows
+  `0`, promotions `0`.
+
+This does not claim new residual descent. It makes the shell-material
+row-correction path safe to continue in bounded slices: every broad sweep now
+has a launch-boundary receipt, child timeout policy, and a rule that only child
+direct-residual receipts beating the seed frontier can promote.
