@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup372-structural-load-path-gate-status.v1",
-  "generated_at": "2026-06-15T13:49:32Z",
+  "generated_at": "2026-06-15T14:28:30Z",
   "status": "pass",
   "storage_policy": {
     "mode": "document_essential_data_no_temp_relocation",
@@ -52,6 +52,24 @@
     "relative_jvp_difference_inf": 6.49716872203685e-13,
     "runtime_seconds": 31.231009352
   },
+  "native_hip_resident_worker_replay": {
+    "status": "pass",
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup373_resident_hip_worker_status.json",
+    "device_name": "AMD Radeon RX 6900 XT",
+    "base_direct_residual_inf_n": 1.787703126865381e-06,
+    "base_resident_worker_residual_inf_n": 2.4881032310020146e-06,
+    "residual_gate_n": 0.001,
+    "resident_worker_residual_gate_ready": true,
+    "batch_size": 4,
+    "resident_worker_evaluation_count": 2,
+    "worker_pid_stable_across_evaluations": true,
+    "operator_buffers_device_resident": true,
+    "resident_worker_kernel_mean_seconds": 0.0010564996,
+    "resident_worker_kernel_speedup_vs_cpu_batch_mean": 16.305773013822296,
+    "max_abs_residual_difference_n": 1.3932482545442326e-06,
+    "relative_residual_difference_inf": 1.5551507893289887e-11,
+    "relative_jvp_difference_inf": 3.24858436101845e-16
+  },
   "backend_contract": {
     "full_residual_vector_on_native_hip": true,
     "jvp_available_from_batch_residual_differences": true,
@@ -60,7 +78,9 @@
     "uses_native_hip_spring_kernel": true,
     "subtracts_external_load_on_native_hip": true,
     "returns_free_dof_residual_only": true,
-    "single_subprocess_boundary": true,
+    "single_subprocess_boundary": false,
+    "persistent_process_worker": true,
+    "operator_buffers_device_resident": true,
     "persistent_in_process_worker": false,
     "rust_ffi_worker": false
   },
@@ -69,10 +89,10 @@
     "shell_nnz": 1901664,
     "spring_nnz": 40608
   },
-  "assessment": "Followup372 promotes the unattached pressure-component diagnosis into an explicit structural load-path policy and verifies the retained followup365 state under that policy through CPU batch replay and native HIP full residual/JVP batch replay. This closes the structural pressure-load residual gate for the retained checkpoint while leaving increment-gate promotion, material Newton consistency, and persistent Rust/HIP worker residency open.",
+  "assessment": "Followup372 promotes the unattached pressure-component diagnosis into an explicit structural load-path policy and verifies the retained followup365 state under that policy through CPU batch replay and native HIP full residual/JVP batch replay. Followup373 then verifies a resident native HIP process worker with device-resident operator buffers across two evaluations. This closes the structural pressure-load residual gate and narrows the production HIP lane, while leaving increment-gate promotion, material Newton consistency, and final in-process Rust FFI worker closure open.",
   "remaining_g1_gaps": [
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
-    "persistent_in_process_rust_hip_newton_worker_not_closed",
+    "in_process_rust_ffi_newton_worker_not_closed",
     "material_newton_consistency_not_proven_as_final_production_contract"
   ]
 }

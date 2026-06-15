@@ -229,6 +229,9 @@ class ResidualJvpBatchCache:
                     "batch_replay_size": int(states.shape[0]),
                     "batch_replay_backend": batch_meta.get("residual_batch_backend"),
                     "hip_full_residual_batch_replay": bool(batch_meta.get("hip_full_residual_batch_replay")),
+                    "hip_full_residual_resident_worker": bool(
+                        batch_meta.get("hip_full_residual_resident_worker", False)
+                    ),
                     "free_dof_set_stable": free_stable,
                     "probe_direct_residual_inf_n": (
                         _max_abs(residual_rows[local_index])

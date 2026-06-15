@@ -281,7 +281,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--residual-batch-replay-backend",
-        choices=("single", "cpu", "hip_full_residual"),
+        choices=("single", "cpu", "hip_full_residual", "hip_full_residual_resident"),
         default="single",
         help="Batch residual replay backend passed to each cached residual/JVP probe.",
     )

@@ -17,6 +17,8 @@ PHASE1 = Path(__file__).resolve().parent
 PRODUCTIZATION = PHASE1 / "release_evidence" / "productization"
 HIP_SOURCE = PHASE1 / "hip_full_residual_batch_replay.cpp"
 HIP_BINARY = PRODUCTIZATION / "bin/hip_full_residual_batch_replay"
+HIP_WORKER_SOURCE = PHASE1 / "hip_full_residual_resident_worker.cpp"
+HIP_WORKER_BINARY = PRODUCTIZATION / "bin/hip_full_residual_resident_worker"
 ROCM_DEVICE_LIB_PATH = (
     PHASE1 / "third_party/rocm_device_libs/opt/rocm-5.7.1/amdgcn/bitcode"
 )
@@ -56,6 +58,48 @@ def build_hip_full_residual_binary(
         "ok": proc.returncode == 0,
         "binary": str(HIP_BINARY),
         "source": str(HIP_SOURCE),
+        "command": command,
+        "returncode": int(proc.returncode),
+        "stdout": proc.stdout[-4000:],
+        "stderr": proc.stderr[-4000:],
+        "seconds": float(time.perf_counter() - started),
+    }
+
+
+def build_hip_full_residual_worker_binary(
+    *,
+    hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+    force_rebuild: bool = False,
+) -> dict[str, Any]:
+    HIP_WORKER_BINARY.parent.mkdir(parents=True, exist_ok=True)
+    needs_build = bool(force_rebuild) or not HIP_WORKER_BINARY.exists()
+    if HIP_WORKER_BINARY.exists() and HIP_WORKER_SOURCE.exists():
+        needs_build = needs_build or HIP_WORKER_SOURCE.stat().st_mtime > HIP_WORKER_BINARY.stat().st_mtime
+    command = [
+        str(hipcc),
+        "-O3",
+        "-std=c++17",
+        "--offload-arch=gfx1030",
+    ]
+    if ROCM_DEVICE_LIB_PATH.exists():
+        command.append(f"--rocm-device-lib-path={ROCM_DEVICE_LIB_PATH}")
+    command.extend([str(HIP_WORKER_SOURCE), "-o", str(HIP_WORKER_BINARY)])
+    if not needs_build:
+        return {
+            "attempted": False,
+            "ok": True,
+            "binary": str(HIP_WORKER_BINARY),
+            "source": str(HIP_WORKER_SOURCE),
+            "command": command,
+            "reason": "binary_current",
+        }
+    started = time.perf_counter()
+    proc = subprocess.run(command, capture_output=True, text=True, check=False)
+    return {
+        "attempted": True,
+        "ok": proc.returncode == 0,
+        "binary": str(HIP_WORKER_BINARY),
+        "source": str(HIP_WORKER_SOURCE),
         "command": command,
         "returncode": int(proc.returncode),
         "stdout": proc.stdout[-4000:],
@@ -283,3 +327,255 @@ class HipFullResidualBatchBackend:
             },
         }
         return np.asarray(residual, dtype=np.float64), meta
+
+
+@dataclass
+class HipFullResidualResidentWorkerBackend:
+    """Long-lived native HIP worker that keeps operator buffers resident."""
+
+    temp_dir: tempfile.TemporaryDirectory[str]
+    process: subprocess.Popen[str]
+    startup: dict[str, Any]
+    frame_dofs_path: Path
+    frame_stiffness_path: Path
+    shell_row_ptr_path: Path
+    shell_col_idx_path: Path
+    shell_values_path: Path
+    spring_row_ptr_path: Path
+    spring_col_idx_path: Path
+    spring_values_path: Path
+    f_ext_path: Path
+    free_path: Path
+    frame_element_count: int
+    n_dof: int
+    shell_nnz: int
+    spring_nnz: int
+    free_count: int
+    build: dict[str, Any]
+    operator_write_seconds: float
+    worker_start_seconds: float
+    evaluation_count: int = 0
+
+    @classmethod
+    def prepare(
+        cls,
+        *,
+        frame_dofs: np.ndarray,
+        frame_stiffness: np.ndarray,
+        shell_csr: Any,
+        spring_csr: Any,
+        f_ext: np.ndarray,
+        free: np.ndarray,
+        hipcc: Path = Path("/opt/rocm/bin/hipcc"),
+        force_rebuild: bool = False,
+    ) -> "HipFullResidualResidentWorkerBackend":
+        build = build_hip_full_residual_worker_binary(hipcc=hipcc, force_rebuild=force_rebuild)
+        if not bool(build.get("ok")):
+            raise RuntimeError("hip full residual resident worker build failed")
+        temp_dir = tempfile.TemporaryDirectory(prefix="mgt_hip_full_residual_worker_")
+        root = Path(temp_dir.name)
+        started = time.perf_counter()
+        frame_dofs_path = root / "frame_dofs.i64"
+        frame_stiffness_path = root / "frame_stiffness.f64"
+        shell_row_ptr_path = root / "shell_row_ptr.i64"
+        shell_col_idx_path = root / "shell_col_idx.i64"
+        shell_values_path = root / "shell_values.f64"
+        spring_row_ptr_path = root / "spring_row_ptr.i64"
+        spring_col_idx_path = root / "spring_col_idx.i64"
+        spring_values_path = root / "spring_values.f64"
+        f_ext_path = root / "f_ext.f64"
+        free_path = root / "free.i64"
+        np.asarray(frame_dofs, dtype=np.int64).tofile(frame_dofs_path)
+        np.asarray(frame_stiffness, dtype=np.float64).tofile(frame_stiffness_path)
+        np.asarray(shell_csr.indptr, dtype=np.int64).tofile(shell_row_ptr_path)
+        np.asarray(shell_csr.indices, dtype=np.int64).tofile(shell_col_idx_path)
+        np.asarray(shell_csr.data, dtype=np.float64).tofile(shell_values_path)
+        np.asarray(spring_csr.indptr, dtype=np.int64).tofile(spring_row_ptr_path)
+        np.asarray(spring_csr.indices, dtype=np.int64).tofile(spring_col_idx_path)
+        np.asarray(spring_csr.data, dtype=np.float64).tofile(spring_values_path)
+        np.asarray(f_ext, dtype=np.float64).tofile(f_ext_path)
+        np.asarray(free, dtype=np.int64).tofile(free_path)
+        operator_write_seconds = float(time.perf_counter() - started)
+        frame_element_count = int(np.asarray(frame_dofs).shape[0])
+        n_dof = int(np.asarray(f_ext).size)
+        shell_nnz = int(shell_csr.nnz)
+        spring_nnz = int(spring_csr.nnz)
+        free_count = int(np.asarray(free).size)
+        command = [
+            str(HIP_WORKER_BINARY),
+            "--frame-dofs",
+            str(frame_dofs_path),
+            "--frame-stiffness",
+            str(frame_stiffness_path),
+            "--shell-row-ptr",
+            str(shell_row_ptr_path),
+            "--shell-col-idx",
+            str(shell_col_idx_path),
+            "--shell-values",
+            str(shell_values_path),
+            "--spring-row-ptr",
+            str(spring_row_ptr_path),
+            "--spring-col-idx",
+            str(spring_col_idx_path),
+            "--spring-values",
+            str(spring_values_path),
+            "--f-ext",
+            str(f_ext_path),
+            "--free",
+            str(free_path),
+            "--frame-element-count",
+            str(frame_element_count),
+            "--n-dof",
+            str(n_dof),
+            "--shell-nnz",
+            str(shell_nnz),
+            "--spring-nnz",
+            str(spring_nnz),
+            "--free-count",
+            str(free_count),
+        ]
+        worker_started = time.perf_counter()
+        process = subprocess.Popen(
+            command,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            bufsize=1,
+        )
+        ready_line = process.stdout.readline() if process.stdout is not None else ""
+        worker_start_seconds = float(time.perf_counter() - worker_started)
+        try:
+            startup = json.loads(ready_line.strip()) if ready_line.strip() else {}
+        except json.JSONDecodeError:
+            startup = {}
+        if not bool(startup.get("ok")):
+            stderr = ""
+            if process.poll() is not None and process.stderr is not None:
+                stderr = process.stderr.read()[-4000:]
+            process.terminate()
+            raise RuntimeError(
+                f"hip full residual resident worker startup failed: {startup or ready_line!r} {stderr}"
+            )
+        startup = {
+            **startup,
+            "command": command,
+            "worker_start_seconds": worker_start_seconds,
+        }
+        return cls(
+            temp_dir=temp_dir,
+            process=process,
+            startup=startup,
+            frame_dofs_path=frame_dofs_path,
+            frame_stiffness_path=frame_stiffness_path,
+            shell_row_ptr_path=shell_row_ptr_path,
+            shell_col_idx_path=shell_col_idx_path,
+            shell_values_path=shell_values_path,
+            spring_row_ptr_path=spring_row_ptr_path,
+            spring_col_idx_path=spring_col_idx_path,
+            spring_values_path=spring_values_path,
+            f_ext_path=f_ext_path,
+            free_path=free_path,
+            frame_element_count=frame_element_count,
+            n_dof=n_dof,
+            shell_nnz=shell_nnz,
+            spring_nnz=spring_nnz,
+            free_count=free_count,
+            build=build,
+            operator_write_seconds=operator_write_seconds,
+            worker_start_seconds=worker_start_seconds,
+        )
+
+    def evaluate(self, states: np.ndarray, *, reps: int = 1) -> tuple[np.ndarray, dict[str, Any]]:
+        if self.process.poll() is not None:
+            raise RuntimeError(f"hip resident worker exited with {self.process.returncode}")
+        state_batch = np.asarray(states, dtype=np.float64)
+        if state_batch.ndim != 2:
+            raise ValueError("states must be a 2D array shaped (batch, n_dof)")
+        if int(state_batch.shape[1]) != int(self.n_dof):
+            raise ValueError(f"state n_dof {state_batch.shape[1]} does not match backend n_dof {self.n_dof}")
+        self.evaluation_count += 1
+        root = Path(self.temp_dir.name)
+        states_path = root / f"states_{self.evaluation_count:06d}.f64"
+        output_path = root / f"hip_full_residual_{self.evaluation_count:06d}.f64"
+        np.asarray(state_batch, dtype=np.float64).tofile(states_path)
+        if self.process.stdin is None or self.process.stdout is None:
+            raise RuntimeError("hip resident worker stdio is not available")
+        command = (
+            f"EVAL {states_path} {output_path} "
+            f"{int(state_batch.shape[0])} {max(int(reps), 1)}\n"
+        )
+        started = time.perf_counter()
+        self.process.stdin.write(command)
+        self.process.stdin.flush()
+        line = self.process.stdout.readline()
+        elapsed = float(time.perf_counter() - started)
+        try:
+            hip_payload = json.loads(line.strip()) if line.strip() else {}
+        except json.JSONDecodeError:
+            hip_payload = {}
+        if not bool(hip_payload.get("ok")):
+            raise RuntimeError(f"hip resident worker evaluation failed: {hip_payload or line!r}")
+        if not output_path.exists():
+            raise RuntimeError(f"hip resident worker output missing: {hip_payload}")
+        residual = np.fromfile(output_path, dtype=np.float64).reshape(
+            (int(state_batch.shape[0]), int(self.free_count))
+        )
+        meta = {
+            "backend": "native_hip_full_residual_resident_worker",
+            "single_subprocess_boundary": False,
+            "persistent_process_worker": True,
+            "persistent_in_process_worker": False,
+            "rust_ffi_worker": False,
+            "operator_buffers_device_resident": bool(
+                self.startup.get("operator_buffers_device_resident")
+                and hip_payload.get("operator_buffers_device_resident")
+            ),
+            "worker_evaluation_count": int(self.evaluation_count),
+            "worker_pid": int(self.process.pid),
+            "batch_size": int(state_batch.shape[0]),
+            "free_dof_count": int(self.free_count),
+            "operator_write_seconds": float(self.operator_write_seconds),
+            "worker_start_seconds": float(self.worker_start_seconds),
+            "worker_roundtrip_seconds": elapsed,
+            "hip_kernel_mean_seconds": float(hip_payload.get("kernel_elapsed_ms_mean") or 0.0) / 1000.0,
+            "build": self.build,
+            "startup": self.startup,
+            "hip": hip_payload,
+            "operator_sizes": {
+                "frame_element_count": int(self.frame_element_count),
+                "shell_nnz": int(self.shell_nnz),
+                "spring_nnz": int(self.spring_nnz),
+            },
+        }
+        return np.asarray(residual, dtype=np.float64), meta
+
+    def close(self) -> None:
+        if self.process.poll() is not None:
+            return
+        if self.process.stdin is not None:
+            try:
+                self.process.stdin.write("QUIT\n")
+                self.process.stdin.flush()
+            except BrokenPipeError:
+                pass
+        try:
+            self.process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            self.process.terminate()
+            try:
+                self.process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                self.process.kill()
+
+    def __enter__(self) -> "HipFullResidualResidentWorkerBackend":
+        return self
+
+    def __exit__(self, _exc_type: Any, _exc: Any, _tb: Any) -> None:
+        self.close()
+
+    def __del__(self) -> None:
+        try:
+            self.close()
+        except Exception:
+            pass
