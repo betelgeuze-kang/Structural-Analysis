@@ -1,13 +1,13 @@
 {
   "schema_version": "material-element-tangent-support-matrix.v1",
-  "generated_at": "2026-06-15T15:08:21.721478+00:00",
+  "generated_at": "2026-06-15T15:19:16.267859+00:00",
   "status": "ready",
   "line_beam_tangent_ready": true,
   "unsupported_queue_ready": true,
   "roundtrip_json": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
   "roundtrip_npz": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
   "mgt_path": "/home/betelgeuze/건축구조분석/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
-  "claim_boundary": "MGT solver lane; surface membrane, bending/drilling, and same-node frame-shell smoke solves are attached with source plate thickness coverage, while calibrated full shell benchmarks, local axes/openings, full-load coupled solves are queued and bounded frame material tangent smoke is attached; full path-dependent material Newton remains queued.",
+  "claim_boundary": "MGT solver lane; surface membrane, bending/drilling, and same-node frame-shell smoke solves are attached with source plate thickness coverage, while calibrated full shell benchmarks, local axes/openings, full-load coupled solves are queued and bounded frame and shell material tangent smokes are attached; full path-dependent material Newton remains queued.",
   "element_inventory": {
     "model_element_type_counts": {
       "BEAM": 2192,
@@ -143,6 +143,24 @@
         }
       ],
       "surface_shell_full_bending_tangent_ready": false,
+      "surface_shell_material_nonlinear_tangent_ready": true,
+      "bounded_shell_material_tangent_smoke_ready": true,
+      "fixed_tangent_global_shell_jvp_consistency_ready": true,
+      "shell_material_state_summary": {
+        "surface_element_count": 7152,
+        "material_family_counts": {
+          "CONC": 6890,
+          "UNKNOWN": 262
+        },
+        "state_tag_counts": {
+          "concrete_compression_softening": 6890,
+          "unknown_elastic_proxy": 262
+        },
+        "nonlinear_tangent_surface_element_count": 6408,
+        "min_tangent_ratio": 0.9481481481481481,
+        "mean_tangent_ratio": 0.9631698093107486,
+        "max_abs_strain": 0.0038681318681318684
+      },
       "element_count": 7152,
       "section_material_coverage_count": 553,
       "section_material_coverage_pct": 7.732102908277405,
@@ -175,13 +193,18 @@
     },
     {
       "family": "nonlinear_rc_steel_composite_material_laws",
-      "status": "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
-      "formulation": "source_material_name_grade_proxy_frame_tangent_smoke",
+      "status": "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+      "formulation": "source_material_name_grade_proxy_frame_shell_tangent_smoke",
       "material_law": "steel_bilinear_concrete_damage_src_bounded_composite_proxy",
       "frame_material_nonlinear_tangent_ready": true,
+      "shell_material_nonlinear_tangent_ready": true,
       "service_load_material_state_ready": true,
+      "service_shell_material_state_ready": true,
       "controlled_probe_material_state_ready": true,
+      "controlled_probe_shell_material_state_ready": true,
       "bounded_material_tangent_global_smoke_ready": true,
+      "bounded_shell_material_tangent_smoke_ready": true,
+      "fixed_tangent_global_shell_jvp_consistency_ready": true,
       "full_material_nonlinear_newton_equilibrium": false,
       "service_material_state_summary": {
         "element_count": 5572,
@@ -209,6 +232,22 @@
         "mean_tangent_ratio": 0.9347290566805491,
         "max_abs_strain": 0.05731207501083598
       },
+      "service_shell_material_state_summary": {
+        "surface_element_count": 7152,
+        "material_family_counts": {
+          "CONC": 6890,
+          "UNKNOWN": 262
+        },
+        "state_tag_counts": {
+          "concrete_tension_elastic": 3703,
+          "concrete_compression_hardening": 3187,
+          "unknown_elastic_proxy": 262
+        },
+        "nonlinear_tangent_surface_element_count": 0,
+        "min_tangent_ratio": 0.9999959647466371,
+        "mean_tangent_ratio": 0.9999997954634183,
+        "max_abs_strain": 1.4189901934977514e-08
+      },
       "controlled_probe_material_state_summary": {
         "element_count": 5572,
         "material_family_counts": {
@@ -234,6 +273,21 @@
         "mean_tangent_ratio": 0.3864230276464881,
         "max_abs_strain": 1.4328018752708995
       },
+      "controlled_probe_shell_material_state_summary": {
+        "surface_element_count": 7152,
+        "material_family_counts": {
+          "CONC": 6890,
+          "UNKNOWN": 262
+        },
+        "state_tag_counts": {
+          "concrete_compression_softening": 6890,
+          "unknown_elastic_proxy": 262
+        },
+        "nonlinear_tangent_surface_element_count": 6408,
+        "min_tangent_ratio": 0.9481481481481481,
+        "mean_tangent_ratio": 0.9631698093107486,
+        "max_abs_strain": 0.0038681318681318684
+      },
       "material_tangent_smoke_equilibrium": {
         "residual_inf_n": 0.000152927590534091,
         "regularization": 2038.7503433934733,
@@ -241,6 +295,21 @@
         "min_solver_tangent_ratio": 0.015,
         "tangent_reduction_element_count": 5487,
         "total_gravity_kn": 192104.21926805886
+      },
+      "shell_material_tangent_smoke_equilibrium": {
+        "residual_inf_n": 1.0897625024597346e-09,
+        "relative_residual_inf": 3.355823352326268e-11,
+        "rhs_inf_n": 32.47377433333335,
+        "max_abs_displacement_m": 5.260916629202686e-05,
+        "active_shell_dof_count": 47364,
+        "free_shell_dof_count": 44940,
+        "restrained_shell_dof_count": 2424,
+        "regularization": 222.20530595318039,
+        "solve_seconds": 0.5006055630001356,
+        "material_tangent_override_surface_element_count": 7152,
+        "material_tangent_reduction_surface_element_count": 6408,
+        "min_material_tangent_ratio": 0.9481481481481482,
+        "max_material_tangent_ratio": 1.1428571428571421
       }
     }
   ],
@@ -263,9 +332,9 @@
     {
       "family": "nonlinear_rc_steel_composite_material_laws",
       "element_count": 12728,
-      "status": "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
-      "reason": "Frame elements now have a bounded material tangent receipt using MGT E/nu and material-name grade proxies with service/probe states, local constitutive finite-difference tangent consistency, global axial stress-correction force/JVP consistency, and a global bounded tangent smoke solve. Full path-dependent internal-force history, fiber sections, shell material nonlinearity, and Newton consistent global residual/Jacobian benchmarks are not promoted.",
-      "required_action_before_claim": "promote path-dependent constitutive update, internal-force history variables, fiber-section/shell material tangents, consistent global Newton residual/Jacobian, and regression benchmarks"
+      "status": "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+      "reason": "Frame and shell elements now have bounded material tangent receipts using MGT E/nu and material-name grade proxies. Frame evidence includes local constitutive finite-difference consistency and global axial stress-correction force/JVP consistency; shell evidence includes per-surface-element material tangent consumption, fixed-tangent global shell JVP consistency, and a bounded shell tangent smoke solve. Full path-dependent internal-force history, fiber/layered shell sections, and production Newton consistent global residual/Jacobian benchmarks are not promoted.",
+      "required_action_before_claim": "promote path-dependent constitutive update, internal-force history variables, fiber/layered-section material tangents, consistent global Newton residual/Jacobian, and regression benchmarks"
     },
     {
       "family": "contact_interface_foundation",

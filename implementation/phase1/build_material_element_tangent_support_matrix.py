@@ -105,6 +105,7 @@ def build_material_element_tangent_support_matrix(
     shell_calibration = _load(productization_dir / "mgt_shell_calibration_benchmarks.json")
     coupled_frame_shell = _load(productization_dir / "mgt_coupled_frame_shell_sparse_equilibrium.json")
     frame_material_nonlinear = _load(productization_dir / "mgt_frame_material_nonlinear_tangent.json")
+    shell_material_nonlinear = _load(productization_dir / "mgt_shell_material_nonlinear_tangent.json")
     local_axis_opening = _load(productization_dir / "mgt_element_local_axis_opening_semantics_receipt.json")
     surface_membrane_ready = bool(
         surface_membrane.get("status") == "ready"
@@ -131,6 +132,13 @@ def build_material_element_tangent_support_matrix(
         and frame_material_nonlinear.get("bounded_material_tangent_global_smoke_ready")
         and frame_material_nonlinear.get("local_constitutive_tangent_fd_consistency_ready")
         and frame_material_nonlinear.get("global_axial_stress_correction_fd_consistency_ready")
+    )
+    shell_material_nonlinear_ready = bool(
+        shell_material_nonlinear.get("status") == "ready"
+        and shell_material_nonlinear.get("shell_material_nonlinear_tangent_ready")
+        and shell_material_nonlinear.get("bounded_shell_material_tangent_smoke_ready")
+        and shell_material_nonlinear.get("local_constitutive_tangent_fd_consistency_ready")
+        and shell_material_nonlinear.get("fixed_tangent_global_shell_jvp_consistency_ready")
     )
     frame_local_axis_ready = bool(
         local_axis_opening.get("status") in {"ready", "partial"}
@@ -256,11 +264,23 @@ def build_material_element_tangent_support_matrix(
                 "family": "nonlinear_rc_steel_composite_material_laws",
                 "element_count": int(elem_type_code.size),
                 "status": (
+                    "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
+                    if frame_material_nonlinear_ready and shell_material_nonlinear_ready
+                    else
                     "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
                     if frame_material_nonlinear_ready
                     else "unsupported_for_material_nonlinearity"
                 ),
                 "reason": (
+                    "Frame and shell elements now have bounded material tangent receipts using MGT E/nu and "
+                    "material-name grade proxies. Frame evidence includes local constitutive finite-difference "
+                    "consistency and global axial stress-correction force/JVP consistency; shell evidence includes "
+                    "per-surface-element material tangent consumption, fixed-tangent global shell JVP consistency, "
+                    "and a bounded shell tangent smoke solve. Full path-dependent internal-force history, "
+                    "fiber/layered shell sections, and production Newton consistent global residual/Jacobian "
+                    "benchmarks are not promoted."
+                    if frame_material_nonlinear_ready and shell_material_nonlinear_ready
+                    else
                     "Frame elements now have a bounded material tangent receipt using MGT E/nu and material-name "
                     "grade proxies with service/probe states, local constitutive finite-difference tangent "
                     "consistency, global axial stress-correction force/JVP consistency, and a global "
@@ -271,7 +291,7 @@ def build_material_element_tangent_support_matrix(
                     else "Current tangent uses elastic isotropic E/nu from MGT materials; plasticity/damage/fiber laws are not promoted."
                 ),
                 "required_action_before_claim": (
-                    "promote path-dependent constitutive update, internal-force history variables, fiber-section/shell material tangents, consistent global Newton residual/Jacobian, and regression benchmarks"
+                    "promote path-dependent constitutive update, internal-force history variables, fiber/layered-section material tangents, consistent global Newton residual/Jacobian, and regression benchmarks"
                     if frame_material_nonlinear_ready
                     else "attach constitutive update, internal-force history variables, consistent Jacobian, and regression benchmarks"
                 ),
@@ -287,7 +307,9 @@ def build_material_element_tangent_support_matrix(
         unsupported_queue_ready = all(row["reason"] and row["required_action_before_claim"] for row in unsupported_queue)
         ready = bool(line_tangent_ready and unsupported_queue_ready)
         material_clause = (
-            "bounded frame material tangent smoke is attached; full path-dependent material Newton remains queued"
+            "bounded frame and shell material tangent smokes are attached; full path-dependent material Newton remains queued"
+            if frame_material_nonlinear_ready and shell_material_nonlinear_ready
+            else "bounded frame material tangent smoke is attached; shell/full path-dependent material Newton remains queued"
             if frame_material_nonlinear_ready
             else "nonlinear material laws remain explicit unsupported queues"
         )
@@ -421,16 +443,32 @@ def build_material_element_tangent_support_matrix(
                         "surface_shell_full_bending_tangent_ready"
                     )
                     or surface_shell_bending.get("surface_shell_full_bending_tangent_ready"),
+                    "surface_shell_material_nonlinear_tangent_ready": shell_material_nonlinear_ready,
+                    "bounded_shell_material_tangent_smoke_ready": shell_material_nonlinear.get(
+                        "bounded_shell_material_tangent_smoke_ready"
+                    ),
+                    "fixed_tangent_global_shell_jvp_consistency_ready": shell_material_nonlinear.get(
+                        "fixed_tangent_global_shell_jvp_consistency_ready"
+                    ),
+                    "shell_material_state_summary": shell_material_nonlinear.get(
+                        "controlled_probe_shell_material_state_summary"
+                    ),
                     **surface_coverage,
                 },
                 {
                     "family": "nonlinear_rc_steel_composite_material_laws",
                     "status": (
+                        "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
+                        if frame_material_nonlinear_ready and shell_material_nonlinear_ready
+                        else
                         "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
                         if frame_material_nonlinear_ready
                         else "not_promoted"
                     ),
                     "formulation": (
+                        "source_material_name_grade_proxy_frame_shell_tangent_smoke"
+                        if frame_material_nonlinear_ready and shell_material_nonlinear_ready
+                        else
                         "source_material_name_grade_proxy_frame_tangent_smoke"
                         if frame_material_nonlinear_ready
                         else "unsupported_for_current_global_tangent"
@@ -441,26 +479,49 @@ def build_material_element_tangent_support_matrix(
                         else "not_promoted"
                     ),
                     "frame_material_nonlinear_tangent_ready": frame_material_nonlinear_ready,
+                    "shell_material_nonlinear_tangent_ready": shell_material_nonlinear_ready,
                     "service_load_material_state_ready": frame_material_nonlinear.get(
                         "service_load_material_state_ready"
+                    ),
+                    "service_shell_material_state_ready": shell_material_nonlinear.get(
+                        "service_shell_material_state_ready"
                     ),
                     "controlled_probe_material_state_ready": frame_material_nonlinear.get(
                         "controlled_probe_material_state_ready"
                     ),
+                    "controlled_probe_shell_material_state_ready": shell_material_nonlinear.get(
+                        "controlled_probe_shell_material_state_ready"
+                    ),
                     "bounded_material_tangent_global_smoke_ready": frame_material_nonlinear.get(
                         "bounded_material_tangent_global_smoke_ready"
                     ),
+                    "bounded_shell_material_tangent_smoke_ready": shell_material_nonlinear.get(
+                        "bounded_shell_material_tangent_smoke_ready"
+                    ),
+                    "fixed_tangent_global_shell_jvp_consistency_ready": shell_material_nonlinear.get(
+                        "fixed_tangent_global_shell_jvp_consistency_ready"
+                    ),
                     "full_material_nonlinear_newton_equilibrium": frame_material_nonlinear.get(
                         "full_material_nonlinear_newton_equilibrium"
-                    ),
+                    )
+                    and shell_material_nonlinear.get("full_material_nonlinear_newton_equilibrium"),
                     "service_material_state_summary": frame_material_nonlinear.get(
                         "service_material_state_summary"
+                    ),
+                    "service_shell_material_state_summary": shell_material_nonlinear.get(
+                        "service_shell_material_state_summary"
                     ),
                     "controlled_probe_material_state_summary": frame_material_nonlinear.get(
                         "controlled_probe_material_state_summary"
                     ),
+                    "controlled_probe_shell_material_state_summary": shell_material_nonlinear.get(
+                        "controlled_probe_shell_material_state_summary"
+                    ),
                     "material_tangent_smoke_equilibrium": frame_material_nonlinear.get(
                         "material_tangent_smoke_equilibrium"
+                    ),
+                    "shell_material_tangent_smoke_equilibrium": shell_material_nonlinear.get(
+                        "material_tangent_shell_equilibrium"
                     ),
                 },
             ],

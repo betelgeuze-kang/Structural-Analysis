@@ -73,9 +73,30 @@ def test_material_element_tangent_support_matrix_is_ready(tmp_path: Path) -> Non
         assert support_rows["plate_shell_surface_code2"]["opening_runtime_semantics_ready"] is True
         assert support_rows["plate_shell_surface_code2"]["current_source_opening_noop_runtime_ready"] is True
         assert support_rows["plate_shell_surface_code2"]["generic_opening_cutout_runtime_semantics_ready"] is False
+    if support_rows["plate_shell_surface_code2"]["surface_shell_material_nonlinear_tangent_ready"]:
+        assert support_rows["plate_shell_surface_code2"]["bounded_shell_material_tangent_smoke_ready"] is True
+        assert support_rows["plate_shell_surface_code2"]["fixed_tangent_global_shell_jvp_consistency_ready"] is True
+        assert (
+            support_rows["plate_shell_surface_code2"]["shell_material_state_summary"][
+                "nonlinear_tangent_surface_element_count"
+            ]
+            > 0
+        )
     nonlinear = support_rows["nonlinear_rc_steel_composite_material_laws"]
-    assert nonlinear["status"] == "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
+    assert nonlinear["status"] in {
+        "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+        "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported",
+    }
     assert nonlinear["frame_material_nonlinear_tangent_ready"] is True
     assert nonlinear["bounded_material_tangent_global_smoke_ready"] is True
     assert nonlinear["controlled_probe_material_state_summary"]["nonlinear_tangent_element_count"] > 0
+    if nonlinear["shell_material_nonlinear_tangent_ready"]:
+        assert nonlinear["bounded_shell_material_tangent_smoke_ready"] is True
+        assert nonlinear["fixed_tangent_global_shell_jvp_consistency_ready"] is True
+        assert (
+            nonlinear["controlled_probe_shell_material_state_summary"][
+                "nonlinear_tangent_surface_element_count"
+            ]
+            > 0
+        )
     assert payload["unsupported_element_material_queue"]

@@ -64,6 +64,7 @@ def _assemble_surface_shell_6dof(
     plate_thickness_props: dict[int, dict[str, Any]],
     include_membrane: bool = False,
     pressure_load_allowed_surface_elements: set[int] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any], list[list[int]]]:
     n_dof = int(node_xyz.shape[0]) * DOF_PER_NODE
     rows: list[int] = []
@@ -83,6 +84,11 @@ def _assemble_surface_shell_6dof(
     thickness_values: list[float] = []
     pressure_loaded_element_count = 0
     pressure_suppressed_element_count = 0
+    tangent_override_count = 0
+    tangent_reduction_count = 0
+    min_tangent_ratio = 1.0
+    max_tangent_ratio = 1.0
+    material_tangent_by_surface_index_mpa = material_tangent_by_surface_index_mpa or {}
     for elem_index in surface_indices.tolist():
         conn = [int(node) for node in conn_idx[conn_ptr[elem_index] : conn_ptr[elem_index + 1]].tolist()]
         if len(conn) not in {3, 4}:
@@ -95,7 +101,16 @@ def _assemble_surface_shell_6dof(
         mat = material_props.get(material_id)
         if isinstance(mat, dict):
             covered_material += 1
-        e_n_per_m2 = float((mat or {}).get("E_kN_per_m2") or 2.1e8) * 1000.0
+        elastic_e_n_per_m2 = float((mat or {}).get("E_kN_per_m2") or 2.1e8) * 1000.0
+        e_n_per_m2 = elastic_e_n_per_m2
+        tangent_mpa = material_tangent_by_surface_index_mpa.get(int(elem_index))
+        if tangent_mpa is not None:
+            e_n_per_m2 = max(float(tangent_mpa) * 1.0e6, 1.0e6)
+            tangent_override_count += 1
+            ratio = e_n_per_m2 / max(elastic_e_n_per_m2, 1.0e-9)
+            min_tangent_ratio = min(min_tangent_ratio, float(ratio))
+            max_tangent_ratio = max(max_tangent_ratio, float(ratio))
+            tangent_reduction_count += int(ratio < 0.98)
         poisson = float((mat or {}).get("poisson") or 0.2)
         thickness, has_source_thickness = _source_or_fallback_thickness(section_id, plate_thickness_props)
         if has_source_thickness:
@@ -185,6 +200,11 @@ def _assemble_surface_shell_6dof(
         "pressure_load_filter_enabled": pressure_load_allowed_surface_elements is not None,
         "pressure_loaded_triangle_count": int(pressure_loaded_element_count),
         "pressure_suppressed_triangle_count": int(pressure_suppressed_element_count),
+        "material_tangent_override_enabled": bool(material_tangent_by_surface_index_mpa),
+        "material_tangent_override_surface_element_count": int(tangent_override_count),
+        "material_tangent_reduction_surface_element_count": int(tangent_reduction_count),
+        "min_material_tangent_ratio": float(min_tangent_ratio),
+        "max_material_tangent_ratio": float(max_tangent_ratio),
     }
     return stiffness, f_ext, meta, surface_conns
 
