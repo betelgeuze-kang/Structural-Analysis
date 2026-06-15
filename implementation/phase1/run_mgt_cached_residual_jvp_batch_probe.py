@@ -1202,7 +1202,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
     )
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUT)

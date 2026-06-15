@@ -127,3 +127,30 @@ def test_surface_pressure_load_path_filter_keeps_restrained_shell_component() ->
     assert allowed == {0}
     assert meta["attached_surface_component_count"] == 1
     assert meta["free_pressure_surface_component_count"] == 0
+
+
+def test_surface_pressure_load_path_filter_supports_structural_policy_name() -> None:
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=6,
+            section_id=1,
+            material_id=1,
+            length_m=3.0,
+        )
+    ]
+    allowed, meta = _surface_pressure_load_path_filter(
+        frame_elements=elements,
+        elem_type_code=np.asarray([2, 2], dtype=np.int32),
+        conn_ptr=np.asarray([0, 3, 6], dtype=np.int64),
+        conn_idx=np.asarray([0, 1, 2, 3, 4, 5], dtype=np.int64),
+        restrained=set(),
+        policy="structural_components_only",
+    )
+
+    assert allowed == {0}
+    assert meta["shell_pressure_load_path_policy"] == "structural_components_only"
+    assert meta["pressure_load_filter_enabled"] is True
+    assert meta["attached_surface_component_count"] == 1
+    assert meta["free_pressure_surface_component_count"] == 1

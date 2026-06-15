@@ -310,7 +310,7 @@ def main() -> int:
     parser.add_argument("--max-newton-iterations", type=int, default=8)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
         help=(
             "Shell pressure load-path policy for the focused residual assembler. "

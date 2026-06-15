@@ -4601,12 +4601,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stiffness-scale-to-si", type=float, default=1000.0)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
         help=(
             "Shell pressure load-path policy. all_components preserves legacy replay; "
             "attached_components_only suppresses pressure on shell surface components "
-            "with no frame-connected node and no authored translational restraint."
+            "without a frame/support attachment; structural_components_only uses the same "
+            "filter as the production structural load-path policy."
         ),
     )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)

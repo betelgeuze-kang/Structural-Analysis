@@ -1883,7 +1883,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
         help="Diagnostic shell pressure load policy for the frozen external load.",
     )

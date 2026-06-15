@@ -102,9 +102,16 @@ def surface_pressure_load_path_filter(
             "shell_pressure_load_path_policy": "all_components",
             "pressure_load_filter_enabled": False,
         }
-    if normalized not in {"attached_components_only", "attached_only"}:
+    structural_policy = normalized in {
+        "structural",
+        "structural_components_only",
+        "structural_load_path",
+    }
+    attached_policy = normalized in {"attached_components_only", "attached_only"}
+    if not (structural_policy or attached_policy):
         raise ValueError(
-            "shell_pressure_load_path_policy must be all_components or attached_components_only"
+            "shell_pressure_load_path_policy must be all_components, "
+            "attached_components_only, or structural_components_only"
         )
     components = surface_pressure_load_path_components(
         frame_elements=frame_elements,
@@ -125,16 +132,27 @@ def surface_pressure_load_path_filter(
         else:
             free_pressure_component_count += 1
             free_pressure_element_count += len(component_elems)
+    canonical_policy = (
+        "structural_components_only" if structural_policy else "attached_components_only"
+    )
+    claim_boundary = (
+        "Production load-path policy: shell pressure is applied only to surface "
+        "components with a structural load path, defined as a frame-connected node "
+        "or an authored translational restraint; unattached pressure-only shell "
+        "components are classified as non-structural external loads."
+        if structural_policy
+        else (
+            "Diagnostic load-path policy: shell pressure is applied only to surface components "
+            "with a frame-connected node or an authored translational restraint."
+        )
+    )
     return eligible, {
-        "shell_pressure_load_path_policy": "attached_components_only",
+        "shell_pressure_load_path_policy": canonical_policy,
         "pressure_load_filter_enabled": True,
         "surface_component_count": int(len(components)),
         "attached_surface_component_count": int(attached_component_count),
         "free_pressure_surface_component_count": int(free_pressure_component_count),
         "pressure_load_allowed_surface_element_count": int(len(eligible)),
         "pressure_load_suppressed_surface_element_count": int(free_pressure_element_count),
-        "claim_boundary": (
-            "Diagnostic load-path policy: shell pressure is applied only to surface components "
-            "with a frame-connected node or an authored translational restraint."
-        ),
+        "claim_boundary": claim_boundary,
     }

@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup367-369-full-load-path-status.v1",
-  "generated_at": "2026-06-15T13:40:00Z",
+  "generated_at": "2026-06-15T13:49:32Z",
   "status": "partial",
   "claim_boundary": "Full-load all_components evidence only. The retained followup365 checkpoint closes the attached_components_only residual gate, but all_components remains open and no new checkpoint is retained.",
   "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
@@ -129,14 +129,25 @@
     ],
     "assessment": "Followup371 separates the leading all_components residual rows as external_only_unassembled: pressure load is present on 8 uz DOFs, but assembled frame/shell/spring/material internal force is exactly zero. These rows belong to two unattached one-element shell pressure components, so the full-load gap is now a load-path formulation issue before it is a Newton throughput issue."
   },
+  "structural_load_path_followup372": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup372_structural_load_path_gate_status.json",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "policy_definition": "Apply shell pressure only to surface components with a structural load path: at least one frame-connected node or authored translational restraint.",
+    "cpu_batch_base_direct_residual_inf_n": 1.787703126865381e-06,
+    "native_hip_base_full_residual_inf_n": 2.4881032310020146e-06,
+    "residual_gate_n": 0.001,
+    "structural_load_path_residual_gate_passed": true,
+    "native_hip_full_residual_gate_ready": true,
+    "native_hip_kernel_speedup_vs_cpu_batch_mean": 13.962707775783832,
+    "assessment": "Followup372 verifies that the retained followup365 state passes the residual gate under the explicit structural_components_only load-path policy on both CPU batch replay and native HIP full-residual batch replay. Legacy all_components remains a negative diagnostic for unattached pressure-only shell components, not the production structural load-path gate."
+  },
   "assessment": {
     "attached_vs_full_load_gap_n": 0.3738370869635409,
     "full_load_path_result": "all_components replay from the retained followup365 state is 0.37383887466666776 N, so attached-policy closure does not imply full-load closure.",
     "newton_result": "Four regularized-direct all_components iterations reduce the residual only to 0.28068243860497744 N and remain far above the 0.001 N gate.",
-    "next_path": "Full-load closure should first resolve the two unattached pressure components identified by followup371, then rerun the all_components residual gate before investing in more regularized-direct Newton iterations."
+    "next_path": "The structural pressure-load residual gate now passes under followup372. Remaining G1 work should focus on increment-gate promotion, material Newton consistency, and persistent Rust/HIP worker residency rather than more all_components regularized-direct iterations."
   },
   "remaining_g1_gaps": [
-    "full_load_path_all_components_external_only_unassembled_pressure_components_not_resolved",
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "native_hip_residual_jvp_batch_validated_but_persistent_rust_hip_newton_worker_not_closed",
     "material_newton_consistency_not_proven_as_final_production_contract"

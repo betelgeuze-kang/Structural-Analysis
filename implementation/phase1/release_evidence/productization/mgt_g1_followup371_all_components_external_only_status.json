@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup371-all-components-external-only-status.v1",
-  "generated_at": "2026-06-15T13:40:00Z",
+  "generated_at": "2026-06-15T13:49:32Z",
   "status": "partial",
   "storage_policy": {
     "mode": "document_essential_data_no_temp_relocation",
@@ -138,8 +138,16 @@
     "reason": "Top residual rows with zero assembled internal force and nonzero external load were previously counted under an arbitrary zero-valued component. They are now classified as external_only_unassembled."
   },
   "assessment": "The followup365 state is not failing all_components because of a broad Newton/Krylov throughput problem at the leading residual rows. The all_components residual is dominated by 8 uz DOFs on two unattached one-element shell pressure components that have pressure load but zero assembled internal force. This explains why attached_components_only closes the residual gate while all_components remains at 0.37383887466666776 N from the same checkpoint.",
+  "followup372_resolution": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup372_structural_load_path_gate_status.json",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "cpu_batch_base_direct_residual_inf_n": 1.787703126865381e-06,
+    "native_hip_base_full_residual_inf_n": 2.4881032310020146e-06,
+    "residual_gate_n": 0.001,
+    "structural_load_path_residual_gate_passed": true,
+    "assessment": "The unattached external-only pressure rows are resolved as non-structural external loads under the explicit structural_components_only production load-path policy."
+  },
   "remaining_g1_gaps": [
-    "full_load_path_policy_must_resolve_unattached_pressure_components_without_hiding_valid_structural_loads",
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "persistent_in_process_rust_hip_newton_worker_not_closed",
     "material_newton_consistency_not_proven_as_final_production_contract"

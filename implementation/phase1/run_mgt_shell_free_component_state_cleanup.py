@@ -340,7 +340,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stiffness-scale-to-si", type=float, default=1000.0)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="attached_components_only",
     )
     parser.add_argument("--relaxation-factor", type=float, default=0.0)

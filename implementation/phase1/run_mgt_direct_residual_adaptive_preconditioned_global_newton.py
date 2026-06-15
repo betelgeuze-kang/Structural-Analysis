@@ -723,7 +723,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--secant-family-min-relative-improvement", type=float, default=1.0e-6)
     parser.add_argument(
         "--shell-pressure-load-path-policy",
-        choices=("all_components", "attached_components_only"),
+        choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
     )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
