@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup372-structural-load-path-gate-status.v1",
-  "generated_at": "2026-06-15T14:28:30Z",
+  "generated_at": "2026-06-15T14:35:00Z",
   "status": "pass",
   "storage_policy": {
     "mode": "document_essential_data_no_temp_relocation",
@@ -70,6 +70,16 @@
     "relative_residual_difference_inf": 1.5551507893289887e-11,
     "relative_jvp_difference_inf": 3.24858436101845e-16
   },
+  "frame_material_newton_consistency": {
+    "status": "partial",
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup374_material_newton_consistency_status.json",
+    "local_constitutive_tangent_fd_consistency_pass": true,
+    "fd_row_count": 11144,
+    "fd_eligible_row_count": 10679,
+    "max_relative_error": 2.427464242549056e-11,
+    "bounded_global_material_tangent_smoke_residual_inf_n": 0.000152927590534091,
+    "remaining_boundary": "shell/plate material nonlinearity, fiber-section history, and global path-dependent material Newton are not closed"
+  },
   "backend_contract": {
     "full_residual_vector_on_native_hip": true,
     "jvp_available_from_batch_residual_differences": true,
@@ -89,10 +99,10 @@
     "shell_nnz": 1901664,
     "spring_nnz": 40608
   },
-  "assessment": "Followup372 promotes the unattached pressure-component diagnosis into an explicit structural load-path policy and verifies the retained followup365 state under that policy through CPU batch replay and native HIP full residual/JVP batch replay. Followup373 then verifies a resident native HIP process worker with device-resident operator buffers across two evaluations. This closes the structural pressure-load residual gate and narrows the production HIP lane, while leaving increment-gate promotion, material Newton consistency, and final in-process Rust FFI worker closure open.",
+  "assessment": "Followup372 promotes the unattached pressure-component diagnosis into an explicit structural load-path policy and verifies the retained followup365 state under that policy through CPU batch replay and native HIP full residual/JVP batch replay. Followup373 then verifies a resident native HIP process worker with device-resident operator buffers across two evaluations. Followup374 proves frame-material local constitutive tangent finite-difference consistency for stable MGT inventory states. This closes the structural pressure-load residual gate and narrows production HIP/material risks, while leaving increment-gate promotion, full path-dependent material Newton, and final in-process Rust FFI worker closure open.",
   "remaining_g1_gaps": [
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "in_process_rust_ffi_newton_worker_not_closed",
-    "material_newton_consistency_not_proven_as_final_production_contract"
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]
 }

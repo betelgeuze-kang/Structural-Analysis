@@ -108,7 +108,9 @@ def _concrete_tangent_state(*, strain: float, e_mpa: float, fc_mpa: float) -> tu
             return e0 * eps, e0, "concrete_tension_elastic"
         decay = math.exp(-(eps - eps_t_crack) / max(5.0 * eps_t_crack, 1.0e-9))
         stress = ft * max(0.05, decay)
-        tangent = max(0.02 * e0, 0.05 * e0 * decay)
+        tangent = -ft * decay / max(5.0 * eps_t_crack, 1.0e-9)
+        if decay <= 0.05:
+            tangent = 0.0
         return stress, tangent, "concrete_tension_cracked"
 
     comp = abs(eps)
@@ -121,9 +123,9 @@ def _concrete_tangent_state(*, strain: float, e_mpa: float, fc_mpa: float) -> tu
         residual = -0.20 * fc
         ratio = (comp - eps_c0) / max(eps_cu - eps_c0, 1.0e-9)
         stress = -fc + ratio * (residual + fc)
-        tangent = max(0.02 * e0, 0.05 * e0 * (1.0 - ratio))
+        tangent = -(residual + fc) / max(eps_cu - eps_c0, 1.0e-9)
         return stress, tangent, "concrete_compression_softening"
-    return -0.20 * fc, 0.02 * e0, "concrete_compression_crushed"
+    return -0.20 * fc, 0.0, "concrete_compression_crushed"
 
 
 def _material_tangent_state(
@@ -190,15 +192,15 @@ def _material_tangent_state(
             e_mpa=concrete_e,
             fc_mpa=float(fc),
         )
-        steel_tangent = max(abs(float(steel_snap.tangent_mpa)), 0.015 * e_mpa)
-        tangent = 0.75 * steel_tangent + 0.25 * concrete_tangent
+        tangent = 0.75 * float(steel_snap.tangent_mpa) + 0.25 * concrete_tangent
         stress = 0.75 * float(steel_snap.stress_mpa) + 0.25 * concrete_stress
+        solver_tangent = max(abs(tangent), 0.02 * e_mpa)
         return MaterialTangentState(
             strain=float(strain),
             stress_mpa=stress,
             tangent_mpa=tangent,
-            solver_tangent_mpa=max(tangent, 0.02 * e_mpa),
-            tangent_ratio=max(tangent, 0.02 * e_mpa) / e_mpa,
+            solver_tangent_mpa=solver_tangent,
+            tangent_ratio=solver_tangent / e_mpa,
             state_tag=f"src_steel_{steel_snap.state_tag}+{concrete_tag}",
             material_family=family_upper,
             inferred_strength_mpa=float(fy),
@@ -207,13 +209,13 @@ def _material_tangent_state(
     if family_upper == "CONC":
         fc = float(strength or 40.0)
         stress, tangent, tag = _concrete_tangent_state(strain=float(strain), e_mpa=e_mpa, fc_mpa=fc)
-        tangent = max(float(tangent), 0.02 * e_mpa)
+        solver_tangent = max(abs(float(tangent)), 0.02 * e_mpa)
         return MaterialTangentState(
             strain=float(strain),
             stress_mpa=stress,
             tangent_mpa=tangent,
-            solver_tangent_mpa=tangent,
-            tangent_ratio=tangent / e_mpa,
+            solver_tangent_mpa=solver_tangent,
+            tangent_ratio=solver_tangent / e_mpa,
             state_tag=tag,
             material_family=family_upper,
             inferred_strength_mpa=fc,
@@ -370,6 +372,82 @@ def _state_summary(states: list[MaterialTangentState]) -> dict[str, Any]:
     }
 
 
+def _material_fd_tangent_row(
+    *,
+    mat: dict[str, Any],
+    strain: float,
+    fallback_e_mpa: float,
+    label: str,
+    material_id: int,
+    elem_id: int | None = None,
+) -> dict[str, Any]:
+    eps = max(1.0e-8, min(1.0e-6, 1.0e-4 * max(abs(float(strain)), 1.0e-4)))
+    center = _material_tangent_state(mat, float(strain), fallback_e_mpa=fallback_e_mpa)
+    plus = _material_tangent_state(mat, float(strain) + eps, fallback_e_mpa=fallback_e_mpa)
+    minus = _material_tangent_state(mat, float(strain) - eps, fallback_e_mpa=fallback_e_mpa)
+    fd_tangent = (float(plus.stress_mpa) - float(minus.stress_mpa)) / (2.0 * eps)
+    tangent = float(center.tangent_mpa)
+    abs_error = abs(fd_tangent - tangent)
+    relative_error = abs_error / max(abs(fd_tangent), abs(tangent), 1.0)
+    state_stable = bool(center.state_tag == plus.state_tag == minus.state_tag)
+    return {
+        "label": str(label),
+        "elem_id": int(elem_id) if elem_id is not None else None,
+        "material_id": int(material_id),
+        "material_family": center.material_family,
+        "state_tag": center.state_tag,
+        "strain": float(strain),
+        "fd_epsilon": float(eps),
+        "stress_mpa": float(center.stress_mpa),
+        "constitutive_tangent_mpa": tangent,
+        "solver_tangent_mpa": float(center.solver_tangent_mpa),
+        "bounded_solver_tangent": bool(abs(float(center.solver_tangent_mpa) - tangent) > max(1.0e-9, 1.0e-9 * abs(tangent))),
+        "fd_tangent_mpa": float(fd_tangent),
+        "absolute_error_mpa": float(abs_error),
+        "relative_error": float(relative_error),
+        "state_stable_under_fd": state_stable,
+        "plus_state_tag": plus.state_tag,
+        "minus_state_tag": minus.state_tag,
+    }
+
+
+def _material_fd_tangent_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    eligible = [
+        row
+        for row in rows
+        if bool(row.get("state_stable_under_fd"))
+        and np.isfinite(float(row.get("relative_error") or 0.0))
+    ]
+    unstable = [row for row in rows if not bool(row.get("state_stable_under_fd"))]
+    bounded = [row for row in rows if bool(row.get("bounded_solver_tangent"))]
+    max_relative_error = max((float(row["relative_error"]) for row in eligible), default=0.0)
+    max_absolute_error = max((float(row["absolute_error_mpa"]) for row in eligible), default=0.0)
+    worst = sorted(
+        eligible,
+        key=lambda row: (float(row.get("relative_error") or 0.0), float(row.get("absolute_error_mpa") or 0.0)),
+        reverse=True,
+    )[:10]
+    return {
+        "row_count": int(len(rows)),
+        "eligible_row_count": int(len(eligible)),
+        "state_unstable_row_count": int(len(unstable)),
+        "bounded_solver_tangent_row_count": int(len(bounded)),
+        "state_tag_counts": dict(Counter(str(row.get("state_tag") or "") for row in rows)),
+        "bounded_solver_state_tag_counts": dict(Counter(str(row.get("state_tag") or "") for row in bounded)),
+        "max_relative_error": float(max_relative_error),
+        "max_absolute_error_mpa": float(max_absolute_error),
+        "relative_error_tolerance": 1.0e-4,
+        "absolute_error_tolerance_mpa": 1.0e-2,
+        "constitutive_tangent_fd_consistency_pass": bool(
+            eligible
+            and max_relative_error <= 1.0e-4
+            and max_absolute_error <= 1.0e-2
+        ),
+        "sample_worst_rows": worst,
+        "sample_unstable_rows": unstable[:10],
+    }
+
+
 def _weakest_examples(
     *,
     elements: list[FrameElement],
@@ -466,6 +544,7 @@ def run_mgt_frame_material_nonlinear_tangent(
     probe_states: dict[int, MaterialTangentState] = {}
     tangent_by_element_mpa: dict[int, float] = {}
     material_strengths: dict[str, dict[str, Any]] = {}
+    fd_tangent_rows: list[dict[str, Any]] = []
     for elem in elements:
         mat = material_props.get(int(elem.material_id), {})
         elastic_props, _used_real = _frame_props(
@@ -484,6 +563,26 @@ def run_mgt_frame_material_nonlinear_tangent(
         service_states[int(elem.elem_id)] = service_state
         probe_states[int(elem.elem_id)] = probe_state
         tangent_by_element_mpa[int(elem.elem_id)] = float(probe_state.solver_tangent_mpa)
+        fd_tangent_rows.append(
+            _material_fd_tangent_row(
+                mat=mat,
+                strain=service_strain,
+                fallback_e_mpa=fallback_e_mpa,
+                label="service",
+                material_id=int(elem.material_id),
+                elem_id=int(elem.elem_id),
+            )
+        )
+        fd_tangent_rows.append(
+            _material_fd_tangent_row(
+                mat=mat,
+                strain=probe_state.strain,
+                fallback_e_mpa=fallback_e_mpa,
+                label="controlled_probe",
+                material_id=int(elem.material_id),
+                elem_id=int(elem.elem_id),
+            )
+        )
         family, strength = _infer_strength_mpa(mat)
         material_strengths[str(elem.material_id)] = {
             "family": family,
@@ -523,6 +622,7 @@ def run_mgt_frame_material_nonlinear_tangent(
     )
     probe_summary = _state_summary(list(probe_states.values()))
     service_summary = _state_summary(list(service_states.values()))
+    fd_tangent_summary = _material_fd_tangent_summary(fd_tangent_rows)
     probe_ready = bool(
         int(probe_summary["nonlinear_tangent_element_count"]) > 0
         and float(probe_summary["min_tangent_ratio"]) < 0.98
@@ -532,7 +632,8 @@ def run_mgt_frame_material_nonlinear_tangent(
         and tangent_residual_inf <= 1.0e-3
         and int(tangent_meta["tangent_reduction_element_count"]) > 0
     )
-    ready = bool(service_ready and probe_ready and smoke_ready)
+    fd_ready = bool(fd_tangent_summary["constitutive_tangent_fd_consistency_pass"])
+    ready = bool(service_ready and probe_ready and smoke_ready and fd_ready)
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -540,6 +641,7 @@ def run_mgt_frame_material_nonlinear_tangent(
         "frame_material_nonlinear_tangent_ready": ready,
         "service_load_material_state_ready": service_ready,
         "controlled_probe_material_state_ready": probe_ready,
+        "local_constitutive_tangent_fd_consistency_ready": fd_ready,
         "bounded_material_tangent_global_smoke_ready": smoke_ready,
         "global_smoke_solver_uses_per_element_material_tangent": smoke_ready,
         "full_material_nonlinear_newton_equilibrium": False,
@@ -550,7 +652,8 @@ def run_mgt_frame_material_nonlinear_tangent(
         "claim_boundary": (
             "MGT line/frame elements consume source material E/nu and material-name grade proxies "
             "for bounded nonlinear tangent states. Service load material states and a controlled "
-            "yield/damage probe are assembled into a per-element tangent smoke solve. This is not "
+            "yield/damage probe are assembled into a per-element tangent smoke solve, and local "
+            "constitutive tangents are checked against finite-difference stress derivatives. This is not "
             "full path-dependent material nonlinear Newton closure, fiber-section closure, or shell material closure."
         ),
         "strength_proxy_policy": {
@@ -574,6 +677,7 @@ def run_mgt_frame_material_nonlinear_tangent(
         "material_strength_inventory": material_strengths,
         "service_material_state_summary": service_summary,
         "controlled_probe_material_state_summary": probe_summary,
+        "local_constitutive_tangent_fd_consistency": fd_tangent_summary,
         "weakest_probe_elements": _weakest_examples(
             elements=elements,
             service_states=service_states,
@@ -605,6 +709,7 @@ def run_mgt_frame_material_nonlinear_tangent(
             "Controlled probe strain is not a production load combination.",
             "Tangent is per-element axial material tangent mapped onto frame EA/EI/GJ stiffness, not a full fiber-section Jacobian.",
             "No path-dependent internal-force history update or Newton residual iteration is promoted by this artifact.",
+            "Global smoke solve uses bounded positive solver tangents where constitutive tangents are negative or zero.",
             "Shell/plate material nonlinearity remains outside this frame receipt.",
         ],
         "blockers": []
@@ -612,6 +717,7 @@ def run_mgt_frame_material_nonlinear_tangent(
         else [
             *([] if service_ready else ["service_load_material_state_not_ready"]),
             *([] if probe_ready else ["controlled_probe_material_state_not_ready"]),
+            *([] if fd_ready else ["local_constitutive_tangent_fd_consistency_not_ready"]),
             *([] if smoke_ready else ["material_tangent_global_smoke_not_ready"]),
         ],
     }

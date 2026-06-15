@@ -30,3 +30,13 @@ def test_steel_response_caps_strength_and_tangent_at_fracture_limit() -> None:
     assert fractured.state_tag == "fracture_limit"
     assert fractured.tangent_mpa == 0.0
     assert abs(fractured.stress_mpa) <= mat.fu_mpa
+
+
+def test_steel_response_reports_zero_tangent_at_monotonic_strength_cap() -> None:
+    mat = SteelMaterial(fy_mpa=235.0, es_mpa=206000.0, hardening_ratio=0.015, fu_mpa=340.75)
+
+    capped = steel_response(-0.07035726414828739, mat)
+
+    assert capped.state_tag == "plastic_capped"
+    assert capped.stress_mpa == -mat.fu_mpa
+    assert capped.tangent_mpa == 0.0

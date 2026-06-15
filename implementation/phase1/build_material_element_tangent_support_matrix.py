@@ -129,6 +129,7 @@ def build_material_element_tangent_support_matrix(
         frame_material_nonlinear.get("status") == "ready"
         and frame_material_nonlinear.get("frame_material_nonlinear_tangent_ready")
         and frame_material_nonlinear.get("bounded_material_tangent_global_smoke_ready")
+        and frame_material_nonlinear.get("local_constitutive_tangent_fd_consistency_ready")
     )
     frame_local_axis_ready = bool(
         local_axis_opening.get("status") in {"ready", "partial"}
@@ -260,14 +261,15 @@ def build_material_element_tangent_support_matrix(
                 ),
                 "reason": (
                     "Frame elements now have a bounded material tangent receipt using MGT E/nu and material-name "
-                    "grade proxies with service/probe states and a global tangent smoke solve. Full path-dependent "
+                    "grade proxies with service/probe states, local constitutive finite-difference tangent "
+                    "consistency, and a global bounded tangent smoke solve. Full path-dependent "
                     "internal-force history, fiber sections, shell material nonlinearity, and Newton consistent "
-                    "Jacobian benchmarks are not promoted."
+                    "global residual/Jacobian benchmarks are not promoted."
                     if frame_material_nonlinear_ready
                     else "Current tangent uses elastic isotropic E/nu from MGT materials; plasticity/damage/fiber laws are not promoted."
                 ),
                 "required_action_before_claim": (
-                    "promote path-dependent constitutive update, internal-force history variables, fiber-section/shell material tangents, consistent Newton Jacobian, and regression benchmarks"
+                    "promote path-dependent constitutive update, internal-force history variables, fiber-section/shell material tangents, consistent global Newton residual/Jacobian, and regression benchmarks"
                     if frame_material_nonlinear_ready
                     else "attach constitutive update, internal-force history variables, consistent Jacobian, and regression benchmarks"
                 ),

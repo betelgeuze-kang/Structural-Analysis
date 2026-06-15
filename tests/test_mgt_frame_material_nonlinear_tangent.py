@@ -32,6 +32,7 @@ def test_mgt_frame_material_nonlinear_tangent_is_ready(tmp_path: Path) -> None:
     assert payload["frame_material_nonlinear_tangent_ready"] is True
     assert payload["service_load_material_state_ready"] is True
     assert payload["controlled_probe_material_state_ready"] is True
+    assert payload["local_constitutive_tangent_fd_consistency_ready"] is True
     assert payload["bounded_material_tangent_global_smoke_ready"] is True
     assert payload["global_smoke_solver_uses_per_element_material_tangent"] is True
     assert payload["full_material_nonlinear_newton_equilibrium"] is False
@@ -44,6 +45,13 @@ def test_mgt_frame_material_nonlinear_tangent_is_ready(tmp_path: Path) -> None:
     assert probe["element_count"] == mesh["line_elements_solved"]
     assert probe["nonlinear_tangent_element_count"] > 0
     assert probe["min_tangent_ratio"] < 0.98
+    fd = payload["local_constitutive_tangent_fd_consistency"]
+    assert fd["constitutive_tangent_fd_consistency_pass"] is True
+    assert fd["row_count"] > mesh["line_elements_solved"]
+    assert fd["eligible_row_count"] > 10000
+    assert fd["max_relative_error"] <= fd["relative_error_tolerance"]
+    assert fd["max_absolute_error_mpa"] <= fd["absolute_error_tolerance_mpa"]
+    assert fd["bounded_solver_tangent_row_count"] > 0
     assert payload["material_tangent_smoke_equilibrium"]["tangent_reduction_element_count"] > 0
     assert payload["material_tangent_smoke_equilibrium"]["residual_inf_n"] <= 1.0e-3
     strengths = payload["material_strength_inventory"]

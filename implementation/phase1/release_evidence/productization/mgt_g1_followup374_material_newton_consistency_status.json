@@ -1,0 +1,69 @@
+{
+  "schema_version": "mgt-g1-followup374-material-newton-consistency-status.v1",
+  "generated_at": "2026-06-15T14:34:00Z",
+  "status": "partial",
+  "storage_policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "material_probe": "implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json",
+    "reason": "Followup374 keeps scalar G1 material-Newton evidence here and detailed local FD samples in the existing frame material tangent receipt."
+  },
+  "target": {
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "roundtrip_json": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "roundtrip_npz": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "frame_free_dof_count": 9816
+  },
+  "local_constitutive_tangent_fd_consistency": {
+    "status": "pass",
+    "row_count": 11144,
+    "eligible_row_count": 10679,
+    "state_unstable_row_count": 465,
+    "bounded_solver_tangent_row_count": 2483,
+    "max_relative_error": 2.427464242549056e-11,
+    "relative_error_tolerance": 0.0001,
+    "max_absolute_error_mpa": 3.5087577998638153e-07,
+    "absolute_error_tolerance_mpa": 0.01,
+    "constitutive_tangent_fd_consistency_pass": true,
+    "steel_plastic_capped_tangent_fix": "steel_response now reports zero constitutive tangent at the monotonic strength cap, matching the finite-difference stress derivative."
+  },
+  "bounded_global_material_tangent_smoke": {
+    "status": "pass",
+    "controlled_probe_nonlinear_tangent_element_count": 5487,
+    "controlled_probe_min_solver_tangent_ratio": 0.015,
+    "controlled_probe_mean_solver_tangent_ratio": 0.3864230276464881,
+    "global_smoke_solver_uses_per_element_material_tangent": true,
+    "residual_inf_n": 0.000152927590534091,
+    "real_section_material_coverage_pct": 98.58219669777459,
+    "tangent_reduction_element_count": 5487
+  },
+  "material_inventory": {
+    "service_state_element_count": 5572,
+    "controlled_probe_element_count": 5572,
+    "material_family_counts": {
+      "CONC": 2110,
+      "UNKNOWN": 79,
+      "USER": 6,
+      "STEEL": 1690,
+      "SRC": 1687
+    },
+    "controlled_probe_state_tags": {
+      "concrete_compression_softening": 2108,
+      "unknown_elastic_proxy": 79,
+      "concrete_compression_crushed": 2,
+      "rigid_user_elastic_proxy": 6,
+      "steel_plastic_hardening": 1688,
+      "steel_plastic_capped": 2,
+      "src_steel_plastic_hardening+concrete_compression_hardening": 1319,
+      "src_steel_plastic_hardening+concrete_tension_cracked": 360,
+      "src_steel_plastic_hardening+concrete_compression_crushed": 8
+    }
+  },
+  "assessment": "Followup374 upgrades the bounded frame material tangent receipt with finite-difference consistency of the local constitutive stress derivative for the actual representative MGT material inventory. This proves local frame-material constitutive tangent consistency for stable differentiable states and keeps the global bounded tangent smoke passing. It does not yet close full path-dependent material Newton: shell/plate material nonlinearity, fiber-section history variables, and global nonlinear material residual/Jacobian Newton iterations remain outside this receipt.",
+  "remaining_g1_gaps": [
+    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
+    "in_process_rust_ffi_newton_worker_not_closed",
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
+  ]
+}

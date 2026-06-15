@@ -109,7 +109,10 @@ def steel_response(strain: float, mat: SteelMaterial | None = None) -> MaterialS
             tangent_mpa=0.0,
             state_tag="fracture_limit",
         )
-    state_tag = "plastic_hardening" if stress_abs < float(mat.fu_mpa) else "plastic_capped"
+    capped = bool(stress_abs >= float(mat.fu_mpa))
+    if capped:
+        tangent = 0.0
+    state_tag = "plastic_hardening" if not capped else "plastic_capped"
     return MaterialSnapshot(strain=e, stress_mpa=sign * stress_abs, tangent_mpa=tangent, state_tag=state_tag)
 
 

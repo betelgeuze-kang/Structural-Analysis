@@ -1,8 +1,8 @@
 {
   "schema_version": "mgt-g1-followup366-increment-rocm-lane-status.v1",
-  "generated_at": "2026-06-15T14:28:00Z",
+  "generated_at": "2026-06-15T14:34:30Z",
   "status": "partial",
-  "claim_boundary": "Followup366 is an increment-gate and ROCm-lane status receipt, now amended with followup370 native HIP residual/JVP replay, followup372 structural load-path gate, and followup373 resident HIP process-worker status. It does not create a new restart checkpoint; followup365 remains the retained residual-gate frontier.",
+  "claim_boundary": "Followup366 is an increment-gate and ROCm-lane status receipt, now amended with followup370 native HIP residual/JVP replay, followup372 structural load-path gate, followup373 resident HIP process-worker status, and followup374 frame-material local constitutive FD consistency. It does not create a new restart checkpoint; followup365 remains the retained residual-gate frontier.",
   "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
   "followup366_increment_probe": {
     "probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup366_attached_increment_gate_probe.json",
@@ -76,6 +76,19 @@
     "backend_boundary": "persistent_native_hip_process_worker_not_yet_in_process_rust_ffi",
     "assessment": "Followup373 keeps the native HIP full-residual/JVP operator buffers resident across two evaluations in one worker PID. It closes the per-evaluation subprocess residency gap but does not yet provide the final in-process Rust FFI Newton worker."
   },
+  "followup374_material_newton_consistency": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup374_material_newton_consistency_status.json",
+    "status": "partial",
+    "local_constitutive_tangent_fd_consistency_pass": true,
+    "fd_row_count": 11144,
+    "fd_eligible_row_count": 10679,
+    "fd_state_unstable_row_count": 465,
+    "max_relative_error": 2.427464242549056e-11,
+    "max_absolute_error_mpa": 3.5087577998638153e-07,
+    "bounded_global_material_tangent_smoke_residual_inf_n": 0.000152927590534091,
+    "controlled_probe_nonlinear_tangent_element_count": 5487,
+    "assessment": "Frame-material local constitutive stress derivatives now match finite-difference tangents for stable states in the representative MGT inventory. This narrows material Newton risk but leaves shell/plate material nonlinearity, fiber-section history variables, and global path-dependent material Newton closure open."
+  },
   "rocm_runtime_status": {
     "rocminfo_gpu_visible_unsandboxed": true,
     "rocminfo_gpu": "AMD Radeon RX 6900 XT / gfx1030 / 80 compute units",
@@ -108,6 +121,6 @@
   "remaining_g1_gaps": [
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "in_process_rust_ffi_newton_worker_not_closed",
-    "material_newton_consistency_not_proven_as_final_production_contract"
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]
 }
