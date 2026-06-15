@@ -105,6 +105,25 @@ def test_component_breakdown_identifies_dominant_top_residual_component() -> Non
     assert row["top_row_dominant_component_counts"] == {"shell": 1}
 
 
+def test_component_breakdown_marks_external_only_unassembled_top_row() -> None:
+    row = _component_breakdown(
+        component_forces={
+            "frame": np.asarray([0.0], dtype=np.float64),
+            "shell": np.asarray([0.0], dtype=np.float64),
+        },
+        free=np.asarray([0], dtype=np.int64),
+        residual=np.asarray([-0.25], dtype=np.float64),
+        rhs=np.asarray([0.25], dtype=np.float64),
+        top_count=1,
+    )
+
+    assert row["top_rows"][0]["internal_sum_n"] == 0.0
+    assert row["top_rows"][0]["dominant_component"] == "external_only_unassembled"
+    assert row["top_row_dominant_component_counts"] == {
+        "external_only_unassembled": 1
+    }
+
+
 def test_scalar_load_balance_diagnostics_fits_shell_top_row_external_scale() -> None:
     row = _scalar_load_balance_diagnostics(
         top_rows=[

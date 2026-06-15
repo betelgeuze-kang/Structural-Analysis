@@ -128,11 +128,19 @@ def _component_breakdown(
             for name, values in components.items()
             if 0 <= global_dof < int(values.size)
         }
-        dominant = max(
-            component_values,
-            key=lambda name: abs(float(component_values[name])),
-            default="none",
+        max_component_abs = max(
+            (abs(float(value)) for value in component_values.values()),
+            default=0.0,
         )
+        external_load = float(rhs_np[int(local_row)]) if int(local_row) < rhs_np.size else 0.0
+        if max_component_abs <= 1.0e-12 and abs(external_load) > 1.0e-12:
+            dominant = "external_only_unassembled"
+        else:
+            dominant = max(
+                component_values,
+                key=lambda name: abs(float(component_values[name])),
+                default="none",
+            )
         dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
         rows.append(
             {
@@ -141,7 +149,7 @@ def _component_breakdown(
                 "node_index": int(global_dof // 6),
                 "dof": dof_names[global_dof % 6],
                 "residual_n": float(residual_np[int(local_row)]),
-                "external_load_n": float(rhs_np[int(local_row)]) if int(local_row) < rhs_np.size else 0.0,
+                "external_load_n": external_load,
                 "component_values_n": component_values,
                 "internal_sum_n": float(sum(component_values.values())),
                 "dominant_component": dominant,

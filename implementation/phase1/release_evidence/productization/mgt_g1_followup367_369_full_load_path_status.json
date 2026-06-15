@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup367-369-full-load-path-status.v1",
-  "generated_at": "2026-06-15T12:51:26.890064+00:00",
+  "generated_at": "2026-06-15T13:40:00Z",
   "status": "partial",
   "claim_boundary": "Full-load all_components evidence only. The retained followup365 checkpoint closes the attached_components_only residual gate, but all_components remains open and no new checkpoint is retained.",
   "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
@@ -78,16 +78,67 @@
     "remaining_margin_to_residual_gate_n": 0.27968243860497743,
     "gate_passed": false
   },
+  "all_components_external_only_followup371": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup371_all_components_external_only_status.json",
+    "component_probe_raw_after_extraction": "pruned_from_working_tree",
+    "base_residual_inf_n": 0.37383887466666776,
+    "top_row_dominant_component_counts": {
+      "external_only_unassembled": 8,
+      "frame": 13,
+      "shell_bending_drilling": 10,
+      "shell_membrane": 1
+    },
+    "external_only_unassembled_linf_n": 0.37383887466666776,
+    "external_only_unassembled_l2_n": 0.8359312139302988,
+    "full_residual_l2_n_from_followup367": 0.8359312139379758,
+    "surface_component_mapping": [
+      {
+        "component_index": 1,
+        "attached": false,
+        "surface_element_count": 1,
+        "surface_node_count": 4,
+        "frame_connected_node_count": 0,
+        "restrained_translation_dof_count": 0,
+        "hit_nodes": [
+          2273,
+          2275,
+          2284,
+          2285
+        ],
+        "surface_element_indices": [
+          5820
+        ]
+      },
+      {
+        "component_index": 2,
+        "attached": false,
+        "surface_element_count": 1,
+        "surface_node_count": 4,
+        "frame_connected_node_count": 0,
+        "restrained_translation_dof_count": 0,
+        "hit_nodes": [
+          7782,
+          7784,
+          7792,
+          7794
+        ],
+        "surface_element_indices": [
+          12184
+        ]
+      }
+    ],
+    "assessment": "Followup371 separates the leading all_components residual rows as external_only_unassembled: pressure load is present on 8 uz DOFs, but assembled frame/shell/spring/material internal force is exactly zero. These rows belong to two unattached one-element shell pressure components, so the full-load gap is now a load-path formulation issue before it is a Newton throughput issue."
+  },
   "assessment": {
     "attached_vs_full_load_gap_n": 0.3738370869635409,
     "full_load_path_result": "all_components replay from the retained followup365 state is 0.37383887466666776 N, so attached-policy closure does not imply full-load closure.",
     "newton_result": "Four regularized-direct all_components iterations reduce the residual only to 0.28068243860497744 N and remain far above the 0.001 N gate.",
-    "next_path": "Full-load closure needs load-path formulation or stronger production Newton/globalization work, not blind repetition of regularized_direct all_components iterations."
+    "next_path": "Full-load closure should first resolve the two unattached pressure components identified by followup371, then rerun the all_components residual gate before investing in more regularized-direct Newton iterations."
   },
   "remaining_g1_gaps": [
-    "full_load_path_all_components_residual_gate_not_closed",
+    "full_load_path_all_components_external_only_unassembled_pressure_components_not_resolved",
     "increment_gate_checkpoint_not_promoted_after_forced_followup366",
-    "production_rocm_hip_newton_solver_lane_not_closed_torch_device_unavailable",
+    "native_hip_residual_jvp_batch_validated_but_persistent_rust_hip_newton_worker_not_closed",
     "material_newton_consistency_not_proven_as_final_production_contract"
   ]
 }

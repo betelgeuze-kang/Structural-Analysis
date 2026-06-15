@@ -1,0 +1,147 @@
+{
+  "schema_version": "mgt-g1-followup371-all-components-external-only-status.v1",
+  "generated_at": "2026-06-15T13:40:00Z",
+  "status": "partial",
+  "storage_policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "raw_component_probe_after_extraction": "pruned_from_working_tree",
+    "reason": "Followup371 keeps only the scalar and node/component evidence needed to explain the all_components full-load residual blocker."
+  },
+  "target": {
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "nodes": 13047,
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "load_scale": 0.656,
+    "shell_pressure_load_path_policy": "all_components"
+  },
+  "all_components_residual": {
+    "base_residual_inf_n": 0.37383887466666776,
+    "base_relative_residual_inf": 4.308816049625206e-05,
+    "rhs_inf_n": 8676.13911480824,
+    "top_residual_count": 32,
+    "top_row_dominant_component_counts": {
+      "external_only_unassembled": 8,
+      "frame": 13,
+      "shell_bending_drilling": 10,
+      "shell_membrane": 1
+    },
+    "external_only_unassembled_linf_n": 0.37383887466666776,
+    "external_only_unassembled_l2_n": 0.8359312139302988,
+    "full_residual_l2_n_from_followup367": 0.8359312139379758
+  },
+  "external_only_unassembled_rows": [
+    {
+      "node_index": 7784,
+      "global_dof": 46706,
+      "dof": "uz",
+      "residual_n": -0.37383887466666776,
+      "external_load_n": 0.37383887466666776,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 7792,
+      "global_dof": 46754,
+      "dof": "uz",
+      "residual_n": -0.37383887466666776,
+      "external_load_n": 0.37383887466666776,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 2275,
+      "global_dof": 13652,
+      "dof": "uz",
+      "residual_n": -0.37383887466666776,
+      "external_load_n": 0.37383887466666776,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 2284,
+      "global_dof": 13706,
+      "dof": "uz",
+      "residual_n": -0.37383887466666776,
+      "external_load_n": 0.37383887466666776,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 7782,
+      "global_dof": 46694,
+      "dof": "uz",
+      "residual_n": -0.18785128533333023,
+      "external_load_n": 0.18785128533333023,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 2273,
+      "global_dof": 13640,
+      "dof": "uz",
+      "residual_n": -0.18785128533333023,
+      "external_load_n": 0.18785128533333023,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 7794,
+      "global_dof": 46766,
+      "dof": "uz",
+      "residual_n": -0.18598758933333753,
+      "external_load_n": 0.18598758933333753,
+      "internal_sum_n": 0.0
+    },
+    {
+      "node_index": 2285,
+      "global_dof": 13712,
+      "dof": "uz",
+      "residual_n": -0.18598758933333753,
+      "external_load_n": 0.18598758933333753,
+      "internal_sum_n": 0.0
+    }
+  ],
+  "surface_component_mapping": [
+    {
+      "component_index": 1,
+      "attached": false,
+      "surface_element_count": 1,
+      "surface_node_count": 4,
+      "frame_connected_node_count": 0,
+      "restrained_translation_dof_count": 0,
+      "hit_nodes": [
+        2273,
+        2275,
+        2284,
+        2285
+      ],
+      "surface_element_indices": [
+        5820
+      ]
+    },
+    {
+      "component_index": 2,
+      "attached": false,
+      "surface_element_count": 1,
+      "surface_node_count": 4,
+      "frame_connected_node_count": 0,
+      "restrained_translation_dof_count": 0,
+      "hit_nodes": [
+        7782,
+        7784,
+        7792,
+        7794
+      ],
+      "surface_element_indices": [
+        12184
+      ]
+    }
+  ],
+  "code_change": {
+    "component_breakdown_external_only_classification": true,
+    "reason": "Top residual rows with zero assembled internal force and nonzero external load were previously counted under an arbitrary zero-valued component. They are now classified as external_only_unassembled."
+  },
+  "assessment": "The followup365 state is not failing all_components because of a broad Newton/Krylov throughput problem at the leading residual rows. The all_components residual is dominated by 8 uz DOFs on two unattached one-element shell pressure components that have pressure load but zero assembled internal force. This explains why attached_components_only closes the residual gate while all_components remains at 0.37383887466666776 N from the same checkpoint.",
+  "remaining_g1_gaps": [
+    "full_load_path_policy_must_resolve_unattached_pressure_components_without_hiding_valid_structural_loads",
+    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
+    "persistent_in_process_rust_hip_newton_worker_not_closed",
+    "material_newton_consistency_not_proven_as_final_production_contract"
+  ]
+}
