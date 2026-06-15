@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup374-material-newton-consistency-status.v1",
-  "generated_at": "2026-06-15T14:34:00Z",
+  "generated_at": "2026-06-15T14:41:30Z",
   "status": "partial",
   "storage_policy": {
     "mode": "document_essential_data_no_temp_relocation",
@@ -62,7 +62,6 @@
   },
   "assessment": "Followup374 upgrades the bounded frame material tangent receipt with finite-difference consistency of the local constitutive stress derivative for the actual representative MGT material inventory. This proves local frame-material constitutive tangent consistency for stable differentiable states and keeps the global bounded tangent smoke passing. It does not yet close full path-dependent material Newton: shell/plate material nonlinearity, fiber-section history variables, and global nonlinear material residual/Jacobian Newton iterations remain outside this receipt.",
   "remaining_g1_gaps": [
-    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "in_process_rust_ffi_newton_worker_not_closed",
     "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]

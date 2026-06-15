@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup366-increment-rocm-lane-status.v1",
-  "generated_at": "2026-06-15T14:34:30Z",
+  "generated_at": "2026-06-15T14:40:30Z",
   "status": "partial",
   "claim_boundary": "Followup366 is an increment-gate and ROCm-lane status receipt, now amended with followup370 native HIP residual/JVP replay, followup372 structural load-path gate, followup373 resident HIP process-worker status, and followup374 frame-material local constitutive FD consistency. It does not create a new restart checkpoint; followup365 remains the retained residual-gate frontier.",
   "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
@@ -89,6 +89,20 @@
     "controlled_probe_nonlinear_tangent_element_count": 5487,
     "assessment": "Frame-material local constitutive stress derivatives now match finite-difference tangents for stable states in the representative MGT inventory. This narrows material Newton risk but leaves shell/plate material nonlinearity, fiber-section history variables, and global path-dependent material Newton closure open."
   },
+  "followup375_terminal_increment_gate": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup375_terminal_increment_gate_status.json",
+    "status": "pass",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "equilibrium_newton_ready": true,
+    "base_residual_inf_n": 1.787703126865381e-06,
+    "final_residual_inf_n": 1.787703126865381e-06,
+    "residual_tolerance_n": 0.0005,
+    "accepted_newton_iteration_count": 0,
+    "terminal_relative_increment": 0.0,
+    "relative_increment_tolerance": 0.0001,
+    "stop_reason": "residual_gate_stationary_no_descent_increment_gate_met",
+    "assessment": "A forced Newton follow-up from the retained followup365 checkpoint found no residual descent because the physical residual was already below gate; the terminal accepted increment is zero and passes the relative-increment gate. No new checkpoint is written because the final state equals the retained checkpoint."
+  },
   "rocm_runtime_status": {
     "rocminfo_gpu_visible_unsandboxed": true,
     "rocminfo_gpu": "AMD Radeon RX 6900 XT / gfx1030 / 80 compute units",
@@ -119,7 +133,6 @@
     "assessment": "Native HIP kernels work outside the sandbox and ROCm sees the RX 6900 XT, but Torch ROCm exposes no cuda/HIP device. The production Newton solver lane therefore needs the native HIP/Rust path rather than the current Torch device-GMRES profile."
   },
   "remaining_g1_gaps": [
-    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
     "in_process_rust_ffi_newton_worker_not_closed",
     "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]

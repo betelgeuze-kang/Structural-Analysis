@@ -124,6 +124,7 @@ def run_equilibrium_newton(
     state_scale_only: bool = False,
     min_newton_iterations_before_residual_stop: int = 0,
     require_relative_increment_gate_for_convergence: bool = False,
+    allow_terminal_no_descent_convergence: bool = False,
 ) -> dict[str, Any]:
     from mgt_sparse_linear_solver import solve_newton_correction
     from run_mgt_coupled_frame_surface_sparse_equilibrium import _translation_metrics
@@ -359,6 +360,16 @@ def run_equilibrium_newton(
             break
         if not accepted:
             iteration_row["stop_reason"] = "no_residual_descent"
+            stationary_tol = max(1.0e-12, 1.0e-9 * max(residual_inf, 1.0))
+            if (
+                bool(allow_terminal_no_descent_convergence)
+                and residual_inf <= float(residual_tolerance_n)
+                and best_residual_inf <= residual_inf + stationary_tol
+                and increment_gate_passed
+            ):
+                iteration_row["stop_reason"] = "residual_gate_stationary_no_descent_increment_gate_met"
+                iteration_row["terminal_stationary_residual_tolerance_n"] = stationary_tol
+                converged = True
             break
         if relative_increment <= float(relative_increment_tolerance):
             _k, _f, _free, final_residual, _rhs, _meta = assemble_residual(u)
@@ -412,5 +423,8 @@ def run_equilibrium_newton(
         ),
         "require_relative_increment_gate_for_convergence": bool(
             require_relative_increment_gate_for_convergence
+        ),
+        "allow_terminal_no_descent_convergence": bool(
+            allow_terminal_no_descent_convergence
         ),
     }

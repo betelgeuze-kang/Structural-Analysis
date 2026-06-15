@@ -163,6 +163,7 @@ def run_mgt_equilibrium_newton_focused_probe(
     state_scale_only: bool = False,
     min_newton_iterations_before_residual_stop: int = 0,
     require_relative_increment_gate_for_convergence: bool = False,
+    allow_terminal_no_descent_convergence: bool = False,
     line_search_alphas: tuple[float, ...] = (
         1.0,
         0.5,
@@ -207,6 +208,9 @@ def run_mgt_equilibrium_newton_focused_probe(
         ),
         require_relative_increment_gate_for_convergence=bool(
             require_relative_increment_gate_for_convergence
+        ),
+        allow_terminal_no_descent_convergence=bool(
+            allow_terminal_no_descent_convergence
         ),
     )
     output_checkpoint_meta: dict[str, Any] | None = None
@@ -263,6 +267,9 @@ def run_mgt_equilibrium_newton_focused_probe(
         ),
         "require_relative_increment_gate_for_convergence": bool(
             require_relative_increment_gate_for_convergence
+        ),
+        "allow_terminal_no_descent_convergence": bool(
+            allow_terminal_no_descent_convergence
         ),
         "line_search_alphas": [float(value) for value in line_search_alphas],
         "displacement_cap_m": (
@@ -379,6 +386,15 @@ def main() -> int:
         ),
     )
     parser.add_argument(
+        "--allow-terminal-no-descent-convergence",
+        action="store_true",
+        help=(
+            "When residual and increment gates are already satisfied after the forced "
+            "Newton follow-up attempt, allow a no-descent line search to terminate as "
+            "a stationary residual-gate convergence instead of failing the probe."
+        ),
+    )
+    parser.add_argument(
         "--line-search-alphas",
         default="1,0.5,0.25,0.125,0.0625,0.03125",
         help="Comma-separated Newton line-search alpha candidates.",
@@ -422,6 +438,9 @@ def main() -> int:
         ),
         require_relative_increment_gate_for_convergence=bool(
             args.require_relative_increment_gate_for_convergence
+        ),
+        allow_terminal_no_descent_convergence=bool(
+            args.allow_terminal_no_descent_convergence
         ),
         line_search_alphas=line_search_alphas,
         displacement_cap_m=args.displacement_cap_m,

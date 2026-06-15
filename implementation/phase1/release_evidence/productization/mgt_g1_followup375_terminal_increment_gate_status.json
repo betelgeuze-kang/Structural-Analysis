@@ -1,0 +1,47 @@
+{
+  "schema_version": "mgt-g1-followup375-terminal-increment-gate-status.v1",
+  "generated_at": "2026-06-15T14:40:00Z",
+  "status": "pass",
+  "storage_policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "raw_probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup375_structural_terminal_increment_gate_probe.json",
+    "raw_probe_size_bytes": 14269,
+    "reason": "Followup375 keeps scalar terminal gate status here and a small raw line-search probe for auditability."
+  },
+  "target": {
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "load_scale": 0.656,
+    "dof_count": 78282,
+    "free_dof_count": 58998
+  },
+  "terminal_increment_gate": {
+    "status": "pass",
+    "equilibrium_newton_ready": true,
+    "base_residual_inf_n": 1.787703126865381e-06,
+    "initial_residual_inf_n": 1.787703126865381e-06,
+    "final_residual_inf_n": 1.787703126865381e-06,
+    "residual_tolerance_n": 0.0005,
+    "residual_gate_passed": true,
+    "accepted_newton_iteration_count": 0,
+    "forced_newton_followup_attempt_count": 1,
+    "terminal_relative_increment": 0.0,
+    "relative_increment_tolerance": 0.0001,
+    "relative_increment_gate_passed": true,
+    "stop_reason": "residual_gate_stationary_no_descent_increment_gate_met",
+    "best_trial_residual_inf_n": 1.787703126865381e-06,
+    "allow_terminal_no_descent_convergence": true,
+    "line_search_alpha_count": 38,
+    "runtime_seconds": 25.49113302599835
+  },
+  "policy": {
+    "terminal_no_descent_rule": "If the retained checkpoint is already below the physical residual gate, a forced Newton follow-up line search finds no residual descent, and the terminal accepted increment is zero within tolerance, report a stationary residual-gate convergence instead of requiring a new checkpoint.",
+    "checkpoint_promotion": "no_new_checkpoint_written_because_final_state_equals_retained_followup365_checkpoint",
+    "claim_boundary": "This closes the focused equilibrium Newton residual+increment terminal gate for the retained structural-components checkpoint. It does not by itself close the remaining in-process Rust FFI worker or full path-dependent material Newton gaps."
+  },
+  "remaining_g1_gaps": [
+    "in_process_rust_ffi_newton_worker_not_closed",
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
+  ]
+}

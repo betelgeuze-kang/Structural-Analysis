@@ -167,6 +167,49 @@ def test_equilibrium_newton_can_force_increment_gate_after_residual_gate() -> No
     assert result["final_residual_inf_n"] <= 2.0e-2
 
 
+def test_equilibrium_newton_can_accept_stationary_no_descent_terminal_gate() -> None:
+    stiffness = sp.csc_matrix(np.asarray([[1.0]], dtype=np.float64))
+
+    def assemble_residual(u: np.ndarray, **_: object):
+        free = np.asarray([0], dtype=np.int64)
+        residual = np.asarray([1.0e-6], dtype=np.float64)
+        rhs = np.asarray([1.0], dtype=np.float64)
+        return stiffness, rhs, free, residual, rhs, {}
+
+    blocked = run_equilibrium_newton(
+        u0=np.asarray([0.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=1,
+        residual_tolerance_n=1.0e-3,
+        relative_increment_tolerance=1.0e-4,
+        prefer_host_ilu=False,
+        linear_solver_profile="regularized_direct",
+        min_newton_iterations_before_residual_stop=1,
+        require_relative_increment_gate_for_convergence=True,
+    )
+    accepted = run_equilibrium_newton(
+        u0=np.asarray([0.0], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=1,
+        residual_tolerance_n=1.0e-3,
+        relative_increment_tolerance=1.0e-4,
+        prefer_host_ilu=False,
+        linear_solver_profile="regularized_direct",
+        min_newton_iterations_before_residual_stop=1,
+        require_relative_increment_gate_for_convergence=True,
+        allow_terminal_no_descent_convergence=True,
+    )
+
+    assert blocked["converged"] is False
+    assert blocked["residual_gate_passed"] is True
+    assert accepted["converged"] is True
+    assert accepted["iterations"][0]["relative_increment"] == 0.0
+    assert (
+        accepted["iterations"][0]["stop_reason"]
+        == "residual_gate_stationary_no_descent_increment_gate_met"
+    )
+
+
 def test_equilibrium_newton_signed_alpha_recovers_from_opposite_tangent_direction() -> None:
     f_ext = 1.0
 
