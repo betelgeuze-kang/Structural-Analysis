@@ -46,6 +46,7 @@ def test_shell_material_rowcorr_budget_zero_launches_no_children(
     payload = controller.run_shell_material_rowcorr_budget_controller(
         seed_probe_json=_write_seed(tmp_path / "seed.json"),
         output_json=tmp_path / "controller.json",
+        output_final_checkpoint_npz=tmp_path / "not_written.npz",
         child_output_dir=tmp_path / "children",
         python_exe=tmp_path / "python",
         max_controller_runtime_seconds=0.0,
@@ -58,6 +59,11 @@ def test_shell_material_rowcorr_budget_zero_launches_no_children(
     assert payload["rows"] == []
     assert payload["seed_probe"]["final_direct_residual_inf_n"] == 14.0
     assert payload["final_direct_residual_inf_n"] == 14.0
+    assert payload["output_final_checkpoint_written"] is False
+    assert not (tmp_path / "not_written.npz").exists()
+    assert payload["initial_checkpoint_path"].endswith(
+        "mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz"
+    )
 
 
 def test_shell_material_rowcorr_budget_promotes_completed_child(
@@ -109,6 +115,7 @@ def test_shell_material_rowcorr_budget_promotes_completed_child(
         row_support_column_counts=(4,),
         row_alpha_values=(0.015625,),
         max_candidates=2,
+        write_child_checkpoints=True,
         child_timeout_seconds=1.0,
     )
 
@@ -119,6 +126,7 @@ def test_shell_material_rowcorr_budget_promotes_completed_child(
     assert row["frontier_improvement_inf_n"] == 1.0
     assert row["subprocess_stdout"] == "completed stdout"
     assert "--apply-shell-material-tangent" in row["subprocess_command"]
+    assert "--compact-output-final-checkpoint" in row["subprocess_command"]
     assert "--enable-current-tangent-residual-row-correction" in row[
         "subprocess_command"
     ]
@@ -163,6 +171,7 @@ def test_shell_material_rowcorr_budget_child_timeout_writes_receipt(
 
     child_receipt = json.loads(Path(row["child_receipt_path"]).read_text())
     assert child_receipt["status"] == "timeout"
+    assert child_receipt["output_final_checkpoint_npz"] is None
     assert child_receipt["output_final_checkpoint_written"] is False
     assert child_receipt["current_tangent_residual_row_correction"]["stop_reason"] == (
         "child_timeout_seconds_exceeded"

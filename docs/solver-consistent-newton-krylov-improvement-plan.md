@@ -206,3 +206,27 @@ This does not claim new residual descent. It makes the shell-material
 row-correction path safe to continue in bounded slices: every broad sweep now
 has a launch-boundary receipt, child timeout policy, and a rule that only child
 direct-residual receipts beating the seed frontier can promote.
+
+Budgeted shell-material continuation:
+
+- `mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json`
+  shows that widening the original one-row seed from support `4` to support `8`
+  does not beat the `14.90754179546407 N` seed frontier.
+- `mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json`
+  promotes target `2` / support `4` from the same checkpoint and lowers the
+  frontier to `14.155544299510074 N`.
+- Compact checkpoint output is now supported through
+  `--compact-output-final-checkpoint`. Followup384 preserves the target `2` /
+  support `4` promoted state as a compact `displacement_u` checkpoint of about
+  `452 KB`, avoiding the prior full-history checkpoint size.
+- Continuation from compact checkpoints is verified. Followup385 lowers
+  `14.155544299510074 -> 10.403522164941286 N`, and followup386 lowers
+  `10.403522164941286 -> 10.240967131025435 N`.
+- Widening the target to `4` at followup387 still promotes but only lowers
+  `10.240967131025435 -> 10.08095402628286 N`.
+
+This is real residual-gated progress, but not closure: the direct residual gate
+is still `5e-4 N`. The route now has a bounded continuation/checkpoint mechanism;
+the next acceleration should combine this compact state chain with a stronger
+consistent Jacobian/globalization or ROCm/HIP residual-row backend instead of
+simply increasing row/support counts.

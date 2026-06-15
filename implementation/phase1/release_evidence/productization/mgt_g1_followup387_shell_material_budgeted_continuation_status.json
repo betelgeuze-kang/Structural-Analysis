@@ -1,0 +1,81 @@
+{
+  "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v1",
+  "status": "partial",
+  "generated_at": "2026-06-16T01:21:35+09:00",
+  "target_model": "midas_generator_33.optimized.roundtrip.json",
+  "direct_residual_gate_tolerance_n": 0.0005,
+  "direct_residual_gate_passed": false,
+  "compact_checkpoint_ready": true,
+  "shell_material_tangent_applied": true,
+  "budgeted_controller_ready": true,
+  "frontier_chain": [
+    {
+      "receipt": "mgt_direct_residual_shell_material_tangent_base_followup379_probe.json",
+      "direct_residual_inf_n": 18.969329986783087,
+      "note": "shell material tangent consumed by physical residual path"
+    },
+    {
+      "receipt": "mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
+      "direct_residual_inf_n": 14.90754179546407,
+      "target_row_count": 1,
+      "support_column_count": 4
+    },
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json",
+      "direct_residual_inf_n": 14.155544299510074,
+      "target_row_count": 2,
+      "support_column_count": 4
+    },
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4.json",
+      "direct_residual_inf_n": 10.403522164941286,
+      "target_row_count": 2,
+      "support_column_count": 4,
+      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_compact_checkpoint.npz"
+    },
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4.json",
+      "direct_residual_inf_n": 10.240967131025435,
+      "target_row_count": 2,
+      "support_column_count": 4,
+      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz"
+    },
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4.json",
+      "direct_residual_inf_n": 10.08095402628286,
+      "target_row_count": 4,
+      "support_column_count": 4,
+      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz"
+    }
+  ],
+  "counter_evidence": [
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json",
+      "result": "support8_replay_matched_seed_frontier",
+      "direct_residual_inf_n": 14.90754179546407
+    }
+  ],
+  "storage_policy": {
+    "full_history_checkpoint_avoided": true,
+    "compact_checkpoint_size_bytes_approx": 451700,
+    "compact_checkpoint_contents": [
+      "displacement_u",
+      "load_scale",
+      "direct_residual_inf_n",
+      "max_translation_m",
+      "source_checkpoint_path"
+    ]
+  },
+  "claim_boundary": {
+    "full_mesh_nonlinear_equilibrium_closed": false,
+    "direct_residual_newton_closed": false,
+    "equilibrium_newton_closed": false,
+    "cpu_diagnostic_only": true,
+    "official_rocm_hip_closure_required": true
+  },
+  "next_actions": [
+    "continue from followup387 compact checkpoint with stronger globalization or updated row target policy",
+    "port residual-row batch replay with state-dependent shell material tangent to a production ROCm/HIP lane",
+    "replace row-only correction with a consistent residual/Jacobian Newton path before claiming commercial closure"
+  ]
+}

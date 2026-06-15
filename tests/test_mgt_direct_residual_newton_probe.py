@@ -67,15 +67,18 @@ def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
     assert default_args.current_tangent_residual_row_use_residual_only_assembly is False
     assert default_args.current_tangent_residual_row_allow_negative_alphas is False
     assert default_args.apply_shell_material_tangent is False
+    assert default_args.compact_output_final_checkpoint is False
 
     enabled_args = parse_args(
         [
             "--apply-shell-material-tangent",
+            "--compact-output-final-checkpoint",
             "--current-tangent-residual-row-use-residual-only-assembly",
             "--current-tangent-residual-row-allow-negative-alphas",
         ]
     )
     assert enabled_args.apply_shell_material_tangent is True
+    assert enabled_args.compact_output_final_checkpoint is True
     assert enabled_args.current_tangent_residual_row_use_residual_only_assembly is True
     assert enabled_args.current_tangent_residual_row_allow_negative_alphas is True
 

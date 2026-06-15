@@ -26,6 +26,10 @@ DEFAULT_SEED_PROBE = (
     PRODUCTIZATION / "mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json"
 )
 DEFAULT_OUTPUT = PRODUCTIZATION / "mgt_shell_material_rowcorr_budget_controller.json"
+DEFAULT_SHELL_MATERIAL_CHECKPOINT = (
+    PRODUCTIZATION
+    / "mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz"
+)
 
 
 def _parse_int_csv(text: str) -> tuple[int, ...]:
@@ -69,6 +73,16 @@ def _rowcorr_group(payload: dict[str, Any]) -> dict[str, Any]:
     return group if isinstance(group, dict) else {}
 
 
+def _checkpoint_from_seed(payload: dict[str, Any]) -> Path | None:
+    checkpoint = payload.get("checkpoint")
+    if not isinstance(checkpoint, dict):
+        return None
+    path = checkpoint.get("path")
+    if not path:
+        return None
+    return Path(str(path))
+
+
 def _probe_summary(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     base = _direct_residual(payload, "base_direct_residual")
     final = _direct_residual(payload, "final_direct_residual")
@@ -104,7 +118,8 @@ def _build_child_command(
     mgt_path: Path,
     checkpoint_npz: Path,
     child_json: Path,
-    child_checkpoint: Path,
+    child_checkpoint: Path | None,
+    compact_child_checkpoint: bool,
     shell_pressure_load_path_policy: str,
     target_row_count: int,
     support_column_count: int,
@@ -115,7 +130,7 @@ def _build_child_command(
     relative_increment_tolerance: float,
 ) -> list[str]:
     script = Path(__file__).resolve().with_name("run_mgt_direct_residual_newton_probe.py")
-    return [
+    command = [
         str(python_exe),
         str(script),
         "--mgt-path",
@@ -124,8 +139,6 @@ def _build_child_command(
         str(checkpoint_npz),
         "--output-json",
         str(child_json),
-        "--output-final-checkpoint-npz",
-        str(child_checkpoint),
         "--shell-pressure-load-path-policy",
         str(shell_pressure_load_path_policy),
         "--residual-tolerance-n",
@@ -150,12 +163,23 @@ def _build_child_command(
         str(float(row_min_relative_improvement)),
         "--allow-cpu-diagnostic",
     ]
+    if child_checkpoint is not None:
+        insertion = command.index("--shell-pressure-load-path-policy")
+        command[insertion:insertion] = [
+            "--output-final-checkpoint-npz",
+            str(child_checkpoint),
+        ]
+        if compact_child_checkpoint:
+            command[insertion + 2 : insertion + 2] = [
+                "--compact-output-final-checkpoint",
+            ]
+    return command
 
 
 def _launch_receipt(
     *,
     child_json: Path,
-    child_checkpoint: Path,
+    child_checkpoint: Path | None,
     checkpoint_npz: Path,
     target_row_count: int,
     support_column_count: int,
@@ -169,7 +193,9 @@ def _launch_receipt(
         "status": "in_progress",
         "checkpoint": str(checkpoint_npz),
         "output_json": str(child_json),
-        "output_final_checkpoint_npz": str(child_checkpoint),
+        "output_final_checkpoint_npz": (
+            None if child_checkpoint is None else str(child_checkpoint)
+        ),
         "target_row_count": int(target_row_count),
         "support_column_count": int(support_column_count),
         "alpha_values": [float(value) for value in alpha_values],
@@ -185,7 +211,7 @@ def _launch_receipt(
 def _timeout_receipt(
     *,
     child_json: Path,
-    child_checkpoint: Path,
+    child_checkpoint: Path | None,
     checkpoint_npz: Path,
     command: list[str],
     timeout: subprocess.TimeoutExpired,
@@ -197,7 +223,9 @@ def _timeout_receipt(
         "status": "timeout",
         "checkpoint": str(checkpoint_npz),
         "output_json": str(child_json),
-        "output_final_checkpoint_npz": str(child_checkpoint),
+        "output_final_checkpoint_npz": (
+            None if child_checkpoint is None else str(child_checkpoint)
+        ),
         "current_tangent_residual_row_correction": {
             "enabled": True,
             "attempted": True,
@@ -224,12 +252,13 @@ def _run_child(
     mgt_path: Path,
     checkpoint_npz: Path,
     child_json: Path,
-    child_checkpoint: Path,
+    child_checkpoint: Path | None,
     shell_pressure_load_path_policy: str,
     target_row_count: int,
     support_column_count: int,
     alpha_values: tuple[float, ...],
     max_row_promotions: int,
+    compact_child_checkpoint: bool,
     row_min_relative_improvement: float,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
@@ -241,6 +270,7 @@ def _run_child(
         checkpoint_npz=checkpoint_npz,
         child_json=child_json,
         child_checkpoint=child_checkpoint,
+        compact_child_checkpoint=compact_child_checkpoint,
         shell_pressure_load_path_policy=shell_pressure_load_path_policy,
         target_row_count=target_row_count,
         support_column_count=support_column_count,
@@ -318,7 +348,7 @@ def _run_child(
 def run_shell_material_rowcorr_budget_controller(
     *,
     mgt_path: Path = DEFAULT_MGT,
-    checkpoint_npz: Path = DEFAULT_CHECKPOINT,
+    checkpoint_npz: Path = DEFAULT_SHELL_MATERIAL_CHECKPOINT,
     seed_probe_json: Path = DEFAULT_SEED_PROBE,
     output_json: Path = DEFAULT_OUTPUT,
     output_final_checkpoint_npz: Path | None = None,
@@ -329,6 +359,8 @@ def run_shell_material_rowcorr_budget_controller(
     row_alpha_values: tuple[float, ...] = (0.015625,),
     max_candidates: int = 1,
     max_row_promotions: int = 1,
+    write_child_checkpoints: bool = False,
+    compact_child_checkpoints: bool = True,
     row_min_relative_improvement: float = 0.0,
     controller_min_relative_improvement: float = 1.0e-7,
     shell_pressure_load_path_policy: str = "structural_components_only",
@@ -349,6 +381,8 @@ def run_shell_material_rowcorr_budget_controller(
     python_exe = python_exe or Path(sys.executable)
 
     seed_payload = _read_json(seed_probe_json)
+    if Path(checkpoint_npz) == DEFAULT_CHECKPOINT:
+        checkpoint_npz = _checkpoint_from_seed(seed_payload) or DEFAULT_SHELL_MATERIAL_CHECKPOINT
     seed_summary = _probe_summary(seed_probe_json, seed_payload)
     seed_frontier = seed_summary.get("final_direct_residual_inf_n")
     current_frontier = float(seed_frontier) if seed_frontier is not None else None
@@ -395,7 +429,11 @@ def run_shell_material_rowcorr_budget_controller(
 
         label = f"candidate{candidate_index}_target{target_count}_support{support_count}"
         child_json = child_output_dir / f"{output_json.stem}_{label}.json"
-        child_checkpoint = child_output_dir / f"{output_json.stem}_{label}_final_checkpoint.npz"
+        child_checkpoint = (
+            child_output_dir / f"{output_json.stem}_{label}_final_checkpoint.npz"
+            if write_child_checkpoints
+            else None
+        )
         child_started = time.perf_counter()
         child_payload, subprocess_meta = _run_child(
             python_exe=python_exe,
@@ -408,6 +446,7 @@ def run_shell_material_rowcorr_budget_controller(
             support_column_count=support_count,
             alpha_values=row_alpha_values,
             max_row_promotions=max_row_promotions,
+            compact_child_checkpoint=compact_child_checkpoints,
             row_min_relative_improvement=row_min_relative_improvement,
             residual_tolerance_n=residual_tolerance_n,
             relative_increment_tolerance=relative_increment_tolerance,
@@ -448,7 +487,9 @@ def run_shell_material_rowcorr_budget_controller(
             "support_column_count": int(support_count),
             "alpha_values": [float(value) for value in row_alpha_values],
             "child_receipt_path": str(child_json),
-            "child_checkpoint_path": str(child_checkpoint),
+            "child_checkpoint_path": (
+                None if child_checkpoint is None else str(child_checkpoint)
+            ),
             "status": child_summary.get("status"),
             "accepted": accepted,
             "row_correction_accepted": rowcorr_accepted,
@@ -478,7 +519,7 @@ def run_shell_material_rowcorr_budget_controller(
             promoted_rows.append(row)
             current_frontier = child_final_value
             final_residual = child_final_value
-            if child_checkpoint.is_file():
+            if child_checkpoint is not None and child_checkpoint.is_file():
                 final_checkpoint = child_checkpoint
             stop_reason = "candidate_promoted"
             break
@@ -492,11 +533,17 @@ def run_shell_material_rowcorr_budget_controller(
     if rows and stop_reason == "max_candidates_reached":
         final_residual = current_frontier
 
-    if output_final_checkpoint_npz is not None and final_checkpoint.is_file():
+    output_final_checkpoint_written = False
+    if (
+        output_final_checkpoint_npz is not None
+        and promotion_count > 0
+        and final_checkpoint.is_file()
+    ):
         output_final_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
         if final_checkpoint.resolve() != output_final_checkpoint_npz.resolve():
             shutil.copyfile(final_checkpoint, output_final_checkpoint_npz)
         final_checkpoint = output_final_checkpoint_npz
+        output_final_checkpoint_written = True
 
     best_row = min(
         (row for row in rows if row.get("final_direct_residual_inf_n") is not None),
@@ -524,6 +571,8 @@ def run_shell_material_rowcorr_budget_controller(
             ],
             "row_alpha_values": [float(value) for value in row_alpha_values],
             "max_row_promotions_per_child": int(max_row_promotions),
+            "write_child_checkpoints": bool(write_child_checkpoints),
+            "compact_child_checkpoints": bool(compact_child_checkpoints),
             "row_min_relative_improvement": float(row_min_relative_improvement),
             "controller_min_relative_improvement": float(
                 controller_min_relative_improvement
@@ -537,6 +586,7 @@ def run_shell_material_rowcorr_budget_controller(
         },
         "initial_checkpoint_path": str(checkpoint_npz),
         "final_checkpoint_path": str(final_checkpoint),
+        "output_final_checkpoint_written": bool(output_final_checkpoint_written),
         "initial_frontier_direct_residual_inf_n": seed_frontier,
         "final_direct_residual_inf_n": final_residual,
         "rows": rows,
@@ -558,7 +608,7 @@ def run_shell_material_rowcorr_budget_controller(
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mgt-path", type=Path, default=DEFAULT_MGT)
-    parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
+    parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_SHELL_MATERIAL_CHECKPOINT)
     parser.add_argument("--seed-probe-json", type=Path, default=DEFAULT_SEED_PROBE)
     parser.add_argument("--output-json", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--output-final-checkpoint-npz", type=Path, default=None)
@@ -569,6 +619,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--row-alpha-values", default="0.015625")
     parser.add_argument("--max-candidates", type=int, default=1)
     parser.add_argument("--max-row-promotions", type=int, default=1)
+    parser.add_argument(
+        "--write-child-checkpoints",
+        action="store_true",
+        help=(
+            "Ask child probes to write final checkpoint NPZ files. The default records "
+            "JSON receipts only to keep broad sweeps storage-bounded."
+        ),
+    )
+    parser.add_argument(
+        "--write-full-child-checkpoints",
+        action="store_true",
+        help=(
+            "When --write-child-checkpoints is enabled, keep full accepted history "
+            "arrays instead of compact displacement-only checkpoints."
+        ),
+    )
     parser.add_argument("--row-min-relative-improvement", type=float, default=0.0)
     parser.add_argument("--controller-min-relative-improvement", type=float, default=1.0e-7)
     parser.add_argument(
@@ -610,6 +676,8 @@ def main(argv: list[str] | None = None) -> int:
         row_alpha_values=_parse_float_csv(args.row_alpha_values) or (0.015625,),
         max_candidates=args.max_candidates,
         max_row_promotions=args.max_row_promotions,
+        write_child_checkpoints=args.write_child_checkpoints,
+        compact_child_checkpoints=not args.write_full_child_checkpoints,
         row_min_relative_improvement=args.row_min_relative_improvement,
         controller_min_relative_improvement=args.controller_min_relative_improvement,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,

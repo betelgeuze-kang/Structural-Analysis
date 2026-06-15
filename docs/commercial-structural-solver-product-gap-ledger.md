@@ -267,6 +267,7 @@
 - `mgt_direct_residual_shell_material_tangent_base_followup379_probe.json`은 이 shell material tangent가 physical residual path에서 소비됨을 보이지만, direct residual gate 미통과를 함께 기록한다.
 - `mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json`은 최소 row-correction descent를 기록하지만, broad sweep은 비용이 커서 다음 단계는 runtime-budgeted continuation과 ROCm/HIP parity가 필요하다.
 - `mgt_shell_material_rowcorr_budget_controller_followup381.json`은 followup380 seed frontier `14.90754179546407 N`을 보존하면서 zero-budget launch boundary를 기록한다. `runtime_budget_exceeded=true`, child rows `0`, promotion `0`이므로 잔차 하강 claim은 추가하지 않고, 긴 shell-material row-correction sweep을 budgeted child receipt 단위로 쪼개기 위한 실행 경계만 닫는다.
+- `mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json`부터 `followup387_target4_support4.json`까지 budgeted continuation은 compact checkpoint를 사용해 direct residual frontier를 `14.90754179546407 N`에서 `10.08095402628286 N`까지 낮춘다. compact checkpoint는 `displacement_u` 중심의 약 `452 KB` NPZ로 full-history checkpoint 팽창을 피하지만, residual gate `5e-4 N`에는 아직 도달하지 못했다.
 - 모델 inventory는 `BEAM=2192`, `COMPTR=3384`, `PLATE=7152`이며, current tangent-coupled claim은 line/beam elastic real-section 범위로 제한된다.
 
 남은 개선점:

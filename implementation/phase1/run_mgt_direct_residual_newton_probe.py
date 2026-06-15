@@ -734,6 +734,7 @@ def run_mgt_direct_residual_newton_probe(
     checkpoint_npz: Path = DEFAULT_CHECKPOINT,
     output_json: Path | None = None,
     output_final_checkpoint_npz: Path | None = None,
+    compact_output_final_checkpoint: bool = False,
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
     shell_pressure_load_path_policy: str = "all_components",
@@ -4238,6 +4239,16 @@ def run_mgt_direct_residual_newton_probe(
                                     ),
                                     "pre_node_block_support_size": pre_node_block_support_size,
                                     "support_size": int(support_cols.size),
+                                    "support_columns": [
+                                        int(value) for value in support_cols.tolist()
+                                    ],
+                                    "support_free_dof_indices": [
+                                        int(value)
+                                        for value in current_free[support_cols].tolist()
+                                    ],
+                                    "support_coefficients_m": [
+                                        float(value) for value in coeffs.tolist()
+                                    ],
                                     "jacobian": jacobian_meta,
                                     "row_equation_scale": row_equation_scale_meta,
                                     "ridge_factor": float(row_ridge_factor),
@@ -4445,38 +4456,47 @@ def run_mgt_direct_residual_newton_probe(
     if output_final_checkpoint_npz is not None and final_state_improved:
         output_final_checkpoint_npz.parent.mkdir(parents=True, exist_ok=True)
         final_translation_metrics = _translation_metrics(current_u, node_xyz)
-        accepted_state_history_array = np.vstack(
-            [np.asarray(row, dtype=np.float64) for row in accepted_state_history]
-        )
-        accepted_residual_history_array = np.vstack(
-            [np.asarray(row, dtype=np.float64) for row in accepted_residual_history]
-        )
-        np.savez_compressed(
-            output_final_checkpoint_npz,
-            checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
-            source_schema_version=np.asarray(SCHEMA_VERSION),
-            load_scale=np.asarray(load_scale, dtype=np.float64),
-            displacement_u=np.asarray(current_u, dtype=np.float64),
-            residual_inf_n=np.asarray(final_direct_residual_inf, dtype=np.float64),
-            direct_residual_inf_n=np.asarray(final_direct_residual_inf, dtype=np.float64),
-            direct_relative_residual_inf=np.asarray(
+        checkpoint_payload: dict[str, Any] = {
+            "checkpoint_schema": np.asarray("mgt-direct-residual-newton-state.v1"),
+            "source_schema_version": np.asarray(SCHEMA_VERSION),
+            "load_scale": np.asarray(load_scale, dtype=np.float64),
+            "displacement_u": np.asarray(current_u, dtype=np.float64),
+            "residual_inf_n": np.asarray(final_direct_residual_inf, dtype=np.float64),
+            "direct_residual_inf_n": np.asarray(final_direct_residual_inf, dtype=np.float64),
+            "direct_relative_residual_inf": np.asarray(
                 final_direct_residual_inf
                 / max(float(np.max(np.abs(current_rhs))) if current_rhs.size else rhs_inf, 1.0),
                 dtype=np.float64,
             ),
-            max_translation_m=np.asarray(
+            "max_translation_m": np.asarray(
                 final_translation_metrics["max_translation_m"],
                 dtype=np.float64,
             ),
-            accepted_state_history_u=accepted_state_history_array,
-            accepted_residual_history=accepted_residual_history_array,
-            accepted_history_count=np.asarray(
-                accepted_state_history_array.shape[0],
-                dtype=np.int64,
-            ),
-            source_checkpoint_path=np.asarray(str(checkpoint_npz)),
-            shell_pressure_load_path_policy=np.asarray(str(shell_pressure_load_path_policy)),
-        )
+            "accepted_history_count": np.asarray(0, dtype=np.int64),
+            "source_checkpoint_path": np.asarray(str(checkpoint_npz)),
+            "shell_pressure_load_path_policy": np.asarray(str(shell_pressure_load_path_policy)),
+            "compact_checkpoint": np.asarray(bool(compact_output_final_checkpoint)),
+        }
+        accepted_history_count = 0
+        if not compact_output_final_checkpoint:
+            accepted_state_history_array = np.vstack(
+                [np.asarray(row, dtype=np.float64) for row in accepted_state_history]
+            )
+            accepted_residual_history_array = np.vstack(
+                [np.asarray(row, dtype=np.float64) for row in accepted_residual_history]
+            )
+            accepted_history_count = int(accepted_state_history_array.shape[0])
+            checkpoint_payload.update(
+                {
+                    "accepted_state_history_u": accepted_state_history_array,
+                    "accepted_residual_history": accepted_residual_history_array,
+                    "accepted_history_count": np.asarray(
+                        accepted_history_count,
+                        dtype=np.int64,
+                    ),
+                }
+            )
+        np.savez_compressed(output_final_checkpoint_npz, **checkpoint_payload)
         output_final_checkpoint_meta = {
             "written": True,
             "path": str(output_final_checkpoint_npz),
@@ -4485,7 +4505,8 @@ def run_mgt_direct_residual_newton_probe(
             "dof_count": int(current_u.size),
             "direct_residual_inf_n": float(final_direct_residual_inf),
             "max_translation_m": float(final_translation_metrics["max_translation_m"]),
-            "accepted_history_count": int(accepted_state_history_array.shape[0]),
+            "accepted_history_count": int(accepted_history_count),
+            "compact_checkpoint": bool(compact_output_final_checkpoint),
             "source_checkpoint_path": str(checkpoint_npz),
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
         }
@@ -4666,6 +4687,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         default=None,
         help="Optional NPZ checkpoint containing the final direct-residual displacement state.",
+    )
+    parser.add_argument(
+        "--compact-output-final-checkpoint",
+        action="store_true",
+        help=(
+            "Write only displacement_u and scalar metadata to the final checkpoint, "
+            "omitting accepted history arrays."
+        ),
     )
     parser.add_argument("--frame-gravity-load-scale", type=float, default=0.01)
     parser.add_argument("--stiffness-scale-to-si", type=float, default=1000.0)
@@ -5221,6 +5250,7 @@ def main(argv: list[str] | None = None) -> int:
         checkpoint_npz=args.checkpoint_npz,
         output_json=args.output_json,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
+        compact_output_final_checkpoint=args.compact_output_final_checkpoint,
         frame_gravity_load_scale=args.frame_gravity_load_scale,
         stiffness_scale_to_si=args.stiffness_scale_to_si,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
