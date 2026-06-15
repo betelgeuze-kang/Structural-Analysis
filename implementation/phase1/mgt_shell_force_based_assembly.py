@@ -24,9 +24,15 @@ def _cached_shell_operator(
     plate_thickness_props: dict[int, dict[str, Any]],
     include_membrane: bool,
     shell_operator_cache: dict[str, Any] | None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[Any, dict[str, Any], bool]:
     cache_key = "shell_full_membrane_bending" if include_membrane else "shell_bending_drilling"
-    if shell_operator_cache is not None and cache_key in shell_operator_cache:
+    material_override_enabled = bool(material_tangent_by_surface_index_mpa)
+    if (
+        not material_override_enabled
+        and shell_operator_cache is not None
+        and cache_key in shell_operator_cache
+    ):
         cached = shell_operator_cache[cache_key]
         return cached["stiffness"], dict(cached["meta"]), True
     assembly_xyz = assembly_node_xyz(node_xyz=node_xyz, u=u)
@@ -40,8 +46,14 @@ def _cached_shell_operator(
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
         include_membrane=include_membrane,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
-    if shell_operator_cache is not None:
+    shell_meta = {
+        **dict(shell_meta),
+        "shell_material_tangent_override_enabled": material_override_enabled,
+        "shell_material_tangent_operator_cache_disabled": material_override_enabled,
+    }
+    if shell_operator_cache is not None and not material_override_enabled:
         shell_operator_cache[cache_key] = {
             "stiffness": shell_stiffness,
             "meta": dict(shell_meta),
@@ -62,6 +74,7 @@ def assemble_shell_internal_force_components(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     shell_operator_cache: dict[str, Any] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     """Recover additive shell resisting-force components for diagnostics."""
     shell_full, full_meta, full_cache_hit = _cached_shell_operator(
@@ -76,6 +89,7 @@ def assemble_shell_internal_force_components(
         plate_thickness_props=plate_thickness_props,
         include_membrane=True,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     shell_bending, bending_meta, bending_cache_hit = _cached_shell_operator(
         u=u,
@@ -89,6 +103,7 @@ def assemble_shell_internal_force_components(
         plate_thickness_props=plate_thickness_props,
         include_membrane=False,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     u_np = np.asarray(u, dtype=np.float64)
     f_full = np.asarray(shell_full @ u_np, dtype=np.float64)
@@ -108,6 +123,12 @@ def assemble_shell_internal_force_components(
         "shell_internal_force_cache_enabled": shell_operator_cache is not None,
         "shell_full_operator_cache_hit": bool(full_cache_hit),
         "shell_bending_operator_cache_hit": bool(bending_cache_hit),
+        "shell_material_tangent_override_enabled": bool(
+            full_meta.get("shell_material_tangent_override_enabled")
+        ),
+        "shell_material_tangent_operator_cache_disabled": bool(
+            full_meta.get("shell_material_tangent_operator_cache_disabled")
+        ),
         "shell_meta": full_meta,
         "shell_bending_drilling_meta": bending_meta,
     }
@@ -125,6 +146,7 @@ def assemble_shell_internal_force_components_batch(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     shell_operator_cache: dict[str, Any] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
     """Batch recover additive shell resisting-force components."""
     states = np.asarray(u_batch, dtype=np.float64)
@@ -143,6 +165,7 @@ def assemble_shell_internal_force_components_batch(
         plate_thickness_props=plate_thickness_props,
         include_membrane=True,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     shell_bending, bending_meta, bending_cache_hit = _cached_shell_operator(
         u=reference_u,
@@ -156,6 +179,7 @@ def assemble_shell_internal_force_components_batch(
         plate_thickness_props=plate_thickness_props,
         include_membrane=False,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     f_full = np.asarray(shell_full @ states.T, dtype=np.float64).T
     f_bending = np.asarray(shell_bending @ states.T, dtype=np.float64).T
@@ -175,6 +199,12 @@ def assemble_shell_internal_force_components_batch(
         "shell_full_operator_cache_hit": bool(full_cache_hit),
         "shell_bending_operator_cache_hit": bool(bending_cache_hit),
         "shell_batch_size": int(states.shape[0]),
+        "shell_material_tangent_override_enabled": bool(
+            full_meta.get("shell_material_tangent_override_enabled")
+        ),
+        "shell_material_tangent_operator_cache_disabled": bool(
+            full_meta.get("shell_material_tangent_operator_cache_disabled")
+        ),
         "shell_meta": full_meta,
         "shell_bending_drilling_meta": bending_meta,
     }
@@ -192,6 +222,7 @@ def assemble_shell_internal_forces(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     shell_operator_cache: dict[str, Any] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Recover shell resisting forces as K_shell(reference) @ u."""
     shell_stiffness, shell_meta, cache_hit = _cached_shell_operator(
@@ -206,6 +237,7 @@ def assemble_shell_internal_forces(
         plate_thickness_props=plate_thickness_props,
         include_membrane=True,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     f_shell = np.asarray(shell_stiffness @ np.asarray(u, dtype=np.float64), dtype=np.float64)
     return f_shell, {
@@ -214,6 +246,12 @@ def assemble_shell_internal_forces(
         "shell_stiffness_nnz": int(shell_stiffness.nnz),
         "shell_internal_force_cache_enabled": shell_operator_cache is not None,
         "shell_internal_force_cache_hit": bool(cache_hit),
+        "shell_material_tangent_override_enabled": bool(
+            shell_meta.get("shell_material_tangent_override_enabled")
+        ),
+        "shell_material_tangent_operator_cache_disabled": bool(
+            shell_meta.get("shell_material_tangent_operator_cache_disabled")
+        ),
         "shell_meta": shell_meta,
     }
 
@@ -230,6 +268,7 @@ def assemble_shell_internal_forces_batch(
     material_props: dict[int, dict[str, Any]],
     plate_thickness_props: dict[int, dict[str, Any]],
     shell_operator_cache: dict[str, Any] | None = None,
+    material_tangent_by_surface_index_mpa: dict[int, float] | None = None,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Batch recover shell resisting forces as K_shell(reference) @ U."""
     states = np.asarray(u_batch, dtype=np.float64)
@@ -248,6 +287,7 @@ def assemble_shell_internal_forces_batch(
         plate_thickness_props=plate_thickness_props,
         include_membrane=True,
         shell_operator_cache=shell_operator_cache,
+        material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
     )
     f_shell = np.asarray(shell_stiffness @ states.T, dtype=np.float64).T
     return f_shell, {
@@ -257,5 +297,11 @@ def assemble_shell_internal_forces_batch(
         "shell_internal_force_cache_enabled": shell_operator_cache is not None,
         "shell_internal_force_cache_hit": bool(cache_hit),
         "shell_batch_size": int(states.shape[0]),
+        "shell_material_tangent_override_enabled": bool(
+            shell_meta.get("shell_material_tangent_override_enabled")
+        ),
+        "shell_material_tangent_operator_cache_disabled": bool(
+            shell_meta.get("shell_material_tangent_operator_cache_disabled")
+        ),
         "shell_meta": shell_meta,
     }

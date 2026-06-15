@@ -52,6 +52,7 @@ from mgt_hip_full_residual_backend import (
     HipFullResidualRustFfiBackend,
 )
 from mgt_shell_force_based_assembly import _cached_shell_operator
+from mgt_shell_material_tangent import shell_material_tangent_by_surface_index
 from mgt_shell_load_path import surface_pressure_load_path_filter
 
 
@@ -736,6 +737,7 @@ def run_mgt_direct_residual_newton_probe(
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
     shell_pressure_load_path_policy: str = "all_components",
+    apply_shell_material_tangent: bool = False,
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_trust_iterations: int = 6,
@@ -960,6 +962,7 @@ def run_mgt_direct_residual_newton_probe(
                     base_axial_forces=base_axial_forces,
                     frame_gravity_load_scale=frame_gravity_load_scale,
                     load_scale=load_scale,
+                    apply_shell_material_tangent=apply_shell_material_tangent,
                     include_component_forces=include_component_forces,
                     shell_operator_cache=shell_operator_cache,
                     frame_force_cache=frame_force_cache,
@@ -998,6 +1001,26 @@ def run_mgt_direct_residual_newton_probe(
                 u=u,
                 material_props=material_props,
             )
+            service_shell_tangent_by_surface_index = None
+            service_shell_material_meta: dict[str, Any] | None = None
+            if apply_shell_material_tangent:
+                (
+                    service_shell_tangent_by_surface_index,
+                    service_shell_material_meta,
+                ) = shell_material_tangent_by_surface_index(
+                    node_xyz=node_xyz,
+                    u=u,
+                    elem_type_code=elem_type_code,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    material_props=material_props,
+                    controlled_probe=False,
+                )
+                service_shell_material_meta = {
+                    **service_shell_material_meta,
+                    "shell_material_tangent_applied": True,
+                }
             stiffness, assembled_f_ext, tangent_meta = assemble_newton_tangent_stiffness(
                 u=u,
                 node_xyz=node_xyz,
@@ -1016,6 +1039,10 @@ def run_mgt_direct_residual_newton_probe(
                 load_scale=load_scale,
                 service_tangent_by_element=service_tangent_by_element,
                 service_material_meta=service_material_meta,
+                service_shell_tangent_by_surface_index_mpa=(
+                    service_shell_tangent_by_surface_index
+                ),
+                service_shell_material_meta=service_shell_material_meta,
                 shell_pressure_load_allowed_surface_elements=pressure_allowed_surface_elements,
             )
             f_int, physical_meta = assemble_physical_internal_forces(
@@ -1034,6 +1061,7 @@ def run_mgt_direct_residual_newton_probe(
                 base_axial_forces=base_axial_forces,
                 frame_gravity_load_scale=frame_gravity_load_scale,
                 load_scale=load_scale,
+                apply_shell_material_tangent=apply_shell_material_tangent,
                 include_component_forces=include_component_forces,
                 shell_operator_cache=shell_operator_cache,
                 frame_force_cache=frame_force_cache,
@@ -3173,6 +3201,11 @@ def run_mgt_direct_residual_newton_probe(
 
             def row_hip_residual_backend() -> Any | None:
                 nonlocal row_hip_backend, row_hip_backend_error
+                if apply_shell_material_tangent:
+                    current_tangent_residual_row_correction[
+                        "batch_replay_backend_disabled_reason"
+                    ] = "state_dependent_shell_material_tangent_requires_cpu_batch"
+                    return None
                 if row_batch_backend not in {
                     "hip_full_residual",
                     "hip_full_residual_resident",
@@ -3316,6 +3349,7 @@ def run_mgt_direct_residual_newton_probe(
                         load_scale=load_scale,
                         shell_operator_cache=shell_operator_cache,
                         frame_force_cache=frame_force_cache,
+                        apply_shell_material_tangent=apply_shell_material_tangent,
                     )
                     elapsed = float(time.perf_counter() - batch_started)
                     residual_batch = np.asarray(
@@ -4481,6 +4515,7 @@ def run_mgt_direct_residual_newton_probe(
             "external_load_vector_reassembled_with_displacement": False,
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "shell_pressure_load_path_meta": pressure_load_path_meta,
+            "shell_material_tangent_residual_applied": bool(apply_shell_material_tangent),
             "frame_geometric_equilibrium_included": True,
             "authored_support_restraints_included": True,
             "finite_elastic_link_springs_included": True,
@@ -4559,7 +4594,15 @@ def run_mgt_direct_residual_newton_probe(
             "direct_residual_newton_ready_requires_increment_gate": True,
         },
         "newton_direction": {
-            "linearized_tangent": "current service-material frame tangent plus frame geometric delta plus shell tangent plus finite springs",
+            "linearized_tangent": (
+                "current service-material frame tangent plus frame geometric delta plus "
+                + (
+                    "state shell material tangent"
+                    if apply_shell_material_tangent
+                    else "elastic shell tangent"
+                )
+                + " plus finite springs"
+            ),
             "regularization": last_regularization,
             "correction_inf_m": last_correction_inf,
             "linear_solve_seconds": last_solve_seconds,
@@ -4635,6 +4678,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "attached_components_only suppresses pressure on shell surface components "
             "without a frame/support attachment; structural_components_only uses the same "
             "filter as the production structural load-path policy."
+        ),
+    )
+    parser.add_argument(
+        "--apply-shell-material-tangent",
+        action="store_true",
+        help=(
+            "Use state-dependent bounded shell material tangents in the physical "
+            "residual and Newton tangent assembly. This is CPU diagnostic evidence "
+            "until the ROCm/HIP full residual backend consumes the same tangent field."
         ),
     )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
@@ -5172,6 +5224,7 @@ def main(argv: list[str] | None = None) -> int:
         frame_gravity_load_scale=args.frame_gravity_load_scale,
         stiffness_scale_to_si=args.stiffness_scale_to_si,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+        apply_shell_material_tangent=args.apply_shell_material_tangent,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_trust_iterations=args.max_trust_iterations,

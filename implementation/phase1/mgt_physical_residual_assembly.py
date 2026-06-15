@@ -33,6 +33,7 @@ from mgt_shell_force_based_assembly import (
     assemble_shell_internal_forces,
     assemble_shell_internal_forces_batch,
 )
+from mgt_shell_material_tangent import shell_material_tangent_by_surface_index
 
 
 def _stress_axial_correction_global(
@@ -71,6 +72,7 @@ def assemble_physical_internal_force_components(
     frame_gravity_load_scale: float,
     load_scale: float,
     apply_material_stress_axial_correction: bool = False,
+    apply_shell_material_tangent: bool = False,
     use_force_based_frame: bool = True,
     split_shell_components: bool = False,
     shell_operator_cache: dict[str, Any] | None = None,
@@ -104,6 +106,25 @@ def assemble_physical_internal_force_components(
             include_geometric=True,
         )
         f_frame = np.asarray(frame_equilibrium_stiffness @ u, dtype=np.float64)
+    shell_material_tangent: dict[int, float] | None = None
+    shell_material_tangent_meta: dict[str, Any] = {
+        "shell_material_tangent_applied": False,
+    }
+    if apply_shell_material_tangent:
+        shell_material_tangent, shell_material_tangent_meta = shell_material_tangent_by_surface_index(
+            node_xyz=node_xyz,
+            u=u,
+            elem_type_code=elem_type_code,
+            elem_material_id=elem_material_id,
+            conn_ptr=conn_ptr,
+            conn_idx=conn_idx,
+            material_props=material_props,
+            controlled_probe=False,
+        )
+        shell_material_tangent_meta = {
+            **shell_material_tangent_meta,
+            "shell_material_tangent_applied": True,
+        }
     if split_shell_components:
         shell_components, shell_meta = assemble_shell_internal_force_components(
             u=u,
@@ -116,6 +137,7 @@ def assemble_physical_internal_force_components(
             material_props=material_props,
             plate_thickness_props=plate_thickness_props,
             shell_operator_cache=shell_operator_cache,
+            material_tangent_by_surface_index_mpa=shell_material_tangent,
         )
         f_shell = np.zeros(int(node_xyz.shape[0]) * DOF_PER_NODE, dtype=np.float64)
         for values in shell_components.values():
@@ -132,6 +154,7 @@ def assemble_physical_internal_force_components(
             material_props=material_props,
             plate_thickness_props=plate_thickness_props,
             shell_operator_cache=shell_operator_cache,
+            material_tangent_by_surface_index_mpa=shell_material_tangent,
         )
         shell_components = {"shell": np.asarray(f_shell, dtype=np.float64)}
     f_spring = np.asarray(spring_stiffness @ u, dtype=np.float64)
@@ -172,6 +195,7 @@ def assemble_physical_internal_force_components(
                 if apply_material_stress_axial_correction
                 else ""
             )
+            + ("_with_shell_material_tangent" if apply_shell_material_tangent else "")
         ),
         "use_force_based_frame": bool(use_force_based_frame),
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,
@@ -184,6 +208,7 @@ def assemble_physical_internal_force_components(
         "split_shell_components": bool(split_shell_components),
         "frame_equilibrium_meta": frame_meta,
         "shell_meta": shell_meta,
+        "shell_material_tangent_meta": shell_material_tangent_meta,
         "stress_corrected_element_count": int(stress_corrected_element_count),
     }
 
@@ -209,6 +234,7 @@ def assemble_physical_internal_forces_batch(
     split_shell_components: bool = False,
     shell_operator_cache: dict[str, Any] | None = None,
     frame_force_cache: Any | None = None,
+    apply_shell_material_tangent: bool = False,
 ) -> tuple[np.ndarray, dict[str, Any]]:
     """Batch assemble F_int(U) for residual-only JVP and alpha replay."""
     states = np.asarray(u_batch, dtype=np.float64)
@@ -249,7 +275,90 @@ def assemble_physical_internal_forces_batch(
             else np.zeros((0, int(node_xyz.shape[0]) * DOF_PER_NODE), dtype=np.float64)
         )
         frame_equilibrium_stiffness_nnz = int(frame_equilibrium_stiffness.nnz) if states.size else 0
-    if split_shell_components:
+    shell_material_batch_meta: dict[str, Any] = {
+        "shell_material_tangent_applied": bool(apply_shell_material_tangent),
+    }
+    if apply_shell_material_tangent:
+        shell_rows: list[np.ndarray] = []
+        shell_tangent_summaries: list[dict[str, Any]] = []
+        last_shell_meta: dict[str, Any] = {}
+        for state in states:
+            shell_material_tangent, tangent_meta = shell_material_tangent_by_surface_index(
+                node_xyz=node_xyz,
+                u=state,
+                elem_type_code=elem_type_code,
+                elem_material_id=elem_material_id,
+                conn_ptr=conn_ptr,
+                conn_idx=conn_idx,
+                material_props=material_props,
+                controlled_probe=False,
+            )
+            shell_tangent_summaries.append(tangent_meta)
+            if split_shell_components:
+                shell_components, last_shell_meta = assemble_shell_internal_force_components(
+                    u=state,
+                    node_xyz=node_xyz,
+                    elem_type_code=elem_type_code,
+                    elem_section_id=elem_section_id,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    material_props=material_props,
+                    plate_thickness_props=plate_thickness_props,
+                    shell_operator_cache=None,
+                    material_tangent_by_surface_index_mpa=shell_material_tangent,
+                )
+                row = np.zeros(int(node_xyz.shape[0]) * DOF_PER_NODE, dtype=np.float64)
+                for values in shell_components.values():
+                    row = row + np.asarray(values, dtype=np.float64)
+            else:
+                row, last_shell_meta = assemble_shell_internal_forces(
+                    u=state,
+                    node_xyz=node_xyz,
+                    elem_type_code=elem_type_code,
+                    elem_section_id=elem_section_id,
+                    elem_material_id=elem_material_id,
+                    conn_ptr=conn_ptr,
+                    conn_idx=conn_idx,
+                    material_props=material_props,
+                    plate_thickness_props=plate_thickness_props,
+                    shell_operator_cache=None,
+                    material_tangent_by_surface_index_mpa=shell_material_tangent,
+                )
+            shell_rows.append(np.asarray(row, dtype=np.float64))
+        f_shell_batch = (
+            np.vstack(shell_rows)
+            if shell_rows
+            else np.zeros((0, int(node_xyz.shape[0]) * DOF_PER_NODE), dtype=np.float64)
+        )
+        shell_meta = {
+            **last_shell_meta,
+            "shell_material_tangent_batch_recomputed": True,
+            "shell_material_tangent_operator_cache_disabled": True,
+        }
+        nonlinear_counts = [
+            int(row.get("nonlinear_tangent_surface_element_count") or 0)
+            for row in shell_tangent_summaries
+        ]
+        min_ratios = [
+            float(row.get("min_tangent_ratio") or 1.0)
+            for row in shell_tangent_summaries
+        ]
+        shell_material_batch_meta.update(
+            {
+                "shell_material_tangent_batch_size": int(states.shape[0]),
+                "shell_material_tangent_min_nonlinear_surface_element_count": (
+                    int(min(nonlinear_counts)) if nonlinear_counts else 0
+                ),
+                "shell_material_tangent_max_nonlinear_surface_element_count": (
+                    int(max(nonlinear_counts)) if nonlinear_counts else 0
+                ),
+                "shell_material_tangent_min_ratio": (
+                    float(min(min_ratios)) if min_ratios else 1.0
+                ),
+            }
+        )
+    elif split_shell_components:
         shell_components_batch, shell_meta = assemble_shell_internal_force_components_batch(
             u_batch=states,
             node_xyz=node_xyz,
@@ -292,7 +401,9 @@ def assemble_physical_internal_forces_batch(
     )
     return f_int_batch, {
         "physical_internal_force_model": (
-            frame_model + "_plus_force_consistent_shell_plus_springs_batch"
+            frame_model
+            + "_plus_force_consistent_shell_plus_springs_batch"
+            + ("_with_shell_material_tangent" if apply_shell_material_tangent else "")
         ),
         "use_force_based_frame": bool(use_force_based_frame),
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,
@@ -305,6 +416,7 @@ def assemble_physical_internal_forces_batch(
         "split_shell_components": bool(split_shell_components),
         "frame_equilibrium_meta": frame_meta,
         "shell_meta": shell_meta,
+        "shell_material_tangent_meta": shell_material_batch_meta,
         "stress_corrected_element_count": 0,
     }
 
@@ -327,6 +439,7 @@ def assemble_physical_internal_forces(
     frame_gravity_load_scale: float,
     load_scale: float,
     apply_material_stress_axial_correction: bool = False,
+    apply_shell_material_tangent: bool = False,
     use_force_based_frame: bool = True,
     include_component_forces: bool = False,
     split_shell_components: bool | None = None,
@@ -352,6 +465,7 @@ def assemble_physical_internal_forces(
         frame_gravity_load_scale=frame_gravity_load_scale,
         load_scale=load_scale,
         apply_material_stress_axial_correction=apply_material_stress_axial_correction,
+        apply_shell_material_tangent=apply_shell_material_tangent,
         use_force_based_frame=use_force_based_frame,
         split_shell_components=split_shell,
         shell_operator_cache=shell_operator_cache,
@@ -460,6 +574,8 @@ def assemble_newton_tangent_stiffness(
     load_scale: float,
     service_tangent_by_element: dict[int, float],
     service_material_meta: dict[str, Any],
+    service_shell_tangent_by_surface_index_mpa: dict[int, float] | None = None,
+    service_shell_material_meta: dict[str, Any] | None = None,
     shell_pressure_load_allowed_surface_elements: set[int] | None = None,
 ) -> tuple[Any, np.ndarray, dict[str, Any]]:
     """Assemble the regularized Newton tangent used only for correction directions."""
@@ -500,6 +616,7 @@ def assemble_newton_tangent_stiffness(
         material_props=material_props,
         plate_thickness_props=plate_thickness_props,
         pressure_load_allowed_surface_elements=shell_pressure_load_allowed_surface_elements,
+        material_tangent_by_surface_index_mpa=service_shell_tangent_by_surface_index_mpa,
     )
     stiffness = frame_stiffness + shell_stiffness + spring_stiffness
     assembled_f_ext = (frame_f * float(frame_gravity_load_scale) + shell_f) * float(load_scale)
@@ -513,6 +630,9 @@ def assemble_newton_tangent_stiffness(
         "frame_material_meta": frame_material_meta,
         "frame_geometric_meta": frame_geometric_meta,
         "service_material_meta": service_material_meta,
+        "service_shell_material_meta": service_shell_material_meta or {
+            "shell_material_tangent_applied": False,
+        },
         "shell_meta": shell_meta,
     }
 

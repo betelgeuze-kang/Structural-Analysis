@@ -26,8 +26,8 @@ from run_mgt_frame_material_nonlinear_tangent import (
     _material_tangent_state,
     _probe_strain,
 )
+from mgt_shell_material_tangent import _state_summary, surface_strain_proxy
 from run_mgt_full_frame_6dof_sparse_equilibrium import DOF_PER_NODE
-from run_mgt_surface_membrane_tangent import _local_basis, _triangulate
 from run_mgt_surface_shell_bending_tangent import _surface_restraints
 from run_story_model_reanalysis import build_mgt_reanalysis_provenance
 
@@ -85,54 +85,6 @@ def _solve_shell_state(
         "restrained_shell_dof_count": len(restrained),
         "regularization": regularization,
         "solve_seconds": solve_s,
-    }
-
-
-def _surface_strain_proxy(
-    *,
-    elem_index: int,
-    node_xyz: np.ndarray,
-    u: np.ndarray,
-    conn_ptr: np.ndarray,
-    conn_idx: np.ndarray,
-) -> float:
-    conn = [int(node) for node in conn_idx[conn_ptr[elem_index] : conn_ptr[elem_index + 1]].tolist()]
-    if len(conn) not in {3, 4}:
-        return 0.0
-    disp = np.asarray(u, dtype=np.float64).reshape((-1, DOF_PER_NODE))[:, :3]
-    best = 0.0
-    for tri in _triangulate(conn):
-        points = np.asarray([node_xyz[node] for node in tri], dtype=np.float64)
-        if _local_basis(points[0], points[1], points[2]) is None:
-            continue
-        for local_i, local_j in ((0, 1), (1, 2), (2, 0)):
-            ni = int(tri[local_i])
-            nj = int(tri[local_j])
-            edge = np.asarray(node_xyz[nj] - node_xyz[ni], dtype=np.float64)
-            length = max(float(np.linalg.norm(edge)), 1.0e-12)
-            direction = edge / length
-            strain = float(np.dot(disp[nj] - disp[ni], direction) / length)
-            if abs(strain) > abs(best):
-                best = strain
-    return float(best)
-
-
-def _state_summary(states: list[MaterialTangentState]) -> dict[str, Any]:
-    ratios = [float(state.tangent_ratio) for state in states]
-    strains = [abs(float(state.strain)) for state in states]
-    nonlinear = [
-        state
-        for state in states
-        if state.material_family != "USER" and float(state.tangent_ratio) < 0.98
-    ]
-    return {
-        "surface_element_count": int(len(states)),
-        "material_family_counts": dict(Counter(state.material_family for state in states)),
-        "state_tag_counts": dict(Counter(state.state_tag for state in states)),
-        "nonlinear_tangent_surface_element_count": int(len(nonlinear)),
-        "min_tangent_ratio": float(min(ratios)) if ratios else 1.0,
-        "mean_tangent_ratio": float(np.mean(ratios)) if ratios else 1.0,
-        "max_abs_strain": float(max(strains)) if strains else 0.0,
     }
 
 
@@ -273,7 +225,7 @@ def run_mgt_shell_material_nonlinear_tangent(
         section_id = int(elem_section_id[surface_index])
         mat = material_props.get(material_id, {})
         fallback_e_mpa = _material_e_mpa(mat, fallback_mpa=210000.0)
-        service_strain = _surface_strain_proxy(
+        service_strain = surface_strain_proxy(
             elem_index=int(surface_index),
             node_xyz=node_xyz,
             u=service_u,
