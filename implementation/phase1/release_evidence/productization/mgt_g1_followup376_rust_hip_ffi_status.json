@@ -1,0 +1,79 @@
+{
+  "schema_version": "mgt-g1-followup376-rust-hip-ffi-status.v1",
+  "generated_at": "2026-06-15T14:55:30Z",
+  "status": "pass",
+  "storage_policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "raw_probe": "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
+    "raw_probe_size_bytes": 14867,
+    "hip_c_abi_library": "implementation/phase1/release_evidence/productization/bin/libmgt_hip_full_residual_ffi.so",
+    "hip_c_abi_library_size_bytes": 47456,
+    "rust_ffi_library": "implementation/phase1/release_evidence/productization/bin/libmgt_hip_full_residual_rust_ffi.so",
+    "rust_ffi_library_size_bytes": 398952,
+    "compiled_library_tracking_policy": "The .so files are reproducible build products ignored by the repository-wide *.so rule; source, build wrappers, raw probe, and compact receipt are the tracked evidence.",
+    "libraries_rebuildable_from_tracked_source": true,
+    "reason": "Followup376 keeps scalar in-process Rust FFI/HIP gate data here and one small raw probe JSON; no checkpoint or temp relocation is introduced."
+  },
+  "target": {
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "dof_count": 78282,
+    "free_dof_count": 58998,
+    "load_scale": 0.656
+  },
+  "rust_hip_ffi_replay": {
+    "status": "pass",
+    "device_name": "AMD Radeon RX 6900 XT",
+    "base_direct_residual_inf_n": 1.787703126865381e-06,
+    "base_cpu_batch_residual_inf_n": 1.787703126865381e-06,
+    "base_rust_ffi_residual_inf_n": 2.4881032310020146e-06,
+    "residual_gate_n": 0.001,
+    "rust_ffi_residual_gate_ready": true,
+    "rhs_inf_n": 8676.13911480824,
+    "batch_size": 4,
+    "reps": 3,
+    "in_process_worker_pass": true,
+    "rust_ffi_worker": true,
+    "native_hip_c_abi": true,
+    "operator_buffers_device_resident": true,
+    "eval_buffers_reused_second_eval": true,
+    "rust_ffi_evaluation_count": 2,
+    "rust_ffi_kernel_mean_seconds": 0.001079304297765096,
+    "rust_ffi_kernel_speedup_vs_cpu_batch_mean": 15.414109225672625,
+    "rust_ffi_call_seconds_second_eval": 0.00435253300020122,
+    "max_abs_residual_difference_n": 1.3932482545442326e-06,
+    "max_abs_repeat_difference_n": 5.820766091346741e-11,
+    "relative_residual_difference_inf": 1.5551507893289887e-11,
+    "jvp_candidate_count": 3,
+    "max_abs_jvp_difference_n_per_unit": 2.9103830456733704e-05,
+    "relative_jvp_difference_inf": 3.24858436101845e-16,
+    "runtime_seconds": 32.83011947399973
+  },
+  "backend_contract": {
+    "full_residual_vector_on_native_hip": true,
+    "jvp_available_from_batch_residual_differences": true,
+    "uses_native_hip_frame_kernel": true,
+    "uses_native_hip_shell_kernel": true,
+    "uses_native_hip_spring_kernel": true,
+    "subtracts_external_load_on_native_hip": true,
+    "returns_free_dof_residual_only": true,
+    "single_subprocess_boundary": false,
+    "persistent_process_worker": false,
+    "persistent_in_process_worker": true,
+    "operator_buffers_device_resident": true,
+    "rust_ffi_worker": true,
+    "native_hip_c_abi": true,
+    "python_loads_rust_cdylib": true,
+    "rust_dlopens_native_hip_c_abi": true
+  },
+  "operator_sizes": {
+    "frame_element_count": 5564,
+    "shell_nnz": 1901664,
+    "spring_nnz": 40608
+  },
+  "assessment": "Followup376 closes the prior in-process Rust FFI worker gap for the G1 full residual/JVP replay lane. The Python process loads a Rust cdylib, Rust dlopens the native HIP C ABI shared library, and the HIP handle keeps frame, shell, spring, external-load, and free-DOF operator buffers resident on the device across two evaluations. The retained followup365 structural checkpoint remains below the physical residual gate, and Rust FFI residual/JVP parity matches the CPU batch replay within tolerance.",
+  "remaining_g1_gaps": [
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
+  ]
+}

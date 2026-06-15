@@ -227,3 +227,76 @@ def test_residual_batch_evaluator_accepts_resident_hip_backend(monkeypatch) -> N
     assert batch_meta["hip_full_residual_batch_replay"] is True
     assert batch_meta["hip_full_residual_resident_worker"] is True
     assert batch_meta["persistent_process_worker"] is True
+
+
+def test_residual_batch_evaluator_accepts_rust_hip_ffi_backend(monkeypatch) -> None:
+    node_xyz = np.asarray([[0.0, 0.0, 0.0], [0.0, 0.0, 3.0]], dtype=np.float64)
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=1,
+            section_id=1,
+            material_id=1,
+            length_m=3.0,
+        )
+    ]
+    section_props = {1: {"A_m2": 0.01, "Iy_m4": 1.0e-4, "Iz_m4": 5.0e-5}}
+    material_props = {1: {"E_kN_per_m2": 210000.0, "poisson": 0.3}}
+    spring = coo_matrix(
+        (np.array([], dtype=np.float64), (np.array([], dtype=np.int64), np.array([], dtype=np.int64))),
+        shape=(12, 12),
+    ).tocsr()
+    assembler, _meta = build_equilibrium_step_assembler(
+        node_xyz=node_xyz,
+        frame_elements=elements,
+        elem_type_code=np.asarray([], dtype=np.int32),
+        elem_section_id=np.asarray([], dtype=np.int32),
+        elem_material_id=np.asarray([], dtype=np.int32),
+        conn_ptr=np.asarray([0], dtype=np.int64),
+        conn_idx=np.asarray([], dtype=np.int64),
+        section_props=section_props,
+        material_props=material_props,
+        plate_thickness_props={},
+        spring_stiffness=spring,
+        base_axial_forces={},
+        frame_gravity_load_scale=1.0,
+        load_scale=0.5,
+        restrained={0, 1, 2, 3, 4, 5},
+    )
+    u = np.zeros(12, dtype=np.float64)
+    _k, _f, free, _r, _rhs, _m = assembler(u)
+    calls: dict[str, int] = {"prepare": 0, "evaluate": 0}
+
+    class FakeRustFfiBackend:
+        def evaluate(self, states: np.ndarray, *, reps: int = 1):
+            calls["evaluate"] += 1
+            state_batch = np.asarray(states, dtype=np.float64)
+            return np.zeros((state_batch.shape[0], free.size), dtype=np.float64), {
+                "backend": "rust_hip_full_residual_ffi",
+                "persistent_in_process_worker": True,
+                "rust_ffi_worker": True,
+                "operator_buffers_device_resident": True,
+            }
+
+    def fake_prepare(**_kwargs):
+        calls["prepare"] += 1
+        return FakeRustFfiBackend()
+
+    monkeypatch.setattr(
+        mgt_hip_full_residual_backend.HipFullResidualRustFfiBackend,
+        "prepare",
+        staticmethod(fake_prepare),
+    )
+    residual_batch, trial_free, _trial_rhs, batch_meta = assembler.evaluate_residual_batch(
+        np.vstack([u, u]),
+        backend="rust_hip_full_residual_ffi",
+    )
+
+    assert calls == {"prepare": 1, "evaluate": 1}
+    assert residual_batch.shape == (2, free.size)
+    np.testing.assert_array_equal(trial_free, free)
+    assert batch_meta["residual_batch_backend"] == "rust_hip_full_residual_ffi"
+    assert batch_meta["hip_full_residual_batch_replay"] is True
+    assert batch_meta["rust_hip_full_residual_ffi_worker"] is True
+    assert batch_meta["persistent_in_process_worker"] is True

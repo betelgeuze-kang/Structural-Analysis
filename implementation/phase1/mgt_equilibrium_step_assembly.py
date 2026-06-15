@@ -261,10 +261,11 @@ def build_equilibrium_step_assembler(
             else np.asarray(reference_holder["reference_free"], dtype=np.int64)
         )
         backend_name = str(backend or "cpu")
-        if backend_name in {"hip_full_residual", "hip_full_residual_resident"}:
+        if backend_name in {"hip_full_residual", "hip_full_residual_resident", "rust_hip_full_residual_ffi"}:
             from mgt_hip_full_residual_backend import (
                 HipFullResidualBatchBackend,
                 HipFullResidualResidentWorkerBackend,
+                HipFullResidualRustFfiBackend,
             )
 
             holder_key = f"{backend_name}:{Path(hipcc)}:{bool(force_rebuild_hip)}"
@@ -291,6 +292,8 @@ def build_equilibrium_step_assembler(
                 backend_cls = (
                     HipFullResidualResidentWorkerBackend
                     if backend_name == "hip_full_residual_resident"
+                    else HipFullResidualRustFfiBackend
+                    if backend_name == "rust_hip_full_residual_ffi"
                     else HipFullResidualBatchBackend
                 )
                 hip_backend = backend_cls.prepare(
@@ -316,6 +319,9 @@ def build_equilibrium_step_assembler(
                     "hip_full_residual_batch_replay": True,
                     "hip_full_residual_resident_worker": bool(
                         backend_name == "hip_full_residual_resident"
+                    ),
+                    "rust_hip_full_residual_ffi_worker": bool(
+                        backend_name == "rust_hip_full_residual_ffi"
                     ),
                     "residual_only_assembly": True,
                     "residual_only_free_override": bool(free_override is not None),
@@ -366,6 +372,7 @@ def build_equilibrium_step_assembler(
     assemble_with_frozen_external_load.supports_residual_batch = True  # type: ignore[attr-defined]
     assemble_with_frozen_external_load.supports_hip_full_residual_batch = True  # type: ignore[attr-defined]
     assemble_with_frozen_external_load.supports_hip_full_residual_resident_worker = True  # type: ignore[attr-defined]
+    assemble_with_frozen_external_load.supports_rust_hip_full_residual_ffi = True  # type: ignore[attr-defined]
 
     setup_meta = {
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,

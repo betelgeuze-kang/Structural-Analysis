@@ -1,0 +1,10 @@
+[package]
+name = "mgt_hip_full_residual_rust_ffi"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "mgt_hip_full_residual_rust_ffi"
+crate-type = ["cdylib"]
+
+[dependencies]

@@ -49,6 +49,7 @@ from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
 from mgt_hip_full_residual_backend import (
     HipFullResidualBatchBackend,
     HipFullResidualResidentWorkerBackend,
+    HipFullResidualRustFfiBackend,
 )
 from mgt_shell_force_based_assembly import _cached_shell_operator
 from mgt_shell_load_path import surface_pressure_load_path_filter
@@ -3132,7 +3133,12 @@ def run_mgt_direct_residual_newton_probe(
             row_batch_backend = str(
                 current_tangent_residual_row_batch_replay_backend
             ).strip()
-            if row_batch_backend not in {"cpu", "hip_full_residual", "hip_full_residual_resident"}:
+            if row_batch_backend not in {
+                "cpu",
+                "hip_full_residual",
+                "hip_full_residual_resident",
+                "rust_hip_full_residual_ffi",
+            }:
                 row_batch_backend = "cpu"
             current_tangent_residual_row_correction["batch_alpha_replay_enabled"] = (
                 row_batch_alpha_replay
@@ -3167,7 +3173,11 @@ def run_mgt_direct_residual_newton_probe(
 
             def row_hip_residual_backend() -> Any | None:
                 nonlocal row_hip_backend, row_hip_backend_error
-                if row_batch_backend not in {"hip_full_residual", "hip_full_residual_resident"}:
+                if row_batch_backend not in {
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                    "rust_hip_full_residual_ffi",
+                }:
                     return None
                 if row_hip_backend is not None:
                     return row_hip_backend
@@ -3188,6 +3198,8 @@ def run_mgt_direct_residual_newton_probe(
                     backend_cls = (
                         HipFullResidualResidentWorkerBackend
                         if row_batch_backend == "hip_full_residual_resident"
+                        else HipFullResidualRustFfiBackend
+                        if row_batch_backend == "rust_hip_full_residual_ffi"
                         else HipFullResidualBatchBackend
                     )
                     row_hip_backend = backend_cls.prepare(
@@ -3275,6 +3287,9 @@ def run_mgt_direct_residual_newton_probe(
                             "hip_full_residual_batch_replay": True,
                             "hip_full_residual_resident_worker": bool(
                                 row_batch_backend == "hip_full_residual_resident"
+                            ),
+                            "rust_hip_full_residual_ffi_worker": bool(
+                                row_batch_backend == "rust_hip_full_residual_ffi"
                             ),
                         }
                     except Exception as exc:  # pragma: no cover - recorded in probe JSON
@@ -4978,12 +4993,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--current-tangent-residual-row-batch-replay-backend",
-        choices=("cpu", "hip_full_residual", "hip_full_residual_resident"),
+        choices=("cpu", "hip_full_residual", "hip_full_residual_resident", "rust_hip_full_residual_ffi"),
         default="cpu",
         help=(
             "Backend for residual-row alpha/FD batch replay. hip_full_residual "
             "uses one native HIP subprocess per batch; hip_full_residual_resident "
-            "keeps the native HIP worker and operator buffers resident."
+            "keeps the native HIP worker and operator buffers resident; "
+            "rust_hip_full_residual_ffi calls the native HIP C ABI through an "
+            "in-process Rust FFI library."
         ),
     )
     parser.add_argument(

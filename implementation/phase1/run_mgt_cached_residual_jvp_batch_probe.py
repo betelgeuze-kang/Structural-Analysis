@@ -584,7 +584,13 @@ def run_mgt_cached_residual_jvp_batch_probe(
         max_support_columns=int(max_support_columns),
     )
     batch_backend = str(residual_batch_replay_backend or "single").strip()
-    if batch_backend not in {"single", "cpu", "hip_full_residual", "hip_full_residual_resident"}:
+    if batch_backend not in {
+        "single",
+        "cpu",
+        "hip_full_residual",
+        "hip_full_residual_resident",
+        "rust_hip_full_residual_ffi",
+    }:
         batch_backend = "single"
     batch_chunk_size = max(int(residual_batch_replay_chunk_size), 1)
     batch_residual_evaluator = getattr(assemble_residual, "evaluate_residual_batch", None)
@@ -1311,7 +1317,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--enable-torch-rocm-lstsq", action="store_true")
     parser.add_argument(
         "--residual-batch-replay-backend",
-        choices=("single", "cpu", "hip_full_residual", "hip_full_residual_resident"),
+        choices=("single", "cpu", "hip_full_residual", "hip_full_residual_resident", "rust_hip_full_residual_ffi"),
         default="single",
         help="Batch residual replay backend for finite-difference JVP and alpha candidates.",
     )

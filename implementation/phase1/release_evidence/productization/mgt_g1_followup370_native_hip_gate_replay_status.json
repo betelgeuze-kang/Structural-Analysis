@@ -64,11 +64,13 @@
     "shell_nnz": 1901664,
     "spring_nnz": 40608
   },
-  "assessment": "Native HIP now validates the followup365 attached-policy residual-gate checkpoint through a full frame+shell+spring free-DOF residual batch replay and residual-difference JVP samples. This supports using HIP for faster residual/JVP batches, but it does not close G1 by itself because increment-gate promotion, all-components load-path closure, material Newton consistency, and a persistent Rust/HIP Newton worker remain open.",
+  "superseded_by_followup376": {
+    "status": "pass",
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup376_rust_hip_ffi_status.json",
+    "closure": "Followup376 upgrades this single-subprocess native HIP replay into an in-process Rust FFI worker over the native HIP C ABI."
+  },
+  "assessment": "Native HIP validates the followup365 attached-policy residual-gate checkpoint through a full frame+shell+spring free-DOF residual batch replay and residual-difference JVP samples. Later followups close the structural load-path policy, terminal increment gate, and in-process Rust/HIP FFI worker. Full path-dependent material Newton remains open.",
   "remaining_g1_gaps": [
-    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
-    "all_components_load_path_residual_still_open_after_followup367_369",
-    "persistent_in_process_rust_hip_newton_worker_not_closed",
-    "material_newton_consistency_not_proven_as_final_production_contract"
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]
 }

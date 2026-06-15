@@ -2,7 +2,7 @@
   "schema_version": "mgt-g1-followup366-increment-rocm-lane-status.v1",
   "generated_at": "2026-06-15T14:40:30Z",
   "status": "partial",
-  "claim_boundary": "Followup366 is an increment-gate and ROCm-lane status receipt, now amended with followup370 native HIP residual/JVP replay, followup372 structural load-path gate, followup373 resident HIP process-worker status, and followup374 frame-material local constitutive FD consistency. It does not create a new restart checkpoint; followup365 remains the retained residual-gate frontier.",
+  "claim_boundary": "Followup366 is an increment-gate and ROCm-lane status receipt, now amended with followup370 native HIP residual/JVP replay, followup372 structural load-path gate, followup373 resident HIP process-worker status, followup374 frame-material local constitutive FD consistency, followup375 terminal increment closure, and followup376 in-process Rust FFI/HIP residual worker closure. It does not create a new restart checkpoint; followup365 remains the retained residual-gate frontier.",
   "retained_frontier_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
   "followup366_increment_probe": {
     "probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup366_attached_increment_gate_probe.json",
@@ -103,6 +103,30 @@
     "stop_reason": "residual_gate_stationary_no_descent_increment_gate_met",
     "assessment": "A forced Newton follow-up from the retained followup365 checkpoint found no residual descent because the physical residual was already below gate; the terminal accepted increment is zero and passes the relative-increment gate. No new checkpoint is written because the final state equals the retained checkpoint."
   },
+  "followup376_rust_hip_ffi_replay": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup376_rust_hip_ffi_status.json",
+    "status": "pass",
+    "shell_pressure_load_path_policy": "structural_components_only",
+    "base_direct_residual_inf_n": 1.787703126865381e-06,
+    "base_rust_ffi_residual_inf_n": 2.4881032310020146e-06,
+    "residual_tolerance_n": 0.001,
+    "rust_ffi_residual_gate_ready": true,
+    "device_name": "AMD Radeon RX 6900 XT",
+    "batch_size": 4,
+    "rust_ffi_evaluation_count": 2,
+    "in_process_worker_pass": true,
+    "rust_ffi_worker": true,
+    "native_hip_c_abi": true,
+    "operator_buffers_device_resident": true,
+    "eval_buffers_reused_second_eval": true,
+    "rust_ffi_kernel_mean_seconds": 0.001079304297765096,
+    "rust_ffi_kernel_speedup_vs_cpu_batch_mean": 15.414109225672625,
+    "max_abs_residual_difference_n": 1.3932482545442326e-06,
+    "relative_residual_difference_inf": 1.5551507893289887e-11,
+    "relative_jvp_difference_inf": 3.24858436101845e-16,
+    "backend_boundary": "in_process_rust_ffi_worker_over_native_hip_c_abi",
+    "assessment": "Followup376 closes the prior in-process Rust FFI worker gap by validating Python -> Rust cdylib -> native HIP C ABI residual/JVP replay with device-resident operator buffers and no subprocess boundary."
+  },
   "rocm_runtime_status": {
     "rocminfo_gpu_visible_unsandboxed": true,
     "rocminfo_gpu": "AMD Radeon RX 6900 XT / gfx1030 / 80 compute units",
@@ -133,7 +157,6 @@
     "assessment": "Native HIP kernels work outside the sandbox and ROCm sees the RX 6900 XT, but Torch ROCm exposes no cuda/HIP device. The production Newton solver lane therefore needs the native HIP/Rust path rather than the current Torch device-GMRES profile."
   },
   "remaining_g1_gaps": [
-    "in_process_rust_ffi_newton_worker_not_closed",
     "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]
 }

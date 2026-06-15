@@ -147,9 +147,16 @@
     "structural_load_path_residual_gate_passed": true,
     "assessment": "The unattached external-only pressure rows are resolved as non-structural external loads under the explicit structural_components_only production load-path policy."
   },
+  "followup376_rust_hip_ffi_resolution": {
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup376_rust_hip_ffi_status.json",
+    "status": "pass",
+    "persistent_in_process_worker": true,
+    "rust_ffi_worker": true,
+    "native_hip_c_abi": true,
+    "operator_buffers_device_resident": true,
+    "assessment": "The earlier persistent Rust/HIP worker gap is resolved by the in-process Rust FFI replay over the native HIP C ABI."
+  },
   "remaining_g1_gaps": [
-    "increment_gate_checkpoint_not_promoted_after_forced_followup366",
-    "persistent_in_process_rust_hip_newton_worker_not_closed",
-    "material_newton_consistency_not_proven_as_final_production_contract"
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]
 }
