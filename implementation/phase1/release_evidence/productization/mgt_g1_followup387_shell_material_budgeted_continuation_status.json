@@ -1,7 +1,7 @@
 {
-  "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v1",
+  "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v2",
   "status": "partial",
-  "generated_at": "2026-06-16T01:21:35+09:00",
+  "generated_at": "2026-06-16T01:30:18+09:00",
   "target_model": "midas_generator_33.optimized.roundtrip.json",
   "direct_residual_gate_tolerance_n": 0.0005,
   "direct_residual_gate_passed": false,
@@ -46,6 +46,20 @@
       "target_row_count": 4,
       "support_column_count": 4,
       "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz"
+    },
+    {
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4.json",
+      "direct_residual_inf_n": 9.465515735677663,
+      "target_row_count": 4,
+      "support_column_count": 4,
+      "max_row_promotions": 4,
+      "internal_pass_finals_n": [
+        9.923441094488489,
+        9.768389271824425,
+        9.615760103715992,
+        9.465515735677663
+      ],
+      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4_compact_checkpoint.npz"
     }
   ],
   "counter_evidence": [

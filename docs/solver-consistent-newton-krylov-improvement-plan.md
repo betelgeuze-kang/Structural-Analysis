@@ -224,6 +224,11 @@ Budgeted shell-material continuation:
   `10.403522164941286 -> 10.240967131025435 N`.
 - Widening the target to `4` at followup387 still promotes but only lowers
   `10.240967131025435 -> 10.08095402628286 N`.
+- A multi-promotion child then reduces restart overhead. Followup388 starts from
+  the followup387 compact checkpoint, allows `4` row-correction promotions in
+  one child, and lowers `10.08095402628286 -> 9.465515735677663 N` through
+  internal pass finals `9.923441094488489`, `9.768389271824425`,
+  `9.615760103715992`, and `9.465515735677663 N`.
 
 This is real residual-gated progress, but not closure: the direct residual gate
 is still `5e-4 N`. The route now has a bounded continuation/checkpoint mechanism;
