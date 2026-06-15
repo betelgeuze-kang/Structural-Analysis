@@ -9,17 +9,13 @@ import numpy as np
 
 from mgt_equilibrium_shell_assembly import assemble_equilibrium_surface_shell_6dof
 from run_mgt_frame_material_nonlinear_tangent import (
-    _axial_strain,
-    _material_tangent_state,
+    _stress_axial_correction_global_with_tangent,
 )
 from run_mgt_full_frame_6dof_sparse_equilibrium import (
     DOF_PER_NODE,
     FrameElement,
     _assemble_sparse_frame,
-    _element_end_points,
-    _frame_props,
     _node_dofs,
-    _rigid_end_offset_transform,
 )
 from run_mgt_frame_material_nonlinear_tangent import _assemble_material_tangent_frame
 from mgt_equilibrium_geometry_contract import (
@@ -47,33 +43,14 @@ def _stress_axial_correction_global(
     section_props: dict[int, dict[str, Any]],
     material_props: dict[int, dict[str, Any]],
 ) -> np.ndarray:
-    props, _ = _frame_props(
-        elem,
+    correction, _tangent, _meta = _stress_axial_correction_global_with_tangent(
+        elem=elem,
+        node_xyz=node_xyz,
+        u=u,
         section_props=section_props,
         material_props=material_props,
     )
-    sec = section_props.get(int(elem.section_id))
-    if not isinstance(sec, dict):
-        return np.zeros(12, dtype=np.float64)
-    area = max(float(sec.get("A_m2") or 0.0), 1.0e-12)
-    strain = _axial_strain(elem, node_xyz, u)
-    mat = material_props.get(int(elem.material_id), {})
-    state = _material_tangent_state(mat, strain)
-    n_linear = float(props.e_n_per_m2) * area * strain
-    n_stress = float(state.stress_mpa) * 1.0e6 * area
-    delta_n = n_stress - n_linear
-    if abs(delta_n) <= 1.0e-12:
-        return np.zeros(12, dtype=np.float64)
-    pi, pj = _element_end_points(elem, node_xyz)
-    axis = np.asarray(pj - pi, dtype=np.float64)
-    axis /= max(float(np.linalg.norm(axis)), 1.0e-12)
-    correction_end = np.zeros(12, dtype=np.float64)
-    correction_end[0:3] = delta_n * axis
-    correction_end[6:9] = -delta_n * axis
-    offset_i = np.asarray(elem.offset_i_global_m, dtype=np.float64)
-    offset_j = np.asarray(elem.offset_j_global_m, dtype=np.float64)
-    rigid_transform = _rigid_end_offset_transform(offset_i, offset_j)
-    return np.asarray(rigid_transform.T @ correction_end, dtype=np.float64)
+    return correction
 
 
 def assemble_physical_internal_force_components(

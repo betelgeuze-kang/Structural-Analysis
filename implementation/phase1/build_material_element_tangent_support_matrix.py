@@ -130,6 +130,7 @@ def build_material_element_tangent_support_matrix(
         and frame_material_nonlinear.get("frame_material_nonlinear_tangent_ready")
         and frame_material_nonlinear.get("bounded_material_tangent_global_smoke_ready")
         and frame_material_nonlinear.get("local_constitutive_tangent_fd_consistency_ready")
+        and frame_material_nonlinear.get("global_axial_stress_correction_fd_consistency_ready")
     )
     frame_local_axis_ready = bool(
         local_axis_opening.get("status") in {"ready", "partial"}
@@ -262,7 +263,8 @@ def build_material_element_tangent_support_matrix(
                 "reason": (
                     "Frame elements now have a bounded material tangent receipt using MGT E/nu and material-name "
                     "grade proxies with service/probe states, local constitutive finite-difference tangent "
-                    "consistency, and a global bounded tangent smoke solve. Full path-dependent "
+                    "consistency, global axial stress-correction force/JVP consistency, and a global "
+                    "bounded tangent smoke solve. Full path-dependent "
                     "internal-force history, fiber sections, shell material nonlinearity, and Newton consistent "
                     "global residual/Jacobian benchmarks are not promoted."
                     if frame_material_nonlinear_ready

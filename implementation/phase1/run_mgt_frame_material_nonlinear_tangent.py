@@ -265,6 +265,212 @@ def _axial_strain(elem: FrameElement, node_xyz: np.ndarray, u: np.ndarray) -> fl
     return float(np.dot(delta, axis) / length)
 
 
+def _stress_axial_correction_global_with_tangent(
+    *,
+    elem: FrameElement,
+    node_xyz: np.ndarray,
+    u: np.ndarray,
+    section_props: dict[int, dict[str, Any]],
+    material_props: dict[int, dict[str, Any]],
+) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
+    props, _ = _frame_props(
+        elem,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    sec = section_props.get(int(elem.section_id))
+    if not isinstance(sec, dict):
+        return np.zeros(12, dtype=np.float64), np.zeros((12, 12), dtype=np.float64), {
+            "status": "missing_section",
+            "elem_id": int(elem.elem_id),
+        }
+    area = max(float(sec.get("A_m2") or 0.0), 1.0e-12)
+    pi, pj = _element_end_points(elem, node_xyz)
+    axis = np.asarray(pj - pi, dtype=np.float64)
+    length = max(float(np.linalg.norm(axis)), 1.0e-12)
+    axis /= length
+    strain = _axial_strain(elem, node_xyz, u)
+    mat = material_props.get(int(elem.material_id), {})
+    fallback_e_mpa = float(props.e_n_per_m2) / 1.0e6
+    state = _material_tangent_state(mat, strain, fallback_e_mpa=fallback_e_mpa)
+    n_linear = float(props.e_n_per_m2) * area * strain
+    n_stress = float(state.stress_mpa) * 1.0e6 * area
+    delta_n = n_stress - n_linear
+    d_delta_n_d_strain = (float(state.tangent_mpa) * 1.0e6 - float(props.e_n_per_m2)) * area
+
+    force_direction = np.zeros(12, dtype=np.float64)
+    force_direction[0:3] = axis
+    force_direction[6:9] = -axis
+    strain_gradient = np.zeros(12, dtype=np.float64)
+    strain_gradient[0:3] = -axis / length
+    strain_gradient[6:9] = axis / length
+
+    offset_i = np.asarray(elem.offset_i_global_m, dtype=np.float64)
+    offset_j = np.asarray(elem.offset_j_global_m, dtype=np.float64)
+    rigid_transform = _rigid_end_offset_transform(offset_i, offset_j)
+    mapped_force_direction = np.asarray(rigid_transform.T @ force_direction, dtype=np.float64)
+    correction = delta_n * mapped_force_direction
+    tangent = d_delta_n_d_strain * np.outer(mapped_force_direction, strain_gradient)
+    return np.asarray(correction, dtype=np.float64), np.asarray(tangent, dtype=np.float64), {
+        "status": "ok",
+        "elem_id": int(elem.elem_id),
+        "material_id": int(elem.material_id),
+        "section_id": int(elem.section_id),
+        "strain": float(strain),
+        "area_m2": float(area),
+        "length_m": float(length),
+        "elastic_e_mpa": float(fallback_e_mpa),
+        "stress_mpa": float(state.stress_mpa),
+        "constitutive_tangent_mpa": float(state.tangent_mpa),
+        "solver_tangent_mpa": float(state.solver_tangent_mpa),
+        "state_tag": state.state_tag,
+        "material_family": state.material_family,
+        "delta_axial_force_n": float(delta_n),
+        "d_delta_axial_force_d_strain_n": float(d_delta_n_d_strain),
+        "correction_inf_n": float(np.max(np.abs(correction))) if correction.size else 0.0,
+        "tangent_inf_n_per_m": float(np.max(np.abs(tangent))) if tangent.size else 0.0,
+    }
+
+
+def _apply_local_direction(
+    *,
+    u: np.ndarray,
+    elem: FrameElement,
+    local_direction: np.ndarray,
+    scale: float,
+) -> np.ndarray:
+    out = np.array(u, dtype=np.float64, copy=True)
+    dofs = _node_dofs(elem.node_i) + _node_dofs(elem.node_j)
+    for local_i, global_i in enumerate(dofs):
+        out[global_i] += float(scale) * float(local_direction[local_i])
+    return out
+
+
+def _global_stress_correction_fd_row(
+    *,
+    elem: FrameElement,
+    node_xyz: np.ndarray,
+    u: np.ndarray,
+    section_props: dict[int, dict[str, Any]],
+    material_props: dict[int, dict[str, Any]],
+    label: str,
+) -> dict[str, Any]:
+    correction, tangent, meta = _stress_axial_correction_global_with_tangent(
+        elem=elem,
+        node_xyz=node_xyz,
+        u=u,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    pi, pj = _element_end_points(elem, node_xyz)
+    axis = np.asarray(pj - pi, dtype=np.float64)
+    axis /= max(float(np.linalg.norm(axis)), 1.0e-12)
+    direction = np.zeros(12, dtype=np.float64)
+    direction[0:3] = -axis
+    direction[6:9] = axis
+    eps = 1.0e-6
+    plus_u = _apply_local_direction(u=u, elem=elem, local_direction=direction, scale=eps)
+    minus_u = _apply_local_direction(u=u, elem=elem, local_direction=direction, scale=-eps)
+    plus, _plus_tangent, plus_meta = _stress_axial_correction_global_with_tangent(
+        elem=elem,
+        node_xyz=node_xyz,
+        u=plus_u,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    minus, _minus_tangent, minus_meta = _stress_axial_correction_global_with_tangent(
+        elem=elem,
+        node_xyz=node_xyz,
+        u=minus_u,
+        section_props=section_props,
+        material_props=material_props,
+    )
+    fd_jvp = (np.asarray(plus, dtype=np.float64) - np.asarray(minus, dtype=np.float64)) / (2.0 * eps)
+    analytic_jvp = np.asarray(tangent @ direction, dtype=np.float64)
+    diff = np.asarray(fd_jvp - analytic_jvp, dtype=np.float64)
+    fd_inf = float(np.max(np.abs(fd_jvp))) if fd_jvp.size else 0.0
+    analytic_inf = float(np.max(np.abs(analytic_jvp))) if analytic_jvp.size else 0.0
+    abs_error = float(np.max(np.abs(diff))) if diff.size else 0.0
+    relative_error = abs_error / max(fd_inf, analytic_inf, 1.0)
+    state_stable = bool(
+        meta.get("state_tag") == plus_meta.get("state_tag") == minus_meta.get("state_tag")
+    )
+    return {
+        "label": str(label),
+        "elem_id": int(elem.elem_id),
+        "material_id": int(elem.material_id),
+        "section_id": int(elem.section_id),
+        "material_family": str(meta.get("material_family") or ""),
+        "state_tag": str(meta.get("state_tag") or ""),
+        "strain": float(meta.get("strain") or 0.0),
+        "fd_epsilon_m": float(eps),
+        "state_stable_under_fd": state_stable,
+        "plus_state_tag": str(plus_meta.get("state_tag") or ""),
+        "minus_state_tag": str(minus_meta.get("state_tag") or ""),
+        "correction_inf_n": float(np.max(np.abs(correction))) if correction.size else 0.0,
+        "tangent_inf_n_per_m": float(np.max(np.abs(tangent))) if tangent.size else 0.0,
+        "fd_jvp_inf_n_per_m": fd_inf,
+        "analytic_jvp_inf_n_per_m": analytic_inf,
+        "absolute_error_n_per_m": abs_error,
+        "relative_error": float(relative_error),
+    }
+
+
+def _global_stress_correction_fd_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    active = [
+        row
+        for row in rows
+        if str(row.get("material_family") or "") not in {"USER", "UNKNOWN"}
+        if max(float(row.get("fd_jvp_inf_n_per_m") or 0.0), float(row.get("analytic_jvp_inf_n_per_m") or 0.0))
+        > 1.0
+    ]
+    eligible = [
+        row
+        for row in active
+        if bool(row.get("state_stable_under_fd"))
+        and np.isfinite(float(row.get("relative_error") or 0.0))
+    ]
+    unstable = [row for row in active if not bool(row.get("state_stable_under_fd"))]
+    max_relative_error = max((float(row["relative_error"]) for row in eligible), default=0.0)
+    max_absolute_error = max((float(row["absolute_error_n_per_m"]) for row in eligible), default=0.0)
+    max_signal = max(
+        (
+            max(
+                float(row.get("fd_jvp_inf_n_per_m") or 0.0),
+                float(row.get("analytic_jvp_inf_n_per_m") or 0.0),
+            )
+            for row in eligible
+        ),
+        default=0.0,
+    )
+    absolute_tolerance = max(1.0e-1, 1.0e-8 * float(max_signal))
+    worst = sorted(
+        eligible,
+        key=lambda row: (float(row.get("relative_error") or 0.0), float(row.get("absolute_error_n_per_m") or 0.0)),
+        reverse=True,
+    )[:10]
+    return {
+        "row_count": int(len(rows)),
+        "active_row_count": int(len(active)),
+        "eligible_row_count": int(len(eligible)),
+        "state_unstable_row_count": int(len(unstable)),
+        "state_tag_counts": dict(Counter(str(row.get("state_tag") or "") for row in rows)),
+        "active_state_tag_counts": dict(Counter(str(row.get("state_tag") or "") for row in active)),
+        "max_relative_error": float(max_relative_error),
+        "max_absolute_error_n_per_m": float(max_absolute_error),
+        "max_signal_inf_n_per_m": float(max_signal),
+        "relative_error_tolerance": 1.0e-4,
+        "absolute_error_tolerance_n_per_m": float(absolute_tolerance),
+        "global_stress_correction_fd_consistency_pass": bool(
+            eligible
+            and max_relative_error <= 1.0e-4
+            and max_absolute_error <= absolute_tolerance
+        ),
+        "sample_worst_rows": worst,
+        "sample_unstable_rows": unstable[:10],
+    }
+
+
 def _frame_props_with_tangent(
     elem: FrameElement,
     *,
@@ -545,6 +751,7 @@ def run_mgt_frame_material_nonlinear_tangent(
     tangent_by_element_mpa: dict[int, float] = {}
     material_strengths: dict[str, dict[str, Any]] = {}
     fd_tangent_rows: list[dict[str, Any]] = []
+    global_stress_correction_fd_rows: list[dict[str, Any]] = []
     for elem in elements:
         mat = material_props.get(int(elem.material_id), {})
         elastic_props, _used_real = _frame_props(
@@ -581,6 +788,34 @@ def run_mgt_frame_material_nonlinear_tangent(
                 label="controlled_probe",
                 material_id=int(elem.material_id),
                 elem_id=int(elem.elem_id),
+            )
+        )
+        global_stress_correction_fd_rows.append(
+            _global_stress_correction_fd_row(
+                elem=elem,
+                node_xyz=node_xyz_sub,
+                u=u,
+                section_props=section_props,
+                material_props=material_props,
+                label="service",
+            )
+        )
+        pi, pj = _element_end_points(elem, node_xyz_sub)
+        axis = np.asarray(pj - pi, dtype=np.float64)
+        length = max(float(np.linalg.norm(axis)), 1.0e-12)
+        axis /= length
+        controlled_u = np.zeros(n_dof, dtype=np.float64)
+        controlled_u[np.asarray(_node_dofs(elem.node_j)[0:3], dtype=np.int64)] = (
+            axis * float(probe_state.strain) * length
+        )
+        global_stress_correction_fd_rows.append(
+            _global_stress_correction_fd_row(
+                elem=elem,
+                node_xyz=node_xyz_sub,
+                u=controlled_u,
+                section_props=section_props,
+                material_props=material_props,
+                label="controlled_probe",
             )
         )
         family, strength = _infer_strength_mpa(mat)
@@ -623,6 +858,9 @@ def run_mgt_frame_material_nonlinear_tangent(
     probe_summary = _state_summary(list(probe_states.values()))
     service_summary = _state_summary(list(service_states.values()))
     fd_tangent_summary = _material_fd_tangent_summary(fd_tangent_rows)
+    global_stress_correction_fd_summary = _global_stress_correction_fd_summary(
+        global_stress_correction_fd_rows
+    )
     probe_ready = bool(
         int(probe_summary["nonlinear_tangent_element_count"]) > 0
         and float(probe_summary["min_tangent_ratio"]) < 0.98
@@ -633,7 +871,16 @@ def run_mgt_frame_material_nonlinear_tangent(
         and int(tangent_meta["tangent_reduction_element_count"]) > 0
     )
     fd_ready = bool(fd_tangent_summary["constitutive_tangent_fd_consistency_pass"])
-    ready = bool(service_ready and probe_ready and smoke_ready and fd_ready)
+    global_stress_correction_fd_ready = bool(
+        global_stress_correction_fd_summary["global_stress_correction_fd_consistency_pass"]
+    )
+    ready = bool(
+        service_ready
+        and probe_ready
+        and smoke_ready
+        and fd_ready
+        and global_stress_correction_fd_ready
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -642,6 +889,7 @@ def run_mgt_frame_material_nonlinear_tangent(
         "service_load_material_state_ready": service_ready,
         "controlled_probe_material_state_ready": probe_ready,
         "local_constitutive_tangent_fd_consistency_ready": fd_ready,
+        "global_axial_stress_correction_fd_consistency_ready": global_stress_correction_fd_ready,
         "bounded_material_tangent_global_smoke_ready": smoke_ready,
         "global_smoke_solver_uses_per_element_material_tangent": smoke_ready,
         "full_material_nonlinear_newton_equilibrium": False,
@@ -654,7 +902,9 @@ def run_mgt_frame_material_nonlinear_tangent(
             "for bounded nonlinear tangent states. Service load material states and a controlled "
             "yield/damage probe are assembled into a per-element tangent smoke solve, and local "
             "constitutive tangents are checked against finite-difference stress derivatives. This is not "
-            "full path-dependent material nonlinear Newton closure, fiber-section closure, or shell material closure."
+            "full path-dependent material nonlinear Newton closure, fiber-section closure, or shell material closure. "
+            "The axial material stress-correction force and dense 12-DOF tangent are also checked against "
+            "finite-difference JVPs for service and controlled probe states."
         ),
         "strength_proxy_policy": {
             "steel": "Q235-style material names infer fy in MPa",
@@ -678,6 +928,7 @@ def run_mgt_frame_material_nonlinear_tangent(
         "service_material_state_summary": service_summary,
         "controlled_probe_material_state_summary": probe_summary,
         "local_constitutive_tangent_fd_consistency": fd_tangent_summary,
+        "global_axial_stress_correction_fd_consistency": global_stress_correction_fd_summary,
         "weakest_probe_elements": _weakest_examples(
             elements=elements,
             service_states=service_states,
@@ -718,6 +969,7 @@ def run_mgt_frame_material_nonlinear_tangent(
             *([] if service_ready else ["service_load_material_state_not_ready"]),
             *([] if probe_ready else ["controlled_probe_material_state_not_ready"]),
             *([] if fd_ready else ["local_constitutive_tangent_fd_consistency_not_ready"]),
+            *([] if global_stress_correction_fd_ready else ["global_axial_stress_correction_fd_consistency_not_ready"]),
             *([] if smoke_ready else ["material_tangent_global_smoke_not_ready"]),
         ],
     }

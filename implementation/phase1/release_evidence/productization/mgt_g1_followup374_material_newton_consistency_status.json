@@ -28,6 +28,19 @@
     "constitutive_tangent_fd_consistency_pass": true,
     "steel_plastic_capped_tangent_fix": "steel_response now reports zero constitutive tangent at the monotonic strength cap, matching the finite-difference stress derivative."
   },
+  "global_axial_stress_correction_fd_consistency": {
+    "status": "pass",
+    "receipt": "implementation/phase1/release_evidence/productization/mgt_g1_followup377_material_global_stress_correction_status.json",
+    "row_count": 11144,
+    "active_row_count": 9267,
+    "eligible_row_count": 7594,
+    "state_unstable_row_count": 1673,
+    "max_relative_error": 5.651992987410962e-09,
+    "relative_error_tolerance": 0.0001,
+    "max_absolute_error_n_per_m": 1.679588794708252,
+    "max_signal_inf_n_per_m": 572548023274.392,
+    "absolute_error_tolerance_n_per_m": 5725.48023274392
+  },
   "bounded_global_material_tangent_smoke": {
     "status": "pass",
     "controlled_probe_nonlinear_tangent_element_count": 5487,
@@ -71,7 +84,7 @@
     "relative_residual_difference_inf": 1.5551507893289887e-11,
     "relative_jvp_difference_inf": 3.24858436101845e-16
   },
-  "assessment": "Followup374 upgrades the bounded frame material tangent receipt with finite-difference consistency of the local constitutive stress derivative for the actual representative MGT material inventory. This proves local frame-material constitutive tangent consistency for stable differentiable states and keeps the global bounded tangent smoke passing. Followup376 separately closes the in-process Rust FFI/HIP residual worker gap. Full path-dependent material Newton remains open: shell/plate material nonlinearity, fiber-section history variables, and global nonlinear material residual/Jacobian Newton iterations remain outside this receipt.",
+  "assessment": "Followup374 upgrades the bounded frame material tangent receipt with finite-difference consistency of the local constitutive stress derivative for the actual representative MGT material inventory. Followup377 further proves global 12-DOF axial material stress-correction force/JVP consistency for stable active non-proxy service and controlled-probe states, and the bounded global tangent smoke remains passing. Followup376 separately closes the in-process Rust FFI/HIP residual worker gap. Full path-dependent material Newton remains open: shell/plate material nonlinearity, fiber-section history variables, cyclic/path history updates, and production global nonlinear material residual/Jacobian Newton iterations remain outside this receipt.",
   "remaining_g1_gaps": [
     "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
   ]

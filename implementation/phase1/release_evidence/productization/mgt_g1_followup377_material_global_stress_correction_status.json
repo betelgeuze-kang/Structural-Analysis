@@ -1,0 +1,53 @@
+{
+  "schema_version": "mgt-g1-followup377-material-global-stress-correction-status.v1",
+  "generated_at": "2026-06-15T15:05:30Z",
+  "status": "partial",
+  "storage_policy": {
+    "mode": "document_essential_data_no_temp_relocation",
+    "material_probe": "implementation/phase1/release_evidence/productization/mgt_frame_material_nonlinear_tangent.json",
+    "material_probe_size_bytes": 44846,
+    "support_matrix": "implementation/phase1/release_evidence/productization/material_element_tangent_support_matrix.json",
+    "support_matrix_size_bytes": 11784,
+    "reason": "Followup377 keeps scalar global material stress-correction FD/JVP consistency here and reuses the existing detailed material tangent and support-matrix receipts."
+  },
+  "target": {
+    "mgt_path": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    "roundtrip_json": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",
+    "roundtrip_npz": "implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.npz",
+    "line_elements_solved": 5572,
+    "line_nodes_solved": 2415,
+    "frame_free_dof_count": 9816
+  },
+  "local_constitutive_tangent_fd_consistency": {
+    "status": "pass",
+    "row_count": 11144,
+    "eligible_row_count": 10679,
+    "state_unstable_row_count": 465,
+    "max_relative_error": 2.427464242549056e-11,
+    "max_absolute_error_mpa": 3.5087577998638153e-07
+  },
+  "global_axial_stress_correction_fd_consistency": {
+    "status": "pass",
+    "row_count": 11144,
+    "active_row_count": 9267,
+    "eligible_row_count": 7594,
+    "state_unstable_row_count": 1673,
+    "max_relative_error": 5.651992987410962e-09,
+    "relative_error_tolerance": 0.0001,
+    "max_absolute_error_n_per_m": 1.679588794708252,
+    "max_signal_inf_n_per_m": 572548023274.392,
+    "absolute_error_tolerance_n_per_m": 5725.48023274392,
+    "pass_rule": "eligible stable active non-proxy rows require relative error <= 1e-4 and absolute error <= max(0.1, 1e-8 * max_signal)"
+  },
+  "bounded_global_material_tangent_smoke": {
+    "status": "pass",
+    "controlled_probe_nonlinear_tangent_element_count": 5487,
+    "controlled_probe_min_solver_tangent_ratio": 0.015,
+    "residual_inf_n": 0.000152927590534091,
+    "tangent_reduction_element_count": 5487
+  },
+  "assessment": "Followup377 upgrades material Newton evidence from local stress-derivative consistency to a global 12-DOF frame axial material stress-correction force/JVP consistency check. The residual-side axial stress correction and dense element tangent agree with finite-difference JVPs for stable active non-proxy service and controlled-probe states. This narrows the global material residual/Jacobian gap, but it still does not close full path-dependent material Newton because shell/plate material nonlinearity, fiber-section history variables, cyclic/path history updates, and a production global nonlinear material Newton iteration remain outside this receipt.",
+  "remaining_g1_gaps": [
+    "full_path_dependent_material_newton_shell_fiber_global_jacobian_not_closed"
+  ]
+}
