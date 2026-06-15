@@ -122,6 +122,8 @@ def run_equilibrium_newton(
     direct_regularization_factor: float | None = None,
     state_scale_line_search_values: tuple[float, ...] = (),
     state_scale_only: bool = False,
+    min_newton_iterations_before_residual_stop: int = 0,
+    require_relative_increment_gate_for_convergence: bool = False,
 ) -> dict[str, Any]:
     from mgt_sparse_linear_solver import solve_newton_correction
     from run_mgt_coupled_frame_surface_sparse_equilibrium import _translation_metrics
@@ -155,7 +157,10 @@ def run_equilibrium_newton(
             initial_residual_inf = residual_inf
         increment_inf = 0.0
         relative_increment = 0.0
-        if residual_inf <= float(residual_tolerance_n):
+        force_residual_gate_followup = iteration <= max(
+            int(min_newton_iterations_before_residual_stop), 0
+        )
+        if residual_inf <= float(residual_tolerance_n) and not force_residual_gate_followup:
             converged = True
             iterations.append(
                 {
@@ -341,7 +346,15 @@ def run_equilibrium_newton(
             **solver_meta,
         }
         iterations.append(iteration_row)
-        if accepted and best_residual_inf <= float(residual_tolerance_n):
+        increment_gate_passed = relative_increment <= float(relative_increment_tolerance)
+        if (
+            accepted
+            and best_residual_inf <= float(residual_tolerance_n)
+            and (
+                increment_gate_passed
+                or not bool(require_relative_increment_gate_for_convergence)
+            )
+        ):
             converged = True
             break
         if not accepted:
@@ -394,4 +407,10 @@ def run_equilibrium_newton(
             float(value) for value in state_scale_line_search_values
         ],
         "state_scale_only": bool(state_scale_only),
+        "min_newton_iterations_before_residual_stop": int(
+            min_newton_iterations_before_residual_stop
+        ),
+        "require_relative_increment_gate_for_convergence": bool(
+            require_relative_increment_gate_for_convergence
+        ),
     }

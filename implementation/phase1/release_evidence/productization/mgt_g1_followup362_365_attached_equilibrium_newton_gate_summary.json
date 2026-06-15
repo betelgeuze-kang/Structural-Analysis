@@ -1,6 +1,6 @@
 {
   "schema_version": "mgt-g1-followup362-365-attached-equilibrium-newton-gate-summary.v1",
-  "generated_at": "2026-06-15T12:29:42.199372+00:00",
+  "generated_at": "2026-06-15T12:45:36.179509+00:00",
   "status": "partial",
   "claim_boundary": "The attached-policy physical direct residual gate is replayed below 0.001 N. Full G1 remains partial until the increment/globalization gate, full-load-path production policy, material Newton, and production ROCm/HIP solver lane are closed.",
   "target_model": "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
@@ -311,10 +311,10 @@
   },
   "lane_assessment": {
     "breakthrough": "Once focused equilibrium Newton is run under attached_components_only, a single regularized-direct Newton step lowers the current attached-policy residual from 0.033136466982157 N to 1.787703126865381e-06 N, passing the 0.001 N residual gate.",
-    "production_rocm_gap": "The attached-policy host_ilu_device_gmres profile still fails before solving because Torch ROCm reports no HIP GPUs available. Native HIP residual replay exists, but this solver lane is not production-closed.",
+    "production_rocm_gap": "Native HIP kernels work outside the sandbox and ROCm sees the RX 6900 XT, but Torch ROCm exposes no cuda/HIP device. The production Newton solver lane therefore needs the native HIP/Rust path rather than the current Torch device-GMRES profile.",
     "remaining_g1_gaps": [
-      "relative_increment_gate_not_closed_or_not_verified_in_direct_residual_replay",
-      "production_rocm_hip_newton_solver_lane_not_closed",
+      "increment_gate_checkpoint_not_promoted_after_forced_followup366",
+      "production_rocm_hip_newton_solver_lane_not_closed_torch_device_unavailable",
       "full_load_path_policy_still_attached_components_only_not_all_components",
       "material_newton_consistency_not_proven_as_final_production_contract"
     ]
@@ -330,5 +330,25 @@
     "retained_compact_summaries": [
       "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
     ]
+  },
+  "followup366_increment_gate_attempt": {
+    "probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup366_attached_increment_gate_probe.json",
+    "shell_pressure_load_path_policy": "attached_components_only",
+    "base_residual_inf_n": 1.787703126865381e-06,
+    "final_residual_inf_n": 1.787703126865381e-06,
+    "residual_gate_n": 0.0005,
+    "residual_gate_passed": true,
+    "equilibrium_newton_ready": false,
+    "accepted_newton_iteration_count": 0,
+    "min_newton_iterations_before_residual_stop": 1,
+    "require_relative_increment_gate_for_convergence": true,
+    "iteration_stop_reason": "no_residual_descent",
+    "best_trial_residual_inf_n": 1.787703126865381e-06,
+    "best_trial_alpha": 0.125,
+    "relative_increment": 0.0,
+    "blockers": [
+      "equilibrium_newton_gate_not_closed"
+    ],
+    "assessment": "The followup365 residual-gate checkpoint is already below tolerance. Forcing an additional attached-policy Newton correction with relative-increment convergence required produced no residual descent, so no new increment-gate checkpoint is promoted."
   }
 }

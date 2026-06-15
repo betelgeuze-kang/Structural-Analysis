@@ -139,6 +139,34 @@ def test_equilibrium_newton_stops_when_already_converged() -> None:
     assert result["accepted_newton_iteration_count"] == 1
 
 
+def test_equilibrium_newton_can_force_increment_gate_after_residual_gate() -> None:
+    stiffness = sp.csc_matrix(np.asarray([[1.0]], dtype=np.float64))
+    f_ext = 1.0
+
+    def assemble_residual(u: np.ndarray, **_: object):
+        free = np.asarray([0], dtype=np.int64)
+        residual = np.asarray([float(u[0]) - f_ext], dtype=np.float64)
+        rhs = np.asarray([f_ext], dtype=np.float64)
+        return stiffness, rhs, free, residual, rhs, {}
+
+    result = run_equilibrium_newton(
+        u0=np.asarray([0.99], dtype=np.float64),
+        assemble_residual=assemble_residual,
+        max_newton_iterations=2,
+        residual_tolerance_n=2.0e-2,
+        relative_increment_tolerance=2.0e-2,
+        prefer_host_ilu=False,
+        linear_solver_profile="regularized_direct",
+        min_newton_iterations_before_residual_stop=1,
+        require_relative_increment_gate_for_convergence=True,
+    )
+
+    assert result["converged"] is True
+    assert "best_residual_inf_n" in result["iterations"][0]
+    assert result["iterations"][0]["relative_increment"] <= 2.0e-2
+    assert result["final_residual_inf_n"] <= 2.0e-2
+
+
 def test_equilibrium_newton_signed_alpha_recovers_from_opposite_tangent_direction() -> None:
     f_ext = 1.0
 

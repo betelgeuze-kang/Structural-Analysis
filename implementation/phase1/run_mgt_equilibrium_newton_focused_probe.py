@@ -161,6 +161,8 @@ def run_mgt_equilibrium_newton_focused_probe(
     direct_regularization_factor: float | None = None,
     state_scale_line_search_values: tuple[float, ...] = (),
     state_scale_only: bool = False,
+    min_newton_iterations_before_residual_stop: int = 0,
+    require_relative_increment_gate_for_convergence: bool = False,
     line_search_alphas: tuple[float, ...] = (
         1.0,
         0.5,
@@ -200,6 +202,12 @@ def run_mgt_equilibrium_newton_focused_probe(
         direct_regularization_factor=direct_regularization_factor,
         state_scale_line_search_values=state_scale_line_search_values,
         state_scale_only=bool(state_scale_only),
+        min_newton_iterations_before_residual_stop=(
+            min_newton_iterations_before_residual_stop
+        ),
+        require_relative_increment_gate_for_convergence=bool(
+            require_relative_increment_gate_for_convergence
+        ),
     )
     output_checkpoint_meta: dict[str, Any] | None = None
     if output_final_checkpoint_npz is not None and float(newton.get("final_residual_inf_n") or 0.0) < base_residual_inf:
@@ -250,6 +258,12 @@ def run_mgt_equilibrium_newton_focused_probe(
             float(value) for value in state_scale_line_search_values
         ],
         "state_scale_only": bool(state_scale_only),
+        "min_newton_iterations_before_residual_stop": int(
+            min_newton_iterations_before_residual_stop
+        ),
+        "require_relative_increment_gate_for_convergence": bool(
+            require_relative_increment_gate_for_convergence
+        ),
         "line_search_alphas": [float(value) for value in line_search_alphas],
         "displacement_cap_m": (
             None if displacement_cap_m is None else float(displacement_cap_m)
@@ -347,6 +361,24 @@ def main() -> int:
         help="Evaluate state-scale candidates and skip the Newton linear solve.",
     )
     parser.add_argument(
+        "--min-newton-iterations-before-residual-stop",
+        type=int,
+        default=0,
+        help=(
+            "Force this many Newton correction attempts before accepting an "
+            "already-satisfied residual gate. Useful for proving the final "
+            "relative-increment gate after a residual-only closure checkpoint."
+        ),
+    )
+    parser.add_argument(
+        "--require-relative-increment-gate-for-convergence",
+        action="store_true",
+        help=(
+            "Require the accepted Newton correction's relative increment to pass "
+            "before reporting equilibrium_newton_ready."
+        ),
+    )
+    parser.add_argument(
         "--line-search-alphas",
         default="1,0.5,0.25,0.125,0.0625,0.03125",
         help="Comma-separated Newton line-search alpha candidates.",
@@ -385,6 +417,12 @@ def main() -> int:
         direct_regularization_factor=args.direct_regularization_factor,
         state_scale_line_search_values=state_scale_line_search_values,
         state_scale_only=bool(args.state_scale_only),
+        min_newton_iterations_before_residual_stop=(
+            args.min_newton_iterations_before_residual_stop
+        ),
+        require_relative_increment_gate_for_convergence=bool(
+            args.require_relative_increment_gate_for_convergence
+        ),
         line_search_alphas=line_search_alphas,
         displacement_cap_m=args.displacement_cap_m,
         max_newton_translation_increment_m=args.max_newton_translation_increment_m,

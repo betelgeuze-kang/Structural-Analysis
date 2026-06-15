@@ -1,6 +1,6 @@
 {
   "schema_version": "g1-checkpoint-retention-manifest.v1",
-  "generated_at": "2026-06-15T12:29:42.199372+00:00",
+  "generated_at": "2026-06-15T12:45:36.179509+00:00",
   "policy": {
     "mode": "document_essential_data_no_temp_relocation",
     "reason": "The workspace is disk constrained. Historical binary continuation checkpoints and per-step probe receipts are not required to resume the current G1 run; compact JSON summaries and this manifest preserve the decision record.",
@@ -215,7 +215,9 @@
     "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup364_attached_host_ilu_device_gmres_probe.json",
     "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_probe.json",
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup365_gate_component_probe.json"
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_attached_policy_followup365_gate_component_probe.json",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup366_increment_rocm_lane_status.json",
+    "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup366_attached_increment_gate_probe.json"
   ],
   "cleanup_scope": {
     "deleted_checkpoint_pattern": "implementation/phase1/release_evidence/productization/**/*_final_checkpoint.npz except current frontier, plus superseded non-final cleanup checkpoint mgt_shell_free_component_state_cleanup_frontier_checkpoint.npz",
@@ -369,6 +371,16 @@
       "compact_summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json",
       "superseded_checkpoint_policy": "followup361 is superseded by attached-policy followup365; all-components followup363 checkpoint is pruned because it used the wrong load-path contract.",
       "pruned_probe_receipt_count": 2
+    },
+    "increment_rocm_lane_followup366": {
+      "retained_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+      "increment_probe": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup366_attached_increment_gate_probe.json",
+      "compact_summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup366_increment_rocm_lane_status.json",
+      "residual_gate_passed": true,
+      "equilibrium_newton_ready": false,
+      "native_hip_unsandboxed_ok": true,
+      "torch_rocm_device_count": 0,
+      "checkpoint_policy": "No followup366 checkpoint retained because no residual descent was promoted."
     }
   },
   "documented_deleted_checkpoint_candidates": [
