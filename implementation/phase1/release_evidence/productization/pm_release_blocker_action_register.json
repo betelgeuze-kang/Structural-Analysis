@@ -1,0 +1,112 @@
+{
+  "contract_pass": false,
+  "generated_at": "2026-06-16T16:36:17.031661+00:00",
+  "next_actions": [
+    "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
+  ],
+  "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=294",
+  "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+  "rows": [
+    {
+      "acceptance_criteria": [
+        "`pr_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+        "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
+        "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
+      ],
+      "blocker_code": "pr_ci_30_consecutive_pass_evidence_missing",
+      "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+      "evidence_artifacts": {
+        "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
+      },
+      "evidence_snapshot": {
+        "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+        "nightly_github_actions_pass_streak_count": 0,
+        "nightly_local_pass_streak_count": 230,
+        "nightly_missing_consecutive_pass_count": 0,
+        "nightly_owner_action": "No release action required; consecutive pass threshold is satisfied.",
+        "nightly_pass_streak_count": 230,
+        "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+        "pr_github_actions_pass_streak_count": 0,
+        "pr_local_pass_streak_count": 2,
+        "pr_missing_consecutive_pass_count": 28,
+        "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_pass_streak_count": 2,
+        "required_consecutive_pass_count": 30
+      },
+      "namespace": "basic_ci",
+      "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "scope": "release_area",
+      "status": "open",
+      "title": "Basic CI"
+    },
+    {
+      "acceptance_criteria": [
+        "`license_status_closure_report.json.contract_pass == true`",
+        "`license_status` is active and populated from approved product/legal evidence",
+        "`security::license_status_not_configured` absent from `release_area_blockers`"
+      ],
+      "blocker_code": "license_status_not_configured",
+      "blocker_id": "security::license_status_not_configured",
+      "claim_boundary": "Security area is release-gate evidence only; live deployment hardening remains governed by the runbook.",
+      "evidence_artifacts": {
+        "license_status": "implementation/phase1/release/support_bundle/license_status.json",
+        "license_status_closure": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
+        "runtime_sbom": "implementation/phase1/runtime_sbom.json",
+        "security_runbook": "docs/production-ops-security.md"
+      },
+      "evidence_snapshot": {
+        "license_status": "not_configured",
+        "license_status_closure_blockers": [
+          "license_status_not_active",
+          "license_tier_missing",
+          "license_id_missing",
+          "license_issuer_or_approver_missing",
+          "license_approval_reference_missing",
+          "license_product_scope_missing",
+          "license_expiry_missing_or_invalid"
+        ],
+        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+        "license_status_template_path": "docs/templates/license_status.template.json",
+        "sbom_component_count": 26
+      },
+      "namespace": "security",
+      "owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "scope": "release_area",
+      "status": "open",
+      "title": "Security"
+    }
+  ],
+  "schema_version": "pm-release-blocker-action-register.v1",
+  "summary": {
+    "full_release_gate_ready": false,
+    "limited_commercial_ready": true,
+    "milestone_blocker_count": 0,
+    "open_blocker_count": 2,
+    "owner_input_required_count": 2,
+    "paid_pilot_candidate": true,
+    "release_area_blocker_count": 2,
+    "release_area_gate_ready": false
+  }
+}

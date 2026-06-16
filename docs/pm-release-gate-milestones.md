@@ -3,6 +3,7 @@
 - 기준일: 2026-06-16
 - 목적: PM 판정 기준을 재현 가능한 release evidence gate로 고정한다.
 - 산출물: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+- blocker handoff: `implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json`
 
 ## 실행 명령
 
@@ -61,6 +62,10 @@ python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
 
+python3 scripts/build_pm_release_blocker_action_register.py \
+  --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json \
+  --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md
+
 npm run ai:preflight
 ```
 
@@ -84,6 +89,8 @@ npm run ai:preflight
 
 - Basic CI: nightly는 로컬 release evidence 기준 `230`회 연속 PASS지만, PR은 로컬 evidence `2`회 및 GitHub Actions `pull_request` run evidence `0`회라서 `30`회 연속 PASS evidence가 아직 없다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
+
+`pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 
 최근 닫힌 release-area blocker:
 
