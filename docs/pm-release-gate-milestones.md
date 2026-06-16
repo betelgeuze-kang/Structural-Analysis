@@ -110,7 +110,7 @@ npm run ai:preflight
 
 전체 PM release-area blocker는 다음과 같다.
 
-- Basic CI: nightly는 로컬 release evidence 기준 `230`회 연속 PASS지만, PR은 로컬 evidence `2`회 및 GitHub Actions `pull_request` run evidence `0`회라서 `30`회 연속 PASS evidence가 아직 없다.
+- Basic CI: local artifacts는 PR `2`회, nightly `230`회 연속 PASS를 보여주지만 release streak credit은 GitHub Actions tracked evidence를 요구한다. 현재 GitHub Actions PR/nightly streak evidence가 `0/30`이므로 두 lane 모두 `30`회 연속 PASS release evidence가 아직 없다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
 - Security dependency audit: `frontend_dependency_audit_report.json`은 `npm audit --json` 결과를 release evidence로 고정하며 high/critical 및 total vulnerability가 `0`이어야 한다.
 

@@ -811,8 +811,8 @@ def _build_release_area_matrix(
 
     rows: list[dict[str, Any]] = []
 
-    pr_streak = max(_pass_streak(ci_pr), _manifest_lane_streak(ci_streak_manifest, "pr"))
-    nightly_streak = max(_pass_streak(ci_nightly), _manifest_lane_streak(ci_streak_manifest, "nightly"))
+    pr_streak = _manifest_lane_streak(ci_streak_manifest, "pr")
+    nightly_streak = _manifest_lane_streak(ci_streak_manifest, "nightly")
     ci_streak_evidence_sources = ci_streak_manifest.get("evidence_sources")
     if not isinstance(ci_streak_evidence_sources, dict):
         ci_streak_evidence_sources = {}

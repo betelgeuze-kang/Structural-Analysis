@@ -86,7 +86,14 @@ def _lane_claim_boundary(label: str) -> str:
     return "Local CI artifacts prove command-level readiness; release streak credit requires tracked CI evidence."
 
 
-def _lane(label: str, reports: list[Path], threshold: int, github_actions_evidence: dict[str, Any]) -> dict[str, Any]:
+def _lane(
+    label: str,
+    reports: list[Path],
+    threshold: int,
+    github_actions_evidence: dict[str, Any],
+    *,
+    require_github_actions: bool = True,
+) -> dict[str, Any]:
     seen: set[Path] = set()
     rows: list[dict[str, Any]] = []
     for report in reports:
@@ -111,24 +118,29 @@ def _lane(label: str, reports: list[Path], threshold: int, github_actions_eviden
             break
         local_consecutive += 1
     github_consecutive = _github_lane_streak(github_actions_evidence, label)
-    consecutive = max(local_consecutive, github_consecutive)
-    threshold_pass = consecutive >= threshold
+    release_consecutive = github_consecutive if require_github_actions else max(local_consecutive, github_consecutive)
+    threshold_pass = release_consecutive >= threshold
     blockers = []
     if not threshold_pass:
         blockers.append(f"{label}_ci_{threshold}_consecutive_pass_evidence_missing")
+    streak_source = "github_actions" if github_consecutive else "missing_tracked_ci_evidence"
+    if not require_github_actions and github_consecutive < local_consecutive:
+        streak_source = "local_artifacts"
     return {
         "lane": label,
         "threshold": threshold,
+        "release_streak_source_policy": "github_actions_required" if require_github_actions else "local_or_github_actions",
         "report_count": len(rows),
         "pass_count": sum(1 for row in rows if row["pass"]),
         "local_consecutive_pass_count": local_consecutive,
         "github_actions_consecutive_pass_count": github_consecutive,
-        "consecutive_pass_count": consecutive,
-        "missing_consecutive_pass_count": max(0, threshold - consecutive),
+        "release_consecutive_pass_count": release_consecutive,
+        "consecutive_pass_count": release_consecutive,
+        "missing_consecutive_pass_count": max(0, threshold - release_consecutive),
         "threshold_pass": threshold_pass,
         "blockers": blockers,
-        "streak_source": "github_actions" if github_consecutive >= local_consecutive and github_consecutive else "local_artifacts",
-        "owner_action": _lane_owner_action(label, threshold, consecutive),
+        "streak_source": streak_source,
+        "owner_action": _lane_owner_action(label, threshold, release_consecutive),
         "claim_boundary": _lane_claim_boundary(label),
         "rows": rows,
     }
@@ -140,11 +152,24 @@ def build_manifest(
     pr_reports: list[Path],
     nightly_reports: list[Path],
     github_actions_evidence_path: Path | None = None,
+    require_github_actions: bool = True,
 ) -> dict[str, Any]:
     github_actions_evidence = _load_json(github_actions_evidence_path) if github_actions_evidence_path else {}
     lanes = {
-        "pr": _lane("pr", pr_reports, threshold, github_actions_evidence),
-        "nightly": _lane("nightly", nightly_reports, threshold, github_actions_evidence),
+        "pr": _lane(
+            "pr",
+            pr_reports,
+            threshold,
+            github_actions_evidence,
+            require_github_actions=require_github_actions,
+        ),
+        "nightly": _lane(
+            "nightly",
+            nightly_reports,
+            threshold,
+            github_actions_evidence,
+            require_github_actions=require_github_actions,
+        ),
     }
     blockers = [
         f"{lane}:{blocker}"
@@ -164,6 +189,9 @@ def build_manifest(
             "github_actions_evidence_path": str(github_actions_evidence_path or ""),
             "github_actions_evidence_available": bool(github_actions_evidence),
             "github_actions_schema_version": str(github_actions_evidence.get("schema_version", "")),
+            "release_streak_source_policy": "github_actions_required"
+            if require_github_actions
+            else "local_or_github_actions",
         },
         "lanes": lanes,
         "summary": {
@@ -187,6 +215,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--threshold", type=int, default=30)
     parser.add_argument("--github-actions-evidence", type=Path, default=DEFAULT_GITHUB_ACTIONS_EVIDENCE)
+    parser.add_argument(
+        "--allow-local-release-streak",
+        action="store_true",
+        help="Allow local artifacts to satisfy release streak credit. Default requires GitHub Actions evidence.",
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -203,6 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         pr_reports=DEFAULT_PR_REPORTS,
         nightly_reports=nightly_reports,
         github_actions_evidence_path=args.github_actions_evidence,
+        require_github_actions=not args.allow_local_release_streak,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

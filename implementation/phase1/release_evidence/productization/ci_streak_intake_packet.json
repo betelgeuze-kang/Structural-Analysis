@@ -3,9 +3,10 @@
   "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It does not convert local gate artifacts into release streak credit; PR and nightly release credit still require tracked consecutive-pass evidence for the configured release window.",
   "contract_pass": false,
   "current_blockers": [
-    "pr:pr_ci_30_consecutive_pass_evidence_missing"
+    "pr:pr_ci_30_consecutive_pass_evidence_missing",
+    "nightly:nightly_ci_30_consecutive_pass_evidence_missing"
   ],
-  "generated_at": "2026-06-16T17:17:51.557767+00:00",
+  "generated_at": "2026-06-16T17:48:19.955755+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -13,40 +14,42 @@
         "pr_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-      "consecutive_pass_count": 2,
+      "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
       "github_actions_threshold_pass": false,
       "lane": "pr",
       "local_consecutive_pass_count": 2,
-      "missing_consecutive_pass_count": 28,
-      "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-      "streak_source": "local_artifacts",
+      "missing_consecutive_pass_count": 30,
+      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "streak_source": "missing_tracked_ci_evidence",
       "threshold": 30,
       "threshold_pass": false
     },
     {
-      "blockers": [],
+      "blockers": [
+        "nightly_ci_30_consecutive_pass_evidence_missing"
+      ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
-      "consecutive_pass_count": 230,
+      "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
       "github_actions_threshold_pass": false,
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
-      "missing_consecutive_pass_count": 0,
-      "owner_action": "No release action required; consecutive pass threshold is satisfied.",
-      "streak_source": "local_artifacts",
+      "missing_consecutive_pass_count": 30,
+      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "streak_source": "missing_tracked_ci_evidence",
       "threshold": 30,
-      "threshold_pass": true
+      "threshold_pass": false
     }
   ],
   "reason_code": "ERR_CI_STREAK_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "summary": {
     "lane_count": 2,
-    "lane_pass_count": 1,
-    "nightly_missing_consecutive_pass_count": 0,
-    "open_blocker_count": 1,
-    "pr_missing_consecutive_pass_count": 28,
+    "lane_pass_count": 0,
+    "nightly_missing_consecutive_pass_count": 30,
+    "open_blocker_count": 2,
+    "pr_missing_consecutive_pass_count": 30,
     "threshold": 30
   },
   "validation_commands": [

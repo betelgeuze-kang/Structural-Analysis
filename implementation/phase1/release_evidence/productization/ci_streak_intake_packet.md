@@ -7,8 +7,8 @@
 
 | Lane | Streak | Missing | Source | Pass | Owner Action |
 |---|---:|---:|---|---|---|
-| `pr` | `2/30` | `28` | `local_artifacts` | `False` | Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
-| `nightly` | `230/30` | `0` | `local_artifacts` | `True` | No release action required; consecutive pass threshold is satisfied. |
+| `pr` | `0/30` | `30` | `missing_tracked_ci_evidence` | `False` | Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
+| `nightly` | `0/30` | `30` | `missing_tracked_ci_evidence` | `False` | Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff. |
 
 ## Validation Commands
 

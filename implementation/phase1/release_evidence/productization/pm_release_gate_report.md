@@ -19,7 +19,7 @@
 
 | Release Area | Status | Blockers |
 |---|---|---|
-| basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing |
+| basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | pass | none |
 | core_engine Core Engine | pass | none |
 | ndtha NDTHA | pass | none |

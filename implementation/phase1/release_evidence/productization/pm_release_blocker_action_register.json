@@ -1,8 +1,9 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T17:43:53.771988+00:00",
+  "generated_at": "2026-06-16T17:48:20.091254+00:00",
   "next_actions": [
-    "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
@@ -31,19 +32,66 @@
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_local_pass_streak_count": 230,
-        "nightly_missing_consecutive_pass_count": 0,
-        "nightly_owner_action": "No release action required; consecutive pass threshold is satisfied.",
-        "nightly_pass_streak_count": 230,
+        "nightly_missing_consecutive_pass_count": 30,
+        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_pass_streak_count": 0,
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
         "pr_local_pass_streak_count": 2,
-        "pr_missing_consecutive_pass_count": 28,
-        "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-        "pr_pass_streak_count": 2,
+        "pr_missing_consecutive_pass_count": 30,
+        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_pass_streak_count": 0,
         "required_consecutive_pass_count": 30
       },
       "namespace": "basic_ci",
-      "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "scope": "release_area",
+      "status": "open",
+      "title": "Basic CI"
+    },
+    {
+      "acceptance_criteria": [
+        "`nightly_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+        "`ci_streak_intake_packet.json.contract_pass == true`",
+        "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
+        "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
+      ],
+      "blocker_code": "nightly_ci_30_consecutive_pass_evidence_missing",
+      "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+      "evidence_artifacts": {
+        "ci_streak_intake_packet": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+        "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
+      },
+      "evidence_snapshot": {
+        "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+        "nightly_github_actions_pass_streak_count": 0,
+        "nightly_local_pass_streak_count": 230,
+        "nightly_missing_consecutive_pass_count": 30,
+        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_pass_streak_count": 0,
+        "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+        "pr_github_actions_pass_streak_count": 0,
+        "pr_local_pass_streak_count": 2,
+        "pr_missing_consecutive_pass_count": 30,
+        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_pass_streak_count": 0,
+        "required_consecutive_pass_count": 30
+      },
+      "namespace": "basic_ci",
+      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -111,10 +159,10 @@
     "full_release_gate_ready": false,
     "limited_commercial_ready": true,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 2,
-    "owner_input_required_count": 2,
+    "open_blocker_count": 3,
+    "owner_input_required_count": 3,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 2,
+    "release_area_blocker_count": 3,
     "release_area_gate_ready": false
   }
 }

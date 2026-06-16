@@ -3,11 +3,12 @@
   "contract_pass": true,
   "full_release_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "security::license_status_not_configured"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T17:43:53.874975+00:00",
+  "generated_at": "2026-06-16T17:48:20.194485+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -183,6 +184,7 @@
   "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "security::license_status_not_configured"
   ],
   "release_area_gate_ready": false,
@@ -197,10 +199,11 @@
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
       "blockers": [
-        "pr_ci_30_consecutive_pass_evidence_missing"
+        "pr_ci_30_consecutive_pass_evidence_missing",
+        "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "checks": {
-        "nightly_ci_30_run_streak_pass": true,
+        "nightly_ci_30_run_streak_pass": false,
         "nightly_ci_pass": true,
         "pr_ci_30_run_streak_pass": false,
         "pr_ci_pass": true
@@ -212,15 +215,15 @@
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_local_pass_streak_count": 230,
-        "nightly_missing_consecutive_pass_count": 0,
-        "nightly_owner_action": "No release action required; consecutive pass threshold is satisfied.",
-        "nightly_pass_streak_count": 230,
+        "nightly_missing_consecutive_pass_count": 30,
+        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_pass_streak_count": 0,
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
         "pr_local_pass_streak_count": 2,
-        "pr_missing_consecutive_pass_count": 28,
-        "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-        "pr_pass_streak_count": 2,
+        "pr_missing_consecutive_pass_count": 30,
+        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_pass_streak_count": 0,
         "required_consecutive_pass_count": 30
       },
       "title": "Basic CI"
@@ -573,6 +576,7 @@
       "family_validation_manual_signoff_missing",
       "customer_audit_failure_bundle_sla_missing",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "security::license_status_not_configured"
     ],
     "ga_enterprise_evidence_gate_pass": false,
