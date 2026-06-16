@@ -109,3 +109,47 @@ def test_ux_release_readiness_blocks_missing_browser_rehearsal(tmp_path: Path) -
     assert payload["contract_pass"] is False
     assert "browser_sample_rehearsal_pass" in payload["blockers"]
     assert "sample_completion_30min_pass" in payload["blockers"]
+
+
+def test_ux_release_readiness_reads_sample_workflow_artifact(tmp_path: Path) -> None:
+    viewer_quality = _write(
+        tmp_path / "viewer_quality.json",
+        {
+            "contract_pass": True,
+            "reason_code": "PASS_WITH_REVIEW_QUEUE",
+            "commercial_viewer_ready": True,
+            "summary": {"hard_blocker_count": 0, "review_item_count": 1},
+            "review_queue": [
+                {
+                    "asset_ref": "RD-001",
+                    "quality_tier": "ifc_geometry_ready_load_review",
+                    "quality_flags": ["not_solver_exact"],
+                    "claim_quality_flags": ["ifc_load_model_missing"],
+                    "recommended_action": "attach IFC load-model evidence before analysis claim",
+                }
+            ],
+        },
+    )
+    viewer_perf = _write(tmp_path / "viewer_perf.json", {"contract_pass": True, "reason_code": "PASS"})
+    sample_workflow = _write(
+        tmp_path / "structure_viewer_sample_workflow_smoke.json",
+        {
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "sample_completion_minutes": 4.5,
+            "browser_error_count": 0,
+            "browser_warning_count": 1,
+        },
+    )
+
+    payload = build_ux_release_readiness_report.build_report(
+        viewer_quality_path=viewer_quality,
+        viewer_performance_path=viewer_perf,
+        sample_workflow_smoke_path=sample_workflow,
+        max_sample_minutes=30.0,
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["sample_completion_minutes"] == 4.5
+    assert payload["browser_smoke"]["artifact_path"] == str(sample_workflow)
+    assert payload["artifacts"]["sample_workflow_smoke"] == str(sample_workflow)

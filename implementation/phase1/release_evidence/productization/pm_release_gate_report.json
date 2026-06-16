@@ -3,13 +3,11 @@
   "contract_pass": true,
   "full_release_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "ux::ux_release_readiness_report_missing_or_failed",
-    "ux::new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T15:57:33.983183+00:00",
+  "generated_at": "2026-06-16T16:02:24.339810+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -177,8 +175,6 @@
   "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep commercial use constrained until release-area blockers are closed.",
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "ux::ux_release_readiness_report_missing_or_failed",
-    "ux::new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured"
   ],
   "release_area_gate_ready": false,
@@ -460,24 +456,21 @@
         "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
-      "blockers": [
-        "ux_release_readiness_report_missing_or_failed",
-        "new_user_30min_sample_evidence_missing"
-      ],
+      "blockers": [],
       "checks": {
         "blocking_review_queue_zero_pass": true,
-        "new_user_sample_30min_evidence_present": false,
-        "new_user_sample_30min_pass": false,
-        "ux_release_readiness_report_pass": false,
+        "new_user_sample_30min_evidence_present": true,
+        "new_user_sample_30min_pass": true,
+        "ux_release_readiness_report_pass": true,
         "viewer_performance_static_budget_pass": true,
         "viewer_quality_gate_pass": true
       },
       "claim_boundary": "UX sample completion is currently automated browser rehearsal evidence; human new-user usability observation remains a GA-strength evidence upgrade.",
-      "ok": false,
-      "status": "blocked",
+      "ok": true,
+      "status": "pass",
       "summary": {
         "blocking_review_item_count": 0,
-        "sample_completion_minutes": null,
+        "sample_completion_minutes": 0.2701333333333333,
         "ux_evidence_source": "ux_release_readiness_report",
         "viewer_review_item_count": 7
       },
@@ -550,8 +543,6 @@
       "customer_audit_failure_bundle_sla_missing",
       "ga_validation_case_count_lt_300",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-      "ux::ux_release_readiness_report_missing_or_failed",
-      "ux::new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured"
     ],
     "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
@@ -562,5 +553,5 @@
     "paid_pilot": true
   },
   "schema_version": "pm-release-gate-report.v1",
-  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=294"
+  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=294"
 }

@@ -1,18 +1,26 @@
 {
   "artifacts": {
+    "sample_workflow_smoke": "implementation/phase1/structure_viewer_sample_workflow_smoke.json",
     "viewer_performance": "implementation/phase1/structure_viewer_browser_performance_probe.json",
     "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
   },
-  "blockers": [
-    "browser_sample_rehearsal_pass",
-    "sample_completion_30min_pass"
-  ],
+  "blockers": [],
   "blocking_review_items": [],
-  "browser_smoke": {},
+  "browser_smoke": {
+    "artifact_path": "implementation/phase1/structure_viewer_sample_workflow_smoke.json",
+    "browser_error_count": 0,
+    "browser_warning_count": 3,
+    "command": "artifact:implementation/phase1/structure_viewer_sample_workflow_smoke.json",
+    "elapsed_seconds": 16.208,
+    "reason_code": "PASS",
+    "return_code": 0,
+    "sample_completion_minutes": 0.2701333333333333,
+    "schema_version": "structure-viewer-sample-workflow-smoke.v1"
+  },
   "checks": {
-    "browser_sample_rehearsal_pass": false,
+    "browser_sample_rehearsal_pass": true,
     "claim_scoped_review_queue_pass": true,
-    "sample_completion_30min_pass": false,
+    "sample_completion_30min_pass": true,
     "viewer_commercial_ready": true,
     "viewer_hard_blockers_zero": true,
     "viewer_performance_probe_pass": true,
@@ -105,16 +113,16 @@
       "review_id": "RQ-007"
     }
   ],
-  "contract_pass": false,
-  "generated_at": "2026-06-16T15:56:03.375525+00:00",
-  "reason_code": "ERR_UX_RELEASE_READINESS_BLOCKED",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T16:02:19.381238+00:00",
+  "reason_code": "PASS",
   "schema_version": "ux-release-readiness-report.v1",
   "summary": {
     "blocking_review_item_count": 0,
-    "browser_smoke_elapsed_seconds": null,
+    "browser_smoke_elapsed_seconds": 16.208,
     "claim_scoped_review_item_count": 7,
     "max_sample_completion_minutes": 30.0,
-    "sample_completion_minutes": null,
+    "sample_completion_minutes": 0.2701333333333333,
     "viewer_hard_blocker_count": 0,
     "viewer_ready_ms": 5145.0,
     "viewer_review_item_count": 7

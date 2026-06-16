@@ -15,6 +15,7 @@ from typing import Any
 
 DEFAULT_VIEWER_QUALITY = Path("implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json")
 DEFAULT_VIEWER_PERFORMANCE = Path("implementation/phase1/structure_viewer_browser_performance_probe.json")
+DEFAULT_SAMPLE_WORKFLOW_SMOKE = Path("implementation/phase1/structure_viewer_sample_workflow_smoke.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_release_readiness_report.json")
 
 
@@ -47,6 +48,13 @@ def _as_float(value: Any, default: float = 0.0) -> float:
         return float(value)
     except Exception:
         return default
+
+
+def _float_or_none(value: Any) -> float | None:
+    try:
+        return float(value)
+    except Exception:
+        return None
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -95,20 +103,44 @@ def _run_browser_smoke(command: list[str]) -> dict[str, Any]:
     }
 
 
+def _browser_smoke_from_artifact(path: Path | None) -> dict[str, Any]:
+    if path is None:
+        return {}
+    payload = _load_json(path)
+    if not payload:
+        return {}
+    contract_pass = _reason_pass(payload)
+    sample_completion_minutes = _float_or_none(payload.get("sample_completion_minutes"))
+    return {
+        "command": f"artifact:{path}",
+        "artifact_path": str(path),
+        "return_code": 0 if contract_pass else 1,
+        "elapsed_seconds": sample_completion_minutes * 60.0 if sample_completion_minutes is not None else 0.0,
+        "sample_completion_minutes": sample_completion_minutes,
+        "browser_error_count": _as_int(payload.get("browser_error_count"), 1),
+        "browser_warning_count": _as_int(payload.get("browser_warning_count"), 0),
+        "reason_code": str(payload.get("reason_code", "")),
+        "schema_version": str(payload.get("schema_version", "")),
+    }
+
+
 def build_report(
     *,
     viewer_quality_path: Path,
     viewer_performance_path: Path,
     max_sample_minutes: float,
+    sample_workflow_smoke_path: Path | None = None,
     browser_smoke: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     viewer_quality = _load_json(viewer_quality_path)
     viewer_perf = _load_json(viewer_performance_path)
     viewer_summary = _summary(viewer_quality)
     claim_scoped_items, blocking_items = _classify_review_queue(viewer_quality)
-    smoke = browser_smoke if isinstance(browser_smoke, dict) else {}
+    smoke = browser_smoke if isinstance(browser_smoke, dict) else _browser_smoke_from_artifact(sample_workflow_smoke_path)
     smoke_elapsed_seconds = _as_float(smoke.get("elapsed_seconds"), 0.0)
-    sample_completion_minutes = smoke_elapsed_seconds / 60.0 if smoke else None
+    sample_completion_minutes = _float_or_none(smoke.get("sample_completion_minutes"))
+    if sample_completion_minutes is None:
+        sample_completion_minutes = smoke_elapsed_seconds / 60.0 if smoke else None
     smoke_pass = bool(smoke and _as_int(smoke.get("return_code"), 1) == 0)
     browser_ready_ms = _as_float((_summary(viewer_perf) or {}).get("ready_ms"), 0.0)
     if browser_ready_ms <= 0.0:
@@ -147,6 +179,7 @@ def build_report(
         "artifacts": {
             "viewer_quality": str(viewer_quality_path),
             "viewer_performance": str(viewer_performance_path),
+            "sample_workflow_smoke": str(sample_workflow_smoke_path) if sample_workflow_smoke_path is not None else "",
         },
         "claim_boundary": (
             "The sample completion evidence is an automated browser rehearsal of the first-run sample workflow, "
@@ -160,6 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--viewer-quality", type=Path, default=DEFAULT_VIEWER_QUALITY)
     parser.add_argument("--viewer-performance", type=Path, default=DEFAULT_VIEWER_PERFORMANCE)
+    parser.add_argument("--sample-workflow-smoke", type=Path, default=DEFAULT_SAMPLE_WORKFLOW_SMOKE)
     parser.add_argument("--max-sample-minutes", type=float, default=30.0)
     parser.add_argument("--run-browser-smoke", action="store_true")
     parser.add_argument("--browser-smoke-command", default="npm run verify:viewer-sample-workflow")
@@ -176,6 +210,7 @@ def main(argv: list[str] | None = None) -> int:
         viewer_quality_path=args.viewer_quality,
         viewer_performance_path=args.viewer_performance,
         max_sample_minutes=float(args.max_sample_minutes),
+        sample_workflow_smoke_path=args.sample_workflow_smoke,
         browser_smoke=smoke,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)

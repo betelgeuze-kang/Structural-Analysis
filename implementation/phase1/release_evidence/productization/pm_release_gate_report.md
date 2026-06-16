@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=294`
+- `summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=294`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep commercial use constrained until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_ready`: `True`
@@ -30,6 +30,6 @@
 | gpu_device GPU / Device | pass | none |
 | interop Interop | pass | none |
 | report Report | pass | none |
-| ux UX | blocked | ux_release_readiness_report_missing_or_failed, new_user_30min_sample_evidence_missing |
+| ux UX | pass | none |
 | support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
