@@ -3,7 +3,10 @@
   "tier": "limited-commercial",
   "license_id": "LICENSE-ID",
   "issuer": "product-or-legal-owner",
+  "approver_role": "APPROVER-ROLE",
   "approval_ref": "LEGAL-OR-PRODUCT-APPROVAL-ID",
+  "approved_at_utc": "APPROVED-AT-UTC",
+  "evidence_ref": "EVIDENCE-REF",
   "product_scope": [
     "review-assist",
     "specified-structure-families",

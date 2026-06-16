@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T21:27:35.345217+00:00",
+  "generated_at": "2026-06-16T21:40:26.495348+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -216,7 +216,7 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "00a99688a6c06d38bb58b26e3c1f828e4b241c3b3c4562a32812e2e07af8faa2",
+        "support_bundle_export_archive_sha256": "fc5d3212968b2f9d14d8013afe93ecf9d458f834d55f9b3d2dca7c00cf92045e",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -639,7 +639,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "00a99688a6c06d38bb58b26e3c1f828e4b241c3b3c4562a32812e2e07af8faa2",
+        "one_click_failure_bundle_archive_sha256": "fc5d3212968b2f9d14d8013afe93ecf9d458f834d55f9b3d2dca7c00cf92045e",
         "pm_blocker_closure_board_external_owner_input_ready_count": 5,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 5,
@@ -699,11 +699,14 @@
           "license_tier_missing",
           "license_id_missing",
           "license_issuer_or_approver_missing",
+          "license_approver_role_missing",
           "license_approval_reference_missing",
+          "license_approved_at_missing",
+          "license_evidence_ref_missing",
           "license_product_scope_missing",
           "license_expiry_missing_or_invalid"
         ],
-        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "license_status_template_path": "docs/templates/license_status.template.json",
         "sbom_component_count": 26
       },

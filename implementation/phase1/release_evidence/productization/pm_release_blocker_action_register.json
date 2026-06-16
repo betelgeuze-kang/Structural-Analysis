@@ -1,12 +1,12 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T21:27:14.299502+00:00",
+  "generated_at": "2026-06-16T21:37:22.230801+00:00",
   "next_actions": [
     "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
     "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-    "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
+    "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
@@ -372,22 +372,28 @@
           "license_tier_missing",
           "license_id_missing",
           "license_issuer_or_approver_missing",
+          "license_approver_role_missing",
           "license_approval_reference_missing",
+          "license_approved_at_missing",
+          "license_evidence_ref_missing",
           "license_product_scope_missing",
           "license_expiry_missing_or_invalid"
         ],
-        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "license_status_template_path": "docs/templates/license_status.template.json",
         "sbom_component_count": 26
       },
       "evidence_status": {
-        "closure_blocker_count": 7,
+        "closure_blocker_count": 10,
         "closure_blockers": [
           "license_status_not_active",
           "license_tier_missing",
           "license_id_missing",
           "license_issuer_or_approver_missing",
+          "license_approver_role_missing",
           "license_approval_reference_missing",
+          "license_approved_at_missing",
+          "license_evidence_ref_missing",
           "license_product_scope_missing",
           "license_expiry_missing_or_invalid"
         ],
@@ -413,9 +419,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "security",
-      "next_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+      "next_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
       "owner": "product_legal_owner",
-      "owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+      "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",

@@ -29,9 +29,9 @@ FIELD_SPECS = (
     {
         "field": "tier",
         "accepted_keys": ["tier", "edition"],
-        "required_value": "commercial tier, for example limited-commercial",
-        "closure_check": "tier_present_pass",
-        "owner_note": "Must match the scope promised in the product/customer contract.",
+        "required_value": "paid-pilot | limited-commercial",
+        "closure_check": "tier_allowed_pass",
+        "owner_note": "Must stay inside the PM-approved paid-pilot or limited-commercial boundary.",
     },
     {
         "field": "license_id",
@@ -48,6 +48,13 @@ FIELD_SPECS = (
         "owner_note": "Template values such as product-or-legal-owner are rejected.",
     },
     {
+        "field": "approver_role",
+        "accepted_keys": ["approver_role", "approval_role"],
+        "required_value": "product_owner | legal_counsel | product_and_legal | delegated_product_owner",
+        "closure_check": "approver_role_allowed_pass",
+        "owner_note": "Role is separate from the human approver identity and must be one of the allowed release roles.",
+    },
+    {
         "field": "approval_ref",
         "accepted_keys": ["approval_ref", "approval_ticket", "legal_ticket", "decision_ref"],
         "required_value": "legal/product approval reference",
@@ -55,10 +62,27 @@ FIELD_SPECS = (
         "owner_note": "Template values such as LEGAL-OR-PRODUCT-APPROVAL-ID are rejected.",
     },
     {
+        "field": "approved_at_utc",
+        "accepted_keys": ["approved_at_utc", "approved_at", "decision_at_utc"],
+        "required_value": "timezone-aware approval timestamp, not future",
+        "closure_check": "approved_at_not_future_pass",
+        "owner_note": "Approval timestamp must be timezone-aware and no later than the report generation time.",
+    },
+    {
+        "field": "evidence_ref",
+        "accepted_keys": ["evidence_ref", "approval_artifact_ref", "evidence_path"],
+        "required_value": "https URL, supported external ref, or existing local evidence path",
+        "closure_check": "evidence_ref_resolvable_pass",
+        "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+    },
+    {
         "field": "product_scope",
         "accepted_keys": ["product_scope", "scope", "features"],
-        "required_value": "one or more approved product-scope entries",
-        "closure_check": "product_scope_present_pass",
+        "required_value": (
+            "review-assist, specified-structure-families, specified-workflows, "
+            "engine-and-reviewer-evidence-package"
+        ),
+        "closure_check": "product_scope_boundary_pass",
         "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
     },
     {
@@ -67,6 +91,26 @@ FIELD_SPECS = (
         "required_value": "future expiry timestamp or perpetual=true",
         "closure_check": "expiry_valid_pass",
         "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+    },
+)
+DERIVED_CHECK_SPECS = (
+    {
+        "field": "approval_timeline",
+        "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+        "closure_check": "approval_timeline_pass",
+        "owner_note": "Approval date must be internally consistent with current validity.",
+    },
+    {
+        "field": "approval_ref_distinct",
+        "required_value": "approval_ref differs from license_id",
+        "closure_check": "approval_ref_distinct_pass",
+        "owner_note": "A license identifier cannot also serve as the approval decision evidence reference.",
+    },
+    {
+        "field": "provenance_complete",
+        "required_value": "approver role, approval time, evidence ref, and distinct approval ref all pass",
+        "closure_check": "provenance_complete_pass",
+        "owner_note": "Derived check for complete legal/product approval provenance.",
     },
 )
 
@@ -100,6 +144,26 @@ def _display_value(value: Any) -> str:
     return str(value or "")
 
 
+def _derived_current_value(field: str, closure_summary: dict[str, Any]) -> str:
+    if field == "approval_timeline":
+        return (
+            f"approved_at={closure_summary.get('approved_at_utc', '')}; "
+            f"expires_at={closure_summary.get('expires_at_utc', '')}"
+        )
+    if field == "approval_ref_distinct":
+        return (
+            f"license_id={closure_summary.get('license_id', '')}; "
+            f"approval_ref={closure_summary.get('approval_ref', '')}"
+        )
+    if field == "provenance_complete":
+        return (
+            f"role={closure_summary.get('approver_role', '')}; "
+            f"evidence_ref={closure_summary.get('evidence_ref', '')}; "
+            f"evidence_kind={closure_summary.get('evidence_ref_kind', '')}"
+        )
+    return ""
+
+
 def build_packet(
     *,
     license_status_path: Path = DEFAULT_LICENSE_STATUS,
@@ -114,10 +178,13 @@ def build_packet(
     closure_blockers = closure.get("blockers") if isinstance(closure.get("blockers"), list) else []
 
     rows: list[dict[str, Any]] = []
-    for spec in FIELD_SPECS:
-        accepted_keys = [str(key) for key in spec["accepted_keys"]]
-        current_value = _first_value(license_status, accepted_keys)
-        template_value = _first_value(template, accepted_keys)
+    for spec in (*FIELD_SPECS, *DERIVED_CHECK_SPECS):
+        accepted_keys = [str(key) for key in spec.get("accepted_keys", [])]
+        current_value = _first_value(license_status, accepted_keys) if accepted_keys else _derived_current_value(
+            str(spec["field"]),
+            closure_summary,
+        )
+        template_value = _first_value(template, accepted_keys) if accepted_keys else "derived from closure report"
         check_name = str(spec["closure_check"])
         rows.append(
             {
@@ -154,6 +221,7 @@ def build_packet(
             "placeholder_values_absent_pass": placeholder_absent,
             "field_count": len(rows),
             "field_pass_count": sum(1 for row in rows if row["closure_check_pass"]),
+            "provenance_complete_pass": bool(closure_checks.get("provenance_complete_pass", False)),
         },
         "claim_boundary": (
             "This intake packet is an owner handoff checklist. It does not create legal approval and "
@@ -174,6 +242,9 @@ def build_packet(
 
 
 def _markdown(payload: dict[str, Any]) -> str:
+    def cell(value: Any) -> str:
+        return str(value).replace("|", r"\|")
+
     lines = [
         "# License Status Intake Packet",
         "",
@@ -188,8 +259,8 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for row in payload["field_rows"]:
         lines.append(
-            f"| `{row['field']}` | `{row['current_value']}` | {row['required_value']} | "
-            f"`{row['closure_check']}` = `{row['closure_check_pass']}` |"
+            f"| `{cell(row['field'])}` | `{cell(row['current_value'])}` | {cell(row['required_value'])} | "
+            f"`{cell(row['closure_check'])}` = `{row['closure_check_pass']}` |"
         )
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:

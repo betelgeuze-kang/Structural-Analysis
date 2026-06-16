@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T21:27:24.525436+00:00",
+  "generated_at": "2026-06-16T21:37:32.369055+00:00",
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
@@ -522,11 +522,14 @@
           "license_tier_missing",
           "license_id_missing",
           "license_issuer_or_approver_missing",
+          "license_approver_role_missing",
           "license_approval_reference_missing",
+          "license_approved_at_missing",
+          "license_evidence_ref_missing",
           "license_product_scope_missing",
           "license_expiry_missing_or_invalid"
         ],
-        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+        "license_status_owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
         "license_status_template_path": "docs/templates/license_status.template.json",
         "sbom_component_count": 26
       },

@@ -18,6 +18,9 @@ DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/templa
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 PLACEHOLDER_MARKERS = (
     "OWNER_INPUT_REQUIRED",
+    "APPROVED-AT-UTC",
+    "APPROVER-ROLE",
+    "EVIDENCE-REF",
     "LICENSE-ID",
     "LEGAL-OR-PRODUCT-APPROVAL-ID",
     "PRODUCT-OR-LEGAL-OWNER",

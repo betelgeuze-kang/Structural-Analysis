@@ -208,47 +208,47 @@
     },
     {
       "available": true,
-      "bytes": 32774,
+      "bytes": 33295,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "332c7a2bcf9cc4a3ad4fd7f99d9e48ffaf6bf039a1675e8e8156648f98132f8f",
-      "sha256": "332c7a2bcf9cc4a3ad4fd7f99d9e48ffaf6bf039a1675e8e8156648f98132f8f",
+      "redacted_sha256": "fd1633325ac86b0d8fad432e77ca23ee488d86652575c7a6ca622bca7a75d22f",
+      "sha256": "fd1633325ac86b0d8fad432e77ca23ee488d86652575c7a6ca622bca7a75d22f",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
       "available": true,
-      "bytes": 19455,
+      "bytes": 19522,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "63d5d724bc35f2a231340b6d85a69911e47764ec4c48a7f93d77cc0491621644",
-      "sha256": "63d5d724bc35f2a231340b6d85a69911e47764ec4c48a7f93d77cc0491621644",
+      "redacted_sha256": "0be2610c168554e2c3cee45dcb9df21717ee95b2340699ab07d1fea3f4d170ae",
+      "sha256": "0be2610c168554e2c3cee45dcb9df21717ee95b2340699ab07d1fea3f4d170ae",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
-      "bytes": 91226,
+      "bytes": 91419,
       "label": "pm_release_gate_completion_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
-      "redacted_sha256": "c4df8bc4f83a0ddae68d3cf43229244d46ff6d6bb5ef8168120b22695a13e501",
-      "sha256": "7c7e70879033670d2053186e48df11e3818919e473a2a253b0ef52745cff9ffb",
+      "redacted_sha256": "fd0c27c0abc23020fd26b4ee6e03bb709887dd438c1e4ec81a34d752a3991b50",
+      "sha256": "5feac88885f742968c4fe2d63c278ace0ee5fdea9786d041d30a34c1d4396166",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
     },
     {
       "available": true,
-      "bytes": 22114,
+      "bytes": 22181,
       "label": "pm_release_gate_reviewer_handoff",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
-      "redacted_sha256": "96d3936d031425962ae0598874a74073612932250c0b2124ca429a9387989b3e",
-      "sha256": "96d3936d031425962ae0598874a74073612932250c0b2124ca429a9387989b3e",
+      "redacted_sha256": "ebcfc5acdf8bcf083f6fe9c3244580a930c5cba4a46300502decaf0fb36b28b3",
+      "sha256": "ebcfc5acdf8bcf083f6fe9c3244580a930c5cba4a46300502decaf0fb36b28b3",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
     },
     {
       "available": true,
-      "bytes": 29110,
+      "bytes": 29244,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "997eb0eddb4a7b273cb5bc77b48f52cae834ee22a263f8646c3913492046d28d",
-      "sha256": "997eb0eddb4a7b273cb5bc77b48f52cae834ee22a263f8646c3913492046d28d",
+      "redacted_sha256": "41657bc3b60b27b00b306e78873518c3aaf8611c61cd3a46595110bc16e9cbcd",
+      "sha256": "41657bc3b60b27b00b306e78873518c3aaf8611c61cd3a46595110bc16e9cbcd",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -280,29 +280,29 @@
     },
     {
       "available": true,
-      "bytes": 5296,
+      "bytes": 8478,
       "label": "license_status_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
-      "redacted_sha256": "426806d61fcb97d90e787437f01e4adb2c63c0f3adaa81c63f9f4330ccad78da",
-      "sha256": "426806d61fcb97d90e787437f01e4adb2c63c0f3adaa81c63f9f4330ccad78da",
+      "redacted_sha256": "e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
+      "sha256": "e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
       "source_path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
     },
     {
       "available": true,
-      "bytes": 1591,
+      "bytes": 2967,
       "label": "license_status_closure_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
-      "redacted_sha256": "08b546316f82fab77db9e5ecee340aaaefbe21866745378c903819ec83c7ae07",
-      "sha256": "08b546316f82fab77db9e5ecee340aaaefbe21866745378c903819ec83c7ae07",
+      "redacted_sha256": "8d431da7c49b7f398e3acb68ad6ec409cb0fa997b02a3d7ec67d48512ea03532",
+      "sha256": "8d431da7c49b7f398e3acb68ad6ec409cb0fa997b02a3d7ec67d48512ea03532",
       "source_path": "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
     },
     {
       "available": true,
-      "bytes": 520,
+      "bytes": 630,
       "label": "license_status_template",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
-      "redacted_sha256": "62bb9c4debdcead89ad63b5af9bfa876583e3c1cd432d9dc3d2f65a9e90e374a",
-      "sha256": "08d7de2106a9aed2d510f6c9fa0e64715d82979145fe08ef005bdc811a80062e",
+      "redacted_sha256": "ead77314eb7db40778f43eb5b07b7f8ab6ce48ec475b5612bb3ecf76b4ecc0cf",
+      "sha256": "bd5c741b071bb5cde08710ea641889fbd2be704e0c1de5afd8537a550f4154b7",
       "source_path": "docs/templates/license_status.template.json"
     },
     {
@@ -415,11 +415,11 @@
     },
     {
       "available": true,
-      "bytes": 6341,
+      "bytes": 6674,
       "label": "template_evidence_safety_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/template_evidence_safety_report.json",
-      "redacted_sha256": "809e28b2314c129c2d8ff725fe07dc2f77c514421e5787d83eb70a5f28cb5f5f",
-      "sha256": "809e28b2314c129c2d8ff725fe07dc2f77c514421e5787d83eb70a5f28cb5f5f",
+      "redacted_sha256": "ca2bb8e772a43eb4d8e9d41c7fcb195633a10c25fb0e897c9a8f94c8d39c23ec",
+      "sha256": "ca2bb8e772a43eb4d8e9d41c7fcb195633a10c25fb0e897c9a8f94c8d39c23ec",
       "source_path": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
     }
   ],
@@ -428,7 +428,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T21:27:29.132233+00:00",
+    "generated_at": "2026-06-16T21:40:21.011211+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -437,7 +437,7 @@
     "artifact_count": 46,
     "available_artifact_count": 46,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "561411ae1cae4b21d6f6bbb2b937331185c20b9040883949d4364a80ba2cfc76"
+    "sha256": "8cc8ac168afacc6c20637110ce5b48273eec63ca07fa84ff7b0482ada722e981"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -458,7 +458,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 103804,
+    "bytes": 104960,
     "error": "",
     "member_count": 49,
     "members": [
@@ -513,9 +513,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "00a99688a6c06d38bb58b26e3c1f828e4b241c3b3c4562a32812e2e07af8faa2"
+    "sha256": "fc5d3212968b2f9d14d8013afe93ecf9d458f834d55f9b3d2dca7c00cf92045e"
   },
-  "generated_at": "2026-06-16T21:27:29.144134+00:00",
+  "generated_at": "2026-06-16T21:40:21.023349+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",

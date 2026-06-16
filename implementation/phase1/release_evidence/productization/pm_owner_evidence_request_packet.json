@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This packet groups open PM blocker evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, or any other external release evidence, and it does not convert missing evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T21:27:24.704905+00:00",
+  "generated_at": "2026-06-16T21:37:32.364802+00:00",
   "incomplete_blockers": [],
   "owner_packets": [
     {
@@ -273,7 +273,7 @@
       "external_input_required": true,
       "incomplete_blockers": [],
       "next_actions": [
-        "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
+        "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass."
       ],
       "owner": "product_legal_owner",
       "owner_input_required": true,
@@ -308,7 +308,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+          "next_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",

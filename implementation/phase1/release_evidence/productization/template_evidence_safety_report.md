@@ -11,7 +11,7 @@
 | `customer_audit_failure_bundle_sla.template.json` | `True` | `0` | `2` | `True` | `none` |
 | `family_validation_manual_signoff.template.json` | `True` | `0` | `2` | `True` | `none` |
 | `independent_vv_attestation.template.json` | `True` | `0` | `2` | `True` | `none` |
-| `license_status.template.json` | `True` | `0` | `4` | `True` | `none` |
+| `license_status.template.json` | `True` | `0` | `7` | `True` | `none` |
 | `ux_new_user_observation.template.json` | `True` | `0` | `2` | `True` | `none` |
 
 ## Validator Probes
