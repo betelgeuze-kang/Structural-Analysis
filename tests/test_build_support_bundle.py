@@ -99,6 +99,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "rows": [{"blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"}],
             },
         ),
+        "ci_streak_intake_packet": _write_json(
+            tmp_path / "ci-streak-intake-packet.json",
+            {
+                "schema_version": "ci-streak-intake-packet.v1",
+                "contract_pass": False,
+                "current_blockers": ["pr:pr_ci_30_consecutive_pass_evidence_missing"],
+            },
+        ),
         "license_status_intake_packet": _write_json(
             tmp_path / "license-status-intake-packet.json",
             {
@@ -155,12 +163,17 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "workstation_job_record" in payload["required_sections"]
     assert "workstation_job_retention_policy" in payload["required_sections"]
     assert "pm_release_blocker_action_register" in payload["optional_sections"]
+    assert "ci_streak_intake_packet" in payload["optional_sections"]
     assert "license_status_intake_packet" in payload["optional_sections"]
     assert "frontend_dependency_audit_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in redacted_pm_blockers
+    redacted_ci_streak = Path(payload["optional_sections"]["ci_streak_intake_packet"]).read_text(
+        encoding="utf-8"
+    )
+    assert "pr:pr_ci_30_consecutive_pass_evidence_missing" in redacted_ci_streak
     redacted_license_intake = Path(payload["optional_sections"]["license_status_intake_packet"]).read_text(
         encoding="utf-8"
     )

@@ -18,6 +18,9 @@ DEFAULT_PM_REPORT_MD = Path("implementation/phase1/release_evidence/productizati
 DEFAULT_CI_STREAK_MANIFEST = Path(
     "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json"
 )
+DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
+)
 DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE = Path(
     "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json"
 )
@@ -113,6 +116,7 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
         required = int(summary.get("required_consecutive_pass_count", 30) or 30)
         return [
             f"`pr_pass_streak_count >= {required}` in `pm_release_gate_report.json`",
+            "`ci_streak_intake_packet.json.contract_pass == true`",
             "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
             "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window",
         ]
@@ -120,6 +124,7 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
         required = int(summary.get("required_consecutive_pass_count", 30) or 30)
         return [
             f"`nightly_pass_streak_count >= {required}` in `pm_release_gate_report.json`",
+            "`ci_streak_intake_packet.json.contract_pass == true`",
             "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
             "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window",
         ]
@@ -150,6 +155,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         return [
             f"python3 scripts/build_github_actions_ci_streak_evidence.py --out {DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE}",
             f"python3 scripts/build_ci_consecutive_pass_manifest.py --out {DEFAULT_CI_STREAK_MANIFEST}",
+            f"python3 scripts/build_ci_streak_intake_packet.py --out {DEFAULT_CI_STREAK_INTAKE_PACKET}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
@@ -192,6 +198,8 @@ def _evidence_artifacts(row: dict[str, Any]) -> dict[str, str]:
 
 def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[str, str]) -> dict[str, str]:
     augmented = dict(artifacts)
+    if namespace == "basic_ci" and "consecutive_pass" in code:
+        augmented["ci_streak_intake_packet"] = str(DEFAULT_CI_STREAK_INTAKE_PACKET)
     if namespace == "security" and "license" in code:
         augmented["license_status_intake_packet"] = str(DEFAULT_LICENSE_STATUS_INTAKE_PACKET)
     if namespace == "security" and "frontend_dependency" in code:

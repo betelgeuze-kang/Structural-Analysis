@@ -89,6 +89,7 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "missing_required_count": 0,
                 },
                 "optional_sections": {
+                    "ci_streak_intake_packet": "release/support_bundle/redacted/ci_streak_intake_packet.json",
                     "license_status_intake_packet": "release/support_bundle/redacted/license_status_intake_packet.json",
                     "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
                     "frontend_dependency_audit_report": (
@@ -447,6 +448,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert basic_ci_area["summary"]["pr_missing_consecutive_pass_count"] == 0
     assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
     assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]
+    assert basic_ci_area["artifacts"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
     core_area = next(row for row in payload["release_area_matrix"] if row["area"] == "core_engine")
     assert core_area["summary"]["p95_evidence_source"] == "core_family_p95_accuracy_report"
     assert core_area["summary"]["max_family_p95_error_pct"] == 3.5
@@ -459,10 +461,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert security_area["checks"]["frontend_dependency_audit_pass"] is True
     assert security_area["summary"]["frontend_dependency_vulnerability_total"] == 0
     support_area = next(row for row in payload["release_area_matrix"] if row["area"] == "support")
+    assert support_area["checks"]["ci_streak_intake_packet_in_failure_bundle"] is True
     assert support_area["checks"]["license_status_intake_packet_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
     assert support_area["checks"]["frontend_dependency_audit_in_failure_bundle"] is True
     assert support_area["summary"]["license_status_intake_packet"].endswith("license_status_intake_packet.json")
+    assert support_area["summary"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
     assert support_area["summary"]["frontend_dependency_audit_report"].endswith("frontend_dependency_audit_report.json")
     assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
         "pm_release_blocker_action_register.json"

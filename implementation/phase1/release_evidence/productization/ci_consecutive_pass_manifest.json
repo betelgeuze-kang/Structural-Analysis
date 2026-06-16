@@ -1,4 +1,7 @@
 {
+  "blockers": [
+    "pr:pr_ci_30_consecutive_pass_evidence_missing"
+  ],
   "contract_pass": false,
   "evidence_sources": {
     "github_actions_evidence_available": true,
@@ -7,9 +10,10 @@
     "local_nightly_report_count": 230,
     "local_pr_report_count": 2
   },
-  "generated_at": "2026-06-16T16:30:19.276478+00:00",
+  "generated_at": "2026-06-16T17:17:51.527822+00:00",
   "lanes": {
     "nightly": {
+      "blockers": [],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 230,
       "github_actions_consecutive_pass_count": 0,
@@ -1636,6 +1640,9 @@
       "threshold_pass": true
     },
     "pr": {
+      "blockers": [
+        "pr_ci_30_consecutive_pass_evidence_missing"
+      ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 2,
       "github_actions_consecutive_pass_count": 0,
@@ -1666,6 +1673,7 @@
       "threshold_pass": false
     }
   },
+  "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "schema_version": "ci-consecutive-pass-manifest.v1",
   "summary": {
     "github_actions_nightly_consecutive_pass_count": 0,

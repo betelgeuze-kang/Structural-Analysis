@@ -53,6 +53,7 @@ def _pm_report(path: Path, *, blockers: list[str] | None = None) -> Path:
                         "pr_claim_boundary": "Tracked PR CI evidence is required.",
                     },
                     "artifacts": {
+                        "ci_streak_intake_packet": "ci_streak_intake_packet.json",
                         "ci_streak_manifest": "ci_consecutive_pass_manifest.json",
                     },
                 },
@@ -90,7 +91,10 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert ci_row["owner_action"] == "Collect 28 additional consecutive successful PR CI run(s)."
     assert ci_row["claim_boundary"] == "Tracked PR CI evidence is required."
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in ci_row["reproduction_commands"])
+    assert any("build_ci_streak_intake_packet.py" in command for command in ci_row["reproduction_commands"])
     assert any("pr_pass_streak_count >= 30" in item for item in ci_row["acceptance_criteria"])
+    assert any("ci_streak_intake_packet.json.contract_pass" in item for item in ci_row["acceptance_criteria"])
+    assert "ci_streak_intake_packet" in ci_row["evidence_artifacts"]
     assert ci_row["evidence_snapshot"]["pr_missing_consecutive_pass_count"] == 28
 
     security_row = rows["security::license_status_not_configured"]

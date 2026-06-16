@@ -22,6 +22,9 @@ DEFAULT_RUNTIME_POLICY = Path("implementation/phase1/release_evidence/productiza
 DEFAULT_CI_PR = Path("implementation/phase1/ci_gate_report.pr.json")
 DEFAULT_CI_NIGHTLY = Path("implementation/phase1/ci_gate_report.nightly.json")
 DEFAULT_CI_STREAK_MANIFEST = Path("implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json")
+DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
+)
 DEFAULT_CI_REQUIRE_NDTHA = Path("implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json")
 DEFAULT_CI_REQUIRE_HIP = Path("implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json")
 DEFAULT_ZERO_COPY_STRICT = Path("implementation/phase1/zero_copy_real_probe_report_strict.json")
@@ -638,6 +641,9 @@ def _packaging_milestone(
         "support_bundle_pm_blocker_register_present": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
         ),
+        "support_bundle_ci_streak_intake_packet_present": bool(
+            support_optional_sections.get("ci_streak_intake_packet")
+        ),
         "support_bundle_license_intake_packet_present": bool(
             support_optional_sections.get("license_status_intake_packet")
         ),
@@ -657,6 +663,11 @@ def _packaging_milestone(
         *(
             ["support_bundle_pm_blocker_register_missing"]
             if not gate_checks["support_bundle_pm_blocker_register_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_ci_streak_intake_packet_missing"]
+            if not gate_checks["support_bundle_ci_streak_intake_packet_present"]
             else []
         ),
         *(
@@ -685,6 +696,9 @@ def _packaging_milestone(
             "support_bundle_pm_blocker_register": str(
                 support_optional_sections.get("pm_release_blocker_action_register", "")
             ),
+            "support_bundle_ci_streak_intake_packet": str(
+                support_optional_sections.get("ci_streak_intake_packet", "")
+            ),
             "support_bundle_license_status_intake_packet": str(
                 support_optional_sections.get("license_status_intake_packet", "")
             ),
@@ -708,6 +722,7 @@ def _build_release_area_matrix(
     ci_pr_path: Path,
     ci_nightly_path: Path,
     ci_streak_manifest_path: Path,
+    ci_streak_intake_packet_path: Path,
     ci_require_ndtha_path: Path,
     ci_require_hip_path: Path,
     commercial_readiness_path: Path,
@@ -856,6 +871,7 @@ def _build_release_area_matrix(
                 "pr_ci": str(ci_pr_path),
                 "nightly_ci": str(ci_nightly_path),
                 "ci_streak_manifest": str(ci_streak_manifest_path),
+                "ci_streak_intake_packet": str(ci_streak_intake_packet_path),
                 "github_actions_ci_streak_evidence": str(
                     ci_streak_evidence_sources.get("github_actions_evidence_path", "")
                 ),
@@ -1322,6 +1338,9 @@ def _build_release_area_matrix(
         "pm_blocker_action_register_in_failure_bundle": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
         ),
+        "ci_streak_intake_packet_in_failure_bundle": bool(
+            support_optional_sections.get("ci_streak_intake_packet")
+        ),
         "license_status_intake_packet_in_failure_bundle": bool(
             support_optional_sections.get("license_status_intake_packet")
         ),
@@ -1344,6 +1363,11 @@ def _build_release_area_matrix(
         *(
             ["pm_blocker_action_register_missing_from_failure_bundle"]
             if not support_area_checks["pm_blocker_action_register_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["ci_streak_intake_packet_missing_from_failure_bundle"]
+            if not support_area_checks["ci_streak_intake_packet_in_failure_bundle"]
             else []
         ),
         *(
@@ -1370,6 +1394,9 @@ def _build_release_area_matrix(
                 "support_bundle_missing_required_count": support_checks.get("missing_required_count"),
                 "pm_release_blocker_action_register": str(
                     support_optional_sections.get("pm_release_blocker_action_register", "")
+                ),
+                "ci_streak_intake_packet": str(
+                    support_optional_sections.get("ci_streak_intake_packet", "")
                 ),
                 "license_status_intake_packet": str(
                     support_optional_sections.get("license_status_intake_packet", "")
@@ -1472,6 +1499,7 @@ def build_report(
     ci_pr: Path = DEFAULT_CI_PR,
     ci_nightly: Path = DEFAULT_CI_NIGHTLY,
     ci_streak_manifest: Path = DEFAULT_CI_STREAK_MANIFEST,
+    ci_streak_intake_packet: Path = DEFAULT_CI_STREAK_INTAKE_PACKET,
     ci_require_ndtha: Path = DEFAULT_CI_REQUIRE_NDTHA,
     ci_require_hip: Path = DEFAULT_CI_REQUIRE_HIP,
     zero_copy_strict: Path = DEFAULT_ZERO_COPY_STRICT,
@@ -1569,6 +1597,7 @@ def build_report(
         ci_pr_path=ci_pr,
         ci_nightly_path=ci_nightly,
         ci_streak_manifest_path=ci_streak_manifest,
+        ci_streak_intake_packet_path=ci_streak_intake_packet,
         ci_require_ndtha_path=ci_require_ndtha,
         ci_require_hip_path=ci_require_hip,
         commercial_readiness_path=commercial_readiness,
@@ -1731,6 +1760,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ci-pr", type=Path, default=DEFAULT_CI_PR)
     parser.add_argument("--ci-nightly", type=Path, default=DEFAULT_CI_NIGHTLY)
     parser.add_argument("--ci-streak-manifest", type=Path, default=DEFAULT_CI_STREAK_MANIFEST)
+    parser.add_argument("--ci-streak-intake-packet", type=Path, default=DEFAULT_CI_STREAK_INTAKE_PACKET)
     parser.add_argument("--ci-require-ndtha", type=Path, default=DEFAULT_CI_REQUIRE_NDTHA)
     parser.add_argument("--ci-require-hip", type=Path, default=DEFAULT_CI_REQUIRE_HIP)
     parser.add_argument("--zero-copy-strict", type=Path, default=DEFAULT_ZERO_COPY_STRICT)
@@ -1792,6 +1822,7 @@ def main(argv: list[str] | None = None) -> int:
         ci_pr=args.ci_pr,
         ci_nightly=args.ci_nightly,
         ci_streak_manifest=args.ci_streak_manifest,
+        ci_streak_intake_packet=args.ci_streak_intake_packet,
         ci_require_ndtha=args.ci_require_ndtha,
         ci_require_hip=args.ci_require_hip,
         zero_copy_strict=args.zero_copy_strict,

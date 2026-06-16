@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T17:07:44.972487+00:00",
+  "generated_at": "2026-06-16T17:17:51.785372+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -155,6 +155,7 @@
         "limitation_manual_present": true,
         "pdf_report_or_reviewer_package_pass": true,
         "signed_release_registry_pass": true,
+        "support_bundle_ci_streak_intake_packet_present": true,
         "support_bundle_export_pass": true,
         "support_bundle_frontend_dependency_audit_present": true,
         "support_bundle_license_intake_packet_present": true,
@@ -168,6 +169,7 @@
       "status": "pass",
       "summary": {
         "release_registry_artifact_count": 12,
+        "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "support_bundle_missing_required_count": 0,
@@ -188,6 +190,7 @@
     {
       "area": "basic_ci",
       "artifacts": {
+        "ci_streak_intake_packet": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
         "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
         "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
         "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
@@ -497,6 +500,7 @@
       },
       "blockers": [],
       "checks": {
+        "ci_streak_intake_packet_in_failure_bundle": true,
         "failure_bundle_export_pass": true,
         "frontend_dependency_audit_in_failure_bundle": true,
         "known_issue_or_limitation_register_present": true,
@@ -508,6 +512,7 @@
       "ok": true,
       "status": "pass",
       "summary": {
+        "ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",

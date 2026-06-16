@@ -113,6 +113,9 @@ def _lane(label: str, reports: list[Path], threshold: int, github_actions_eviden
     github_consecutive = _github_lane_streak(github_actions_evidence, label)
     consecutive = max(local_consecutive, github_consecutive)
     threshold_pass = consecutive >= threshold
+    blockers = []
+    if not threshold_pass:
+        blockers.append(f"{label}_ci_{threshold}_consecutive_pass_evidence_missing")
     return {
         "lane": label,
         "threshold": threshold,
@@ -123,6 +126,7 @@ def _lane(label: str, reports: list[Path], threshold: int, github_actions_eviden
         "consecutive_pass_count": consecutive,
         "missing_consecutive_pass_count": max(0, threshold - consecutive),
         "threshold_pass": threshold_pass,
+        "blockers": blockers,
         "streak_source": "github_actions" if github_consecutive >= local_consecutive and github_consecutive else "local_artifacts",
         "owner_action": _lane_owner_action(label, threshold, consecutive),
         "claim_boundary": _lane_claim_boundary(label),
@@ -142,11 +146,18 @@ def build_manifest(
         "pr": _lane("pr", pr_reports, threshold, github_actions_evidence),
         "nightly": _lane("nightly", nightly_reports, threshold, github_actions_evidence),
     }
+    blockers = [
+        f"{lane}:{blocker}"
+        for lane, lane_payload in lanes.items()
+        for blocker in lane_payload["blockers"]
+    ]
     return {
         "schema_version": "ci-consecutive-pass-manifest.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "threshold": threshold,
-        "contract_pass": all(row["threshold_pass"] for row in lanes.values()),
+        "contract_pass": not blockers,
+        "reason_code": "PASS" if not blockers else "ERR_CI_STREAK_INCOMPLETE",
+        "blockers": blockers,
         "evidence_sources": {
             "local_pr_report_count": len(pr_reports),
             "local_nightly_report_count": len(nightly_reports),
