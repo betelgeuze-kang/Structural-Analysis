@@ -24,6 +24,9 @@ DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE = Path(
 DEFAULT_LICENSE_STATUS_CLOSURE = Path(
     "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
 )
+DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
+)
 
 
 def _now_utc_iso() -> str:
@@ -138,6 +141,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "security" and "license" in code:
         return [
+            f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_LICENSE_STATUS_INTAKE_PACKET}",
             f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -163,6 +167,13 @@ def _evidence_artifacts(row: dict[str, Any]) -> dict[str, str]:
     }
     artifacts["pm_release_gate_report"] = str(DEFAULT_PM_REPORT)
     return artifacts
+
+
+def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[str, str]) -> dict[str, str]:
+    augmented = dict(artifacts)
+    if namespace == "security" and "license" in code:
+        augmented["license_status_intake_packet"] = str(DEFAULT_LICENSE_STATUS_INTAKE_PACKET)
+    return augmented
 
 
 def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
@@ -201,7 +212,11 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "claim_boundary": _claim_boundary(namespace=namespace, code=code, row=source_row),
             "acceptance_criteria": _acceptance_criteria(namespace=namespace, code=code, row=source_row),
             "reproduction_commands": _reproduction_commands(namespace=namespace, code=code),
-            "evidence_artifacts": _evidence_artifacts(source_row),
+            "evidence_artifacts": _augment_evidence_artifacts(
+                namespace=namespace,
+                code=code,
+                artifacts=_evidence_artifacts(source_row),
+            ),
             "evidence_snapshot": _as_dict(source_row.get("summary")),
         }
         rows.append(row)

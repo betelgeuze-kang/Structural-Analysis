@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T16:41:15.030150+00:00",
+  "generated_at": "2026-06-16T16:47:18.735043+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -156,6 +156,7 @@
         "pdf_report_or_reviewer_package_pass": true,
         "signed_release_registry_pass": true,
         "support_bundle_export_pass": true,
+        "support_bundle_license_intake_packet_present": true,
         "support_bundle_pm_blocker_register_present": true,
         "validation_manual_present": true,
         "viewer_reviewer_customer_surface_pass": true,
@@ -166,6 +167,7 @@
       "status": "pass",
       "summary": {
         "release_registry_artifact_count": 12,
+        "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "viewer_mode": "static_release_artifact_viewer"
@@ -495,6 +497,7 @@
       "checks": {
         "failure_bundle_export_pass": true,
         "known_issue_or_limitation_register_present": true,
+        "license_status_intake_packet_in_failure_bundle": true,
         "pm_blocker_action_register_in_failure_bundle": true,
         "rollback_runbook_present": true
       },
@@ -502,6 +505,7 @@
       "ok": true,
       "status": "pass",
       "summary": {
+        "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_missing_required_count": 0
       },

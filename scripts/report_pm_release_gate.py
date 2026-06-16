@@ -633,6 +633,9 @@ def _packaging_milestone(
         "support_bundle_pm_blocker_register_present": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
         ),
+        "support_bundle_license_intake_packet_present": bool(
+            support_optional_sections.get("license_status_intake_packet")
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
     }
@@ -646,6 +649,11 @@ def _packaging_milestone(
         *(
             ["support_bundle_pm_blocker_register_missing"]
             if not gate_checks["support_bundle_pm_blocker_register_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_license_intake_packet_missing"]
+            if not gate_checks["support_bundle_license_intake_packet_present"]
             else []
         ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
@@ -663,6 +671,9 @@ def _packaging_milestone(
             "support_bundle_missing_required_count": _as_int(support_checks.get("missing_required_count"), -1),
             "support_bundle_pm_blocker_register": str(
                 support_optional_sections.get("pm_release_blocker_action_register", "")
+            ),
+            "support_bundle_license_status_intake_packet": str(
+                support_optional_sections.get("license_status_intake_packet", "")
             ),
         },
         artifacts={
@@ -1293,6 +1304,9 @@ def _build_release_area_matrix(
         "pm_blocker_action_register_in_failure_bundle": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
         ),
+        "license_status_intake_packet_in_failure_bundle": bool(
+            support_optional_sections.get("license_status_intake_packet")
+        ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
@@ -1311,6 +1325,11 @@ def _build_release_area_matrix(
             if not support_area_checks["pm_blocker_action_register_in_failure_bundle"]
             else []
         ),
+        *(
+            ["license_status_intake_packet_missing_from_failure_bundle"]
+            if not support_area_checks["license_status_intake_packet_in_failure_bundle"]
+            else []
+        ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
         *(["rollback_runbook_missing"] if not support_area_checks["rollback_runbook_present"] else []),
     ]
@@ -1325,6 +1344,9 @@ def _build_release_area_matrix(
                 "support_bundle_missing_required_count": support_checks.get("missing_required_count"),
                 "pm_release_blocker_action_register": str(
                     support_optional_sections.get("pm_release_blocker_action_register", "")
+                ),
+                "license_status_intake_packet": str(
+                    support_optional_sections.get("license_status_intake_packet", "")
                 ),
             },
             artifacts={

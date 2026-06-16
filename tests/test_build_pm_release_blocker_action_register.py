@@ -95,8 +95,10 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
 
     security_row = rows["security::license_status_not_configured"]
     assert security_row["owner_action"] == "Populate license status from approved legal evidence."
+    assert any("build_license_status_intake_packet.py" in command for command in security_row["reproduction_commands"])
     assert any("build_license_status_closure_report.py" in command for command in security_row["reproduction_commands"])
     assert any("license_status_closure_report.json.contract_pass" in item for item in security_row["acceptance_criteria"])
+    assert "license_status_intake_packet" in security_row["evidence_artifacts"]
 
 
 def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) -> None:

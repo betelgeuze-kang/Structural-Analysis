@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T16:41:15.064795+00:00",
+  "generated_at": "2026-06-16T16:47:18.766573+00:00",
   "next_actions": [
     "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
@@ -65,6 +65,7 @@
       "evidence_artifacts": {
         "license_status": "implementation/phase1/release/support_bundle/license_status.json",
         "license_status_closure": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "license_status_intake_packet": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
         "runtime_sbom": "implementation/phase1/runtime_sbom.json",
@@ -89,6 +90,7 @@
       "owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
       "owner_input_required": true,
       "reproduction_commands": [
+        "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
         "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
