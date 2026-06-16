@@ -211,8 +211,8 @@
       "bytes": 30666,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "77258add79f74f1cfc5dd2f9ae9399f4ada9d04d3343bc6ef97b4c5daa3aa1c8",
-      "sha256": "77258add79f74f1cfc5dd2f9ae9399f4ada9d04d3343bc6ef97b4c5daa3aa1c8",
+      "redacted_sha256": "acb2b86e3ff98ffa59269176bbfb25d074723ee64623e8d5df17fa7db8812f7f",
+      "sha256": "acb2b86e3ff98ffa59269176bbfb25d074723ee64623e8d5df17fa7db8812f7f",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -347,7 +347,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T19:02:12.347767+00:00",
+    "generated_at": "2026-06-16T19:07:15.950477+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -356,7 +356,7 @@
     "artifact_count": 37,
     "available_artifact_count": 37,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "4594b4b44eceab168954556b1de3ae996e5e1f3cde2fcafa992fea9e92d386c7"
+    "sha256": "33cb61c6c2eb36ebc723f2c2917f65bb8345ea026c1fe90ba756ac491d583b9c"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -377,7 +377,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 80692,
+    "bytes": 80690,
     "error": "",
     "member_count": 40,
     "members": [
@@ -423,9 +423,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "26ece4c8c907462cd6436ff0ef96487c2c85693d45f049cf01edafa210797fff"
+    "sha256": "1daeda211fb76f4afd5ef7d25099717cb25cf50b65368a9041d8a9f5c8acd4d8"
   },
-  "generated_at": "2026-06-16T19:02:12.357112+00:00",
+  "generated_at": "2026-06-16T19:07:15.959798+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",

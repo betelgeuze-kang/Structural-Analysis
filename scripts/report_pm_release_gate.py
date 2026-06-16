@@ -35,6 +35,9 @@ DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release_evidence/product
 DEFAULT_WORKFLOW_PRODUCTIZATION = Path("implementation/phase1/workflow_productization_gate_report.json")
 DEFAULT_RELEASE_REGISTRY = Path("implementation/phase1/release/release_registry.json")
 DEFAULT_SUPPORT_BUNDLE = Path("implementation/phase1/support_bundle_manifest.json")
+DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+)
 DEFAULT_COMMERCIAL_READINESS = Path("implementation/phase1/commercial_readiness_report.strict_breadth.json")
 DEFAULT_CORE_FAMILY_P95_REPORT = Path(
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json"
@@ -648,15 +651,18 @@ def _packaging_milestone(
     workflow_path: Path,
     release_registry_path: Path,
     support_bundle_path: Path,
+    pm_blocker_action_register_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
 ) -> dict[str, Any]:
     workflow = _load_json(workflow_path)
     registry = _load_json(release_registry_path)
     support = _load_json(support_bundle_path)
+    pm_blocker_register = _load_json(pm_blocker_action_register_path)
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
+    pm_blocker_summary = _summary(pm_blocker_register)
     support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
     summary_line = str(workflow.get("summary_line", "") or "")
@@ -692,6 +698,13 @@ def _packaging_milestone(
         "support_bundle_pm_blocker_register_present": _support_section_present(
             support_optional_sections,
             "pm_release_blocker_action_register",
+        ),
+        "pm_blocker_register_handoff_ready_pass": bool(
+            _truthy_contract(pm_blocker_register)
+            or (
+                bool(pm_blocker_summary.get("all_open_blockers_have_handoff", False))
+                and _as_int(pm_blocker_summary.get("handoff_not_ready_count"), 1) == 0
+            )
         ),
         "support_bundle_ci_streak_intake_packet_present": _support_section_present(
             support_optional_sections,
@@ -763,6 +776,11 @@ def _packaging_milestone(
         *(
             ["support_bundle_pm_blocker_register_missing"]
             if not gate_checks["support_bundle_pm_blocker_register_present"]
+            else []
+        ),
+        *(
+            ["pm_blocker_action_register_handoff_not_ready"]
+            if not gate_checks["pm_blocker_register_handoff_ready_pass"]
             else []
         ),
         *(
@@ -840,6 +858,18 @@ def _packaging_milestone(
             "support_bundle_pm_blocker_register": str(
                 support_optional_sections.get("pm_release_blocker_action_register", "")
             ),
+            "pm_blocker_register_open_blocker_count": _as_int(
+                pm_blocker_summary.get("open_blocker_count"), 0
+            ),
+            "pm_blocker_register_handoff_ready_count": _as_int(
+                pm_blocker_summary.get("handoff_ready_count"), 0
+            ),
+            "pm_blocker_register_handoff_not_ready_count": _as_int(
+                pm_blocker_summary.get("handoff_not_ready_count"), 0
+            ),
+            "pm_blocker_register_external_owner_input_ready_count": _as_int(
+                pm_blocker_summary.get("external_owner_input_ready_count"), 0
+            ),
             "support_bundle_ci_streak_intake_packet": str(
                 support_optional_sections.get("ci_streak_intake_packet", "")
             ),
@@ -880,6 +910,7 @@ def _packaging_milestone(
             "workflow_productization": str(workflow_path),
             "release_registry": str(release_registry_path),
             "support_bundle": str(support_bundle_path),
+            "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
             "validation_manual": str(validation_manual_path),
             "limitation_manual": str(limitation_manual_path),
         },
@@ -905,6 +936,7 @@ def _build_release_area_matrix(
     workflow_productization_path: Path,
     release_registry_path: Path,
     support_bundle_path: Path,
+    pm_blocker_action_register_path: Path,
     runtime_packaging_path: Path,
     runtime_memory_budget_path: Path,
     runtime_sbom_path: Path,
@@ -949,6 +981,7 @@ def _build_release_area_matrix(
     measured_breadth = _load_json(measured_benchmark_breadth_path)
     workflow = _load_json(workflow_productization_path)
     support = _load_json(support_bundle_path)
+    pm_blocker_register = _load_json(pm_blocker_action_register_path)
     runtime_packaging = _load_json(runtime_packaging_path)
     runtime_memory_budget = _load_json(runtime_memory_budget_path)
     sbom = _load_json(runtime_sbom_path)
@@ -1539,6 +1572,7 @@ def _build_release_area_matrix(
 
     runtime_packaging_checks = _checks(runtime_packaging)
     support_checks = _checks(support)
+    pm_blocker_summary = _summary(pm_blocker_register)
     support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
     limitation_manual_text = _read_text_or_empty(limitation_manual_path)
@@ -1551,6 +1585,13 @@ def _build_release_area_matrix(
         "pm_blocker_action_register_in_failure_bundle": _support_section_present(
             support_optional_sections,
             "pm_release_blocker_action_register",
+        ),
+        "pm_blocker_action_register_handoff_ready_pass": bool(
+            _truthy_contract(pm_blocker_register)
+            or (
+                bool(pm_blocker_summary.get("all_open_blockers_have_handoff", False))
+                and _as_int(pm_blocker_summary.get("handoff_not_ready_count"), 1) == 0
+            )
         ),
         "ci_streak_intake_packet_in_failure_bundle": _support_section_present(
             support_optional_sections,
@@ -1624,6 +1665,11 @@ def _build_release_area_matrix(
         *(
             ["pm_blocker_action_register_missing_from_failure_bundle"]
             if not support_area_checks["pm_blocker_action_register_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["pm_blocker_action_register_handoff_not_ready"]
+            if not support_area_checks["pm_blocker_action_register_handoff_ready_pass"]
             else []
         ),
         *(
@@ -1706,6 +1752,18 @@ def _build_release_area_matrix(
                 "pm_release_blocker_action_register": str(
                     support_optional_sections.get("pm_release_blocker_action_register", "")
                 ),
+                "pm_blocker_register_open_blocker_count": _as_int(
+                    pm_blocker_summary.get("open_blocker_count"), 0
+                ),
+                "pm_blocker_register_handoff_ready_count": _as_int(
+                    pm_blocker_summary.get("handoff_ready_count"), 0
+                ),
+                "pm_blocker_register_handoff_not_ready_count": _as_int(
+                    pm_blocker_summary.get("handoff_not_ready_count"), 0
+                ),
+                "pm_blocker_register_external_owner_input_ready_count": _as_int(
+                    pm_blocker_summary.get("external_owner_input_ready_count"), 0
+                ),
                 "ci_streak_intake_packet": str(
                     support_optional_sections.get("ci_streak_intake_packet", "")
                 ),
@@ -1744,6 +1802,7 @@ def _build_release_area_matrix(
             },
             artifacts={
                 "support_bundle": str(support_bundle_path),
+                "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
                 "runtime_packaging": str(runtime_packaging_path),
                 "limitation_manual": str(limitation_manual_path),
             },
@@ -1845,6 +1904,7 @@ def build_report(
     workflow_productization: Path = DEFAULT_WORKFLOW_PRODUCTIZATION,
     release_registry: Path = DEFAULT_RELEASE_REGISTRY,
     support_bundle: Path = DEFAULT_SUPPORT_BUNDLE,
+    pm_release_blocker_action_register: Path = DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
     commercial_readiness: Path = DEFAULT_COMMERCIAL_READINESS,
     core_family_p95_report: Path = DEFAULT_CORE_FAMILY_P95_REPORT,
     runtime_packaging: Path = DEFAULT_RUNTIME_PACKAGING,
@@ -1908,6 +1968,7 @@ def build_report(
             workflow_path=workflow_productization,
             release_registry_path=release_registry,
             support_bundle_path=support_bundle,
+            pm_blocker_action_register_path=pm_release_blocker_action_register,
             validation_manual_path=validation_manual,
             limitation_manual_path=limitation_manual,
         ),
@@ -1953,6 +2014,7 @@ def build_report(
         workflow_productization_path=workflow_productization,
         release_registry_path=release_registry,
         support_bundle_path=support_bundle,
+        pm_blocker_action_register_path=pm_release_blocker_action_register,
         runtime_packaging_path=runtime_packaging,
         runtime_memory_budget_path=runtime_memory_budget,
         runtime_sbom_path=runtime_sbom,
@@ -2134,6 +2196,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--workflow-productization", type=Path, default=DEFAULT_WORKFLOW_PRODUCTIZATION)
     parser.add_argument("--release-registry", type=Path, default=DEFAULT_RELEASE_REGISTRY)
     parser.add_argument("--support-bundle", type=Path, default=DEFAULT_SUPPORT_BUNDLE)
+    parser.add_argument(
+        "--pm-release-blocker-action-register",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
+    )
     parser.add_argument("--commercial-readiness", type=Path, default=DEFAULT_COMMERCIAL_READINESS)
     parser.add_argument("--core-family-p95-report", type=Path, default=DEFAULT_CORE_FAMILY_P95_REPORT)
     parser.add_argument("--runtime-packaging", type=Path, default=DEFAULT_RUNTIME_PACKAGING)
@@ -2200,6 +2267,7 @@ def main(argv: list[str] | None = None) -> int:
         workflow_productization=args.workflow_productization,
         release_registry=args.release_registry,
         support_bundle=args.support_bundle,
+        pm_release_blocker_action_register=args.pm_release_blocker_action_register,
         commercial_readiness=args.commercial_readiness,
         core_family_p95_report=args.core_family_p95_report,
         runtime_packaging=args.runtime_packaging,
