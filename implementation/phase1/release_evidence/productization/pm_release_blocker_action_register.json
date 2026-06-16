@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:57:15.843068+00:00",
+  "generated_at": "2026-06-16T19:02:12.278796+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
@@ -56,6 +56,22 @@
         "state": "missing_tracked_ci_streak_evidence"
       },
       "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "ci_streak_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
       "namespace": "basic_ci",
       "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
@@ -121,6 +137,22 @@
         "state": "missing_tracked_ci_streak_evidence"
       },
       "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "ci_streak_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
       "namespace": "basic_ci",
       "next_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
       "owner": "release_ci_owner",
@@ -180,6 +212,22 @@
         "state": "missing_human_new_user_observation"
       },
       "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
       "namespace": "ux",
       "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
@@ -239,6 +287,22 @@
         "state": "missing_human_new_user_observation"
       },
       "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
       "namespace": "ux",
       "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
@@ -312,6 +376,22 @@
         "template_path": "docs/templates/license_status.template.json"
       },
       "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "license_status_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
       "namespace": "security",
       "next_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
       "owner": "product_legal_owner",
@@ -335,9 +415,14 @@
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
+    "all_open_blockers_have_handoff": true,
     "external_input_required_count": 5,
+    "external_owner_input_ready_count": 5,
     "full_release_gate_ready": false,
+    "handoff_not_ready_count": 0,
+    "handoff_ready_count": 5,
     "limited_commercial_ready": true,
+    "local_remediation_ready_count": 0,
     "milestone_blocker_count": 0,
     "open_blocker_count": 5,
     "owner_input_required_count": 5,

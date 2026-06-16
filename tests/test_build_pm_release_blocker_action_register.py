@@ -87,6 +87,11 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert payload["summary"]["open_blocker_count"] == 2
     assert payload["summary"]["owner_input_required_count"] == 2
     assert payload["summary"]["external_input_required_count"] == 2
+    assert payload["summary"]["handoff_ready_count"] == 2
+    assert payload["summary"]["handoff_not_ready_count"] == 0
+    assert payload["summary"]["external_owner_input_ready_count"] == 2
+    assert payload["summary"]["local_remediation_ready_count"] == 0
+    assert payload["summary"]["all_open_blockers_have_handoff"] is True
 
     ci_row = rows["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"]
     assert ci_row["owner"] == "release_ci_owner"
@@ -101,6 +106,10 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert any("pr_pass_streak_count >= 30" in item for item in ci_row["acceptance_criteria"])
     assert any("ci_streak_intake_packet.json.contract_pass" in item for item in ci_row["acceptance_criteria"])
     assert "ci_streak_intake_packet" in ci_row["evidence_artifacts"]
+    assert ci_row["handoff_ready"] is True
+    assert ci_row["handoff_state"] == "external_owner_input_ready"
+    assert ci_row["handoff"]["expected_intake_artifact"] == "ci_streak_intake_packet"
+    assert ci_row["handoff"]["checks"]["expected_intake_artifact_present"] is True
     assert ci_row["evidence_status"]["state"] == "missing_tracked_ci_streak_evidence"
     assert ci_row["evidence_status"]["lane"] == "pr"
     assert ci_row["evidence_status"]["missing_consecutive_pass_count"] == 28
@@ -116,6 +125,9 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert any("build_license_status_closure_report.py" in command for command in security_row["verification_commands"])
     assert any("license_status_closure_report.json.contract_pass" in item for item in security_row["acceptance_criteria"])
     assert "license_status_intake_packet" in security_row["evidence_artifacts"]
+    assert security_row["handoff_ready"] is True
+    assert security_row["handoff_state"] == "external_owner_input_ready"
+    assert security_row["handoff"]["expected_intake_artifact"] == "license_status_intake_packet"
     assert security_row["evidence_status"]["state"] == "not_configured"
 
 
@@ -163,6 +175,9 @@ def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path)
     assert row["owner"] == "frontend_security_owner"
     assert row["external_input_required"] is False
     assert row["resolution_type"] == "local_dependency_remediation_required"
+    assert row["handoff_ready"] is True
+    assert row["handoff_state"] == "local_remediation_ready"
+    assert row["handoff"]["expected_intake_artifact"] == ""
     assert "npm audit --audit-level high" in row["reproduction_commands"]
     assert any("build_frontend_dependency_audit_report.py" in command for command in row["reproduction_commands"])
     assert any("build_frontend_dependency_audit_report.py" in command for command in row["verification_commands"])
@@ -220,6 +235,9 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
     assert any("ux_new_user_observation_report.json.contract_pass" in item for item in row["acceptance_criteria"])
     assert "ux_new_user_observation_report" in row["evidence_artifacts"]
     assert "ux_new_user_observation_intake_packet" in row["evidence_artifacts"]
+    assert row["handoff_ready"] is True
+    assert row["handoff_state"] == "external_owner_input_ready"
+    assert row["handoff"]["expected_intake_artifact"] == "ux_new_user_observation_intake_packet"
     assert row["evidence_status"]["state"] == "missing_human_new_user_observation"
     assert row["evidence_status"]["source_policy"] == "human_new_user_observation_required"
     assert row["evidence_status"]["human_observation_reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
@@ -247,3 +265,4 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 2
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in out_md.read_text(encoding="utf-8")
     assert "release_ci_owner" in out_md.read_text(encoding="utf-8")
+    assert "external_owner_input_ready" in out_md.read_text(encoding="utf-8")

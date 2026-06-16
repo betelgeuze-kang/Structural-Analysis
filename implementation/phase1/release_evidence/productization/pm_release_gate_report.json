@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T18:57:15.961816+00:00",
+  "generated_at": "2026-06-16T19:02:12.399245+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -195,7 +195,7 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "76a30ff2a15d22a0aa4853cf0132caccace50f07d3c05eb0bb55750cdbeab492",
+        "support_bundle_export_archive_sha256": "26ece4c8c907462cd6436ff0ef96487c2c85693d45f049cf01edafa210797fff",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -588,7 +588,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "76a30ff2a15d22a0aa4853cf0132caccace50f07d3c05eb0bb55750cdbeab492",
+        "one_click_failure_bundle_archive_sha256": "26ece4c8c907462cd6436ff0ef96487c2c85693d45f049cf01edafa210797fff",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",

@@ -293,6 +293,16 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
     return augmented
 
 
+def _expected_intake_artifact(*, namespace: str, code: str) -> str:
+    if namespace == "basic_ci" and "consecutive_pass" in code:
+        return "ci_streak_intake_packet"
+    if namespace == "security" and "license" in code:
+        return "license_status_intake_packet"
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return "ux_new_user_observation_intake_packet"
+    return ""
+
+
 def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(row.get("summary"))
     if namespace == "basic_ci":
@@ -354,6 +364,43 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
     return {"state": "open_release_evidence_blocker"}
 
 
+def _handoff_payload(
+    *,
+    owner: str,
+    owner_action: str,
+    owner_input_required: bool,
+    acceptance_criteria: list[str],
+    reproduction_commands: list[str],
+    verification_commands: list[str],
+    evidence_artifacts: dict[str, str],
+    expected_intake_artifact: str,
+) -> dict[str, Any]:
+    checks = {
+        "owner_assigned": bool(owner),
+        "owner_action_present": bool(owner_action),
+        "acceptance_criteria_present": bool(acceptance_criteria),
+        "reproduction_commands_present": bool(reproduction_commands),
+        "verification_commands_present": bool(verification_commands),
+        "evidence_artifacts_present": bool(evidence_artifacts),
+        "expected_intake_artifact_present": (
+            not expected_intake_artifact or bool(evidence_artifacts.get(expected_intake_artifact))
+        ),
+    }
+    handoff_ready = all(checks.values())
+    if handoff_ready and owner_input_required:
+        state = "external_owner_input_ready"
+    elif handoff_ready:
+        state = "local_remediation_ready"
+    else:
+        state = "handoff_incomplete"
+    return {
+        "handoff_ready": handoff_ready,
+        "handoff_state": state,
+        "expected_intake_artifact": expected_intake_artifact,
+        "checks": checks,
+    }
+
+
 def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     report = _load_json(pm_report)
     release_area_rows = _indexed_rows(_as_list(report.get("release_area_matrix")), "area")
@@ -381,6 +428,25 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
         owner = _owner(namespace=namespace, code=code)
         owner_action = _owner_action(namespace=namespace, code=code, row=source_row)
         owner_input_required = _owner_input_required(namespace=namespace, code=code)
+        acceptance_criteria = _acceptance_criteria(namespace=namespace, code=code, row=source_row)
+        reproduction_commands = _reproduction_commands(namespace=namespace, code=code)
+        verification_commands = _verification_commands(namespace=namespace, code=code)
+        evidence_artifacts = _augment_evidence_artifacts(
+            namespace=namespace,
+            code=code,
+            artifacts=_evidence_artifacts(source_row),
+        )
+        expected_intake_artifact = _expected_intake_artifact(namespace=namespace, code=code)
+        handoff = _handoff_payload(
+            owner=owner,
+            owner_action=owner_action,
+            owner_input_required=owner_input_required,
+            acceptance_criteria=acceptance_criteria,
+            reproduction_commands=reproduction_commands,
+            verification_commands=verification_commands,
+            evidence_artifacts=evidence_artifacts,
+            expected_intake_artifact=expected_intake_artifact,
+        )
         row = {
             "blocker_id": blocker_id,
             "blocker_code": code,
@@ -395,16 +461,15 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "owner_action": owner_action,
             "next_action": owner_action,
             "claim_boundary": _claim_boundary(namespace=namespace, code=code, row=source_row),
-            "acceptance_criteria": _acceptance_criteria(namespace=namespace, code=code, row=source_row),
-            "reproduction_commands": _reproduction_commands(namespace=namespace, code=code),
-            "verification_commands": _verification_commands(namespace=namespace, code=code),
-            "evidence_artifacts": _augment_evidence_artifacts(
-                namespace=namespace,
-                code=code,
-                artifacts=_evidence_artifacts(source_row),
-            ),
+            "acceptance_criteria": acceptance_criteria,
+            "reproduction_commands": reproduction_commands,
+            "verification_commands": verification_commands,
+            "evidence_artifacts": evidence_artifacts,
             "evidence_status": _evidence_status(namespace=namespace, code=code, row=source_row),
             "evidence_snapshot": _as_dict(source_row.get("summary")),
+            "handoff": handoff,
+            "handoff_ready": bool(handoff["handoff_ready"]),
+            "handoff_state": str(handoff["handoff_state"]),
         }
         rows.append(row)
 
@@ -428,6 +493,15 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "limited_commercial_ready": bool(report.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(report.get("paid_pilot_candidate", False)),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
+            "handoff_ready_count": sum(1 for row in rows if row["handoff_ready"]),
+            "handoff_not_ready_count": sum(1 for row in rows if not row["handoff_ready"]),
+            "external_owner_input_ready_count": sum(
+                1 for row in rows if row["handoff_state"] == "external_owner_input_ready"
+            ),
+            "local_remediation_ready_count": sum(
+                1 for row in rows if row["handoff_state"] == "local_remediation_ready"
+            ),
+            "all_open_blockers_have_handoff": all(row["handoff_ready"] for row in rows),
         },
         "rows": rows,
         "next_actions": [row["next_action"] for row in rows],
@@ -450,7 +524,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         evidence_status = _as_dict(row.get("evidence_status"))
         lines.append(
             f"| `{row['blocker_id']}` | {row['scope']} | `{row['owner']}` | "
-            f"`{evidence_status.get('state', 'open')}` | {row['next_action']} | {acceptance} |"
+            f"`{evidence_status.get('state', 'open')}` / `{row.get('handoff_state', 'handoff_incomplete')}` | "
+            f"{row['next_action']} | {acceptance} |"
         )
     if not payload["rows"]:
         lines.append("| none | release | `release_owner` | `closed` | No open PM release blockers. | PM release gate is ready. |")

@@ -125,6 +125,7 @@ npm run ai:preflight
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
 
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
+각 open blocker는 `handoff_state=external_owner_input_ready`로 분류된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
 `ci_consecutive_pass_manifest.json`과 `github_actions_ci_streak_evidence.json`도 support bundle에 함께 포함된다. intake packet은 owner handoff이고, source streak evidence가 없는 상태를 release pass로 바꾸지 않는다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
