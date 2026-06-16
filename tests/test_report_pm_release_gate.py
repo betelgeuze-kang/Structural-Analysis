@@ -210,6 +210,55 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 },
             },
         ),
+        "ci_streak_intake_packet": _write(
+            tmp_path / "ci_streak_intake_packet.json",
+            {
+                "schema_version": "ci-streak-intake-packet.v1",
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "summary": {
+                    "threshold": 30,
+                    "lane_pass_count": 2,
+                    "source_evidence_pass": True,
+                    "source_evidence_generated_at": "2026-06-16T00:00:00+00:00",
+                    "source_evidence_age_hours": 1.0,
+                    "source_evidence_freshness_pass": True,
+                    "pr_missing_consecutive_pass_count": 0,
+                    "nightly_missing_consecutive_pass_count": 0,
+                    "pr_pull_request_run_source_present": True,
+                },
+                "source_evidence": {
+                    "contract_pass": True,
+                    "generated_at": "2026-06-16T00:00:00+00:00",
+                    "age_hours": 1.0,
+                    "freshness_pass": True,
+                    "lanes": {
+                        "pr": {
+                            "source_release_credit_pass": True,
+                            "workflow_state": "active",
+                        },
+                        "nightly": {
+                            "source_release_credit_pass": True,
+                            "workflow_state": "active",
+                        },
+                    },
+                },
+                "lane_rows": [
+                    {
+                        "lane": "pr",
+                        "threshold": 30,
+                        "threshold_pass": True,
+                        "consecutive_pass_count": 30,
+                    },
+                    {
+                        "lane": "nightly",
+                        "threshold": 30,
+                        "threshold_pass": True,
+                        "consecutive_pass_count": 30,
+                    },
+                ],
+            },
+        ),
         "commercial_readiness": _write(
             tmp_path / "commercial_readiness.json",
             {
@@ -573,6 +622,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     basic_ci_area = next(row for row in payload["release_area_matrix"] if row["area"] == "basic_ci")
     assert basic_ci_area["summary"]["pr_missing_consecutive_pass_count"] == 0
     assert basic_ci_area["summary"]["pr_pull_request_run_source_present"] is True
+    assert basic_ci_area["checks"]["ci_streak_intake_contract_pass"] is True
+    assert basic_ci_area["checks"]["ci_streak_source_evidence_pass"] is True
+    assert basic_ci_area["summary"]["pr_source_evidence_release_credit_pass"] is True
+    assert basic_ci_area["summary"]["nightly_source_evidence_release_credit_pass"] is True
+    assert basic_ci_area["summary"]["pr_github_actions_workflow_state"] == "active"
     assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
     assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]
     assert basic_ci_area["artifacts"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
@@ -728,6 +782,54 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             },
         },
     )
+    ci_gap_kwargs["ci_streak_intake_packet"] = _write(
+        tmp_path / "ci_gap" / "ci_streak_intake_packet.json",
+        {
+            "schema_version": "ci-streak-intake-packet.v1",
+            "contract_pass": False,
+            "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+            "summary": {
+                "threshold": 30,
+                "lane_pass_count": 1,
+                "source_evidence_pass": False,
+                "source_evidence_freshness_pass": True,
+                "pr_missing_consecutive_pass_count": 30,
+                "nightly_missing_consecutive_pass_count": 0,
+                "pr_pull_request_run_source_present": False,
+            },
+            "source_evidence": {
+                "contract_pass": False,
+                "generated_at": "2026-06-16T00:00:00+00:00",
+                "age_hours": 1.0,
+                "freshness_pass": True,
+                "lanes": {
+                    "pr": {
+                        "source_release_credit_pass": False,
+                        "workflow_state": "active",
+                    },
+                    "nightly": {
+                        "source_release_credit_pass": True,
+                        "workflow_state": "active",
+                    },
+                },
+            },
+            "lane_rows": [
+                {
+                    "lane": "pr",
+                    "threshold": 30,
+                    "threshold_pass": False,
+                    "consecutive_pass_count": 0,
+                    "pull_request_run_source_present": False,
+                },
+                {
+                    "lane": "nightly",
+                    "threshold": 30,
+                    "threshold_pass": True,
+                    "consecutive_pass_count": 30,
+                },
+            ],
+        },
+    )
     payload_with_ci_gap = report_pm_release_gate.build_report(
         ndtha_residual=ndtha,
         element_material_breadth=element,
@@ -739,8 +841,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
 
     assert payload_with_ci_gap["release_area_gate_ready"] is False
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in payload_with_ci_gap["release_area_blockers"]
-    assert ci_gap_area["summary"]["pr_missing_consecutive_pass_count"] == 28
+    assert ci_gap_area["summary"]["pr_missing_consecutive_pass_count"] == 30
     assert ci_gap_area["summary"]["pr_pull_request_run_source_present"] is False
+    assert ci_gap_area["checks"]["ci_streak_source_evidence_pass"] is False
+    assert ci_gap_area["summary"]["pr_source_evidence_release_credit_pass"] is False
     assert ci_gap_area["summary"]["pr_owner_action"].startswith("No pull_request-triggered CI runs")
     assert "tracked PR CI evidence" in ci_gap_area["summary"]["pr_claim_boundary"]
 

@@ -183,6 +183,13 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _lane_row_by_id(payload: dict[str, Any], lane: str) -> dict[str, Any]:
+    for row in _as_list(payload.get("lane_rows")):
+        if isinstance(row, dict) and str(row.get("lane", "")) == lane:
+            return row
+    return {}
+
+
 def _in_release_evidence(path: Path) -> bool:
     return "release_evidence" in path.parts and path.name == "ndtha_residual_gate_report.json"
 
@@ -1130,8 +1137,21 @@ def _build_release_area_matrix(
 
     rows: list[dict[str, Any]] = []
 
-    pr_streak = _manifest_lane_streak(ci_streak_manifest, "pr")
-    nightly_streak = _manifest_lane_streak(ci_streak_manifest, "nightly")
+    ci_streak_intake = _load_json(ci_streak_intake_packet_path)
+    ci_streak_source_evidence = _as_dict(ci_streak_intake.get("source_evidence"))
+    ci_streak_source_lanes = _as_dict(ci_streak_source_evidence.get("lanes"))
+    pr_intake_lane = _lane_row_by_id(ci_streak_intake, "pr")
+    nightly_intake_lane = _lane_row_by_id(ci_streak_intake, "nightly")
+    pr_streak = (
+        _as_int(pr_intake_lane.get("consecutive_pass_count"))
+        if pr_intake_lane
+        else _manifest_lane_streak(ci_streak_manifest, "pr")
+    )
+    nightly_streak = (
+        _as_int(nightly_intake_lane.get("consecutive_pass_count"))
+        if nightly_intake_lane
+        else _manifest_lane_streak(ci_streak_manifest, "nightly")
+    )
     ci_streak_evidence_sources = ci_streak_manifest.get("evidence_sources")
     if not isinstance(ci_streak_evidence_sources, dict):
         ci_streak_evidence_sources = {}
@@ -1158,6 +1178,8 @@ def _build_release_area_matrix(
         "nightly_ci_pass": _reason_pass(ci_nightly),
         "pr_ci_30_run_streak_pass": pr_streak >= ci_pass_streak_threshold,
         "nightly_ci_30_run_streak_pass": nightly_streak >= ci_pass_streak_threshold,
+        "ci_streak_intake_contract_pass": _truthy_contract(ci_streak_intake),
+        "ci_streak_source_evidence_pass": ci_streak_source_evidence.get("contract_pass") is True,
     }
     basic_ci_blockers = [
         *(["pr_ci_not_pass"] if not basic_ci_checks["pr_ci_pass"] else []),
@@ -1191,6 +1213,23 @@ def _build_release_area_matrix(
                 ),
                 "nightly_github_actions_pass_streak_count": _manifest_lane_int(
                     ci_streak_manifest, "nightly", "github_actions_consecutive_pass_count"
+                ),
+                "ci_streak_source_evidence_generated_at": str(
+                    ci_streak_source_evidence.get("generated_at", "")
+                ),
+                "ci_streak_source_evidence_age_hours": ci_streak_source_evidence.get("age_hours"),
+                "ci_streak_source_evidence_freshness_pass": ci_streak_source_evidence.get("freshness_pass"),
+                "pr_source_evidence_release_credit_pass": _as_dict(
+                    ci_streak_source_lanes.get("pr")
+                ).get("source_release_credit_pass"),
+                "nightly_source_evidence_release_credit_pass": _as_dict(
+                    ci_streak_source_lanes.get("nightly")
+                ).get("source_release_credit_pass"),
+                "pr_github_actions_workflow_state": _as_dict(ci_streak_source_lanes.get("pr")).get(
+                    "workflow_state"
+                ),
+                "nightly_github_actions_workflow_state": _as_dict(ci_streak_source_lanes.get("nightly")).get(
+                    "workflow_state"
                 ),
                 "pr_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - pr_streak),
                 "nightly_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - nightly_streak),

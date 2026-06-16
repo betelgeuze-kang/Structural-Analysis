@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T20:14:11.950208+00:00",
+  "generated_at": "2026-06-16T21:12:27.572918+00:00",
   "incomplete_blockers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
@@ -46,7 +46,7 @@
         "`release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "`release_area.basic_ci::pr_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`",
-        "Current false audit check(s): `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
+        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
       ],
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
@@ -90,7 +90,7 @@
         "`release_area.basic_ci` status is `pass` in `pm_release_gate_completion_audit.json`",
         "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
         "`release_area.basic_ci::nightly_ci_30_run_streak_pass` is `true` in `pm_release_gate_report.json`",
-        "Current false audit check(s): `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
+        "Current false audit check(s): `ci_streak_intake_contract_pass`, `ci_streak_source_evidence_pass`, `nightly_ci_30_run_streak_pass`, `pr_ci_30_run_streak_pass`"
       ],
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",

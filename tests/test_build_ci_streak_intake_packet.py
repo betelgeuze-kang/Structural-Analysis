@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta, timezone
 import importlib.util
 import json
 from pathlib import Path
@@ -19,7 +20,43 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
+def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int = 30) -> Path:
+    return _write_json(
+        path,
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": threshold,
+            "workflow_discovery": {"query_error": ""},
+            "lanes": {
+                "pr": {
+                    "threshold": threshold,
+                    "threshold_pass": True,
+                    "consecutive_pass_count": threshold,
+                    "run_count": threshold,
+                    "queried_run_count": threshold,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "query_error": "",
+                    "pull_request_run_source_present": True,
+                },
+                "nightly": {
+                    "threshold": threshold,
+                    "threshold_pass": True,
+                    "consecutive_pass_count": threshold,
+                    "run_count": threshold,
+                    "queried_run_count": threshold,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "query_error": "",
+                },
+            },
+        },
+    )
+
+
 def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
     manifest = _write_json(
         tmp_path / "ci_consecutive_pass_manifest.json",
         {
@@ -67,9 +104,30 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     github_actions = _write_json(
         tmp_path / "github_actions_ci_streak_evidence.json",
         {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": now.isoformat(),
+            "threshold": 30,
+            "workflow_discovery": {"query_error": ""},
             "lanes": {
-                "pr": {"consecutive_pass_count": 0, "threshold_pass": False},
-                "nightly": {"consecutive_pass_count": 0, "threshold_pass": False},
+                "pr": {
+                    "threshold": 30,
+                    "consecutive_pass_count": 0,
+                    "threshold_pass": False,
+                    "workflow_registered": True,
+                    "registered_workflow": {"state": "active"},
+                    "run_count": 0,
+                    "pull_request_run_source_present": False,
+                    "query_error": "",
+                },
+                "nightly": {
+                    "threshold": 30,
+                    "consecutive_pass_count": 0,
+                    "threshold_pass": False,
+                    "workflow_registered": False,
+                    "registered_workflow": {},
+                    "run_count": 0,
+                    "query_error": "failed to get runs",
+                },
             }
         },
     )
@@ -77,31 +135,34 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     payload = build_ci_streak_intake_packet.build_packet(
         manifest_path=manifest,
         github_actions_evidence_path=github_actions,
+        now=now,
     )
     rows = {row["lane"]: row for row in payload["lane_rows"]}
 
     assert payload["contract_pass"] is False
-    assert payload["reason_code"] == "ERR_CI_STREAK_EVIDENCE_INCOMPLETE"
-    assert payload["summary"]["pr_missing_consecutive_pass_count"] == 28
+    assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
+    assert payload["summary"]["source_evidence_pass"] is False
+    assert payload["summary"]["source_evidence_freshness_pass"] is True
+    assert payload["summary"]["pr_missing_consecutive_pass_count"] == 30
     assert payload["summary"]["pr_pull_request_run_source_present"] is False
-    assert payload["summary"]["nightly_missing_consecutive_pass_count"] == 0
+    assert payload["summary"]["nightly_missing_consecutive_pass_count"] == 30
     assert rows["pr"]["threshold_pass"] is False
     assert rows["pr"]["github_actions_consecutive_pass_count"] == 0
     assert rows["pr"]["github_actions_workflow_registered"] is True
-    assert rows["pr"]["github_actions_queried_run_count"] == 2
+    assert rows["pr"]["github_actions_workflow_state"] == "active"
     assert rows["pr"]["pull_request_run_source_present"] is False
     assert rows["pr"]["github_actions_ignored_event_names"] == ["push"]
-    assert rows["nightly"]["threshold_pass"] is True
+    assert rows["nightly"]["threshold_pass"] is False
     assert rows["nightly"]["github_actions_workflow_registered"] is False
-    assert rows["nightly"]["local_workflow_present"] is True
     assert rows["nightly"]["github_actions_query_error"].startswith("failed to get runs")
     assert "pr:pr_ci_30_consecutive_pass_evidence_missing" in payload["current_blockers"]
     assert "pr:pr_pull_request_run_source_absent" in payload["current_blockers"]
+    assert "nightly:github_actions_query_error" in payload["current_blockers"]
     assert payload["summary"]["nightly_github_actions_workflow_registered"] is False
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in payload["validation_commands"])
 
 
-def test_ci_streak_intake_packet_passes_closed_manifest(tmp_path: Path) -> None:
+def test_ci_streak_intake_packet_blocks_closed_manifest_without_source_evidence(tmp_path: Path) -> None:
     manifest = _write_json(
         tmp_path / "ci_consecutive_pass_manifest.json",
         {
@@ -119,10 +180,103 @@ def test_ci_streak_intake_packet_passes_closed_manifest(tmp_path: Path) -> None:
         github_actions_evidence_path=tmp_path / "missing-github.json",
     )
 
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
+    assert payload["source_evidence"]["present"] is False
+    assert "pr:github_actions_ci_streak_evidence_missing" in payload["current_blockers"]
+    assert payload["summary"]["lane_pass_count"] == 0
+
+
+def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_evidence(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": True,
+            "threshold": 30,
+            "lanes": {
+                "pr": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+                "nightly": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+            },
+        },
+    )
+    github_actions = _valid_github_actions_evidence(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        now=now,
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["current_blockers"] == []
     assert payload["summary"]["lane_pass_count"] == 2
+    assert payload["summary"]["source_evidence_pass"] is True
+    assert payload["summary"]["pr_source_threshold_pass"] is True
+    assert payload["source_evidence"]["lanes"]["pr"]["workflow_active"] is True
+
+
+def test_ci_streak_intake_packet_rejects_stale_source_evidence(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": True,
+            "threshold": 30,
+            "lanes": {
+                "pr": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+                "nightly": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+            },
+        },
+    )
+    github_actions = _valid_github_actions_evidence(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        now=now - timedelta(days=10),
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["source_evidence"]["freshness_pass"] is False
+    assert "pr:github_actions_ci_streak_evidence_stale" in payload["current_blockers"]
+
+
+def test_ci_streak_intake_packet_rejects_source_threshold_mismatch(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": True,
+            "threshold": 30,
+            "lanes": {
+                "pr": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+                "nightly": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+            },
+        },
+    )
+    github_actions = _valid_github_actions_evidence(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        now=now,
+        threshold=1,
+    )
+
+    payload = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["source_evidence"]["threshold_match"] is False
+    assert "pr:github_actions_ci_streak_evidence_threshold_mismatch" in payload["current_blockers"]
 
 
 def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -156,6 +310,9 @@ def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> 
     captured = capsys.readouterr()
     assert exit_code == 0
     assert "CI Streak Intake Packet" in captured.out
-    assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 1
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["summary"]["open_blocker_count"] > 1
+    assert payload["reason_code"] == "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE"
     assert "Validation Commands" in out_md.read_text(encoding="utf-8")
     assert "Workflow Registered" in out_md.read_text(encoding="utf-8")
+    assert "Source Evidence" in out_md.read_text(encoding="utf-8")

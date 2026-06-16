@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T20:59:16.789698+00:00",
+  "generated_at": "2026-06-16T21:12:40.279319+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -216,7 +216,7 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "cdf0e7e9910253ebc75e37e9a0fc276d57dfb6bb3519a4902c9d425bf3af9697",
+        "support_bundle_export_archive_sha256": "4872079a38b56ed900a37f6cfba41848e26c7b0edde6cb345164f42de13d1b3f",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -274,6 +274,8 @@
         "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "checks": {
+        "ci_streak_intake_contract_pass": false,
+        "ci_streak_source_evidence_pass": false,
         "nightly_ci_30_run_streak_pass": false,
         "nightly_ci_pass": true,
         "pr_ci_30_run_streak_pass": false,
@@ -283,19 +285,26 @@
       "ok": false,
       "status": "blocked",
       "summary": {
+        "ci_streak_source_evidence_age_hours": 1.275,
+        "ci_streak_source_evidence_freshness_pass": true,
+        "ci_streak_source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_pass_streak_count": 0,
+        "nightly_github_actions_workflow_state": "",
         "nightly_local_pass_streak_count": 230,
         "nightly_missing_consecutive_pass_count": 30,
         "nightly_owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
         "nightly_pass_streak_count": 0,
+        "nightly_source_evidence_release_credit_pass": false,
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
+        "pr_github_actions_workflow_state": "active",
         "pr_local_pass_streak_count": 2,
         "pr_missing_consecutive_pass_count": 30,
         "pr_owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
         "pr_pass_streak_count": 0,
         "pr_pull_request_run_source_present": false,
+        "pr_source_evidence_release_credit_pass": false,
         "required_consecutive_pass_count": 30
       },
       "title": "Basic CI"
@@ -630,7 +639,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "cdf0e7e9910253ebc75e37e9a0fc276d57dfb6bb3519a4902c9d425bf3af9697",
+        "one_click_failure_bundle_archive_sha256": "4872079a38b56ed900a37f6cfba41848e26c7b0edde6cb345164f42de13d1b3f",
         "pm_blocker_closure_board_external_owner_input_ready_count": 5,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 5,

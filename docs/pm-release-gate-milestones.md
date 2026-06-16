@@ -155,6 +155,7 @@ npm run ai:preflight
 `pm_release_gate_reviewer_handoff.json`은 open blocker별 owner, closure state, reproduction/verification command, verdict-change condition을 reviewer package로 묶는다. 이 handoff는 reviewer가 어떤 evidence가 들어오면 판정이 바뀌는지 확인하는 산출물이며, CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `pm_owner_evidence_request_packet.json`은 같은 open blocker를 owner별로 다시 묶어 owner가 제출해야 할 intake artifact, acceptance criteria, reproduction/verification command를 한 곳에 고정한다. 이 packet도 external evidence를 생성하거나 blocker를 해제하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
+CI streak intake는 `github_actions_ci_streak_evidence.json`의 schema, freshness, threshold, workflow active state, PR `pull_request` source, lane별 threshold pass를 다시 검증한다. 따라서 local artifact나 manifest-only 수정은 release streak credit이 아니며, source evidence가 blocked이면 intake도 hard fail한다.
 `ci_consecutive_pass_manifest.json`과 `github_actions_ci_streak_evidence.json`도 support bundle에 함께 포함된다. intake packet은 owner handoff이고, source streak evidence가 없는 상태를 release pass로 바꾸지 않는다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
 `license_status_closure_report.json`과 `docs/templates/license_status.template.json`도 support bundle에 포함된다. closure report가 실제 승인 evidence이고, template은 입력 예시일 뿐 release evidence가 아니다.
