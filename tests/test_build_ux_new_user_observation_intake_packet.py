@@ -21,17 +21,35 @@ def _write_json(path: Path, payload: object) -> Path:
 
 def _template() -> dict[str, object]:
     return {
+        "contract_pass": False,
+        "participant_role": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user",
+        "new_to_product": "OWNER_INPUT_REQUIRED: true",
+        "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
+        "workflow_scope": "OWNER_INPUT_REQUIRED: open sample project and export reviewer report",
+        "observer": "OWNER_INPUT_REQUIRED: UX research owner",
+        "started_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T09:00:00+00:00",
+        "completed_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T09:24:00+00:00",
+        "completion_minutes": "OWNER_INPUT_REQUIRED: numeric minutes <= 30.0",
+        "blocker_count": "OWNER_INPUT_REQUIRED: 0",
+        "evidence_ref": "OWNER_INPUT_REQUIRED: evidence reference",
+        "approval_decision": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release",
+        "template_only": True,
+    }
+
+
+def _observation() -> dict[str, object]:
+    return {
         "contract_pass": True,
         "participant_role": "new_user",
         "new_to_product": True,
-        "sample_project_id": "SAMPLE-PROJECT-ID",
+        "sample_project_id": "sample_tower",
         "workflow_scope": "open sample project and export reviewer report",
-        "observer": "UX-RESEARCH-OWNER",
+        "observer": "ux-research-owner",
         "started_at_utc": "2026-06-16T09:00:00+00:00",
         "completed_at_utc": "2026-06-16T09:24:00+00:00",
         "completion_minutes": 24.0,
         "blocker_count": 0,
-        "evidence_ref": "UX-OBSERVATION-EVIDENCE-REF",
+        "evidence_ref": "ux-observation-001",
         "approval_decision": "accepted",
     }
 
@@ -83,7 +101,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED"
     assert payload["summary"]["field_pass_count"] == 0
     assert payload["summary"]["observation_blocker_count"] == 2
-    assert rows["participant_role"]["template_value"] == "new_user"
+    assert rows["participant_role"]["template_value"].startswith("OWNER_INPUT_REQUIRED")
     assert rows["completion_minutes"]["missing"] is True
     assert rows["completion_minutes"]["report_check_pass"] is False
     assert "observation_file_missing" in payload["current_blockers"]
@@ -91,7 +109,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
 
 
 def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> None:
-    observation = _write_json(tmp_path / "ux-observation.json", _template())
+    observation = _write_json(tmp_path / "ux-observation.json", _observation())
     template = _write_json(tmp_path / "ux-template.json", _template())
     report = _write_json(
         tmp_path / "ux-report.json",

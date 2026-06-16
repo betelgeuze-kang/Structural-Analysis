@@ -105,6 +105,7 @@ DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
 DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
 )
+DEFAULT_UX_NEW_USER_OBSERVATION_TEMPLATE = Path("docs/templates/ux_new_user_observation.template.json")
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -416,6 +417,7 @@ def build_support_bundle(
     release_limitation_manual: Path | None = DEFAULT_RELEASE_LIMITATION_MANUAL,
     ux_new_user_observation_report: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_REPORT,
     ux_new_user_observation_intake_packet: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
+    ux_new_user_observation_template: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_TEMPLATE,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -467,6 +469,7 @@ def build_support_bundle(
         ("release_limitation_manual", release_limitation_manual),
         ("ux_new_user_observation_report", ux_new_user_observation_report),
         ("ux_new_user_observation_intake_packet", ux_new_user_observation_intake_packet),
+        ("ux_new_user_observation_template", ux_new_user_observation_template),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -717,6 +720,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
     )
+    parser.add_argument(
+        "--ux-new-user-observation-template",
+        type=Path,
+        default=DEFAULT_UX_NEW_USER_OBSERVATION_TEMPLATE,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -774,6 +782,7 @@ def main(argv: list[str] | None = None) -> int:
         release_limitation_manual=args.release_limitation_manual,
         ux_new_user_observation_report=args.ux_new_user_observation_report,
         ux_new_user_observation_intake_packet=args.ux_new_user_observation_intake_packet,
+        ux_new_user_observation_template=args.ux_new_user_observation_template,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

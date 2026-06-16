@@ -16,6 +16,10 @@ DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 ACCEPTED_DECISIONS = {"accepted", "approved", "pass", "signed", "approved_for_release"}
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
+PLACEHOLDER_TOKENS = {
+    "SAMPLE-PROJECT-ID",
+    "UX-OBSERVATION-EVIDENCE-REF",
+}
 REQUIRED_FIELDS = (
     "contract_pass",
     "participant_role",
@@ -67,7 +71,7 @@ def _looks_placeholder(value: Any) -> bool:
     if not isinstance(value, str):
         return False
     upper = value.strip().upper()
-    return bool(not upper or any(marker in upper for marker in PLACEHOLDER_MARKERS))
+    return bool(not upper or upper in PLACEHOLDER_TOKENS or any(marker in upper for marker in PLACEHOLDER_MARKERS))
 
 
 def _as_float(value: Any) -> float | None:
@@ -97,12 +101,16 @@ def build_report(
     participant_role = str(observation.get("participant_role", "")).strip().lower()
     new_to_product = observation.get("new_to_product") is True
     blocker_count = _as_int(observation.get("blocker_count"), 1)
+    template_only = observation.get("template_only") is True
+    template_note_present = _looks_placeholder(observation.get("note"))
 
     checks = {
         "observation_file_present": observation_path.exists(),
         "contract_signal_pass": _reason_pass(observation),
         "required_fields_present": not missing_fields,
         "placeholder_values_absent": not placeholder_fields,
+        "template_only_absent": not template_only,
+        "template_note_absent": not template_note_present,
         "participant_role_new_user_pass": participant_role in {"new_user", "first_time_user", "pilot_user"},
         "new_to_product_pass": new_to_product,
         "completion_minutes_present": completion_minutes is not None,
@@ -115,6 +123,8 @@ def build_report(
         *(["contract_signal_not_pass"] if not checks["contract_signal_pass"] else []),
         *(["required_fields_missing"] if not checks["required_fields_present"] else []),
         *(["placeholder_values_present"] if not checks["placeholder_values_absent"] else []),
+        *(["template_only_observation_source"] if not checks["template_only_absent"] else []),
+        *(["template_note_observation_source"] if not checks["template_note_absent"] else []),
         *(["participant_not_new_user"] if not checks["participant_role_new_user_pass"] else []),
         *(["new_to_product_not_confirmed"] if not checks["new_to_product_pass"] else []),
         *(["completion_minutes_missing"] if not checks["completion_minutes_present"] else []),
@@ -145,6 +155,8 @@ def build_report(
             "approval_decision": decision,
             "missing_fields": missing_fields,
             "placeholder_fields": placeholder_fields,
+            "template_only": template_only,
+            "template_note_present": template_note_present,
             "owner_action": (
                 "Attach a human new-user observation record for the sample project workflow, including "
                 "participant status, observer, timestamps, completion minutes, blocker count, evidence "

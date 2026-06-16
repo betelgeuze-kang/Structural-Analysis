@@ -19,11 +19,13 @@
     "observation_file_present": false,
     "participant_role_new_user_pass": false,
     "placeholder_values_absent": true,
-    "required_fields_present": false
+    "required_fields_present": false,
+    "template_note_absent": true,
+    "template_only_absent": true
   },
   "claim_boundary": "This report validates a human new-user observation record. Automated browser rehearsal evidence does not satisfy the PM UX release-area gate by itself.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:32:33.208788+00:00",
+  "generated_at": "2026-06-16T20:46:15.992249+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
   "required_fields": [
@@ -63,7 +65,9 @@
     "new_to_product": false,
     "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
     "participant_role": "",
-    "placeholder_fields": []
+    "placeholder_fields": [],
+    "template_note_present": false,
+    "template_only": false
   },
   "summary_line": "UX new-user observation: BLOCKED | completion=missing/30.0 min | blockers=1",
   "validation_commands": [

@@ -1,8 +1,8 @@
 {
   "archive_roundtrip": {
-    "actual_artifact_count": 44,
-    "artifact_count": 44,
-    "member_count": 47,
+    "actual_artifact_count": 45,
+    "artifact_count": 45,
+    "member_count": 48,
     "missing_members": [],
     "pass": true,
     "reason": "PASS"
@@ -211,8 +211,8 @@
       "bytes": 31638,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "df18b856eb6fc51d331c5b8826ec78748ebe233521a8b3f735989950ced6624b",
-      "sha256": "df18b856eb6fc51d331c5b8826ec78748ebe233521a8b3f735989950ced6624b",
+      "redacted_sha256": "227d2031a2c148a6af0527c90c7536c808c5231489e9772a8018e46a2bde2940",
+      "sha256": "227d2031a2c148a6af0527c90c7536c808c5231489e9772a8018e46a2bde2940",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -220,8 +220,8 @@
       "bytes": 19383,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "e5f1e642dbba727bb603ccc9d7a6c3423bd8ec31c353a53298e33f0c246c7d50",
-      "sha256": "e5f1e642dbba727bb603ccc9d7a6c3423bd8ec31c353a53298e33f0c246c7d50",
+      "redacted_sha256": "a59f00badab1dbdb39d5101a55127ff7f098c9b116f6c2a5217e9e8be9cda8c9",
+      "sha256": "a59f00badab1dbdb39d5101a55127ff7f098c9b116f6c2a5217e9e8be9cda8c9",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
@@ -247,8 +247,8 @@
       "bytes": 29002,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "f81cd16a5a29672f9d6b48d44d8df62ffe645b8573369952c3a37cb1c71e167a",
-      "sha256": "f81cd16a5a29672f9d6b48d44d8df62ffe645b8573369952c3a37cb1c71e167a",
+      "redacted_sha256": "cd622f1e74a9a74f8d56d58493a6c0412511fbfae34c55ad0d1e1cee8938e072",
+      "sha256": "cd622f1e74a9a74f8d56d58493a6c0412511fbfae34c55ad0d1e1cee8938e072",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -388,21 +388,30 @@
     },
     {
       "available": true,
-      "bytes": 2942,
+      "bytes": 3074,
       "label": "ux_new_user_observation_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
-      "redacted_sha256": "f07dc7688a53f63c09a088e6c2be714b799a76f5c2411b6cd8ab2ed0cf47fdc2",
-      "sha256": "f07dc7688a53f63c09a088e6c2be714b799a76f5c2411b6cd8ab2ed0cf47fdc2",
+      "redacted_sha256": "be9a385305b5574c9115aa6735fd7f72b5f5193b76f0899143a5348a38444557",
+      "sha256": "be9a385305b5574c9115aa6735fd7f72b5f5193b76f0899143a5348a38444557",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
     },
     {
       "available": true,
-      "bytes": 7190,
+      "bytes": 7594,
       "label": "ux_new_user_observation_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
-      "redacted_sha256": "c873002c17258d9e8a1bb00988b886e0c552e240ae435a84fc27ff0318f99204",
-      "sha256": "c873002c17258d9e8a1bb00988b886e0c552e240ae435a84fc27ff0318f99204",
+      "redacted_sha256": "f140de497343602a4969725cdfea20547b578bddd79c8a8684b601f8da4c4a71",
+      "sha256": "f140de497343602a4969725cdfea20547b578bddd79c8a8684b601f8da4c4a71",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+    },
+    {
+      "available": true,
+      "bytes": 1069,
+      "label": "ux_new_user_observation_template",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_template.json",
+      "redacted_sha256": "c3f5c8bc25a2dbc4696f3ed5a233792991ffd916103fc030911d58859428083d",
+      "sha256": "c7fb4f31b9a519812df2d66f2d53b4bebbb9e2e8ec23e150740ab3907e681fdd",
+      "source_path": "docs/templates/ux_new_user_observation.template.json"
     }
   ],
   "audit_digest": {
@@ -410,16 +419,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T20:36:46.922690+00:00",
+    "generated_at": "2026-06-16T20:46:16.320410+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 44,
-    "available_artifact_count": 44,
+    "artifact_count": 45,
+    "available_artifact_count": 45,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "b54119957522fdfa47c732058ec11046f5d9a0c18711d7fba0dd2d2b87304cf6"
+    "sha256": "c3e4ab58868b9c2bf750f78b216301078519562dbd1a7c25b6668af57a91ee78"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -440,9 +449,9 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 100063,
+    "bytes": 100824,
     "error": "",
-    "member_count": 47,
+    "member_count": 48,
     "members": [
       "audit_digest.json",
       "license_status.json",
@@ -480,6 +489,7 @@
       "redacted/runtime_probe.json",
       "redacted/ux_new_user_observation_intake_packet.json",
       "redacted/ux_new_user_observation_report.json",
+      "redacted/ux_new_user_observation_template.json",
       "redacted/viewer_browser_performance_probe.json",
       "redacted/viewer_performance_budget_manifest.json",
       "redacted/viewer_visual_regression_baseline.json",
@@ -493,9 +503,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "1edc6a977259a7c2eff18305e13e1968682944779a12dde97fe00c238e8a6cdc"
+    "sha256": "3da4f533a403601517ac03c49a3a8bb210fb26cd46725fa5cc7e62e7eb49ed4f"
   },
-  "generated_at": "2026-06-16T20:36:46.934240+00:00",
+  "generated_at": "2026-06-16T20:46:16.332017+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -524,7 +534,8 @@
     "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
     "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
     "ux_new_user_observation_intake_packet": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
-    "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json"
+    "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
+    "ux_new_user_observation_template": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_template.json"
   },
   "reason_code": "PASS",
   "required_sections": {
@@ -552,5 +563,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=44/44 | redaction=True | roundtrip=True | archive=True"
+  "summary_line": "Support bundle: PASS | artifacts=45/45 | redaction=True | roundtrip=True | archive=True"
 }

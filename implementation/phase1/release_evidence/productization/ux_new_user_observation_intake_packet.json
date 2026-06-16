@@ -21,7 +21,7 @@
       "report_check": "contract_signal_pass",
       "report_check_pass": false,
       "required_value": "true",
-      "template_value": "true"
+      "template_value": "false"
     },
     {
       "current_value": "",
@@ -32,7 +32,7 @@
       "report_check": "participant_role_new_user_pass",
       "report_check_pass": false,
       "required_value": "new_user | first_time_user | pilot_user",
-      "template_value": "new_user"
+      "template_value": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user"
     },
     {
       "current_value": "",
@@ -43,7 +43,7 @@
       "report_check": "new_to_product_pass",
       "report_check_pass": false,
       "required_value": "true",
-      "template_value": "true"
+      "template_value": "OWNER_INPUT_REQUIRED: true"
     },
     {
       "current_value": "",
@@ -54,7 +54,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "sample project identifier used in the observed workflow",
-      "template_value": "SAMPLE-PROJECT-ID"
+      "template_value": "OWNER_INPUT_REQUIRED: sample project identifier"
     },
     {
       "current_value": "",
@@ -65,7 +65,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "observed workflow steps, including reviewer package/report export",
-      "template_value": "open sample project, inspect engine/reviewer evidence package, export reviewer report"
+      "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
     },
     {
       "current_value": "",
@@ -76,7 +76,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "human observer or UX research owner",
-      "template_value": "UX-RESEARCH-OWNER"
+      "template_value": "OWNER_INPUT_REQUIRED: UX research owner or human observer"
     },
     {
       "current_value": "",
@@ -87,7 +87,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "observation start timestamp",
-      "template_value": "2026-06-16T09:00:00+00:00"
+      "template_value": "OWNER_INPUT_REQUIRED: 2026-06-16T09:00:00+00:00"
     },
     {
       "current_value": "",
@@ -98,7 +98,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "observation completion timestamp",
-      "template_value": "2026-06-16T09:24:00+00:00"
+      "template_value": "OWNER_INPUT_REQUIRED: 2026-06-16T09:24:00+00:00"
     },
     {
       "current_value": "",
@@ -109,7 +109,7 @@
       "report_check": "completion_30min_pass",
       "report_check_pass": false,
       "required_value": "<= 30.0",
-      "template_value": "24.0"
+      "template_value": "OWNER_INPUT_REQUIRED: numeric minutes <= 30.0"
     },
     {
       "current_value": "",
@@ -120,7 +120,7 @@
       "report_check": "blocker_count_zero_pass",
       "report_check_pass": false,
       "required_value": "0",
-      "template_value": "0"
+      "template_value": "OWNER_INPUT_REQUIRED: 0"
     },
     {
       "current_value": "",
@@ -131,7 +131,7 @@
       "report_check": "required_fields_present",
       "report_check_pass": false,
       "required_value": "non-placeholder evidence reference",
-      "template_value": "UX-OBSERVATION-EVIDENCE-REF"
+      "template_value": "OWNER_INPUT_REQUIRED: observation note, ticket, recording, or signed evidence bundle"
     },
     {
       "current_value": "",
@@ -142,10 +142,10 @@
       "report_check": "approval_decision_pass",
       "report_check_pass": false,
       "required_value": "accepted | approved | pass | signed | approved_for_release",
-      "template_value": "accepted"
+      "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
     }
   ],
-  "generated_at": "2026-06-16T18:32:46.270807+00:00",
+  "generated_at": "2026-06-16T20:46:16.020841+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",

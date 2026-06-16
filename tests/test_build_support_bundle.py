@@ -301,6 +301,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "current_blockers": ["observation_file_missing"],
             },
         ),
+        "ux_new_user_observation_template": _write_json(
+            tmp_path / "ux-new-user-observation-template.json",
+            {
+                "contract_pass": False,
+                "template_only": True,
+                "sample_project_id": "OWNER_INPUT_REQUIRED",
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -349,6 +357,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/independent_vv_attestation_template.json" in members
         assert "redacted/family_validation_manual_signoff_template.json" in members
         assert "redacted/customer_audit_failure_bundle_sla_template.json" in members
+        assert "redacted/ux_new_user_observation_template.json" in members
         assert "license_status.template.json" not in members
     assert "project_ops_deployment_drill" in payload["required_sections"]
     assert "viewer_performance_budget_manifest" in payload["required_sections"]
@@ -384,6 +393,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "release_limitation_manual" in payload["optional_sections"]
     assert "ux_new_user_observation_report" in payload["optional_sections"]
     assert "ux_new_user_observation_intake_packet" in payload["optional_sections"]
+    assert "ux_new_user_observation_template" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -474,6 +484,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "ux-new-user-observation-intake-packet.v1" in redacted_ux_intake
+    redacted_ux_template = Path(payload["optional_sections"]["ux_new_user_observation_template"]).read_text(
+        encoding="utf-8"
+    )
+    assert "OWNER_INPUT_REQUIRED" in redacted_ux_template
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )
