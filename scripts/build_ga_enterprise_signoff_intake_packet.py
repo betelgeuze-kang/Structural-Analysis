@@ -14,8 +14,18 @@ SCHEMA_VERSION = "ga-enterprise-signoff-intake-packet.v1"
 DEFAULT_GA_READINESS = Path("implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_INDEPENDENT_VV_ATTESTATION = Path(
+    "implementation/phase1/release_evidence/productization/independent_vv_attestation.json"
+)
+DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF = Path(
+    "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json"
+)
+DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA = Path(
+    "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json"
+)
 ACCEPTED_SIGNOFF_DECISIONS = {"approved", "accepted", "pass", "signed", "approved_for_ga"}
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
+OWNER_ORDER = ("independent_vv_owner", "validation_manual_owner", "customer_success_ops_owner", "ga_release_owner")
 
 
 SIGNOFF_SPECS = {
@@ -34,6 +44,9 @@ SIGNOFF_SPECS = {
             "approval_decision",
         ],
         "owner_note": "Attach independent V&V scope, reviewer identity, case set, report reference, and signed decision.",
+        "default_evidence_path": DEFAULT_INDEPENDENT_VV_ATTESTATION,
+        "default_acceptance": "`independent_vv_attestation.contract_pass == true`",
+        "default_owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
     },
     "family_validation_manual_signoff_missing": {
         "signoff": "family_validation_manual_signoff",
@@ -49,6 +62,9 @@ SIGNOFF_SPECS = {
             "approval_decision",
         ],
         "owner_note": "Attach family-by-family validation manual signoff tied to the signed release registry.",
+        "default_evidence_path": DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF,
+        "default_acceptance": "`family_validation_manual_signoff.contract_pass == true`",
+        "default_owner_action": "Attach family-by-family validation manual signoff tied to the release registry.",
     },
     "customer_audit_failure_bundle_sla_missing": {
         "signoff": "customer_audit_failure_bundle_sla",
@@ -65,6 +81,9 @@ SIGNOFF_SPECS = {
             "approval_decision",
         ],
         "owner_note": "Attach customer/ops acceptance for audit export, failure bundle, support SLA, and rollback path.",
+        "default_evidence_path": DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA,
+        "default_acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
+        "default_owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
     },
 }
 
@@ -85,6 +104,27 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _dedupe(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.add(value)
+            deduped.append(value)
+    return deduped
+
+
+def _owner_sort_key(owner: str) -> tuple[int, str]:
+    try:
+        return (OWNER_ORDER.index(owner), owner)
+    except ValueError:
+        return (len(OWNER_ORDER), owner)
 
 
 def _reason_pass(payload: dict[str, Any]) -> bool:
@@ -148,15 +188,70 @@ def _verification_commands() -> list[str]:
     ]
 
 
+def _source_artifacts(readiness: dict[str, Any], ga_readiness_report: Path) -> dict[str, str]:
+    source_artifacts = {"ga_enterprise_readiness_report": str(ga_readiness_report)}
+    source_artifacts.update(
+        {
+            str(key): str(value)
+            for key, value in _as_dict(readiness.get("artifacts")).items()
+            if str(value)
+        }
+    )
+    return source_artifacts
+
+
+def _owner_row_by_blocker(owner_rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("blocker", "")): row
+        for row in owner_rows
+        if str(row.get("blocker", ""))
+    }
+
+
+def _evidence_path(owner_row: dict[str, Any], spec: dict[str, Any]) -> Path:
+    path = owner_row.get("evidence_path") or spec.get("default_evidence_path") or ""
+    return Path(str(path))
+
+
+def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    incomplete = [row["signoff"] for row in rows if not row["evidence_contract_pass"]]
+    source_artifacts: dict[str, str] = {}
+    for row in rows:
+        source_artifacts.update({str(key): str(value) for key, value in _as_dict(row.get("source_artifacts")).items()})
+    return {
+        "owner": owner,
+        "request_state": "ready_for_ga_readiness_regeneration" if not incomplete else "owner_input_required",
+        "signoff_count": len(rows),
+        "signoff_pass_count": len(rows) - len(incomplete),
+        "blockers": [row["blocker"] for row in rows],
+        "signoffs": [row["signoff"] for row in rows],
+        "evidence_paths": [row["evidence_path"] for row in rows],
+        "evidence_states": _dedupe([str(_as_dict(row.get("evidence_status")).get("state", "")) for row in rows]),
+        "source_artifacts": source_artifacts,
+        "acceptance_criteria": _dedupe([row["acceptance"] for row in rows]),
+        "required_fields": _dedupe([field for row in rows for field in _as_list(row.get("required_fields"))]),
+        "missing_fields": _dedupe([field for row in rows for field in _as_list(row.get("missing_fields"))]),
+        "placeholder_fields": _dedupe([field for row in rows for field in _as_list(row.get("placeholder_fields"))]),
+        "verification_commands": _dedupe(
+            [command for row in rows for command in _as_list(row.get("verification_commands"))]
+        ),
+        "external_input_required": any(row["external_input_required"] for row in rows),
+        "owner_input_required": any(row["owner_input_required"] for row in rows),
+        "incomplete_signoffs": incomplete,
+        "request_rows": rows,
+    }
+
+
 def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[str, Any]:
     readiness = _load_json(ga_readiness_report)
     blockers = [str(item) for item in _as_list(readiness.get("blockers"))]
     owner_rows = [row for row in _as_list(readiness.get("owner_handoff_rows")) if isinstance(row, dict)]
+    owner_rows_by_blocker = _owner_row_by_blocker(owner_rows)
+    source_artifacts = _source_artifacts(readiness, ga_readiness_report)
     rows: list[dict[str, Any]] = []
-    for owner_row in owner_rows:
-        blocker = str(owner_row.get("blocker", ""))
-        spec = SIGNOFF_SPECS.get(blocker, {})
-        evidence_path = Path(str(owner_row.get("evidence_path", "")))
+    for blocker, spec in SIGNOFF_SPECS.items():
+        owner_row = owner_rows_by_blocker.get(blocker, {})
+        evidence_path = _evidence_path(owner_row, spec)
         evidence = _load_json(evidence_path)
         required_fields = [str(field) for field in spec.get("required_fields", [])]
         field_status = _evidence_field_status(evidence, required_fields)
@@ -172,7 +267,8 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
             evidence_contract_pass=evidence_contract_pass,
             field_status=field_status,
         )
-        owner_action = str(owner_row.get("owner_action", ""))
+        owner_action = str(owner_row.get("owner_action", "") or spec.get("default_owner_action", ""))
+        acceptance = str(owner_row.get("acceptance", "") or spec.get("default_acceptance", ""))
         rows.append(
             {
                 "blocker": blocker,
@@ -199,13 +295,23 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
                 "owner_action": owner_action,
                 "next_action": owner_action,
                 "owner_note": str(spec.get("owner_note", "")),
-                "acceptance": str(owner_row.get("acceptance", "")),
+                "acceptance": acceptance,
+                "source_artifacts": source_artifacts,
                 "verification_commands": _verification_commands(),
             }
         )
 
     current_open = [row["blocker"] for row in rows if not row["evidence_contract_pass"]]
-    contract_pass = bool(_reason_pass(readiness) and not current_open)
+    grouped: dict[str, list[dict[str, Any]]] = {}
+    for row in rows:
+        grouped.setdefault(row["owner"], []).append(row)
+    owner_packets = [
+        _owner_packet(owner, grouped[owner])
+        for owner in sorted(grouped, key=_owner_sort_key)
+    ]
+    current_blockers = _dedupe([*current_open, *blockers])
+    readiness_pass = bool(_reason_pass(readiness) and not blockers)
+    contract_pass = bool(readiness_pass and not current_open)
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -215,21 +321,26 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
         "summary_line": (
             f"GA enterprise signoff intake: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"signoffs={len(rows) - len(current_open)}/{len(rows)} | "
-            f"readiness_pass={_reason_pass(readiness)}"
+            f"readiness_pass={readiness_pass}"
         ),
         "summary": {
             "signoff_count": len(rows),
             "signoff_pass_count": len(rows) - len(current_open),
             "open_signoff_count": len(current_open),
+            "owner_packet_count": len(owner_packets),
+            "incomplete_owner_packet_count": sum(1 for packet in owner_packets if packet["incomplete_signoffs"]),
             "readiness_blocker_count": len(blockers),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
+            "source_artifact_count": len(source_artifacts),
             "owner_action": (
                 "Populate the referenced GA/Enterprise signoff evidence files from independent V&V, "
                 "family validation manual signoff, and customer audit/failure-bundle/SLA approval records."
             ),
         },
+        "source_artifacts": source_artifacts,
+        "owner_packets": owner_packets,
         "signoff_rows": rows,
-        "current_blockers": current_open,
+        "current_blockers": current_blockers,
         "validation_commands": _verification_commands(),
         "claim_boundary": (
             "This packet is an owner handoff checklist. It does not create independent V&V, customer "
@@ -245,9 +356,27 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         "",
+        "## Owner Packets",
+        "",
+        "| Owner | State | Signoffs | Evidence | Acceptance |",
+        "|---|---|---|---|---|",
+    ]
+    for packet in payload["owner_packets"]:
+        signoffs = "<br>".join(f"`{item}`" for item in packet["signoffs"])
+        evidence = "<br>".join(f"`{item}`" for item in packet["evidence_paths"])
+        acceptance = "<br>".join(str(item) for item in packet["acceptance_criteria"])
+        lines.append(
+            f"| `{packet['owner']}` | `{packet['request_state']}` | {signoffs} | {evidence} | {acceptance} |"
+        )
+    lines.extend(
+        [
+            "",
+            "## Signoff Rows",
+            "",
         "| Signoff | Owner | Evidence Status | Evidence | Pass | Next Action | Required Fields |",
         "|---|---|---|---|---|---|---|",
-    ]
+        ]
+    )
     for row in payload["signoff_rows"]:
         evidence_status = row.get("evidence_status", {})
         status = evidence_status.get("state", "open") if isinstance(evidence_status, dict) else "open"

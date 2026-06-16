@@ -325,11 +325,11 @@
     },
     {
       "available": true,
-      "bytes": 8984,
+      "bytes": 32395,
       "label": "ga_enterprise_signoff_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
-      "redacted_sha256": "0ba6c72c9a2165041c1cd5be413b7acb2148aae3361cee60ea3b929924f54020",
-      "sha256": "0ba6c72c9a2165041c1cd5be413b7acb2148aae3361cee60ea3b929924f54020",
+      "redacted_sha256": "f4b41b06b17b5677e1923bb0831951a97cd24167fdac822316bc6085ec039817",
+      "sha256": "f4b41b06b17b5677e1923bb0831951a97cd24167fdac822316bc6085ec039817",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
     },
     {
@@ -383,7 +383,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T20:14:12.027530+00:00",
+    "generated_at": "2026-06-16T20:26:31.413658+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -392,7 +392,7 @@
     "artifact_count": 41,
     "available_artifact_count": 41,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "189e0cc76057f3d7e2a73af0146d99fc27712eabd346f90870f99b6c3bd75e6f"
+    "sha256": "c8d66706c294567b4a4c246db2230bf8edc93a1bcd6e38e5f2992be0d44ba969"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -413,7 +413,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 97176,
+    "bytes": 98044,
     "error": "",
     "member_count": 44,
     "members": [
@@ -463,9 +463,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "429afc827aa6f73066c71cb4c19a3ccf40b06cfa63434f32c7bcb4ae9a1766c4"
+    "sha256": "cee5a9206ded6512323a2441cb937aaf7230f9f8d9d81a39091e011c384e6c10"
   },
-  "generated_at": "2026-06-16T20:14:12.038543+00:00",
+  "generated_at": "2026-06-16T20:26:31.424980+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",

@@ -3,6 +3,16 @@
 - `summary_line`: `GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False`
 - `contract_pass`: `False`
 
+## Owner Packets
+
+| Owner | State | Signoffs | Evidence | Acceptance |
+|---|---|---|---|---|
+| `independent_vv_owner` | `owner_input_required` | `independent_vv_attestation` | `implementation/phase1/release_evidence/productization/independent_vv_attestation.json` | `independent_vv_attestation.contract_pass == true` |
+| `validation_manual_owner` | `owner_input_required` | `family_validation_manual_signoff` | `implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json` | `family_validation_manual_signoff.contract_pass == true` |
+| `customer_success_ops_owner` | `owner_input_required` | `customer_audit_failure_bundle_sla` | `implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json` | `customer_audit_failure_bundle_sla.contract_pass == true` |
+
+## Signoff Rows
+
 | Signoff | Owner | Evidence Status | Evidence | Pass | Next Action | Required Fields |
 |---|---|---|---|---|---|---|
 | `independent_vv_attestation` | `independent_vv_owner` | `missing_external_signoff_evidence` | `implementation/phase1/release_evidence/productization/independent_vv_attestation.json` | `False` | Attach third-party or independent V&V attestation with scope, case set, date, and approver. | `contract_pass`, `attestation_scope`, `independent_reviewer`, `independence_basis`, `case_set_reference`, `report_reference`, `signed_at_utc`, `approval_decision` |

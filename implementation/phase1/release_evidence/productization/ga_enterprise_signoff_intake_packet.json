@@ -7,7 +7,377 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T18:09:49.955809+00:00",
+  "generated_at": "2026-06-16T20:26:26.101603+00:00",
+  "owner_packets": [
+    {
+      "acceptance_criteria": [
+        "`independent_vv_attestation.contract_pass == true`"
+      ],
+      "blockers": [
+        "independent_vv_missing"
+      ],
+      "evidence_paths": [
+        "implementation/phase1/release_evidence/productization/independent_vv_attestation.json"
+      ],
+      "evidence_states": [
+        "missing_external_signoff_evidence"
+      ],
+      "external_input_required": true,
+      "incomplete_signoffs": [
+        "independent_vv_attestation"
+      ],
+      "missing_fields": [
+        "contract_pass",
+        "attestation_scope",
+        "independent_reviewer",
+        "independence_basis",
+        "case_set_reference",
+        "report_reference",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "owner": "independent_vv_owner",
+      "owner_input_required": true,
+      "placeholder_fields": [],
+      "request_rows": [
+        {
+          "acceptance": "`independent_vv_attestation.contract_pass == true`",
+          "approval_decision": "",
+          "approval_decision_pass": false,
+          "blocker": "independent_vv_missing",
+          "evidence_contract_pass": false,
+          "evidence_path": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+          "evidence_present": false,
+          "evidence_status": {
+            "approval_decision": "",
+            "approval_decision_pass": false,
+            "missing_field_count": 8,
+            "placeholder_field_count": 0,
+            "state": "missing_external_signoff_evidence"
+          },
+          "external_input_required": true,
+          "missing_fields": [
+            "contract_pass",
+            "attestation_scope",
+            "independent_reviewer",
+            "independence_basis",
+            "case_set_reference",
+            "report_reference",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "next_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
+          "owner": "independent_vv_owner",
+          "owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
+          "owner_input_required": true,
+          "owner_note": "Attach independent V&V scope, reviewer identity, case set, report reference, and signed decision.",
+          "placeholder_fields": [],
+          "required_fields": [
+            "contract_pass",
+            "attestation_scope",
+            "independent_reviewer",
+            "independence_basis",
+            "case_set_reference",
+            "report_reference",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "resolution_type": "external_independent_vv_attestation_required",
+          "signoff": "independent_vv_attestation",
+          "source_artifacts": {
+            "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+            "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+            "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+            "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+            "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+            "release_registry": "implementation/phase1/release/release_registry.json",
+            "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+            "validation_manual": "docs/release-validation-manual.md"
+          },
+          "verification_commands": [
+            "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+            "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+            "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          ]
+        }
+      ],
+      "request_state": "owner_input_required",
+      "required_fields": [
+        "contract_pass",
+        "attestation_scope",
+        "independent_reviewer",
+        "independence_basis",
+        "case_set_reference",
+        "report_reference",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "signoff_count": 1,
+      "signoff_pass_count": 0,
+      "signoffs": [
+        "independent_vv_attestation"
+      ],
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`family_validation_manual_signoff.contract_pass == true`"
+      ],
+      "blockers": [
+        "family_validation_manual_signoff_missing"
+      ],
+      "evidence_paths": [
+        "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json"
+      ],
+      "evidence_states": [
+        "missing_external_signoff_evidence"
+      ],
+      "external_input_required": true,
+      "incomplete_signoffs": [
+        "family_validation_manual_signoff"
+      ],
+      "missing_fields": [
+        "contract_pass",
+        "release_registry_ref",
+        "validation_manual_ref",
+        "family_rows",
+        "signoff_owner",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "owner": "validation_manual_owner",
+      "owner_input_required": true,
+      "placeholder_fields": [],
+      "request_rows": [
+        {
+          "acceptance": "`family_validation_manual_signoff.contract_pass == true`",
+          "approval_decision": "",
+          "approval_decision_pass": false,
+          "blocker": "family_validation_manual_signoff_missing",
+          "evidence_contract_pass": false,
+          "evidence_path": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+          "evidence_present": false,
+          "evidence_status": {
+            "approval_decision": "",
+            "approval_decision_pass": false,
+            "missing_field_count": 7,
+            "placeholder_field_count": 0,
+            "state": "missing_external_signoff_evidence"
+          },
+          "external_input_required": true,
+          "missing_fields": [
+            "contract_pass",
+            "release_registry_ref",
+            "validation_manual_ref",
+            "family_rows",
+            "signoff_owner",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "next_action": "Attach family-by-family validation manual signoff tied to the release registry.",
+          "owner": "validation_manual_owner",
+          "owner_action": "Attach family-by-family validation manual signoff tied to the release registry.",
+          "owner_input_required": true,
+          "owner_note": "Attach family-by-family validation manual signoff tied to the signed release registry.",
+          "placeholder_fields": [],
+          "required_fields": [
+            "contract_pass",
+            "release_registry_ref",
+            "validation_manual_ref",
+            "family_rows",
+            "signoff_owner",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "resolution_type": "external_family_validation_manual_signoff_required",
+          "signoff": "family_validation_manual_signoff",
+          "source_artifacts": {
+            "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+            "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+            "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+            "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+            "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+            "release_registry": "implementation/phase1/release/release_registry.json",
+            "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+            "validation_manual": "docs/release-validation-manual.md"
+          },
+          "verification_commands": [
+            "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+            "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+            "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          ]
+        }
+      ],
+      "request_state": "owner_input_required",
+      "required_fields": [
+        "contract_pass",
+        "release_registry_ref",
+        "validation_manual_ref",
+        "family_rows",
+        "signoff_owner",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "signoff_count": 1,
+      "signoff_pass_count": 0,
+      "signoffs": [
+        "family_validation_manual_signoff"
+      ],
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`customer_audit_failure_bundle_sla.contract_pass == true`"
+      ],
+      "blockers": [
+        "customer_audit_failure_bundle_sla_missing"
+      ],
+      "evidence_paths": [
+        "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json"
+      ],
+      "evidence_states": [
+        "missing_external_signoff_evidence"
+      ],
+      "external_input_required": true,
+      "incomplete_signoffs": [
+        "customer_audit_failure_bundle_sla"
+      ],
+      "missing_fields": [
+        "contract_pass",
+        "customer_or_ops_approver",
+        "audit_export_acceptance_ref",
+        "failure_bundle_export_ref",
+        "support_sla_ref",
+        "rollback_policy_ref",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "owner": "customer_success_ops_owner",
+      "owner_input_required": true,
+      "placeholder_fields": [],
+      "request_rows": [
+        {
+          "acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
+          "approval_decision": "",
+          "approval_decision_pass": false,
+          "blocker": "customer_audit_failure_bundle_sla_missing",
+          "evidence_contract_pass": false,
+          "evidence_path": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+          "evidence_present": false,
+          "evidence_status": {
+            "approval_decision": "",
+            "approval_decision_pass": false,
+            "missing_field_count": 8,
+            "placeholder_field_count": 0,
+            "state": "missing_external_signoff_evidence"
+          },
+          "external_input_required": true,
+          "missing_fields": [
+            "contract_pass",
+            "customer_or_ops_approver",
+            "audit_export_acceptance_ref",
+            "failure_bundle_export_ref",
+            "support_sla_ref",
+            "rollback_policy_ref",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "next_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
+          "owner": "customer_success_ops_owner",
+          "owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
+          "owner_input_required": true,
+          "owner_note": "Attach customer/ops acceptance for audit export, failure bundle, support SLA, and rollback path.",
+          "placeholder_fields": [],
+          "required_fields": [
+            "contract_pass",
+            "customer_or_ops_approver",
+            "audit_export_acceptance_ref",
+            "failure_bundle_export_ref",
+            "support_sla_ref",
+            "rollback_policy_ref",
+            "signed_at_utc",
+            "approval_decision"
+          ],
+          "resolution_type": "external_customer_audit_failure_bundle_sla_required",
+          "signoff": "customer_audit_failure_bundle_sla",
+          "source_artifacts": {
+            "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+            "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+            "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+            "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+            "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+            "release_registry": "implementation/phase1/release/release_registry.json",
+            "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+            "validation_manual": "docs/release-validation-manual.md"
+          },
+          "verification_commands": [
+            "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+            "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+            "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          ]
+        }
+      ],
+      "request_state": "owner_input_required",
+      "required_fields": [
+        "contract_pass",
+        "customer_or_ops_approver",
+        "audit_export_acceptance_ref",
+        "failure_bundle_export_ref",
+        "support_sla_ref",
+        "rollback_policy_ref",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "signoff_count": 1,
+      "signoff_pass_count": 0,
+      "signoffs": [
+        "customer_audit_failure_bundle_sla"
+      ],
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    }
+  ],
   "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
   "schema_version": "ga-enterprise-signoff-intake-packet.v1",
   "signoff_rows": [
@@ -55,6 +425,16 @@
       ],
       "resolution_type": "external_independent_vv_attestation_required",
       "signoff": "independent_vv_attestation",
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -103,6 +483,16 @@
       ],
       "resolution_type": "external_family_validation_manual_signoff_required",
       "signoff": "family_validation_manual_signoff",
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -153,6 +543,16 @@
       ],
       "resolution_type": "external_customer_audit_failure_bundle_sla_required",
       "signoff": "customer_audit_failure_bundle_sla",
+      "source_artifacts": {
+        "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+        "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/release-validation-manual.md"
+      },
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -160,13 +560,26 @@
       ]
     }
   ],
+  "source_artifacts": {
+    "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+    "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+    "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+    "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+    "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+    "release_registry": "implementation/phase1/release/release_registry.json",
+    "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+    "validation_manual": "docs/release-validation-manual.md"
+  },
   "summary": {
     "external_input_required_count": 3,
+    "incomplete_owner_packet_count": 3,
     "open_signoff_count": 3,
     "owner_action": "Populate the referenced GA/Enterprise signoff evidence files from independent V&V, family validation manual signoff, and customer audit/failure-bundle/SLA approval records.",
+    "owner_packet_count": 3,
     "readiness_blocker_count": 3,
     "signoff_count": 3,
-    "signoff_pass_count": 0
+    "signoff_pass_count": 0,
+    "source_artifact_count": 8
   },
   "summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
   "validation_commands": [
