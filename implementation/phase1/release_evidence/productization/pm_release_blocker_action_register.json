@@ -1,11 +1,11 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T21:12:27.483349+00:00",
+  "generated_at": "2026-06-16T21:27:14.299502+00:00",
   "next_actions": [
     "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
     "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
-    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
-    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
@@ -213,7 +213,7 @@
       "evidence_snapshot": {
         "automated_sample_completion_minutes": 0.2701333333333333,
         "blocking_review_item_count": 0,
-        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
         "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "human_sample_completion_minutes": null,
         "sample_completion_minutes": null,
@@ -248,9 +248,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "ux",
-      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
-      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -289,7 +289,7 @@
       "evidence_snapshot": {
         "automated_sample_completion_minutes": 0.2701333333333333,
         "blocking_review_item_count": 0,
-        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
         "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "human_sample_completion_minutes": null,
         "sample_completion_minutes": null,
@@ -324,9 +324,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "ux",
-      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner": "ux_research_owner",
-      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

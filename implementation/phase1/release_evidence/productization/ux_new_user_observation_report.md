@@ -1,8 +1,16 @@
 # UX New-User Observation Report
 
-- `summary_line`: `UX new-user observation: BLOCKED | completion=missing/30.0 min | blockers=1`
+- `summary_line`: `UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | blockers=8`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
+
+## Timing Checks
+
+- `declared_completion_minutes`: `None`
+- `elapsed_minutes`: `None`
+- `max_completion_minutes`: `30.0`
+- `timestamp_tolerance_minutes`: `1.0`
+- `completion_minutes_elapsed_match_pass`: `False`
 
 ## Required Fields
 

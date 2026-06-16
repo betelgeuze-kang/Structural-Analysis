@@ -82,34 +82,34 @@
       "current_value": "",
       "field": "started_at_utc",
       "missing": true,
-      "owner_note": "Use ISO-8601 with timezone.",
+      "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
       "placeholder": false,
-      "report_check": "required_fields_present",
+      "report_check": "started_at_utc_valid",
       "report_check_pass": false,
-      "required_value": "observation start timestamp",
-      "template_value": "OWNER_INPUT_REQUIRED: 2026-06-16T09:00:00+00:00"
+      "required_value": "timezone-aware ISO-8601 observation start timestamp",
+      "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z"
     },
     {
       "current_value": "",
       "field": "completed_at_utc",
       "missing": true,
-      "owner_note": "Use ISO-8601 with timezone.",
+      "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
       "placeholder": false,
-      "report_check": "required_fields_present",
+      "report_check": "completed_at_utc_valid",
       "report_check_pass": false,
-      "required_value": "observation completion timestamp",
-      "template_value": "OWNER_INPUT_REQUIRED: 2026-06-16T09:24:00+00:00"
+      "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+      "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z"
     },
     {
       "current_value": "",
       "field": "completion_minutes",
       "missing": true,
-      "owner_note": "Completion time must prove the PM 30-minute UX gate.",
+      "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
       "placeholder": false,
       "report_check": "completion_30min_pass",
       "report_check_pass": false,
-      "required_value": "<= 30.0",
-      "template_value": "OWNER_INPUT_REQUIRED: numeric minutes <= 30.0"
+      "required_value": "<= 30.0 and matches timestamp elapsed minutes",
+      "template_value": "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
     },
     {
       "current_value": "",
@@ -143,23 +143,59 @@
       "report_check_pass": false,
       "required_value": "accepted | approved | pass | signed | approved_for_release",
       "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
+    },
+    {
+      "current_value": "",
+      "field": "timestamp_order",
+      "missing": false,
+      "owner_note": "Completion timestamp must not precede the observed start timestamp.",
+      "placeholder": false,
+      "report_check": "timestamp_order_pass",
+      "report_check_pass": false,
+      "required_value": "completed_at_utc >= started_at_utc",
+      "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "",
+      "field": "elapsed_minutes",
+      "missing": false,
+      "owner_note": "The PM 30-minute gate is enforced from parsed wall-clock timestamps.",
+      "placeholder": false,
+      "report_check": "elapsed_30min_pass",
+      "report_check_pass": false,
+      "required_value": "<= 30.0 from completed_at_utc - started_at_utc",
+      "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "declared=None; elapsed=None; tolerance=1.0",
+      "field": "completion_minutes_elapsed_match",
+      "missing": false,
+      "owner_note": "Declared completion_minutes must match computed elapsed minutes within the report tolerance.",
+      "placeholder": false,
+      "report_check": "completion_minutes_elapsed_match_pass",
+      "report_check_pass": false,
+      "required_value": "completion_minutes equals elapsed_minutes within tolerance",
+      "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-06-16T20:46:16.020841+00:00",
+  "generated_at": "2026-06-16T21:27:08.161963+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
   "schema_version": "ux-new-user-observation-intake-packet.v1",
   "summary": {
     "completion_minutes": null,
-    "field_count": 12,
+    "declared_completion_minutes": null,
+    "elapsed_minutes": null,
+    "field_count": 15,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
     "observation_blocker_count": 8,
     "observation_contract_pass": false,
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision."
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "timestamp_tolerance_minutes": 1.0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/12 | blockers=8",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

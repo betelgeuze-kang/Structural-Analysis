@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This packet groups open PM blocker evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, or any other external release evidence, and it does not convert missing evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T21:12:27.600575+00:00",
+  "generated_at": "2026-06-16T21:27:24.704905+00:00",
   "incomplete_blockers": [],
   "owner_packets": [
     {
@@ -154,7 +154,7 @@
       "external_input_required": true,
       "incomplete_blockers": [],
       "next_actions": [
-        "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision."
+        "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision."
       ],
       "owner": "ux_research_owner",
       "owner_input_required": true,
@@ -188,7 +188,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
@@ -227,7 +227,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

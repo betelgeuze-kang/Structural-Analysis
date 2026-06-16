@@ -27,9 +27,11 @@ def _template() -> dict[str, object]:
         "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
         "workflow_scope": "OWNER_INPUT_REQUIRED: open sample project and export reviewer report",
         "observer": "OWNER_INPUT_REQUIRED: UX research owner",
-        "started_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T09:00:00+00:00",
-        "completed_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T09:24:00+00:00",
-        "completion_minutes": "OWNER_INPUT_REQUIRED: numeric minutes <= 30.0",
+        "started_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z",
+        "completed_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z",
+        "completion_minutes": (
+            "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
+        ),
         "blocker_count": "OWNER_INPUT_REQUIRED: 0",
         "evidence_ref": "OWNER_INPUT_REQUIRED: evidence reference",
         "approval_decision": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release",
@@ -66,6 +68,11 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
                 "participant_role_new_user_pass": False,
                 "new_to_product_pass": False,
                 "completion_30min_pass": False,
+                "started_at_utc_valid": False,
+                "completed_at_utc_valid": False,
+                "timestamp_order_pass": False,
+                "elapsed_30min_pass": False,
+                "completion_minutes_elapsed_match_pass": False,
                 "blocker_count_zero_pass": False,
                 "approval_decision_pass": False,
             },
@@ -104,6 +111,8 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert rows["participant_role"]["template_value"].startswith("OWNER_INPUT_REQUIRED")
     assert rows["completion_minutes"]["missing"] is True
     assert rows["completion_minutes"]["report_check_pass"] is False
+    assert rows["elapsed_minutes"]["report_check"] == "elapsed_30min_pass"
+    assert rows["completion_minutes_elapsed_match"]["report_check_pass"] is False
     assert "observation_file_missing" in payload["current_blockers"]
     assert any("build_ux_new_user_observation_report.py" in command for command in payload["validation_commands"])
 
@@ -122,6 +131,11 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
                 "new_to_product_pass": True,
                 "required_fields_present": True,
                 "completion_30min_pass": True,
+                "started_at_utc_valid": True,
+                "completed_at_utc_valid": True,
+                "timestamp_order_pass": True,
+                "elapsed_30min_pass": True,
+                "completion_minutes_elapsed_match_pass": True,
                 "blocker_count_zero_pass": True,
                 "approval_decision_pass": True,
             },
@@ -129,6 +143,11 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
                 "missing_fields": [],
                 "placeholder_fields": [],
                 "completion_minutes": 24.0,
+                "declared_completion_minutes": 24.0,
+                "elapsed_minutes": 24.0,
+                "started_at_utc": "2026-06-16T09:00:00+00:00",
+                "completed_at_utc": "2026-06-16T09:24:00+00:00",
+                "timestamp_tolerance_minutes": 1.0,
             },
         },
     )
@@ -141,7 +160,8 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 12
+    assert payload["summary"]["field_pass_count"] == 15
+    assert payload["summary"]["elapsed_minutes"] == 24.0
     assert payload["current_blockers"] == []
 
 

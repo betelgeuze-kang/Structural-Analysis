@@ -70,7 +70,102 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["checks"]["completion_30min_pass"] is True
+    assert payload["checks"]["elapsed_30min_pass"] is True
+    assert payload["checks"]["completion_minutes_elapsed_match_pass"] is True
     assert payload["summary"]["completion_minutes"] == 24.0
+    assert payload["summary"]["elapsed_minutes"] == 24.0
+    assert payload["summary"]["timestamp_tolerance_minutes"] == 1.0
+
+
+def test_ux_new_user_observation_accepts_z_suffix_timestamps(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["started_at_utc"] = "2026-06-16T09:00:00Z"
+    record["completed_at_utc"] = "2026-06-16T09:24:00Z"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["elapsed_minutes"] == 24.0
+    assert payload["summary"]["started_at_utc"] == "2026-06-16T09:00:00+00:00"
+
+
+def test_ux_new_user_observation_accepts_offset_timestamps(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["started_at_utc"] = "2026-06-16T18:00:00+09:00"
+    record["completed_at_utc"] = "2026-06-16T18:24:00+09:00"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["elapsed_minutes"] == 24.0
+    assert payload["summary"]["started_at_utc"] == "2026-06-16T09:00:00+00:00"
+
+
+def test_ux_new_user_observation_rejects_naive_timestamps(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["started_at_utc"] = "2026-06-16T09:00:00"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "started_at_utc_invalid" in payload["blockers"]
+    assert "elapsed_minutes_missing" in payload["blockers"]
+    assert payload["checks"]["started_at_utc_valid"] is False
+
+
+def test_ux_new_user_observation_rejects_reversed_timestamps(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["completed_at_utc"] = "2026-06-16T08:59:00+00:00"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "completion_timestamp_order_invalid" in payload["blockers"]
+    assert "elapsed_minutes_missing" in payload["blockers"]
+    assert payload["checks"]["timestamp_order_pass"] is False
+
+
+def test_ux_new_user_observation_rejects_elapsed_over_30_with_declared_pass(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["completed_at_utc"] = "2026-06-16T09:31:00+00:00"
+    record["completion_minutes"] = 29.0
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "completion_gt_30min" not in payload["blockers"]
+    assert "elapsed_gt_30min" in payload["blockers"]
+    assert "completion_minutes_elapsed_mismatch" in payload["blockers"]
+
+
+def test_ux_new_user_observation_rejects_declared_elapsed_mismatch(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["completion_minutes"] = 20.0
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "completion_minutes_elapsed_mismatch" in payload["blockers"]
+    assert payload["checks"]["completion_minutes_elapsed_match_pass"] is False
+
+
+def test_ux_new_user_observation_rejects_declared_over_30_with_elapsed_pass(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["completion_minutes"] = 31.0
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "completion_gt_30min" in payload["blockers"]
+    assert "elapsed_gt_30min" not in payload["blockers"]
+    assert "completion_minutes_elapsed_mismatch" in payload["blockers"]
 
 
 def test_ux_new_user_observation_rejects_template_copy(tmp_path: Path) -> None:

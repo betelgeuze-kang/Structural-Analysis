@@ -2,7 +2,7 @@
   "blockers": [],
   "claim_boundary": "This audit proves docs/templates JSON files are handoff-only templates and are rejected by release-evidence validators. It does not create owner evidence or replace external signoff.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T20:58:58.438906+00:00",
+  "generated_at": "2026-06-16T21:27:14.125462+00:00",
   "mode": "template_safety_audit",
   "reason_code": "PASS",
   "schema_version": "template-evidence-safety-report.v1",
@@ -117,6 +117,9 @@
         "participant_not_new_user",
         "new_to_product_not_confirmed",
         "completion_minutes_missing",
+        "started_at_utc_invalid",
+        "completed_at_utc_invalid",
+        "elapsed_minutes_missing",
         "blocking_usability_issue_present",
         "approval_decision_not_accepted"
       ],

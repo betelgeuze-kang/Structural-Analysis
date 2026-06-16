@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T21:12:40.279319+00:00",
+  "generated_at": "2026-06-16T21:27:35.345217+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -216,7 +216,7 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "4872079a38b56ed900a37f6cfba41848e26c7b0edde6cb345164f42de13d1b3f",
+        "support_bundle_export_archive_sha256": "00a99688a6c06d38bb58b26e3c1f828e4b241c3b3c4562a32812e2e07af8faa2",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -577,7 +577,7 @@
       "summary": {
         "automated_sample_completion_minutes": 0.2701333333333333,
         "blocking_review_item_count": 0,
-        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
         "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "human_sample_completion_minutes": null,
         "sample_completion_minutes": null,
@@ -639,7 +639,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "4872079a38b56ed900a37f6cfba41848e26c7b0edde6cb345164f42de13d1b3f",
+        "one_click_failure_bundle_archive_sha256": "00a99688a6c06d38bb58b26e3c1f828e4b241c3b3c4562a32812e2e07af8faa2",
         "pm_blocker_closure_board_external_owner_input_ready_count": 5,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 5,

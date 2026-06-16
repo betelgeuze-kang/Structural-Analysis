@@ -58,21 +58,21 @@ FIELD_SPECS = (
     },
     {
         "field": "started_at_utc",
-        "required_value": "observation start timestamp",
-        "check": "required_fields_present",
-        "owner_note": "Use ISO-8601 with timezone.",
+        "required_value": "timezone-aware ISO-8601 observation start timestamp",
+        "check": "started_at_utc_valid",
+        "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
     },
     {
         "field": "completed_at_utc",
-        "required_value": "observation completion timestamp",
-        "check": "required_fields_present",
-        "owner_note": "Use ISO-8601 with timezone.",
+        "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+        "check": "completed_at_utc_valid",
+        "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
     },
     {
         "field": "completion_minutes",
-        "required_value": "<= 30.0",
+        "required_value": "<= 30.0 and matches timestamp elapsed minutes",
         "check": "completion_30min_pass",
-        "owner_note": "Completion time must prove the PM 30-minute UX gate.",
+        "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
     },
     {
         "field": "blocker_count",
@@ -91,6 +91,26 @@ FIELD_SPECS = (
         "required_value": "accepted | approved | pass | signed | approved_for_release",
         "check": "approval_decision_pass",
         "owner_note": "Decision must explicitly accept the observation for release evidence.",
+    },
+)
+DERIVED_CHECK_SPECS = (
+    {
+        "field": "timestamp_order",
+        "required_value": "completed_at_utc >= started_at_utc",
+        "check": "timestamp_order_pass",
+        "owner_note": "Completion timestamp must not precede the observed start timestamp.",
+    },
+    {
+        "field": "elapsed_minutes",
+        "required_value": "<= 30.0 from completed_at_utc - started_at_utc",
+        "check": "elapsed_30min_pass",
+        "owner_note": "The PM 30-minute gate is enforced from parsed wall-clock timestamps.",
+    },
+    {
+        "field": "completion_minutes_elapsed_match",
+        "required_value": "completion_minutes equals elapsed_minutes within tolerance",
+        "check": "completion_minutes_elapsed_match_pass",
+        "owner_note": "Declared completion_minutes must match computed elapsed minutes within the report tolerance.",
     },
 )
 
@@ -132,7 +152,7 @@ def _field_status(*, field: str, check_name: str, observation_report: dict[str, 
     placeholder_fields = {str(item) for item in _as_list(summary.get("placeholder_fields"))}
     missing = field in missing_fields
     placeholder = field in placeholder_fields
-    if field in {"sample_project_id", "workflow_scope", "observer", "started_at_utc", "completed_at_utc", "evidence_ref"}:
+    if check_name == "required_fields_present":
         check_pass = (not missing) and (not placeholder)
     else:
         check_pass = bool(checks.get(check_name, False)) and not missing and not placeholder
@@ -141,6 +161,21 @@ def _field_status(*, field: str, check_name: str, observation_report: dict[str, 
         "placeholder": placeholder,
         "check_pass": check_pass,
     }
+
+
+def _current_value(field: str, observation: dict[str, Any], summary: dict[str, Any]) -> Any:
+    if field == "timestamp_order":
+        started = summary.get("started_at_utc")
+        completed = summary.get("completed_at_utc")
+        return f"{started} <= {completed}" if started or completed else ""
+    if field == "elapsed_minutes":
+        return summary.get("elapsed_minutes")
+    if field == "completion_minutes_elapsed_match":
+        declared = summary.get("declared_completion_minutes", summary.get("completion_minutes"))
+        elapsed = summary.get("elapsed_minutes")
+        tolerance = summary.get("timestamp_tolerance_minutes")
+        return f"declared={declared}; elapsed={elapsed}; tolerance={tolerance}"
+    return observation.get(field)
 
 
 def build_packet(
@@ -156,7 +191,7 @@ def build_packet(
     summary = _as_dict(report.get("summary"))
 
     field_rows: list[dict[str, Any]] = []
-    for spec in FIELD_SPECS:
+    for spec in (*FIELD_SPECS, *DERIVED_CHECK_SPECS):
         field = str(spec["field"])
         status = _field_status(
             field=field,
@@ -167,8 +202,8 @@ def build_packet(
             {
                 "field": field,
                 "required_value": str(spec["required_value"]),
-                "current_value": _display_value(observation.get(field)),
-                "template_value": _display_value(template.get(field)),
+                "current_value": _display_value(_current_value(field, observation, summary)),
+                "template_value": _display_value(template.get(field, "derived from observation timestamps")),
                 "report_check": str(spec["check"]),
                 "report_check_pass": bool(status["check_pass"]),
                 "missing": bool(status["missing"]),
@@ -203,7 +238,10 @@ def build_packet(
             "field_count": len(field_rows),
             "field_pass_count": sum(1 for row in field_rows if row["report_check_pass"]),
             "completion_minutes": summary.get("completion_minutes"),
+            "declared_completion_minutes": summary.get("declared_completion_minutes", summary.get("completion_minutes")),
+            "elapsed_minutes": summary.get("elapsed_minutes"),
             "max_completion_minutes": summary.get("max_completion_minutes", 30.0),
+            "timestamp_tolerance_minutes": summary.get("timestamp_tolerance_minutes"),
         },
         "field_rows": field_rows,
         "current_blockers": blockers,

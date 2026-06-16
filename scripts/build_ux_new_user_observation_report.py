@@ -14,6 +14,7 @@ SCHEMA_VERSION = "ux-new-user-observation-report.v1"
 DEFAULT_OBSERVATION = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_TIMESTAMP_TOLERANCE_MINUTES = 1.0
 ACCEPTED_DECISIONS = {"accepted", "approved", "pass", "signed", "approved_for_release"}
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
 PLACEHOLDER_TOKENS = {
@@ -88,15 +89,38 @@ def _as_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _parse_datetime(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(timezone.utc)
+
+
 def build_report(
     *,
     observation_path: Path = DEFAULT_OBSERVATION,
     max_completion_minutes: float = 30.0,
+    timestamp_tolerance_minutes: float = DEFAULT_TIMESTAMP_TOLERANCE_MINUTES,
 ) -> dict[str, Any]:
     observation = _load_json(observation_path)
     missing_fields = [field for field in REQUIRED_FIELDS if not _field_present(observation, field)]
     placeholder_fields = [field for field in REQUIRED_FIELDS if _looks_placeholder(observation.get(field))]
     completion_minutes = _as_float(observation.get("completion_minutes"))
+    started_at_raw = observation.get("started_at_utc")
+    completed_at_raw = observation.get("completed_at_utc")
+    started_at_present = _field_present(observation, "started_at_utc")
+    completed_at_present = _field_present(observation, "completed_at_utc")
+    started_at = _parse_datetime(started_at_raw)
+    completed_at = _parse_datetime(completed_at_raw)
+    timestamp_order_pass = bool(started_at is not None and completed_at is not None and completed_at >= started_at)
+    elapsed_minutes = (
+        round((completed_at - started_at).total_seconds() / 60.0, 6) if timestamp_order_pass else None
+    )
     decision = str(observation.get("approval_decision", "")).strip().lower()
     participant_role = str(observation.get("participant_role", "")).strip().lower()
     new_to_product = observation.get("new_to_product") is True
@@ -115,6 +139,16 @@ def build_report(
         "new_to_product_pass": new_to_product,
         "completion_minutes_present": completion_minutes is not None,
         "completion_30min_pass": bool(completion_minutes is not None and completion_minutes <= max_completion_minutes),
+        "started_at_utc_valid": bool(started_at_present and started_at is not None),
+        "completed_at_utc_valid": bool(completed_at_present and completed_at is not None),
+        "timestamp_order_pass": timestamp_order_pass,
+        "elapsed_minutes_present": elapsed_minutes is not None,
+        "elapsed_30min_pass": bool(elapsed_minutes is not None and elapsed_minutes <= max_completion_minutes),
+        "completion_minutes_elapsed_match_pass": bool(
+            completion_minutes is not None
+            and elapsed_minutes is not None
+            and abs(completion_minutes - elapsed_minutes) <= timestamp_tolerance_minutes
+        ),
         "blocker_count_zero_pass": blocker_count == 0,
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
     }
@@ -129,6 +163,22 @@ def build_report(
         *(["new_to_product_not_confirmed"] if not checks["new_to_product_pass"] else []),
         *(["completion_minutes_missing"] if not checks["completion_minutes_present"] else []),
         *(["completion_gt_30min"] if completion_minutes is not None and not checks["completion_30min_pass"] else []),
+        *(["started_at_utc_invalid"] if started_at_present and not checks["started_at_utc_valid"] else []),
+        *(["completed_at_utc_invalid"] if completed_at_present and not checks["completed_at_utc_valid"] else []),
+        *(
+            ["completion_timestamp_order_invalid"]
+            if started_at is not None and completed_at is not None and not checks["timestamp_order_pass"]
+            else []
+        ),
+        *(["elapsed_minutes_missing"] if (started_at_present or completed_at_present) and elapsed_minutes is None else []),
+        *(["elapsed_gt_30min"] if elapsed_minutes is not None and not checks["elapsed_30min_pass"] else []),
+        *(
+            ["completion_minutes_elapsed_mismatch"]
+            if completion_minutes is not None
+            and elapsed_minutes is not None
+            and not checks["completion_minutes_elapsed_match_pass"]
+            else []
+        ),
         *(["blocking_usability_issue_present"] if not checks["blocker_count_zero_pass"] else []),
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
@@ -144,14 +194,22 @@ def build_report(
         "summary_line": (
             f"UX new-user observation: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"completion={completion_minutes if completion_minutes is not None else 'missing'}/{max_completion_minutes} min | "
-            f"blockers={blocker_count}"
+            f"elapsed={elapsed_minutes if elapsed_minutes is not None else 'missing'}/{max_completion_minutes} min | "
+            f"blockers={len(blockers)}"
         ),
         "summary": {
             "completion_minutes": completion_minutes,
+            "declared_completion_minutes": completion_minutes,
+            "elapsed_minutes": elapsed_minutes,
             "max_completion_minutes": max_completion_minutes,
+            "timestamp_tolerance_minutes": timestamp_tolerance_minutes,
+            "started_at_utc": started_at.isoformat() if started_at is not None else None,
+            "completed_at_utc": completed_at.isoformat() if completed_at is not None else None,
             "participant_role": participant_role,
             "new_to_product": new_to_product,
             "blocker_count": blocker_count,
+            "reported_blocker_count": blocker_count,
+            "release_blocker_count": len(blockers),
             "approval_decision": decision,
             "missing_fields": missing_fields,
             "placeholder_fields": placeholder_fields,
@@ -159,8 +217,8 @@ def build_report(
             "template_note_present": template_note_present,
             "owner_action": (
                 "Attach a human new-user observation record for the sample project workflow, including "
-                "participant status, observer, timestamps, completion minutes, blocker count, evidence "
-                "reference, and accepted release decision."
+                "participant status, observer, timezone-aware start/end timestamps, wall-clock completion "
+                "minutes, blocker count, evidence reference, and accepted release decision."
             ),
         },
         "required_fields": list(REQUIRED_FIELDS),
@@ -187,6 +245,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `observation_path`: `{payload['observation_path']}`",
         "",
+        "## Timing Checks",
+        "",
+        f"- `declared_completion_minutes`: `{payload['summary']['declared_completion_minutes']}`",
+        f"- `elapsed_minutes`: `{payload['summary']['elapsed_minutes']}`",
+        f"- `max_completion_minutes`: `{payload['summary']['max_completion_minutes']}`",
+        f"- `timestamp_tolerance_minutes`: `{payload['summary']['timestamp_tolerance_minutes']}`",
+        f"- `completion_minutes_elapsed_match_pass`: "
+        f"`{payload['checks']['completion_minutes_elapsed_match_pass']}`",
+        "",
         "## Required Fields",
         "",
     ]
@@ -202,6 +269,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--observation", type=Path, default=DEFAULT_OBSERVATION)
     parser.add_argument("--max-completion-minutes", type=float, default=30.0)
+    parser.add_argument("--timestamp-tolerance-minutes", type=float, default=DEFAULT_TIMESTAMP_TOLERANCE_MINUTES)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
     parser.add_argument("--json", action="store_true")
@@ -214,6 +282,7 @@ def main(argv: list[str] | None = None) -> int:
     payload = build_report(
         observation_path=args.observation,
         max_completion_minutes=float(args.max_completion_minutes),
+        timestamp_tolerance_minutes=float(args.timestamp_tolerance_minutes),
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
