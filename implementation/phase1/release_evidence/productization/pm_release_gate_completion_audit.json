@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:55:50.165691+00:00",
+  "generated_at": "2026-06-16T20:04:02.408840+00:00",
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",

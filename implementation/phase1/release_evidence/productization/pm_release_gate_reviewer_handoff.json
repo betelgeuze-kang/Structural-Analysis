@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T19:55:50.197275+00:00",
+  "generated_at": "2026-06-16T20:04:02.438642+00:00",
   "incomplete_blockers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
@@ -145,7 +145,7 @@
       "acceptance_criteria": [
         "`ux_new_user_observation_report.json.contract_pass == true`",
         "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+        "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
       ],
       "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
       "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
@@ -159,7 +159,7 @@
         "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
-      "evidence_state": "missing_human_new_user_observation",
+      "evidence_state": "missing_human_new_user_completion_evidence",
       "external_input_required": true,
       "handoff_state": "external_owner_input_ready",
       "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",

@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:55:50.135052+00:00",
+  "generated_at": "2026-06-16T20:04:02.379165+00:00",
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
@@ -128,12 +128,12 @@
       "acceptance_criteria": [
         "`ux_new_user_observation_report.json.contract_pass == true`",
         "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+        "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
       ],
       "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
       "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
       "closure_state": "external_owner_input_ready",
-      "evidence_state": "missing_human_new_user_observation",
+      "evidence_state": "missing_human_new_user_completion_evidence",
       "external_input_required": true,
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",

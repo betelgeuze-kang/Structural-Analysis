@@ -183,10 +183,12 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`security::frontend_dependency_audit_missing_or_failed` absent from `release_area_blockers`",
         ]
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        blocker_id = f"{namespace}::{code}"
+        blocker_absence_criterion = f"`{blocker_id}` absent from `release_area_blockers`"
         return [
             "`ux_new_user_observation_report.json.contract_pass == true`",
             "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-            "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`",
+            blocker_absence_criterion,
         ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
@@ -348,10 +350,17 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         checks = _as_dict(row.get("checks"))
         human_pass = bool(checks.get("human_new_user_observation_pass", False))
+        human_30min_evidence_present = bool(checks.get("human_new_user_sample_30min_evidence_present", False))
         human_30min_pass = bool(checks.get("human_new_user_sample_30min_pass", False))
         completion_minutes = summary.get("human_sample_completion_minutes")
         state = "ready_for_pm_regeneration"
-        if not human_pass:
+        if "30min_sample_evidence" in code and not human_30min_evidence_present:
+            state = "missing_human_new_user_completion_evidence"
+        elif "30min" in code and completion_minutes is None:
+            state = "missing_human_new_user_completion_evidence"
+        elif "30min" in code and not human_30min_pass:
+            state = "human_new_user_completion_gt_30min"
+        elif not human_pass:
             state = "missing_human_new_user_observation"
         elif completion_minutes is None:
             state = "missing_human_new_user_completion_evidence"
@@ -360,6 +369,7 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         return {
             "state": state,
             "human_new_user_observation_pass": human_pass,
+            "human_new_user_sample_30min_evidence_present": human_30min_evidence_present,
             "human_new_user_sample_30min_pass": human_30min_pass,
             "human_sample_completion_minutes": completion_minutes,
             "automated_sample_completion_minutes": summary.get("automated_sample_completion_minutes"),

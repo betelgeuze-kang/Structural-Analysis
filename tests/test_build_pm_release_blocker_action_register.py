@@ -245,6 +245,73 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
     assert row["evidence_status"]["human_observation_reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
 
 
+def test_build_register_distinguishes_ux_observation_and_30min_evidence_blockers(tmp_path: Path) -> None:
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": [
+                "ux::human_new_user_observation_missing_or_failed",
+                "ux::human_new_user_30min_sample_evidence_missing",
+            ],
+            "release_area_blockers": [
+                "ux::human_new_user_observation_missing_or_failed",
+                "ux::human_new_user_30min_sample_evidence_missing",
+            ],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "ux",
+                    "title": "UX",
+                    "status": "blocked",
+                    "blockers": [
+                        "human_new_user_observation_missing_or_failed",
+                        "human_new_user_30min_sample_evidence_missing",
+                    ],
+                    "claim_boundary": "Human new-user observation is required for PM UX pass.",
+                    "checks": {
+                        "human_new_user_observation_pass": False,
+                        "human_new_user_sample_30min_evidence_present": False,
+                        "human_new_user_sample_30min_pass": False,
+                    },
+                    "summary": {
+                        "automated_sample_completion_minutes": 0.27,
+                        "human_sample_completion_minutes": None,
+                        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+                        "human_observation_owner_action": "Schedule and attach one observed new-user sample run.",
+                    },
+                    "artifacts": {
+                        "ux_new_user_observation": "ux_new_user_observation_report.json",
+                    },
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    rows = {row["blocker_id"]: row for row in payload["rows"]}
+
+    observation_row = rows["ux::human_new_user_observation_missing_or_failed"]
+    completion_row = rows["ux::human_new_user_30min_sample_evidence_missing"]
+
+    assert observation_row["evidence_status"]["state"] == "missing_human_new_user_observation"
+    assert completion_row["evidence_status"]["state"] == "missing_human_new_user_completion_evidence"
+    assert completion_row["evidence_status"]["human_new_user_sample_30min_evidence_present"] is False
+    assert any(
+        "ux::human_new_user_observation_missing_or_failed" in item
+        for item in observation_row["acceptance_criteria"]
+    )
+    assert any(
+        "ux::human_new_user_30min_sample_evidence_missing" in item
+        for item in completion_row["acceptance_criteria"]
+    )
+    assert not any(
+        "ux::human_new_user_observation_missing_or_failed" in item
+        for item in completion_row["acceptance_criteria"]
+    )
+
+
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     out = tmp_path / "register.json"

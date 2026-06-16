@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:55:50.105145+00:00",
+  "generated_at": "2026-06-16T20:04:02.348751+00:00",
   "next_actions": [
     "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
     "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
@@ -209,6 +209,7 @@
       "evidence_status": {
         "automated_sample_completion_minutes": 0.2701333333333333,
         "human_new_user_observation_pass": false,
+        "human_new_user_sample_30min_evidence_present": false,
         "human_new_user_sample_30min_pass": false,
         "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "human_sample_completion_minutes": null,
@@ -257,7 +258,7 @@
       "acceptance_criteria": [
         "`ux_new_user_observation_report.json.contract_pass == true`",
         "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
-        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+        "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
       ],
       "blocker_code": "human_new_user_30min_sample_evidence_missing",
       "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
@@ -284,11 +285,12 @@
       "evidence_status": {
         "automated_sample_completion_minutes": 0.2701333333333333,
         "human_new_user_observation_pass": false,
+        "human_new_user_sample_30min_evidence_present": false,
         "human_new_user_sample_30min_pass": false,
         "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "human_sample_completion_minutes": null,
         "source_policy": "human_new_user_observation_required",
-        "state": "missing_human_new_user_observation"
+        "state": "missing_human_new_user_completion_evidence"
       },
       "external_input_required": true,
       "handoff": {
