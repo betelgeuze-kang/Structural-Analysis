@@ -93,6 +93,26 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     return f"Resolve `{code}` in {title} evidence, regenerate PM release reports, and attach the updated evidence."
 
 
+def _owner(*, namespace: str, code: str) -> str:
+    if namespace == "basic_ci":
+        return "release_ci_owner"
+    if namespace == "security" and "license" in code:
+        return "product_legal_owner"
+    if namespace == "security" and "frontend_dependency" in code:
+        return "frontend_security_owner"
+    return "release_owner"
+
+
+def _resolution_type(*, namespace: str, code: str) -> str:
+    if namespace == "basic_ci" and "consecutive_pass" in code:
+        return "external_tracked_ci_evidence_required"
+    if namespace == "security" and "license" in code:
+        return "product_legal_decision_required"
+    if namespace == "security" and "frontend_dependency" in code:
+        return "local_dependency_remediation_required"
+    return "release_evidence_remediation_required"
+
+
 def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     summary = _as_dict(row.get("summary"))
     if namespace == "basic_ci":
@@ -179,6 +199,27 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
     ]
 
 
+def _verification_commands(*, namespace: str, code: str) -> list[str]:
+    if namespace == "basic_ci":
+        return [
+            f"python3 scripts/build_ci_streak_intake_packet.py --out {DEFAULT_CI_STREAK_INTAKE_PACKET} --fail-blocked",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
+    if namespace == "security" and "license" in code:
+        return [
+            f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE} --fail-blocked",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
+    if namespace == "security" and "frontend_dependency" in code:
+        return [
+            "npm audit --audit-level high",
+            f"python3 scripts/build_frontend_dependency_audit_report.py --out {DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT} --fail-blocked",
+        ]
+    return [
+        f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+    ]
+
+
 def _owner_input_required(*, namespace: str, code: str) -> bool:
     return bool(
         (namespace == "basic_ci" and "consecutive_pass" in code)
@@ -207,6 +248,46 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
     return augmented
 
 
+def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[str, Any]:
+    summary = _as_dict(row.get("summary"))
+    if namespace == "basic_ci":
+        lane = "nightly" if code.startswith("nightly_ci") else "pr"
+        required = int(summary.get("required_consecutive_pass_count", 30) or 30)
+        release_count = int(summary.get(f"{lane}_pass_streak_count", 0) or 0)
+        local_count = int(summary.get(f"{lane}_local_pass_streak_count", 0) or 0)
+        github_count = int(summary.get(f"{lane}_github_actions_pass_streak_count", 0) or 0)
+        missing = int(summary.get(f"{lane}_missing_consecutive_pass_count", max(0, required - release_count)) or 0)
+        return {
+            "state": "ready_for_pm_regeneration" if release_count >= required else "missing_tracked_ci_streak_evidence",
+            "lane": lane,
+            "required_consecutive_pass_count": required,
+            "release_consecutive_pass_count": release_count,
+            "github_actions_consecutive_pass_count": github_count,
+            "local_consecutive_pass_count": local_count,
+            "missing_consecutive_pass_count": missing,
+            "source_policy": "github_actions_required",
+        }
+    if namespace == "security" and "license" in code:
+        blockers = [str(item) for item in _as_list(summary.get("license_status_closure_blockers"))]
+        status = str(summary.get("license_status", "") or "missing")
+        return {
+            "state": status,
+            "license_status": status,
+            "closure_blocker_count": len(blockers),
+            "closure_blockers": blockers,
+            "template_path": str(summary.get("license_status_template_path", "")),
+        }
+    if namespace == "security" and "frontend_dependency" in code:
+        high_or_critical = int(summary.get("frontend_dependency_high_or_critical_vulnerability_count", 0) or 0)
+        total = int(summary.get("frontend_dependency_vulnerability_total", high_or_critical) or 0)
+        return {
+            "state": "dependency_vulnerabilities_present" if high_or_critical else "ready_for_pm_regeneration",
+            "vulnerability_total": total,
+            "high_or_critical_vulnerability_count": high_or_critical,
+        }
+    return {"state": "open_release_evidence_blocker"}
+
+
 def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     report = _load_json(pm_report)
     release_area_rows = _indexed_rows(_as_list(report.get("release_area_matrix")), "area")
@@ -231,6 +312,9 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             scope = "unknown"
             source_row = {}
         title = str(source_row.get("title", namespace) or namespace)
+        owner = _owner(namespace=namespace, code=code)
+        owner_action = _owner_action(namespace=namespace, code=code, row=source_row)
+        owner_input_required = _owner_input_required(namespace=namespace, code=code)
         row = {
             "blocker_id": blocker_id,
             "blocker_code": code,
@@ -238,16 +322,22 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "scope": scope,
             "title": title,
             "status": "open",
-            "owner_input_required": _owner_input_required(namespace=namespace, code=code),
-            "owner_action": _owner_action(namespace=namespace, code=code, row=source_row),
+            "owner": owner,
+            "owner_input_required": owner_input_required,
+            "external_input_required": owner_input_required,
+            "resolution_type": _resolution_type(namespace=namespace, code=code),
+            "owner_action": owner_action,
+            "next_action": owner_action,
             "claim_boundary": _claim_boundary(namespace=namespace, code=code, row=source_row),
             "acceptance_criteria": _acceptance_criteria(namespace=namespace, code=code, row=source_row),
             "reproduction_commands": _reproduction_commands(namespace=namespace, code=code),
+            "verification_commands": _verification_commands(namespace=namespace, code=code),
             "evidence_artifacts": _augment_evidence_artifacts(
                 namespace=namespace,
                 code=code,
                 artifacts=_evidence_artifacts(source_row),
             ),
+            "evidence_status": _evidence_status(namespace=namespace, code=code, row=source_row),
             "evidence_snapshot": _as_dict(source_row.get("summary")),
         }
         rows.append(row)
@@ -271,9 +361,10 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "release_area_gate_ready": bool(report.get("release_area_gate_ready", False)),
             "limited_commercial_ready": bool(report.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(report.get("paid_pilot_candidate", False)),
+            "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
         },
         "rows": rows,
-        "next_actions": [row["owner_action"] for row in rows],
+        "next_actions": [row["next_action"] for row in rows],
     }
 
 
@@ -285,16 +376,18 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `open_blocker_count`: `{payload['summary']['open_blocker_count']}`",
         "",
-        "| Blocker | Scope | Owner Action | Acceptance |",
-        "|---|---|---|---|",
+        "| Blocker | Scope | Owner | Evidence Status | Next Action | Acceptance |",
+        "|---|---|---|---|---|---|",
     ]
     for row in payload["rows"]:
         acceptance = "<br>".join(str(item) for item in row.get("acceptance_criteria", []))
+        evidence_status = _as_dict(row.get("evidence_status"))
         lines.append(
-            f"| `{row['blocker_id']}` | {row['scope']} | {row['owner_action']} | {acceptance} |"
+            f"| `{row['blocker_id']}` | {row['scope']} | `{row['owner']}` | "
+            f"`{evidence_status.get('state', 'open')}` | {row['next_action']} | {acceptance} |"
         )
     if not payload["rows"]:
-        lines.append("| none | release | No open PM release blockers. | PM release gate is ready. |")
+        lines.append("| none | release | `release_owner` | `closed` | No open PM release blockers. | PM release gate is ready. |")
     return "\n".join(lines) + "\n"
 
 

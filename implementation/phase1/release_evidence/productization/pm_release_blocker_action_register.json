@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T17:48:20.091254+00:00",
+  "generated_at": "2026-06-16T17:57:42.337676+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -43,7 +43,20 @@
         "pr_pass_streak_count": 0,
         "required_consecutive_pass_count": 30
       },
+      "evidence_status": {
+        "github_actions_consecutive_pass_count": 0,
+        "lane": "pr",
+        "local_consecutive_pass_count": 2,
+        "missing_consecutive_pass_count": 30,
+        "release_consecutive_pass_count": 0,
+        "required_consecutive_pass_count": 30,
+        "source_policy": "github_actions_required",
+        "state": "missing_tracked_ci_streak_evidence"
+      },
+      "external_input_required": true,
       "namespace": "basic_ci",
+      "next_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner": "release_ci_owner",
       "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
@@ -53,9 +66,14 @@
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
+      "resolution_type": "external_tracked_ci_evidence_required",
       "scope": "release_area",
       "status": "open",
-      "title": "Basic CI"
+      "title": "Basic CI",
+      "verification_commands": [
+        "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
     },
     {
       "acceptance_criteria": [
@@ -90,7 +108,20 @@
         "pr_pass_streak_count": 0,
         "required_consecutive_pass_count": 30
       },
+      "evidence_status": {
+        "github_actions_consecutive_pass_count": 0,
+        "lane": "nightly",
+        "local_consecutive_pass_count": 230,
+        "missing_consecutive_pass_count": 30,
+        "release_consecutive_pass_count": 0,
+        "required_consecutive_pass_count": 30,
+        "source_policy": "github_actions_required",
+        "state": "missing_tracked_ci_streak_evidence"
+      },
+      "external_input_required": true,
       "namespace": "basic_ci",
+      "next_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner": "release_ci_owner",
       "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
@@ -100,9 +131,14 @@
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
+      "resolution_type": "external_tracked_ci_evidence_required",
       "scope": "release_area",
       "status": "open",
-      "title": "Basic CI"
+      "title": "Basic CI",
+      "verification_commands": [
+        "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
     },
     {
       "acceptance_criteria": [
@@ -140,7 +176,25 @@
         "license_status_template_path": "docs/templates/license_status.template.json",
         "sbom_component_count": 26
       },
+      "evidence_status": {
+        "closure_blocker_count": 7,
+        "closure_blockers": [
+          "license_status_not_active",
+          "license_tier_missing",
+          "license_id_missing",
+          "license_issuer_or_approver_missing",
+          "license_approval_reference_missing",
+          "license_product_scope_missing",
+          "license_expiry_missing_or_invalid"
+        ],
+        "license_status": "not_configured",
+        "state": "not_configured",
+        "template_path": "docs/templates/license_status.template.json"
+      },
+      "external_input_required": true,
       "namespace": "security",
+      "next_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+      "owner": "product_legal_owner",
       "owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
       "owner_input_required": true,
       "reproduction_commands": [
@@ -149,13 +203,19 @@
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
+      "resolution_type": "product_legal_decision_required",
       "scope": "release_area",
       "status": "open",
-      "title": "Security"
+      "title": "Security",
+      "verification_commands": [
+        "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
+    "external_input_required_count": 3,
     "full_release_gate_ready": false,
     "limited_commercial_ready": true,
     "milestone_blocker_count": 0,

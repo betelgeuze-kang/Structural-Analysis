@@ -86,23 +86,37 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
     assert payload["summary"]["open_blocker_count"] == 2
     assert payload["summary"]["owner_input_required_count"] == 2
+    assert payload["summary"]["external_input_required_count"] == 2
 
     ci_row = rows["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"]
+    assert ci_row["owner"] == "release_ci_owner"
+    assert ci_row["next_action"] == ci_row["owner_action"]
+    assert ci_row["external_input_required"] is True
+    assert ci_row["resolution_type"] == "external_tracked_ci_evidence_required"
     assert ci_row["owner_action"] == "Collect 28 additional consecutive successful PR CI run(s)."
     assert ci_row["claim_boundary"] == "Tracked PR CI evidence is required."
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in ci_row["reproduction_commands"])
     assert any("build_ci_streak_intake_packet.py" in command for command in ci_row["reproduction_commands"])
+    assert any("build_ci_streak_intake_packet.py" in command for command in ci_row["verification_commands"])
     assert any("pr_pass_streak_count >= 30" in item for item in ci_row["acceptance_criteria"])
     assert any("ci_streak_intake_packet.json.contract_pass" in item for item in ci_row["acceptance_criteria"])
     assert "ci_streak_intake_packet" in ci_row["evidence_artifacts"]
+    assert ci_row["evidence_status"]["state"] == "missing_tracked_ci_streak_evidence"
+    assert ci_row["evidence_status"]["lane"] == "pr"
+    assert ci_row["evidence_status"]["missing_consecutive_pass_count"] == 28
     assert ci_row["evidence_snapshot"]["pr_missing_consecutive_pass_count"] == 28
 
     security_row = rows["security::license_status_not_configured"]
+    assert security_row["owner"] == "product_legal_owner"
+    assert security_row["external_input_required"] is True
+    assert security_row["resolution_type"] == "product_legal_decision_required"
     assert security_row["owner_action"] == "Populate license status from approved legal evidence."
     assert any("build_license_status_intake_packet.py" in command for command in security_row["reproduction_commands"])
     assert any("build_license_status_closure_report.py" in command for command in security_row["reproduction_commands"])
+    assert any("build_license_status_closure_report.py" in command for command in security_row["verification_commands"])
     assert any("license_status_closure_report.json.contract_pass" in item for item in security_row["acceptance_criteria"])
     assert "license_status_intake_packet" in security_row["evidence_artifacts"]
+    assert security_row["evidence_status"]["state"] == "not_configured"
 
 
 def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) -> None:
@@ -146,8 +160,12 @@ def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path)
     row = payload["rows"][0]
 
     assert row["blocker_id"] == "security::frontend_dependency_audit_missing_or_failed"
+    assert row["owner"] == "frontend_security_owner"
+    assert row["external_input_required"] is False
+    assert row["resolution_type"] == "local_dependency_remediation_required"
     assert "npm audit --audit-level high" in row["reproduction_commands"]
     assert any("build_frontend_dependency_audit_report.py" in command for command in row["reproduction_commands"])
+    assert any("build_frontend_dependency_audit_report.py" in command for command in row["verification_commands"])
     assert any("high_or_critical_vulnerability_count == 0" in item for item in row["acceptance_criteria"])
     assert "frontend_dependency_audit_report" in row["evidence_artifacts"]
 
@@ -173,3 +191,4 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert "PM Release Blocker Action Register" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 2
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in out_md.read_text(encoding="utf-8")
+    assert "release_ci_owner" in out_md.read_text(encoding="utf-8")
