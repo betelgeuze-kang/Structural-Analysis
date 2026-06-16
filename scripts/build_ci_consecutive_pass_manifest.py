@@ -55,6 +55,37 @@ def _github_lane_streak(payload: dict[str, Any], lane: str) -> int:
         return 0
 
 
+def _lane_owner_action(label: str, threshold: int, consecutive: int) -> str:
+    if consecutive >= threshold:
+        return "No release action required; consecutive pass threshold is satisfied."
+    missing = max(0, threshold - consecutive)
+    if label == "pr":
+        return (
+            f"Collect {missing} additional consecutive successful PR CI run(s); keep the pull_request CI lane "
+            "green and refresh github_actions_ci_streak_evidence before release signoff."
+        )
+    if label == "nightly":
+        return (
+            f"Collect {missing} additional consecutive successful nightly CI run(s); keep the scheduled/nightly "
+            "lane green and refresh github_actions_ci_streak_evidence before release signoff."
+        )
+    return f"Collect {missing} additional consecutive successful CI run(s) before release signoff."
+
+
+def _lane_claim_boundary(label: str) -> str:
+    if label == "pr":
+        return (
+            "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI "
+            "evidence for the consecutive-pass window."
+        )
+    if label == "nightly":
+        return (
+            "Local nightly artifacts prove command-level readiness; release streak credit requires tracked "
+            "nightly CI evidence for the consecutive-pass window."
+        )
+    return "Local CI artifacts prove command-level readiness; release streak credit requires tracked CI evidence."
+
+
 def _lane(label: str, reports: list[Path], threshold: int, github_actions_evidence: dict[str, Any]) -> dict[str, Any]:
     seen: set[Path] = set()
     rows: list[dict[str, Any]] = []
@@ -81,6 +112,7 @@ def _lane(label: str, reports: list[Path], threshold: int, github_actions_eviden
         local_consecutive += 1
     github_consecutive = _github_lane_streak(github_actions_evidence, label)
     consecutive = max(local_consecutive, github_consecutive)
+    threshold_pass = consecutive >= threshold
     return {
         "lane": label,
         "threshold": threshold,
@@ -89,7 +121,11 @@ def _lane(label: str, reports: list[Path], threshold: int, github_actions_eviden
         "local_consecutive_pass_count": local_consecutive,
         "github_actions_consecutive_pass_count": github_consecutive,
         "consecutive_pass_count": consecutive,
-        "threshold_pass": consecutive >= threshold,
+        "missing_consecutive_pass_count": max(0, threshold - consecutive),
+        "threshold_pass": threshold_pass,
+        "streak_source": "github_actions" if github_consecutive >= local_consecutive and github_consecutive else "local_artifacts",
+        "owner_action": _lane_owner_action(label, threshold, consecutive),
+        "claim_boundary": _lane_claim_boundary(label),
         "rows": rows,
     }
 
@@ -128,6 +164,10 @@ def build_manifest(
             ],
             "pr_threshold_pass": lanes["pr"]["threshold_pass"],
             "nightly_threshold_pass": lanes["nightly"]["threshold_pass"],
+            "pr_missing_consecutive_pass_count": lanes["pr"]["missing_consecutive_pass_count"],
+            "nightly_missing_consecutive_pass_count": lanes["nightly"]["missing_consecutive_pass_count"],
+            "pr_owner_action": lanes["pr"]["owner_action"],
+            "nightly_owner_action": lanes["nightly"]["owner_action"],
         },
     }
 

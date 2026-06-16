@@ -201,6 +201,47 @@ def _manifest_lane_int(payload: dict[str, Any], lane: str, key: str) -> int:
     return _as_int(lane_payload.get(key), 0)
 
 
+def _manifest_lane_text(payload: dict[str, Any], lane: str, key: str) -> str:
+    lanes = payload.get("lanes")
+    if not isinstance(lanes, dict):
+        return ""
+    lane_payload = lanes.get(lane)
+    if not isinstance(lane_payload, dict):
+        return ""
+    return str(lane_payload.get(key, "") or "")
+
+
+def _ci_lane_owner_action(lane: str, threshold: int, consecutive: int) -> str:
+    if consecutive >= threshold:
+        return "No release action required; consecutive pass threshold is satisfied."
+    missing = max(0, threshold - consecutive)
+    if lane == "pr":
+        return (
+            f"Collect {missing} additional consecutive successful PR CI run(s); keep the pull_request CI lane "
+            "green and refresh github_actions_ci_streak_evidence before release signoff."
+        )
+    if lane == "nightly":
+        return (
+            f"Collect {missing} additional consecutive successful nightly CI run(s); keep the scheduled/nightly "
+            "lane green and refresh github_actions_ci_streak_evidence before release signoff."
+        )
+    return f"Collect {missing} additional consecutive successful CI run(s) before release signoff."
+
+
+def _ci_lane_claim_boundary(lane: str) -> str:
+    if lane == "pr":
+        return (
+            "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI "
+            "evidence for the consecutive-pass window."
+        )
+    if lane == "nightly":
+        return (
+            "Local nightly artifacts prove command-level readiness; release streak credit requires tracked "
+            "nightly CI evidence for the consecutive-pass window."
+        )
+    return "Local CI artifacts prove command-level readiness; release streak credit requires tracked CI evidence."
+
+
 def _read_text_or_empty(path: Path) -> str:
     if not path.exists():
         return ""
@@ -702,6 +743,24 @@ def _build_release_area_matrix(
     ci_streak_evidence_sources = ci_streak_manifest.get("evidence_sources")
     if not isinstance(ci_streak_evidence_sources, dict):
         ci_streak_evidence_sources = {}
+    pr_owner_action = _manifest_lane_text(ci_streak_manifest, "pr", "owner_action") or _ci_lane_owner_action(
+        "pr",
+        ci_pass_streak_threshold,
+        pr_streak,
+    )
+    nightly_owner_action = _manifest_lane_text(
+        ci_streak_manifest,
+        "nightly",
+        "owner_action",
+    ) or _ci_lane_owner_action("nightly", ci_pass_streak_threshold, nightly_streak)
+    pr_claim_boundary = _manifest_lane_text(ci_streak_manifest, "pr", "claim_boundary") or _ci_lane_claim_boundary(
+        "pr"
+    )
+    nightly_claim_boundary = _manifest_lane_text(
+        ci_streak_manifest,
+        "nightly",
+        "claim_boundary",
+    ) or _ci_lane_claim_boundary("nightly")
     basic_ci_checks = {
         "pr_ci_pass": _reason_pass(ci_pr),
         "nightly_ci_pass": _reason_pass(ci_nightly),
@@ -741,6 +800,12 @@ def _build_release_area_matrix(
                 "nightly_github_actions_pass_streak_count": _manifest_lane_int(
                     ci_streak_manifest, "nightly", "github_actions_consecutive_pass_count"
                 ),
+                "pr_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - pr_streak),
+                "nightly_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - nightly_streak),
+                "pr_owner_action": pr_owner_action,
+                "nightly_owner_action": nightly_owner_action,
+                "pr_claim_boundary": pr_claim_boundary,
+                "nightly_claim_boundary": nightly_claim_boundary,
             },
             artifacts={
                 "pr_ci": str(ci_pr_path),
@@ -750,6 +815,11 @@ def _build_release_area_matrix(
                     ci_streak_evidence_sources.get("github_actions_evidence_path", "")
                 ),
             },
+            claim_boundary=" ".join(
+                boundary
+                for boundary in (pr_claim_boundary, nightly_claim_boundary)
+                if boundary
+            ),
         )
     )
 

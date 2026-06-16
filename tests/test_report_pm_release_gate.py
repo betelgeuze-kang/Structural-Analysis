@@ -102,6 +102,37 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
             tmp_path / "ci_nightly.json",
             {"reason_code": "PASS", "summary": {"pass_streak_count": 30}},
         ),
+        "ci_streak_manifest": _write(
+            tmp_path / "ci_streak_manifest.json",
+            {
+                "schema_version": "ci-consecutive-pass-manifest.v1",
+                "threshold": 30,
+                "contract_pass": True,
+                "evidence_sources": {
+                    "github_actions_evidence_path": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+                },
+                "lanes": {
+                    "pr": {
+                        "consecutive_pass_count": 30,
+                        "local_consecutive_pass_count": 30,
+                        "github_actions_consecutive_pass_count": 0,
+                        "missing_consecutive_pass_count": 0,
+                        "threshold_pass": True,
+                        "owner_action": "No release action required; consecutive pass threshold is satisfied.",
+                        "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+                    },
+                    "nightly": {
+                        "consecutive_pass_count": 30,
+                        "local_consecutive_pass_count": 30,
+                        "github_actions_consecutive_pass_count": 0,
+                        "missing_consecutive_pass_count": 0,
+                        "threshold_pass": True,
+                        "owner_action": "No release action required; consecutive pass threshold is satisfied.",
+                        "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+                    },
+                },
+            },
+        ),
         "commercial_readiness": _write(
             tmp_path / "commercial_readiness.json",
             {
@@ -393,6 +424,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["release_area_gate_ready"] is True
     assert payload["full_release_gate_ready"] is True
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
+    basic_ci_area = next(row for row in payload["release_area_matrix"] if row["area"] == "basic_ci")
+    assert basic_ci_area["summary"]["pr_missing_consecutive_pass_count"] == 0
+    assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
+    assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]
     core_area = next(row for row in payload["release_area_matrix"] if row["area"] == "core_engine")
     assert core_area["summary"]["p95_evidence_source"] == "core_family_p95_accuracy_report"
     assert core_area["summary"]["max_family_p95_error_pct"] == 3.5
@@ -405,6 +440,55 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["ga_enterprise_ready"] is False
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
+
+    ci_gap_kwargs = dict(base_kwargs)
+    ci_gap_kwargs["ci_pr"] = _write(
+        tmp_path / "ci_gap" / "ci_pr.json",
+        {"reason_code": "PASS", "summary": {"pass_streak_count": 2}},
+    )
+    ci_gap_kwargs["ci_streak_manifest"] = _write(
+        tmp_path / "ci_gap" / "ci_streak_manifest.json",
+        {
+            "schema_version": "ci-consecutive-pass-manifest.v1",
+            "threshold": 30,
+            "contract_pass": False,
+            "evidence_sources": {"github_actions_evidence_path": "github_actions_ci_streak_evidence.json"},
+            "lanes": {
+                "pr": {
+                    "consecutive_pass_count": 2,
+                    "local_consecutive_pass_count": 2,
+                    "github_actions_consecutive_pass_count": 0,
+                    "missing_consecutive_pass_count": 28,
+                    "threshold_pass": False,
+                    "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+                    "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+                },
+                "nightly": {
+                    "consecutive_pass_count": 30,
+                    "local_consecutive_pass_count": 30,
+                    "github_actions_consecutive_pass_count": 0,
+                    "missing_consecutive_pass_count": 0,
+                    "threshold_pass": True,
+                    "owner_action": "No release action required; consecutive pass threshold is satisfied.",
+                    "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+                },
+            },
+        },
+    )
+    payload_with_ci_gap = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **ci_gap_kwargs,
+    )
+    ci_gap_area = next(row for row in payload_with_ci_gap["release_area_matrix"] if row["area"] == "basic_ci")
+
+    assert payload_with_ci_gap["release_area_gate_ready"] is False
+    assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in payload_with_ci_gap["release_area_blockers"]
+    assert ci_gap_area["summary"]["pr_missing_consecutive_pass_count"] == 28
+    assert ci_gap_area["summary"]["pr_owner_action"].startswith("Collect 28 additional consecutive successful PR CI")
+    assert "tracked PR CI evidence" in ci_gap_area["summary"]["pr_claim_boundary"]
 
     _write(base_kwargs["ci_require_hip"], {"reason_code": "ERR_HIP_KERNEL_SMOKE_FAIL"})
     payload_with_stale_strict_ci = report_pm_release_gate.build_report(

@@ -39,9 +39,18 @@ def test_build_manifest_counts_trailing_pass_streak(tmp_path: Path) -> None:
 
     assert payload["contract_pass"] is False
     assert payload["lanes"]["pr"]["consecutive_pass_count"] == 1
+    assert payload["lanes"]["pr"]["missing_consecutive_pass_count"] == 2
     assert payload["lanes"]["pr"]["threshold_pass"] is False
+    assert payload["lanes"]["pr"]["owner_action"].startswith(
+        "Collect 2 additional consecutive successful PR CI run"
+    )
+    assert "release streak credit requires tracked PR CI evidence" in payload["lanes"]["pr"]["claim_boundary"]
     assert payload["lanes"]["nightly"]["consecutive_pass_count"] == 3
+    assert payload["lanes"]["nightly"]["missing_consecutive_pass_count"] == 0
     assert payload["lanes"]["nightly"]["threshold_pass"] is True
+    assert payload["summary"]["pr_missing_consecutive_pass_count"] == 2
+    assert payload["summary"]["nightly_missing_consecutive_pass_count"] == 0
+    assert payload["summary"]["pr_owner_action"] == payload["lanes"]["pr"]["owner_action"]
 
 
 def test_build_manifest_uses_github_actions_streak_evidence_when_available(tmp_path: Path) -> None:
@@ -72,3 +81,5 @@ def test_build_manifest_uses_github_actions_streak_evidence_when_available(tmp_p
     assert payload["lanes"]["pr"]["local_consecutive_pass_count"] == 2
     assert payload["lanes"]["pr"]["github_actions_consecutive_pass_count"] == 30
     assert payload["lanes"]["pr"]["consecutive_pass_count"] == 30
+    assert payload["lanes"]["pr"]["missing_consecutive_pass_count"] == 0
+    assert payload["lanes"]["pr"]["streak_source"] == "github_actions"

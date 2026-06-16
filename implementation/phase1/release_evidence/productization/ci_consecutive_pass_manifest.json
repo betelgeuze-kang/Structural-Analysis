@@ -7,13 +7,16 @@
     "local_nightly_report_count": 230,
     "local_pr_report_count": 2
   },
-  "generated_at": "2026-06-16T16:05:46.201834+00:00",
+  "generated_at": "2026-06-16T16:30:19.276478+00:00",
   "lanes": {
     "nightly": {
+      "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 230,
       "github_actions_consecutive_pass_count": 0,
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
+      "missing_consecutive_pass_count": 0,
+      "owner_action": "No release action required; consecutive pass threshold is satisfied.",
       "pass_count": 230,
       "report_count": 230,
       "rows": [
@@ -1628,14 +1631,18 @@
           "reason_code": "PASS"
         }
       ],
+      "streak_source": "local_artifacts",
       "threshold": 30,
       "threshold_pass": true
     },
     "pr": {
+      "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 2,
       "github_actions_consecutive_pass_count": 0,
       "lane": "pr",
       "local_consecutive_pass_count": 2,
+      "missing_consecutive_pass_count": 28,
+      "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pass_count": 2,
       "report_count": 2,
       "rows": [
@@ -1654,6 +1661,7 @@
           "reason_code": "PASS"
         }
       ],
+      "streak_source": "local_artifacts",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -1663,8 +1671,12 @@
     "github_actions_nightly_consecutive_pass_count": 0,
     "github_actions_pr_consecutive_pass_count": 0,
     "nightly_consecutive_pass_count": 230,
+    "nightly_missing_consecutive_pass_count": 0,
+    "nightly_owner_action": "No release action required; consecutive pass threshold is satisfied.",
     "nightly_threshold_pass": true,
     "pr_consecutive_pass_count": 2,
+    "pr_missing_consecutive_pass_count": 28,
+    "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "pr_threshold_pass": false
   },
   "threshold": 30

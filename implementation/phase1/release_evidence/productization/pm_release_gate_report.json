@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T16:15:24.484688+00:00",
+  "generated_at": "2026-06-16T16:30:28.010975+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -196,15 +196,21 @@
         "pr_ci_30_run_streak_pass": false,
         "pr_ci_pass": true
       },
-      "claim_boundary": "",
+      "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window. Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "ok": false,
       "status": "blocked",
       "summary": {
+        "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_local_pass_streak_count": 230,
+        "nightly_missing_consecutive_pass_count": 0,
+        "nightly_owner_action": "No release action required; consecutive pass threshold is satisfied.",
         "nightly_pass_streak_count": 230,
+        "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
         "pr_local_pass_streak_count": 2,
+        "pr_missing_consecutive_pass_count": 28,
+        "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "pr_pass_streak_count": 2,
         "required_consecutive_pass_count": 30
       },
