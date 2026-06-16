@@ -44,6 +44,9 @@ DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD = Path(
 DEFAULT_PM_RELEASE_GATE_COMPLETION_AUDIT = Path(
     "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
 )
+DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
+)
 DEFAULT_COMMERCIAL_READINESS = Path("implementation/phase1/commercial_readiness_report.strict_breadth.json")
 DEFAULT_CORE_FAMILY_P95_REPORT = Path(
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json"
@@ -729,6 +732,10 @@ def _packaging_milestone(
             support_optional_sections,
             "pm_release_gate_completion_audit",
         ),
+        "support_bundle_pm_release_gate_reviewer_handoff_present": _support_section_present(
+            support_optional_sections,
+            "pm_release_gate_reviewer_handoff",
+        ),
         "pm_blocker_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
@@ -814,6 +821,11 @@ def _packaging_milestone(
         *(
             ["support_bundle_pm_release_gate_completion_audit_missing"]
             if not gate_checks["support_bundle_pm_release_gate_completion_audit_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_pm_release_gate_reviewer_handoff_missing"]
+            if not gate_checks["support_bundle_pm_release_gate_reviewer_handoff_present"]
             else []
         ),
         *(
@@ -911,6 +923,9 @@ def _packaging_milestone(
             ),
             "support_bundle_pm_release_gate_completion_audit": str(
                 support_optional_sections.get("pm_release_gate_completion_audit", "")
+            ),
+            "support_bundle_pm_release_gate_reviewer_handoff": str(
+                support_optional_sections.get("pm_release_gate_reviewer_handoff", "")
             ),
             "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
             "pm_blocker_register_handoff_ready_count": _as_int(
@@ -1662,6 +1677,10 @@ def _build_release_area_matrix(
             support_optional_sections,
             "pm_release_gate_completion_audit",
         ),
+        "pm_release_gate_reviewer_handoff_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "pm_release_gate_reviewer_handoff",
+        ),
         "pm_blocker_action_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
@@ -1749,6 +1768,11 @@ def _build_release_area_matrix(
         *(
             ["pm_release_gate_completion_audit_missing_from_failure_bundle"]
             if not support_area_checks["pm_release_gate_completion_audit_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["pm_release_gate_reviewer_handoff_missing_from_failure_bundle"]
+            if not support_area_checks["pm_release_gate_reviewer_handoff_in_failure_bundle"]
             else []
         ),
         *(
@@ -1851,6 +1875,9 @@ def _build_release_area_matrix(
                 ),
                 "pm_release_gate_completion_audit": str(
                     support_optional_sections.get("pm_release_gate_completion_audit", "")
+                ),
+                "pm_release_gate_reviewer_handoff": str(
+                    support_optional_sections.get("pm_release_gate_reviewer_handoff", "")
                 ),
                 "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
                 "pm_blocker_register_handoff_ready_count": _as_int(

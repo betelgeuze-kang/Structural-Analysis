@@ -89,8 +89,6 @@ python3 scripts/build_paid_pilot_scope_guard_report.py \
   --out implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json \
   --out-md implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.md
 
-python3 scripts/build_support_bundle.py
-
 python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
@@ -106,6 +104,16 @@ python3 scripts/build_pm_release_blocker_closure_board.py \
 python3 scripts/build_pm_release_gate_completion_audit.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md
+
+python3 scripts/build_pm_release_gate_reviewer_handoff.py \
+  --out implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json \
+  --out-md implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md
+
+python3 scripts/build_support_bundle.py
+
+python3 scripts/report_pm_release_gate.py \
+  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
+  --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
 
 npm run ai:preflight
 ```
@@ -136,6 +144,7 @@ npm run ai:preflight
 각 open blocker는 `handoff_state=external_owner_input_ready`로 분류된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `pm_release_blocker_closure_board.json`은 open blocker를 `external_owner_input_ready`, `local_remediation_ready`, `handoff_incomplete` closure state로 다시 묶는 PM daily board다. 이 board도 blocker를 해제하지 않으며, action register의 open blocker count와 handoff readiness가 support bundle에서 바로 확인되는지를 고정한다.
 `pm_release_gate_completion_audit.json`은 PM release-area 14개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `11/14` pass, Basic CI/UX/Security 3개 top-level row가 external owner input ready 상태로 blocked임을 기록한다.
+`pm_release_gate_reviewer_handoff.json`은 open blocker별 owner, closure state, reproduction/verification command, verdict-change condition을 reviewer package로 묶는다. 이 handoff는 reviewer가 어떤 evidence가 들어오면 판정이 바뀌는지 확인하는 산출물이며, CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
 `ci_consecutive_pass_manifest.json`과 `github_actions_ci_streak_evidence.json`도 support bundle에 함께 포함된다. intake packet은 owner handoff이고, source streak evidence가 없는 상태를 release pass로 바꾸지 않는다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.

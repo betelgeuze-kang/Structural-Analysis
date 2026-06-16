@@ -56,6 +56,9 @@ DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD = Path(
 DEFAULT_PM_RELEASE_GATE_COMPLETION_AUDIT = Path(
     "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
 )
+DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
+)
 DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
 )
@@ -384,6 +387,7 @@ def build_support_bundle(
     pm_release_blocker_action_register: Path | None = DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
     pm_release_blocker_closure_board: Path | None = DEFAULT_PM_RELEASE_BLOCKER_CLOSURE_BOARD,
     pm_release_gate_completion_audit: Path | None = DEFAULT_PM_RELEASE_GATE_COMPLETION_AUDIT,
+    pm_release_gate_reviewer_handoff: Path | None = DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF,
     ci_streak_intake_packet: Path | None = DEFAULT_CI_STREAK_INTAKE_PACKET,
     ci_streak_manifest: Path | None = DEFAULT_CI_STREAK_MANIFEST,
     github_actions_ci_streak_evidence: Path | None = DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE,
@@ -430,6 +434,7 @@ def build_support_bundle(
         ("pm_release_blocker_action_register", pm_release_blocker_action_register),
         ("pm_release_blocker_closure_board", pm_release_blocker_closure_board),
         ("pm_release_gate_completion_audit", pm_release_gate_completion_audit),
+        ("pm_release_gate_reviewer_handoff", pm_release_gate_reviewer_handoff),
         ("ci_streak_intake_packet", ci_streak_intake_packet),
         ("ci_streak_manifest", ci_streak_manifest),
         ("github_actions_ci_streak_evidence", github_actions_ci_streak_evidence),
@@ -600,6 +605,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_PM_RELEASE_GATE_COMPLETION_AUDIT,
     )
     parser.add_argument(
+        "--pm-release-gate-reviewer-handoff",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF,
+    )
+    parser.add_argument(
         "--ci-streak-intake-packet",
         type=Path,
         default=DEFAULT_CI_STREAK_INTAKE_PACKET,
@@ -707,6 +717,7 @@ def main(argv: list[str] | None = None) -> int:
         pm_release_blocker_action_register=args.pm_release_blocker_action_register,
         pm_release_blocker_closure_board=args.pm_release_blocker_closure_board,
         pm_release_gate_completion_audit=args.pm_release_gate_completion_audit,
+        pm_release_gate_reviewer_handoff=args.pm_release_gate_reviewer_handoff,
         ci_streak_intake_packet=args.ci_streak_intake_packet,
         ci_streak_manifest=args.ci_streak_manifest,
         github_actions_ci_streak_evidence=args.github_actions_ci_streak_evidence,
