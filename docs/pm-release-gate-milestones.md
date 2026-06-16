@@ -46,6 +46,10 @@ python3 scripts/build_opensees_roundtrip_trace_report.py --json
 
 python3 scripts/build_ux_release_readiness_report.py --run-browser-smoke
 
+python3 scripts/build_ux_new_user_observation_report.py \
+  --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json \
+  --out-md implementation/phase1/release_evidence/productization/ux_new_user_observation_report.md
+
 python3 scripts/build_ai_orchestration_preflight_report.py \
   --out implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json
 
@@ -81,6 +85,8 @@ python3 scripts/build_paid_pilot_scope_guard_report.py \
   --out implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json \
   --out-md implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.md
 
+python3 scripts/build_support_bundle.py
+
 python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
@@ -95,7 +101,7 @@ npm run ai:preflight
 ## 현재 판정
 
 현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_ready=true`, `ga_enterprise_ready=false`다.
-다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `12/14` green이다.
+다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `11/14` green이다.
 
 합격한 마일스톤:
 
@@ -111,12 +117,13 @@ npm run ai:preflight
 전체 PM release-area blocker는 다음과 같다.
 
 - Basic CI: local artifacts는 PR `2`회, nightly `230`회 연속 PASS를 보여주지만 release streak credit은 GitHub Actions tracked evidence를 요구한다. 현재 GitHub Actions PR/nightly streak evidence가 `0/30`이므로 두 lane 모두 `30`회 연속 PASS release evidence가 아직 없다.
+- UX: automated browser rehearsal는 sample workflow가 30분 예산 안에 끝난다는 workflow evidence로만 인정한다. PM UX release-area pass는 실제 신규 사용자 human observation record, completion minutes, blocker count, observer, evidence reference, accepted decision이 들어간 `ux_new_user_observation_report.json.contract_pass=true`를 요구한다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
-- Security dependency audit: `frontend_dependency_audit_report.json`은 `npm audit --json` 결과를 release evidence로 고정하며 high/critical 및 total vulnerability가 `0`이어야 한다.
 
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
+`ux_new_user_observation_report.json`은 신규 사용자 30분 sample workflow 관찰 evidence를 고정한다. observation source가 없거나 placeholder, slow completion, blocker count, 승인 decision 누락이 있으면 UX release-area blocker로 남는다.
 `ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
 `ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드와 evidence path를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.
 `paid_pilot_scope_guard_report.json`은 constrained paid pilot에 필요한 검토 보조, 지정 구조군/workflow, engine/reviewer evidence package, unsupported/missing evidence blocker 문구와 evidence package artifact 존재를 검증한다.
@@ -128,7 +135,8 @@ npm run ai:preflight
 - Memory: explicit OOM count `0` 및 peak memory budget report가 고정됐다.
 - Interop: MIDAS/KDS roundtrip evidence와 OpenSees topology canonicalization/reload trace가 통과했다.
 - Core engine: HF-vs-topk comparison row 기준 family별 core p95 accuracy report가 통과했다. high-noise robustness p95는 core p95 판정에서 제외하고 별도 robustness evidence로 유지한다.
-- UX: automated browser rehearsal 기준 샘플 workflow가 30분 예산 안에 완료됐고, 기존 viewer review queue `7`건은 IFC load-model claim-scope 항목으로 분리됐다. 사람 대상 신규 사용자 관찰은 GA-strength evidence로 남긴다.
+- Security dependency audit: `frontend_dependency_audit_report.json`은 `npm audit --json` 결과를 release evidence로 고정하며 high/critical 및 total vulnerability `0`으로 통과했다.
+- UX workflow rehearsal: automated browser rehearsal 기준 샘플 workflow가 30분 예산 안에 완료됐고, 기존 viewer review queue `7`건은 IFC load-model claim-scope 항목으로 분리됐다. 다만 사람 대상 신규 사용자 관찰은 PM UX release-area pass 조건이라 닫힌 blocker가 아니다.
 
 ## Claim Boundary
 

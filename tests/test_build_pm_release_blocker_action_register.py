@@ -170,6 +170,58 @@ def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path)
     assert "frontend_dependency_audit_report" in row["evidence_artifacts"]
 
 
+def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None:
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": ["ux::human_new_user_observation_missing_or_failed"],
+            "release_area_blockers": ["ux::human_new_user_observation_missing_or_failed"],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "ux",
+                    "title": "UX",
+                    "status": "blocked",
+                    "blockers": ["human_new_user_observation_missing_or_failed"],
+                    "claim_boundary": "Human new-user observation is required for PM UX pass.",
+                    "checks": {
+                        "human_new_user_observation_pass": False,
+                        "human_new_user_sample_30min_pass": False,
+                    },
+                    "summary": {
+                        "automated_sample_completion_minutes": 0.27,
+                        "human_sample_completion_minutes": None,
+                        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+                        "human_observation_owner_action": "Schedule and attach one observed new-user sample run.",
+                    },
+                    "artifacts": {
+                        "ux_new_user_observation": "ux_new_user_observation_report.json",
+                    },
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == "ux::human_new_user_observation_missing_or_failed"
+    assert row["owner"] == "ux_research_owner"
+    assert row["owner_input_required"] is True
+    assert row["external_input_required"] is True
+    assert row["resolution_type"] == "external_human_new_user_observation_required"
+    assert row["owner_action"] == "Schedule and attach one observed new-user sample run."
+    assert any("build_ux_new_user_observation_report.py" in command for command in row["reproduction_commands"])
+    assert any("build_ux_new_user_observation_report.py" in command for command in row["verification_commands"])
+    assert any("ux_new_user_observation_report.json.contract_pass" in item for item in row["acceptance_criteria"])
+    assert "ux_new_user_observation_report" in row["evidence_artifacts"]
+    assert row["evidence_status"]["state"] == "missing_human_new_user_observation"
+    assert row["evidence_status"]["source_policy"] == "human_new_user_observation_required"
+    assert row["evidence_status"]["human_observation_reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
+
+
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     out = tmp_path / "register.json"

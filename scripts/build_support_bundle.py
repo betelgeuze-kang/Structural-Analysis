@@ -68,6 +68,9 @@ DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT = Path(
 )
 DEFAULT_RELEASE_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_RELEASE_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
+DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+)
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -299,6 +302,7 @@ def build_support_bundle(
     paid_pilot_scope_guard_report: Path | None = DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT,
     release_validation_manual: Path | None = DEFAULT_RELEASE_VALIDATION_MANUAL,
     release_limitation_manual: Path | None = DEFAULT_RELEASE_LIMITATION_MANUAL,
+    ux_new_user_observation_report: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_REPORT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -337,6 +341,7 @@ def build_support_bundle(
         ("paid_pilot_scope_guard_report", paid_pilot_scope_guard_report),
         ("release_validation_manual", release_validation_manual),
         ("release_limitation_manual", release_limitation_manual),
+        ("ux_new_user_observation_report", ux_new_user_observation_report),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -497,6 +502,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_RELEASE_LIMITATION_MANUAL,
     )
+    parser.add_argument(
+        "--ux-new-user-observation-report",
+        type=Path,
+        default=DEFAULT_UX_NEW_USER_OBSERVATION_REPORT,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -540,6 +550,7 @@ def main(argv: list[str] | None = None) -> int:
         paid_pilot_scope_guard_report=args.paid_pilot_scope_guard_report,
         release_validation_manual=args.release_validation_manual,
         release_limitation_manual=args.release_limitation_manual,
+        ux_new_user_observation_report=args.ux_new_user_observation_report,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

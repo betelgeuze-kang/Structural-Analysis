@@ -60,6 +60,9 @@ DEFAULT_OPENSEES_ROUNDTRIP_TRACE = Path(
 )
 DEFAULT_VIEWER_QUALITY = Path("implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json")
 DEFAULT_UX_RELEASE_READINESS = Path("implementation/phase1/release_evidence/productization/ux_release_readiness_report.json")
+DEFAULT_UX_NEW_USER_OBSERVATION = Path(
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+)
 DEFAULT_SECURITY_RUNBOOK = Path("docs/production-ops-security.md")
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
 DEFAULT_LICENSE_STATUS_CLOSURE = Path(
@@ -694,6 +697,9 @@ def _packaging_milestone(
         "support_bundle_limitation_manual_present": bool(
             support_optional_sections.get("release_limitation_manual")
         ),
+        "support_bundle_ux_new_user_observation_present": bool(
+            support_optional_sections.get("ux_new_user_observation_report")
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
         "validation_manual_content_pass": _contains_terms(
@@ -742,6 +748,11 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_limitation_manual_present"]
             else []
         ),
+        *(
+            ["support_bundle_ux_new_user_observation_missing"]
+            if not gate_checks["support_bundle_ux_new_user_observation_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
         *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
@@ -774,6 +785,9 @@ def _packaging_milestone(
             ),
             "support_bundle_limitation_manual": str(
                 support_optional_sections.get("release_limitation_manual", "")
+            ),
+            "support_bundle_ux_new_user_observation": str(
+                support_optional_sections.get("ux_new_user_observation_report", "")
             ),
             "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
             "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
@@ -822,6 +836,7 @@ def _build_release_area_matrix(
     opensees_roundtrip_trace_path: Path,
     viewer_quality_path: Path,
     ux_release_readiness_path: Path,
+    ux_new_user_observation_path: Path,
     security_runbook_path: Path,
     license_status_path: Path,
     license_status_closure_path: Path,
@@ -865,6 +880,7 @@ def _build_release_area_matrix(
     opensees_roundtrip_report = _load_json(opensees_roundtrip_trace_path)
     viewer_quality = _load_json(viewer_quality_path)
     ux_release = _load_json(ux_release_readiness_path)
+    ux_new_user = _load_json(ux_new_user_observation_path)
     license_status = _load_json(license_status_path)
     license_status_closure = _load_json(license_status_closure_path)
 
@@ -1338,6 +1354,7 @@ def _build_release_area_matrix(
 
     viewer_quality_summary = _summary(viewer_quality)
     ux_release_summary = _summary(ux_release)
+    ux_new_user_summary = _summary(ux_new_user)
     sample_completion_minutes = _first_float(
         ux_release,
         "sample_completion_minutes",
@@ -1352,7 +1369,14 @@ def _build_release_area_matrix(
             "sample_project_completion_minutes",
             "new_user_sample_project_completion_minutes",
         )
+    human_completion_minutes = _first_float(
+        ux_new_user,
+        "completion_minutes",
+        "sample_completion_minutes",
+        "new_user_sample_completion_minutes",
+    )
     ux_release_available = _reason_pass(ux_release)
+    human_observation_pass = _reason_pass(ux_new_user)
     blocking_review_item_count = _as_int(
         ux_release_summary.get("blocking_review_item_count"),
         _as_int(viewer_quality_summary.get("review_item_count"), 1),
@@ -1361,18 +1385,40 @@ def _build_release_area_matrix(
         "viewer_quality_gate_pass": _reason_pass(viewer_quality),
         "ux_release_readiness_report_pass": ux_release_available,
         "blocking_review_queue_zero_pass": blocking_review_item_count == 0,
-        "new_user_sample_30min_evidence_present": sample_completion_minutes is not None,
-        "new_user_sample_30min_pass": bool(sample_completion_minutes is not None and sample_completion_minutes <= 30.0),
+        "automated_sample_rehearsal_30min_evidence_present": sample_completion_minutes is not None,
+        "automated_sample_rehearsal_30min_pass": bool(
+            sample_completion_minutes is not None and sample_completion_minutes <= 30.0
+        ),
+        "human_new_user_observation_pass": human_observation_pass,
+        "human_new_user_sample_30min_evidence_present": human_completion_minutes is not None,
+        "human_new_user_sample_30min_pass": bool(
+            human_completion_minutes is not None and human_completion_minutes <= 30.0
+        ),
         "viewer_performance_static_budget_pass": _reason_pass(viewer_perf),
     }
     ux_blockers = [
         *(["viewer_quality_gate_not_green"] if not ux_checks["viewer_quality_gate_pass"] else []),
         *(["ux_release_readiness_report_missing_or_failed"] if not ux_checks["ux_release_readiness_report_pass"] else []),
         *(["viewer_blocking_review_queue_not_empty"] if not ux_checks["blocking_review_queue_zero_pass"] else []),
-        *(["new_user_30min_sample_evidence_missing"] if not ux_checks["new_user_sample_30min_evidence_present"] else []),
         *(
-            ["new_user_sample_gt_30min"]
+            ["automated_sample_rehearsal_30min_missing"]
+            if not ux_checks["automated_sample_rehearsal_30min_evidence_present"]
+            else []
+        ),
+        *(
+            ["automated_sample_rehearsal_gt_30min"]
             if sample_completion_minutes is not None and sample_completion_minutes > 30.0
+            else []
+        ),
+        *(["human_new_user_observation_missing_or_failed"] if not ux_checks["human_new_user_observation_pass"] else []),
+        *(
+            ["human_new_user_30min_sample_evidence_missing"]
+            if not ux_checks["human_new_user_sample_30min_evidence_present"]
+            else []
+        ),
+        *(
+            ["human_new_user_sample_gt_30min"]
+            if human_completion_minutes is not None and human_completion_minutes > 30.0
             else []
         ),
         *(["viewer_performance_static_budget_not_green"] if not ux_checks["viewer_performance_static_budget_pass"] else []),
@@ -1385,7 +1431,11 @@ def _build_release_area_matrix(
             blockers=ux_blockers,
             checks=ux_checks,
             summary={
-                "sample_completion_minutes": sample_completion_minutes,
+                "sample_completion_minutes": human_completion_minutes,
+                "automated_sample_completion_minutes": sample_completion_minutes,
+                "human_sample_completion_minutes": human_completion_minutes,
+                "human_observation_reason_code": str(ux_new_user.get("reason_code", "")),
+                "human_observation_owner_action": str(ux_new_user_summary.get("owner_action", "")),
                 "viewer_review_item_count": _as_int(viewer_quality_summary.get("review_item_count"), -1),
                 "blocking_review_item_count": blocking_review_item_count,
                 "ux_evidence_source": "ux_release_readiness_report" if ux_release else "viewer_quality_fallback",
@@ -1394,10 +1444,11 @@ def _build_release_area_matrix(
                 "viewer_quality": str(viewer_quality_path),
                 "viewer_performance_budget": str(viewer_performance_budget_path),
                 "ux_release_readiness": str(ux_release_readiness_path),
+                "ux_new_user_observation": str(ux_new_user_observation_path),
             },
             claim_boundary=(
-                "UX sample completion is currently automated browser rehearsal evidence; human new-user "
-                "usability observation remains a GA-strength evidence upgrade."
+                "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires "
+                "human new-user sample workflow observation evidence."
             ),
         )
     )
@@ -1429,6 +1480,9 @@ def _build_release_area_matrix(
         ),
         "limitation_manual_in_failure_bundle": bool(
             support_optional_sections.get("release_limitation_manual")
+        ),
+        "ux_new_user_observation_report_in_failure_bundle": bool(
+            support_optional_sections.get("ux_new_user_observation_report")
         ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
@@ -1478,6 +1532,11 @@ def _build_release_area_matrix(
             if not support_area_checks["limitation_manual_in_failure_bundle"]
             else []
         ),
+        *(
+            ["ux_new_user_observation_report_missing_from_failure_bundle"]
+            if not support_area_checks["ux_new_user_observation_report_in_failure_bundle"]
+            else []
+        ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
         *(["rollback_runbook_missing"] if not support_area_checks["rollback_runbook_present"] else []),
     ]
@@ -1507,6 +1566,9 @@ def _build_release_area_matrix(
                 ),
                 "release_limitation_manual": str(
                     support_optional_sections.get("release_limitation_manual", "")
+                ),
+                "ux_new_user_observation_report": str(
+                    support_optional_sections.get("ux_new_user_observation_report", "")
                 ),
             },
             artifacts={
@@ -1629,6 +1691,7 @@ def build_report(
     opensees_roundtrip_trace: Path = DEFAULT_OPENSEES_ROUNDTRIP_TRACE,
     viewer_quality: Path = DEFAULT_VIEWER_QUALITY,
     ux_release_readiness: Path = DEFAULT_UX_RELEASE_READINESS,
+    ux_new_user_observation: Path = DEFAULT_UX_NEW_USER_OBSERVATION,
     security_runbook: Path = DEFAULT_SECURITY_RUNBOOK,
     license_status: Path = DEFAULT_LICENSE_STATUS,
     license_status_closure: Path = DEFAULT_LICENSE_STATUS_CLOSURE,
@@ -1734,6 +1797,7 @@ def build_report(
         opensees_roundtrip_trace_path=opensees_roundtrip_trace,
         viewer_quality_path=viewer_quality,
         ux_release_readiness_path=ux_release_readiness,
+        ux_new_user_observation_path=ux_new_user_observation,
         security_runbook_path=security_runbook,
         license_status_path=license_status,
         license_status_closure_path=license_status_closure,
@@ -1916,6 +1980,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--opensees-roundtrip-trace", type=Path, default=DEFAULT_OPENSEES_ROUNDTRIP_TRACE)
     parser.add_argument("--viewer-quality", type=Path, default=DEFAULT_VIEWER_QUALITY)
     parser.add_argument("--ux-release-readiness", type=Path, default=DEFAULT_UX_RELEASE_READINESS)
+    parser.add_argument("--ux-new-user-observation", type=Path, default=DEFAULT_UX_NEW_USER_OBSERVATION)
     parser.add_argument("--security-runbook", type=Path, default=DEFAULT_SECURITY_RUNBOOK)
     parser.add_argument("--license-status", type=Path, default=DEFAULT_LICENSE_STATUS)
     parser.add_argument("--license-status-closure", type=Path, default=DEFAULT_LICENSE_STATUS_CLOSURE)
@@ -1981,6 +2046,7 @@ def main(argv: list[str] | None = None) -> int:
         opensees_roundtrip_trace=args.opensees_roundtrip_trace,
         viewer_quality=args.viewer_quality,
         ux_release_readiness=args.ux_release_readiness,
+        ux_new_user_observation=args.ux_new_user_observation,
         security_runbook=args.security_runbook,
         license_status=args.license_status,
         license_status_closure=args.license_status_closure,

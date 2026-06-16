@@ -4,11 +4,13 @@
   "full_release_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+    "ux::human_new_user_observation_missing_or_failed",
+    "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured"
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T18:09:57.118040+00:00",
+  "generated_at": "2026-06-16T18:26:01.164128+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -163,6 +165,7 @@
         "support_bundle_license_intake_packet_present": true,
         "support_bundle_limitation_manual_present": true,
         "support_bundle_pm_blocker_register_present": true,
+        "support_bundle_ux_new_user_observation_present": true,
         "support_bundle_validation_manual_present": true,
         "validation_manual_content_pass": true,
         "validation_manual_present": true,
@@ -189,6 +192,7 @@
         "support_bundle_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_ux_new_user_observation": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
         "support_bundle_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
         "validation_manual_required_terms": [
           "pm release gate",
@@ -209,6 +213,8 @@
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+    "ux::human_new_user_observation_missing_or_failed",
+    "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured"
   ],
   "release_area_gate_ready": false,
@@ -494,25 +500,36 @@
     {
       "area": "ux",
       "artifacts": {
+        "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
         "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
-      "blockers": [],
+      "blockers": [
+        "human_new_user_observation_missing_or_failed",
+        "human_new_user_30min_sample_evidence_missing"
+      ],
       "checks": {
+        "automated_sample_rehearsal_30min_evidence_present": true,
+        "automated_sample_rehearsal_30min_pass": true,
         "blocking_review_queue_zero_pass": true,
-        "new_user_sample_30min_evidence_present": true,
-        "new_user_sample_30min_pass": true,
+        "human_new_user_observation_pass": false,
+        "human_new_user_sample_30min_evidence_present": false,
+        "human_new_user_sample_30min_pass": false,
         "ux_release_readiness_report_pass": true,
         "viewer_performance_static_budget_pass": true,
         "viewer_quality_gate_pass": true
       },
-      "claim_boundary": "UX sample completion is currently automated browser rehearsal evidence; human new-user usability observation remains a GA-strength evidence upgrade.",
-      "ok": true,
-      "status": "pass",
+      "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
+      "ok": false,
+      "status": "blocked",
       "summary": {
+        "automated_sample_completion_minutes": 0.2701333333333333,
         "blocking_review_item_count": 0,
-        "sample_completion_minutes": 0.2701333333333333,
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+        "human_sample_completion_minutes": null,
+        "sample_completion_minutes": null,
         "ux_evidence_source": "ux_release_readiness_report",
         "viewer_review_item_count": 7
       },
@@ -536,6 +553,7 @@
         "limitation_manual_in_failure_bundle": true,
         "pm_blocker_action_register_in_failure_bundle": true,
         "rollback_runbook_present": true,
+        "ux_new_user_observation_report_in_failure_bundle": true,
         "validation_manual_in_failure_bundle": true
       },
       "claim_boundary": "",
@@ -548,7 +566,8 @@
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
-        "support_bundle_missing_required_count": 0
+        "support_bundle_missing_required_count": 0,
+        "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json"
       },
       "title": "Support"
     },
@@ -606,6 +625,8 @@
       "customer_audit_failure_bundle_sla_missing",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "ux::human_new_user_observation_missing_or_failed",
+      "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured"
     ],
     "ga_enterprise_evidence_gate_pass": false,
@@ -626,5 +647,5 @@
     "technical_paid_pilot_candidate": true
   },
   "schema_version": "pm-release-gate-report.v1",
-  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=304"
+  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304"
 }

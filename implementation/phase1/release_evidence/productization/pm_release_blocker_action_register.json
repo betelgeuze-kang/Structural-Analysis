@@ -1,13 +1,15 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T17:57:42.337676+00:00",
+  "generated_at": "2026-06-16T18:25:53.631854+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "rows": [
     {
@@ -142,6 +144,118 @@
     },
     {
       "acceptance_criteria": [
+        "`ux_new_user_observation_report.json.contract_pass == true`",
+        "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+      ],
+      "blocker_code": "human_new_user_observation_missing_or_failed",
+      "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+      "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
+      "evidence_artifacts": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
+        "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+        "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+      },
+      "evidence_snapshot": {
+        "automated_sample_completion_minutes": 0.2701333333333333,
+        "blocking_review_item_count": 0,
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+        "human_sample_completion_minutes": null,
+        "sample_completion_minutes": null,
+        "ux_evidence_source": "ux_release_readiness_report",
+        "viewer_review_item_count": 7
+      },
+      "evidence_status": {
+        "automated_sample_completion_minutes": 0.2701333333333333,
+        "human_new_user_observation_pass": false,
+        "human_new_user_sample_30min_pass": false,
+        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+        "human_sample_completion_minutes": null,
+        "source_policy": "human_new_user_observation_required",
+        "state": "missing_human_new_user_observation"
+      },
+      "external_input_required": true,
+      "namespace": "ux",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner": "ux_research_owner",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_human_new_user_observation_required",
+      "scope": "release_area",
+      "status": "open",
+      "title": "UX",
+      "verification_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`ux_new_user_observation_report.json.contract_pass == true`",
+        "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+      ],
+      "blocker_code": "human_new_user_30min_sample_evidence_missing",
+      "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+      "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
+      "evidence_artifacts": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
+        "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+        "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+      },
+      "evidence_snapshot": {
+        "automated_sample_completion_minutes": 0.2701333333333333,
+        "blocking_review_item_count": 0,
+        "human_observation_owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+        "human_sample_completion_minutes": null,
+        "sample_completion_minutes": null,
+        "ux_evidence_source": "ux_release_readiness_report",
+        "viewer_review_item_count": 7
+      },
+      "evidence_status": {
+        "automated_sample_completion_minutes": 0.2701333333333333,
+        "human_new_user_observation_pass": false,
+        "human_new_user_sample_30min_pass": false,
+        "human_observation_reason_code": "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
+        "human_sample_completion_minutes": null,
+        "source_policy": "human_new_user_observation_required",
+        "state": "missing_human_new_user_observation"
+      },
+      "external_input_required": true,
+      "namespace": "ux",
+      "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner": "ux_research_owner",
+      "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_human_new_user_observation_required",
+      "scope": "release_area",
+      "status": "open",
+      "title": "UX",
+      "verification_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
         "`license_status_closure_report.json.contract_pass == true`",
         "`license_status` is active and populated from approved product/legal evidence",
         "`security::license_status_not_configured` absent from `release_area_blockers`"
@@ -215,14 +329,14 @@
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
-    "external_input_required_count": 3,
+    "external_input_required_count": 5,
     "full_release_gate_ready": false,
     "limited_commercial_ready": true,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 3,
-    "owner_input_required_count": 3,
+    "open_blocker_count": 5,
+    "owner_input_required_count": 5,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 3,
+    "release_area_blocker_count": 5,
     "release_area_gate_ready": false
   }
 }

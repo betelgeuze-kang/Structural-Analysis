@@ -33,6 +33,13 @@ DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
 DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
 )
+DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+)
+
+
+def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
+    return namespace == "ux" and "human_new_user" in code
 
 
 def _now_utc_iso() -> str:
@@ -86,6 +93,14 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             "Patch or replace vulnerable frontend dependencies, rerun `npm audit --audit-level high`, "
             "and regenerate frontend dependency audit evidence before security release signoff."
         )
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        direct = str(summary.get("human_observation_owner_action", "") or "")
+        if direct:
+            return direct
+        return (
+            "Attach a human new-user observation record for the sample project workflow, rerun "
+            "`build_ux_new_user_observation_report.py`, and regenerate the PM release gate evidence."
+        )
     direct = str(summary.get("owner_action", "") or row.get("owner_action", "") or "")
     if direct:
         return direct
@@ -100,6 +115,8 @@ def _owner(*, namespace: str, code: str) -> str:
         return "product_legal_owner"
     if namespace == "security" and "frontend_dependency" in code:
         return "frontend_security_owner"
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return "ux_research_owner"
     return "release_owner"
 
 
@@ -110,6 +127,8 @@ def _resolution_type(*, namespace: str, code: str) -> str:
         return "product_legal_decision_required"
     if namespace == "security" and "frontend_dependency" in code:
         return "local_dependency_remediation_required"
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return "external_human_new_user_observation_required"
     return "release_evidence_remediation_required"
 
 
@@ -160,6 +179,12 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`frontend_dependency_audit_report.json.summary.high_or_critical_vulnerability_count == 0`",
             "`security::frontend_dependency_audit_missing_or_failed` absent from `release_area_blockers`",
         ]
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return [
+            "`ux_new_user_observation_report.json.contract_pass == true`",
+            "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+            "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`",
+        ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
@@ -193,6 +218,12 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return [
+            f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     return [
         pm_report_command,
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -215,6 +246,11 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             "npm audit --audit-level high",
             f"python3 scripts/build_frontend_dependency_audit_report.py --out {DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT} --fail-blocked",
         ]
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        return [
+            f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT} --fail-blocked",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
     return [
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
     ]
@@ -224,6 +260,7 @@ def _owner_input_required(*, namespace: str, code: str) -> bool:
     return bool(
         (namespace == "basic_ci" and "consecutive_pass" in code)
         or (namespace == "security" and "license" in code)
+        or _is_ux_human_new_user_blocker(namespace=namespace, code=code)
     )
 
 
@@ -245,6 +282,8 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
         augmented["license_status_intake_packet"] = str(DEFAULT_LICENSE_STATUS_INTAKE_PACKET)
     if namespace == "security" and "frontend_dependency" in code:
         augmented["frontend_dependency_audit_report"] = str(DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT)
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        augmented["ux_new_user_observation_report"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_REPORT)
     return augmented
 
 
@@ -284,6 +323,27 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "state": "dependency_vulnerabilities_present" if high_or_critical else "ready_for_pm_regeneration",
             "vulnerability_total": total,
             "high_or_critical_vulnerability_count": high_or_critical,
+        }
+    if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
+        checks = _as_dict(row.get("checks"))
+        human_pass = bool(checks.get("human_new_user_observation_pass", False))
+        human_30min_pass = bool(checks.get("human_new_user_sample_30min_pass", False))
+        completion_minutes = summary.get("human_sample_completion_minutes")
+        state = "ready_for_pm_regeneration"
+        if not human_pass:
+            state = "missing_human_new_user_observation"
+        elif completion_minutes is None:
+            state = "missing_human_new_user_completion_evidence"
+        elif not human_30min_pass:
+            state = "human_new_user_completion_gt_30min"
+        return {
+            "state": state,
+            "human_new_user_observation_pass": human_pass,
+            "human_new_user_sample_30min_pass": human_30min_pass,
+            "human_sample_completion_minutes": completion_minutes,
+            "automated_sample_completion_minutes": summary.get("automated_sample_completion_minutes"),
+            "human_observation_reason_code": str(summary.get("human_observation_reason_code", "")),
+            "source_policy": "human_new_user_observation_required",
         }
     return {"state": "open_release_evidence_blocker"}
 

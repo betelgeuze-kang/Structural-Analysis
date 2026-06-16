@@ -159,6 +159,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
             tmp_path / "release-limitation-manual.md",
             "claim boundary paid pilot limited commercial ga/enterprise known issues support bundle rollback\n",
         ),
+        "ux_new_user_observation_report": _write_json(
+            tmp_path / "ux-new-user-observation-report.json",
+            {
+                "schema_version": "ux-new-user-observation-report.v1",
+                "contract_pass": False,
+                "blockers": ["observation_file_missing"],
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -207,6 +215,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "paid_pilot_scope_guard_report" in payload["optional_sections"]
     assert "release_validation_manual" in payload["optional_sections"]
     assert "release_limitation_manual" in payload["optional_sections"]
+    assert "ux_new_user_observation_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -243,6 +252,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "claim boundary" in redacted_limitation_manual
+    redacted_ux_observation = Path(payload["optional_sections"]["ux_new_user_observation_report"]).read_text(
+        encoding="utf-8"
+    )
+    assert "observation_file_missing" in redacted_ux_observation
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )
