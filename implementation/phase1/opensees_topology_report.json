@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase3-opensees-topology-parser",
-  "generated_at": "2026-03-28T15:32:08.195665+00:00",
+  "generated_at": "2026-06-16T13:28:50.281283+00:00",
   "inputs": {
     "model": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
     "edges_out": "implementation/phase1/open_data/megastructure/opensees_edges.json",

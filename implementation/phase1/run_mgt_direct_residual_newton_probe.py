@@ -992,10 +992,6 @@ def run_mgt_direct_residual_newton_probe(
                 }
             translations = np.asarray(u, dtype=np.float64).reshape((-1, DOF_PER_NODE))[:, :3]
             deformed_xyz = node_xyz + translations
-            axial_forces = {
-                int(elem_id): float(force) * float(frame_gravity_load_scale) * load_scale
-                for elem_id, force in base_axial_forces.items()
-            }
             service_tangent_by_element, service_material_meta = _service_tangent_by_element(
                 elements=frame_elements,
                 node_xyz=deformed_xyz,

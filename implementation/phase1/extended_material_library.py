@@ -15,7 +15,7 @@ Provides reduced-order material laws for:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 import math
 from typing import Tuple
 
@@ -369,11 +369,11 @@ def rock_hoek_brown_response(
 @dataclass(frozen=True)
 class TimberMaterial:
     """Timber/gluam/CLT/LVL material with orthotropic behavior."""
-    fc_0_mpa: float = 24.0  // compression parallel
-    ft_0_mpa: float = 18.0  // tension parallel
-    fc_90_mpa: float = 4.0  // compression perpendicular
-    ft_90_mpa: float = 0.5  // tension perpendicular
-    fv_mpa: float = 3.5     // shear
+    fc_0_mpa: float = 24.0  # compression parallel
+    ft_0_mpa: float = 18.0  # tension parallel
+    fc_90_mpa: float = 4.0  # compression perpendicular
+    ft_90_mpa: float = 0.5  # tension perpendicular
+    fv_mpa: float = 3.5  # shear
     e_0_mpa: float = 12000.0
     e_90_mpa: float = 400.0
     g_mpa: float = 750.0

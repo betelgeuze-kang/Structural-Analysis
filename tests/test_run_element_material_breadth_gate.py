@@ -88,8 +88,16 @@ def test_element_material_breadth_gate_passes_with_direct_shell_wall_contact_and
                     "case_id": "wall-1",
                     "topology_type": "wall-frame",
                     "hazard_type": "seismic",
+                    "checks": {
+                        "converged_all_steps": True,
+                        "plasticity_triggered": True,
+                    },
                     "summary": {
                         "material_model": "rc_composite",
+                        "residual_metric_source": "solver_raw",
+                        "residual_metric_fallback_used": False,
+                        "residual_top_displacement_m": 0.12,
+                        "residual_drift_ratio_pct": 0.4,
                         "section_family_counts": {"wall_boundary": 6, "wall_web": 9},
                         "material_indices": {"compression_damage_mean": 1.0},
                     },
@@ -243,15 +251,15 @@ def test_element_material_breadth_gate_passes_with_direct_shell_wall_contact_and
         {
             "cases": [
                 {
-                    "case_id": "A-001",
-                    "topology_type": "wall-frame",
+                    "case_id": f"A-{idx:03d}",
+                    "topology_type": "wall-frame" if idx % 2 else "outrigger",
+                    "hazard_type": "seismic" if idx % 2 else "wind",
+                    "split": "test",
+                    "source_family": "fixture",
                     "element_mix": "shell_beam_mix",
-                },
-                {
-                    "case_id": "A-002",
-                    "topology_type": "outrigger",
-                    "element_mix": "shell_beam_mix",
-                },
+                    "residual_norm": 0.01 * idx,
+                }
+                for idx in range(1, 11)
             ]
         },
     )
@@ -317,6 +325,9 @@ def test_element_material_breadth_gate_passes_with_direct_shell_wall_contact_and
     assert payload["checks"]["assembled_global_depth_surface_present"] is True
     assert payload["checks"]["section_family_demand_surface_present"] is True
     assert payload["checks"]["beam_shell_contact_coupling_surface_present"] is True
+    assert payload["checks"]["contact_material_coupled_case_manifest_pass"] is True
+    assert payload["checks"]["panel_contact_failure_mode_reason_code_pass"] is True
+    assert payload["checks"]["nonlinear_residual_integrated_case_pass"] is True
     assert payload["summary"]["contact_surface_status"] == "full_structural_contact"
     assert payload["summary"]["panel_rc_cyclic_surface_status"] == "pass"
     assert payload["summary"]["panel_rc_cyclic_section_count"] == 2
@@ -359,6 +370,12 @@ def test_element_material_breadth_gate_passes_with_direct_shell_wall_contact_and
     assert payload["summary"]["beam_shell_contact_node_surface_proxy_count"] == 5
     assert payload["summary"]["beam_shell_contact_support_family_count"] == 2
     assert payload["summary"]["beam_shell_contact_proxy_family_count"] == 2
+    assert payload["summary"]["contact_material_coupled_case_count"] == 10
+    assert payload["summary"]["panel_contact_failure_mode_reason_code_count"] >= 5
+    assert payload["summary"]["nonlinear_residual_integrated_case_count"] == 1
+    assert len(payload["contact_material_coupled_case_rows"]) == 10
+    assert payload["nonlinear_residual_integrated_case_rows"][0]["residual_metric_source"] == "solver_raw"
+    assert "CONTACT_GAP_UPLIFT_UNILATERAL" in payload["summary"]["panel_contact_failure_mode_reason_codes"]
     assert payload["summary"]["material_model_types"] == ["rc_composite", "steel_elastic_plastic"]
     assert payload["summary"]["link_model_types"] == [
         "bearing_bilinear",
@@ -405,13 +422,18 @@ def test_element_material_breadth_gate_passes_with_direct_shell_wall_contact_and
     assert "panel_cyclic=yes(sections=2," in payload["summary_line"]
     assert "assembled_depth=yes(beam_iter=" in payload["summary_line"]
     assert "family_demand=yes(stories=5," in payload["summary_line"]
-    assert "coupling=yes(beam=1,panel=2,support=21,search=9,proxy=5)" in payload["summary_line"]
+    assert "coupling=yes(beam=1,panel=2,support=21,search=9,proxy=5,cases=10)" in payload["summary_line"]
+    assert "failure_reason_codes=yes" in payload["summary_line"]
+    assert "nonlinear_residual=yes(cases=1)" in payload["summary_line"]
     assert "support=15(contact=6,foundation=4,device=5)" in payload["summary_line"]
     assert any("shell=pass" in reason for reason in payload["reasons"])
     assert any("panel_rc_cyclic=pass" in reason for reason in payload["reasons"])
     assert any("assembled_global_depth=pass" in reason for reason in payload["reasons"])
     assert any("section_family_demand=pass" in reason for reason in payload["reasons"])
     assert any("beam_shell_contact_coupling=pass" in reason for reason in payload["reasons"])
+    assert any("contact_material_case_manifest=pass" in reason for reason in payload["reasons"])
+    assert any("panel_contact_failure_reason_codes=pass" in reason for reason in payload["reasons"])
+    assert any("nonlinear_residual_same_case=pass" in reason for reason in payload["reasons"])
     assert any("support_link_surface=pass" in reason for reason in payload["reasons"])
     assert any("Structural-contact breadth is measured" in item for item in payload["limitations"])
     assert any("Panel RC cyclic surface is a bounded library-backed wall/slab helper summary" in item for item in payload["limitations"])

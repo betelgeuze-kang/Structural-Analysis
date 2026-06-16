@@ -1,0 +1,51 @@
+{
+  "schema_version": "structure-viewer-sample-workflow-smoke.v1",
+  "generated_at": "2026-06-16T14:00:15.811Z",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "sample_completion_minutes": 0.2701333333333333,
+  "max_sample_completion_minutes": 30,
+  "browser_error_count": 0,
+  "browser_warning_count": 3,
+  "steps": [
+    {
+      "label": "midas33 optimized sample project",
+      "query": "project=midas33_release&drawing=midas33_optimized&variant=optimized",
+      "elapsed_ms": 8457,
+      "browser_error_count": 0,
+      "browser_errors": [],
+      "browser_warning_count": 1,
+      "browser_warnings": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "canvas_nonblank": true,
+      "canvas_significant_pixel_count": 4802
+    },
+    {
+      "label": "midas33 search and selection input",
+      "elapsed_ms": 0,
+      "browser_error_count": 0,
+      "canvas_nonblank": true
+    },
+    {
+      "label": "real drawing sample project",
+      "query": "preset=real_drawing_private_3d&member=RD-001&drawing_asset=RD-001",
+      "elapsed_ms": 7751,
+      "browser_error_count": 0,
+      "browser_errors": [],
+      "browser_warning_count": 2,
+      "browser_warnings": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)"
+      ],
+      "canvas_nonblank": true,
+      "canvas_significant_pixel_count": 2332
+    },
+    {
+      "label": "real drawing search input",
+      "elapsed_ms": 0,
+      "browser_error_count": 0,
+      "canvas_nonblank": true
+    }
+  ]
+}

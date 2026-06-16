@@ -1710,7 +1710,6 @@ def test_mgt_rocm_sparse_solver_probe_records_line_gpu_solve(tmp_path: Path) -> 
     assert payload["coupled_frame_shell_rocm_sparse_residual_replay_ready"] is True
     shell = payload["probe_rows"][2]
     shell_solve = payload["probe_rows"][3]
-    coupled = payload["probe_rows"][4]
     coupled_solve = payload["probe_rows"][5]
     assert shell["label"] == "surface_shell_bending_rocm_residual_replay"
     assert shell["backend"] == "rocm_torch_sparse_residual_replay"

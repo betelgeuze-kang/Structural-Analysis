@@ -93,6 +93,7 @@ INPUT_SCHEMA = {
         "min_wall_rows",
         "min_wall_frame_cases",
         "min_compression_surrogate_rows",
+        "min_contact_material_coupled_cases",
         "out",
     ],
     "properties": {
@@ -119,6 +120,7 @@ INPUT_SCHEMA = {
         "min_wall_rows": {"type": "integer", "minimum": 1},
         "min_wall_frame_cases": {"type": "integer", "minimum": 1},
         "min_compression_surrogate_rows": {"type": "integer", "minimum": 1},
+        "min_contact_material_coupled_cases": {"type": "integer", "minimum": 1},
         "out": {"type": "string", "minLength": 1},
     },
 }
@@ -275,6 +277,7 @@ def _aggregate_benchmark_cases(case_paths: list[Path]) -> dict:
     topology_counts: Counter[str] = Counter()
     element_mix_counts: Counter[str] = Counter()
     case_count = 0
+    case_rows: list[dict] = []
     rows_by_file: list[dict] = []
 
     for path in case_paths:
@@ -296,6 +299,19 @@ def _aggregate_benchmark_cases(case_paths: list[Path]) -> dict:
             if mix:
                 element_mix_counts[mix] += 1
                 file_mix_counts[mix] += 1
+            case_rows.append(
+                {
+                    "case_id": str(row.get("case_id", "") or ""),
+                    "cases_path": str(path),
+                    "split": str(row.get("split", "") or ""),
+                    "topology_type": topology,
+                    "hazard_type": str(row.get("hazard_type", "") or ""),
+                    "source_family": str(row.get("source_family", "") or ""),
+                    "element_mix": mix,
+                    "residual_norm": float(row.get("residual_norm", 0.0) or 0.0),
+                    "metric_source": str(row.get("metric_source", "") or ""),
+                }
+            )
         rows_by_file.append(
             {
                 "cases_path": str(path),
@@ -311,11 +327,179 @@ def _aggregate_benchmark_cases(case_paths: list[Path]) -> dict:
         "topology_counts": dict(sorted(topology_counts.items())),
         "element_mix_counts": dict(sorted(element_mix_counts.items())),
         "rows_by_file": rows_by_file,
+        "case_rows": case_rows,
     }
 
 
 def _format_yes_no(value: bool) -> str:
     return "yes" if value else "no"
+
+
+def _contact_material_coupled_case_rows(
+    benchmark_case_rows: list[dict],
+    *,
+    material_models: list[str],
+    contact_surface_status: str,
+    structural_contact_direct_contract_pass: bool,
+    contact_interface_compression_surrogate_pass: bool,
+    material_capability_breadth_pass: bool,
+) -> list[dict]:
+    rows: list[dict] = []
+    if not material_models:
+        return rows
+    contact_basis = (
+        "full_structural_contact"
+        if structural_contact_direct_contract_pass
+        else "interface_compression_surrogate"
+        if contact_interface_compression_surrogate_pass
+        else ""
+    )
+    if not contact_basis or not material_capability_breadth_pass:
+        return rows
+    for row in benchmark_case_rows:
+        if not isinstance(row, dict):
+            continue
+        if str(row.get("element_mix", "") or "").strip() != "shell_beam_mix":
+            continue
+        rows.append(
+            {
+                "case_id": str(row.get("case_id", "") or ""),
+                "topology_type": str(row.get("topology_type", "") or ""),
+                "hazard_type": str(row.get("hazard_type", "") or ""),
+                "source_family": str(row.get("source_family", "") or ""),
+                "split": str(row.get("split", "") or ""),
+                "cases_path": str(row.get("cases_path", "") or ""),
+                "element_mix": "shell_beam_mix",
+                "material_model_types": list(material_models),
+                "contact_surface_status": contact_surface_status,
+                "coupling_basis": [
+                    "benchmark_shell_beam_mix_case",
+                    contact_basis,
+                    "material_capability_breadth_pass",
+                ],
+                "residual_norm": float(row.get("residual_norm", 0.0) or 0.0),
+            }
+        )
+    return rows
+
+
+def _panel_contact_failure_reason_rows(
+    *,
+    panel_rc_cyclic_summary: dict[str, object],
+    link_model_types: list[str],
+    support_search_family_types: list[str],
+    node_to_surface_proxy_family_types: list[str],
+) -> list[dict]:
+    rows: list[dict] = []
+    evidence_tags = {str(tag) for tag in panel_rc_cyclic_summary.get("evidence_tags", [])}
+    if "crushing" in evidence_tags:
+        rows.append(
+            {
+                "domain": "panel",
+                "failure_mode": "rc_crushing",
+                "reason_code": "PANEL_RC_CRUSHING",
+                "evidence_basis": "panel_rc_cyclic_evidence_tags",
+            }
+        )
+    if "pinching" in evidence_tags:
+        rows.append(
+            {
+                "domain": "panel",
+                "failure_mode": "cyclic_pinching",
+                "reason_code": "PANEL_RC_CYCLIC_PINCHING",
+                "evidence_basis": "panel_rc_cyclic_evidence_tags",
+            }
+        )
+    if "degradation" in evidence_tags:
+        rows.append(
+            {
+                "domain": "panel",
+                "failure_mode": "stiffness_strength_degradation",
+                "reason_code": "PANEL_RC_DEGRADATION",
+                "evidence_basis": "panel_rc_cyclic_evidence_tags",
+            }
+        )
+
+    link_models = set(link_model_types)
+    if {"normal_gap_unilateral", "uplift_seat_unilateral"}.issubset(link_models):
+        rows.append(
+            {
+                "domain": "contact",
+                "failure_mode": "gap_uplift_unilateral",
+                "reason_code": "CONTACT_GAP_UPLIFT_UNILATERAL",
+                "evidence_basis": "structural_contact_link_model_types",
+            }
+        )
+    if {"bearing_bilinear", "coulomb_friction", "kelvin_voigt_pounding"}.issubset(link_models):
+        rows.append(
+            {
+                "domain": "contact",
+                "failure_mode": "bearing_friction_impact",
+                "reason_code": "CONTACT_BEARING_FRICTION_IMPACT",
+                "evidence_basis": "structural_contact_link_model_types",
+            }
+        )
+
+    support_families = set(support_search_family_types) | set(node_to_surface_proxy_family_types)
+    for family in sorted(support_families):
+        rows.append(
+            {
+                "domain": "contact",
+                "failure_mode": family,
+                "reason_code": f"CONTACT_{family.upper()}",
+                "evidence_basis": "support_search_family_types",
+            }
+        )
+    return rows
+
+
+def _nonlinear_residual_integrated_case_rows(ndtha_payload: dict) -> list[dict]:
+    if not bool(ndtha_payload.get("contract_pass", False)):
+        return []
+    rows = ndtha_payload.get("rows") if isinstance(ndtha_payload.get("rows"), list) else []
+    integrated_rows: list[dict] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        row_checks = row.get("checks") if isinstance(row.get("checks"), dict) else {}
+        row_summary = row.get("summary") if isinstance(row.get("summary"), dict) else {}
+        material_model = str(row_summary.get("material_model", "") or "").strip()
+        residual_source = str(row_summary.get("residual_metric_source", "") or "").strip()
+        try:
+            residual_top = float(row_summary.get("residual_top_displacement_m", 0.0) or 0.0)
+            residual_drift = float(row_summary.get("residual_drift_ratio_pct", 0.0) or 0.0)
+        except Exception:
+            continue
+        residual_fallback_used = bool(row_summary.get("residual_metric_fallback_used", False))
+        integrated_pass = bool(
+            row_checks.get("converged_all_steps", False)
+            and row_checks.get("plasticity_triggered", False)
+            and material_model
+            and residual_source
+            and not residual_fallback_used
+            and np.isfinite(residual_top)
+            and np.isfinite(residual_drift)
+        )
+        if not integrated_pass:
+            continue
+        integrated_rows.append(
+            {
+                "case_id": str(row.get("case_id", "") or ""),
+                "topology_type": str(row.get("topology_type", "") or ""),
+                "hazard_type": str(row.get("hazard_type", "") or ""),
+                "material_model": material_model,
+                "residual_metric_source": residual_source,
+                "residual_metric_fallback_used": residual_fallback_used,
+                "residual_top_displacement_m": residual_top,
+                "residual_drift_ratio_pct": residual_drift,
+                "integration_basis": [
+                    "ndtha_nonlinear_material_response",
+                    "same_case_solver_raw_residual",
+                    "all_steps_converged",
+                ],
+            }
+        )
+    return integrated_rows
 
 
 def _panel_rc_cyclic_surface_summary() -> dict[str, object]:
@@ -717,6 +901,7 @@ def main() -> None:
     parser.add_argument("--min-wall-rows", type=int, default=1)
     parser.add_argument("--min-wall-frame-cases", type=int, default=1)
     parser.add_argument("--min-compression-surrogate-rows", type=int, default=1)
+    parser.add_argument("--min-contact-material-coupled-cases", type=int, default=10)
     parser.add_argument("--out", default="implementation/phase1/element_material_breadth_gate_report.json")
     args = parser.parse_args()
 
@@ -744,6 +929,7 @@ def main() -> None:
         "min_wall_rows": int(args.min_wall_rows),
         "min_wall_frame_cases": int(args.min_wall_frame_cases),
         "min_compression_surrogate_rows": int(args.min_compression_surrogate_rows),
+        "min_contact_material_coupled_cases": int(args.min_contact_material_coupled_cases),
         "out": str(args.out),
     }
     out = Path(args.out)
@@ -1021,6 +1207,23 @@ def main() -> None:
             if contact_interface_compression_surrogate_pass
             else "tracked_gap"
         )
+        contact_material_coupled_case_rows = _contact_material_coupled_case_rows(
+            benchmarks.get("case_rows") if isinstance(benchmarks.get("case_rows"), list) else [],
+            material_models=material_models,
+            contact_surface_status=contact_surface_status,
+            structural_contact_direct_contract_pass=structural_contact_direct_contract_pass,
+            contact_interface_compression_surrogate_pass=contact_interface_compression_surrogate_pass,
+            material_capability_breadth_pass=material_capability_breadth_pass,
+        )
+        panel_contact_failure_reason_rows = _panel_contact_failure_reason_rows(
+            panel_rc_cyclic_summary=panel_rc_cyclic_summary,
+            link_model_types=link_model_types,
+            support_search_family_types=list(beam_shell_contact_coupling_summary["support_search_family_types"]),
+            node_to_surface_proxy_family_types=list(
+                beam_shell_contact_coupling_summary["node_to_surface_proxy_family_types"]
+            ),
+        )
+        nonlinear_residual_integrated_case_rows = _nonlinear_residual_integrated_case_rows(ndtha)
         checks = {
             "shell_topology_evidence_pass": bool(shell_topology_evidence_pass),
             "shell_diaphragm_evidence_pass": bool(shell_diaphragm_evidence_pass),
@@ -1056,6 +1259,14 @@ def main() -> None:
             "assembled_global_depth_surface_present": bool(assembled_global_depth_summary["present"]),
             "section_family_demand_surface_present": bool(section_family_demand_summary["present"]),
             "beam_shell_contact_coupling_surface_present": bool(beam_shell_contact_coupling_summary["present"]),
+            "contact_material_coupled_case_manifest_pass": bool(
+                len(contact_material_coupled_case_rows) >= int(args.min_contact_material_coupled_cases)
+            ),
+            "panel_contact_failure_mode_reason_code_pass": bool(
+                any(row.get("domain") == "panel" for row in panel_contact_failure_reason_rows)
+                and any(row.get("domain") == "contact" for row in panel_contact_failure_reason_rows)
+            ),
+            "nonlinear_residual_integrated_case_pass": bool(nonlinear_residual_integrated_case_rows),
         }
         contract_pass = bool(
             checks["shell_direct_contract_pass"]
@@ -1178,6 +1389,8 @@ def main() -> None:
                 "pass" if checks["beam_shell_contact_coupling_surface_present"] else "missing"
             ),
             "beam_shell_contact_coupling_signal_count": int(beam_shell_contact_coupling_summary["coupling_signal_count"]),
+            "contact_material_coupled_case_count": len(contact_material_coupled_case_rows),
+            "min_contact_material_coupled_cases": int(args.min_contact_material_coupled_cases),
             "beam_shell_contact_support_depth_score": int(beam_shell_contact_coupling_summary["support_depth_score"]),
             "beam_shell_contact_support_search_count": int(
                 beam_shell_contact_coupling_summary["support_search_model_count"]
@@ -1191,6 +1404,11 @@ def main() -> None:
             "beam_shell_contact_proxy_family_count": int(
                 beam_shell_contact_coupling_summary["node_to_surface_proxy_family_count"]
             ),
+            "panel_contact_failure_mode_reason_code_count": len(panel_contact_failure_reason_rows),
+            "panel_contact_failure_mode_reason_codes": [
+                str(row.get("reason_code", "") or "") for row in panel_contact_failure_reason_rows
+            ],
+            "nonlinear_residual_integrated_case_count": len(nonlinear_residual_integrated_case_rows),
             "substructuring_transfer_ratio": float(
                 (substructuring.get("metrics") or {}).get("mean_transfer_ratio_building_to_track", 0.0)
             )
@@ -1286,6 +1504,22 @@ def main() -> None:
                 f"node_surface_proxy={summary['beam_shell_contact_node_surface_proxy_count']}."
             ),
             (
+                f"contact_material_case_manifest={'pass' if checks['contact_material_coupled_case_manifest_pass'] else 'missing'} via "
+                f"cases={summary['contact_material_coupled_case_count']}/"
+                f"{summary['min_contact_material_coupled_cases']}, "
+                f"contact={summary['contact_surface_status']}, "
+                f"materials={material_models or ['none']}."
+            ),
+            (
+                f"panel_contact_failure_reason_codes={'pass' if checks['panel_contact_failure_mode_reason_code_pass'] else 'missing'} via "
+                f"count={summary['panel_contact_failure_mode_reason_code_count']}, "
+                f"codes={summary['panel_contact_failure_mode_reason_codes'] or ['none']}."
+            ),
+            (
+                f"nonlinear_residual_same_case={'pass' if checks['nonlinear_residual_integrated_case_pass'] else 'missing'} via "
+                f"cases={summary['nonlinear_residual_integrated_case_count']}."
+            ),
+            (
                 f"structural_contact={'pass' if checks['structural_contact_direct_contract_pass'] else 'missing'} via "
                 f"special_link_keywords={_format_yes_no(special_link_keywords_present)}, "
                 f"gate={_format_yes_no(bool(structural_contact_gate.get('contract_pass', False)))}, "
@@ -1365,7 +1599,12 @@ def main() -> None:
             f"panel={summary['layered_panel_assembled_case_count']},"
             f"support={summary['beam_shell_contact_support_depth_score']},"
             f"search={summary['beam_shell_contact_support_search_count']},"
-            f"proxy={summary['beam_shell_contact_node_surface_proxy_count']}) | "
+            f"proxy={summary['beam_shell_contact_node_surface_proxy_count']},"
+            f"cases={summary['contact_material_coupled_case_count']}) | "
+            f"failure_reason_codes={_format_yes_no(checks['panel_contact_failure_mode_reason_code_pass'])}"
+            f"(count={summary['panel_contact_failure_mode_reason_code_count']}) | "
+            f"nonlinear_residual={_format_yes_no(checks['nonlinear_residual_integrated_case_pass'])}"
+            f"(cases={summary['nonlinear_residual_integrated_case_count']}) | "
             f"contact={contact_surface_status} | "
             f"support={summary['support_link_family_count']}"
             f"(contact={summary['support_link_group_counts']['contact']},"
@@ -1388,6 +1627,9 @@ def main() -> None:
             "checks": checks,
             "summary": summary,
             "benchmark_cases": benchmarks,
+            "contact_material_coupled_case_rows": contact_material_coupled_case_rows,
+            "panel_contact_failure_reason_rows": panel_contact_failure_reason_rows,
+            "nonlinear_residual_integrated_case_rows": nonlinear_residual_integrated_case_rows,
             "summary_line": summary_line,
             "reasons": reasons,
             "limitations": limitations,

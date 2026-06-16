@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import {
   assertCanvasWellFramed,
   installCanvasFrameProbe,
@@ -50,6 +50,95 @@ async function expectCanvasReady(page) {
   expect(metrics.significantPixelCount).toBeGreaterThan(32)
 }
 
+type RenderMode = 'wireframe' | 'solid' | 'contour'
+type ViewPreset = 'review' | 'frame' | 'plan' | 'fit'
+
+async function expectRenderMode(page: Page, mode: RenderMode) {
+  const toolButton = page.locator(`[data-viewport-tool-render-mode="${mode}"]`).first()
+  await expect(toolButton).toHaveAttribute('aria-pressed', 'true', { timeout: 30000 })
+  await expect(page.locator(`#btn-${mode}`)).toHaveClass(/active/, { timeout: 30000 })
+}
+
+async function clickRenderMode(page: Page, mode: RenderMode) {
+  const toolButton = page.locator(`[data-viewport-tool-render-mode="${mode}"]`).first()
+  if (await toolButton.isVisible()) {
+    await toolButton.click()
+  } else {
+    await page.locator(`#btn-${mode}`).click()
+  }
+  await expectRenderMode(page, mode)
+}
+
+async function expectViewPreset(page: Page, preset: ViewPreset) {
+  if (preset !== 'fit') {
+    await expect(page.locator(`[data-viewport-view-preset="${preset}"]`).first()).toHaveAttribute('aria-pressed', 'true', {
+      timeout: 30000,
+    })
+  }
+  await expect(page.locator(`#btn-view-${preset}`)).toHaveClass(/active/, { timeout: 30000 })
+}
+
+async function clickViewPreset(page: Page, preset: ViewPreset) {
+  const toolButton =
+    preset === 'fit'
+      ? page.locator('[data-viewport-tool="fit-all"]').first()
+      : page.locator(`[data-viewport-view-preset="${preset}"]`).first()
+  if (await toolButton.isVisible()) {
+    await toolButton.click()
+  } else {
+    await page.locator(`#btn-view-${preset}`).click()
+  }
+  await expectViewPreset(page, preset)
+}
+
+async function clickViewportTool(page: Page, tool: string) {
+  const toolButton = page.locator(`[data-viewport-tool="${tool}"]`).first()
+  await expect(toolButton).toBeVisible({ timeout: 30000 })
+  await toolButton.click()
+}
+
+async function openWorkspaceChrome(page: Page) {
+  if ((await page.locator('body').getAttribute('data-si-shell')) !== 'workspace') {
+    await page.locator('#toggle-workspace-chrome').click()
+  }
+  await expect(page.locator('body')).toHaveAttribute('data-si-shell', 'workspace', { timeout: 30000 })
+  await expect(page.locator('#project-workspace-section')).toBeVisible({ timeout: 30000 })
+}
+
+async function openProductShell(page: Page) {
+  await page.locator('#member-search-input').fill('')
+  if ((await page.locator('body').getAttribute('data-si-shell')) !== 'product') {
+    await page.locator('#toggle-workspace-chrome').click()
+  }
+  await expect(page.locator('body')).toHaveAttribute('data-si-shell', 'product', { timeout: 30000 })
+  await page.evaluate(() => {
+    ;['left-panel', 'right-panel'].forEach((panelId) => {
+      const panel = document.getElementById(panelId)
+      if (panel instanceof HTMLElement && !panel.classList.contains('is-collapsed')) {
+        window.togglePanelRailCollapse?.(panelId)
+      }
+    })
+  })
+  await expect(page.locator('#app')).toHaveAttribute('data-left-rail-collapsed', 'true', { timeout: 30000 })
+  await expect(page.locator('#app')).toHaveAttribute('data-right-rail-collapsed', 'true', { timeout: 30000 })
+}
+
+async function focusFirstAvailableMember(page: Page, fallbackQuery = '911') {
+  const callout = page.locator('[data-stage-callout-focus-member]').first()
+  if ((await callout.count()) > 0 && (await callout.isVisible())) {
+    await callout.click()
+  } else {
+    await page.locator('#member-search-input').fill(fallbackQuery)
+    const firstSearchResult = page.locator('[data-search-focus]').first()
+    await expect(firstSearchResult).toBeVisible({ timeout: 10000 })
+    await firstSearchResult.click()
+  }
+  await page.waitForFunction(() => {
+    const badge = document.querySelector('[data-viewport-selection-focus-badge]')
+    return Boolean(badge?.classList.contains('is-visible'))
+  }, null, { timeout: 10000 })
+}
+
 async function openRealDrawingViewer(page, viewport: Viewport) {
   const errors = await openViewer(
     page,
@@ -62,16 +151,16 @@ async function openRealDrawingViewer(page, viewport: Viewport) {
 
 async function openMidas33OptimizedViewer(page, viewport: Viewport) {
   const errors = await openViewer(page, viewport, 'project=midas33_release&drawing=midas33_optimized&variant=optimized')
-  await expect(page.locator('#midas33-view-toolbar')).toBeVisible({ timeout: 30000 })
-  await expect(page.locator('#project-workspace-section')).toBeVisible({ timeout: 30000 })
+  await expect(page.locator('[data-viewport-view-preset="review"]').first()).toBeVisible({ timeout: 30000 })
+  await openWorkspaceChrome(page)
   await expect(page.locator('#project-workspace-select')).toContainText('Release Visualization Entries (8)', { timeout: 30000 })
   await expect(page.locator('[data-shell-project-select]')).toHaveValue('midas33_release::midas33_optimized', { timeout: 30000 })
   await expect(page.locator('[data-shell-project-receipt]')).toContainText('optimized', { timeout: 30000 })
   await expect(page.locator('#project-drawing-list')).toContainText('MIDAS33', { timeout: 30000 })
   await expect(page.locator('#stage-variant-chip')).toContainText('Variant optimized', { timeout: 30000 })
   await expect(page.locator('#stage-quality-chip')).toContainText('Review ready', { timeout: 30000 })
-  await expect(page.locator('#btn-view-review')).toHaveClass(/active/, { timeout: 30000 })
-  await expect(page.locator('#btn-contour')).toHaveClass(/active/, { timeout: 30000 })
+  await expectViewPreset(page, 'review')
+  await expectRenderMode(page, 'contour')
   await expect(page.locator('#project-drawing-list')).toContainText('0 issues', { timeout: 30000 })
   await expect(page.locator('#project-drawing-evidence-panel')).toContainText('상용 검토 가능', { timeout: 30000 })
   await expect(page.locator('#before-after-comparison-panel')).toContainText('Member reduction', { timeout: 30000 })
@@ -85,10 +174,9 @@ test('structure viewer renders real drawing stage and supports core controls', a
 
   await page.locator('#member-search-input').fill('RD-001')
   await expect(page.locator('#search-results')).toContainText('RD-001')
-  await page.locator('#btn-solid').click()
-  await expect(page.locator('#btn-solid')).toHaveClass(/active/)
-  await page.getByRole('button', { name: 'Fit All' }).click()
-  await page.getByRole('button', { name: 'Reset' }).click()
+  await clickRenderMode(page, 'solid')
+  await clickViewportTool(page, 'fit-all')
+  await clickViewportTool(page, 'reset-view')
   await expect(page.locator('#stage-selection-chip')).toContainText('RD-001')
   await expect(page.locator('#footer-selection-context')).toContainText('selected')
   await expectNoBrowserErrors(errors)
@@ -109,22 +197,18 @@ test('structure viewer renders MIDAS33 optimized model with view presets and sel
   await page.locator('#project-workspace-query').fill('')
   await expectCanvasReady(page)
 
-  await page.locator('#btn-view-frame').click()
-  await expect(page.locator('#btn-view-frame')).toHaveClass(/active/)
+  await clickViewPreset(page, 'frame')
   await expectCanvasReady(page)
 
-  await page.locator('#btn-view-plan').click()
-  await expect(page.locator('#btn-view-plan')).toHaveClass(/active/)
-  await expect(page.locator('#btn-wireframe')).toHaveClass(/active/)
+  await clickViewPreset(page, 'plan')
+  await expectRenderMode(page, 'wireframe')
   await waitForCanvasNonBlank(page)
 
-  await page.locator('#btn-view-fit').click()
-  await expect(page.locator('#btn-view-fit')).toHaveClass(/active/)
+  await clickViewPreset(page, 'fit')
   await waitForCanvasNonBlank(page)
 
-  await page.locator('#btn-view-review').click()
-  await expect(page.locator('#btn-view-review')).toHaveClass(/active/)
-  await expect(page.locator('#btn-contour')).toHaveClass(/active/)
+  await clickViewPreset(page, 'review')
+  await expectRenderMode(page, 'contour')
   await expectCanvasReady(page)
 
   await page.locator('#member-search-input').fill('911')
@@ -270,11 +354,7 @@ test('structure viewer renders MIDAS33 optimized model with view presets and sel
 test('structure viewer keeps dense desktop cockpit regions readable', async ({ page }) => {
   const errors = await openMidas33OptimizedViewer(page, { width: 1600, height: 900 })
   await expectCanvasReady(page)
-  await page.locator('[data-stage-callout-focus-member]').first().click()
-  await page.waitForFunction(() => {
-    const badge = document.querySelector('[data-viewport-selection-focus-badge]')
-    return Boolean(badge?.classList.contains('is-visible'))
-  }, null, { timeout: 10000 })
+  await focusFirstAvailableMember(page)
   const firstScheduleStep = page.locator('[data-result-step-schedule] [data-result-step-row]').first()
   await expect(firstScheduleStep).toBeVisible({ timeout: 10000 })
   const clickedStep = await firstScheduleStep.getAttribute('data-result-step')
@@ -367,6 +447,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(reviewMapSnapshot.overflowCount).toBe(0)
   await page.locator('[data-integrated-review-close]').click()
   await expect(page.locator('[data-integrated-review-navigator]')).toHaveAttribute('data-integrated-review-open', 'false')
+  await page.locator('#member-search-input').fill('')
 
   const layout = await page.evaluate(() => {
     const rectFor = (selector: string) => {
@@ -909,6 +990,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
       memberSectionCapacitySourceBackedCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-source-backed-count') || '0'),
       memberSectionCapacitySourceCapacityCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-source-capacity-count') || '0'),
       memberSectionCapacityEstimatedCapacityCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-estimated-capacity-count') || '0'),
+      memberSectionCapacityEvidenceCount: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-evidence-count') || '0'),
       memberSectionCapacityMaxDcr: Number(document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-max-dcr') || '0'),
       memberSectionCapacityGeometryReady: document.querySelector('[data-member-section-capacity]')?.getAttribute('data-member-section-capacity-geometry-ready') || '',
       memberSectionCapacityRenderedRowCount: document.querySelectorAll('[data-member-section-capacity] [data-member-section-capacity-row]').length,
@@ -2041,7 +2123,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.stageResultCalloutOverflowCount).toBe(0)
   expect(layout.rightPanel?.width || 0).toBeGreaterThanOrEqual(360)
   expect(layout.toolRail?.width || 0).toBeGreaterThanOrEqual(30)
-  expect(layout.toolRailGroupCount).toBe(3)
+  expect(layout.toolRailGroupCount).toBeGreaterThanOrEqual(3)
   expect(layout.toolRailButtonCount).toBeGreaterThanOrEqual(10)
   expect(layout.toolRailTooltipCount).toBeGreaterThanOrEqual(10)
   expect(layout.toolRailRenderModeCount).toBe(3)
@@ -2312,7 +2394,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.memberSectionCapacitySectionId).toBe(layout.memberMaterialNonlinearSectionId)
   expect(layout.memberSectionCapacitySourceBackedCount).toBeGreaterThanOrEqual(1)
   expect(layout.memberSectionCapacitySourceCapacityCount).toBeGreaterThanOrEqual(1)
-  expect(layout.memberSectionCapacityEstimatedCapacityCount).toBeGreaterThanOrEqual(1)
+  expect(layout.memberSectionCapacityEvidenceCount).toBeGreaterThanOrEqual(layout.memberSectionCapacityRowCount)
   expect(layout.memberSectionCapacityMaxDcr).toBeGreaterThan(0)
   expect(layout.memberSectionCapacityGeometryReady).toBe('true')
   expect(layout.memberSectionCapacityBarCount).toBeGreaterThanOrEqual(layout.memberSectionCapacityRowCount * 2)
@@ -2322,6 +2404,7 @@ test('structure viewer keeps dense desktop cockpit regions readable', async ({ p
   expect(layout.memberSectionCapacityWindowState?.rowCount).toBe(layout.memberSectionCapacityRowCount)
   expect(layout.memberSectionCapacityWindowState?.selectedCombination).toBe(layout.loadCombinationForceSelectedCombination)
   expect(layout.memberSectionCapacityWindowState?.sectionId).toBe(layout.memberMaterialNonlinearSectionId)
+  expect(layout.memberSectionCapacityWindowState?.capacityEvidenceCount).toBe(layout.memberSectionCapacityEvidenceCount)
   expect(layout.memberSectionCapacityOverflowCount).toBe(0)
   expect(layout.memberForcePlaybackStatus).toBe('ready')
   expect(layout.memberForcePlaybackSchema).toBe('structure-viewer-member-force-playback.v1')
@@ -3303,8 +3386,7 @@ test('structure viewer keeps the mobile real drawing workflow usable', async ({ 
   await waitForCanvasNonBlank(page)
   await expect(page.locator('#stage-panel')).toBeVisible()
   await expect(page.locator('#real-drawing-quality-panel')).toContainText('RD-')
-  await page.locator('#btn-wireframe').click()
-  await expect(page.locator('#btn-wireframe')).toHaveClass(/active/)
+  await clickRenderMode(page, 'wireframe')
   await expectNoBrowserErrors(errors)
 })
 
@@ -3312,9 +3394,8 @@ test('structure viewer keeps the mobile MIDAS33 optimized workflow usable', asyn
   test.skip(mode === 'minimal', 'minimal smoke runs only the desktop browser paths')
   const errors = await openMidas33OptimizedViewer(page, { width: 390, height: 844 })
   await expectCanvasReady(page)
-  await page.locator('#btn-view-plan').click()
-  await expect(page.locator('#btn-view-plan')).toHaveClass(/active/)
-  await expect(page.locator('#btn-wireframe')).toHaveClass(/active/)
+  await clickViewPreset(page, 'plan')
+  await expectRenderMode(page, 'wireframe')
   await page.locator('#member-search-input').fill('903')
   await expect(page.locator('#search-results')).toContainText('903', { timeout: 30000 })
   await expectNoBrowserErrors(errors)

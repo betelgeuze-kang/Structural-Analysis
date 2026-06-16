@@ -1,0 +1,37 @@
+{
+  "blockers": [
+    "license_status_not_active",
+    "license_tier_missing",
+    "license_id_missing",
+    "license_issuer_or_approver_missing",
+    "license_approval_reference_missing",
+    "license_product_scope_missing",
+    "license_expiry_missing_or_invalid"
+  ],
+  "checks": {
+    "approval_reference_present_pass": false,
+    "expiry_valid_pass": false,
+    "issuer_or_approver_present_pass": false,
+    "license_id_present_pass": false,
+    "license_status_file_present": true,
+    "perpetual": false,
+    "product_scope_present_pass": false,
+    "status_active_pass": false,
+    "tier_present_pass": false
+  },
+  "claim_boundary": "This report verifies that license status evidence is populated and current; it does not create legal approval or substitute for counsel/product-owner signoff.",
+  "contract_pass": false,
+  "generated_at": "2026-06-16T15:55:21.422108+00:00",
+  "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
+  "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
+  "schema_version": "license-status-closure-report.v1",
+  "summary": {
+    "approval_ref": "",
+    "expires_at_utc": "",
+    "issuer_or_approver": "",
+    "license_id": "",
+    "product_scope_count": 0,
+    "status": "not_configured",
+    "tier": ""
+  }
+}

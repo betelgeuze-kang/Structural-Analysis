@@ -1136,7 +1136,6 @@ def _hotspot_signed_displacement_sweep(
     residual_tolerance_n: float = 1.0e-3,
 ) -> dict[str, Any]:
     base_u = np.asarray(u, dtype=np.float64)
-    free_idx = np.asarray(free, dtype=np.int64)
     selected_rows = [
         row
         for row in top_rows

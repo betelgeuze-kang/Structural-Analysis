@@ -10,7 +10,6 @@ from implementation.phase1.open_data.korea.generate_korean_source_catalog import
     load_merged_korean_seed_rows,
 )
 from implementation.phase1.open_data.korea.korean_building_scale import building_scale_band, is_medium_or_large
-from implementation.phase1.open_data.korea.report_medium_large_korean_sources import build_medium_large_report
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = REPO_ROOT / "scripts" / "report_medium_large_korean_sources.py"

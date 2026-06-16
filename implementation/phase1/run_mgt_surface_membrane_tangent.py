@@ -185,7 +185,6 @@ def run_mgt_surface_membrane_tangent(
     with np.load(roundtrip_npz, allow_pickle=False) as archive:
         node_xyz = np.asarray(archive["node_xyz"], dtype=np.float64)
         elem_type_code = np.asarray(archive["elem_type_code"], dtype=np.int32)
-        elem_id = np.asarray(archive["elem_id"], dtype=np.int64)
         elem_section_id = np.asarray(archive["elem_section_id"], dtype=np.int32)
         elem_material_id = np.asarray(archive["elem_material_id"], dtype=np.int32)
         conn_ptr = np.asarray(archive["elem_conn_ptr"], dtype=np.int64)

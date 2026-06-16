@@ -1,0 +1,62 @@
+{
+  "schema_version": "ndtha-corrected-state-recompute.v1",
+  "run_id": "pm-release-ndtha-corrected-state-recompute",
+  "generated_at": "2026-06-16T15:56:03.385772+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "checks": {
+    "rows_present": true,
+    "all_rows_pass": true,
+    "row_level_recompute_basis_declared": true,
+    "full_fe_rerun_claimed": false
+  },
+  "summary": {
+    "case_count": 3,
+    "pass_count": 3,
+    "recommended_residual_top_displacement_m": 1.0,
+    "recommended_residual_drift_ratio_pct": 2.0,
+    "min_reduction_ratio": 0.5,
+    "corrected_residual_top_displacement_m_max_abs": 5.015942885747372e-06,
+    "corrected_residual_drift_ratio_pct_max_abs": 1.3950144000000175e-05
+  },
+  "limitations": [
+    "This is a row-level NDTHA residual contract recompute because the checked-in NDTHA report does not contain full global DOF state.",
+    "The recompute applies gnn_residual_model to a deterministic residual graph and replays the corrected residual metrics under the same row contract.",
+    "This evidence is suitable for PM release traceability, but it is not an independent full finite-element rerun."
+  ],
+  "rows": [
+    {
+      "case_id": "C-TST-001",
+      "contract_pass": true,
+      "source": "gnn_residual_model_row_contract_recompute",
+      "original_residual_top_displacement_m": 0.6880580090188355,
+      "original_residual_drift_ratio_pct": 1.9136000000000006,
+      "corrected_residual_top_displacement_m": 5.015942885747372e-06,
+      "corrected_residual_drift_ratio_pct": 1.3950144000000175e-05,
+      "residual_reduction_ratio": 0.99999271,
+      "reason_code": "PASS"
+    },
+    {
+      "case_id": "C-TST-002",
+      "contract_pass": true,
+      "source": "gnn_residual_model_row_contract_recompute",
+      "original_residual_top_displacement_m": 0.5756788824675577,
+      "original_residual_drift_ratio_pct": 1.9136000000000006,
+      "corrected_residual_top_displacement_m": 4.196699053188492e-06,
+      "corrected_residual_drift_ratio_pct": 1.3950143999999992e-05,
+      "residual_reduction_ratio": 0.99999271,
+      "reason_code": "PASS"
+    },
+    {
+      "case_id": "C-TST-003",
+      "contract_pass": true,
+      "source": "gnn_residual_model_row_contract_recompute",
+      "original_residual_top_displacement_m": 0.6846960537279713,
+      "original_residual_drift_ratio_pct": 1.9136000000000004,
+      "corrected_residual_top_displacement_m": 4.991434231676939e-06,
+      "corrected_residual_drift_ratio_pct": 1.3950144000000084e-05,
+      "residual_reduction_ratio": 0.99999271,
+      "reason_code": "PASS"
+    }
+  ]
+}

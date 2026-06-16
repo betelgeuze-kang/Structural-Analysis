@@ -263,7 +263,6 @@ def run_mgt_shell_free_component_state_cleanup(
         relaxation_factor=np.asarray(float(relaxation_factor), dtype=np.float64),
     )
 
-    before_inf = float(before_snapshot["direct_residual_inf_n"])
     after_inf = float(after_snapshot["direct_residual_inf_n"])
     gate_passed = after_inf <= float(residual_tolerance_n)
     payload = {

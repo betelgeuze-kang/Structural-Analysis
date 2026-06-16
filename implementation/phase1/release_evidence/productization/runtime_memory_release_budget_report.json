@@ -1,0 +1,106 @@
+{
+  "artifacts": {
+    "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+    "nightly_10m_repro": "implementation/phase1/release_evidence/productization/nightly_10m_repro_report.json",
+    "nightly_history_root": "implementation/phase1/release",
+    "workstation_budget": "implementation/phase1/workstation_service_budget.json"
+  },
+  "blockers": [],
+  "checks": {
+    "memory_budget_rows_pass": true,
+    "oom_zero_pass": true,
+    "p95_runtime_budget_exceed_rate_pass": true,
+    "peak_memory_budget_report_present": true,
+    "runtime_budget_rows_present": true
+  },
+  "claim_boundary": "This report turns existing release runtime evidence into explicit PM budget rows. It is not a customer-device benchmark and does not replace broader performance qualification.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T15:56:03.406232+00:00",
+  "memory_budget_rows": [
+    {
+      "actual": 0,
+      "budget_id": "oom_signature_count",
+      "limit": 0,
+      "sample_count": 694,
+      "status": "pass",
+      "title": "OOM signature count in release runtime rows",
+      "unit": "count"
+    },
+    {
+      "actual": 959.408935546875,
+      "budget_id": "nightly_10m_working_set_p95",
+      "limit": 31979.52,
+      "sample_count": 231,
+      "status": "pass",
+      "title": "P95 of historical 10M nightly working-set means",
+      "unit": "MiB"
+    },
+    {
+      "actual": 1,
+      "budget_id": "peak_memory_budget_report_present",
+      "limit": 1,
+      "sample_count": 1,
+      "status": "pass",
+      "title": "Workstation peak memory budget is present",
+      "unit": "boolean"
+    },
+    {
+      "actual": 0.0,
+      "budget_id": "ndtha_peak_vram_report_present",
+      "limit": 0.0,
+      "sample_count": 2,
+      "status": "pass",
+      "title": "NDTHA peak VRAM report is present",
+      "unit": "MiB"
+    }
+  ],
+  "reason_code": "PASS",
+  "runtime_budget_rows": [
+    {
+      "actual": 4250.953472,
+      "budget_id": "nightly_10m_latency_p95",
+      "limit": 6000.0,
+      "sample_count": 231,
+      "status": "pass",
+      "title": "P95 of historical 10M nightly latency means",
+      "unit": "ms"
+    },
+    {
+      "actual": 86.27247142791748,
+      "budget_id": "nightly_10m_command_seconds_p95",
+      "limit": 180.0,
+      "sample_count": 692,
+      "status": "pass",
+      "title": "P95 of historical nightly 10M gate command wall time",
+      "unit": "s"
+    },
+    {
+      "actual": 106.59479910299979,
+      "budget_id": "ndtha_long_profile_elapsed_p95",
+      "limit": 180.0,
+      "sample_count": 2,
+      "status": "pass",
+      "title": "P95 of NDTHA long-profile run elapsed wall time",
+      "unit": "s"
+    },
+    {
+      "actual": 4745.0,
+      "budget_id": "workstation_viewer_ready_ms",
+      "limit": 60000.0,
+      "sample_count": 1,
+      "status": "pass",
+      "title": "Workstation viewer ready time",
+      "unit": "ms"
+    }
+  ],
+  "schema_version": "runtime-memory-release-budget-report.v1",
+  "summary": {
+    "memory_budget_fail_count": 0,
+    "memory_budget_row_count": 4,
+    "nightly_history_report_count": 230,
+    "oom_count": 0,
+    "p95_runtime_budget_exceed_rate": 0.0,
+    "runtime_budget_fail_count": 0,
+    "runtime_budget_row_count": 4
+  }
+}

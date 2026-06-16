@@ -16,7 +16,6 @@ from mgt_physical_residual_assembly import (
     assemble_physical_residual,
 )
 from mgt_shell_load_path import (
-    surface_pressure_load_path_components,
     surface_pressure_load_path_filter,
 )
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly

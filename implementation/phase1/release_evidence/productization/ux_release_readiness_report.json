@@ -1,0 +1,122 @@
+{
+  "artifacts": {
+    "viewer_performance": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+    "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+  },
+  "blockers": [
+    "browser_sample_rehearsal_pass",
+    "sample_completion_30min_pass"
+  ],
+  "blocking_review_items": [],
+  "browser_smoke": {},
+  "checks": {
+    "browser_sample_rehearsal_pass": false,
+    "claim_scoped_review_queue_pass": true,
+    "sample_completion_30min_pass": false,
+    "viewer_commercial_ready": true,
+    "viewer_hard_blockers_zero": true,
+    "viewer_performance_probe_pass": true,
+    "viewer_quality_gate_pass": true
+  },
+  "claim_boundary": "The sample completion evidence is an automated browser rehearsal of the first-run sample workflow, not a human usability study. Claim-scoped IFC load-model review items remain visible to reviewers and are excluded from UX hard blockers only while product claims stay engineer-in-loop and review-assist.",
+  "claim_scoped_review_items": [
+    {
+      "asset_ref": "RD-001",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-001"
+    },
+    {
+      "asset_ref": "RD-002",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-002"
+    },
+    {
+      "asset_ref": "RD-003",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-003"
+    },
+    {
+      "asset_ref": "RD-004",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-004"
+    },
+    {
+      "asset_ref": "RD-005",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-005"
+    },
+    {
+      "asset_ref": "RD-006",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-006"
+    },
+    {
+      "asset_ref": "RD-007",
+      "claim_quality_flags": [
+        "ifc_load_model_missing"
+      ],
+      "quality_flags": [
+        "not_solver_exact"
+      ],
+      "quality_tier": "ifc_geometry_ready_load_review",
+      "recommended_action": "attach IFC load-model evidence before analysis claim",
+      "review_id": "RQ-007"
+    }
+  ],
+  "contract_pass": false,
+  "generated_at": "2026-06-16T15:56:03.375525+00:00",
+  "reason_code": "ERR_UX_RELEASE_READINESS_BLOCKED",
+  "schema_version": "ux-release-readiness-report.v1",
+  "summary": {
+    "blocking_review_item_count": 0,
+    "browser_smoke_elapsed_seconds": null,
+    "claim_scoped_review_item_count": 7,
+    "max_sample_completion_minutes": 30.0,
+    "sample_completion_minutes": null,
+    "viewer_hard_blocker_count": 0,
+    "viewer_ready_ms": 5145.0,
+    "viewer_review_item_count": 7
+  }
+}

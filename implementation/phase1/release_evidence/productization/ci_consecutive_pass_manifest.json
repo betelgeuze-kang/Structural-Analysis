@@ -1,0 +1,1671 @@
+{
+  "contract_pass": false,
+  "evidence_sources": {
+    "github_actions_evidence_available": true,
+    "github_actions_evidence_path": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+    "github_actions_schema_version": "github-actions-ci-streak-evidence.v1",
+    "local_nightly_report_count": 230,
+    "local_pr_report_count": 2
+  },
+  "generated_at": "2026-06-16T15:55:22.635120+00:00",
+  "lanes": {
+    "nightly": {
+      "consecutive_pass_count": 230,
+      "github_actions_consecutive_pass_count": 0,
+      "lane": "nightly",
+      "local_consecutive_pass_count": 230,
+      "pass_count": 230,
+      "report_count": 230,
+      "rows": [
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/ci_gate_report.nightly.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T084332Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T091759Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T092348Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T105815Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T112242Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T121753Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T122812Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T130052Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T131950Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T133733Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T135818Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T143010Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260301T144149Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260302T125857Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260302T134621Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260304T124124Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260304T130147Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260305T104801Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260305T145124Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260305T150309Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260306T112627Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260306T122613Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260306T134536Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260310T125808Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260310T135608Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260311T121221Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260311T124246Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260312T132911Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260314T161850Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T040546Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T054216Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T055813Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T061728Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T093932Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T094353Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260315T095538Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T125334Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T125523Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T125649Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T125700Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T130602Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T130603Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T131644Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T132627Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T134201Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T140656Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260317T143906Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T101348Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T101611Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T105125Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T105824Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T165000Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T182309Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T182731Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T184303Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T185209Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T190014Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T191035Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T192205Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T193054Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260320T193843Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T065725Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T071644Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T071753Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T172014Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T174018Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T175911Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T180000Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260321T180855Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260322T085458Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260322T085857Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260322T090602Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T153740Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T153759Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T160400Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T160419Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T160528Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T160546Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T163152Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T163210Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T165124Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T165143Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T171149Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T171208Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T171641Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T171700Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T173545Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T173605Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T180632Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T180650Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T183640Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260328T183700Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T032943Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T033001Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T033110Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T033129Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T034642Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T034702Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T040718Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T040737Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T042527Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T042547Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T050751Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T050811Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T051146Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T051205Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T053922Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T053941Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T060536Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T060554Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T063531Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T063551Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T072107Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T072125Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T093815Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T093833Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T103522Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T103540Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T122550Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T122608Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T130046Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T130104Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T144203Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T144223Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T153158Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260329T153216Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T115553Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T115611Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T120826Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T120844Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T122421Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T122440Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T123342Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T123400Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T124805Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T124823Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T133333Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T133402Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T135729Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T135755Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T135827Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T135846Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T143359Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T143417Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T143745Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T143803Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T150858Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T150917Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T162656Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T162714Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T164829Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260330T164848Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T123550Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T123609Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T130614Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T130633Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135017Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135038Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135216Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135237Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135243Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135303Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135715Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T135735Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T141851Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T141911Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T142707Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T142727Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T143045Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T143105Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T150150Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T150210Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T152812Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260401T152834Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T132342Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T132402Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T142418Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144257Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144318Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144815Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144837Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144926Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T144946Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150240Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150300Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150434Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150454Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150618Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260402T150639Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T125617Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T125636Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T125835Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T125854Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T130619Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T130640Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T130901Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T130921Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T132246Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260403T132305Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T122754Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T123111Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T123256Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T123315Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T135459Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260406T135519Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T124746Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T125048Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T125445Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T125515Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T131237Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T131306Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T134533Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T134603Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T140927Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T140956Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T154722Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T154751Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T163609Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T163639Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T172020Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T172049Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T174448Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260502T174518Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T040555Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T040625Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T053221Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T053251Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T054912Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/release/phase3_nightly_hardening_20260503T054942Z/ci_gate_report.json",
+          "reason_code": "PASS"
+        }
+      ],
+      "threshold": 30,
+      "threshold_pass": true
+    },
+    "pr": {
+      "consecutive_pass_count": 2,
+      "github_actions_consecutive_pass_count": 0,
+      "lane": "pr",
+      "local_consecutive_pass_count": 2,
+      "pass_count": 2,
+      "report_count": 2,
+      "rows": [
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/ci_gate_report.pr.json",
+          "reason_code": "PASS"
+        },
+        {
+          "contract_pass": null,
+          "exists": true,
+          "pass": true,
+          "path": "implementation/phase1/ci_gate_report.pr_recheck.json",
+          "reason_code": "PASS"
+        }
+      ],
+      "threshold": 30,
+      "threshold_pass": false
+    }
+  },
+  "schema_version": "ci-consecutive-pass-manifest.v1",
+  "summary": {
+    "github_actions_nightly_consecutive_pass_count": 0,
+    "github_actions_pr_consecutive_pass_count": 0,
+    "nightly_consecutive_pass_count": 230,
+    "nightly_threshold_pass": true,
+    "pr_consecutive_pass_count": 2,
+    "pr_threshold_pass": false
+  },
+  "threshold": 30
+}

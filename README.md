@@ -20,6 +20,8 @@ The README image is captured from the actual `src/structure-viewer/index.html?pr
 - [Workstation delivery package](docs/workstation-delivery-package.md)
 - [Production ops security runbook](docs/production-ops-security.md)
 - [Runtime production packaging runbook](docs/runtime-production-packaging.md)
+- [PM release gate milestones](docs/pm-release-gate-milestones.md)
+- [Codex/Cursor/OpenCode orchestration](docs/ai/ORCHESTRATION.md)
 - [Real Project Corpus closeout guide](docs/real-project-corpus.md)
 - [차세대 하이브리드 건축구조 분석 AI 아키텍처 명세서 (ADD)](docs/architecture-definition-document.md)
 - [Phase 1 실행 산출물: LF 출력 스키마/검증](implementation/phase1/README.md)
@@ -69,6 +71,19 @@ python3 scripts/build_workstation_job_retention_policy.py --json
 node scripts/verify-workstation-delivery-viewer-smoke.mjs --json
 python3 scripts/check_workstation_delivery_readiness.py --json
 python3 scripts/build_support_bundle.py --json
+python3 scripts/build_ai_orchestration_preflight_report.py --json
+python3 scripts/build_github_actions_ci_streak_evidence.py --json
+python3 scripts/build_ci_consecutive_pass_manifest.py
+python3 scripts/build_license_status_closure_report.py --json
+python3 scripts/build_pm_strict_ci_reports.py
+python3 scripts/build_core_family_p95_report.py --json
+python3 scripts/build_runtime_memory_release_budget_report.py
+python3 scripts/build_opensees_roundtrip_trace_report.py --json
+python3 scripts/build_ux_release_readiness_report.py --run-browser-smoke --json
+python3 scripts/materialize_ndtha_corrected_state_recompute.py
+python3 implementation/phase1/run_ndtha_residual_gate.py --ndtha-stress implementation/phase1/release_evidence/productization/nonlinear_ndtha_stress.corrected_state_recompute.json --max-fallback-rate 0.05 --strict-recommended-residual-hard-fail --require-corrected-state-recompute --out implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json
+python3 scripts/report_pm_release_gate.py --json
+npm run ai:preflight
 python3 scripts/check_independent_product_readiness.py --json
 python3 scripts/verify_quality_gate.py --mode pr
 python3 scripts/verify_quality_gate.py --mode full

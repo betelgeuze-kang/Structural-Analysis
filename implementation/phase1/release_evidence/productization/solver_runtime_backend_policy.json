@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-runtime-backend-policy.v1",
-  "generated_at": "2026-06-07T15:06:44.385840+00:00",
+  "generated_at": "2026-06-16T12:24:13.576406+00:00",
   "status": "ready",
   "official_solver_compute_backend": "amd_rocm_hip",
   "official_solver_backend": "amd_rocm_hip",

@@ -25,6 +25,8 @@ REASONS = {
     "ERR_SOLVER_CONTROL_TRACE": "ndtha solver-control traceability fields invalid",
     "ERR_SOLVER_CONTROL_LIMIT": "ndtha solver-control hard threshold violated",
     "ERR_RESIDUAL_HARD_LIMIT": "ndtha residual hard threshold violated",
+    "ERR_RESIDUAL_RECOMMENDED_LIMIT": "ndtha recommended residual release threshold violated",
+    "ERR_CORRECTED_STATE_RECOMPUTE": "ndtha corrected-state recompute evidence is missing or failed",
 }
 
 
@@ -47,6 +49,8 @@ INPUT_SCHEMA = {
         "recommended_residual_top_displacement_m": {"type": "number", "exclusiveMinimum": 0.0},
         "recommended_residual_drift_ratio_pct": {"type": "number", "exclusiveMinimum": 0.0},
         "max_fallback_rate": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+        "strict_recommended_residual_hard_fail": {"type": "boolean"},
+        "require_corrected_state_recompute": {"type": "boolean"},
         "out": {"type": "string", "minLength": 1},
     },
 }
@@ -133,6 +137,31 @@ def _case_solver_control_metrics(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _case_corrected_state_recompute_metrics(row_summary: dict[str, Any]) -> dict[str, Any]:
+    recompute = row_summary.get("corrected_state_recompute")
+    if not isinstance(recompute, dict):
+        recompute = row_summary.get("gnn_corrected_state_recompute")
+    if not isinstance(recompute, dict):
+        return {
+            "present": False,
+            "pass": False,
+            "source": "missing",
+            "residual_top_displacement_m": math.nan,
+            "residual_drift_ratio_pct": math.nan,
+        }
+
+    top = _finite(recompute.get("residual_top_displacement_m"))
+    drift = _finite(recompute.get("residual_drift_ratio_pct"))
+    pass_value = recompute.get("contract_pass", recompute.get("pass", False))
+    return {
+        "present": True,
+        "pass": bool(pass_value),
+        "source": str(recompute.get("source", "corrected_state_recompute") or "corrected_state_recompute"),
+        "residual_top_displacement_m": float(top) if math.isfinite(top) else math.nan,
+        "residual_drift_ratio_pct": float(drift) if math.isfinite(drift) else math.nan,
+    }
+
+
 def run_ndtha_residual_gate(
     *,
     ndtha_report: dict[str, Any],
@@ -141,6 +170,8 @@ def run_ndtha_residual_gate(
     recommended_residual_top_displacement_m: float,
     recommended_residual_drift_ratio_pct: float,
     max_fallback_rate: float,
+    strict_recommended_residual_hard_fail: bool = False,
+    require_corrected_state_recompute: bool = False,
 ) -> dict[str, Any]:
     rows = ndtha_report.get("rows")
     summary = ndtha_report.get("summary") if isinstance(ndtha_report.get("summary"), dict) else {}
@@ -176,6 +207,8 @@ def run_ndtha_residual_gate(
     solver_control_nonconverged_step_total = 0
     solver_control_recommended_dt_scale_min = 1.0
     solver_control_trace_source_counts: dict[str, int] = {}
+    corrected_state_recompute_present_all = True
+    corrected_state_recompute_pass_all = True
 
     for idx, row in enumerate(rows):
         if not isinstance(row, dict):
@@ -201,6 +234,24 @@ def run_ndtha_residual_gate(
 
         recommended_top_ok = bool(finite_ok and abs(residual_top) <= float(recommended_residual_top_displacement_m))
         recommended_drift_ok = bool(finite_ok and abs(residual_drift) <= float(recommended_residual_drift_ratio_pct))
+        normalized = {
+            "hard_top_ratio": float(abs(residual_top) / float(max_residual_top_displacement_m))
+            if finite_ok and max_residual_top_displacement_m > 0.0
+            else math.inf,
+            "hard_drift_ratio": float(abs(residual_drift) / float(max_residual_drift_ratio_pct))
+            if finite_ok and max_residual_drift_ratio_pct > 0.0
+            else math.inf,
+            "recommended_top_ratio": float(abs(residual_top) / float(recommended_residual_top_displacement_m))
+            if finite_ok and recommended_residual_top_displacement_m > 0.0
+            else math.inf,
+            "recommended_drift_ratio": float(abs(residual_drift) / float(recommended_residual_drift_ratio_pct))
+            if finite_ok and recommended_residual_drift_ratio_pct > 0.0
+            else math.inf,
+        }
+        normalized["hard_max_ratio"] = float(max(normalized["hard_top_ratio"], normalized["hard_drift_ratio"]))
+        normalized["recommended_max_ratio"] = float(
+            max(normalized["recommended_top_ratio"], normalized["recommended_drift_ratio"])
+        )
 
         finite_ok_all = bool(finite_ok_all and finite_ok)
         trace_ok_all = bool(trace_ok_all and trace_ok)
@@ -242,6 +293,13 @@ def run_ndtha_residual_gate(
             )
         if bool(solver_control_metrics["cutback_case"]):
             solver_control_cutback_case_ids.append(case_id)
+        corrected_state_metrics = _case_corrected_state_recompute_metrics(row_summary)
+        corrected_state_recompute_present_all = bool(
+            corrected_state_recompute_present_all and corrected_state_metrics["present"]
+        )
+        corrected_state_recompute_pass_all = bool(
+            corrected_state_recompute_pass_all and corrected_state_metrics["pass"]
+        )
 
         gate_rows.append(
             {
@@ -253,6 +311,8 @@ def run_ndtha_residual_gate(
                 "raw_residual_drift_ratio_pct": float(raw_drift) if math.isfinite(raw_drift) else math.inf,
                 "residual_metric_source": source,
                 "residual_metric_fallback_used": bool(fallback_used),
+                "normalized_residual": normalized,
+                "corrected_state_recompute": corrected_state_metrics,
                 "solver_control_trace_source": solver_control_trace_source,
                 "solver_control_event_count": int(solver_control_metrics["event_count"]),
                 "solver_control_cutback_step_count": int(solver_control_metrics["cutback_step_count"]),
@@ -266,6 +326,9 @@ def run_ndtha_residual_gate(
                     "hard_pass": bool(hard_ok),
                     "recommended_top_pass": bool(recommended_top_ok),
                     "recommended_drift_pass": bool(recommended_drift_ok),
+                    "recommended_residual_pass": bool(recommended_top_ok and recommended_drift_ok),
+                    "corrected_state_recompute_present": bool(corrected_state_metrics["present"]),
+                    "corrected_state_recompute_pass": bool(corrected_state_metrics["pass"]),
                     "solver_control_trace_pass": bool(solver_control_metrics["trace_pass"]),
                     "solver_control_event_sequence_pass": bool(solver_control_metrics["event_sequence_pass"]),
                 },
@@ -274,6 +337,11 @@ def run_ndtha_residual_gate(
 
     case_count = len(gate_rows)
     fallback_rate = float(len(fallback_case_ids) / max(1, case_count))
+    source_ratios = {
+        key: float(value / max(1, case_count))
+        for key, value in sorted(source_counts.items())
+    }
+    solver_raw_ratio = float(source_counts.get("solver_raw", 0) / max(1, case_count))
     ndtha_solver_control_trace = bool(checks.get("solver_control_history_pass", False))
     ndtha_solver_control_event_total = _int_or_default(summary.get("solver_control_event_count_total"), default=-1)
     ndtha_solver_control_nonconverged_total = _int_or_default(summary.get("solver_control_nonconverged_step_total"), default=-1)
@@ -299,6 +367,20 @@ def run_ndtha_residual_gate(
         "fallback_rate_pass": bool(fallback_rate <= float(max_fallback_rate)),
         "recommended_top_pass": bool(len(recommended_top_exceed) == 0),
         "recommended_drift_pass": bool(len(recommended_drift_exceed) == 0),
+        "recommended_residual_pass": bool(len(recommended_top_exceed) == 0 and len(recommended_drift_exceed) == 0),
+        "strict_recommended_residual_hard_fail_enabled": bool(strict_recommended_residual_hard_fail),
+        "strict_recommended_residual_pass": bool(
+            (not strict_recommended_residual_hard_fail)
+            or (len(recommended_top_exceed) == 0 and len(recommended_drift_exceed) == 0)
+        ),
+        "corrected_state_recompute_required": bool(require_corrected_state_recompute),
+        "corrected_state_recompute_present_pass": bool(
+            (not require_corrected_state_recompute) or corrected_state_recompute_present_all
+        ),
+        "corrected_state_recompute_pass": bool(
+            (not require_corrected_state_recompute)
+            or (corrected_state_recompute_present_all and corrected_state_recompute_pass_all)
+        ),
         "solver_control_trace_pass": bool(solver_control_trace_ok_all and ndtha_solver_control_trace),
         "solver_control_rollup_pass": bool(solver_control_rollup_pass),
         "solver_control_event_sequence_pass": bool(solver_control_sequence_ok_all and solver_control_nonconverged_step_total == 0),
@@ -312,6 +394,8 @@ def run_ndtha_residual_gate(
         and gate_checks["residual_top_hard_pass"]
         and gate_checks["residual_drift_hard_pass"]
         and gate_checks["fallback_rate_pass"]
+        and gate_checks["strict_recommended_residual_pass"]
+        and gate_checks["corrected_state_recompute_pass"]
         and gate_checks["solver_control_trace_pass"]
         and gate_checks["solver_control_rollup_pass"]
         and gate_checks["solver_control_event_sequence_pass"]
@@ -325,6 +409,10 @@ def run_ndtha_residual_gate(
         reason_code = "ERR_SOLVER_CONTROL_TRACE"
     elif not gate_checks["solver_control_event_sequence_pass"]:
         reason_code = "ERR_SOLVER_CONTROL_LIMIT"
+    elif not gate_checks["strict_recommended_residual_pass"]:
+        reason_code = "ERR_RESIDUAL_RECOMMENDED_LIMIT"
+    elif not gate_checks["corrected_state_recompute_pass"]:
+        reason_code = "ERR_CORRECTED_STATE_RECOMPUTE"
     elif not contract_pass:
         reason_code = "ERR_RESIDUAL_HARD_LIMIT"
     else:
@@ -345,8 +433,19 @@ def run_ndtha_residual_gate(
             "fallback_rate": float(fallback_rate),
             "fallback_case_ids": fallback_case_ids,
             "residual_metric_source_counts": source_counts,
+            "residual_metric_source_ratios": source_ratios,
+            "solver_raw_case_count": int(source_counts.get("solver_raw", 0)),
+            "solver_raw_ratio": float(solver_raw_ratio),
             "recommended_top_exceed_case_ids": recommended_top_exceed,
             "recommended_drift_exceed_case_ids": recommended_drift_exceed,
+            "strict_recommended_residual_hard_fail": bool(strict_recommended_residual_hard_fail),
+            "corrected_state_recompute_required": bool(require_corrected_state_recompute),
+            "corrected_state_recompute_present_count": int(
+                sum(1 for row in gate_rows if row["checks"]["corrected_state_recompute_present"])
+            ),
+            "corrected_state_recompute_pass_count": int(
+                sum(1 for row in gate_rows if row["checks"]["corrected_state_recompute_pass"])
+            ),
             "solver_control_event_count_total": int(solver_control_event_count_total),
             "solver_control_nonconverged_step_total": int(solver_control_nonconverged_step_total),
             "solver_control_cutback_case_ids": solver_control_cutback_case_ids,
@@ -357,6 +456,7 @@ def run_ndtha_residual_gate(
                 f"{'PASS' if contract_pass else 'CHECK'} | "
                 f"cases={case_count} | "
                 f"fallback_rate={fallback_rate:.3f} | "
+                f"solver_raw_ratio={solver_raw_ratio:.3f} | "
                 f"solver_control=events={solver_control_event_count_total},"
                 f"nonconverged={solver_control_nonconverged_step_total},"
                 f"cutback_cases={len(solver_control_cutback_case_ids)},"
@@ -378,6 +478,8 @@ def main() -> None:
     p.add_argument("--recommended-residual-top-displacement-m", type=float, default=1.0)
     p.add_argument("--recommended-residual-drift-ratio-pct", type=float, default=2.0)
     p.add_argument("--max-fallback-rate", type=float, default=1.0)
+    p.add_argument("--strict-recommended-residual-hard-fail", action="store_true")
+    p.add_argument("--require-corrected-state-recompute", action="store_true")
     p.add_argument("--out", default="implementation/phase1/ndtha_residual_gate_report.json")
     args = p.parse_args()
 
@@ -388,6 +490,8 @@ def main() -> None:
         "recommended_residual_top_displacement_m": float(args.recommended_residual_top_displacement_m),
         "recommended_residual_drift_ratio_pct": float(args.recommended_residual_drift_ratio_pct),
         "max_fallback_rate": float(args.max_fallback_rate),
+        "strict_recommended_residual_hard_fail": bool(args.strict_recommended_residual_hard_fail),
+        "require_corrected_state_recompute": bool(args.require_corrected_state_recompute),
         "out": str(args.out),
     }
     out = Path(args.out)
@@ -403,6 +507,8 @@ def main() -> None:
             recommended_residual_top_displacement_m=float(args.recommended_residual_top_displacement_m),
             recommended_residual_drift_ratio_pct=float(args.recommended_residual_drift_ratio_pct),
             max_fallback_rate=float(args.max_fallback_rate),
+            strict_recommended_residual_hard_fail=bool(args.strict_recommended_residual_hard_fail),
+            require_corrected_state_recompute=bool(args.require_corrected_state_recompute),
         )
     except (ValueError, FileNotFoundError, InputContractError, json.JSONDecodeError) as exc:
         report = {

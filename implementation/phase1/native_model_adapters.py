@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any
 
 
 @dataclass
@@ -92,7 +91,6 @@ def parse_midas_mgt(text: str) -> NativeModelParseResult:
         m = MIDAS_ELEMENT_PATTERN.match(line)
         if m:
             elem_type = m.group(1).lower()
-            elem_id = _safe_int(m.group(2))
             n1 = _safe_int(m.group(3))
             n2 = _safe_int(m.group(4))
             element_id_counter += 1

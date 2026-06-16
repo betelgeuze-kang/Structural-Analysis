@@ -1,0 +1,32 @@
+{
+  "blockers": [],
+  "checks": {
+    "cursor_worker_cli_present": true,
+    "opencode_json_valid": true,
+    "opencode_worker_cli_present": true,
+    "required_files_present": true,
+    "worker_shell_syntax_pass": true,
+    "worker_wrappers_executable": true,
+    "worker_wrappers_present": true
+  },
+  "claim_boundary": "This report verifies Cursor/OpenCode worker bridge readiness only. Codex still owns goal tracking, diff review, verification, and final acceptance.",
+  "contract_pass": true,
+  "diagnostics": {
+    "missing_files": [],
+    "missing_wrappers": [],
+    "opencode_json_output": "{\n    \"$schema\": \"https://opencode.ai/config.json\",\n    \"instructions\": [\n        \"AGENTS.md\"\n    ],\n    \"permission\": {\n        \"read\": {\n            \"*\": \"allow\",\n            \".env\": \"deny\",\n            \".env.*\": \"deny\",\n            \"*.env\": \"deny\",\n            \"*.env.*\": \"deny\",\n            \".env.example\": \"allow\",\n            \"*.env.example\": \"allow\"\n        },\n        \"external_directory\": \"deny\",\n        \"glob\": \"allow\",\n        \"grep\": \"allow\",\n        \"lsp\": \"allow\",\n        \"edit\": \"allow\",\n        \"bash\": \"allow\",\n        \"webfetch\": \"deny\",\n        \"websearch\": \"deny\",\n        \"task\": \"deny\",\n        \"todowrite\": \"allow\"\n    }\n}",
+    "wrapper_syntax_output": ""
+  },
+  "generated_at": "2026-06-16T15:55:21.992156+00:00",
+  "reason_code": "PASS",
+  "schema_version": "ai-orchestration-preflight-report.v1",
+  "summary": {
+    "cursor_worker_cli": "cursor-agent",
+    "cursor_worker_cli_path": "/home/betelgeuze/.local/bin/cursor-agent",
+    "opencode_version": "1.17.7",
+    "opencode_worker_cli": "opencode",
+    "opencode_worker_cli_path": "/home/betelgeuze/.local/bin/opencode",
+    "required_file_count": 10,
+    "wrapper_count": 5
+  }
+}

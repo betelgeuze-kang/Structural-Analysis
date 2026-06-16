@@ -305,7 +305,6 @@ def _backtracking_line_search(
     lam = 1.0
     best_u = u.copy()
     best_r = baseline
-    accepted = False
     for _ in range(int(max_trials)):
         u_trial = u.copy()
         u_trial[free] = u[free] + lam * du

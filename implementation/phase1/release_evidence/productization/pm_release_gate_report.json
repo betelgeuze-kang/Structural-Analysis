@@ -1,0 +1,566 @@
+{
+  "blockers": [],
+  "contract_pass": true,
+  "full_release_blockers": [
+    "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "ux::ux_release_readiness_report_missing_or_failed",
+    "ux::new_user_30min_sample_evidence_missing",
+    "security::license_status_not_configured"
+  ],
+  "full_release_gate_ready": false,
+  "ga_enterprise_ready": false,
+  "generated_at": "2026-06-16T15:57:33.983183+00:00",
+  "implementation_orchestration": {
+    "artifacts": {
+      "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
+    },
+    "claim_boundary": "Cursor/OpenCode are implementation workers for scoped slices; Codex still owns PM gate review, verification, and final acceptance.",
+    "cursor_opencode_worker_preflight_pass": true,
+    "summary": {
+      "cursor_worker_cli": "cursor-agent",
+      "opencode_version": "1.17.7",
+      "opencode_worker_cli": "opencode"
+    }
+  },
+  "limited_commercial_ready": true,
+  "milestone_gate_pass": true,
+  "milestones": [
+    {
+      "artifacts": {
+        "ndtha_residual_gate_report": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "corrected_state_recompute_pass": true,
+        "corrected_state_recompute_release_required": true,
+        "corrected_state_recompute_report_required": true,
+        "fallback_rate_pass": true,
+        "ndtha_residual_contract_pass": true,
+        "normalized_residual_rows_pass": true,
+        "release_evidence_path_fixed": true,
+        "residual_source_solver_raw_ratio_present": true,
+        "strict_recommended_residual_hard_fail_enabled": true,
+        "strict_recommended_residual_pass": true
+      },
+      "milestone": "M1",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "case_count": 3,
+        "corrected_state_recompute_pass_count": 3,
+        "corrected_state_recompute_present_count": 3,
+        "fallback_rate": 0.0,
+        "max_fallback_rate": 0.05,
+        "solver_raw_ratio": 1.0
+      },
+      "title": "Residual Release Hardening"
+    },
+    {
+      "artifacts": {
+        "element_material_breadth_report": "implementation/phase1/element_material_breadth_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "composite_material_present": true,
+        "contact_material_coupled_case_count_pass": true,
+        "element_material_breadth_contract_pass": true,
+        "nonlinear_residual_same_case_pass": true,
+        "panel_contact_failure_reason_code_pass": true,
+        "rc_material_present": true,
+        "ssi_foundation_link_pass": true,
+        "steel_material_present": true,
+        "structural_contact_pass": true
+      },
+      "milestone": "M2",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "beam_shell_contact_coupling_signal_count": 21,
+        "contact_material_coupled_case_count": 31,
+        "material_model_types": [
+          "rc_composite",
+          "steel_elastic_plastic"
+        ],
+        "nonlinear_residual_integrated_case_count": 3
+      },
+      "title": "Core Engine Depth Closure"
+    },
+    {
+      "artifacts": {
+        "ci_require_ndtha": "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json",
+        "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+        "runtime_policy": "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
+        "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json",
+        "zero_copy_strict": "implementation/phase1/zero_copy_real_probe_report_strict.json"
+      },
+      "blockers": [],
+      "checks": {
+        "cpu_fallback_release_forbidden_pass": true,
+        "cpu_only_product_mode_declared": false,
+        "device_residency_target_pass": true,
+        "host_copy_share_pass": true,
+        "official_backend_rocm_hip": true,
+        "require_hip_pass": true,
+        "require_ndtha_pass": true,
+        "runtime_backend_policy_ready": true
+      },
+      "milestone": "M3",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "device_residency_ratio_min": 1.0,
+        "host_copy_share": 0.0,
+        "max_host_copy_share": 0.05,
+        "min_device_residency_ratio": 0.99,
+        "official_solver_backend": "amd_rocm_hip",
+        "rocm_sparse_solver_probe_ready": true
+      },
+      "title": "Strict Runtime Closure"
+    },
+    {
+      "artifacts": {
+        "measured_benchmark_breadth_report": "implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json",
+        "worst_case_report": "implementation/phase1/release/benchmark_expansion/worst_case_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "holdout_cases_per_family_present": true,
+        "measured_benchmark_breadth_contract_pass": true,
+        "measured_open_data_split_pass": true,
+        "structure_family_count_pass": true,
+        "validation_case_count_pass": true,
+        "worst_case_report_pass": true
+      },
+      "milestone": "M4",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "holdout_family_count": 21,
+        "measured_case_count": 294,
+        "measured_family_count": 21,
+        "min_structure_families": 5,
+        "min_validation_cases": 100
+      },
+      "title": "Benchmark Breadth Expansion"
+    },
+    {
+      "artifacts": {
+        "limitation_manual": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+        "validation_manual": "docs/commercial-structural-solver-product-gap-ledger.md",
+        "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "audit_trail_action_source_trace_pass": true,
+        "limitation_manual_present": true,
+        "pdf_report_or_reviewer_package_pass": true,
+        "signed_release_registry_pass": true,
+        "support_bundle_export_pass": true,
+        "validation_manual_present": true,
+        "viewer_reviewer_customer_surface_pass": true,
+        "workflow_productization_pass": true
+      },
+      "milestone": "M5",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "release_registry_artifact_count": 12,
+        "support_bundle_missing_required_count": 0,
+        "viewer_mode": "static_release_artifact_viewer"
+      },
+      "title": "Commercial Packaging"
+    }
+  ],
+  "paid_pilot_candidate": true,
+  "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep commercial use constrained until release-area blockers are closed.",
+  "release_area_blockers": [
+    "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "ux::ux_release_readiness_report_missing_or_failed",
+    "ux::new_user_30min_sample_evidence_missing",
+    "security::license_status_not_configured"
+  ],
+  "release_area_gate_ready": false,
+  "release_area_matrix": [
+    {
+      "area": "basic_ci",
+      "artifacts": {
+        "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
+        "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
+      },
+      "blockers": [
+        "pr_ci_30_consecutive_pass_evidence_missing"
+      ],
+      "checks": {
+        "nightly_ci_30_run_streak_pass": true,
+        "nightly_ci_pass": true,
+        "pr_ci_30_run_streak_pass": false,
+        "pr_ci_pass": true
+      },
+      "claim_boundary": "",
+      "ok": false,
+      "status": "blocked",
+      "summary": {
+        "nightly_github_actions_pass_streak_count": 0,
+        "nightly_local_pass_streak_count": 230,
+        "nightly_pass_streak_count": 230,
+        "pr_github_actions_pass_streak_count": 0,
+        "pr_local_pass_streak_count": 2,
+        "pr_pass_streak_count": 2,
+        "required_consecutive_pass_count": 30
+      },
+      "title": "Basic CI"
+    },
+    {
+      "area": "strict_ci",
+      "artifacts": {
+        "ci_require_hip": "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json",
+        "ci_require_ndtha": "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json",
+        "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+        "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "cpu_only_product_mode_declared": false,
+        "direct_require_hip_or_cpu_scope_pass": true,
+        "direct_require_ndtha_pass": true,
+        "strict_ci_require_hip_artifact_or_cpu_scope_pass": true,
+        "strict_ci_require_ndtha_artifact_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "ci_require_hip_reason_code": "PASS",
+        "ci_require_ndtha_reason_code": "PASS"
+      },
+      "title": "Strict CI"
+    },
+    {
+      "area": "core_engine",
+      "artifacts": {
+        "commercial_readiness": "implementation/phase1/commercial_readiness_report.strict_breadth.json",
+        "core_depth": "implementation/phase1/element_material_breadth_gate_report.json",
+        "core_family_p95_accuracy": "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "commercial_accuracy_contract_pass": true,
+        "commercial_readiness_contract_pass": true,
+        "core_depth_milestone_pass": true,
+        "core_family_p95_accuracy_report_pass": true,
+        "family_p95_error_evidence_present": true,
+        "family_p95_error_limited_pass": true
+      },
+      "claim_boundary": "Core p95 uses HF-vs-topk comparison accuracy evidence; high-noise robustness p95 is tracked separately and is not counted as core engine family p95.",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "max_family_p95_error_pct": 2.262251278851306,
+        "max_family_p95_error_pct_limit": 5.0,
+        "p95_evidence_source": "core_family_p95_accuracy_report",
+        "p95_metric_row_count": 9
+      },
+      "title": "Core Engine"
+    },
+    {
+      "area": "ndtha",
+      "artifacts": {
+        "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+        "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "all_converged_pass": true,
+        "long_profile_pass": true,
+        "no_collapse_false_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "ndtha_long_profile_reason_code": "PASS",
+        "solver_control_nonconverged_step_total": 0
+      },
+      "title": "NDTHA"
+    },
+    {
+      "area": "residual",
+      "artifacts": {
+        "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "fallback_rate_ga_pass": true,
+        "fallback_rate_limited_pass": true,
+        "hard_residual_pass": true,
+        "recommended_residual_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "fallback_rate": 0.0,
+        "ga_fallback_rate_limit": 0.01,
+        "limited_fallback_rate_limit": 0.05
+      },
+      "title": "Residual"
+    },
+    {
+      "area": "benchmark_breadth",
+      "artifacts": {
+        "measured_benchmark_breadth": "implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "benchmark_breadth_milestone_pass": true,
+        "ga_case_threshold_pass": false,
+        "limited_case_threshold_pass": true,
+        "paid_pilot_case_threshold_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "ga_validation_case_threshold": 300,
+        "limited_validation_case_threshold": 100,
+        "measured_case_count": 294
+      },
+      "title": "Benchmark Breadth"
+    },
+    {
+      "area": "runtime",
+      "artifacts": {
+        "runtime_memory_budget": "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json",
+        "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
+        "workstation_budget": "implementation/phase1/workstation_service_budget.json"
+      },
+      "blockers": [],
+      "checks": {
+        "p95_runtime_budget_exceed_rate_pass": true,
+        "p95_runtime_budget_exceed_rate_present": true,
+        "runtime_memory_budget_report_pass": true,
+        "runtime_packaging_pass": true,
+        "strict_runtime_milestone_pass": true,
+        "workstation_budget_contract_pass": true
+      },
+      "claim_boundary": "Existing workstation budgets pass, but PM p95 exceed-rate requires explicit release evidence.",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "max_runtime_budget_exceed_rate": 0.05,
+        "p95_runtime_budget_exceed_rate": 0.0
+      },
+      "title": "Runtime"
+    },
+    {
+      "area": "memory",
+      "artifacts": {
+        "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json",
+        "runtime_memory_budget": "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json",
+        "workstation_budget": "implementation/phase1/workstation_service_budget.json"
+      },
+      "blockers": [],
+      "checks": {
+        "ndtha_peak_vram_report_present": true,
+        "oom_zero_explicit_evidence_present": true,
+        "oom_zero_pass": true,
+        "peak_memory_budget_report_present": true,
+        "runtime_memory_budget_report_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "ndtha_peak_vram_mb_mean": 0.0,
+        "oom_count": 0.0
+      },
+      "title": "Memory"
+    },
+    {
+      "area": "gpu_device",
+      "artifacts": {
+        "runtime_policy": "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
+        "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "cpu_fallback_release_forbidden_pass": true,
+        "cpu_only_product_mode_declared": false,
+        "device_residency_target_pass": true,
+        "gpu_strict_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "device_residency_ratio_min": 1.0,
+        "official_solver_backend": "amd_rocm_hip"
+      },
+      "title": "GPU / Device"
+    },
+    {
+      "area": "interop",
+      "artifacts": {
+        "midas_exact_roundtrip": "implementation/phase1/midas_exact_roundtrip_closure_gate_report.json",
+        "midas_interop": "implementation/phase1/midas_interoperability_gate_report.json",
+        "midas_kds_geometry": "implementation/phase1/midas_kds_geometry_bridge_validation_report.json",
+        "midas_native_roundtrip": "implementation/phase1/midas_native_roundtrip_gate_report.json",
+        "opensees_roundtrip_trace": "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json",
+        "opensees_topology": "implementation/phase1/opensees_topology_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "kds_full_crosswalk_pass": true,
+        "midas_exact_roundtrip_pass": true,
+        "midas_interop_pass": true,
+        "midas_native_roundtrip_pass": true,
+        "opensees_roundtrip_trace_pass": true,
+        "opensees_roundtrip_trace_report_pass": true,
+        "opensees_trace_pass": true
+      },
+      "claim_boundary": "OpenSees evidence is a topology canonicalization/reload trace, not a full solver execution roundtrip.",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "midas_exact_case_ratio": 1.0,
+        "opensees_schema_version": "1.0"
+      },
+      "title": "Interop"
+    },
+    {
+      "area": "report",
+      "artifacts": {
+        "release_registry": "implementation/phase1/release/release_registry.json",
+        "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
+        "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
+      },
+      "blockers": [],
+      "checks": {
+        "commercial_packaging_milestone_pass": true,
+        "repro_command_present": true,
+        "reproducibility_lock_pass": true,
+        "reviewer_package_auto_pass": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "release_registry_signed": true
+      },
+      "title": "Report"
+    },
+    {
+      "area": "ux",
+      "artifacts": {
+        "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
+        "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+        "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+      },
+      "blockers": [
+        "ux_release_readiness_report_missing_or_failed",
+        "new_user_30min_sample_evidence_missing"
+      ],
+      "checks": {
+        "blocking_review_queue_zero_pass": true,
+        "new_user_sample_30min_evidence_present": false,
+        "new_user_sample_30min_pass": false,
+        "ux_release_readiness_report_pass": false,
+        "viewer_performance_static_budget_pass": true,
+        "viewer_quality_gate_pass": true
+      },
+      "claim_boundary": "UX sample completion is currently automated browser rehearsal evidence; human new-user usability observation remains a GA-strength evidence upgrade.",
+      "ok": false,
+      "status": "blocked",
+      "summary": {
+        "blocking_review_item_count": 0,
+        "sample_completion_minutes": null,
+        "ux_evidence_source": "ux_release_readiness_report",
+        "viewer_review_item_count": 7
+      },
+      "title": "UX"
+    },
+    {
+      "area": "support",
+      "artifacts": {
+        "limitation_manual": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
+        "support_bundle": "implementation/phase1/support_bundle_manifest.json"
+      },
+      "blockers": [],
+      "checks": {
+        "failure_bundle_export_pass": true,
+        "known_issue_or_limitation_register_present": true,
+        "rollback_runbook_present": true
+      },
+      "claim_boundary": "",
+      "ok": true,
+      "status": "pass",
+      "summary": {
+        "support_bundle_missing_required_count": 0
+      },
+      "title": "Support"
+    },
+    {
+      "area": "security",
+      "artifacts": {
+        "license_status": "implementation/phase1/release/support_bundle/license_status.json",
+        "license_status_closure": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
+        "runtime_sbom": "implementation/phase1/runtime_sbom.json",
+        "security_runbook": "docs/production-ops-security.md"
+      },
+      "blockers": [
+        "license_status_not_configured"
+      ],
+      "checks": {
+        "license_status_closure_report_present": true,
+        "license_status_configured_pass": false,
+        "repro_build_pass": true,
+        "sbom_present_pass": true,
+        "secrets_negative_start_or_no_default_secret_pass": true
+      },
+      "claim_boundary": "Security area is release-gate evidence only; live deployment hardening remains governed by the runbook.",
+      "ok": false,
+      "status": "blocked",
+      "summary": {
+        "license_status": "not_configured",
+        "license_status_closure_blockers": [
+          "license_status_not_active",
+          "license_tier_missing",
+          "license_id_missing",
+          "license_issuer_or_approver_missing",
+          "license_approval_reference_missing",
+          "license_product_scope_missing",
+          "license_expiry_missing_or_invalid"
+        ],
+        "sbom_component_count": 26
+      },
+      "title": "Security"
+    }
+  ],
+  "release_tiers": {
+    "ga_enterprise": false,
+    "ga_enterprise_blockers": [
+      "independent_vv_missing",
+      "family_validation_manual_signoff_missing",
+      "customer_audit_failure_bundle_sla_missing",
+      "ga_validation_case_count_lt_300",
+      "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "ux::ux_release_readiness_report_missing_or_failed",
+      "ux::new_user_30min_sample_evidence_missing",
+      "security::license_status_not_configured"
+    ],
+    "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+    "ga_validation_case_threshold": 300,
+    "ga_validation_case_threshold_met": false,
+    "limited_commercial_full_gate_ready": false,
+    "limited_commercial_milestone_ready": true,
+    "paid_pilot": true
+  },
+  "schema_version": "pm-release-gate-report.v1",
+  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=294"
+}

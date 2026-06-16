@@ -392,7 +392,6 @@ def force_based_beam_column_response(
 
     n_points = max(int(integration_points), 3)
     xi = np.linspace(0.0, 1.0, n_points)
-    dx = 1.0 / max(n_points - 1, 1)
 
     plastic_hinge_length = max(0.5 * length, min(length, 2.0 * float(props.iy_m4) ** 0.5))
 

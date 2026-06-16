@@ -5095,7 +5095,6 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                         "operator_action_repo_candidate_ifc_source_mapping_candidates"
                     )
                 ),
-                "operator_action_queue": korea.get("operator_action_queue"),
                 "repo_benchmark_bridge_count": bridge_count,
                 "operator_attached_real_mgt_header_ok_count": real_mgt_ok,
             },

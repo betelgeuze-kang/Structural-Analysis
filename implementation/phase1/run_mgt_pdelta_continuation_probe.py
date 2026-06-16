@@ -1048,8 +1048,6 @@ def _post_failed_relaxation_sensitivity_probe(
 ) -> dict[str, Any]:
     started = time.perf_counter()
     rows: list[dict[str, Any]] = []
-    accepted_displacement: np.ndarray | None = None
-    accepted_relaxation_factor: float | None = None
     for relaxation in relaxation_factors:
         attempt_started = time.perf_counter()
         result, next_u = _solve_deformed_state_pdelta_fixed_point(

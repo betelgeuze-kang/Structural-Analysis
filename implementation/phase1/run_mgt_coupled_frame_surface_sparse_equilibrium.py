@@ -22,7 +22,6 @@ from run_mgt_full_frame_6dof_sparse_equilibrium import (
     _assemble_sparse_frame,
     _beam_end_offset_lookup,
     _element_angle_array_from_props,
-    _frame_props,
     _node_dofs,
 )
 from run_mgt_surface_membrane_tangent import (

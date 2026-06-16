@@ -1,0 +1,24 @@
+{
+  "artifacts": {
+    "ndtha_long_profile": "implementation/phase1/ndtha_long_profile_report.json"
+  },
+  "blockers": [],
+  "checks": {
+    "ndtha_all_runs_pass": true,
+    "ndtha_elapsed_cov_pass": true,
+    "ndtha_long_profile_contract_pass": true,
+    "ndtha_peak_vram_cov_pass": true,
+    "ndtha_rust_backend_all_runs_pass": true
+  },
+  "claim_boundary": "This is a PM-scoped strict CI artifact. It verifies the release promise named by kind and does not replace broader monolithic CI gates.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T15:56:03.328560+00:00",
+  "kind": "require_ndtha",
+  "reason_code": "PASS",
+  "schema_version": "pm-strict-ci-report.v1",
+  "summary": {
+    "elapsed_wall_s_mean": 106.34080333699967,
+    "ndtha_long_profile_reason_code": "PASS",
+    "peak_vram_mb_mean": 0.0
+  }
+}

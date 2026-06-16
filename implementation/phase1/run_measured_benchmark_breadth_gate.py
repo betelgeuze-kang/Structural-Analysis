@@ -119,6 +119,282 @@ def _canton_tower_delta(
     return {"measured:canton_tower_reduced_shm"}, benchmark_case_count, observed_channel_count, rows
 
 
+def _allocate_case_counts(total_case_count: int, family_ids: list[str]) -> dict[str, int]:
+    if not family_ids:
+        return {}
+    total = max(int(total_case_count), 0)
+    base_count = total // len(family_ids)
+    remainder = total % len(family_ids)
+    return {
+        family_id: base_count + (1 if idx < remainder else 0)
+        for idx, family_id in enumerate(family_ids)
+    }
+
+
+def _add_family_coverage(
+    families: dict[str, dict[str, Any]],
+    *,
+    family_id: str,
+    source_bucket: str,
+    measured_case_count: int,
+    evidence_ref: dict[str, Any],
+) -> None:
+    family = str(family_id or "").strip()
+    if not family:
+        return
+    row = families.setdefault(
+        family,
+        {
+            "family_id": family,
+            "measured_case_count": 0,
+            "source_buckets": [],
+            "evidence_refs": [],
+        },
+    )
+    row["measured_case_count"] = int(row.get("measured_case_count", 0) or 0) + max(
+        int(measured_case_count or 0),
+        0,
+    )
+    bucket = str(source_bucket or "").strip()
+    if bucket and bucket not in row["source_buckets"]:
+        row["source_buckets"].append(bucket)
+    row["evidence_refs"].append(evidence_ref)
+
+
+def _family_coverage_rows(
+    *,
+    baseline_rows: list[dict[str, Any]],
+    opensees_rows: list[dict[str, Any]],
+    authority_rows: list[dict[str, Any]],
+    external_rows: list[dict[str, Any]],
+    canton_rows: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    families: dict[str, dict[str, Any]] = {}
+    for row in baseline_rows:
+        source_families = [
+            str(token).strip()
+            for token in row.get("measured_source_families", [])
+            if str(token).strip()
+        ]
+        allocated_counts = _allocate_case_counts(
+            int(row.get("measured_case_count", 0) or 0),
+            source_families,
+        )
+        for family_id in source_families:
+            _add_family_coverage(
+                families,
+                family_id=family_id,
+                source_bucket="commercial_baseline",
+                measured_case_count=allocated_counts.get(family_id, 0),
+                evidence_ref={
+                    "model_id": str(row.get("model_id", "") or ""),
+                    "allocated_from_model_case_count": int(row.get("measured_case_count", 0) or 0),
+                },
+            )
+
+    for row in opensees_rows:
+        family_id = str(row.get("family_id", "") or "").strip()
+        if not family_id:
+            continue
+        _add_family_coverage(
+            families,
+            family_id=f"opensees:{family_id}",
+            source_bucket="opensees_canonical",
+            measured_case_count=1,
+            evidence_ref={
+                "case_id": str(row.get("case_id", "") or ""),
+                "path": str(row.get("path", "") or ""),
+                "parser_contract_ready": bool(row.get("parser_contract_ready", False)),
+            },
+        )
+
+    for row in authority_rows:
+        track = str(row.get("track", "") or "").strip()
+        if not track:
+            continue
+        _add_family_coverage(
+            families,
+            family_id=f"authority:{track}",
+            source_bucket="global_authority",
+            measured_case_count=int(row.get("case_count", 0) or 0),
+            evidence_ref={"track": track},
+        )
+
+    for row in external_rows:
+        benchmark_family = str(row.get("benchmark_family", "") or "").strip()
+        if not benchmark_family:
+            continue
+        _add_family_coverage(
+            families,
+            family_id=f"external:{benchmark_family}",
+            source_bucket="official_external_benchmark_fullcase",
+            measured_case_count=1,
+            evidence_ref={
+                "case_id": str(row.get("case_id", "") or ""),
+                "execution_status": str(row.get("execution_status", "") or ""),
+                "artifact_path": str(row.get("artifact_path", "") or ""),
+            },
+        )
+
+    for row in canton_rows:
+        _add_family_coverage(
+            families,
+            family_id="measured:canton_tower_reduced_shm",
+            source_bucket="open_data_reduced_order_shm",
+            measured_case_count=int(row.get("case_count", 0) or 0),
+            evidence_ref={
+                "track": str(row.get("track", "") or ""),
+                "observed_channel_count": int(row.get("observed_channel_count", 0) or 0),
+            },
+        )
+
+    rows = []
+    for family_id, row in families.items():
+        source_buckets = sorted(str(bucket) for bucket in row.get("source_buckets", []))
+        measured_case_count = int(row.get("measured_case_count", 0) or 0)
+        rows.append(
+            {
+                "family_id": family_id,
+                "measured_case_count": measured_case_count,
+                "source_buckets": source_buckets,
+                "source_bucket_count": len(source_buckets),
+                "holdout_candidate_count": 1 if measured_case_count > 0 else 0,
+                "evidence_refs": row.get("evidence_refs", []),
+            }
+        )
+    return sorted(rows, key=lambda item: str(item.get("family_id", "")))
+
+
+def _holdout_rows(family_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows = []
+    for row in family_rows:
+        family_id = str(row.get("family_id", "") or "").strip()
+        measured_case_count = int(row.get("measured_case_count", 0) or 0)
+        if not family_id or measured_case_count <= 0:
+            continue
+        rows.append(
+            {
+                "family_id": family_id,
+                "holdout_id": f"{family_id}::holdout_001",
+                "holdout_case_count": 1,
+                "family_measured_case_count": measured_case_count,
+                "selection_policy": "deterministic_family_holdout_v1",
+                "selection_basis": "stable family_id sort with one retained coverage holdout candidate per measured family",
+                "source_buckets": list(row.get("source_buckets", [])),
+            }
+        )
+    return rows
+
+
+def _coverage_risk_score(row: dict[str, Any], *, has_holdout: bool) -> tuple[float, list[str]]:
+    case_count = int(row.get("measured_case_count", 0) or 0)
+    source_bucket_count = int(row.get("source_bucket_count", 0) or 0)
+    reason_codes: list[str] = []
+    if case_count <= 0:
+        score = 1.0
+        reason_codes.append("ERR_NO_MEASURED_CASES")
+    elif case_count == 1:
+        score = 0.85
+        reason_codes.append("LOW_CASE_COUNT_SINGLETON")
+    elif case_count < 5:
+        score = 0.65
+        reason_codes.append("LOW_CASE_COUNT_LT5")
+    elif case_count < 10:
+        score = 0.45
+        reason_codes.append("MODERATE_CASE_COUNT_LT10")
+    else:
+        score = 0.25
+
+    if not has_holdout:
+        score += 0.2
+        reason_codes.append("NO_HOLDOUT_SELECTOR")
+    if source_bucket_count <= 1:
+        score += 0.1
+        reason_codes.append("SINGLE_SOURCE_BUCKET")
+    if not reason_codes:
+        reason_codes.append("LOWEST_COVERAGE_RISK_BUCKET")
+    return min(score, 1.0), reason_codes
+
+
+def build_benchmark_worst_case_report(measured_payload: dict[str, Any]) -> dict[str, Any]:
+    summary = measured_payload.get("summary") if isinstance(measured_payload.get("summary"), dict) else {}
+    family_rows = (
+        measured_payload.get("family_coverage_rows")
+        if isinstance(measured_payload.get("family_coverage_rows"), list)
+        else []
+    )
+    holdout_rows = (
+        measured_payload.get("holdout_rows")
+        if isinstance(measured_payload.get("holdout_rows"), list)
+        else []
+    )
+    holdout_families = {
+        str(row.get("family_id", "") or "").strip()
+        for row in holdout_rows
+        if isinstance(row, dict) and str(row.get("family_id", "") or "").strip()
+    }
+    ranked_rows = []
+    for row in family_rows:
+        if not isinstance(row, dict):
+            continue
+        family_id = str(row.get("family_id", "") or "").strip()
+        score, reason_codes = _coverage_risk_score(row, has_holdout=family_id in holdout_families)
+        ranked_rows.append(
+            {
+                "family_id": family_id,
+                "measured_case_count": int(row.get("measured_case_count", 0) or 0),
+                "holdout_candidate_count": 1 if family_id in holdout_families else 0,
+                "source_buckets": list(row.get("source_buckets", [])),
+                "coverage_risk_score": round(score, 4),
+                "reason_codes": reason_codes,
+            }
+        )
+    ranked_rows.sort(
+        key=lambda row: (
+            -float(row.get("coverage_risk_score", 0.0) or 0.0),
+            int(row.get("measured_case_count", 0) or 0),
+            str(row.get("family_id", "")),
+        )
+    )
+    for idx, row in enumerate(ranked_rows, start=1):
+        row["rank"] = idx
+
+    source_contract_pass = bool(measured_payload.get("contract_pass", False))
+    checks = {
+        "source_measured_benchmark_breadth_contract_pass": source_contract_pass,
+        "family_coverage_rows_present": bool(family_rows),
+        "holdout_manifest_present": bool(holdout_rows),
+        "coverage_worst_case_rows_present": bool(ranked_rows),
+        "no_accuracy_claim": True,
+    }
+    contract_pass = all(checks.values())
+    return {
+        "schema_version": "benchmark-worst-case-report.v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "contract_pass": contract_pass,
+        "reason_code": "PASS" if contract_pass else "ERR_WORST_CASE_COVERAGE_REPORT_INCOMPLETE",
+        "metric_basis": "coverage_risk_no_accuracy_claim",
+        "accuracy_claimed": False,
+        "checks": checks,
+        "summary": {
+            "source_measured_case_count": int(summary.get("measured_case_count", 0) or 0),
+            "source_measured_family_count": int(summary.get("measured_family_count", 0) or 0),
+            "holdout_family_count": len(holdout_families),
+            "worst_case_family_count": len(ranked_rows),
+            "highest_coverage_risk_family_id": str(ranked_rows[0].get("family_id", "")) if ranked_rows else "",
+            "highest_coverage_risk_score": float(ranked_rows[0].get("coverage_risk_score", 0.0)) if ranked_rows else 0.0,
+        },
+        "summary_line": (
+            "Benchmark worst-case coverage: "
+            f"{'PASS' if contract_pass else 'CHECK'} | "
+            f"basis=coverage_risk_no_accuracy_claim | "
+            f"families={len(ranked_rows)} | "
+            f"holdout_families={len(holdout_families)}"
+        ),
+        "rows": ranked_rows,
+    }
+
+
 def run_measured_benchmark_breadth_gate(
     commercial_readiness: dict[str, Any],
     opensees_canonical_breadth: dict[str, Any],
@@ -142,6 +418,14 @@ def run_measured_benchmark_breadth_gate(
     combined_families.update(external_families)
     combined_families.update(canton_families)
     combined_case_count = int(baseline_cases + opensees_cases + authority_cases + external_cases + canton_cases)
+    family_rows = _family_coverage_rows(
+        baseline_rows=baseline_rows,
+        opensees_rows=opensees_rows,
+        authority_rows=authority_rows,
+        external_rows=external_rows,
+        canton_rows=canton_rows,
+    )
+    holdout_rows = _holdout_rows(family_rows)
 
     contract_pass = len(combined_families) >= 10 and combined_case_count >= 70 and parser_ready_cases >= 3
     reason_code = "PASS" if contract_pass else "ERR_MEASURED_BREADTH_LOW"
@@ -161,6 +445,10 @@ def run_measured_benchmark_breadth_gate(
         "opensees_parser_ready_case_count": int(parser_ready_cases),
         "measured_family_count": len(combined_families),
         "measured_case_count": int(combined_case_count),
+        "family_coverage_row_count": len(family_rows),
+        "holdout_family_count": len({str(row.get("family_id", "") or "") for row in holdout_rows}),
+        "holdout_case_count": sum(int(row.get("holdout_case_count", 0) or 0) for row in holdout_rows),
+        "holdout_policy": "deterministic_family_holdout_v1",
     }
     summary_line = (
         f"Measured benchmark breadth: {'PASS' if contract_pass else 'CHECK'} | "
@@ -171,10 +459,11 @@ def run_measured_benchmark_breadth_gate(
         f"canton_delta={len(canton_families)}/{int(canton_cases)} | "
         f"measured_families={len(combined_families)} | "
         f"measured_cases={int(combined_case_count)} | "
+        f"holdout_families={summary['holdout_family_count']} | "
         f"parser_ready={int(parser_ready_cases)}"
     )
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "contract_pass": contract_pass,
         "reason_code": reason_code,
@@ -190,6 +479,8 @@ def run_measured_benchmark_breadth_gate(
         "authority_rows": authority_rows,
         "external_rows": external_rows,
         "canton_rows": canton_rows,
+        "family_coverage_rows": family_rows,
+        "holdout_rows": holdout_rows,
     }
 
 
@@ -223,6 +514,7 @@ def main(argv: list[str] | None = None) -> int:
         "--out",
         default="implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json",
     )
+    parser.add_argument("--worst-case-out", default=None)
     args = parser.parse_args(argv)
 
     payload = run_measured_benchmark_breadth_gate(
@@ -237,6 +529,11 @@ def main(argv: list[str] | None = None) -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"Wrote measured benchmark breadth gate report: {out}")
+    worst_case_out = Path(args.worst_case_out) if args.worst_case_out else out.parent / "worst_case_report.json"
+    worst_case_payload = build_benchmark_worst_case_report(payload)
+    worst_case_out.parent.mkdir(parents=True, exist_ok=True)
+    worst_case_out.write_text(json.dumps(worst_case_payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"Wrote benchmark worst-case coverage report: {worst_case_out}")
     return 0 if payload.get("contract_pass", False) else 1
 
 

@@ -139,8 +139,22 @@ def test_run_measured_benchmark_breadth_gate_generates_expected_summary(tmp_path
     assert payload["summary"]["external_incremental_case_count"] == 10
     assert payload["summary"]["measured_family_count"] == 20
     assert payload["summary"]["measured_case_count"] == 74
+    assert payload["summary"]["family_coverage_row_count"] == 20
+    assert payload["summary"]["holdout_family_count"] == 20
+    assert payload["summary"]["holdout_case_count"] == 20
     assert payload["summary"]["opensees_parser_ready_case_count"] == 3
+    assert len(payload["family_coverage_rows"]) == 20
+    assert len(payload["holdout_rows"]) == 20
     assert "Measured benchmark breadth: PASS" in payload["summary_line"]
+    assert "holdout_families=20" in payload["summary_line"]
+
+    worst_case = json.loads((tmp_path / "worst_case_report.json").read_text(encoding="utf-8"))
+    assert worst_case["contract_pass"] is True
+    assert worst_case["metric_basis"] == "coverage_risk_no_accuracy_claim"
+    assert worst_case["accuracy_claimed"] is False
+    assert worst_case["summary"]["worst_case_family_count"] == 20
+    assert worst_case["summary"]["holdout_family_count"] == 20
+    assert worst_case["rows"][0]["reason_codes"]
 
 
 def test_run_measured_benchmark_breadth_gate_surfaces_canton_delta(tmp_path: Path) -> None:
@@ -206,3 +220,105 @@ def test_run_measured_benchmark_breadth_gate_surfaces_canton_delta(tmp_path: Pat
     assert payload["summary"]["canton_incremental_case_count"] == 64
     assert payload["summary"]["canton_observed_channel_count"] == 20
     assert "canton_delta=1/64" in payload["summary_line"]
+
+
+def test_run_measured_benchmark_breadth_gate_writes_coverage_worst_case_report(tmp_path: Path) -> None:
+    commercial = tmp_path / "commercial_readiness_report.json"
+    opensees = tmp_path / "opensees_canonical_breadth_report.json"
+    authority = tmp_path / "global_authority_gate_report.json"
+    external = tmp_path / "external_benchmark_execution_status_manifest.json"
+    canton_conversion = tmp_path / "missing_canton_conversion_report.json"
+    canton_compare = tmp_path / "missing_canton_compare_report.json"
+    out = tmp_path / "measured_benchmark_breadth_report.json"
+    worst_case_out = tmp_path / "custom_worst_case_report.json"
+
+    commercial.write_text(
+        json.dumps(
+            {
+                "model_rows": [
+                    {
+                        "model_id": "baseline",
+                        "source_provenance": {
+                            "measured_source_families": ["baseline_a", "baseline_b"],
+                            "measured_case_count": 60,
+                        },
+                    }
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    opensees.write_text(
+        json.dumps(
+            {
+                "summary": {"standalone_parser_ready_case_count": 3},
+                "rows": [
+                    {"family_id": "frame", "case_id": "frame_1", "parser_contract_ready": True},
+                    {"family_id": "frame", "case_id": "frame_2", "parser_contract_ready": True},
+                    {"family_id": "wall", "case_id": "wall_1", "parser_contract_ready": True},
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    authority.write_text(
+        json.dumps({"summary": {"sac_case_count": 3, "nheri_case_count": 3}}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    external.write_text(
+        json.dumps(
+            {
+                "tasks": [
+                    {
+                        "case_id": f"external_case_{idx}",
+                        "benchmark_family": family,
+                        "execution_status": "completed",
+                        "source_origin_class": "official_external_benchmark_fullcase",
+                    }
+                    for idx, family in enumerate(["ssi", "ndtha", "buckling", "wind"], start=1)
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/run_measured_benchmark_breadth_gate.py",
+            "--commercial-readiness",
+            str(commercial),
+            "--opensees-canonical-breadth",
+            str(opensees),
+            "--authority-report",
+            str(authority),
+            "--external-benchmark-status",
+            str(external),
+            "--canton-conversion-report",
+            str(canton_conversion),
+            "--canton-reduced-order-compare",
+            str(canton_compare),
+            "--out",
+            str(out),
+            "--worst-case-out",
+            str(worst_case_out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    worst_case = json.loads(worst_case_out.read_text(encoding="utf-8"))
+    assert worst_case["contract_pass"] is True
+    assert worst_case["checks"]["no_accuracy_claim"] is True
+    assert worst_case["metric_basis"] == "coverage_risk_no_accuracy_claim"
+    assert worst_case["rows"][0]["measured_case_count"] == 1
+    assert "LOW_CASE_COUNT_SINGLETON" in worst_case["rows"][0]["reason_codes"]
+    assert worst_case["accuracy_claimed"] is False

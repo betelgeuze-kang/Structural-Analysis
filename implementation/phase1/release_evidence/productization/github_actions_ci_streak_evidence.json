@@ -1,0 +1,54 @@
+{
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events.",
+  "contract_pass": false,
+  "generated_at": "2026-06-16T15:55:28.257231+00:00",
+  "lanes": {
+    "nightly": {
+      "allowed_events": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "blockers": [
+        "github_actions_query_failed",
+        "nightly_github_actions_30_consecutive_pass_evidence_missing"
+      ],
+      "consecutive_pass_count": 0,
+      "lane": "nightly",
+      "pass_count": 0,
+      "query_error": "* Request at 2026-06-17 00:55:27.244282021 +0900 KST m=+0.007560649\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/Nightly%20Full%20Quality\n* Request took 695.872168ms\n* Request at 2026-06-17 00:55:27.940285804 +0900 KST m=+0.703564422\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows?per_page=100&page=1\n* Request took 315.103216ms\nfailed to get runs: could not find any workflows named Nightly Full Quality",
+      "rows": [],
+      "run_count": 0,
+      "threshold": 30,
+      "threshold_pass": false,
+      "workflow": "Nightly Full Quality"
+    },
+    "pr": {
+      "allowed_events": [
+        "pull_request"
+      ],
+      "blockers": [
+        "pr_github_actions_30_consecutive_pass_evidence_missing"
+      ],
+      "consecutive_pass_count": 0,
+      "lane": "pr",
+      "pass_count": 0,
+      "query_error": "",
+      "rows": [],
+      "run_count": 0,
+      "threshold": 30,
+      "threshold_pass": false,
+      "workflow": "CI"
+    }
+  },
+  "limit": 100,
+  "reason_code": "ERR_CI_STREAK_INCOMPLETE",
+  "repo": "betelgeuze-kang/Structural-Analysis",
+  "schema_version": "github-actions-ci-streak-evidence.v1",
+  "summary": {
+    "nightly_consecutive_pass_count": 0,
+    "nightly_threshold_pass": false,
+    "pr_consecutive_pass_count": 0,
+    "pr_threshold_pass": false
+  },
+  "threshold": 30
+}

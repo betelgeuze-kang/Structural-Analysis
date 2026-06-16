@@ -1,0 +1,34 @@
+{
+  "artifacts": {
+    "runtime_policy": "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json",
+    "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json",
+    "zero_copy_strict": "implementation/phase1/zero_copy_real_probe_report_strict.json"
+  },
+  "blockers": [],
+  "checks": {
+    "all_main_loops_gpu_pass": true,
+    "cpu_fallback_release_forbidden_pass": true,
+    "device_residency_target_pass": true,
+    "host_copy_share_pass": true,
+    "no_cpu_backend_pass": true,
+    "no_cpu_fallback_pass": true,
+    "no_cpu_required_pass": true,
+    "runtime_backend_policy_ready": true,
+    "solver_hip_e2e_contract_pass": true
+  },
+  "claim_boundary": "This is a PM-scoped strict CI artifact. It verifies the release promise named by kind and does not replace broader monolithic CI gates.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T15:56:03.328879+00:00",
+  "kind": "require_hip",
+  "reason_code": "PASS",
+  "schema_version": "pm-strict-ci-report.v1",
+  "summary": {
+    "cpu_only_product_mode": false,
+    "device_residency_ratio_min": 1.0,
+    "host_copy_share": 0.0,
+    "max_host_copy_share": 0.05,
+    "min_device_residency_ratio": 0.99,
+    "official_solver_backend": "amd_rocm_hip",
+    "solver_hip_e2e_reason_code": "PASS"
+  }
+}

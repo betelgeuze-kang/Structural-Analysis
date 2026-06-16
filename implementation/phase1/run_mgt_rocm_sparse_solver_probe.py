@@ -354,7 +354,6 @@ def _torch_sparse_bicgstab(
     residual_inf = float(torch.max(torch.abs(residual)).detach().cpu()) if residual.numel() else 0.0
     breakdown = ""
     iteration = 0
-    converged = residual_inf <= threshold
     for iteration in range(1, int(max_iterations) + 1):
         rho_new = torch.dot(shadow, residual)
         rho_new_float = float(rho_new.detach().cpu())
@@ -376,7 +375,6 @@ def _torch_sparse_bicgstab(
         if s_inf <= threshold:
             x = x + alpha * direction_hat
             residual_inf = s_inf
-            converged = True
             break
         s_hat = precondition(s)
         t_vec = matvec(s_hat)
@@ -394,7 +392,6 @@ def _torch_sparse_bicgstab(
         residual = s - omega * t_vec
         residual_inf = float(torch.max(torch.abs(residual)).detach().cpu()) if residual.numel() else 0.0
         if residual_inf <= threshold:
-            converged = True
             break
         rho_old = rho_new
 
@@ -1600,7 +1597,6 @@ def _torch_sparse_block_bicgstab(
     threshold = max(float(tolerance_abs), float(tolerance_rel) * max(rhs_inf, 1.0))
     residual_inf = float(torch.max(torch.abs(residual)).detach().cpu()) if residual.numel() else 0.0
     breakdown = ""
-    converged = residual_inf <= threshold
     iteration = 0
     for iteration in range(1, int(max_iterations) + 1):
         rho_new = torch.dot(shadow, residual)
@@ -1623,7 +1619,6 @@ def _torch_sparse_block_bicgstab(
         if s_inf <= threshold:
             x = x + alpha * direction_hat
             residual_inf = s_inf
-            converged = True
             break
         s_hat = precondition(s)
         t_vec = matvec(s_hat)
@@ -1644,7 +1639,6 @@ def _torch_sparse_block_bicgstab(
             breakdown = "block_bicgstab_nonfinite_residual"
             break
         if residual_inf <= threshold:
-            converged = True
             break
         rho_old = rho_new
 
@@ -2379,7 +2373,6 @@ def _torch_sparse_node_block_gmres(
     device = torch.device("cuda:0")
     started = time.perf_counter()
     csr = k_ff.tocsr()
-    n = int(csr.shape[0])
     groups = _node_block_groups_from_free_dof(
         free_global_dof=np.asarray(free_global_dof, dtype=np.int64),
         dof_per_node=int(dof_per_node),
@@ -3916,7 +3909,6 @@ def _torch_sparse_smoothed_aggregation_pcg(
     rz_old = torch.dot(residual, z)
     residual_inf = float(torch.max(torch.abs(residual)).detach().cpu()) if residual.numel() else 0.0
     breakdown = ""
-    converged = bool(residual_inf <= threshold)
     iteration = 0
     residual_history: list[float] = [float(residual_inf)]
     coarse_solve_count = 1
@@ -3933,7 +3925,6 @@ def _torch_sparse_smoothed_aggregation_pcg(
         residual_inf = float(torch.max(torch.abs(residual)).detach().cpu()) if residual.numel() else 0.0
         residual_history.append(float(residual_inf))
         if residual_inf <= threshold:
-            converged = True
             break
         z, last_coarse_backend = apply_preconditioner(residual)
         coarse_solve_count += 1
@@ -8839,8 +8830,6 @@ def _torch_sparse_hotspot_subspace_correction(
     best_residual_inf = residual_inf_value
     pass_rows: list[dict[str, Any]] = []
     total_dense_solves = 0
-    host_dense_solves = 0
-    device_dense_solves = 0
     total_matvecs = 1
     local_matrix_host_bytes = 0
     breakdown = ""
@@ -8901,7 +8890,6 @@ def _torch_sparse_hotspot_subspace_correction(
             alpha_rows: list[dict[str, Any]] = []
             group_best_residual_inf = float("inf")
             group_best_alpha: float | None = None
-            group_best_x = best_x.clone()
             for alpha in alphas:
                 candidate = best_x.clone()
                 candidate_values = candidate[support_tensor] + float(alpha) * delta
@@ -8922,7 +8910,6 @@ def _torch_sparse_hotspot_subspace_correction(
                 if np.isfinite(candidate_residual_inf) and candidate_residual_inf < group_best_residual_inf:
                     group_best_residual_inf = candidate_residual_inf
                     group_best_alpha = float(alpha)
-                    group_best_x = candidate.clone()
                 if improved:
                     pass_best_residual_inf = candidate_residual_inf
                     pass_best_group_count = int(group_count)
@@ -14197,7 +14184,6 @@ def _assemble_surface_shell_active_system_for_rocalution(
     roundtrip = _load_json(roundtrip_json)
     with np.load(roundtrip_npz, allow_pickle=False) as archive:
         node_xyz = np.asarray(archive["node_xyz"], dtype=np.float64)
-        elem_id = np.asarray(archive["elem_id"], dtype=np.int64)
         elem_type_code = np.asarray(archive["elem_type_code"], dtype=np.int32)
         elem_section_id = np.asarray(archive["elem_section_id"], dtype=np.int32)
         elem_material_id = np.asarray(archive["elem_material_id"], dtype=np.int32)

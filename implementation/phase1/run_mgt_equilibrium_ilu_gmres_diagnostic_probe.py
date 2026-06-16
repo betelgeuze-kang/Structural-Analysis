@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
 """Diagnose ILU-GMRES breakdown on the equilibrium Newton tangent at lambda=0.05."""
 
 from __future__ import annotations

@@ -4768,6 +4768,7 @@ async function buildInstancedSurfaceElements(surfaceElements,nodeMap,{forceChunk
 }
 function applyDenseViewportOverlayBudget(elementCount=0){
   const dense=elementCount>=DENSE_MODEL_OVERLAY_ELEMENT_THRESHOLD;
+  const collapse=dense&&isProductShellMode();
   viewportDenseOverlayMode=dense;
   const viewport=document.getElementById('viewport');
   const calloutPanel=document.getElementById('stage-result-callouts');
@@ -4775,24 +4776,24 @@ function applyDenseViewportOverlayBudget(elementCount=0){
   const stageReceipt=document.getElementById('stage-overlay-receipt');
   const leftStagePanel=document.querySelector('.stage-overlay-panel--left');
   if(viewport){
-    viewport.setAttribute('data-stage-callouts-collapsed',dense?'true':'false');
+    viewport.setAttribute('data-stage-callouts-collapsed',collapse?'true':'false');
     viewport.setAttribute('data-stage-overlay-occlusion-budget',dense?'dense-model-protagonist':'standard');
   }
   if(calloutPanel instanceof HTMLElement){
-    calloutPanel.hidden=dense;
-    calloutPanel.setAttribute('data-stage-result-callouts-status',dense?'collapsed':'active');
+    calloutPanel.hidden=collapse;
+    calloutPanel.setAttribute('data-stage-result-callouts-status',collapse?'collapsed':'ready');
     calloutPanel.setAttribute('data-stage-result-callout-max',String(STAGE_RESULT_CALLOUT_MAX_VISIBLE));
   }
   if(calloutAnchors instanceof HTMLElement){
-    calloutAnchors.hidden=dense;
-    calloutAnchors.setAttribute('data-stage-result-callout-anchor-status',dense?'collapsed':'active');
+    calloutAnchors.hidden=collapse;
+    calloutAnchors.setAttribute('data-stage-result-callout-anchor-status',collapse?'collapsed':'ready');
   }
-  if(stageReceipt instanceof HTMLElement)stageReceipt.hidden=dense;
+  if(stageReceipt instanceof HTMLElement)stageReceipt.hidden=collapse;
   if(leftStagePanel instanceof HTMLElement)leftStagePanel.hidden=dense;
   const criticalHotspots=document.getElementById('stage-critical-hotspots');
   if(criticalHotspots instanceof HTMLElement){
-    criticalHotspots.hidden=dense;
-    if(dense)criticalHotspots.innerHTML='';
+    criticalHotspots.hidden=collapse;
+    if(collapse)criticalHotspots.innerHTML='';
   }
   const infoOverlay=document.getElementById('info-overlay');
   if(infoOverlay instanceof HTMLElement)infoOverlay.hidden=dense;
@@ -4822,8 +4823,26 @@ function applyProductShellPresentation(){
   if(app instanceof HTMLElement)app.dataset.siShell=shell;
   if(viewport instanceof HTMLElement){
     viewport.setAttribute('data-si-product-viewport',shell==='product'?'true':'false');
-    if(shell==='product'||viewportDenseOverlayMode){
-      viewport.setAttribute('data-stage-callouts-collapsed','true');
+    viewport.setAttribute('data-stage-callouts-collapsed',shell==='product'?'true':'false');
+    if(shell==='workspace'){
+      const calloutPanel=document.getElementById('stage-result-callouts');
+      const calloutAnchors=document.getElementById('stage-result-callout-anchors');
+      const stageReceipt=document.getElementById('stage-overlay-receipt');
+      const leftStagePanel=document.querySelector('.stage-overlay-panel--left');
+      if(calloutPanel instanceof HTMLElement){
+        calloutPanel.hidden=false;
+        if(calloutPanel.getAttribute('data-stage-result-callouts-status')==='collapsed'){
+          calloutPanel.setAttribute('data-stage-result-callouts-status','ready');
+        }
+      }
+      if(calloutAnchors instanceof HTMLElement){
+        calloutAnchors.hidden=false;
+        if(calloutAnchors.getAttribute('data-stage-result-callout-anchor-status')==='collapsed'){
+          calloutAnchors.setAttribute('data-stage-result-callout-anchor-status','ready');
+        }
+      }
+      if(stageReceipt instanceof HTMLElement)stageReceipt.hidden=false;
+      if(leftStagePanel instanceof HTMLElement)leftStagePanel.hidden=viewportDenseOverlayMode;
     }
   }
   document.body.dataset.siCockpitCharts=shell==='workspace'?'visible':'hidden';
@@ -5852,8 +5871,9 @@ async function buildModelFromInteractivePayloadWithWorker(payload,sourceMeta={})
   return result;
 }
 async function tryFetchArtifact(candidate){
-  const url=new URL(candidate,window.location.href);
-  setLoadingMessage(`Trying repo artifact: ${candidate}`);
+  const resolvedCandidate=resolveRepoArtifactUrl(candidate,window.location.href);
+  const url=new URL(resolvedCandidate,window.location.href);
+  setLoadingMessage(`Trying repo artifact: ${resolvedCandidate}`);
   const response=await fetch(url,{cache:'no-store'});
   if(!response.ok)throw new Error(`HTTP ${response.status}`);
   const payload=parseJsonText(await response.text(),candidate);
@@ -7054,7 +7074,22 @@ function syncTopRunControl({summary=null,cockpitModel=null}={}){
   }
 }
 function isMidas33PresetActive(){
-  return isMidas33PresetToken(getRequestedPreset());
+  const params=new URLSearchParams(window.location.search);
+  const tokens=[
+    getRequestedPreset(),
+    window.__STRUCTURE_VIEWER_WORKSPACE_RESOLVED_PRESET__,
+    workspaceState?.viewerPreset,
+    workspaceState?.projectId,
+    workspaceState?.drawingId,
+    workspaceState?.artifactPath,
+    params.get('project'),
+    params.get('drawing'),
+    params.get('preset'),
+    params.get('model_preset'),
+    params.get('artifact'),
+    params.get('data'),
+  ].map(value=>normalizeSelectionValue(value).toLowerCase());
+  return tokens.some(token=>isMidas33PresetToken(token)||token==='midas33_release'||token.includes('midas33'));
 }
 function updateMidas33ViewToolbarVisibility(){
   const toolbar=document.getElementById('midas33-view-toolbar');
@@ -7691,11 +7726,12 @@ function renderCriticalMembersPanel(cockpitModel=null){
       const statusTone=normalizeAnalysisTone(row.statusTone||status);
       const driftTone=normalizeAnalysisTone(row.driftTone||'neutral');
       const actionTone=normalizeAnalysisTone(row.actionTone||'neutral');
+      const evidenceStatus=(['high','danger','warn'].includes(status)||['danger','warn'].includes(statusTone))?'high':status;
       const rowMemberId=normalizeSelectionValue(row.id);
       const selected=Boolean(rowMemberId&&selectedMemberIds.has(rowMemberId));
       const primary=Boolean(rowMemberId&&rowMemberId===selectedMemberId);
       return `
-      <button type="button" class="critical-members-row critical-members-row--${escapeHtml(status)} critical-members-row--tone-${escapeHtml(statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(status)}" data-critical-ratio="${ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="${escapeHtml(row.id)} - D/C ${ratio.toFixed(2)} - ${escapeHtml(row.ratioMarginLabel||'Limit 1.00')}">
+      <button type="button" class="critical-members-row critical-members-row--${escapeHtml(status)} critical-members-row--tone-${escapeHtml(statusTone)}${selected?' is-selected':''}${primary?' is-primary':''}" data-critical-member-id="${escapeHtml(row.id)}" data-critical-status="${escapeHtml(evidenceStatus)}" data-critical-source-status="${escapeHtml(status)}" data-critical-ratio="${ratio.toFixed(3)}" aria-selected="${selected?'true':'false'}" aria-pressed="${selected?'true':'false'}" title="${escapeHtml(row.id)} - D/C ${ratio.toFixed(2)} - ${escapeHtml(row.ratioMarginLabel||'Limit 1.00')}">
         <span class="critical-members-id">${escapeHtml(row.id)}</span>
         <span>${escapeHtml(row.story)}</span>
         <span>${escapeHtml(row.type)}</span>
@@ -9036,7 +9072,7 @@ function buildDrawingForceVectorEvidenceModel({forceHandoff=null,drawingSheetPac
   const materialLocked=Boolean(parity.locked||parity.materialLocked)
     ||(materialMatchPercent>=99.999&&memberAssignmentMatchPercent>=99.999);
   const sourceRows=Array.isArray(force.rows)?force.rows:[];
-  const rows=sourceRows.map((row,index)=>{
+  let rows=sourceRows.map((row,index)=>{
     const kind=normalizeSelectionValue(row.kind)||resolveMemberForceDiagramKind(row.component)||'check';
     const component=normalizeSelectionValue(row.component)||kind;
     const dcr=safeNumber(row.dcr,0);
@@ -9062,7 +9098,47 @@ function buildDrawingForceVectorEvidenceModel({forceHandoff=null,drawingSheetPac
       sourceBacked:Boolean(row.sourceBacked),
       tone,
     };
-  }).filter(row=>row.dcr>0)
+  }).filter(row=>row.dcr>0);
+  const requiredVectorKinds=['axial','shear','moment'];
+  const presentVectorKinds=new Set(rows.map(row=>row.vectorKind));
+  if(requiredVectorKinds.some(kind=>!presentVectorKinds.has(kind))){
+    const allForceRows=buildLoadCombinationForceCandidateRows(modelData||{});
+    const memberRows=allForceRows
+      .filter(row=>rowMatchesMemberForceIdentity(row,selectedMemberId))
+      .sort((a,b)=>{
+        const combinationDelta=(normalizeSelectionValue(b.combination)===selectedCombination?1:0)-(normalizeSelectionValue(a.combination)===selectedCombination?1:0);
+        return combinationDelta||safeNumber(b.dcr,0)-safeNumber(a.dcr,0);
+      });
+    requiredVectorKinds.forEach(requiredKind=>{
+      if(presentVectorKinds.has(requiredKind))return;
+      const row=memberRows.find(candidate=>resolveMemberForceDiagramKind(candidate.component)===requiredKind);
+      if(!row)return;
+      const dcr=safeNumber(row.dcr,0);
+      if(!(dcr>0))return;
+      const demand=Math.abs(safeNumber(row.demand,0));
+      const capacity=Math.abs(safeNumber(row.capacity,0));
+      const memberId=normalizeSelectionValue(row.memberId||row.sourceMemberId||row.targetElementId)||selectedMemberId;
+      const combination=normalizeSelectionValue(row.combination)||selectedCombination;
+      rows.push({
+        key:`${requiredKind}-source`,
+        kind:requiredKind,
+        component:normalizeSelectionValue(row.component)||requiredKind,
+        vectorKind:requiredKind,
+        label:getMemberForceDiagramLabel(requiredKind,row.component),
+        value:`D/C ${formatMaterialCatalogNumber(dcr,{digits:2,allowZero:true})}`,
+        detail:`${memberId} · ${formatMaterialCatalogNumber(demand,{digits:1,allowZero:true})}/${formatMaterialCatalogNumber(capacity,{digits:1,allowZero:true})}`,
+        memberId,
+        combination,
+        demand,
+        capacity,
+        dcr,
+        sourceBacked:Boolean(row.sourceBacked),
+        tone:dcr>=1?'danger':dcr>=.85?'warn':dcr>0?'accent':'neutral',
+      });
+      presentVectorKinds.add(requiredKind);
+    });
+  }
+  rows=rows
     .sort((a,b)=>{
       const order={axial:0,shear:1,moment:2,interaction:3,drift:4,buckling:5,check:6};
       return (order[a.vectorKind]??9)-(order[b.vectorKind]??9)||b.dcr-a.dcr;
@@ -11112,11 +11188,12 @@ function renderMaterialMemberCatalogPanel(data=modelData||{}){
 function renderStageResultCallouts(cockpitModel=null){
   const panel=document.getElementById('stage-result-callouts');
   if(!(panel instanceof HTMLElement))return;
-  if(viewportDenseOverlayMode){
+  if(viewportDenseOverlayMode&&isProductShellMode()){
     panel.hidden=true;
     panel.innerHTML='';
     return;
   }
+  panel.hidden=false;
   const model=cockpitModel||lastAnalysisCockpitModel;
   const timeline=getResolvedAnalysisTimeline(model)||{};
   panel.innerHTML=buildStageResultCalloutsHtml({
@@ -11598,6 +11675,9 @@ function positionViewportSelectionFocusBadge(){
   }
   badge.classList.add('is-visible');
   positionStageResultCalloutDock();
+  positionStageMemberForcePlaybackTrail();
+  positionStageMemberForceVectorField();
+  positionStageMemberMaterialStateBadge();
 }
 
 function findElementRecordByMemberId(memberId=''){
@@ -11610,31 +11690,69 @@ function findElementRecordByMemberId(memberId=''){
   return modelData.elements.find(element=>normalizeSelectionValue(resolveSelectionMemberId(element))===normalized)||null;
 }
 
+function normalizeStageCriticalHotspotRow(row={},index=0){
+  return{
+    memberId:normalizeSelectionValue(row?.id||row?.memberId||row?.member_id),
+    story:normalizeSelectionValue(row?.story)||'--',
+    type:normalizeSelectionValue(row?.type)||'member',
+    ratio:safeNumber(row?.ratio,NaN),
+    status:normalizeSelectionValue(row?.status)||'Review',
+    statusTone:normalizeAnalysisTone(row?.statusTone||row?.statusKey||row?.status||'neutral'),
+    driftContributionPct:safeNumber(row?.driftContributionPct,0),
+    rank:index+1,
+  };
+}
 function buildStageCriticalHotspotRows(cockpitModel=null){
   const rows=Array.isArray(cockpitModel?.criticalMembers)?cockpitModel.criticalMembers:[];
   return rows.slice(0,3)
-    .map((row,index)=>({
-      memberId:normalizeSelectionValue(row?.id),
-      story:normalizeSelectionValue(row?.story)||'--',
-      type:normalizeSelectionValue(row?.type)||'member',
-      ratio:safeNumber(row?.ratio,NaN),
-      status:normalizeSelectionValue(row?.status)||'Review',
-      statusTone:normalizeAnalysisTone(row?.statusTone||row?.statusKey||row?.status||'neutral'),
-      driftContributionPct:safeNumber(row?.driftContributionPct,0),
-      rank:index+1,
-    }))
+    .map(normalizeStageCriticalHotspotRow)
     .filter(row=>row.memberId);
+}
+function buildSelectedStageCriticalHotspotRow(memberId='',cockpitModel=null,rank=3){
+  const normalizedMemberId=normalizeSelectionValue(memberId);
+  if(!normalizedMemberId)return null;
+  const criticalRows=Array.isArray(cockpitModel?.criticalMembers)?cockpitModel.criticalMembers:[];
+  const criticalMatch=criticalRows.find(row=>normalizeSelectionValue(row?.id||row?.memberId||row?.member_id)===normalizedMemberId);
+  if(criticalMatch)return{...normalizeStageCriticalHotspotRow(criticalMatch,rank-1),rank};
+  const forceRows=buildLoadCombinationForceCandidateRows(modelData||{})
+    .filter(row=>rowMatchesMemberForceIdentity(row,normalizedMemberId))
+    .sort((a,b)=>safeNumber(b.dcr,0)-safeNumber(a.dcr,0));
+  const forceRow=forceRows[0]||null;
+  const element=findElementRecordByMemberId(normalizedMemberId)||{};
+  const ratio=safeNumber(forceRow?.dcr,safeNumber(element?.dcr ?? element?.demand_capacity_ratio ?? element?.utilization ?? element?.stress_ratio,NaN));
+  return{
+    memberId:normalizedMemberId,
+    story:normalizeSelectionValue(element?.story_band_label||element?.story||element?.level)||'selected',
+    type:normalizeElementType(element?.type||forceRow?.memberType)||'member',
+    ratio,
+    status:Number.isFinite(ratio)&&ratio>=1?'Capacity exceed':Number.isFinite(ratio)&&ratio>=.85?'Review':'Selected',
+    statusTone:normalizeAnalysisTone(Number.isFinite(ratio)&&ratio>=1?'danger':Number.isFinite(ratio)&&ratio>=.85?'warn':'success'),
+    driftContributionPct:0,
+    rank,
+  };
 }
 
 function renderStageCriticalHotspots(cockpitModel=null){
   const panel=document.getElementById('stage-critical-hotspots');
   if(!(panel instanceof HTMLElement))return;
-  if(viewportDenseOverlayMode){
+  if(viewportDenseOverlayMode&&isProductShellMode()){
     panel.hidden=true;
     panel.innerHTML='';
     return;
   }
-  const rows=buildStageCriticalHotspotRows(cockpitModel||lastAnalysisCockpitModel);
+  panel.hidden=false;
+  const activeCockpitModel=cockpitModel||lastAnalysisCockpitModel;
+  const selection=getCurrentSelectionState();
+  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||selection.memberId));
+  let rows=buildStageCriticalHotspotRows(activeCockpitModel);
+  if(rows.length&&selectedMemberIds.size&&!rows.some(row=>selectedMemberIds.has(row.memberId))){
+    const selectedMemberId=[...selectedMemberIds][0];
+    const selectedRow=buildSelectedStageCriticalHotspotRow(selectedMemberId,activeCockpitModel,Math.max(rows.length,1));
+    if(selectedRow?.memberId){
+      rows=rows.slice();
+      rows[Math.max(0,rows.length-1)]={...selectedRow,rank:rows.length};
+    }
+  }
   panel.dataset.stageCriticalHotspotsSchema=STAGE_CRITICAL_HOTSPOTS_SCHEMA;
   panel.dataset.stageCriticalHotspotsStatus=rows.length?'ready':'pending';
   panel.dataset.stageCriticalHotspotCount=String(rows.length);
@@ -11649,8 +11767,6 @@ function renderStageCriticalHotspots(cockpitModel=null){
     };
     return;
   }
-  const selection=getCurrentSelectionState();
-  const selectedMemberIds=new Set(normalizeSelectionValues(selection.memberIds||selection.memberId));
   panel.innerHTML=rows.map(row=>{
     const selected=selectedMemberIds.has(row.memberId);
     const ratioLabel=Number.isFinite(row.ratio)?row.ratio.toFixed(2):'--';
@@ -11966,7 +12082,7 @@ function positionStageLoadCombinationForceGlyphs(){
       });
       row.left=best.left;
       row.top=best.top;
-      row.projection=row.projection==='projected'?'edge-pinned':row.projection;
+      row.projection=row.projection==='projected'&&best.overlap>0?'edge-pinned':row.projection;
     }
   });
   placed.forEach(row=>{
@@ -12264,7 +12380,7 @@ function positionStageForceDemandContour(){
       });
       row.left=best.left;
       row.top=best.top;
-      row.projection=row.projection==='projected'?'edge-pinned':row.projection;
+      row.projection=row.projection==='projected'&&best.overlap>0?'edge-pinned':row.projection;
     }
   });
   const selection=getCurrentSelectionState();
@@ -13643,9 +13759,10 @@ function positionStageMemberForcePlaybackTrail(){
   const focusState=element?buildElementFocusState(element):null;
   const worldPoint=focusState?.center?.clone?.()||focusState?.badgePoint?.clone?.()||null;
   const projected=worldPoint?projectWorldPointToViewport(worldPoint,viewportRect,canvasRect):null;
-  const frameWidth=118;
-  const frameHeight=40;
-  const frameGap=43;
+  const denseBudget=hasDenseModelProtagonistBudget(vp);
+  const frameWidth=denseBudget?98:118;
+  const frameHeight=denseBudget?28:40;
+  const frameGap=denseBudget?34:43;
   const minLeft=18;
   const maxLeft=Math.max(viewportRect.width-frameWidth-18,minLeft);
   const minTop=96;
@@ -13727,6 +13844,35 @@ function positionStageMemberForcePlaybackTrail(){
   for(let index=placed.length-1;index>=0;index-=1){
     placed[index].top=Math.min(placed[index].top,maxTop-(placed.length-1-index)*frameGap);
   }
+  placed.forEach((row,index)=>{
+    if(candidateOverlap(row.left,row.top)<=0)return;
+    const leftCandidates=[row.left,minLeft,maxLeft,anchorLeft+28,anchorLeft-frameWidth-28];
+    const topCandidates=[row.top,minTop,maxTop];
+    avoidRects.forEach(avoid=>{
+      leftCandidates.push(avoid.left-frameWidth-14-index*2,avoid.right+14+index*2);
+      topCandidates.push(avoid.top-frameHeight/2-10-index*3,avoid.bottom+frameHeight/2+10+index*3);
+    });
+    let best={left:row.left,top:row.top,overlap:candidateOverlap(row.left,row.top),distance:0};
+    leftCandidates.forEach(rawLeft=>{
+      topCandidates.forEach(rawTop=>{
+        const candidateLeft=Math.min(Math.max(rawLeft,minLeft),maxLeft);
+        const candidateTop=Math.min(Math.max(rawTop,minTop),maxTop);
+        const overlap=candidateOverlap(candidateLeft,candidateTop);
+        const distance=Math.abs(candidateLeft-row.left)*.45+Math.abs(candidateTop-row.top);
+        if(overlap<best.overlap||(overlap===best.overlap&&distance<best.distance)){
+          best={left:candidateLeft,top:candidateTop,overlap,distance};
+        }
+      });
+    });
+    row.left=best.left;
+    row.top=best.top;
+    if(best.overlap>0){
+      const rightLaneOverlap=candidateOverlap(maxLeft,row.top);
+      const leftLaneOverlap=candidateOverlap(minLeft,row.top);
+      row.left=rightLaneOverlap<=leftLaneOverlap?maxLeft:minLeft;
+    }
+    row.projection=row.projection==='projected'?'edge-pinned':row.projection;
+  });
   placed.forEach(row=>{
     const top=Math.min(Math.max(row.top,minTop),maxTop);
     row.button.style.left=`${row.left.toFixed(1)}px`;
@@ -14151,7 +14297,7 @@ function positionStageMemberMaterialStateBadge(){
   const maxTop=Math.max(viewportRect.height-cardHeight-76,minTop);
   const anchorLeft=projected?.left??(modelBounds?modelBounds.left+modelBounds.width*.58:viewportRect.width*.58);
   const anchorTop=projected?.top??(modelBounds?modelBounds.top+modelBounds.height*.34:viewportRect.height*.34);
-  const avoidRects=['[data-viewport-selection-focus-badge].is-visible','[data-panel-zone-stage-badge].is-visible','[data-stage-member-force-vector]','[data-stage-member-force-playback-trail-frame]','[data-stage-load-combination-force-glyph]','[data-stage-critical-hotspot]']
+  const rectsForSelectors=(selectors)=>selectors
     .map(selector=>[...document.querySelectorAll(selector)])
     .flat()
     .filter(node=>node instanceof HTMLElement)
@@ -14164,10 +14310,14 @@ function positionStageMemberMaterialStateBadge(){
         bottom:rect.bottom-viewportRect.top,
       };
     });
+  const focusAvoidRects=rectsForSelectors(['[data-viewport-selection-focus-badge].is-visible']);
+  const avoidRects=focusAvoidRects.concat(rectsForSelectors(['[data-panel-zone-stage-badge].is-visible','[data-stage-member-force-vector]','[data-stage-member-force-playback-trail-frame]','[data-stage-load-combination-force-glyph]','[data-stage-critical-hotspot]']));
   const rectFor=(left,top)=>({left,right:left+cardWidth,top,bottom:top+cardHeight});
   const scoreCandidate=(left,top)=>{
     const rect=rectFor(left,top);
-    return avoidRects.reduce((total,avoid)=>total+getRectOverlapArea(rect,avoid,8),0);
+    const focusOverlap=focusAvoidRects.reduce((total,avoid)=>total+getRectOverlapArea(rect,avoid,8),0);
+    const overlayOverlap=avoidRects.reduce((total,avoid)=>total+getRectOverlapArea(rect,avoid,8),0);
+    return focusOverlap*1000+overlayOverlap;
   };
   const rawCandidates=[
     {left:anchorLeft-cardWidth/2,top:anchorTop-cardHeight-48},
@@ -14178,6 +14328,14 @@ function positionStageMemberMaterialStateBadge(){
     {left:maxLeft,top:minTop+24},
     {left:maxLeft,top:maxTop-24},
   ];
+  focusAvoidRects.forEach((avoid,index)=>{
+    rawCandidates.push(
+      {left:avoid.left-cardWidth-16-index*4,top:avoid.top},
+      {left:avoid.right+16+index*4,top:avoid.top},
+      {left:avoid.left-cardWidth/2,top:avoid.top-cardHeight-16-index*4},
+      {left:avoid.left-cardWidth/2,top:avoid.bottom+16+index*4}
+    );
+  });
   const candidates=rawCandidates.map(candidate=>({
     left:Math.min(Math.max(candidate.left,minLeft),maxLeft),
     top:Math.min(Math.max(candidate.top,minTop),maxTop),
@@ -15228,7 +15386,7 @@ async function refreshCodecheckContourAfterCombinationChange(){
   }
   refreshDirectMeshVisuals();
   refreshInstancedVisuals();
-  requestRenderFrame();
+  requestViewerRender();
 }
 function setLoadCombinationForceSelection(combination,{focus=false}={}){
   const selectedCombination=normalizeSelectionValue(combination);
@@ -16880,6 +17038,7 @@ function buildMemberSectionCapacityModel(data=modelData||{},matrix=null,cockpitM
   const sourceBackedCount=rows.filter(row=>row.sourceBacked).length;
   const sourceCapacityCount=rows.filter(row=>row.sourceCapacity>0).length;
   const estimatedCapacityCount=rows.filter(row=>row.estimatedCapacity>0).length;
+  const capacityEvidenceCount=rows.filter(row=>row.sourceCapacity>0||row.estimatedCapacity>0).length;
   const maxDcr=rows.reduce((maxValue,row)=>Math.max(maxValue,row.dcr),0);
   return{
     schemaVersion:MEMBER_SECTION_CAPACITY_SCHEMA,
@@ -16902,6 +17061,7 @@ function buildMemberSectionCapacityModel(data=modelData||{},matrix=null,cockpitM
     sourceBackedCount,
     sourceCapacityCount,
     estimatedCapacityCount,
+    capacityEvidenceCount,
     maxDcr,
     rows,
   };
@@ -16920,6 +17080,7 @@ function renderMemberSectionCapacityPanel(matrix=null,cockpitModel=null){
   panel.dataset.memberSectionCapacitySourceBackedCount=String(model.sourceBackedCount||0);
   panel.dataset.memberSectionCapacitySourceCapacityCount=String(model.sourceCapacityCount||0);
   panel.dataset.memberSectionCapacityEstimatedCapacityCount=String(model.estimatedCapacityCount||0);
+  panel.dataset.memberSectionCapacityEvidenceCount=String(model.capacityEvidenceCount||0);
   panel.dataset.memberSectionCapacityMaxDcr=String(model.maxDcr||0);
   panel.dataset.memberSectionCapacityGeometryReady=model.geometryReady?'true':'false';
   window.__STRUCTURE_VIEWER_MEMBER_SECTION_CAPACITY_STATE__={
@@ -16940,6 +17101,7 @@ function renderMemberSectionCapacityPanel(matrix=null,cockpitModel=null){
     sourceBackedCount:model.sourceBackedCount,
     sourceCapacityCount:model.sourceCapacityCount,
     estimatedCapacityCount:model.estimatedCapacityCount,
+    capacityEvidenceCount:model.capacityEvidenceCount,
     maxDcr:model.maxDcr,
     rows:model.rows.map(row=>({
       kind:row.kind,
@@ -18179,7 +18341,7 @@ function applyDrawingCompareWipeClipping(position=0.5){
 function setDrawingCompareWipePosition(value='50'){
   drawingCompareWipePosition=Math.max(0,Math.min(1,safeNumber(value,50)/100));
   applyDrawingCompareWipeClipping(drawingCompareWipePosition);
-  requestRenderFrame();
+  requestViewerRender();
 }
 function renderOptimizationTimelinePanel(model=null){
   const slider=document.getElementById('viewer-optimization-timeline-slider');
@@ -18280,7 +18442,7 @@ function setOptimizationTimelineStep(value='-1'){
     step,
     changeCount:model?.changeCount||0,
   };
-  requestRenderFrame();
+  requestViewerRender();
 }
 function syncOptimizationTimelineFromChanges(changesPayload=null){
   optimizationTimelineModel=buildOptimizationTimelineModel(changesPayload||{});
@@ -18511,7 +18673,7 @@ async function refreshDrawingComparisonPresentation(){
   refreshInstancedVisuals();
   applyBaselineGhostContourColors();
   renderProjectWorkspacePanel();
-  requestRenderFrame();
+  requestViewerRender();
 }
 function setMemberComparisonFilter(filter='changed'){
   memberComparisonFilter=normalizeSelectionValue(filter)||'changed';

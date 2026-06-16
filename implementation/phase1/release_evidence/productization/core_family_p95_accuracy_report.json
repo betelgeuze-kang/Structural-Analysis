@@ -1,0 +1,152 @@
+{
+  "artifacts": {
+    "commercial_readiness": "implementation/phase1/commercial_readiness_report.strict_breadth.json",
+    "comparison_reports": {
+      "commercial_benchmark_cases.atwood_open": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/topk_comparison.json",
+      "commercial_benchmark_cases.from_csv": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/topk_comparison.json",
+      "commercial_benchmark_cases.rwth_zenodo": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/topk_comparison.json"
+    }
+  },
+  "blockers": [],
+  "checks": {
+    "commercial_readiness_contract_pass": true,
+    "comparison_reports_present": true,
+    "family_p95_error_limited_pass": true,
+    "family_rows_present": true,
+    "finite_error_rows": true,
+    "noise_robustness_metrics_excluded": true
+  },
+  "claim_boundary": "Core family p95 is computed from benchmark HF-vs-topk comparison rows for primary accuracy metrics. High-noise robustness p95 metrics are intentionally excluded from this core accuracy gate.",
+  "contract_pass": true,
+  "family_rows": [
+    {
+      "comparison_report": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.rwth_zenodo/topk_comparison.json",
+      "family": "rwth_zenodo",
+      "max_family_p95_error_pct": 2.262251278851306,
+      "metric_count": 3,
+      "model_id": "commercial_benchmark_cases.rwth_zenodo",
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "comparison_report": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.from_csv/topk_comparison.json",
+      "family": "commercial_export",
+      "max_family_p95_error_pct": 1.611357927322397,
+      "metric_count": 3,
+      "model_id": "commercial_benchmark_cases.from_csv",
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "comparison_report": "implementation/phase1/stress/commercial_readiness/models/commercial_benchmark_cases.atwood_open/topk_comparison.json",
+      "family": "zenodo_atwood_highrise_shm_2025",
+      "max_family_p95_error_pct": 1.1029397381897843,
+      "metric_count": 3,
+      "model_id": "commercial_benchmark_cases.atwood_open",
+      "status": "pass",
+      "threshold_pct": 5.0
+    }
+  ],
+  "generated_at": "2026-06-16T15:55:21.426827+00:00",
+  "reason_code": "PASS",
+  "rows": [
+    {
+      "family": "rwth_zenodo",
+      "max_error_pct": 1.9627722331156676,
+      "metric": "drift_error_pct",
+      "model_id": "commercial_benchmark_cases.rwth_zenodo",
+      "p95_error_pct": 1.7499145646259546,
+      "sample_count": 22,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "rwth_zenodo",
+      "max_error_pct": 0.963867791951665,
+      "metric": "base_shear_error_pct",
+      "model_id": "commercial_benchmark_cases.rwth_zenodo",
+      "p95_error_pct": 0.862940114756343,
+      "sample_count": 22,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "rwth_zenodo",
+      "max_error_pct": 2.6519344166368244,
+      "metric": "buckling_factor_error_pct",
+      "model_id": "commercial_benchmark_cases.rwth_zenodo",
+      "p95_error_pct": 2.262251278851306,
+      "sample_count": 22,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "commercial_export",
+      "max_error_pct": 1.597494893259814,
+      "metric": "drift_error_pct",
+      "model_id": "commercial_benchmark_cases.from_csv",
+      "p95_error_pct": 1.597494893259814,
+      "sample_count": 12,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "commercial_export",
+      "max_error_pct": 1.04119078240172,
+      "metric": "base_shear_error_pct",
+      "model_id": "commercial_benchmark_cases.from_csv",
+      "p95_error_pct": 1.04119078240172,
+      "sample_count": 12,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "commercial_export",
+      "max_error_pct": 1.611357927322397,
+      "metric": "buckling_factor_error_pct",
+      "model_id": "commercial_benchmark_cases.from_csv",
+      "p95_error_pct": 1.611357927322397,
+      "sample_count": 12,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "zenodo_atwood_highrise_shm_2025",
+      "max_error_pct": 1.1183404198678149,
+      "metric": "drift_error_pct",
+      "model_id": "commercial_benchmark_cases.atwood_open",
+      "p95_error_pct": 1.1029397381897843,
+      "sample_count": 29,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "zenodo_atwood_highrise_shm_2025",
+      "max_error_pct": 0.6214181268332145,
+      "metric": "base_shear_error_pct",
+      "model_id": "commercial_benchmark_cases.atwood_open",
+      "p95_error_pct": 0.6179901457212913,
+      "sample_count": 29,
+      "status": "pass",
+      "threshold_pct": 5.0
+    },
+    {
+      "family": "zenodo_atwood_highrise_shm_2025",
+      "max_error_pct": 0.5066726139503354,
+      "metric": "buckling_factor_error_pct",
+      "model_id": "commercial_benchmark_cases.atwood_open",
+      "p95_error_pct": 0.5024984586170091,
+      "sample_count": 29,
+      "status": "pass",
+      "threshold_pct": 5.0
+    }
+  ],
+  "schema_version": "core-family-p95-accuracy-report.v1",
+  "summary": {
+    "family_count": 3,
+    "max_family_p95_error_pct": 2.262251278851306,
+    "max_metric_p95_error_pct": 2.262251278851306,
+    "max_p95_error_pct_limit": 5.0,
+    "metric_row_count": 9
+  }
+}

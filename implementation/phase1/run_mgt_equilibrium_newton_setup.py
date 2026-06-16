@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: E402
 """Build the physical direct-residual assembler used by equilibrium Newton."""
 
 from __future__ import annotations

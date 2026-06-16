@@ -1,0 +1,93 @@
+# Codex Goal Orchestration
+
+이 저장소에서는 별도 자동 실행기나 로컬 runner를 실행하지 않는다. 반복 진행은 Codex의 goal 기능이 맡고, Cursor auto와 OpenCode Minimax M3는 필요한 구현 조각만 처리하는 worker로 사용한다.
+
+```text
+사용자가 Codex goal에 목표 입력
+-> Codex가 목표를 추적하며 설계/작업 분해
+-> 필요할 때 Cursor 또는 OpenCode worker prompt 생성
+-> scripts/ai-worker-cursor.sh <prompt-file>
+   또는 scripts/ai-worker-opencode.sh <prompt-file>
+-> scripts/ai-verify.sh
+-> Codex가 diff와 검증 결과 리뷰
+-> Codex goal 기능으로 계속 진행
+```
+
+## 역할
+
+```text
+Codex goal: 목표 추적, 설계, 리뷰, 최종 판단
+OpenCode Minimax M3: 큰 컨텍스트, 긴 로그/문서, 넓은 저장소 탐색, 반복 구현 slice 수행
+Cursor auto: 현재 에디터 상태, 선택 영역, IDE affordance가 중요한 구현 slice 수행
+ai-verify.sh: 오케스트레이션 smoke 검증
+Human owner: push, merge, deploy, release, billing, production mutation 승인
+```
+
+## 현재 목표에 붙이는 방식
+
+현재 제품화 목표는 `docs/commercial-structural-solver-product-gap-ledger.md`와 `docs/structural-analysis-ai-engine-gap-ledger.md`의 G1-G10, AI-G1-AI-G10 readiness gap을 권위 있는 증거로 닫는 것이다.
+
+- Codex는 `.betelgeuze/intent_spec.md`, `.betelgeuze/project_contract.yaml`, gap ledger, status reporter, productization receipt를 기준으로 claim boundary를 판단한다.
+- Worker에게는 한 번에 하나의 구현 slice만 맡긴다.
+- Codex TASK는 짧게 유지하며 목표, 범위, 파일 후보, 검증 기준만 담는다.
+- Worker는 할당된 slice의 탐색, 구현, focused test 실행, 요약까지 책임진다.
+- Worker 출력은 변경 파일, 테스트 결과, 실패 테스트명, 핵심 diff 요약, blocker로 제한하며 `scripts/validate-ai-worker-output.mjs`가 이 형식을 검사한다.
+- Codex는 전체 worker 로그를 기본으로 읽지 않는다. 필요할 때만 특정 파일, 실패 테스트, diff를 본다.
+- Codex가 직접 처리할 수 있는 100-200 LOC 이하 변경, 단순 문서, 작은 테스트, 명확한 수정은 위임하지 않는다.
+- 대량 기계적 수정, 넓은 탐색, 반복 테스트 수정, 다파일 리팩터링만 worker에 위임한다.
+- partial/proxy/fallback/external-blocked 상태는 문서나 리포트에서 숨기지 않는다.
+
+## Worker 실행
+
+Cursor worker가 필요하면 Codex가 run-specific prompt를 만들고 다음 형태로 실행한다.
+
+```bash
+./scripts/ai-worker-cursor.sh docs/ai/dispatch/<task-id>.md
+```
+
+OpenCode worker가 필요하면 다음 형태로 실행한다.
+
+```bash
+./scripts/ai-worker-opencode.sh docs/ai/dispatch/<task-id>.md
+```
+
+둘 다 같은 목표 안에서 쓸 수 있지만, 동시에 여러 worker를 돌리지 않는다.
+
+Wrapper는 worker 원본 출력을 먼저 `.betelgeuze/worker_outputs/`에 캡처하고, validator를 통과한 요약만 stdout에 출력한다. 유효한 실행의 raw output은 기본적으로 삭제되며, 디버깅용 보존이 필요할 때만 `AI_WORKER_KEEP_RAW=1`을 사용한다.
+
+## TASK 형식
+
+Worker에게 넘기는 prompt는 다음 네 필드만 상세화한다.
+
+```text
+Goal: <무엇을 끝낼지>
+Scope: <허용되는 작업 범위와 금지 범위>
+Candidate files: <우선 확인할 파일 후보>
+Verification criteria: <통과해야 할 테스트/게이트/증거 기준>
+```
+
+## 검증
+
+```bash
+./scripts/ai-preflight.sh
+./scripts/ai-verify.sh
+```
+
+`ai-verify.sh`는 오케스트레이션 파일의 smoke 검증이다. 제품 readiness 변경을 완료로 판단할 때는 별도로 `pytest`, `npm run build`, `python -m compileall .`, 그리고 관련 gap/status/readiness gate를 실행한다.
+
+## 안전 경계
+
+자동으로 실행하지 않는다.
+
+```text
+git push
+merge
+deploy
+publish/release
+production migration
+payment/refund/billing mutation
+cloud resource mutation
+secret rotation
+permission/OAuth scope escalation
+destructive data operation
+```

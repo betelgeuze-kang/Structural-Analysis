@@ -44,14 +44,13 @@ from implementation.phase1.extended_material_library import (
     masonry_compression_response,
     cold_formed_steel_response,
     prestressing_steel_response,
+    viscous_damper_force,
 )
 from implementation.phase1.rc_constitutive_library import (
     ConcreteMaterial,
     SteelMaterial,
     concrete_response,
     steel_response,
-    CompositeActionMaterial as RcCompositeActionMaterial,
-    composite_action_response,
 )
 
 

@@ -194,8 +194,6 @@ def build_frontier_0p85_receipt(
 
     step_results = aggregate.get("step_results") or []
     rule_family_breakdown = _per_rule_family_breakdown(step_results)
-    accepted_steps = [row for row in step_results if _classify_step(row) == "accepted"]
-    failed_steps = [row for row in step_results if _classify_step(row) == "failed"]
 
     target_reached = frontier >= float(target_load_scale)
     incremental_gain_vs_source = float(frontier - source_frontier)

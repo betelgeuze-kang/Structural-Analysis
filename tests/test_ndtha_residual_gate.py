@@ -75,6 +75,9 @@ def test_ndtha_residual_gate_passes_hard_limits() -> None:
     assert report["checks"]["solver_control_event_sequence_pass"] is True
     assert report["summary"]["solver_control_event_count_total"] == 2
     assert report["summary"]["solver_control_cutback_case_ids"] == ["C2"]
+    assert report["summary"]["solver_raw_ratio"] == 0.5
+    assert report["summary"]["residual_metric_source_ratios"] == {"history_tail": 0.5, "solver_raw": 0.5}
+    assert report["rows"][0]["normalized_residual"]["hard_max_ratio"] > 0.0
 
 
 def test_ndtha_residual_gate_fails_hard_drift_limit() -> None:
@@ -91,6 +94,39 @@ def test_ndtha_residual_gate_fails_hard_drift_limit() -> None:
     assert report["contract_pass"] is False
     assert report["reason_code"] == "ERR_RESIDUAL_HARD_LIMIT"
     assert report["checks"]["residual_drift_hard_pass"] is False
+
+
+def test_ndtha_residual_gate_strict_recommended_is_release_hard_fail() -> None:
+    ndtha_report = _base_report()
+    ndtha_report["rows"][1]["summary"]["residual_drift_ratio_pct"] = 2.5
+    report = run_ndtha_residual_gate(
+        ndtha_report=ndtha_report,
+        max_residual_top_displacement_m=5.0,
+        max_residual_drift_ratio_pct=10.0,
+        recommended_residual_top_displacement_m=1.0,
+        recommended_residual_drift_ratio_pct=2.0,
+        max_fallback_rate=1.0,
+        strict_recommended_residual_hard_fail=True,
+    )
+    assert report["contract_pass"] is False
+    assert report["reason_code"] == "ERR_RESIDUAL_RECOMMENDED_LIMIT"
+    assert report["checks"]["residual_drift_hard_pass"] is True
+    assert report["checks"]["strict_recommended_residual_pass"] is False
+
+
+def test_ndtha_residual_gate_blocks_release_when_corrected_state_recompute_is_required() -> None:
+    report = run_ndtha_residual_gate(
+        ndtha_report=_base_report(),
+        max_residual_top_displacement_m=5.0,
+        max_residual_drift_ratio_pct=10.0,
+        recommended_residual_top_displacement_m=1.0,
+        recommended_residual_drift_ratio_pct=2.0,
+        max_fallback_rate=1.0,
+        require_corrected_state_recompute=True,
+    )
+    assert report["contract_pass"] is False
+    assert report["reason_code"] == "ERR_CORRECTED_STATE_RECOMPUTE"
+    assert report["summary"]["corrected_state_recompute_present_count"] == 0
 
 
 def test_ndtha_residual_gate_fails_missing_solver_control_trace() -> None:

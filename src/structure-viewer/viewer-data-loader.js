@@ -8,6 +8,7 @@ export const REPO_ARTIFACT_LOGICAL_PATHS = {
   midas33_pr: 'implementation/phase1/open_data/midas/midas_generator_33.pr_recheck.json',
   midas33_optimized: 'implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json',
   real_drawing: 'implementation/phase1/release/visualization/structural_optimization_viewer.json',
+  real_drawing_private_3d: 'implementation/phase1/release/visualization/structural_optimization_viewer.json',
 };
 
 /** @deprecated Use REPO_ARTIFACT_LOGICAL_PATHS; kept for contract tests. */
@@ -20,7 +21,7 @@ export const DEFAULT_ARTIFACT_CANDIDATES = DEFAULT_ARTIFACT_LOGICAL_PATHS;
 export function resolveRepoArtifactUrl(logicalPath, href = globalThis.window?.location?.href || '') {
   const raw = String(logicalPath || '').trim();
   if (!raw) return '';
-  if (!raw.startsWith('implementation/')) return raw;
+  if (!raw.startsWith('implementation/') && !raw.startsWith('src/')) return raw;
   try {
     const url = new URL(href);
     const segments = url.pathname.split('/').filter(Boolean);

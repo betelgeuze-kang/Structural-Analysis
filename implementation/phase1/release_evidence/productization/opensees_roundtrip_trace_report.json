@@ -1,0 +1,31 @@
+{
+  "artifacts": {
+    "canonical_edges": "implementation/phase1/release_evidence/productization/opensees_roundtrip_canonical_edges.json",
+    "edges_json": "implementation/phase1/open_data/megastructure/opensees_edges.json",
+    "opensees_topology": "implementation/phase1/opensees_topology_report.json"
+  },
+  "blockers": [],
+  "checks": {
+    "edge_count_match": true,
+    "edges_json_present": true,
+    "no_lossy_rewrite_pass": true,
+    "node_count_match": true,
+    "roundtrip_trace_pass": true,
+    "serialize_reload_exact_pass": true,
+    "source_trace_pass": true,
+    "topology_gate_pass": true
+  },
+  "claim_boundary": "OpenSees roundtrip trace covers topology edge-list canonicalization and exact JSON reload. It is not a full OpenSees solver execution roundtrip.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T15:56:03.354507+00:00",
+  "reason_code": "PASS",
+  "schema_version": "opensees-roundtrip-trace-report.v1",
+  "summary": {
+    "canonical_sha256": "f71e360e8ff31edc502ce1e9f4957ce3abb153116aa2ad9a723895761b09e624",
+    "edge_count": 270,
+    "node_count": 426,
+    "roundtrip_exact_entry_row_coverage_min": 1.0,
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc"
+  }
+}

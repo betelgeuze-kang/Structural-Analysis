@@ -167,6 +167,32 @@
     color:#ff8a80;
   }
 
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .app-topbar__primary {
+    grid-template-columns:auto minmax(220px,1fr) minmax(360px,420px) minmax(360px,420px);
+  }
+
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .topbar-context-strip,
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .topbar-project-selector {
+    min-width:0;
+    max-width:100%;
+    overflow:hidden;
+  }
+
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .topbar-project-selector {
+    width:100%;
+    grid-template-columns:auto minmax(0,1fr) minmax(0,72px);
+  }
+
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .project-select {
+    width:100%;
+    max-width:100%;
+    text-overflow:ellipsis;
+  }
+
+  body.structural-surface.command-center-shell.viewer-product-shell[data-si-shell='product'] .topbar-project-receipt {
+    max-width:72px;
+  }
+
   body.structural-surface.command-center-shell .viewport-tool-group {
     gap:4px;
     padding-bottom:5px;
@@ -204,6 +230,13 @@
 
   body.structural-surface.command-center-shell .kpi-card__evidence {
     max-width:100%;
+  }
+
+  body.structural-surface.command-center-shell [data-kpi-chip] {
+    min-width:0;
+    max-width:100%;
+    white-space:normal;
+    overflow-wrap:anywhere;
   }
 
   body.structural-surface.command-center-shell .viewer-tab {
@@ -641,6 +674,156 @@
     background:linear-gradient(180deg, rgba(8,17,29,.88), rgba(6,13,23,.78));
     box-shadow:0 8px 18px rgba(0,0,0,.20);
     overflow:hidden;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callouts {
+    width:min(190px, calc(100% - 24px));
+    gap:4px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout {
+    min-height:30px;
+    padding:4px 6px;
+    grid-template-columns:8px minmax(0,1fr);
+    column-gap:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot {
+    width:126px;
+    min-height:34px;
+    padding:4px 6px;
+    gap:5px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot__leader {
+    flex-basis:12px;
+    min-height:20px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot__leader::before {
+    width:12px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot__label {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot strong {
+    font-size:10px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-critical-hotspot small {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler {
+    width:92px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler__receipt {
+    width:88px;
+    padding:3px 4px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler__receipt span,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler__receipt strong,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler__receipt small {
+    font-size:6.5px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler-row {
+    width:88px;
+    min-height:18px;
+    padding:2px 4px 2px 0;
+    gap:4px;
+    border-radius:5px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler-row__tick {
+    flex-basis:14px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler-row__tick::before {
+    width:14px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler-row b {
+    font-size:8px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-story-ruler-row small {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-vector {
+    width:98px;
+    min-height:28px;
+    padding:3px 4px;
+    gap:4px;
+    border-radius:6px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame {
+    grid-template-columns:16px minmax(0,1fr);
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame__bead {
+    width:16px;
+    height:16px;
+    overflow:hidden;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame__bead i {
+    inset:3px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame__bead::before,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame__bead::after {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-vector {
+    grid-template-columns:24px minmax(0,1fr);
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-vector__arrow {
+    width:24px;
+    height:16px;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-vector__body small,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-member-force-playback-trail-frame__body small,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout small,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout__label,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout__evidence,
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout__leader {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout strong {
+    font-size:10px;
+    line-height:1;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout-anchor::before {
+    display:none;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout-anchor {
+    grid-template-columns:8px;
+    max-width:20px;
+    min-height:16px;
+    padding:3px 4px;
+    overflow:hidden;
+  }
+
+  body.structural-surface.command-center-shell #viewport[data-stage-overlay-occlusion-budget="dense-model-protagonist"] .stage-result-callout-anchor b {
+    display:none;
   }
 
   body.structural-surface.command-center-shell button.stage-result-callout {
@@ -2016,6 +2199,8 @@
   body.structural-surface.command-center-shell .analysis-cockpit-strip {
     gap:8px;
     min-height:154px;
+    margin-top:18px;
+    margin-bottom:18px;
   }
 
   body.structural-surface.command-center-shell .analysis-chart-panel {
@@ -4189,7 +4374,7 @@
   body.structural-surface.command-center-shell .drawing-material-constitutive-row {
     appearance:none;
     display:grid;
-    grid-template-columns:minmax(76px,.82fr) minmax(52px,.44fr) minmax(36px,.3fr);
+    grid-template-columns:minmax(0,.9fr) minmax(0,.56fr) minmax(34px,.24fr);
     column-gap:6px;
     row-gap:3px;
     align-items:center;
@@ -4222,7 +4407,7 @@
 
   body.structural-surface.command-center-shell .drawing-material-constitutive-row__law em {
     white-space:normal;
-    overflow:visible;
+    overflow:hidden;
     overflow-wrap:anywhere;
     text-overflow:clip;
     line-height:1.15;
@@ -4249,7 +4434,7 @@
   body.structural-surface.command-center-shell .drawing-material-constitutive-row > em {
     grid-column:1/-1;
     white-space:normal;
-    overflow:visible;
+    overflow:hidden;
     overflow-wrap:anywhere;
     line-height:1.2;
     text-overflow:clip;

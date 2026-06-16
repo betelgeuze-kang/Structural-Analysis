@@ -237,7 +237,6 @@ def design_rc_beam(
     
     effective_depth = depth - 0.06
     bar_area = 0.000285
-    min_steel_ratio = max(0.25 * math.sqrt(fc) / fy, 1.4 / fy)
     required_steel_area = moment * 1e6 / (0.9 * fy * effective_depth * 0.8)
     bar_count = max(2, int(required_steel_area / bar_area))
     

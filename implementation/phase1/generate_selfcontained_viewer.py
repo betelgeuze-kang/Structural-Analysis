@@ -45,6 +45,7 @@ ARTIFACT_PRESET_INPUTS = {
 LOCAL_VIEWER_MODULE_IMPORT_RE = re.compile(
     r"from\s+([\"'])(\./viewer-[^\"']+\.js)\1\s*;?"
 )
+REMOTE_LINK_RE = re.compile(r"\s*<link\b[^>]+href=[\"']https?://[^\"']+[\"'][^>]*>\s*", re.IGNORECASE)
 
 
 def generate_demo_model() -> dict:
@@ -163,6 +164,7 @@ def generate_selfcontained_html(model_data: dict) -> str:
 
     if viewer_html_path.exists():
         html_content = viewer_html_path.read_text(encoding="utf-8")
+        html_content = _remove_remote_links_and_placeholders(html_content)
         html_content = _remove_sidecar_data_bootstrap(html_content)
         html_content = _remove_importmap_bootstrap(html_content)
         html_content = inline_structure_viewer_stylesheets(html_content)
@@ -176,10 +178,10 @@ def generate_selfcontained_html(model_data: dict) -> str:
         html_content = _inline_viewer_worker_module_urls(html_content, viewer_module_import_urls)
         embedded_json = json.dumps(model_data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
-        # Inline JSON is preferred by the viewer when opened over file://
-        # Use a global JS object instead of application/json to avoid HTML-parsing edge cases
-        # with large payloads (e.g., <!--, -->, </script> inside JSON strings).
+        # Keep both contracts: the viewer data loader prefers the JSON script tag,
+        # while the global payload preserves the large-file fallback path.
         injection = f"""
+<script type="application/json" id="embedded-model-data">{embedded_json}</script>
 <script>
 window.__STRUCTURE_VIEWER_PAYLOAD__ = {embedded_json};
 </script>
@@ -476,6 +478,13 @@ def _remove_sidecar_data_bootstrap(html_content: str) -> str:
         html_content,
         count=1,
     )
+
+
+def _remove_remote_links_and_placeholders(html_content: str) -> str:
+    """Strip remote-only references so the generated viewer is file-safe."""
+
+    html_content = REMOTE_LINK_RE.sub("\n", html_content)
+    return html_content.replace("https://... or path/to/file.json", "path/to/file.json")
 
 
 def _remove_importmap_bootstrap(html_content: str) -> str:

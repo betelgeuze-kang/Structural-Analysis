@@ -21,8 +21,12 @@
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
     "verify:viewer-performance-probe": "node ./scripts/measure-structure-viewer-performance.mjs --verify --fail-blocked",
+    "verify:viewer-sample-workflow": "node ./scripts/verify-structure-viewer-sample-workflow.mjs --fail-blocked",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
-    "serve:viewer": "node ./scripts/serve-structure-viewer.mjs"
+    "serve:viewer": "node ./scripts/serve-structure-viewer.mjs",
+    "ai:preflight": "./scripts/ai-preflight.sh",
+    "ai:verify": "./scripts/ai-verify.sh",
+    "ai:validate-worker-output": "node ./scripts/validate-ai-worker-output.mjs"
   },
   "dependencies": {
     "react": "18.2.0",
