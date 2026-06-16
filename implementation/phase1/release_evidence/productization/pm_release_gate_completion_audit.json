@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:25:36.415502+00:00",
+  "generated_at": "2026-06-16T19:33:37.419255+00:00",
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
@@ -441,7 +441,6 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "pm_blocker_closure_board_external_owner_input_ready_count": 5,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 5,
@@ -1287,7 +1286,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1360,7 +1358,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1433,7 +1430,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1506,7 +1502,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1579,7 +1574,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1652,7 +1646,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1725,7 +1718,6 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "2ab8a97b66079cc1380acc08aceafb04a1eadbb7bca3a7f880054ae25fa04fb8",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -1754,6 +1746,14 @@
     }
   ],
   "schema_version": "pm-release-gate-completion-audit.v1",
+  "snapshot_policy": {
+    "excluded_key_markers": [
+      "sha256",
+      "generated_at"
+    ],
+    "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
+    "stable_summary_snapshot": true
+  },
   "summary": {
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,

@@ -17,6 +17,10 @@ DEFAULT_CLOSURE_BOARD = Path(
 )
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+SNAPSHOT_EXCLUDED_KEY_MARKERS = (
+    "sha256",
+    "generated_at",
+)
 
 RELEASE_AREA_REQUIREMENTS = [
     ("basic_ci", "Basic CI", "PR/nightly 30 consecutive PASS evidence"),
@@ -93,6 +97,18 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _stable_snapshot(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(key): _stable_snapshot(item)
+            for key, item in value.items()
+            if not any(marker in str(key).lower() for marker in SNAPSHOT_EXCLUDED_KEY_MARKERS)
+        }
+    if isinstance(value, list):
+        return [_stable_snapshot(item) for item in value]
+    return value
+
+
 def _indexed(rows: list[Any], key: str) -> dict[str, dict[str, Any]]:
     indexed: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -162,7 +178,7 @@ def _release_area_audit_rows(
                     for blocker in blocker_ids
                 },
                 "checks": checks,
-                "summary_snapshot": summary,
+                "summary_snapshot": _stable_snapshot(summary),
                 "evidence_artifacts": {
                     str(key): str(value)
                     for key, value in _as_dict(source.get("artifacts")).items()
@@ -197,7 +213,7 @@ def _milestone_audit_rows(pm_report: dict[str, Any]) -> list[dict[str, Any]]:
                 "check_value": check_value,
                 "blockers": [str(item) for item in _as_list(source.get("blockers"))],
                 "checks": {check_key: checks.get(check_key, False)},
-                "summary_snapshot": _as_dict(source.get("summary")),
+                "summary_snapshot": _stable_snapshot(_as_dict(source.get("summary"))),
                 "evidence_artifacts": {
                     str(key): str(value)
                     for key, value in _as_dict(source.get("artifacts")).items()
@@ -260,6 +276,15 @@ def build_audit(
             "release_area_gate_ready": bool(pm_payload.get("release_area_gate_ready", False)),
             "limited_commercial_ready": bool(pm_payload.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(pm_payload.get("paid_pilot_candidate", False)),
+        },
+        "snapshot_policy": {
+            "stable_summary_snapshot": True,
+            "excluded_key_markers": list(SNAPSHOT_EXCLUDED_KEY_MARKERS),
+            "reason": (
+                "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests "
+                "hash this audit as an output artifact, so the audit avoids embedding support-bundle archive "
+                "hashes that would create circular freshness claims."
+            ),
         },
         "rows": rows,
         "claim_boundary": (

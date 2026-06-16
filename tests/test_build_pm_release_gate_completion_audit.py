@@ -26,7 +26,11 @@ def _area(area_id: str, *, ok: bool = True, blockers: list[str] | None = None) -
         "ok": ok,
         "blockers": blockers or [],
         "checks": {"explicit_check": ok},
-        "summary": {"evidence_source": f"{area_id}_report.json"},
+        "summary": {
+            "evidence_source": f"{area_id}_report.json",
+            "generated_at": "2026-06-16T00:00:00+00:00",
+            "support_bundle_export_archive_sha256": "volatile-sha",
+        },
         "artifacts": {f"{area_id}_report": f"{area_id}_report.json"},
         "claim_boundary": f"{area_id} claim boundary",
     }
@@ -39,7 +43,11 @@ def _milestone(milestone_id: str, checks: dict[str, bool]) -> dict[str, object]:
         "ok": all(checks.values()),
         "blockers": [],
         "checks": checks,
-        "summary": {"source": f"{milestone_id}.json"},
+        "summary": {
+            "source": f"{milestone_id}.json",
+            "generated_at": "2026-06-16T00:00:00+00:00",
+            "support_bundle_export_archive_sha256": "volatile-sha",
+        },
         "artifacts": {f"{milestone_id}_report": f"{milestone_id}.json"},
     }
 
@@ -113,6 +121,12 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing": "external_owner_input_ready",
     }
     assert rows["m1_residual_report_fixed"]["status"] == "pass"
+    assert rows["release_area.support"]["summary_snapshot"]["evidence_source"] == "support_report.json"
+    assert "generated_at" not in rows["release_area.support"]["summary_snapshot"]
+    assert "support_bundle_export_archive_sha256" not in rows["release_area.support"]["summary_snapshot"]
+    assert "generated_at" not in rows["m5_support_bundle_export"]["summary_snapshot"]
+    assert "support_bundle_export_archive_sha256" not in rows["m5_support_bundle_export"]["summary_snapshot"]
+    assert payload["snapshot_policy"]["stable_summary_snapshot"] is True
 
 
 def test_build_audit_passes_only_when_full_gate_and_rows_pass(tmp_path: Path) -> None:
