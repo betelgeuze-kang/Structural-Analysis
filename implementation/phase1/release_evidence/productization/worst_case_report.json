@@ -1,0 +1,330 @@
+{
+  "schema_version": "benchmark-worst-case-report.v1",
+  "generated_at": "2026-06-16T17:07:44.799850+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "metric_basis": "coverage_risk_no_accuracy_claim",
+  "accuracy_claimed": false,
+  "checks": {
+    "source_measured_benchmark_breadth_contract_pass": true,
+    "family_coverage_rows_present": true,
+    "holdout_manifest_present": true,
+    "coverage_worst_case_rows_present": true,
+    "no_accuracy_claim": true
+  },
+  "summary": {
+    "source_measured_case_count": 304,
+    "source_measured_family_count": 22,
+    "holdout_family_count": 22,
+    "worst_case_family_count": 22,
+    "highest_coverage_risk_family_id": "external:buckling_snapthrough",
+    "highest_coverage_risk_score": 0.95
+  },
+  "summary_line": "Benchmark worst-case coverage: PASS | basis=coverage_risk_no_accuracy_claim | families=22 | holdout_families=22",
+  "rows": [
+    {
+      "family_id": "external:buckling_snapthrough",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 1
+    },
+    {
+      "family_id": "external:construction_stage_time_dependent",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 2
+    },
+    {
+      "family_id": "external:excavation_tunnel_ground_interaction",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 3
+    },
+    {
+      "family_id": "external:highrise_ndtha",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 4
+    },
+    {
+      "family_id": "external:moving_load_track_bridge",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 5
+    },
+    {
+      "family_id": "external:offshore_multiphysics_ssi",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 6
+    },
+    {
+      "family_id": "external:progressive_collapse",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 7
+    },
+    {
+      "family_id": "external:seismic_isolation_damping",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 8
+    },
+    {
+      "family_id": "external:soil_structure_interaction",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 9
+    },
+    {
+      "family_id": "external:wind_time_history",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "official_external_benchmark_fullcase"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 10
+    },
+    {
+      "family_id": "opensees:amaelkady_constructbrace",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 11
+    },
+    {
+      "family_id": "opensees:amaelkady_scbf16cg",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 12
+    },
+    {
+      "family_id": "opensees:nheri_soft_story_podium",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 13
+    },
+    {
+      "family_id": "opensees:sac_scbf16b",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 14
+    },
+    {
+      "family_id": "opensees:sac_scbf16b_shell_beam_mix",
+      "measured_case_count": 1,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.95,
+      "reason_codes": [
+        "LOW_CASE_COUNT_SINGLETON",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 15
+    },
+    {
+      "family_id": "opensees:luxinzheng_megatall",
+      "measured_case_count": 2,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "opensees_canonical"
+      ],
+      "coverage_risk_score": 0.75,
+      "reason_codes": [
+        "LOW_CASE_COUNT_LT5",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 16
+    },
+    {
+      "family_id": "authority:nheri",
+      "measured_case_count": 3,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "global_authority"
+      ],
+      "coverage_risk_score": 0.75,
+      "reason_codes": [
+        "LOW_CASE_COUNT_LT5",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 17
+    },
+    {
+      "family_id": "authority:sac",
+      "measured_case_count": 3,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "global_authority"
+      ],
+      "coverage_risk_score": 0.75,
+      "reason_codes": [
+        "LOW_CASE_COUNT_LT5",
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 18
+    },
+    {
+      "family_id": "peer_blind_prediction:edefense_peer_blind_prediction",
+      "measured_case_count": 10,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "peer_blind_prediction_measured_response"
+      ],
+      "coverage_risk_score": 0.35,
+      "reason_codes": [
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 19
+    },
+    {
+      "family_id": "rwth_zenodo",
+      "measured_case_count": 22,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "commercial_baseline"
+      ],
+      "coverage_risk_score": 0.35,
+      "reason_codes": [
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 20
+    },
+    {
+      "family_id": "opstool_606m_megatall_model",
+      "measured_case_count": 29,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "commercial_baseline"
+      ],
+      "coverage_risk_score": 0.35,
+      "reason_codes": [
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 21
+    },
+    {
+      "family_id": "measured:canton_tower_reduced_shm",
+      "measured_case_count": 220,
+      "holdout_candidate_count": 1,
+      "source_buckets": [
+        "open_data_reduced_order_shm"
+      ],
+      "coverage_risk_score": 0.35,
+      "reason_codes": [
+        "SINGLE_SOURCE_BUCKET"
+      ],
+      "rank": 22
+    }
+  ]
+}

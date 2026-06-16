@@ -20,6 +20,8 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert "scripts/check_p0_closure_status.py --json --fail-core-open" in output
     assert "scripts/check_p1_readiness_status.py --json --fail-core-open" in output
     assert "scripts/check_p1_benchmark_breadth_status.py --json --fail-core-open" in output
+    assert "npm audit --audit-level high" in output
+    assert output.index("npm ci") < output.index("npm audit --audit-level high")
     assert "verify:viewer-manifest" in output
     assert "scripts/verify_structure_viewer_contracts.py" in output
     assert output.index("verify:viewer-manifest") < output.index("scripts/verify_structure_viewer_contracts.py")

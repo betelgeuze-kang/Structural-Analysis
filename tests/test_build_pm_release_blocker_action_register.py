@@ -111,6 +111,43 @@ def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) ->
     assert payload["next_actions"] == []
 
 
+def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path) -> None:
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": ["security::frontend_dependency_audit_missing_or_failed"],
+            "release_area_blockers": ["security::frontend_dependency_audit_missing_or_failed"],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "security",
+                    "title": "Security",
+                    "status": "blocked",
+                    "blockers": ["frontend_dependency_audit_missing_or_failed"],
+                    "summary": {
+                        "frontend_dependency_vulnerability_total": 1,
+                        "frontend_dependency_high_or_critical_vulnerability_count": 1,
+                    },
+                    "artifacts": {
+                        "frontend_dependency_audit": "frontend_dependency_audit_report.json",
+                    },
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == "security::frontend_dependency_audit_missing_or_failed"
+    assert "npm audit --audit-level high" in row["reproduction_commands"]
+    assert any("build_frontend_dependency_audit_report.py" in command for command in row["reproduction_commands"])
+    assert any("high_or_critical_vulnerability_count == 0" in item for item in row["acceptance_criteria"])
+    assert "frontend_dependency_audit_report" in row["evidence_artifacts"]
+
+
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     out = tmp_path / "register.json"

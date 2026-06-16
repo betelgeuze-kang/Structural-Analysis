@@ -1,0 +1,33 @@
+{
+  "blockers": [],
+  "checks": {
+    "dependency_high_or_critical_zero_pass": true,
+    "dependency_vulnerability_total_zero_pass": true,
+    "npm_audit_exit_code_zero_pass": true,
+    "npm_audit_json_parse_pass": true,
+    "package_json_present": true,
+    "package_lock_present": true
+  },
+  "claim_boundary": "This report records npm audit release evidence for the frontend dependency graph. It does not replace secrets, license, SBOM, or reproducible-build checks in the PM security gate.",
+  "contract_pass": true,
+  "diagnostics": {
+    "npm_audit_stderr_tail": "",
+    "npm_audit_stdout_bytes": 361
+  },
+  "generated_at": "2026-06-16T16:59:45.367795+00:00",
+  "reason_code": "PASS",
+  "schema_version": "frontend-dependency-audit-report.v1",
+  "summary": {
+    "critical_vulnerability_count": 0,
+    "high_or_critical_vulnerability_count": 0,
+    "high_vulnerability_count": 0,
+    "info_vulnerability_count": 0,
+    "low_vulnerability_count": 0,
+    "moderate_vulnerability_count": 0,
+    "npm_audit_exit_code": 0,
+    "package_json": "package.json",
+    "package_lock": "package-lock.json",
+    "vulnerability_total": 0
+  },
+  "vulnerabilities": []
+}

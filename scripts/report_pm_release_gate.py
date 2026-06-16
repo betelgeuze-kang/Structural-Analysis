@@ -25,8 +25,10 @@ DEFAULT_CI_STREAK_MANIFEST = Path("implementation/phase1/release_evidence/produc
 DEFAULT_CI_REQUIRE_NDTHA = Path("implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json")
 DEFAULT_CI_REQUIRE_HIP = Path("implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json")
 DEFAULT_ZERO_COPY_STRICT = Path("implementation/phase1/zero_copy_real_probe_report_strict.json")
-DEFAULT_MEASURED_BREADTH = Path("implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json")
-DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release/benchmark_expansion/worst_case_report.json")
+DEFAULT_MEASURED_BREADTH = Path(
+    "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json"
+)
+DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release_evidence/productization/worst_case_report.json")
 DEFAULT_WORKFLOW_PRODUCTIZATION = Path("implementation/phase1/workflow_productization_gate_report.json")
 DEFAULT_RELEASE_REGISTRY = Path("implementation/phase1/release/release_registry.json")
 DEFAULT_SUPPORT_BUNDLE = Path("implementation/phase1/support_bundle_manifest.json")
@@ -39,6 +41,9 @@ DEFAULT_RUNTIME_MEMORY_BUDGET = Path(
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json"
 )
 DEFAULT_RUNTIME_SBOM = Path("implementation/phase1/runtime_sbom.json")
+DEFAULT_FRONTEND_DEPENDENCY_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
+)
 DEFAULT_REPRO_LOCK = Path("implementation/phase1/reproducibility_version_lock_report.json")
 DEFAULT_WORKSTATION_BUDGET = Path("implementation/phase1/workstation_service_budget.json")
 DEFAULT_VIEWER_PERFORMANCE_BUDGET = Path("implementation/phase1/structure_viewer_performance_budget_manifest.json")
@@ -636,6 +641,9 @@ def _packaging_milestone(
         "support_bundle_license_intake_packet_present": bool(
             support_optional_sections.get("license_status_intake_packet")
         ),
+        "support_bundle_frontend_dependency_audit_present": bool(
+            support_optional_sections.get("frontend_dependency_audit_report")
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
     }
@@ -656,6 +664,11 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_license_intake_packet_present"]
             else []
         ),
+        *(
+            ["support_bundle_frontend_dependency_audit_missing"]
+            if not gate_checks["support_bundle_frontend_dependency_audit_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
     ]
@@ -674,6 +687,9 @@ def _packaging_milestone(
             ),
             "support_bundle_license_status_intake_packet": str(
                 support_optional_sections.get("license_status_intake_packet", "")
+            ),
+            "support_bundle_frontend_dependency_audit": str(
+                support_optional_sections.get("frontend_dependency_audit_report", "")
             ),
         },
         artifacts={
@@ -707,6 +723,7 @@ def _build_release_area_matrix(
     runtime_packaging_path: Path,
     runtime_memory_budget_path: Path,
     runtime_sbom_path: Path,
+    frontend_dependency_audit_path: Path,
     repro_lock_path: Path,
     workstation_budget_path: Path,
     viewer_performance_budget_path: Path,
@@ -749,6 +766,7 @@ def _build_release_area_matrix(
     runtime_packaging = _load_json(runtime_packaging_path)
     runtime_memory_budget = _load_json(runtime_memory_budget_path)
     sbom = _load_json(runtime_sbom_path)
+    frontend_dependency_audit = _load_json(frontend_dependency_audit_path)
     repro = _load_json(repro_lock_path)
     workstation = _load_json(workstation_budget_path)
     viewer_perf = _load_json(viewer_performance_budget_path)
@@ -1307,6 +1325,9 @@ def _build_release_area_matrix(
         "license_status_intake_packet_in_failure_bundle": bool(
             support_optional_sections.get("license_status_intake_packet")
         ),
+        "frontend_dependency_audit_in_failure_bundle": bool(
+            support_optional_sections.get("frontend_dependency_audit_report")
+        ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
@@ -1330,6 +1351,11 @@ def _build_release_area_matrix(
             if not support_area_checks["license_status_intake_packet_in_failure_bundle"]
             else []
         ),
+        *(
+            ["frontend_dependency_audit_missing_from_failure_bundle"]
+            if not support_area_checks["frontend_dependency_audit_in_failure_bundle"]
+            else []
+        ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
         *(["rollback_runbook_missing"] if not support_area_checks["rollback_runbook_present"] else []),
     ]
@@ -1348,6 +1374,9 @@ def _build_release_area_matrix(
                 "license_status_intake_packet": str(
                     support_optional_sections.get("license_status_intake_packet", "")
                 ),
+                "frontend_dependency_audit_report": str(
+                    support_optional_sections.get("frontend_dependency_audit_report", "")
+                ),
             },
             artifacts={
                 "support_bundle": str(support_bundle_path),
@@ -1363,6 +1392,8 @@ def _build_release_area_matrix(
     license_closure_blockers = license_status_closure.get("blockers", [])
     if not isinstance(license_closure_blockers, list):
         license_closure_blockers = []
+    frontend_dependency_audit_summary = _summary(frontend_dependency_audit)
+    frontend_dependency_audit_checks = _checks(frontend_dependency_audit)
     security_checks = {
         "secrets_negative_start_or_no_default_secret_pass": bool(
             "no production default secret" in security_text and "negative" in security_text
@@ -1370,6 +1401,11 @@ def _build_release_area_matrix(
         "license_status_configured_pass": _reason_pass(license_status_closure),
         "license_status_closure_report_present": license_status_closure_path.exists(),
         "sbom_present_pass": bool(sbom.get("component_count", 0)),
+        "frontend_dependency_audit_report_present": frontend_dependency_audit_path.exists(),
+        "frontend_dependency_audit_pass": _reason_pass(frontend_dependency_audit),
+        "frontend_dependency_high_or_critical_zero_pass": bool(
+            frontend_dependency_audit_checks.get("dependency_high_or_critical_zero_pass", False)
+        ),
         "repro_build_pass": _reason_pass(repro),
     }
     security_blockers = [
@@ -1381,6 +1417,11 @@ def _build_release_area_matrix(
         *(["license_status_not_configured"] if not security_checks["license_status_configured_pass"] else []),
         *(["license_status_closure_report_missing"] if not security_checks["license_status_closure_report_present"] else []),
         *(["sbom_missing"] if not security_checks["sbom_present_pass"] else []),
+        *(
+            ["frontend_dependency_audit_missing_or_failed"]
+            if not security_checks["frontend_dependency_audit_pass"]
+            else []
+        ),
         *(["repro_build_not_green"] if not security_checks["repro_build_pass"] else []),
     ]
     rows.append(
@@ -1396,15 +1437,25 @@ def _build_release_area_matrix(
                 "license_status_owner_action": str(license_closure_summary.get("owner_action", "")),
                 "license_status_template_path": str(license_closure_summary.get("template_path", "")),
                 "sbom_component_count": _as_int(sbom.get("component_count"), 0),
+                "frontend_dependency_vulnerability_total": _as_int(
+                    frontend_dependency_audit_summary.get("vulnerability_total"), 0
+                ),
+                "frontend_dependency_high_or_critical_vulnerability_count": _as_int(
+                    frontend_dependency_audit_summary.get("high_or_critical_vulnerability_count"), 0
+                ),
             },
             artifacts={
                 "security_runbook": str(security_runbook_path),
                 "license_status": str(license_status_path),
                 "license_status_closure": str(license_status_closure_path),
                 "runtime_sbom": str(runtime_sbom_path),
+                "frontend_dependency_audit": str(frontend_dependency_audit_path),
                 "reproducibility_lock": str(repro_lock_path),
             },
-            claim_boundary="Security area is release-gate evidence only; live deployment hardening remains governed by the runbook.",
+            claim_boundary=(
+                "Security area is release-gate evidence only; live deployment hardening remains governed "
+                "by the runbook."
+            ),
         )
     )
 
@@ -1434,6 +1485,7 @@ def build_report(
     runtime_packaging: Path = DEFAULT_RUNTIME_PACKAGING,
     runtime_memory_budget: Path = DEFAULT_RUNTIME_MEMORY_BUDGET,
     runtime_sbom: Path = DEFAULT_RUNTIME_SBOM,
+    frontend_dependency_audit: Path = DEFAULT_FRONTEND_DEPENDENCY_AUDIT,
     repro_lock: Path = DEFAULT_REPRO_LOCK,
     workstation_budget: Path = DEFAULT_WORKSTATION_BUDGET,
     viewer_performance_budget: Path = DEFAULT_VIEWER_PERFORMANCE_BUDGET,
@@ -1532,6 +1584,7 @@ def build_report(
         runtime_packaging_path=runtime_packaging,
         runtime_memory_budget_path=runtime_memory_budget,
         runtime_sbom_path=runtime_sbom,
+        frontend_dependency_audit_path=frontend_dependency_audit,
         repro_lock_path=repro_lock,
         workstation_budget_path=workstation_budget,
         viewer_performance_budget_path=viewer_performance_budget,
@@ -1691,6 +1744,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--runtime-packaging", type=Path, default=DEFAULT_RUNTIME_PACKAGING)
     parser.add_argument("--runtime-memory-budget", type=Path, default=DEFAULT_RUNTIME_MEMORY_BUDGET)
     parser.add_argument("--runtime-sbom", type=Path, default=DEFAULT_RUNTIME_SBOM)
+    parser.add_argument("--frontend-dependency-audit", type=Path, default=DEFAULT_FRONTEND_DEPENDENCY_AUDIT)
     parser.add_argument("--repro-lock", type=Path, default=DEFAULT_REPRO_LOCK)
     parser.add_argument("--workstation-budget", type=Path, default=DEFAULT_WORKSTATION_BUDGET)
     parser.add_argument("--viewer-performance-budget", type=Path, default=DEFAULT_VIEWER_PERFORMANCE_BUDGET)
@@ -1751,6 +1805,7 @@ def main(argv: list[str] | None = None) -> int:
         runtime_packaging=args.runtime_packaging,
         runtime_memory_budget=args.runtime_memory_budget,
         runtime_sbom=args.runtime_sbom,
+        frontend_dependency_audit=args.frontend_dependency_audit,
         repro_lock=args.repro_lock,
         workstation_budget=args.workstation_budget,
         viewer_performance_budget=args.viewer_performance_budget,

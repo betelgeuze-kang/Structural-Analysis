@@ -91,6 +91,9 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                 "optional_sections": {
                     "license_status_intake_packet": "release/support_bundle/redacted/license_status_intake_packet.json",
                     "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
+                    "frontend_dependency_audit_report": (
+                        "release/support_bundle/redacted/frontend_dependency_audit_report.json"
+                    ),
                 },
             },
         ),
@@ -191,6 +194,18 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
             },
         ),
         "runtime_sbom": _write(tmp_path / "runtime_sbom.json", {"component_count": 3}),
+        "frontend_dependency_audit": _write(
+            tmp_path / "frontend_dependency_audit.json",
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "checks": {
+                    "dependency_vulnerability_total_zero_pass": True,
+                    "dependency_high_or_critical_zero_pass": True,
+                },
+                "summary": {"vulnerability_total": 0, "high_or_critical_vulnerability_count": 0},
+            },
+        ),
         "repro_lock": _write(tmp_path / "repro_lock.json", {"contract_pass": True, "reason_code": "PASS"}),
         "workstation_budget": _write(
             tmp_path / "workstation_budget.json",
@@ -441,10 +456,14 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert ux_area["summary"]["sample_completion_minutes"] == 2.0
     security_area = next(row for row in payload["release_area_matrix"] if row["area"] == "security")
     assert security_area["summary"]["license_status_template_path"] == "docs/templates/license_status.template.json"
+    assert security_area["checks"]["frontend_dependency_audit_pass"] is True
+    assert security_area["summary"]["frontend_dependency_vulnerability_total"] == 0
     support_area = next(row for row in payload["release_area_matrix"] if row["area"] == "support")
     assert support_area["checks"]["license_status_intake_packet_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
+    assert support_area["checks"]["frontend_dependency_audit_in_failure_bundle"] is True
     assert support_area["summary"]["license_status_intake_packet"].endswith("license_status_intake_packet.json")
+    assert support_area["summary"]["frontend_dependency_audit_report"].endswith("frontend_dependency_audit_report.json")
     assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
         "pm_release_blocker_action_register.json"
     )

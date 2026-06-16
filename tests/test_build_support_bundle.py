@@ -107,6 +107,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "current_blockers": ["license_status_not_active"],
             },
         ),
+        "frontend_dependency_audit_report": _write_json(
+            tmp_path / "frontend-dependency-audit-report.json",
+            {
+                "schema_version": "frontend-dependency-audit-report.v1",
+                "contract_pass": True,
+                "summary": {"vulnerability_total": 0, "high_or_critical_vulnerability_count": 0},
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -148,6 +156,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "workstation_job_retention_policy" in payload["required_sections"]
     assert "pm_release_blocker_action_register" in payload["optional_sections"]
     assert "license_status_intake_packet" in payload["optional_sections"]
+    assert "frontend_dependency_audit_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -156,6 +165,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "license_status_not_active" in redacted_license_intake
+    redacted_frontend_audit = Path(payload["optional_sections"]["frontend_dependency_audit_report"]).read_text(
+        encoding="utf-8"
+    )
+    assert '"vulnerability_total": 0' in redacted_frontend_audit
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

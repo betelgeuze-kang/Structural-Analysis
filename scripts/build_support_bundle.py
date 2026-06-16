@@ -51,6 +51,9 @@ DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER = Path(
 DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
 )
+DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
+)
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -275,6 +278,7 @@ def build_support_bundle(
     residual_holdout_updates: Path = DEFAULT_RESIDUAL_HOLDOUT_UPDATES,
     pm_release_blocker_action_register: Path | None = DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
     license_status_intake_packet: Path | None = DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
+    frontend_dependency_audit_report: Path | None = DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -306,6 +310,7 @@ def build_support_bundle(
     optional_specs = [
         ("pm_release_blocker_action_register", pm_release_blocker_action_register),
         ("license_status_intake_packet", license_status_intake_packet),
+        ("frontend_dependency_audit_report", frontend_dependency_audit_report),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -431,6 +436,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
     )
+    parser.add_argument(
+        "--frontend-dependency-audit-report",
+        type=Path,
+        default=DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -467,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_holdout_updates=args.residual_holdout_updates,
         pm_release_blocker_action_register=args.pm_release_blocker_action_register,
         license_status_intake_packet=args.license_status_intake_packet,
+        frontend_dependency_audit_report=args.frontend_dependency_audit_report,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

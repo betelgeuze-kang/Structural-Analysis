@@ -41,6 +41,7 @@ def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
         [_python(), "scripts/check_p1_readiness_status.py", "--json", p1_failure_flag],
         [_python(), "scripts/check_p1_benchmark_breadth_status.py", "--json", p1_failure_flag],
         [_npm(), "ci"],
+        [_npm(), "audit", "--audit-level", "high"],
         [
             _python(),
             "scripts/verify_release_artifacts_manifest.py",

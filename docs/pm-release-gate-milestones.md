@@ -29,8 +29,8 @@ python3 implementation/phase1/run_ndtha_residual_gate.py \
 python3 implementation/phase1/run_element_material_breadth_gate.py
 
 python3 implementation/phase1/run_measured_benchmark_breadth_gate.py \
-  --out implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json \
-  --worst-case-out implementation/phase1/release/benchmark_expansion/worst_case_report.json
+  --out implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json \
+  --worst-case-out implementation/phase1/release_evidence/productization/worst_case_report.json
 
 python3 scripts/build_core_family_p95_report.py \
   --out implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json
@@ -62,6 +62,9 @@ python3 scripts/build_license_status_intake_packet.py \
   --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json \
   --out-md implementation/phase1/release_evidence/productization/license_status_intake_packet.md
 
+python3 scripts/build_frontend_dependency_audit_report.py \
+  --out implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json
+
 python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
@@ -83,7 +86,7 @@ npm run ai:preflight
 - M1 Residual Release Hardening: release evidence 경로의 residual gate가 strict recommended hard-fail, fallback `0%`, `solver_raw_ratio=1.0`, normalized residual, corrected-state recompute `3/3`을 통과했다.
 - M2 Core Engine Depth Closure: contact-material coupled case `31`, panel/contact failure `reason_code` `7`, nonlinear+residual same-case `3`이 같은 element/material breadth report에 명시됐다.
 - M3 Strict Runtime Closure: NDTHA long profile, HIP e2e, CPU fallback 금지, device residency, host copy share가 통과했다.
-- M4 Benchmark Breadth Expansion: measured breadth `294` cases, `21` families, family별 holdout, coverage-risk worst-case report가 통과했다.
+- M4 Benchmark Breadth Expansion: measured breadth `304` cases, `22` families, family별 holdout, coverage-risk worst-case report가 통과했다. PEER/E-Defense blind prediction measured-response family `10` cases는 `peer_blind_delta=1/10`으로 별도 집계한다.
 - M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle, validation/limitation manuals가 통과했다.
 - Implementation orchestration: Cursor Agent와 OpenCode worker bridge preflight가 통과했다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
 
@@ -93,6 +96,7 @@ npm run ai:preflight
 
 - Basic CI: nightly는 로컬 release evidence 기준 `230`회 연속 PASS지만, PR은 로컬 evidence `2`회 및 GitHub Actions `pull_request` run evidence `0`회라서 `30`회 연속 PASS evidence가 아직 없다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
+- Security dependency audit: `frontend_dependency_audit_report.json`은 `npm audit --json` 결과를 release evidence로 고정하며 high/critical 및 total vulnerability가 `0`이어야 한다.
 
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
@@ -117,4 +121,4 @@ npm run ai:preflight
 
 OpenSees evidence는 topology edge-list canonicalization과 exact JSON reload trace까지이며 full OpenSees solver execution roundtrip 주장은 아니다.
 
-GA/Enterprise는 이 로컬 gate와 별개로 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence가 필요하다. 현재 measured cases는 `294`로 GA의 `300+` 기준에도 아직 `6` cases가 모자라므로 `ga_enterprise_ready=false`가 맞다.
+GA/Enterprise는 이 로컬 gate와 별개로 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence가 필요하다. 현재 measured cases는 `304`로 GA의 `300+` case-count 기준은 충족했지만, 독립 V&V와 고객 audit/failure bundle/SLA evidence가 없으므로 `ga_enterprise_ready=false`가 맞다.

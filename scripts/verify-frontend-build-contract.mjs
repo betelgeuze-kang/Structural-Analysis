@@ -110,7 +110,7 @@ const expectedDevDependencies = {
   '@types/react-dom': '18.2.7',
   '@vitejs/plugin-react': '6.0.1',
   typescript: '5.0.2',
-  vite: '8.0.8',
+  vite: '8.0.16',
 }
 
 function assertExactDependencies(groupName, actualGroup, expectedGroup) {

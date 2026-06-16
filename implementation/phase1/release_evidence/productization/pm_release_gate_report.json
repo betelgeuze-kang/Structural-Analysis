@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T16:47:18.735043+00:00",
+  "generated_at": "2026-06-16T17:07:44.972487+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -117,8 +117,8 @@
     },
     {
       "artifacts": {
-        "measured_benchmark_breadth_report": "implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json",
-        "worst_case_report": "implementation/phase1/release/benchmark_expansion/worst_case_report.json"
+        "measured_benchmark_breadth_report": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+        "worst_case_report": "implementation/phase1/release_evidence/productization/worst_case_report.json"
       },
       "blockers": [],
       "checks": {
@@ -133,9 +133,9 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "holdout_family_count": 21,
-        "measured_case_count": 294,
-        "measured_family_count": 21,
+        "holdout_family_count": 22,
+        "measured_case_count": 304,
+        "measured_family_count": 22,
         "min_structure_families": 5,
         "min_validation_cases": 100
       },
@@ -156,6 +156,7 @@
         "pdf_report_or_reviewer_package_pass": true,
         "signed_release_registry_pass": true,
         "support_bundle_export_pass": true,
+        "support_bundle_frontend_dependency_audit_present": true,
         "support_bundle_license_intake_packet_present": true,
         "support_bundle_pm_blocker_register_present": true,
         "validation_manual_present": true,
@@ -167,6 +168,7 @@
       "status": "pass",
       "summary": {
         "release_registry_artifact_count": 12,
+        "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
@@ -318,12 +320,12 @@
     {
       "area": "benchmark_breadth",
       "artifacts": {
-        "measured_benchmark_breadth": "implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json"
+        "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json"
       },
       "blockers": [],
       "checks": {
         "benchmark_breadth_milestone_pass": true,
-        "ga_case_threshold_pass": false,
+        "ga_case_threshold_pass": true,
         "limited_case_threshold_pass": true,
         "paid_pilot_case_threshold_pass": true
       },
@@ -333,7 +335,7 @@
       "summary": {
         "ga_validation_case_threshold": 300,
         "limited_validation_case_threshold": 100,
-        "measured_case_count": 294
+        "measured_case_count": 304
       },
       "title": "Benchmark Breadth"
     },
@@ -496,6 +498,7 @@
       "blockers": [],
       "checks": {
         "failure_bundle_export_pass": true,
+        "frontend_dependency_audit_in_failure_bundle": true,
         "known_issue_or_limitation_register_present": true,
         "license_status_intake_packet_in_failure_bundle": true,
         "pm_blocker_action_register_in_failure_bundle": true,
@@ -505,6 +508,7 @@
       "ok": true,
       "status": "pass",
       "summary": {
+        "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_missing_required_count": 0
@@ -514,6 +518,7 @@
     {
       "area": "security",
       "artifacts": {
+        "frontend_dependency_audit": "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
         "license_status": "implementation/phase1/release/support_bundle/license_status.json",
         "license_status_closure": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
         "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
@@ -524,6 +529,9 @@
         "license_status_not_configured"
       ],
       "checks": {
+        "frontend_dependency_audit_pass": true,
+        "frontend_dependency_audit_report_present": true,
+        "frontend_dependency_high_or_critical_zero_pass": true,
         "license_status_closure_report_present": true,
         "license_status_configured_pass": false,
         "repro_build_pass": true,
@@ -534,6 +542,8 @@
       "ok": false,
       "status": "blocked",
       "summary": {
+        "frontend_dependency_high_or_critical_vulnerability_count": 0,
+        "frontend_dependency_vulnerability_total": 0,
         "license_status": "not_configured",
         "license_status_closure_blockers": [
           "license_status_not_active",
@@ -557,17 +567,16 @@
       "independent_vv_missing",
       "family_validation_manual_signoff_missing",
       "customer_audit_failure_bundle_sla_missing",
-      "ga_validation_case_count_lt_300",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "security::license_status_not_configured"
     ],
     "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
     "ga_validation_case_threshold": 300,
-    "ga_validation_case_threshold_met": false,
+    "ga_validation_case_threshold_met": true,
     "limited_commercial_full_gate_ready": false,
     "limited_commercial_milestone_ready": true,
     "paid_pilot": true
   },
   "schema_version": "pm-release-gate-report.v1",
-  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=294"
+  "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=304"
 }

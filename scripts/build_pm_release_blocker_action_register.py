@@ -27,6 +27,9 @@ DEFAULT_LICENSE_STATUS_CLOSURE = Path(
 DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
 )
+DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
+)
 
 
 def _now_utc_iso() -> str:
@@ -75,6 +78,11 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             return str(summary.get("nightly_owner_action", "") or "")
     if namespace == "security" and "license" in code:
         return str(summary.get("license_status_owner_action", "") or "")
+    if namespace == "security" and "frontend_dependency" in code:
+        return (
+            "Patch or replace vulnerable frontend dependencies, rerun `npm audit --audit-level high`, "
+            "and regenerate frontend dependency audit evidence before security release signoff."
+        )
     direct = str(summary.get("owner_action", "") or row.get("owner_action", "") or "")
     if direct:
         return direct
@@ -121,6 +129,12 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`license_status` is active and populated from approved product/legal evidence",
             "`security::license_status_not_configured` absent from `release_area_blockers`",
         ]
+    if namespace == "security" and "frontend_dependency" in code:
+        return [
+            "`frontend_dependency_audit_report.json.contract_pass == true`",
+            "`frontend_dependency_audit_report.json.summary.high_or_critical_vulnerability_count == 0`",
+            "`security::frontend_dependency_audit_missing_or_failed` absent from `release_area_blockers`",
+        ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
@@ -143,6 +157,13 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         return [
             f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_LICENSE_STATUS_INTAKE_PACKET}",
             f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
+    if namespace == "security" and "frontend_dependency" in code:
+        return [
+            "npm audit --audit-level high",
+            f"python3 scripts/build_frontend_dependency_audit_report.py --out {DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
@@ -173,6 +194,8 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
     augmented = dict(artifacts)
     if namespace == "security" and "license" in code:
         augmented["license_status_intake_packet"] = str(DEFAULT_LICENSE_STATUS_INTAKE_PACKET)
+    if namespace == "security" and "frontend_dependency" in code:
+        augmented["frontend_dependency_audit_report"] = str(DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT)
     return augmented
 
 

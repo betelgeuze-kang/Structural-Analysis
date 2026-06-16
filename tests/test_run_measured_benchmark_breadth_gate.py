@@ -117,6 +117,10 @@ def test_run_measured_benchmark_breadth_gate_generates_expected_summary(tmp_path
             str(canton_conversion),
             "--canton-reduced-order-compare",
             str(canton_compare),
+            "--peer-blind-prediction-cases",
+            str(tmp_path / "missing_peer_cases.json"),
+            "--peer-blind-prediction-compare",
+            str(tmp_path / "missing_peer_compare.json"),
             "--out",
             str(out),
         ],
@@ -206,6 +210,10 @@ def test_run_measured_benchmark_breadth_gate_surfaces_canton_delta(tmp_path: Pat
             str(canton_conversion),
             "--canton-reduced-order-compare",
             str(canton_compare),
+            "--peer-blind-prediction-cases",
+            str(tmp_path / "missing_peer_cases.json"),
+            "--peer-blind-prediction-compare",
+            str(tmp_path / "missing_peer_compare.json"),
             "--out",
             str(out),
         ],
@@ -220,6 +228,156 @@ def test_run_measured_benchmark_breadth_gate_surfaces_canton_delta(tmp_path: Pat
     assert payload["summary"]["canton_incremental_case_count"] == 64
     assert payload["summary"]["canton_observed_channel_count"] == 20
     assert "canton_delta=1/64" in payload["summary_line"]
+
+
+def test_run_measured_benchmark_breadth_gate_surfaces_peer_blind_prediction_delta(tmp_path: Path) -> None:
+    commercial = tmp_path / "commercial_readiness_report.json"
+    opensees = tmp_path / "opensees_canonical_breadth_report.json"
+    authority = tmp_path / "global_authority_gate_report.json"
+    external = tmp_path / "external_benchmark_execution_status_manifest.json"
+    canton_conversion = tmp_path / "missing_canton_conversion_report.json"
+    canton_compare = tmp_path / "missing_canton_compare_report.json"
+    peer_cases = tmp_path / "commercial_benchmark_cases.peer_blind_prediction_open.json"
+    peer_compare = tmp_path / "peer_blind_prediction_compare_report.json"
+    out = tmp_path / "measured_benchmark_breadth_report.json"
+
+    commercial.write_text(
+        json.dumps(
+            {
+                "model_rows": [
+                    {
+                        "model_id": "baseline",
+                        "source_provenance": {
+                            "measured_source_families": ["baseline_a", "baseline_b"],
+                            "measured_case_count": 60,
+                        },
+                    }
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    opensees.write_text(
+        json.dumps(
+            {
+                "summary": {"standalone_parser_ready_case_count": 3},
+                "rows": [
+                    {"family_id": "frame", "case_id": "frame_1", "parser_contract_ready": True},
+                    {"family_id": "wall", "case_id": "wall_1", "parser_contract_ready": True},
+                    {"family_id": "bridge", "case_id": "bridge_1", "parser_contract_ready": True},
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    authority.write_text(
+        json.dumps({"summary": {"sac_case_count": 3, "nheri_case_count": 3}}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    external.write_text(
+        json.dumps(
+            {
+                "tasks": [
+                    {
+                        "case_id": "external_case_1",
+                        "benchmark_family": "ssi",
+                        "execution_status": "completed",
+                        "source_origin_class": "official_external_benchmark_fullcase",
+                    },
+                    {
+                        "case_id": "external_case_2",
+                        "benchmark_family": "wind",
+                        "execution_status": "completed",
+                        "source_origin_class": "official_external_benchmark_fullcase",
+                    },
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    peer_cases.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case_id": f"edefense_peer_blind_prediction_seed_01::gm{idx}",
+                        "source_family": "edefense_peer_blind_prediction",
+                        "source_member": "peer_blind_prediction_public_input_bundle_report.json",
+                        "benchmark_case_status": "ready",
+                        "compare_ready": True,
+                        "blind_prediction_targets": {"measured_response_present": True},
+                        "blind_prediction_metrics": {
+                            "measured_channel_count": 11,
+                            "drift_channel_count": 11,
+                        },
+                    }
+                    for idx in range(1, 11)
+                ]
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    peer_compare.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "summary": {
+                    "case_count": 10,
+                    "measured_response_ready": True,
+                },
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    proc = subprocess.run(
+        [
+            sys.executable,
+            "implementation/phase1/run_measured_benchmark_breadth_gate.py",
+            "--commercial-readiness",
+            str(commercial),
+            "--opensees-canonical-breadth",
+            str(opensees),
+            "--authority-report",
+            str(authority),
+            "--external-benchmark-status",
+            str(external),
+            "--canton-conversion-report",
+            str(canton_conversion),
+            "--canton-reduced-order-compare",
+            str(canton_compare),
+            "--peer-blind-prediction-cases",
+            str(peer_cases),
+            "--peer-blind-prediction-compare",
+            str(peer_compare),
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert proc.returncode == 0, proc.stderr
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["summary"]["peer_blind_prediction_incremental_family_count"] == 1
+    assert payload["summary"]["peer_blind_prediction_incremental_case_count"] == 10
+    assert payload["summary"]["peer_blind_prediction_ready_case_count"] == 10
+    assert payload["summary"]["peer_blind_prediction_compare_ready"] is True
+    assert payload["summary"]["measured_case_count"] == 81
+    assert "peer_blind_delta=1/10" in payload["summary_line"]
+    family_ids = {row["family_id"] for row in payload["family_coverage_rows"]}
+    assert "peer_blind_prediction:edefense_peer_blind_prediction" in family_ids
 
 
 def test_run_measured_benchmark_breadth_gate_writes_coverage_worst_case_report(tmp_path: Path) -> None:
@@ -304,6 +462,10 @@ def test_run_measured_benchmark_breadth_gate_writes_coverage_worst_case_report(t
             str(canton_conversion),
             "--canton-reduced-order-compare",
             str(canton_compare),
+            "--peer-blind-prediction-cases",
+            str(tmp_path / "missing_peer_cases.json"),
+            "--peer-blind-prediction-compare",
+            str(tmp_path / "missing_peer_compare.json"),
             "--out",
             str(out),
             "--worst-case-out",

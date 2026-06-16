@@ -119,6 +119,36 @@ def _canton_tower_delta(
     return {"measured:canton_tower_reduced_shm"}, benchmark_case_count, observed_channel_count, rows
 
 
+def _peer_blind_prediction_delta(
+    cases_payload: dict[str, Any],
+    compare_report: dict[str, Any],
+) -> tuple[set[str], int, int, bool, list[dict[str, Any]]]:
+    cases = cases_payload.get("cases") if isinstance(cases_payload.get("cases"), list) else []
+    compare_summary = compare_report.get("summary") if isinstance(compare_report.get("summary"), dict) else {}
+    measured_response_ready = bool(compare_summary.get("measured_response_ready", False))
+    compare_contract_ready = bool(compare_report.get("contract_pass", False) and measured_response_ready)
+    eligible_rows: list[dict[str, Any]] = []
+    for row in cases:
+        if not isinstance(row, dict):
+            continue
+        targets = row.get("blind_prediction_targets") if isinstance(row.get("blind_prediction_targets"), dict) else {}
+        source_family = str(row.get("source_family", "") or "").strip()
+        if (
+            source_family
+            and str(row.get("benchmark_case_status", "") or "").strip().lower() == "ready"
+            and bool(row.get("compare_ready", False))
+            and bool(targets.get("measured_response_present", False))
+        ):
+            eligible_rows.append(row)
+    case_count = len(eligible_rows) if compare_contract_ready else 0
+    families = {
+        f"peer_blind_prediction:{str(row.get('source_family', '')).strip()}"
+        for row in eligible_rows
+        if str(row.get("source_family", "")).strip()
+    }
+    return families, case_count, len(eligible_rows), compare_contract_ready, eligible_rows
+
+
 def _allocate_case_counts(total_case_count: int, family_ids: list[str]) -> dict[str, int]:
     if not family_ids:
         return {}
@@ -168,6 +198,7 @@ def _family_coverage_rows(
     authority_rows: list[dict[str, Any]],
     external_rows: list[dict[str, Any]],
     canton_rows: list[dict[str, Any]],
+    peer_blind_prediction_rows: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
     families: dict[str, dict[str, Any]] = {}
     for row in baseline_rows:
@@ -245,6 +276,25 @@ def _family_coverage_rows(
             evidence_ref={
                 "track": str(row.get("track", "") or ""),
                 "observed_channel_count": int(row.get("observed_channel_count", 0) or 0),
+            },
+        )
+
+    for row in peer_blind_prediction_rows:
+        source_family = str(row.get("source_family", "") or "").strip()
+        case_id = str(row.get("case_id", "") or "").strip()
+        if not source_family or not case_id:
+            continue
+        metrics = row.get("blind_prediction_metrics") if isinstance(row.get("blind_prediction_metrics"), dict) else {}
+        _add_family_coverage(
+            families,
+            family_id=f"peer_blind_prediction:{source_family}",
+            source_bucket="peer_blind_prediction_measured_response",
+            measured_case_count=1,
+            evidence_ref={
+                "case_id": case_id,
+                "source_member": str(row.get("source_member", "") or ""),
+                "measured_channel_count": int(metrics.get("measured_channel_count", 0) or 0),
+                "drift_channel_count": int(metrics.get("drift_channel_count", 0) or 0),
             },
         )
 
@@ -402,6 +452,8 @@ def run_measured_benchmark_breadth_gate(
     external_benchmark_status: dict[str, Any],
     canton_conversion_report: dict[str, Any] | None = None,
     canton_reduced_order_compare: dict[str, Any] | None = None,
+    peer_blind_prediction_cases: dict[str, Any] | None = None,
+    peer_blind_prediction_compare: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     baseline_families, baseline_cases, baseline_rows = _commercial_measured_baseline(commercial_readiness)
     opensees_families, opensees_cases, parser_ready_cases, opensees_rows = _opensees_delta(opensees_canonical_breadth)
@@ -411,19 +463,38 @@ def run_measured_benchmark_breadth_gate(
         canton_conversion_report or {},
         canton_reduced_order_compare or {},
     )
+    (
+        peer_blind_prediction_families,
+        peer_blind_prediction_cases_count,
+        peer_blind_prediction_ready_case_count,
+        peer_blind_prediction_compare_ready,
+        peer_blind_prediction_rows,
+    ) = _peer_blind_prediction_delta(
+        peer_blind_prediction_cases or {},
+        peer_blind_prediction_compare or {},
+    )
 
     combined_families = set(baseline_families)
     combined_families.update(opensees_families)
     combined_families.update(authority_families)
     combined_families.update(external_families)
     combined_families.update(canton_families)
-    combined_case_count = int(baseline_cases + opensees_cases + authority_cases + external_cases + canton_cases)
+    combined_families.update(peer_blind_prediction_families)
+    combined_case_count = int(
+        baseline_cases
+        + opensees_cases
+        + authority_cases
+        + external_cases
+        + canton_cases
+        + peer_blind_prediction_cases_count
+    )
     family_rows = _family_coverage_rows(
         baseline_rows=baseline_rows,
         opensees_rows=opensees_rows,
         authority_rows=authority_rows,
         external_rows=external_rows,
         canton_rows=canton_rows,
+        peer_blind_prediction_rows=peer_blind_prediction_rows,
     )
     holdout_rows = _holdout_rows(family_rows)
 
@@ -442,6 +513,10 @@ def run_measured_benchmark_breadth_gate(
         "canton_incremental_family_count": len(canton_families),
         "canton_incremental_case_count": int(canton_cases),
         "canton_observed_channel_count": int(canton_observed_channels),
+        "peer_blind_prediction_incremental_family_count": len(peer_blind_prediction_families),
+        "peer_blind_prediction_incremental_case_count": int(peer_blind_prediction_cases_count),
+        "peer_blind_prediction_ready_case_count": int(peer_blind_prediction_ready_case_count),
+        "peer_blind_prediction_compare_ready": bool(peer_blind_prediction_compare_ready),
         "opensees_parser_ready_case_count": int(parser_ready_cases),
         "measured_family_count": len(combined_families),
         "measured_case_count": int(combined_case_count),
@@ -457,6 +532,7 @@ def run_measured_benchmark_breadth_gate(
         f"authority_delta={len(authority_families)}/{int(authority_cases)} | "
         f"external_delta={len(external_families)}/{int(external_cases)} | "
         f"canton_delta={len(canton_families)}/{int(canton_cases)} | "
+        f"peer_blind_delta={len(peer_blind_prediction_families)}/{int(peer_blind_prediction_cases_count)} | "
         f"measured_families={len(combined_families)} | "
         f"measured_cases={int(combined_case_count)} | "
         f"holdout_families={summary['holdout_family_count']} | "
@@ -479,6 +555,7 @@ def run_measured_benchmark_breadth_gate(
         "authority_rows": authority_rows,
         "external_rows": external_rows,
         "canton_rows": canton_rows,
+        "peer_blind_prediction_rows": peer_blind_prediction_rows,
         "family_coverage_rows": family_rows,
         "holdout_rows": holdout_rows,
     }
@@ -511,8 +588,16 @@ def main(argv: list[str] | None = None) -> int:
         default="implementation/phase1/release/benchmark_expansion/canton_tower_reduced_order_compare_report.json",
     )
     parser.add_argument(
+        "--peer-blind-prediction-cases",
+        default="implementation/phase1/commercial_benchmark_cases.peer_blind_prediction_open.json",
+    )
+    parser.add_argument(
+        "--peer-blind-prediction-compare",
+        default="implementation/phase1/release/benchmark_expansion/peer_blind_prediction_compare_report.json",
+    )
+    parser.add_argument(
         "--out",
-        default="implementation/phase1/release/benchmark_expansion/measured_benchmark_breadth_report.json",
+        default="implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
     )
     parser.add_argument("--worst-case-out", default=None)
     args = parser.parse_args(argv)
@@ -524,6 +609,8 @@ def main(argv: list[str] | None = None) -> int:
         _load_json(Path(args.external_benchmark_status)),
         _load_json(Path(args.canton_conversion_report)),
         _load_json(Path(args.canton_reduced_order_compare)),
+        _load_json(Path(args.peer_blind_prediction_cases)),
+        _load_json(Path(args.peer_blind_prediction_compare)),
     )
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
