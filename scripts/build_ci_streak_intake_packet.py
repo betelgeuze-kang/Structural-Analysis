@@ -66,6 +66,16 @@ def _lane_row(lane: str, manifest: dict[str, Any], github_actions: dict[str, Any
         "local_consecutive_pass_count": _as_int(manifest_lane.get("local_consecutive_pass_count")),
         "github_actions_consecutive_pass_count": github_consecutive,
         "github_actions_threshold_pass": bool(github_lane.get("threshold_pass", False)),
+        "github_actions_workflow_registered": manifest_lane.get("github_actions_workflow_registered"),
+        "github_actions_query_error": str(manifest_lane.get("github_actions_query_error", "")),
+        "github_actions_queried_run_count": _as_int(manifest_lane.get("github_actions_queried_run_count")),
+        "github_actions_filtered_run_count": _as_int(manifest_lane.get("github_actions_filtered_run_count")),
+        "github_actions_ignored_event_names": [
+            str(item)
+            for item in manifest_lane.get("github_actions_ignored_event_names", [])
+            if isinstance(item, str)
+        ],
+        "local_workflow_present": bool(manifest_lane.get("local_workflow_present", False)),
         "streak_source": str(manifest_lane.get("streak_source", "")),
         "owner_action": str(manifest_lane.get("owner_action", "")),
         "claim_boundary": str(manifest_lane.get("claim_boundary", "")),
@@ -109,6 +119,15 @@ def build_packet(
             "nightly_missing_consecutive_pass_count": next(
                 row["missing_consecutive_pass_count"] for row in lane_rows if row["lane"] == "nightly"
             ),
+            "pr_github_actions_workflow_registered": next(
+                row["github_actions_workflow_registered"] for row in lane_rows if row["lane"] == "pr"
+            ),
+            "nightly_github_actions_workflow_registered": next(
+                row["github_actions_workflow_registered"] for row in lane_rows if row["lane"] == "nightly"
+            ),
+            "nightly_local_workflow_present": next(
+                row["local_workflow_present"] for row in lane_rows if row["lane"] == "nightly"
+            ),
         },
         "lane_rows": lane_rows,
         "current_blockers": blockers,
@@ -140,14 +159,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `ci_consecutive_pass_manifest`: `{payload['ci_consecutive_pass_manifest']}`",
         f"- `github_actions_ci_streak_evidence`: `{payload['github_actions_ci_streak_evidence']}`",
         "",
-        "| Lane | Streak | Missing | Source | Pass | Owner Action |",
-        "|---|---:|---:|---|---|---|",
+        "| Lane | Streak | Missing | Source | Workflow Registered | Pass | Owner Action |",
+        "|---|---:|---:|---|---|---|---|",
     ]
     for row in payload["lane_rows"]:
         lines.append(
             f"| `{row['lane']}` | `{row['consecutive_pass_count']}/{row['threshold']}` | "
             f"`{row['missing_consecutive_pass_count']}` | `{row['streak_source']}` | "
-            f"`{row['threshold_pass']}` | {row['owner_action']} |"
+            f"`{row['github_actions_workflow_registered']}` | `{row['threshold_pass']}` | "
+            f"{row['owner_action']} |"
         )
     lines.extend(["", "## Validation Commands", ""])
     for command in payload["validation_commands"]:

@@ -1,9 +1,9 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:47:59.662096+00:00",
+  "generated_at": "2026-06-16T18:57:15.843068+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-    "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
@@ -35,7 +35,7 @@
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_local_pass_streak_count": 230,
         "nightly_missing_consecutive_pass_count": 30,
-        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
         "nightly_pass_streak_count": 0,
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
@@ -100,7 +100,7 @@
         "nightly_github_actions_pass_streak_count": 0,
         "nightly_local_pass_streak_count": 230,
         "nightly_missing_consecutive_pass_count": 30,
-        "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "nightly_owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
         "nightly_pass_streak_count": 0,
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
         "pr_github_actions_pass_streak_count": 0,
@@ -122,9 +122,9 @@
       },
       "external_input_required": true,
       "namespace": "basic_ci",
-      "next_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "next_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
       "owner": "release_ci_owner",
-      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",

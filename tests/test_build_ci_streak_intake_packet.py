@@ -34,6 +34,10 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
                     "github_actions_consecutive_pass_count": 0,
                     "missing_consecutive_pass_count": 28,
                     "streak_source": "local_artifacts",
+                    "github_actions_workflow_registered": True,
+                    "github_actions_queried_run_count": 2,
+                    "github_actions_filtered_run_count": 0,
+                    "github_actions_ignored_event_names": ["push"],
                     "owner_action": "Collect 28 additional consecutive successful PR CI run(s).",
                     "claim_boundary": "PR release streak credit requires tracked PR CI evidence.",
                     "blockers": ["pr_ci_30_consecutive_pass_evidence_missing"],
@@ -46,6 +50,9 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
                     "github_actions_consecutive_pass_count": 0,
                     "missing_consecutive_pass_count": 0,
                     "streak_source": "local_artifacts",
+                    "github_actions_workflow_registered": False,
+                    "github_actions_query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+                    "local_workflow_present": True,
                     "owner_action": "No release action required; consecutive pass threshold is satisfied.",
                     "claim_boundary": "Nightly release streak credit requires tracked nightly CI evidence.",
                     "blockers": [],
@@ -75,8 +82,15 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     assert payload["summary"]["nightly_missing_consecutive_pass_count"] == 0
     assert rows["pr"]["threshold_pass"] is False
     assert rows["pr"]["github_actions_consecutive_pass_count"] == 0
+    assert rows["pr"]["github_actions_workflow_registered"] is True
+    assert rows["pr"]["github_actions_queried_run_count"] == 2
+    assert rows["pr"]["github_actions_ignored_event_names"] == ["push"]
     assert rows["nightly"]["threshold_pass"] is True
+    assert rows["nightly"]["github_actions_workflow_registered"] is False
+    assert rows["nightly"]["local_workflow_present"] is True
+    assert rows["nightly"]["github_actions_query_error"].startswith("failed to get runs")
     assert "pr:pr_ci_30_consecutive_pass_evidence_missing" in payload["current_blockers"]
+    assert payload["summary"]["nightly_github_actions_workflow_registered"] is False
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in payload["validation_commands"])
 
 
@@ -137,3 +151,4 @@ def test_ci_streak_intake_packet_cli_writes_markdown(tmp_path: Path, capsys) -> 
     assert "CI Streak Intake Packet" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 1
     assert "Validation Commands" in out_md.read_text(encoding="utf-8")
+    assert "Workflow Registered" in out_md.read_text(encoding="utf-8")

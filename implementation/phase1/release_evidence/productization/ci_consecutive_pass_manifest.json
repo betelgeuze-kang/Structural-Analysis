@@ -1,6 +1,8 @@
 {
   "blockers": [
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
+    "nightly:nightly_github_actions_query_failed",
+    "nightly:nightly_github_actions_workflow_not_registered",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing"
   ],
   "contract_pass": false,
@@ -12,19 +14,27 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-06-16T17:48:19.924101+00:00",
+  "generated_at": "2026-06-16T18:57:15.740944+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
+        "nightly_github_actions_query_failed",
+        "nightly_github_actions_workflow_not_registered",
         "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
+      "github_actions_filtered_run_count": 0,
+      "github_actions_ignored_event_names": [],
+      "github_actions_queried_run_count": 0,
+      "github_actions_query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+      "github_actions_workflow_registered": false,
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
+      "local_workflow_present": true,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
       "pass_count": 230,
       "release_consecutive_pass_count": 0,
       "release_streak_source_policy": "github_actions_required",
@@ -1641,7 +1651,7 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "github_actions_workflow_not_registered",
       "threshold": 30,
       "threshold_pass": false
     },
@@ -1652,8 +1662,16 @@
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
+      "github_actions_filtered_run_count": 0,
+      "github_actions_ignored_event_names": [
+        "push"
+      ],
+      "github_actions_queried_run_count": 100,
+      "github_actions_query_error": "",
+      "github_actions_workflow_registered": true,
       "lane": "pr",
       "local_consecutive_pass_count": 2,
+      "local_workflow_present": true,
       "missing_consecutive_pass_count": 30,
       "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pass_count": 2,
@@ -1685,10 +1703,13 @@
   "schema_version": "ci-consecutive-pass-manifest.v1",
   "summary": {
     "github_actions_nightly_consecutive_pass_count": 0,
+    "github_actions_nightly_local_workflow_present": true,
+    "github_actions_nightly_workflow_registered": false,
     "github_actions_pr_consecutive_pass_count": 0,
+    "github_actions_pr_workflow_registered": true,
     "nightly_consecutive_pass_count": 0,
     "nightly_missing_consecutive_pass_count": 30,
-    "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "nightly_owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
     "nightly_threshold_pass": false,
     "pr_consecutive_pass_count": 0,
     "pr_missing_consecutive_pass_count": 30,

@@ -42,6 +42,13 @@ def _reason_pass(payload: dict[str, Any]) -> bool:
     )
 
 
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return default
+
+
 def _github_lane_streak(payload: dict[str, Any], lane: str) -> int:
     lanes = payload.get("lanes")
     if not isinstance(lanes, dict):
@@ -55,10 +62,37 @@ def _github_lane_streak(payload: dict[str, Any], lane: str) -> int:
         return 0
 
 
-def _lane_owner_action(label: str, threshold: int, consecutive: int) -> str:
+def _github_lane_payload(payload: dict[str, Any], lane: str) -> dict[str, Any]:
+    lanes = payload.get("lanes")
+    if not isinstance(lanes, dict):
+        return {}
+    lane_payload = lanes.get(lane)
+    return lane_payload if isinstance(lane_payload, dict) else {}
+
+
+def _lane_owner_action(
+    label: str,
+    threshold: int,
+    consecutive: int,
+    *,
+    github_workflow_registered: bool | None = None,
+    github_query_error: str = "",
+    local_workflow_present: bool = False,
+) -> str:
     if consecutive >= threshold:
         return "No release action required; consecutive pass threshold is satisfied."
     missing = max(0, threshold - consecutive)
+    if github_workflow_registered is False:
+        local_hint = " Local workflow file is present, so merge/register it in GitHub Actions first." if local_workflow_present else ""
+        return (
+            f"Register or enable the {label} GitHub Actions workflow, then collect {missing} additional "
+            f"consecutive successful {label} CI run(s) before release signoff.{local_hint}"
+        )
+    if github_query_error:
+        return (
+            f"Fix the {label} GitHub Actions evidence query and refresh github_actions_ci_streak_evidence, "
+            f"then collect {missing} additional consecutive successful CI run(s) before release signoff."
+        )
     if label == "pr":
         return (
             f"Collect {missing} additional consecutive successful PR CI run(s); keep the pull_request CI lane "
@@ -94,6 +128,7 @@ def _lane(
     *,
     require_github_actions: bool = True,
 ) -> dict[str, Any]:
+    github_lane = _github_lane_payload(github_actions_evidence, label)
     seen: set[Path] = set()
     rows: list[dict[str, Any]] = []
     for report in reports:
@@ -118,12 +153,26 @@ def _lane(
             break
         local_consecutive += 1
     github_consecutive = _github_lane_streak(github_actions_evidence, label)
+    github_workflow_registered = (
+        bool(github_lane.get("workflow_registered")) if "workflow_registered" in github_lane else None
+    )
+    github_query_error = str(github_lane.get("query_error", "") or "")
+    local_workflow_present = bool(github_lane.get("local_workflow_present", False))
+    github_blockers = [str(item) for item in github_lane.get("blockers", []) if isinstance(item, str)]
     release_consecutive = github_consecutive if require_github_actions else max(local_consecutive, github_consecutive)
     threshold_pass = release_consecutive >= threshold
     blockers = []
+    if "github_actions_query_failed" in github_blockers:
+        blockers.append(f"{label}_github_actions_query_failed")
+    if "github_actions_workflow_not_registered" in github_blockers:
+        blockers.append(f"{label}_github_actions_workflow_not_registered")
     if not threshold_pass:
         blockers.append(f"{label}_ci_{threshold}_consecutive_pass_evidence_missing")
     streak_source = "github_actions" if github_consecutive else "missing_tracked_ci_evidence"
+    if github_workflow_registered is False:
+        streak_source = "github_actions_workflow_not_registered"
+    elif github_query_error:
+        streak_source = "github_actions_query_failed"
     if not require_github_actions and github_consecutive < local_consecutive:
         streak_source = "local_artifacts"
     return {
@@ -134,13 +183,28 @@ def _lane(
         "pass_count": sum(1 for row in rows if row["pass"]),
         "local_consecutive_pass_count": local_consecutive,
         "github_actions_consecutive_pass_count": github_consecutive,
+        "github_actions_workflow_registered": github_workflow_registered,
+        "github_actions_query_error": github_query_error,
+        "github_actions_queried_run_count": _as_int(github_lane.get("queried_run_count"), 0),
+        "github_actions_filtered_run_count": _as_int(github_lane.get("run_count"), 0),
+        "github_actions_ignored_event_names": [
+            str(item) for item in github_lane.get("ignored_event_names", []) if isinstance(item, str)
+        ],
+        "local_workflow_present": local_workflow_present,
         "release_consecutive_pass_count": release_consecutive,
         "consecutive_pass_count": release_consecutive,
         "missing_consecutive_pass_count": max(0, threshold - release_consecutive),
         "threshold_pass": threshold_pass,
         "blockers": blockers,
         "streak_source": streak_source,
-        "owner_action": _lane_owner_action(label, threshold, release_consecutive),
+        "owner_action": _lane_owner_action(
+            label,
+            threshold,
+            release_consecutive,
+            github_workflow_registered=github_workflow_registered,
+            github_query_error=github_query_error,
+            local_workflow_present=local_workflow_present,
+        ),
         "claim_boundary": _lane_claim_boundary(label),
         "rows": rows,
     }
@@ -201,6 +265,9 @@ def build_manifest(
             "github_actions_nightly_consecutive_pass_count": lanes["nightly"][
                 "github_actions_consecutive_pass_count"
             ],
+            "github_actions_pr_workflow_registered": lanes["pr"]["github_actions_workflow_registered"],
+            "github_actions_nightly_workflow_registered": lanes["nightly"]["github_actions_workflow_registered"],
+            "github_actions_nightly_local_workflow_present": lanes["nightly"]["local_workflow_present"],
             "pr_threshold_pass": lanes["pr"]["threshold_pass"],
             "nightly_threshold_pass": lanes["nightly"]["threshold_pass"],
             "pr_missing_consecutive_pass_count": lanes["pr"]["missing_consecutive_pass_count"],

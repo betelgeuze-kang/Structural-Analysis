@@ -1,7 +1,7 @@
 {
   "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T16:05:50.344788+00:00",
+  "generated_at": "2026-06-16T18:57:15.031432+00:00",
   "lanes": {
     "nightly": {
       "allowed_events": [
@@ -10,17 +10,29 @@
       ],
       "blockers": [
         "github_actions_query_failed",
+        "github_actions_workflow_not_registered",
         "nightly_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
+      "ignored_event_count": 0,
+      "ignored_event_names": [],
       "lane": "nightly",
+      "local_workflow": {
+        "exists": true,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml"
+      },
+      "local_workflow_present": true,
       "pass_count": 0,
-      "query_error": "* Request at 2026-06-17 01:05:49.668827437 +0900 KST m=+0.007292749\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/Nightly%20Full%20Quality\n* Request took 329.568478ms\n* Request at 2026-06-17 01:05:49.998537988 +0900 KST m=+0.337003290\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows?per_page=100&page=1\n* Request took 344.226043ms\nfailed to get runs: could not find any workflows named Nightly Full Quality",
+      "queried_run_count": 0,
+      "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+      "registered_workflow": {},
       "rows": [],
       "run_count": 0,
       "threshold": 30,
       "threshold_pass": false,
-      "workflow": "Nightly Full Quality"
+      "workflow": "Nightly Full Quality",
+      "workflow_registered": false
     },
     "pr": {
       "allowed_events": [
@@ -30,14 +42,32 @@
         "pr_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
+      "ignored_event_count": 100,
+      "ignored_event_names": [
+        "push"
+      ],
       "lane": "pr",
+      "local_workflow": {
+        "exists": true,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml"
+      },
+      "local_workflow_present": true,
       "pass_count": 0,
+      "queried_run_count": 100,
       "query_error": "",
+      "registered_workflow": {
+        "id": 266642626,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml",
+        "state": "active"
+      },
       "rows": [],
       "run_count": 0,
       "threshold": 30,
       "threshold_pass": false,
-      "workflow": "CI"
+      "workflow": "CI",
+      "workflow_registered": true
     }
   },
   "limit": 100,
@@ -46,9 +76,54 @@
   "schema_version": "github-actions-ci-streak-evidence.v1",
   "summary": {
     "nightly_consecutive_pass_count": 0,
+    "nightly_local_workflow_present": true,
     "nightly_threshold_pass": false,
+    "nightly_workflow_registered": false,
     "pr_consecutive_pass_count": 0,
-    "pr_threshold_pass": false
+    "pr_threshold_pass": false,
+    "pr_workflow_registered": true
   },
-  "threshold": 30
+  "threshold": 30,
+  "workflow_discovery": {
+    "local_workflow_count": 3,
+    "local_workflows": [
+      {
+        "exists": true,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml"
+      },
+      {
+        "exists": true,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml"
+      },
+      {
+        "exists": true,
+        "name": "Publish Release Assets",
+        "path": ".github/workflows/release-publish.yml"
+      }
+    ],
+    "query_error": "",
+    "registered_workflow_count": 3,
+    "registered_workflows": [
+      {
+        "id": 266642626,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 268963929,
+        "name": "Publish Release Assets",
+        "path": ".github/workflows/release-publish.yml",
+        "state": "active"
+      },
+      {
+        "id": 267086525,
+        "name": "Dependency Graph",
+        "path": "dynamic/dependabot/update-graph",
+        "state": "active"
+      }
+    ]
+  }
 }

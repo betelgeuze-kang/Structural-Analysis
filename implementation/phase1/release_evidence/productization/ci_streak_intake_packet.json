@@ -4,9 +4,11 @@
   "contract_pass": false,
   "current_blockers": [
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
+    "nightly:nightly_github_actions_query_failed",
+    "nightly:nightly_github_actions_workflow_not_registered",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing"
   ],
-  "generated_at": "2026-06-16T17:48:19.955755+00:00",
+  "generated_at": "2026-06-16T18:57:15.771925+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -16,9 +18,17 @@
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
+      "github_actions_filtered_run_count": 0,
+      "github_actions_ignored_event_names": [
+        "push"
+      ],
+      "github_actions_queried_run_count": 100,
+      "github_actions_query_error": "",
       "github_actions_threshold_pass": false,
+      "github_actions_workflow_registered": true,
       "lane": "pr",
       "local_consecutive_pass_count": 2,
+      "local_workflow_present": true,
       "missing_consecutive_pass_count": 30,
       "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "streak_source": "missing_tracked_ci_evidence",
@@ -27,17 +37,25 @@
     },
     {
       "blockers": [
+        "nightly_github_actions_query_failed",
+        "nightly_github_actions_workflow_not_registered",
         "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
       "github_actions_consecutive_pass_count": 0,
+      "github_actions_filtered_run_count": 0,
+      "github_actions_ignored_event_names": [],
+      "github_actions_queried_run_count": 0,
+      "github_actions_query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
       "github_actions_threshold_pass": false,
+      "github_actions_workflow_registered": false,
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
+      "local_workflow_present": true,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
-      "streak_source": "missing_tracked_ci_evidence",
+      "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+      "streak_source": "github_actions_workflow_not_registered",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -47,8 +65,11 @@
   "summary": {
     "lane_count": 2,
     "lane_pass_count": 0,
+    "nightly_github_actions_workflow_registered": false,
+    "nightly_local_workflow_present": true,
     "nightly_missing_consecutive_pass_count": 30,
-    "open_blocker_count": 2,
+    "open_blocker_count": 4,
+    "pr_github_actions_workflow_registered": true,
     "pr_missing_consecutive_pass_count": 30,
     "threshold": 30
   },

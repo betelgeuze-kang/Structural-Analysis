@@ -91,3 +91,54 @@ def test_build_manifest_uses_github_actions_streak_evidence_when_available(tmp_p
     assert payload["lanes"]["pr"]["consecutive_pass_count"] == 30
     assert payload["lanes"]["pr"]["missing_consecutive_pass_count"] == 0
     assert payload["lanes"]["pr"]["streak_source"] == "github_actions"
+
+
+def test_build_manifest_surfaces_github_actions_workflow_registration_gap(tmp_path: Path) -> None:
+    pr_reports = [_write(tmp_path / "pr1.json", {"reason_code": "PASS"})]
+    nightly_reports = [_write(tmp_path / "nightly1.json", {"reason_code": "PASS"})]
+    github_evidence = _write(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "lanes": {
+                "pr": {
+                    "consecutive_pass_count": 0,
+                    "workflow_registered": True,
+                    "queried_run_count": 100,
+                    "run_count": 0,
+                    "ignored_event_names": ["push"],
+                    "blockers": ["pr_github_actions_30_consecutive_pass_evidence_missing"],
+                },
+                "nightly": {
+                    "consecutive_pass_count": 0,
+                    "workflow_registered": False,
+                    "local_workflow_present": True,
+                    "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+                    "blockers": [
+                        "github_actions_query_failed",
+                        "github_actions_workflow_not_registered",
+                        "nightly_github_actions_30_consecutive_pass_evidence_missing",
+                    ],
+                },
+            },
+        },
+    )
+
+    payload = build_ci_consecutive_pass_manifest.build_manifest(
+        threshold=30,
+        pr_reports=pr_reports,
+        nightly_reports=nightly_reports,
+        github_actions_evidence_path=github_evidence,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["lanes"]["pr"]["github_actions_workflow_registered"] is True
+    assert payload["lanes"]["pr"]["github_actions_queried_run_count"] == 100
+    assert payload["lanes"]["pr"]["github_actions_ignored_event_names"] == ["push"]
+    assert payload["lanes"]["nightly"]["github_actions_workflow_registered"] is False
+    assert payload["lanes"]["nightly"]["local_workflow_present"] is True
+    assert payload["lanes"]["nightly"]["streak_source"] == "github_actions_workflow_not_registered"
+    assert "nightly_github_actions_query_failed" in payload["lanes"]["nightly"]["blockers"]
+    assert "nightly_github_actions_workflow_not_registered" in payload["lanes"]["nightly"]["blockers"]
+    assert payload["lanes"]["nightly"]["owner_action"].startswith("Register or enable the nightly")
+    assert payload["summary"]["github_actions_nightly_workflow_registered"] is False

@@ -120,7 +120,7 @@ npm run ai:preflight
 
 전체 PM release-area blocker는 다음과 같다.
 
-- Basic CI: local artifacts는 PR `2`회, nightly `230`회 연속 PASS를 보여주지만 release streak credit은 GitHub Actions tracked evidence를 요구한다. 현재 GitHub Actions PR/nightly streak evidence가 `0/30`이므로 두 lane 모두 `30`회 연속 PASS release evidence가 아직 없다.
+- Basic CI: local artifacts는 PR `2`회, nightly `230`회 연속 PASS를 보여주지만 release streak credit은 GitHub Actions tracked evidence를 요구한다. 현재 GitHub Actions PR/nightly streak evidence가 `0/30`이므로 두 lane 모두 `30`회 연속 PASS release evidence가 아직 없다. PR은 원격 `CI` workflow가 등록됐지만 tracked `pull_request` streak가 없고, nightly는 로컬 `.github/workflows/nightly-full-quality.yml` 파일은 있으나 원격 GitHub Actions registry에 아직 등록되지 않았다.
 - UX: automated browser rehearsal는 sample workflow가 30분 예산 안에 끝난다는 workflow evidence로만 인정한다. PM UX release-area pass는 실제 신규 사용자 human observation record, completion minutes, blocker count, observer, evidence reference, accepted decision이 들어간 `ux_new_user_observation_report.json.contract_pass=true`를 요구한다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
 
