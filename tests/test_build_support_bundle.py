@@ -135,6 +135,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "ga_enterprise_signoff_intake_packet": _write_json(
+            tmp_path / "ga-enterprise-signoff-intake-packet.json",
+            {
+                "schema_version": "ga-enterprise-signoff-intake-packet.v1",
+                "contract_pass": False,
+                "current_blockers": ["independent_vv_missing"],
+            },
+        ),
         "paid_pilot_scope_guard_report": _write_json(
             tmp_path / "paid-pilot-scope-guard-report.json",
             {
@@ -187,6 +195,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "license_status_intake_packet" in payload["optional_sections"]
     assert "frontend_dependency_audit_report" in payload["optional_sections"]
     assert "ga_enterprise_readiness_report" in payload["optional_sections"]
+    assert "ga_enterprise_signoff_intake_packet" in payload["optional_sections"]
     assert "paid_pilot_scope_guard_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
@@ -208,6 +217,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "independent_vv_missing" in redacted_ga_readiness
+    redacted_ga_signoff = Path(payload["optional_sections"]["ga_enterprise_signoff_intake_packet"]).read_text(
+        encoding="utf-8"
+    )
+    assert "independent_vv_missing" in redacted_ga_signoff
     redacted_scope_guard = Path(payload["optional_sections"]["paid_pilot_scope_guard_report"]).read_text(
         encoding="utf-8"
     )

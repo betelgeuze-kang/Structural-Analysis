@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T17:32:48.655141+00:00",
+  "generated_at": "2026-06-16T17:38:40.865020+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -580,6 +580,8 @@
     "ga_enterprise_owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
     "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
     "ga_enterprise_readiness_summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+    "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+    "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
     "ga_validation_case_threshold": 300,
     "ga_validation_case_threshold_met": true,
     "limited_commercial_full_gate_ready": false,

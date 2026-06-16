@@ -71,6 +71,9 @@ DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
 DEFAULT_GA_ENTERPRISE_READINESS = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
 )
+DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE = Path(
+    "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
+)
 DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
 )
@@ -1540,6 +1543,7 @@ def build_report(
     license_status_closure: Path = DEFAULT_LICENSE_STATUS_CLOSURE,
     ai_orchestration_preflight: Path = DEFAULT_AI_ORCHESTRATION_PREFLIGHT,
     ga_enterprise_readiness: Path = DEFAULT_GA_ENTERPRISE_READINESS,
+    ga_enterprise_signoff_intake: Path = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE,
     paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
@@ -1670,6 +1674,7 @@ def build_report(
     ai_orchestration = _load_json(ai_orchestration_preflight)
     ai_orchestration_summary = _summary(ai_orchestration)
     ga_readiness_summary = _summary(ga_readiness)
+    ga_signoff_intake = _load_json(ga_enterprise_signoff_intake)
     if full_release_gate_ready:
         recommended_scope = "Limited Commercial release candidate"
     elif limited_ready:
@@ -1739,6 +1744,8 @@ def build_report(
             "ga_enterprise_evidence_gate_pass": _reason_pass(ga_readiness),
             "ga_enterprise_readiness_report": str(ga_enterprise_readiness),
             "ga_enterprise_readiness_summary_line": str(ga_readiness.get("summary_line", "")),
+            "ga_enterprise_signoff_intake_packet": str(ga_enterprise_signoff_intake),
+            "ga_enterprise_signoff_intake_summary_line": str(ga_signoff_intake.get("summary_line", "")),
             "ga_validation_case_threshold": ga_validation_cases,
             "ga_validation_case_threshold_met": measured_cases >= ga_validation_cases,
             "ga_enterprise_blockers": ga_blockers,
@@ -1823,6 +1830,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--license-status-closure", type=Path, default=DEFAULT_LICENSE_STATUS_CLOSURE)
     parser.add_argument("--ai-orchestration-preflight", type=Path, default=DEFAULT_AI_ORCHESTRATION_PREFLIGHT)
     parser.add_argument("--ga-enterprise-readiness", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS)
+    parser.add_argument("--ga-enterprise-signoff-intake", type=Path, default=DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE)
     parser.add_argument("--paid-pilot-scope-guard", type=Path, default=DEFAULT_PAID_PILOT_SCOPE_GUARD)
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
@@ -1887,6 +1895,7 @@ def main(argv: list[str] | None = None) -> int:
         license_status_closure=args.license_status_closure,
         ai_orchestration_preflight=args.ai_orchestration_preflight,
         ga_enterprise_readiness=args.ga_enterprise_readiness,
+        ga_enterprise_signoff_intake=args.ga_enterprise_signoff_intake,
         paid_pilot_scope_guard=args.paid_pilot_scope_guard,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,

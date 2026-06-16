@@ -309,6 +309,14 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "ga_enterprise_signoff_intake": _write(
+            tmp_path / "ga_enterprise_signoff_intake.json",
+            {
+                "contract_pass": False,
+                "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
+                "summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3",
+            },
+        ),
         "paid_pilot_scope_guard": _write(
             tmp_path / "paid_pilot_scope_guard.json",
             {
@@ -504,6 +512,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False
     assert payload["release_tiers"]["ga_enterprise_readiness_report"].endswith("ga_enterprise_readiness.json")
+    assert payload["release_tiers"]["ga_enterprise_signoff_intake_packet"].endswith(
+        "ga_enterprise_signoff_intake.json"
+    )
+    assert "signoffs=0/3" in payload["release_tiers"]["ga_enterprise_signoff_intake_summary_line"]
     assert "independent_vv_missing" in payload["release_tiers"]["ga_enterprise_blockers"]
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
