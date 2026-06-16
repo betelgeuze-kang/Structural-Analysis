@@ -20,7 +20,7 @@ def _npm() -> str:
     return "npm.cmd" if sys.platform == "win32" else "npm"
 
 
-def _pr_commands() -> list[list[str]]:
+def _pr_commands(*, p1_failure_mode: str = "core") -> list[list[str]]:
     source_boundary = [
         _python(),
         "scripts/plan_source_boundary_cleanup.py",
@@ -30,6 +30,7 @@ def _pr_commands() -> list[list[str]]:
         "implementation/phase1/source_boundary_allowlist.json",
         "--fail-on-candidates",
     ]
+    p1_failure_flag = "--fail-blocked" if p1_failure_mode == "blocked" else "--fail-core-open"
     return [
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
@@ -37,8 +38,8 @@ def _pr_commands() -> list[list[str]]:
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
         [_python(), "-m", "ruff", "check", "."],
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-core-open"],
-        [_python(), "scripts/check_p1_readiness_status.py", "--json", "--fail-blocked"],
-        [_python(), "scripts/check_p1_benchmark_breadth_status.py", "--json", "--fail-blocked"],
+        [_python(), "scripts/check_p1_readiness_status.py", "--json", p1_failure_flag],
+        [_python(), "scripts/check_p1_benchmark_breadth_status.py", "--json", p1_failure_flag],
         [_npm(), "ci"],
         [
             _python(),
@@ -72,12 +73,11 @@ def _pr_commands() -> list[list[str]]:
 
 
 def _command_groups(mode: str) -> list[list[str]]:
-    pr_commands = _pr_commands()
     if mode == "pr":
-        return pr_commands
+        return _pr_commands(p1_failure_mode="core")
     return [
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
-        *pr_commands,
+        *_pr_commands(p1_failure_mode="blocked"),
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],
         [_npm(), "run", "verify:viewer-report-pdf"],

@@ -19,13 +19,13 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def _p0_status(path: Path, *, p0_closed: bool = False) -> Path:
+def _p0_status(path: Path, *, p0_closed: bool = False, core_evidence_closed: bool = True) -> Path:
     return _write_json(
         path,
         {
             "schema_version": "p0-closure-status.v1",
             "p0_closed": p0_closed,
-            "core_evidence_closed": True,
+            "core_evidence_closed": core_evidence_closed,
             "release_publication_closed": p0_closed,
         },
     )
@@ -147,6 +147,7 @@ def _paths(tmp_path: Path) -> dict[str, Path]:
 def test_p1_readiness_separates_inputs_ready_from_p0_release_blocker(tmp_path: Path) -> None:
     status = check_p1_readiness.build_status(**_paths(tmp_path))
 
+    assert status["p0_core_evidence_closed"] is True
     assert status["p1_inputs_ready"] is True
     assert status["p1_execution_unblocked"] is False
     assert status["p0_release_blocker"] is True
@@ -266,6 +267,64 @@ def test_p1_readiness_passes_publication_evidence_index_when_building_p0(
 
     assert status["p1_execution_unblocked"] is True
     assert status["publication_evidence_index"] == str(publication_index)
+
+
+def test_p1_readiness_fail_core_open_ignores_release_publication_blocker(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    paths = _paths(tmp_path)
+
+    exit_code = check_p1_readiness.main(
+        [
+            "--p0-status",
+            str(paths["p0_status"]),
+            "--open-data-restore-plan",
+            str(paths["open_data_restore_plan"]),
+            "--coverage-matrix",
+            str(paths["coverage_matrix"]),
+            "--peer-metric-records",
+            str(paths["peer_metric_records"]),
+            "--row-provenance",
+            str(paths["row_provenance"]),
+            "--json",
+            "--fail-core-open",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert '"p0_core_evidence_closed": true' in captured.out
+    assert '"p1_execution_unblocked": false' in captured.out
+
+
+def test_p1_readiness_fail_core_open_fails_when_core_evidence_is_open(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    paths = _paths(tmp_path)
+    paths["p0_status"] = _p0_status(tmp_path / "p0.json", core_evidence_closed=False)
+
+    exit_code = check_p1_readiness.main(
+        [
+            "--p0-status",
+            str(paths["p0_status"]),
+            "--open-data-restore-plan",
+            str(paths["open_data_restore_plan"]),
+            "--coverage-matrix",
+            str(paths["coverage_matrix"]),
+            "--peer-metric-records",
+            str(paths["peer_metric_records"]),
+            "--row-provenance",
+            str(paths["row_provenance"]),
+            "--json",
+            "--fail-core-open",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert '"p0_core_evidence_closed": false' in captured.out
 
 
 def test_cli_writes_markdown_and_fails_when_execution_blocked(tmp_path: Path, capsys) -> None:

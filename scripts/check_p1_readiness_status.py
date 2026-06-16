@@ -208,6 +208,7 @@ def build_status(
     return {
         "schema_version": "p1-readiness-status.v1",
         "status": "ready" if p1_execution_unblocked else "blocked",
+        "p0_core_evidence_closed": bool(p0_gate["core_evidence_closed"]),
         "p1_inputs_ready": p1_inputs_ready,
         "p1_execution_unblocked": p1_execution_unblocked,
         "p0_release_blocker": p0_release_blocker,
@@ -254,6 +255,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--out-md", type=Path)
+    parser.add_argument(
+        "--fail-core-open",
+        action="store_true",
+        help="Fail only when the P0 core evidence prerequisite is open.",
+    )
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
 
@@ -282,6 +288,8 @@ def main(argv: list[str] | None = None) -> int:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
         args.out_md.write_text(_markdown(status), encoding="utf-8")
     print(payload if args.json else _markdown(status))
+    if args.fail_core_open and not bool(status["p0_core_evidence_closed"]):
+        return 1
     return 1 if args.fail_blocked and not bool(status["p1_execution_unblocked"]) else 0
 
 

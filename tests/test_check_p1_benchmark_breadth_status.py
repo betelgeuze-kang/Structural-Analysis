@@ -19,11 +19,17 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def _p1_status(path: Path, *, execution_unblocked: bool = False) -> Path:
+def _p1_status(
+    path: Path,
+    *,
+    execution_unblocked: bool = False,
+    core_evidence_closed: bool = True,
+) -> Path:
     return _write_json(
         path,
         {
             "schema_version": "p1-readiness-status.v1",
+            "p0_core_evidence_closed": core_evidence_closed,
             "p1_inputs_ready": True,
             "p1_execution_unblocked": execution_unblocked,
             "p0_release_blocker": not execution_unblocked,
@@ -384,6 +390,7 @@ def test_benchmark_breadth_passes_publication_index_to_readiness_builder(tmp_pat
         assert publication_evidence_index == publication_index
         return {
             "schema_version": "p1-readiness-status.v1",
+            "p0_core_evidence_closed": True,
             "p1_inputs_ready": True,
             "p1_execution_unblocked": True,
             "p0_release_blocker": False,
@@ -433,3 +440,71 @@ def test_cli_writes_markdown_and_fails_when_blocked(tmp_path: Path, capsys) -> N
     assert "P1 work slice: `quality/fallback/benchmark breadth`" in captured.out
     assert "P1 Benchmark Breadth Status" in markdown
     assert "P1 work slice: `quality/fallback/benchmark breadth`" in markdown
+
+
+def test_cli_fail_core_open_ignores_p1_execution_blocker(tmp_path: Path, capsys) -> None:
+    paths = _paths(tmp_path)
+
+    exit_code = check_p1_benchmark.main(
+        [
+            "--p1-readiness-status",
+            str(paths["p1_readiness_status"]),
+            "--commercial-readiness",
+            str(paths["commercial_readiness"]),
+            "--external-benchmark-submission-readiness",
+            str(paths["external_benchmark_submission_readiness"]),
+            "--external-benchmark-submission-updates",
+            str(paths["external_benchmark_submission_updates"]),
+            "--residual-holdout-closure-updates",
+            str(paths["residual_holdout_closure_updates"]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][0]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][1]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][2]),
+            "--json",
+            "--fail-core-open",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 0
+    assert '"p0_core_evidence_closed": true' in captured.out
+    assert '"p1_benchmark_execution_unblocked": false' in captured.out
+
+
+def test_cli_fail_core_open_fails_when_core_evidence_is_open(tmp_path: Path, capsys) -> None:
+    paths = _paths(tmp_path)
+    paths["p1_readiness_status"] = _p1_status(
+        tmp_path / "p1.json",
+        execution_unblocked=False,
+        core_evidence_closed=False,
+    )
+
+    exit_code = check_p1_benchmark.main(
+        [
+            "--p1-readiness-status",
+            str(paths["p1_readiness_status"]),
+            "--commercial-readiness",
+            str(paths["commercial_readiness"]),
+            "--external-benchmark-submission-readiness",
+            str(paths["external_benchmark_submission_readiness"]),
+            "--external-benchmark-submission-updates",
+            str(paths["external_benchmark_submission_updates"]),
+            "--residual-holdout-closure-updates",
+            str(paths["residual_holdout_closure_updates"]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][0]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][1]),
+            "--benchmark-report",
+            str(paths["benchmark_reports"][2]),
+            "--json",
+            "--fail-core-open",
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert '"p0_core_evidence_closed": false' in captured.out

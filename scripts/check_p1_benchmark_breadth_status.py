@@ -479,6 +479,7 @@ def _p1_gate(payload: dict[str, Any]) -> dict[str, Any]:
         "label": "P1 execution prerequisite",
         "status": _status(p1_execution_unblocked),
         "ok": p1_execution_unblocked,
+        "p0_core_evidence_closed": bool(payload.get("p0_core_evidence_closed", False)),
         "p1_inputs_ready": bool(payload.get("p1_inputs_ready", False)),
         "p1_execution_unblocked": p1_execution_unblocked,
         "p0_release_blocker": bool(payload.get("p0_release_blocker", True)),
@@ -651,6 +652,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--out-md", type=Path)
+    parser.add_argument(
+        "--fail-core-open",
+        action="store_true",
+        help="Fail only when the P0 core evidence prerequisite is open.",
+    )
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
 
@@ -679,6 +685,8 @@ def main(argv: list[str] | None = None) -> int:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
         args.out_md.write_text(_markdown(status), encoding="utf-8")
     print(payload if args.json else _markdown(status))
+    if args.fail_core_open and not bool(status["gates"][0]["p0_core_evidence_closed"]):
+        return 1
     return 1 if args.fail_blocked and not bool(status["p1_benchmark_execution_unblocked"]) else 0
 
 
