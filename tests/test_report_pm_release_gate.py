@@ -95,11 +95,19 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "frontend_dependency_audit_report": (
                         "release/support_bundle/redacted/frontend_dependency_audit_report.json"
                     ),
+                    "release_validation_manual": "release/support_bundle/redacted/release_validation_manual.md",
+                    "release_limitation_manual": "release/support_bundle/redacted/release_limitation_manual.md",
                 },
             },
         ),
-        "validation_manual": _text(tmp_path / "validation.md"),
-        "limitation_manual": _text(tmp_path / "limitations.md"),
+        "validation_manual": _text(
+            tmp_path / "validation.md",
+            "PM release gate validation family p95 error residual benchmark breadth interop reproduction commands\n",
+        ),
+        "limitation_manual": _text(
+            tmp_path / "limitations.md",
+            "claim boundary paid pilot limited commercial ga/enterprise known issues support bundle rollback\n",
+        ),
     }
 
 
@@ -505,12 +513,22 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["license_status_intake_packet_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
     assert support_area["checks"]["frontend_dependency_audit_in_failure_bundle"] is True
+    assert support_area["checks"]["validation_manual_in_failure_bundle"] is True
+    assert support_area["checks"]["limitation_manual_in_failure_bundle"] is True
+    assert support_area["checks"]["known_issue_or_limitation_register_content_pass"] is True
     assert support_area["summary"]["license_status_intake_packet"].endswith("license_status_intake_packet.json")
     assert support_area["summary"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
     assert support_area["summary"]["frontend_dependency_audit_report"].endswith("frontend_dependency_audit_report.json")
     assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
         "pm_release_blocker_action_register.json"
     )
+    assert support_area["summary"]["release_validation_manual"].endswith("release_validation_manual.md")
+    assert support_area["summary"]["release_limitation_manual"].endswith("release_limitation_manual.md")
+    m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
+    assert m5["checks"]["validation_manual_content_pass"] is True
+    assert m5["checks"]["limitation_manual_content_pass"] is True
+    assert m5["checks"]["support_bundle_validation_manual_present"] is True
+    assert m5["checks"]["support_bundle_limitation_manual_present"] is True
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False
     assert payload["release_tiers"]["ga_enterprise_readiness_report"].endswith("ga_enterprise_readiness.json")

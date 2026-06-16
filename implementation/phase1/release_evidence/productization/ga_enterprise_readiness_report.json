@@ -6,7 +6,7 @@
     "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
     "release_registry": "implementation/phase1/release/release_registry.json",
     "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-    "validation_manual": "docs/commercial-structural-solver-product-gap-ledger.md"
+    "validation_manual": "docs/release-validation-manual.md"
   },
   "blockers": [
     "independent_vv_missing",
@@ -27,7 +27,7 @@
   },
   "claim_boundary": "This report is a readiness/evidence gate. It does not create independent V&V, legal approval, customer acceptance, or support SLA commitments.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T17:43:53.609183+00:00",
+  "generated_at": "2026-06-16T18:09:41.477467+00:00",
   "owner_handoff_rows": [
     {
       "acceptance": "`independent_vv_attestation.contract_pass == true`",

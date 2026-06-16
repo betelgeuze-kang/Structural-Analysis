@@ -7,7 +7,7 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T18:03:36.516093+00:00",
+  "generated_at": "2026-06-16T18:09:49.955809+00:00",
   "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
   "schema_version": "ga-enterprise-signoff-intake-packet.v1",
   "signoff_rows": [

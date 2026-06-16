@@ -18,7 +18,7 @@ DEFAULT_MEASURED_BREADTH = Path(
 )
 DEFAULT_RELEASE_REGISTRY = Path("implementation/phase1/release/release_registry.json")
 DEFAULT_SUPPORT_BUNDLE = Path("implementation/phase1/support_bundle_manifest.json")
-DEFAULT_VALIDATION_MANUAL = Path("docs/commercial-structural-solver-product-gap-ledger.md")
+DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_INDEPENDENT_VV_ATTESTATION = Path(
     "implementation/phase1/release_evidence/productization/independent_vv_attestation.json"
 )

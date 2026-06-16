@@ -103,7 +103,7 @@ npm run ai:preflight
 - M2 Core Engine Depth Closure: contact-material coupled case `31`, panel/contact failure `reason_code` `7`, nonlinear+residual same-case `3`이 같은 element/material breadth report에 명시됐다.
 - M3 Strict Runtime Closure: NDTHA long profile, HIP e2e, CPU fallback 금지, device residency, host copy share가 통과했다.
 - M4 Benchmark Breadth Expansion: measured breadth `304` cases, `22` families, family별 holdout, coverage-risk worst-case report가 통과했다. PEER/E-Defense blind prediction measured-response family `10` cases는 `peer_blind_delta=1/10`으로 별도 집계한다.
-- M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle, validation/limitation manuals가 통과했다.
+- M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle, validation/limitation manuals가 통과했다. 전용 manual은 `docs/release-validation-manual.md`와 `docs/release-limitation-manual.md`이며, support bundle의 redacted reviewer package에 함께 포함된다.
 - Implementation orchestration: Cursor Agent와 OpenCode worker bridge preflight가 통과했다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
 
 남은 M1-M5 milestone blocker는 없다.

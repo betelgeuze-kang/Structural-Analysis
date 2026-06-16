@@ -8,7 +8,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T18:03:50.959692+00:00",
+  "generated_at": "2026-06-16T18:09:57.118040+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -144,15 +144,16 @@
     },
     {
       "artifacts": {
-        "limitation_manual": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "limitation_manual": "docs/release-limitation-manual.md",
         "release_registry": "implementation/phase1/release/release_registry.json",
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
-        "validation_manual": "docs/commercial-structural-solver-product-gap-ledger.md",
+        "validation_manual": "docs/release-validation-manual.md",
         "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
       },
       "blockers": [],
       "checks": {
         "audit_trail_action_source_trace_pass": true,
+        "limitation_manual_content_pass": true,
         "limitation_manual_present": true,
         "pdf_report_or_reviewer_package_pass": true,
         "signed_release_registry_pass": true,
@@ -160,7 +161,10 @@
         "support_bundle_export_pass": true,
         "support_bundle_frontend_dependency_audit_present": true,
         "support_bundle_license_intake_packet_present": true,
+        "support_bundle_limitation_manual_present": true,
         "support_bundle_pm_blocker_register_present": true,
+        "support_bundle_validation_manual_present": true,
+        "validation_manual_content_pass": true,
         "validation_manual_present": true,
         "viewer_reviewer_customer_surface_pass": true,
         "workflow_productization_pass": true
@@ -169,12 +173,32 @@
       "ok": true,
       "status": "pass",
       "summary": {
+        "limitation_manual_required_terms": [
+          "claim boundary",
+          "paid pilot",
+          "limited commercial",
+          "ga/enterprise",
+          "known issues",
+          "support bundle",
+          "rollback"
+        ],
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
+        "support_bundle_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
+        "validation_manual_required_terms": [
+          "pm release gate",
+          "validation family",
+          "p95 error",
+          "residual",
+          "benchmark breadth",
+          "interop",
+          "reproduction commands"
+        ],
         "viewer_mode": "static_release_artifact_viewer"
       },
       "title": "Commercial Packaging"
@@ -497,7 +521,7 @@
     {
       "area": "support",
       "artifacts": {
-        "limitation_manual": "docs/structural-analysis-ai-engine-gap-ledger.md",
+        "limitation_manual": "docs/release-limitation-manual.md",
         "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
         "support_bundle": "implementation/phase1/support_bundle_manifest.json"
       },
@@ -506,10 +530,13 @@
         "ci_streak_intake_packet_in_failure_bundle": true,
         "failure_bundle_export_pass": true,
         "frontend_dependency_audit_in_failure_bundle": true,
+        "known_issue_or_limitation_register_content_pass": true,
         "known_issue_or_limitation_register_present": true,
         "license_status_intake_packet_in_failure_bundle": true,
+        "limitation_manual_in_failure_bundle": true,
         "pm_blocker_action_register_in_failure_bundle": true,
-        "rollback_runbook_present": true
+        "rollback_runbook_present": true,
+        "validation_manual_in_failure_bundle": true
       },
       "claim_boundary": "",
       "ok": true,
@@ -519,6 +546,8 @@
         "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
+        "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
         "support_bundle_missing_required_count": 0
       },
       "title": "Support"

@@ -151,6 +151,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "summary_line": "Paid pilot scope guard: PASS",
             },
         ),
+        "release_validation_manual": _write_text(
+            tmp_path / "release-validation-manual.md",
+            "PM release gate validation family p95 error residual benchmark breadth interop reproduction commands\n",
+        ),
+        "release_limitation_manual": _write_text(
+            tmp_path / "release-limitation-manual.md",
+            "claim boundary paid pilot limited commercial ga/enterprise known issues support bundle rollback\n",
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -197,6 +205,8 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "ga_enterprise_readiness_report" in payload["optional_sections"]
     assert "ga_enterprise_signoff_intake_packet" in payload["optional_sections"]
     assert "paid_pilot_scope_guard_report" in payload["optional_sections"]
+    assert "release_validation_manual" in payload["optional_sections"]
+    assert "release_limitation_manual" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -225,6 +235,14 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "Paid pilot scope guard: PASS" in redacted_scope_guard
+    redacted_validation_manual = Path(payload["optional_sections"]["release_validation_manual"]).read_text(
+        encoding="utf-8"
+    )
+    assert "PM release gate" in redacted_validation_manual
+    redacted_limitation_manual = Path(payload["optional_sections"]["release_limitation_manual"]).read_text(
+        encoding="utf-8"
+    )
+    assert "claim boundary" in redacted_limitation_manual
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

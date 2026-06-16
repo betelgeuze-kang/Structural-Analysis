@@ -77,8 +77,26 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE = Path(
 DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
 )
-DEFAULT_VALIDATION_MANUAL = Path("docs/commercial-structural-solver-product-gap-ledger.md")
-DEFAULT_LIMITATION_MANUAL = Path("docs/structural-analysis-ai-engine-gap-ledger.md")
+DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
+DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
+VALIDATION_MANUAL_REQUIRED_TERMS = (
+    "pm release gate",
+    "validation family",
+    "p95 error",
+    "residual",
+    "benchmark breadth",
+    "interop",
+    "reproduction commands",
+)
+LIMITATION_MANUAL_REQUIRED_TERMS = (
+    "claim boundary",
+    "paid pilot",
+    "limited commercial",
+    "ga/enterprise",
+    "known issues",
+    "support bundle",
+    "rollback",
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -274,6 +292,11 @@ def _read_text_or_empty(path: Path) -> str:
         return path.read_text(encoding="utf-8")
     except Exception:
         return ""
+
+
+def _contains_terms(text: str, terms: tuple[str, ...]) -> bool:
+    lowered = text.lower()
+    return all(term in lowered for term in terms)
 
 
 def _first_float(payload: dict[str, Any], *keys: str) -> float | None:
@@ -628,6 +651,8 @@ def _packaging_milestone(
     support_checks = _checks(support)
     support_optional_sections = _as_dict(support.get("optional_sections"))
     summary_line = str(workflow.get("summary_line", "") or "")
+    validation_manual_text = _read_text_or_empty(validation_manual_path)
+    limitation_manual_text = _read_text_or_empty(limitation_manual_path)
     gate_checks = {
         "workflow_productization_pass": _truthy_contract(workflow),
         "viewer_reviewer_customer_surface_pass": bool(
@@ -663,8 +688,22 @@ def _packaging_milestone(
         "support_bundle_frontend_dependency_audit_present": bool(
             support_optional_sections.get("frontend_dependency_audit_report")
         ),
+        "support_bundle_validation_manual_present": bool(
+            support_optional_sections.get("release_validation_manual")
+        ),
+        "support_bundle_limitation_manual_present": bool(
+            support_optional_sections.get("release_limitation_manual")
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
+        "validation_manual_content_pass": _contains_terms(
+            validation_manual_text,
+            VALIDATION_MANUAL_REQUIRED_TERMS,
+        ),
+        "limitation_manual_content_pass": _contains_terms(
+            limitation_manual_text,
+            LIMITATION_MANUAL_REQUIRED_TERMS,
+        ),
     }
     blockers = [
         *(["workflow_productization_gate_not_green"] if not gate_checks["workflow_productization_pass"] else []),
@@ -693,8 +732,20 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_frontend_dependency_audit_present"]
             else []
         ),
+        *(
+            ["support_bundle_validation_manual_missing"]
+            if not gate_checks["support_bundle_validation_manual_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_limitation_manual_missing"]
+            if not gate_checks["support_bundle_limitation_manual_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
+        *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
+        *(["limitation_manual_incomplete"] if not gate_checks["limitation_manual_content_pass"] else []),
     ]
     return _gate(
         "M5",
@@ -718,6 +769,14 @@ def _packaging_milestone(
             "support_bundle_frontend_dependency_audit": str(
                 support_optional_sections.get("frontend_dependency_audit_report", "")
             ),
+            "support_bundle_validation_manual": str(
+                support_optional_sections.get("release_validation_manual", "")
+            ),
+            "support_bundle_limitation_manual": str(
+                support_optional_sections.get("release_limitation_manual", "")
+            ),
+            "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
+            "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
         },
         artifacts={
             "workflow_productization": str(workflow_path),
@@ -1346,8 +1405,13 @@ def _build_release_area_matrix(
     runtime_packaging_checks = _checks(runtime_packaging)
     support_checks = _checks(support)
     support_optional_sections = _as_dict(support.get("optional_sections"))
+    limitation_manual_text = _read_text_or_empty(limitation_manual_path)
     support_area_checks = {
         "known_issue_or_limitation_register_present": limitation_manual_path.exists(),
+        "known_issue_or_limitation_register_content_pass": _contains_terms(
+            limitation_manual_text,
+            LIMITATION_MANUAL_REQUIRED_TERMS,
+        ),
         "pm_blocker_action_register_in_failure_bundle": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
         ),
@@ -1360,6 +1424,12 @@ def _build_release_area_matrix(
         "frontend_dependency_audit_in_failure_bundle": bool(
             support_optional_sections.get("frontend_dependency_audit_report")
         ),
+        "validation_manual_in_failure_bundle": bool(
+            support_optional_sections.get("release_validation_manual")
+        ),
+        "limitation_manual_in_failure_bundle": bool(
+            support_optional_sections.get("release_limitation_manual")
+        ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
@@ -1371,6 +1441,11 @@ def _build_release_area_matrix(
         *(
             ["known_issue_or_limitation_register_missing"]
             if not support_area_checks["known_issue_or_limitation_register_present"]
+            else []
+        ),
+        *(
+            ["known_issue_or_limitation_register_incomplete"]
+            if not support_area_checks["known_issue_or_limitation_register_content_pass"]
             else []
         ),
         *(
@@ -1391,6 +1466,16 @@ def _build_release_area_matrix(
         *(
             ["frontend_dependency_audit_missing_from_failure_bundle"]
             if not support_area_checks["frontend_dependency_audit_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["validation_manual_missing_from_failure_bundle"]
+            if not support_area_checks["validation_manual_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["limitation_manual_missing_from_failure_bundle"]
+            if not support_area_checks["limitation_manual_in_failure_bundle"]
             else []
         ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
@@ -1416,6 +1501,12 @@ def _build_release_area_matrix(
                 ),
                 "frontend_dependency_audit_report": str(
                     support_optional_sections.get("frontend_dependency_audit_report", "")
+                ),
+                "release_validation_manual": str(
+                    support_optional_sections.get("release_validation_manual", "")
+                ),
+                "release_limitation_manual": str(
+                    support_optional_sections.get("release_limitation_manual", "")
                 ),
             },
             artifacts={

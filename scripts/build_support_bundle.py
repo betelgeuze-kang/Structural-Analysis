@@ -66,6 +66,8 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
 DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT = Path(
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
 )
+DEFAULT_RELEASE_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
+DEFAULT_RELEASE_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -295,6 +297,8 @@ def build_support_bundle(
     ga_enterprise_readiness_report: Path | None = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
     ga_enterprise_signoff_intake_packet: Path | None = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET,
     paid_pilot_scope_guard_report: Path | None = DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT,
+    release_validation_manual: Path | None = DEFAULT_RELEASE_VALIDATION_MANUAL,
+    release_limitation_manual: Path | None = DEFAULT_RELEASE_LIMITATION_MANUAL,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -331,6 +335,8 @@ def build_support_bundle(
         ("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
         ("ga_enterprise_signoff_intake_packet", ga_enterprise_signoff_intake_packet),
         ("paid_pilot_scope_guard_report", paid_pilot_scope_guard_report),
+        ("release_validation_manual", release_validation_manual),
+        ("release_limitation_manual", release_limitation_manual),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -481,6 +487,16 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT,
     )
+    parser.add_argument(
+        "--release-validation-manual",
+        type=Path,
+        default=DEFAULT_RELEASE_VALIDATION_MANUAL,
+    )
+    parser.add_argument(
+        "--release-limitation-manual",
+        type=Path,
+        default=DEFAULT_RELEASE_LIMITATION_MANUAL,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -522,6 +538,8 @@ def main(argv: list[str] | None = None) -> int:
         ga_enterprise_readiness_report=args.ga_enterprise_readiness_report,
         ga_enterprise_signoff_intake_packet=args.ga_enterprise_signoff_intake_packet,
         paid_pilot_scope_guard_report=args.paid_pilot_scope_guard_report,
+        release_validation_manual=args.release_validation_manual,
+        release_limitation_manual=args.release_limitation_manual,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,
