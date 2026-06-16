@@ -90,6 +90,15 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
         ),
         "external_benchmark_updates": _write_json(tmp_path / "eb.json", {"receipt_status": "pending"}),
         "residual_holdout_updates": _write_json(tmp_path / "rh.json", {"status": "open"}),
+        "pm_release_blocker_action_register": _write_json(
+            tmp_path / "pm-release-blocker-action-register.json",
+            {
+                "schema_version": "pm-release-blocker-action-register.v1",
+                "contract_pass": False,
+                "summary": {"open_blocker_count": 2},
+                "rows": [{"blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"}],
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -129,6 +138,11 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "client_input_validation_report" in payload["required_sections"]
     assert "workstation_job_record" in payload["required_sections"]
     assert "workstation_job_retention_policy" in payload["required_sections"]
+    assert "pm_release_blocker_action_register" in payload["optional_sections"]
+    redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
+        encoding="utf-8"
+    )
+    assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in redacted_pm_blockers
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

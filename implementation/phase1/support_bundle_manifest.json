@@ -113,8 +113,8 @@
       "bytes": 19693,
       "label": "workstation_delivery_package_manifest",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_package_manifest.json",
-      "redacted_sha256": "fe7fc01c7856574ebec546cf1c7ef345c1e131f6993c6eebd3dec5c2f77f2feb",
-      "sha256": "fe7fc01c7856574ebec546cf1c7ef345c1e131f6993c6eebd3dec5c2f77f2feb",
+      "redacted_sha256": "2edc0da2014ccfc074d683e7098f63812687c3bea37759aa540f76b2f590c516",
+      "sha256": "2edc0da2014ccfc074d683e7098f63812687c3bea37759aa540f76b2f590c516",
       "source_path": "implementation/phase1/workstation_delivery_package_manifest.json"
     },
     {
@@ -122,17 +122,17 @@
       "bytes": 6480,
       "label": "workstation_delivery_readiness",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_readiness.json",
-      "redacted_sha256": "bb915acf0d2d7f0b827a0ce930af078931ff35e6af24f2785da08e552cabf402",
-      "sha256": "bb915acf0d2d7f0b827a0ce930af078931ff35e6af24f2785da08e552cabf402",
+      "redacted_sha256": "1e94f9a1630c8403c39e2833dc85ec7e9559131a5c6e7d8c0241812358492ec0",
+      "sha256": "1e94f9a1630c8403c39e2833dc85ec7e9559131a5c6e7d8c0241812358492ec0",
       "source_path": "implementation/phase1/workstation_delivery_readiness.json"
     },
     {
       "available": true,
-      "bytes": 7985,
+      "bytes": 8112,
       "label": "workstation_delivery_viewer_smoke",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_viewer_smoke.json",
-      "redacted_sha256": "3e9cbf46c721fca0f31a2d26893f53a13b0223ff6526371abacbb109ddfef76d",
-      "sha256": "b0c7220bc1a410ec42bb27c99ad7fc94c2f8f47b5cf9824090ce52a9ba27cc19",
+      "redacted_sha256": "fa745caeb2d9b16b5294416ced1390ddaaacf0d90f1f7cf93b32b589ef78e37d",
+      "sha256": "3a14e8951ca2a595489c56f1a7ebc21cad22423c7213ca840f0e3fe1ec732d9e",
       "source_path": "implementation/phase1/workstation_delivery_viewer_smoke.json"
     },
     {
@@ -149,8 +149,8 @@
       "bytes": 8101,
       "label": "workstation_job_record",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_job_record.json",
-      "redacted_sha256": "e1f990f6490ad28bbb86a8358b1f998e223ce6fd7bacda046b73f65ccfc6d2ec",
-      "sha256": "e1f990f6490ad28bbb86a8358b1f998e223ce6fd7bacda046b73f65ccfc6d2ec",
+      "redacted_sha256": "98ca6d9daabe04dbf8485199fc90a818acfcd0034734ffc073d1d4b08e270c72",
+      "sha256": "98ca6d9daabe04dbf8485199fc90a818acfcd0034734ffc073d1d4b08e270c72",
       "source_path": "implementation/phase1/workstation_job_record.json"
     },
     {
@@ -173,20 +173,20 @@
     },
     {
       "available": true,
-      "bytes": 2130,
+      "bytes": 5619,
       "label": "residual_holdout_updates",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/residual_holdout_updates.json",
-      "redacted_sha256": "cbd6760e377d37b9d39d66feed40bff45d9e67b3d10671352c1e1980d9404490",
-      "sha256": "0ee6c1921f78f8c06676afd56f0026020845574c7b63575dde411cd44f696914",
+      "redacted_sha256": "3ab74fc410e4c9887664642501738f15c6e920505697df5ab0ab07eb56779976",
+      "sha256": "b44f81a417626a0c3723c171322329d43aa05e004cffd24c3d3103e355d11f57",
       "source_path": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
     },
     {
       "available": true,
-      "bytes": 1565,
+      "bytes": 1917,
       "label": "package_json",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/package_json.json",
-      "redacted_sha256": "78b915fde85b7a36360ee48065226d798f8b6d5cc8cf5d87a0799dde4411f921",
-      "sha256": "0b967fef7fd17df4d909ced0a5fa33a70a3414dcbb8d72f72b313bde33908ace",
+      "redacted_sha256": "f076ebfbfb6f540d5c01fc25ffebb2f8f4ccc1cd2d462548d9c50e8c39cbde5a",
+      "sha256": "f136461fa93bf803af58809d48beff43b205e9f722f6743f4f907e6b1f80d94c",
       "source_path": "package.json"
     },
     {
@@ -197,6 +197,15 @@
       "redacted_sha256": "10b64836acdf962e38015bd65d304582227dfec95da15ed0c25645033dd92218",
       "sha256": "3aa41f0a111c41dfa7324edb0d3d075cf9eb1a1f6baa02c6bc7bd0fda428b5c3",
       "source_path": "pyproject.toml"
+    },
+    {
+      "available": true,
+      "bytes": 7655,
+      "label": "pm_release_blocker_action_register",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+      "redacted_sha256": "8b1b7474d41262dce8f0a351963e049f89b1ddfa4d9381a451216b49d816c9b6",
+      "sha256": "8b1b7474d41262dce8f0a351963e049f89b1ddfa4d9381a451216b49d816c9b6",
+      "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     }
   ],
   "audit_digest": {
@@ -204,16 +213,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-05-25T21:42:49.045795+00:00",
+    "generated_at": "2026-06-16T16:41:14.990103+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 22,
-    "available_artifact_count": 22,
+    "artifact_count": 23,
+    "available_artifact_count": 23,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "da0e6f2a7e382b14c9edf4c36018278c0ca03c5a746b45708ebd7fa46419b94b"
+    "sha256": "d97486a7a9561740afcbc38e89942570153f069e9b13f8f4d00b27c4107d7d9f"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -229,14 +238,16 @@
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-05-25T21:42:49.046528+00:00",
+  "generated_at": "2026-06-16T16:41:14.990795+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
     "path": "",
     "sha256": "147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
   },
-  "optional_sections": {},
+  "optional_sections": {
+    "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json"
+  },
   "reason_code": "PASS",
   "required_sections": {
     "client_input_validation_report": "implementation/phase1/release/support_bundle/redacted/client_input_validation_report.json",
@@ -263,5 +274,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=22/22 | redaction=True | roundtrip=True"
+  "summary_line": "Support bundle: PASS | artifacts=23/23 | redaction=True | roundtrip=True"
 }

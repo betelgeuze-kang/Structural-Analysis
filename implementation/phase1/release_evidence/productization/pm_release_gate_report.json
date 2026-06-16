@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T16:30:28.010975+00:00",
+  "generated_at": "2026-06-16T16:41:15.030150+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -156,6 +156,7 @@
         "pdf_report_or_reviewer_package_pass": true,
         "signed_release_registry_pass": true,
         "support_bundle_export_pass": true,
+        "support_bundle_pm_blocker_register_present": true,
         "validation_manual_present": true,
         "viewer_reviewer_customer_surface_pass": true,
         "workflow_productization_pass": true
@@ -166,6 +167,7 @@
       "summary": {
         "release_registry_artifact_count": 12,
         "support_bundle_missing_required_count": 0,
+        "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "viewer_mode": "static_release_artifact_viewer"
       },
       "title": "Commercial Packaging"
@@ -493,12 +495,14 @@
       "checks": {
         "failure_bundle_export_pass": true,
         "known_issue_or_limitation_register_present": true,
+        "pm_blocker_action_register_in_failure_bundle": true,
         "rollback_runbook_present": true
       },
       "claim_boundary": "",
       "ok": true,
       "status": "pass",
       "summary": {
+        "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_missing_required_count": 0
       },
       "title": "Support"

@@ -45,6 +45,9 @@ DEFAULT_EXTERNAL_BENCHMARK_UPDATES = Path(
 DEFAULT_RESIDUAL_HOLDOUT_UPDATES = Path(
     "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
 )
+DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+)
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -267,6 +270,7 @@ def build_support_bundle(
     workstation_job_retention_policy: Path = DEFAULT_WORKSTATION_JOB_RETENTION_POLICY,
     external_benchmark_updates: Path = DEFAULT_EXTERNAL_BENCHMARK_UPDATES,
     residual_holdout_updates: Path = DEFAULT_RESIDUAL_HOLDOUT_UPDATES,
+    pm_release_blocker_action_register: Path | None = DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -296,6 +300,7 @@ def build_support_bundle(
         ("pyproject", pyproject),
     ]
     optional_specs = [
+        ("pm_release_blocker_action_register", pm_release_blocker_action_register),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -411,6 +416,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--external-benchmark-updates", type=Path, default=DEFAULT_EXTERNAL_BENCHMARK_UPDATES)
     parser.add_argument("--residual-holdout-updates", type=Path, default=DEFAULT_RESIDUAL_HOLDOUT_UPDATES)
+    parser.add_argument(
+        "--pm-release-blocker-action-register",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -445,6 +455,7 @@ def main(argv: list[str] | None = None) -> int:
         workstation_job_retention_policy=args.workstation_job_retention_policy,
         external_benchmark_updates=args.external_benchmark_updates,
         residual_holdout_updates=args.residual_holdout_updates,
+        pm_release_blocker_action_register=args.pm_release_blocker_action_register,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

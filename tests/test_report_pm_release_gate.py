@@ -88,6 +88,9 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "bundle_roundtrip_test_pass": True,
                     "missing_required_count": 0,
                 },
+                "optional_sections": {
+                    "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
+                },
             },
         ),
         "validation_manual": _text(tmp_path / "validation.md"),
@@ -437,6 +440,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert ux_area["summary"]["sample_completion_minutes"] == 2.0
     security_area = next(row for row in payload["release_area_matrix"] if row["area"] == "security")
     assert security_area["summary"]["license_status_template_path"] == "docs/templates/license_status.template.json"
+    support_area = next(row for row in payload["release_area_matrix"] if row["area"] == "support")
+    assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
+    assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
+        "pm_release_blocker_action_register.json"
+    )
     assert payload["ga_enterprise_ready"] is False
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
