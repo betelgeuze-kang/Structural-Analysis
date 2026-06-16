@@ -108,6 +108,7 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "license_status_template": "release/support_bundle/redacted/license_status_template.json",
                     "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
                     "pm_release_blocker_closure_board": "release/support_bundle/redacted/pm_release_blocker_closure_board.json",
+                    "pm_release_gate_completion_audit": "release/support_bundle/redacted/pm_release_gate_completion_audit.json",
                     "frontend_dependency_audit_report": (
                         "release/support_bundle/redacted/frontend_dependency_audit_report.json"
                     ),
@@ -581,6 +582,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["license_status_template_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_closure_board_in_failure_bundle"] is True
+    assert support_area["checks"]["pm_release_gate_completion_audit_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_handoff_ready_pass"] is True
     assert support_area["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
     assert support_area["checks"]["pm_blocker_closure_board_register_count_match"] is True
@@ -607,6 +609,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["pm_release_blocker_closure_board"].endswith(
         "pm_release_blocker_closure_board.json"
     )
+    assert support_area["summary"]["pm_release_gate_completion_audit"].endswith(
+        "pm_release_gate_completion_audit.json"
+    )
     assert support_area["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
     assert support_area["summary"]["pm_blocker_closure_board_handoff_not_ready_count"] == 0
     assert support_area["summary"]["release_validation_manual"].endswith("release_validation_manual.md")
@@ -628,6 +633,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["support_bundle_license_status_template_present"] is True
     assert m5["checks"]["pm_blocker_register_handoff_ready_pass"] is True
     assert m5["checks"]["support_bundle_pm_blocker_closure_board_present"] is True
+    assert m5["checks"]["support_bundle_pm_release_gate_completion_audit_present"] is True
     assert m5["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
     assert m5["checks"]["pm_blocker_closure_board_register_count_match"] is True
     assert m5["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
