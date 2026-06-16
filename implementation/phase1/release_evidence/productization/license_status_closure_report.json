@@ -15,13 +15,14 @@
     "license_id_present_pass": false,
     "license_status_file_present": true,
     "perpetual": false,
+    "placeholder_values_absent_pass": true,
     "product_scope_present_pass": false,
     "status_active_pass": false,
     "tier_present_pass": false
   },
   "claim_boundary": "This report verifies that license status evidence is populated and current; it does not create legal approval or substitute for counsel/product-owner signoff.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T15:55:21.422108+00:00",
+  "generated_at": "2026-06-16T16:12:56.687511+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "schema_version": "license-status-closure-report.v1",
@@ -30,8 +31,10 @@
     "expires_at_utc": "",
     "issuer_or_approver": "",
     "license_id": "",
+    "owner_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
     "product_scope_count": 0,
     "status": "not_configured",
+    "template_path": "docs/templates/license_status.template.json",
     "tier": ""
   }
 }

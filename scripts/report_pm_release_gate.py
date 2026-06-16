@@ -1271,6 +1271,8 @@ def _build_release_area_matrix(
             summary={
                 "license_status": str(license_closure_summary.get("status", license_state or "missing")),
                 "license_status_closure_blockers": license_closure_blockers,
+                "license_status_owner_action": str(license_closure_summary.get("owner_action", "")),
+                "license_status_template_path": str(license_closure_summary.get("template_path", "")),
                 "sbom_component_count": _as_int(sbom.get("component_count"), 0),
             },
             artifacts={

@@ -83,7 +83,7 @@ npm run ai:preflight
 전체 PM release-area blocker는 다음과 같다.
 
 - Basic CI: nightly는 로컬 release evidence 기준 `230`회 연속 PASS지만, PR은 로컬 evidence `2`회 및 GitHub Actions `pull_request` run evidence `0`회라서 `30`회 연속 PASS evidence가 아직 없다.
-- Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `implementation/phase1/release/support_bundle/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니다.
+- Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
 
 최근 닫힌 release-area blocker:
 

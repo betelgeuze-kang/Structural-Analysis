@@ -1,0 +1,16 @@
+{
+  "status": "active",
+  "tier": "limited-commercial",
+  "license_id": "LICENSE-ID",
+  "issuer": "product-or-legal-owner",
+  "approval_ref": "LEGAL-OR-PRODUCT-APPROVAL-ID",
+  "product_scope": [
+    "review-assist",
+    "specified-structure-families",
+    "specified-workflows",
+    "engine-and-reviewer-evidence-package"
+  ],
+  "expires_at_utc": "2027-06-16T00:00:00+00:00",
+  "template_only": true,
+  "note": "Template only. Do not use as release evidence until populated from an approved product/license decision."
+}

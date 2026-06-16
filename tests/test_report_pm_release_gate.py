@@ -219,7 +219,12 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
             {
                 "contract_pass": True,
                 "reason_code": "PASS",
-                "summary": {"status": "active", "tier": "limited-commercial"},
+                "summary": {
+                    "status": "active",
+                    "tier": "limited-commercial",
+                    "owner_action": "license evidence populated",
+                    "template_path": "docs/templates/license_status.template.json",
+                },
                 "blockers": [],
             },
         ),
@@ -395,6 +400,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert ux_area["summary"]["ux_evidence_source"] == "ux_release_readiness_report"
     assert ux_area["summary"]["blocking_review_item_count"] == 0
     assert ux_area["summary"]["sample_completion_minutes"] == 2.0
+    security_area = next(row for row in payload["release_area_matrix"] if row["area"] == "security")
+    assert security_area["summary"]["license_status_template_path"] == "docs/templates/license_status.template.json"
     assert payload["ga_enterprise_ready"] is False
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
