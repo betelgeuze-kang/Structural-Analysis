@@ -113,7 +113,7 @@ npm run ai:preflight
 - M2 Core Engine Depth Closure: contact-material coupled case `31`, panel/contact failure `reason_code` `7`, nonlinear+residual same-case `3`이 같은 element/material breadth report에 명시됐다.
 - M3 Strict Runtime Closure: NDTHA long profile, HIP e2e, CPU fallback 금지, device residency, host copy share가 통과했다.
 - M4 Benchmark Breadth Expansion: measured breadth `304` cases, `22` families, family별 holdout, coverage-risk worst-case report가 통과했다. PEER/E-Defense blind prediction measured-response family `10` cases는 `peer_blind_delta=1/10`으로 별도 집계한다.
-- M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle one-click export archive, validation/limitation manuals가 통과했다. 전용 manual은 `docs/release-validation-manual.md`와 `docs/release-limitation-manual.md`이며, support bundle의 redacted reviewer package에 함께 포함된다.
+- M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle one-click export archive, validation/limitation manuals가 통과했다. 전용 manual은 `docs/release-validation-manual.md`와 `docs/release-limitation-manual.md`이며, CI/license source evidence와 함께 support bundle의 redacted reviewer package에 포함된다.
 - Implementation orchestration: Cursor Agent와 OpenCode worker bridge preflight가 통과했다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
 
 남은 M1-M5 milestone blocker는 없다.
@@ -126,7 +126,9 @@ npm run ai:preflight
 
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
+`ci_consecutive_pass_manifest.json`과 `github_actions_ci_streak_evidence.json`도 support bundle에 함께 포함된다. intake packet은 owner handoff이고, source streak evidence가 없는 상태를 release pass로 바꾸지 않는다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
+`license_status_closure_report.json`과 `docs/templates/license_status.template.json`도 support bundle에 포함된다. closure report가 실제 승인 evidence이고, template은 입력 예시일 뿐 release evidence가 아니다.
 `ux_new_user_observation_report.json`은 신규 사용자 30분 sample workflow 관찰 evidence를 고정한다. observation source가 없거나 placeholder, slow completion, blocker count, 승인 decision 누락이 있으면 UX release-area blocker로 남는다.
 `ux_new_user_observation_intake_packet.json`은 UX owner가 채워야 할 관찰 필드, `docs/templates/ux_new_user_observation.template.json`, 현재 blocker, 검증 command를 support bundle에 고정한다.
 `support_bundle_manifest.json`은 redacted support bundle directory뿐 아니라 `implementation/phase1/release/support_bundle_export.zip`의 path, sha256, member count, archive roundtrip check를 고정한다. zip 자체는 ignored runtime artifact이고 manifest가 one-click export evidence다.

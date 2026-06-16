@@ -97,7 +97,15 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                 },
                 "optional_sections": {
                     "ci_streak_intake_packet": "release/support_bundle/redacted/ci_streak_intake_packet.json",
+                    "ci_streak_manifest": "release/support_bundle/redacted/ci_streak_manifest.json",
+                    "github_actions_ci_streak_evidence": (
+                        "release/support_bundle/redacted/github_actions_ci_streak_evidence.json"
+                    ),
                     "license_status_intake_packet": "release/support_bundle/redacted/license_status_intake_packet.json",
+                    "license_status_closure_report": (
+                        "release/support_bundle/redacted/license_status_closure_report.json"
+                    ),
+                    "license_status_template": "release/support_bundle/redacted/license_status_template.json",
                     "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
                     "frontend_dependency_audit_report": (
                         "release/support_bundle/redacted/frontend_dependency_audit_report.json"
@@ -537,7 +545,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert security_area["summary"]["frontend_dependency_vulnerability_total"] == 0
     support_area = next(row for row in payload["release_area_matrix"] if row["area"] == "support")
     assert support_area["checks"]["ci_streak_intake_packet_in_failure_bundle"] is True
+    assert support_area["checks"]["ci_streak_manifest_in_failure_bundle"] is True
+    assert support_area["checks"]["github_actions_ci_streak_evidence_in_failure_bundle"] is True
     assert support_area["checks"]["license_status_intake_packet_in_failure_bundle"] is True
+    assert support_area["checks"]["license_status_closure_report_in_failure_bundle"] is True
+    assert support_area["checks"]["license_status_template_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
     assert support_area["checks"]["frontend_dependency_audit_in_failure_bundle"] is True
     assert support_area["checks"]["validation_manual_in_failure_bundle"] is True
@@ -549,6 +561,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["known_issue_or_limitation_register_content_pass"] is True
     assert support_area["summary"]["license_status_intake_packet"].endswith("license_status_intake_packet.json")
     assert support_area["summary"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
+    assert support_area["summary"]["ci_streak_manifest"].endswith("ci_streak_manifest.json")
+    assert support_area["summary"]["github_actions_ci_streak_evidence"].endswith(
+        "github_actions_ci_streak_evidence.json"
+    )
+    assert support_area["summary"]["license_status_closure_report"].endswith("license_status_closure_report.json")
+    assert support_area["summary"]["license_status_template"].endswith("license_status_template.json")
     assert support_area["summary"]["frontend_dependency_audit_report"].endswith("frontend_dependency_audit_report.json")
     assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
         "pm_release_blocker_action_register.json"
@@ -566,6 +584,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
     assert m5["checks"]["validation_manual_content_pass"] is True
     assert m5["checks"]["limitation_manual_content_pass"] is True
+    assert m5["checks"]["support_bundle_ci_streak_manifest_present"] is True
+    assert m5["checks"]["support_bundle_github_actions_ci_streak_evidence_present"] is True
+    assert m5["checks"]["support_bundle_license_status_closure_present"] is True
+    assert m5["checks"]["support_bundle_license_status_template_present"] is True
     assert m5["checks"]["support_bundle_validation_manual_present"] is True
     assert m5["checks"]["support_bundle_limitation_manual_present"] is True
     assert m5["checks"]["support_bundle_ux_new_user_observation_present"] is True

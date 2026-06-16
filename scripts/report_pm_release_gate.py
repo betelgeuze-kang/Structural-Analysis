@@ -302,6 +302,11 @@ def _contains_terms(text: str, terms: tuple[str, ...]) -> bool:
     return all(term in lowered for term in terms)
 
 
+def _support_section_present(sections: dict[str, Any], key: str) -> bool:
+    value = str(sections.get(key, "") or "")
+    return bool(value and value != "missing")
+
+
 def _first_float(payload: dict[str, Any], *keys: str) -> float | None:
     for source in (payload, _summary(payload), _checks(payload)):
         for key in keys:
@@ -684,29 +689,53 @@ def _packaging_milestone(
         "support_bundle_one_click_archive_present": bool(
             support_export_archive.get("available") and support_export_archive.get("sha256")
         ),
-        "support_bundle_pm_blocker_register_present": bool(
-            support_optional_sections.get("pm_release_blocker_action_register")
+        "support_bundle_pm_blocker_register_present": _support_section_present(
+            support_optional_sections,
+            "pm_release_blocker_action_register",
         ),
-        "support_bundle_ci_streak_intake_packet_present": bool(
-            support_optional_sections.get("ci_streak_intake_packet")
+        "support_bundle_ci_streak_intake_packet_present": _support_section_present(
+            support_optional_sections,
+            "ci_streak_intake_packet",
         ),
-        "support_bundle_license_intake_packet_present": bool(
-            support_optional_sections.get("license_status_intake_packet")
+        "support_bundle_ci_streak_manifest_present": _support_section_present(
+            support_optional_sections,
+            "ci_streak_manifest",
         ),
-        "support_bundle_frontend_dependency_audit_present": bool(
-            support_optional_sections.get("frontend_dependency_audit_report")
+        "support_bundle_github_actions_ci_streak_evidence_present": _support_section_present(
+            support_optional_sections,
+            "github_actions_ci_streak_evidence",
         ),
-        "support_bundle_validation_manual_present": bool(
-            support_optional_sections.get("release_validation_manual")
+        "support_bundle_license_intake_packet_present": _support_section_present(
+            support_optional_sections,
+            "license_status_intake_packet",
         ),
-        "support_bundle_limitation_manual_present": bool(
-            support_optional_sections.get("release_limitation_manual")
+        "support_bundle_license_status_closure_present": _support_section_present(
+            support_optional_sections,
+            "license_status_closure_report",
         ),
-        "support_bundle_ux_new_user_observation_present": bool(
-            support_optional_sections.get("ux_new_user_observation_report")
+        "support_bundle_license_status_template_present": _support_section_present(
+            support_optional_sections,
+            "license_status_template",
         ),
-        "support_bundle_ux_new_user_observation_intake_present": bool(
-            support_optional_sections.get("ux_new_user_observation_intake_packet")
+        "support_bundle_frontend_dependency_audit_present": _support_section_present(
+            support_optional_sections,
+            "frontend_dependency_audit_report",
+        ),
+        "support_bundle_validation_manual_present": _support_section_present(
+            support_optional_sections,
+            "release_validation_manual",
+        ),
+        "support_bundle_limitation_manual_present": _support_section_present(
+            support_optional_sections,
+            "release_limitation_manual",
+        ),
+        "support_bundle_ux_new_user_observation_present": _support_section_present(
+            support_optional_sections,
+            "ux_new_user_observation_report",
+        ),
+        "support_bundle_ux_new_user_observation_intake_present": _support_section_present(
+            support_optional_sections,
+            "ux_new_user_observation_intake_packet",
         ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
@@ -742,8 +771,28 @@ def _packaging_milestone(
             else []
         ),
         *(
+            ["support_bundle_ci_streak_manifest_missing"]
+            if not gate_checks["support_bundle_ci_streak_manifest_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_github_actions_ci_streak_evidence_missing"]
+            if not gate_checks["support_bundle_github_actions_ci_streak_evidence_present"]
+            else []
+        ),
+        *(
             ["support_bundle_license_intake_packet_missing"]
             if not gate_checks["support_bundle_license_intake_packet_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_license_status_closure_missing"]
+            if not gate_checks["support_bundle_license_status_closure_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_license_status_template_missing"]
+            if not gate_checks["support_bundle_license_status_template_present"]
             else []
         ),
         *(
@@ -794,8 +843,20 @@ def _packaging_milestone(
             "support_bundle_ci_streak_intake_packet": str(
                 support_optional_sections.get("ci_streak_intake_packet", "")
             ),
+            "support_bundle_ci_streak_manifest": str(
+                support_optional_sections.get("ci_streak_manifest", "")
+            ),
+            "support_bundle_github_actions_ci_streak_evidence": str(
+                support_optional_sections.get("github_actions_ci_streak_evidence", "")
+            ),
             "support_bundle_license_status_intake_packet": str(
                 support_optional_sections.get("license_status_intake_packet", "")
+            ),
+            "support_bundle_license_status_closure": str(
+                support_optional_sections.get("license_status_closure_report", "")
+            ),
+            "support_bundle_license_status_template": str(
+                support_optional_sections.get("license_status_template", "")
             ),
             "support_bundle_frontend_dependency_audit": str(
                 support_optional_sections.get("frontend_dependency_audit_report", "")
@@ -1487,29 +1548,53 @@ def _build_release_area_matrix(
             limitation_manual_text,
             LIMITATION_MANUAL_REQUIRED_TERMS,
         ),
-        "pm_blocker_action_register_in_failure_bundle": bool(
-            support_optional_sections.get("pm_release_blocker_action_register")
+        "pm_blocker_action_register_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "pm_release_blocker_action_register",
         ),
-        "ci_streak_intake_packet_in_failure_bundle": bool(
-            support_optional_sections.get("ci_streak_intake_packet")
+        "ci_streak_intake_packet_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "ci_streak_intake_packet",
         ),
-        "license_status_intake_packet_in_failure_bundle": bool(
-            support_optional_sections.get("license_status_intake_packet")
+        "ci_streak_manifest_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "ci_streak_manifest",
         ),
-        "frontend_dependency_audit_in_failure_bundle": bool(
-            support_optional_sections.get("frontend_dependency_audit_report")
+        "github_actions_ci_streak_evidence_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "github_actions_ci_streak_evidence",
         ),
-        "validation_manual_in_failure_bundle": bool(
-            support_optional_sections.get("release_validation_manual")
+        "license_status_intake_packet_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "license_status_intake_packet",
         ),
-        "limitation_manual_in_failure_bundle": bool(
-            support_optional_sections.get("release_limitation_manual")
+        "license_status_closure_report_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "license_status_closure_report",
         ),
-        "ux_new_user_observation_report_in_failure_bundle": bool(
-            support_optional_sections.get("ux_new_user_observation_report")
+        "license_status_template_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "license_status_template",
         ),
-        "ux_new_user_observation_intake_packet_in_failure_bundle": bool(
-            support_optional_sections.get("ux_new_user_observation_intake_packet")
+        "frontend_dependency_audit_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "frontend_dependency_audit_report",
+        ),
+        "validation_manual_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "release_validation_manual",
+        ),
+        "limitation_manual_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "release_limitation_manual",
+        ),
+        "ux_new_user_observation_report_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "ux_new_user_observation_report",
+        ),
+        "ux_new_user_observation_intake_packet_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "ux_new_user_observation_intake_packet",
         ),
         "one_click_failure_bundle_archive_present": bool(
             support_export_archive.get("available") and support_export_archive.get("sha256")
@@ -1547,8 +1632,28 @@ def _build_release_area_matrix(
             else []
         ),
         *(
+            ["ci_streak_manifest_missing_from_failure_bundle"]
+            if not support_area_checks["ci_streak_manifest_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["github_actions_ci_streak_evidence_missing_from_failure_bundle"]
+            if not support_area_checks["github_actions_ci_streak_evidence_in_failure_bundle"]
+            else []
+        ),
+        *(
             ["license_status_intake_packet_missing_from_failure_bundle"]
             if not support_area_checks["license_status_intake_packet_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["license_status_closure_report_missing_from_failure_bundle"]
+            if not support_area_checks["license_status_closure_report_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["license_status_template_missing_from_failure_bundle"]
+            if not support_area_checks["license_status_template_in_failure_bundle"]
             else []
         ),
         *(
@@ -1604,8 +1709,20 @@ def _build_release_area_matrix(
                 "ci_streak_intake_packet": str(
                     support_optional_sections.get("ci_streak_intake_packet", "")
                 ),
+                "ci_streak_manifest": str(
+                    support_optional_sections.get("ci_streak_manifest", "")
+                ),
+                "github_actions_ci_streak_evidence": str(
+                    support_optional_sections.get("github_actions_ci_streak_evidence", "")
+                ),
                 "license_status_intake_packet": str(
                     support_optional_sections.get("license_status_intake_packet", "")
+                ),
+                "license_status_closure_report": str(
+                    support_optional_sections.get("license_status_closure_report", "")
+                ),
+                "license_status_template": str(
+                    support_optional_sections.get("license_status_template", "")
                 ),
                 "frontend_dependency_audit_report": str(
                     support_optional_sections.get("frontend_dependency_audit_report", "")

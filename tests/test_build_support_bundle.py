@@ -108,12 +108,49 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "current_blockers": ["pr:pr_ci_30_consecutive_pass_evidence_missing"],
             },
         ),
+        "ci_streak_manifest": _write_json(
+            tmp_path / "ci-streak-manifest.json",
+            {
+                "schema_version": "ci-consecutive-pass-manifest.v1",
+                "contract_pass": False,
+                "lanes": {
+                    "pr": {"threshold_pass": False},
+                    "nightly": {"threshold_pass": False},
+                },
+            },
+        ),
+        "github_actions_ci_streak_evidence": _write_json(
+            tmp_path / "github-actions-ci-streak-evidence.json",
+            {
+                "schema_version": "github-actions-ci-streak-evidence.v1",
+                "lanes": {
+                    "pr": {"consecutive_pass_count": 0},
+                    "nightly": {"consecutive_pass_count": 0},
+                },
+            },
+        ),
         "license_status_intake_packet": _write_json(
             tmp_path / "license-status-intake-packet.json",
             {
                 "schema_version": "license-status-intake-packet.v1",
                 "contract_pass": False,
                 "current_blockers": ["license_status_not_active"],
+            },
+        ),
+        "license_status_closure_report": _write_json(
+            tmp_path / "license-status-closure-report.json",
+            {
+                "schema_version": "license-status-closure-report.v1",
+                "contract_pass": False,
+                "blockers": ["license_status_not_active"],
+            },
+        ),
+        "license_status_template": _write_json(
+            tmp_path / "license-status-template.json",
+            {
+                "status": "active",
+                "license_id": "LICENSE-ID",
+                "template_only": True,
             },
         ),
         "frontend_dependency_audit_report": _write_json(
@@ -209,9 +246,15 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert payload["export_archive"]["member_count"] >= payload["bundle_index"]["artifact_count"]
     assert payload["archive_roundtrip"]["pass"] is True
     with zipfile.ZipFile(archive_path) as archive:
-        assert "support_bundle_index.json" in archive.namelist()
-        assert "audit_digest.json" in archive.namelist()
-        assert "license_status.json" in archive.namelist()
+        members = archive.namelist()
+        assert "support_bundle_index.json" in members
+        assert "audit_digest.json" in members
+        assert "license_status.json" in members
+        assert "redacted/ci_streak_manifest.json" in members
+        assert "redacted/github_actions_ci_streak_evidence.json" in members
+        assert "redacted/license_status_closure_report.json" in members
+        assert "redacted/license_status_template.json" in members
+        assert "license_status.template.json" not in members
     assert "project_ops_deployment_drill" in payload["required_sections"]
     assert "viewer_performance_budget_manifest" in payload["required_sections"]
     assert "viewer_browser_performance_probe" in payload["required_sections"]
@@ -226,7 +269,11 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "workstation_job_retention_policy" in payload["required_sections"]
     assert "pm_release_blocker_action_register" in payload["optional_sections"]
     assert "ci_streak_intake_packet" in payload["optional_sections"]
+    assert "ci_streak_manifest" in payload["optional_sections"]
+    assert "github_actions_ci_streak_evidence" in payload["optional_sections"]
     assert "license_status_intake_packet" in payload["optional_sections"]
+    assert "license_status_closure_report" in payload["optional_sections"]
+    assert "license_status_template" in payload["optional_sections"]
     assert "frontend_dependency_audit_report" in payload["optional_sections"]
     assert "ga_enterprise_readiness_report" in payload["optional_sections"]
     assert "ga_enterprise_signoff_intake_packet" in payload["optional_sections"]
@@ -243,10 +290,24 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "pr:pr_ci_30_consecutive_pass_evidence_missing" in redacted_ci_streak
+    redacted_ci_manifest = Path(payload["optional_sections"]["ci_streak_manifest"]).read_text(encoding="utf-8")
+    assert "ci-consecutive-pass-manifest.v1" in redacted_ci_manifest
+    redacted_github_actions = Path(payload["optional_sections"]["github_actions_ci_streak_evidence"]).read_text(
+        encoding="utf-8"
+    )
+    assert "github-actions-ci-streak-evidence.v1" in redacted_github_actions
     redacted_license_intake = Path(payload["optional_sections"]["license_status_intake_packet"]).read_text(
         encoding="utf-8"
     )
     assert "license_status_not_active" in redacted_license_intake
+    redacted_license_closure = Path(payload["optional_sections"]["license_status_closure_report"]).read_text(
+        encoding="utf-8"
+    )
+    assert "license_status_not_active" in redacted_license_closure
+    redacted_license_template = Path(payload["optional_sections"]["license_status_template"]).read_text(
+        encoding="utf-8"
+    )
+    assert "LICENSE-ID" in redacted_license_template
     redacted_frontend_audit = Path(payload["optional_sections"]["frontend_dependency_audit_report"]).read_text(
         encoding="utf-8"
     )

@@ -53,9 +53,19 @@ DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER = Path(
 DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
 )
+DEFAULT_CI_STREAK_MANIFEST = Path(
+    "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json"
+)
+DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE = Path(
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json"
+)
 DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
 )
+DEFAULT_LICENSE_STATUS_CLOSURE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
+)
+DEFAULT_LICENSE_STATUS_TEMPLATE = Path("docs/templates/license_status.template.json")
 DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
 )
@@ -273,15 +283,11 @@ def _roundtrip_self_test(index: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _build_export_archive(*, bundle_dir: Path, archive_out: Path) -> dict[str, Any]:
+def _build_export_archive(*, bundle_dir: Path, archive_out: Path, source_paths: list[Path]) -> dict[str, Any]:
     if archive_out.exists():
         archive_out.unlink()
     archive_out.parent.mkdir(parents=True, exist_ok=True)
-    files = [
-        path
-        for path in bundle_dir.rglob("*")
-        if path.is_file() and path.resolve() != archive_out.resolve()
-    ]
+    files = [path for path in source_paths if path.exists() and path.is_file()]
     members = [path.relative_to(bundle_dir).as_posix() for path in files]
     try:
         with zipfile.ZipFile(archive_out, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -371,7 +377,11 @@ def build_support_bundle(
     residual_holdout_updates: Path = DEFAULT_RESIDUAL_HOLDOUT_UPDATES,
     pm_release_blocker_action_register: Path | None = DEFAULT_PM_RELEASE_BLOCKER_ACTION_REGISTER,
     ci_streak_intake_packet: Path | None = DEFAULT_CI_STREAK_INTAKE_PACKET,
+    ci_streak_manifest: Path | None = DEFAULT_CI_STREAK_MANIFEST,
+    github_actions_ci_streak_evidence: Path | None = DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE,
     license_status_intake_packet: Path | None = DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
+    license_status_closure_report: Path | None = DEFAULT_LICENSE_STATUS_CLOSURE_REPORT,
+    license_status_template: Path | None = DEFAULT_LICENSE_STATUS_TEMPLATE,
     frontend_dependency_audit_report: Path | None = DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
     ga_enterprise_readiness_report: Path | None = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
     ga_enterprise_signoff_intake_packet: Path | None = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET,
@@ -411,7 +421,11 @@ def build_support_bundle(
     optional_specs = [
         ("pm_release_blocker_action_register", pm_release_blocker_action_register),
         ("ci_streak_intake_packet", ci_streak_intake_packet),
+        ("ci_streak_manifest", ci_streak_manifest),
+        ("github_actions_ci_streak_evidence", github_actions_ci_streak_evidence),
         ("license_status_intake_packet", license_status_intake_packet),
+        ("license_status_closure_report", license_status_closure_report),
+        ("license_status_template", license_status_template),
         ("frontend_dependency_audit_report", frontend_dependency_audit_report),
         ("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
         ("ga_enterprise_signoff_intake_packet", ga_enterprise_signoff_intake_packet),
@@ -432,7 +446,21 @@ def build_support_bundle(
     redaction = _redaction_self_test()
     index = _build_index(bundle_dir=bundle_dir, artifact_rows=artifact_rows, audit_digest=audit_digest)
     roundtrip = _roundtrip_self_test(index)
-    export_archive = _build_export_archive(bundle_dir=bundle_dir, archive_out=archive_out)
+    archive_source_paths = [
+        *[
+            Path(str(row.get("redacted_bundle_path", "")))
+            for row in artifact_rows
+            if row.get("available") and row.get("redacted_bundle_path")
+        ],
+        Path(str(audit_digest.get("bundle_path", ""))),
+        Path(str(license_snapshot.get("bundle_path", ""))),
+        Path(str(index.get("bundle_index_path", ""))),
+    ]
+    export_archive = _build_export_archive(
+        bundle_dir=bundle_dir,
+        archive_out=archive_out,
+        source_paths=archive_source_paths,
+    )
     archive_roundtrip = _archive_roundtrip_self_test(export_archive)
 
     missing_required = [row["label"] for row in artifact_rows[: len(required_specs)] if not row.get("available")]
@@ -557,9 +585,29 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_CI_STREAK_INTAKE_PACKET,
     )
     parser.add_argument(
+        "--ci-streak-manifest",
+        type=Path,
+        default=DEFAULT_CI_STREAK_MANIFEST,
+    )
+    parser.add_argument(
+        "--github-actions-ci-streak-evidence",
+        type=Path,
+        default=DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE,
+    )
+    parser.add_argument(
         "--license-status-intake-packet",
         type=Path,
         default=DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
+    )
+    parser.add_argument(
+        "--license-status-closure-report",
+        type=Path,
+        default=DEFAULT_LICENSE_STATUS_CLOSURE_REPORT,
+    )
+    parser.add_argument(
+        "--license-status-template",
+        type=Path,
+        default=DEFAULT_LICENSE_STATUS_TEMPLATE,
     )
     parser.add_argument(
         "--frontend-dependency-audit-report",
@@ -638,7 +686,11 @@ def main(argv: list[str] | None = None) -> int:
         residual_holdout_updates=args.residual_holdout_updates,
         pm_release_blocker_action_register=args.pm_release_blocker_action_register,
         ci_streak_intake_packet=args.ci_streak_intake_packet,
+        ci_streak_manifest=args.ci_streak_manifest,
+        github_actions_ci_streak_evidence=args.github_actions_ci_streak_evidence,
         license_status_intake_packet=args.license_status_intake_packet,
+        license_status_closure_report=args.license_status_closure_report,
+        license_status_template=args.license_status_template,
         frontend_dependency_audit_report=args.frontend_dependency_audit_report,
         ga_enterprise_readiness_report=args.ga_enterprise_readiness_report,
         ga_enterprise_signoff_intake_packet=args.ga_enterprise_signoff_intake_packet,

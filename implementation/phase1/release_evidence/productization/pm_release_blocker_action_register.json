@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:38:39.032914+00:00",
+  "generated_at": "2026-06-16T18:47:59.662096+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
