@@ -1,0 +1,186 @@
+{
+  "blockers": [],
+  "claim_boundary": "This audit proves docs/templates JSON files are handoff-only templates and are rejected by release-evidence validators. It does not create owner evidence or replace external signoff.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T20:58:58.438906+00:00",
+  "mode": "template_safety_audit",
+  "reason_code": "PASS",
+  "schema_version": "template-evidence-safety-report.v1",
+  "summary": {
+    "missing_known_templates": [],
+    "template_count": 5,
+    "template_pass_count": 5,
+    "unprobed_templates": [],
+    "validator_probe_count": 5,
+    "validator_probe_pass_count": 5
+  },
+  "summary_line": "Template evidence safety: PASS | templates=5 | validator_probes=5 | blockers=0",
+  "template_dir": "docs/templates",
+  "template_rows": [
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "customer_audit_failure_bundle_sla.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "family_validation_manual_signoff.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/family_validation_manual_signoff.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "independent_vv_attestation.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/independent_vv_attestation.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "license_status.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/license_status.template.json",
+      "placeholder_markers": [
+        "LICENSE-ID",
+        "LEGAL-OR-PRODUCT-APPROVAL-ID",
+        "PRODUCT-OR-LEGAL-OWNER",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "ux_new_user_observation.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/ux_new_user_observation.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    }
+  ],
+  "validator_probes": [
+    {
+      "contract_pass": true,
+      "expected_blockers_present": [
+        "license_status_template_only"
+      ],
+      "label": "license_status_template_probe",
+      "observed_blockers": [
+        "license_id_placeholder",
+        "license_issuer_or_approver_placeholder",
+        "license_approval_reference_placeholder",
+        "license_status_template_only"
+      ],
+      "state": "template_rejected_as_license_evidence",
+      "template_path": "docs/templates/license_status.template.json",
+      "validator_contract_pass": false
+    },
+    {
+      "contract_pass": true,
+      "expected_blockers_present": [
+        "placeholder_values_present",
+        "template_only_observation_source"
+      ],
+      "label": "ux_new_user_observation_template_probe",
+      "observed_blockers": [
+        "contract_signal_not_pass",
+        "placeholder_values_present",
+        "template_only_observation_source",
+        "template_note_observation_source",
+        "participant_not_new_user",
+        "new_to_product_not_confirmed",
+        "completion_minutes_missing",
+        "blocking_usability_issue_present",
+        "approval_decision_not_accepted"
+      ],
+      "state": "template_rejected_as_ux_evidence",
+      "template_path": "docs/templates/ux_new_user_observation.template.json",
+      "validator_contract_pass": false
+    },
+    {
+      "approval_decision_pass": false,
+      "contract_pass": true,
+      "expected_state": "template_only_external_signoff_evidence",
+      "label": "independent_vv_attestation_template_probe",
+      "missing_fields": [],
+      "observed_state": "template_only_external_signoff_evidence",
+      "placeholder_fields": [
+        "attestation_scope",
+        "independent_reviewer",
+        "independence_basis",
+        "case_set_reference",
+        "report_reference",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "template_only": true,
+      "template_path": "docs/templates/independent_vv_attestation.template.json",
+      "validator_contract_pass": false
+    },
+    {
+      "approval_decision_pass": false,
+      "contract_pass": true,
+      "expected_state": "template_only_external_signoff_evidence",
+      "label": "family_validation_manual_signoff_template_probe",
+      "missing_fields": [],
+      "observed_state": "template_only_external_signoff_evidence",
+      "placeholder_fields": [
+        "release_registry_ref",
+        "validation_manual_ref",
+        "signoff_owner",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "template_only": true,
+      "template_path": "docs/templates/family_validation_manual_signoff.template.json",
+      "validator_contract_pass": false
+    },
+    {
+      "approval_decision_pass": false,
+      "contract_pass": true,
+      "expected_state": "template_only_external_signoff_evidence",
+      "label": "customer_audit_failure_bundle_sla_template_probe",
+      "missing_fields": [],
+      "observed_state": "template_only_external_signoff_evidence",
+      "placeholder_fields": [
+        "customer_or_ops_approver",
+        "audit_export_acceptance_ref",
+        "failure_bundle_export_ref",
+        "support_sla_ref",
+        "rollback_policy_ref",
+        "signed_at_utc",
+        "approval_decision"
+      ],
+      "template_only": true,
+      "template_path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
+      "validator_contract_pass": false
+    }
+  ]
+}

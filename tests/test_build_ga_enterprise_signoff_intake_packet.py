@@ -208,7 +208,9 @@ def test_ga_signoff_templates_do_not_pass_when_copied_to_evidence_paths(tmp_path
     assert packet["contract_pass"] is False
     assert packet["summary"]["open_signoff_count"] == 3
     assert all(row["evidence_contract_pass"] is False for row in packet["signoff_rows"])
-    assert all(row["evidence_status"]["state"] == "placeholder_external_signoff_evidence" for row in packet["signoff_rows"])
+    assert all(row["evidence_status"]["state"] == "template_only_external_signoff_evidence" for row in packet["signoff_rows"])
+    assert all(row["template_only"] is True for row in packet["signoff_rows"])
+    assert all(row["evidence_status"]["template_only"] is True for row in packet["signoff_rows"])
     assert all("approval_decision" in row["placeholder_fields"] for row in packet["signoff_rows"])
 
 

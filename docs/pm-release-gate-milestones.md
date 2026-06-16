@@ -113,6 +113,10 @@ python3 scripts/build_pm_owner_evidence_request_packet.py \
   --out implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json \
   --out-md implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md
 
+python3 scripts/build_template_evidence_safety_report.py \
+  --out implementation/phase1/release_evidence/productization/template_evidence_safety_report.json \
+  --out-md implementation/phase1/release_evidence/productization/template_evidence_safety_report.md
+
 python3 scripts/build_support_bundle.py
 
 python3 scripts/report_pm_release_gate.py \
@@ -156,6 +160,7 @@ npm run ai:preflight
 `license_status_closure_report.json`과 `docs/templates/license_status.template.json`도 support bundle에 포함된다. closure report가 실제 승인 evidence이고, template은 입력 예시일 뿐 release evidence가 아니다.
 `ux_new_user_observation_report.json`은 신규 사용자 30분 sample workflow 관찰 evidence를 고정한다. observation source가 없거나 placeholder, slow completion, blocker count, 승인 decision 누락이 있으면 UX release-area blocker로 남는다.
 `ux_new_user_observation_intake_packet.json`은 UX owner가 채워야 할 관찰 필드, `docs/templates/ux_new_user_observation.template.json`, 현재 blocker, 검증 command를 support bundle에 고정한다. UX template은 `template_only=true`와 `OWNER_INPUT_REQUIRED` placeholder를 포함하므로 그대로 observation evidence로 복사하면 hard fail한다.
+`template_evidence_safety_report.json`은 `docs/templates/*.json` 전체를 스캔해 `template_only=true`, placeholder marker, pass signal 부재를 확인하고 license/UX/GA validator probe가 template copy를 evidence로 인정하지 않는지 고정한다. 이 audit은 template hygiene evidence이며, owner가 제출해야 할 실제 release evidence를 생성하지 않는다.
 `support_bundle_manifest.json`은 redacted support bundle directory뿐 아니라 `implementation/phase1/release/support_bundle_export.zip`의 path, sha256, member count, archive roundtrip check를 고정한다. zip 자체는 ignored runtime artifact이고 manifest가 one-click export evidence다.
 `ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
 `ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드, owner별 packet, evidence path, source artifact, `docs/templates/*.template.json` template path를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`나 template copy만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.

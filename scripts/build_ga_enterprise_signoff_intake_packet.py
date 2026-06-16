@@ -168,11 +168,13 @@ def _evidence_field_status(payload: dict[str, Any], required_fields: list[str]) 
     ]
     decision = str(payload.get("approval_decision", "")).strip().lower()
     approval_decision_pass = decision in ACCEPTED_SIGNOFF_DECISIONS
+    template_only = payload.get("template_only") is True
     return {
         "missing_fields": missing_fields,
         "placeholder_fields": placeholder_fields,
         "approval_decision": decision,
         "approval_decision_pass": approval_decision_pass,
+        "template_only": template_only,
     }
 
 
@@ -181,6 +183,8 @@ def _evidence_state(*, evidence_present: bool, evidence_contract_pass: bool, fie
         return "ready_for_ga_readiness_regeneration"
     if not evidence_present:
         return "missing_external_signoff_evidence"
+    if field_status["template_only"]:
+        return "template_only_external_signoff_evidence"
     if field_status["placeholder_fields"]:
         return "placeholder_external_signoff_evidence"
     if field_status["missing_fields"] or not field_status["approval_decision_pass"]:
@@ -277,6 +281,7 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
             and not field_status["missing_fields"]
             and not field_status["placeholder_fields"]
             and field_status["approval_decision_pass"]
+            and not field_status["template_only"]
         )
         evidence_state = _evidence_state(
             evidence_present=evidence_path.exists(),
@@ -302,12 +307,14 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
                     "state": evidence_state,
                     "missing_field_count": len(field_status["missing_fields"]),
                     "placeholder_field_count": len(field_status["placeholder_fields"]),
+                    "template_only": field_status["template_only"],
                     "approval_decision": field_status["approval_decision"],
                     "approval_decision_pass": field_status["approval_decision_pass"],
                 },
                 "required_fields": required_fields,
                 "missing_fields": field_status["missing_fields"],
                 "placeholder_fields": field_status["placeholder_fields"],
+                "template_only": field_status["template_only"],
                 "approval_decision": field_status["approval_decision"],
                 "approval_decision_pass": field_status["approval_decision_pass"],
                 "owner_action": owner_action,

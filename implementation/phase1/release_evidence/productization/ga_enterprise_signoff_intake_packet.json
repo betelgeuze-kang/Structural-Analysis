@@ -7,7 +7,7 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T20:36:46.842649+00:00",
+  "generated_at": "2026-06-16T20:59:08.203168+00:00",
   "owner_packets": [
     {
       "acceptance_criteria": [
@@ -53,7 +53,8 @@
             "approval_decision_pass": false,
             "missing_field_count": 8,
             "placeholder_field_count": 0,
-            "state": "missing_external_signoff_evidence"
+            "state": "missing_external_signoff_evidence",
+            "template_only": false
           },
           "external_input_required": true,
           "missing_fields": [
@@ -94,6 +95,7 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_only": false,
           "template_path": "docs/templates/independent_vv_attestation.template.json",
           "template_present": true,
           "verification_commands": [
@@ -181,7 +183,8 @@
             "approval_decision_pass": false,
             "missing_field_count": 7,
             "placeholder_field_count": 0,
-            "state": "missing_external_signoff_evidence"
+            "state": "missing_external_signoff_evidence",
+            "template_only": false
           },
           "external_input_required": true,
           "missing_fields": [
@@ -220,6 +223,7 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_only": false,
           "template_path": "docs/templates/family_validation_manual_signoff.template.json",
           "template_present": true,
           "verification_commands": [
@@ -307,7 +311,8 @@
             "approval_decision_pass": false,
             "missing_field_count": 8,
             "placeholder_field_count": 0,
-            "state": "missing_external_signoff_evidence"
+            "state": "missing_external_signoff_evidence",
+            "template_only": false
           },
           "external_input_required": true,
           "missing_fields": [
@@ -348,6 +353,7 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_only": false,
           "template_path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
           "template_present": true,
           "verification_commands": [
@@ -409,7 +415,8 @@
         "approval_decision_pass": false,
         "missing_field_count": 8,
         "placeholder_field_count": 0,
-        "state": "missing_external_signoff_evidence"
+        "state": "missing_external_signoff_evidence",
+        "template_only": false
       },
       "external_input_required": true,
       "missing_fields": [
@@ -450,6 +457,7 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_only": false,
       "template_path": "docs/templates/independent_vv_attestation.template.json",
       "template_present": true,
       "verification_commands": [
@@ -471,7 +479,8 @@
         "approval_decision_pass": false,
         "missing_field_count": 7,
         "placeholder_field_count": 0,
-        "state": "missing_external_signoff_evidence"
+        "state": "missing_external_signoff_evidence",
+        "template_only": false
       },
       "external_input_required": true,
       "missing_fields": [
@@ -510,6 +519,7 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_only": false,
       "template_path": "docs/templates/family_validation_manual_signoff.template.json",
       "template_present": true,
       "verification_commands": [
@@ -531,7 +541,8 @@
         "approval_decision_pass": false,
         "missing_field_count": 8,
         "placeholder_field_count": 0,
-        "state": "missing_external_signoff_evidence"
+        "state": "missing_external_signoff_evidence",
+        "template_only": false
       },
       "external_input_required": true,
       "missing_fields": [
@@ -572,6 +583,7 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_only": false,
       "template_path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
       "template_present": true,
       "verification_commands": [

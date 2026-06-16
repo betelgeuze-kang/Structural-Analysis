@@ -124,6 +124,9 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "ux_new_user_observation_intake_packet": (
                         "release/support_bundle/redacted/ux_new_user_observation_intake_packet.json"
                     ),
+                    "template_evidence_safety_report": (
+                        "release/support_bundle/redacted/template_evidence_safety_report.json"
+                    ),
                 },
             },
         ),
@@ -402,6 +405,14 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 "summary_line": "Paid pilot scope guard: PASS",
             },
         ),
+        "template_evidence_safety": _write(
+            tmp_path / "template_evidence_safety_report.json",
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "summary_line": "Template evidence safety: PASS | templates=5 | validator_probes=5 | blockers=0",
+            },
+        ),
     }
 
 
@@ -599,6 +610,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["limitation_manual_in_failure_bundle"] is True
     assert support_area["checks"]["ux_new_user_observation_report_in_failure_bundle"] is True
     assert support_area["checks"]["ux_new_user_observation_intake_packet_in_failure_bundle"] is True
+    assert support_area["checks"]["template_evidence_safety_report_present"] is True
+    assert support_area["checks"]["template_evidence_safety_pass"] is True
+    assert support_area["checks"]["template_evidence_safety_report_in_failure_bundle"] is True
     assert support_area["checks"]["one_click_failure_bundle_archive_present"] is True
     assert support_area["checks"]["failure_bundle_archive_roundtrip_pass"] is True
     assert support_area["checks"]["known_issue_or_limitation_register_content_pass"] is True
@@ -636,6 +650,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["ux_new_user_observation_intake_packet"].endswith(
         "ux_new_user_observation_intake_packet.json"
     )
+    assert support_area["summary"]["template_evidence_safety_report"].endswith(
+        "template_evidence_safety_report.json"
+    )
+    assert support_area["summary"]["template_evidence_safety_report_bundle_path"].endswith(
+        "template_evidence_safety_report.json"
+    )
     assert support_area["summary"]["one_click_failure_bundle_archive"].endswith("support_bundle_export.zip")
     assert support_area["summary"]["one_click_failure_bundle_archive_sha256"] == "support-bundle-sha256"
     m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
@@ -658,6 +678,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["support_bundle_limitation_manual_present"] is True
     assert m5["checks"]["support_bundle_ux_new_user_observation_present"] is True
     assert m5["checks"]["support_bundle_ux_new_user_observation_intake_present"] is True
+    assert m5["checks"]["template_evidence_safety_report_present"] is True
+    assert m5["checks"]["template_evidence_safety_pass"] is True
+    assert m5["checks"]["support_bundle_template_evidence_safety_report_present"] is True
     assert m5["checks"]["support_bundle_one_click_archive_present"] is True
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False

@@ -92,6 +92,9 @@ DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE = Path(
 DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
 )
+DEFAULT_TEMPLATE_EVIDENCE_SAFETY = Path(
+    "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
 VALIDATION_MANUAL_REQUIRED_TERMS = (
@@ -683,6 +686,7 @@ def _packaging_milestone(
     support_bundle_path: Path,
     pm_blocker_action_register_path: Path,
     pm_blocker_closure_board_path: Path,
+    template_evidence_safety_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
 ) -> dict[str, Any]:
@@ -691,6 +695,7 @@ def _packaging_milestone(
     support = _load_json(support_bundle_path)
     pm_blocker_register = _load_json(pm_blocker_action_register_path)
     pm_blocker_closure_board = _load_json(pm_blocker_closure_board_path)
+    template_evidence_safety = _load_json(template_evidence_safety_path)
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
@@ -798,6 +803,12 @@ def _packaging_milestone(
         "support_bundle_ux_new_user_observation_intake_present": _support_section_present(
             support_optional_sections,
             "ux_new_user_observation_intake_packet",
+        ),
+        "template_evidence_safety_report_present": template_evidence_safety_path.exists(),
+        "template_evidence_safety_pass": _truthy_contract(template_evidence_safety),
+        "support_bundle_template_evidence_safety_report_present": _support_section_present(
+            support_optional_sections,
+            "template_evidence_safety_report",
         ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
@@ -912,6 +923,17 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_ux_new_user_observation_intake_present"]
             else []
         ),
+        *(
+            ["template_evidence_safety_report_missing"]
+            if not gate_checks["template_evidence_safety_report_present"]
+            else []
+        ),
+        *(["template_evidence_safety_not_green"] if not gate_checks["template_evidence_safety_pass"] else []),
+        *(
+            ["support_bundle_template_evidence_safety_report_missing"]
+            if not gate_checks["support_bundle_template_evidence_safety_report_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
         *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
@@ -997,6 +1019,11 @@ def _packaging_milestone(
             "support_bundle_ux_new_user_observation_intake": str(
                 support_optional_sections.get("ux_new_user_observation_intake_packet", "")
             ),
+            "template_evidence_safety_report": str(template_evidence_safety_path),
+            "template_evidence_safety_summary_line": str(template_evidence_safety.get("summary_line", "")),
+            "support_bundle_template_evidence_safety_report": str(
+                support_optional_sections.get("template_evidence_safety_report", "")
+            ),
             "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
             "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
         },
@@ -1006,6 +1033,7 @@ def _packaging_milestone(
             "support_bundle": str(support_bundle_path),
             "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
             "pm_release_blocker_closure_board": str(pm_blocker_closure_board_path),
+            "template_evidence_safety": str(template_evidence_safety_path),
             "validation_manual": str(validation_manual_path),
             "limitation_manual": str(limitation_manual_path),
         },
@@ -1052,6 +1080,7 @@ def _build_release_area_matrix(
     security_runbook_path: Path,
     license_status_path: Path,
     license_status_closure_path: Path,
+    template_evidence_safety_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
     cpu_only_product_mode: bool,
@@ -1097,6 +1126,7 @@ def _build_release_area_matrix(
     ux_new_user = _load_json(ux_new_user_observation_path)
     license_status = _load_json(license_status_path)
     license_status_closure = _load_json(license_status_closure_path)
+    template_evidence_safety = _load_json(template_evidence_safety_path)
 
     rows: list[dict[str, Any]] = []
 
@@ -1754,6 +1784,12 @@ def _build_release_area_matrix(
             support_optional_sections,
             "ux_new_user_observation_intake_packet",
         ),
+        "template_evidence_safety_report_present": template_evidence_safety_path.exists(),
+        "template_evidence_safety_pass": _truthy_contract(template_evidence_safety),
+        "template_evidence_safety_report_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "template_evidence_safety_report",
+        ),
         "one_click_failure_bundle_archive_present": bool(
             support_export_archive.get("available") and support_export_archive.get("sha256")
         ),
@@ -1870,6 +1906,17 @@ def _build_release_area_matrix(
             else []
         ),
         *(
+            ["template_evidence_safety_report_missing"]
+            if not support_area_checks["template_evidence_safety_report_present"]
+            else []
+        ),
+        *(["template_evidence_safety_not_green"] if not support_area_checks["template_evidence_safety_pass"] else []),
+        *(
+            ["template_evidence_safety_report_missing_from_failure_bundle"]
+            if not support_area_checks["template_evidence_safety_report_in_failure_bundle"]
+            else []
+        ),
+        *(
             ["one_click_failure_bundle_archive_missing"]
             if not support_area_checks["one_click_failure_bundle_archive_present"]
             else []
@@ -1959,6 +2006,11 @@ def _build_release_area_matrix(
                 "ux_new_user_observation_intake_packet": str(
                     support_optional_sections.get("ux_new_user_observation_intake_packet", "")
                 ),
+                "template_evidence_safety_report": str(template_evidence_safety_path),
+                "template_evidence_safety_summary_line": str(template_evidence_safety.get("summary_line", "")),
+                "template_evidence_safety_report_bundle_path": str(
+                    support_optional_sections.get("template_evidence_safety_report", "")
+                ),
                 "one_click_failure_bundle_archive": str(support_export_archive.get("path", "")),
                 "one_click_failure_bundle_archive_sha256": str(support_export_archive.get("sha256", "")),
             },
@@ -1966,6 +2018,7 @@ def _build_release_area_matrix(
                 "support_bundle": str(support_bundle_path),
                 "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
                 "pm_release_blocker_closure_board": str(pm_blocker_closure_board_path),
+                "template_evidence_safety": str(template_evidence_safety_path),
                 "runtime_packaging": str(runtime_packaging_path),
                 "limitation_manual": str(limitation_manual_path),
             },
@@ -2094,6 +2147,7 @@ def build_report(
     ga_enterprise_readiness: Path = DEFAULT_GA_ENTERPRISE_READINESS,
     ga_enterprise_signoff_intake: Path = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE,
     paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
+    template_evidence_safety: Path = DEFAULT_TEMPLATE_EVIDENCE_SAFETY,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -2134,6 +2188,7 @@ def build_report(
             support_bundle_path=support_bundle,
             pm_blocker_action_register_path=pm_release_blocker_action_register,
             pm_blocker_closure_board_path=pm_release_blocker_closure_board,
+            template_evidence_safety_path=template_evidence_safety,
             validation_manual_path=validation_manual,
             limitation_manual_path=limitation_manual,
         ),
@@ -2200,6 +2255,7 @@ def build_report(
         security_runbook_path=security_runbook,
         license_status_path=license_status,
         license_status_closure_path=license_status_closure,
+        template_evidence_safety_path=template_evidence_safety,
         validation_manual_path=validation_manual,
         limitation_manual_path=limitation_manual,
         cpu_only_product_mode=cpu_only_product_mode,
@@ -2397,6 +2453,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ga-enterprise-readiness", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS)
     parser.add_argument("--ga-enterprise-signoff-intake", type=Path, default=DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE)
     parser.add_argument("--paid-pilot-scope-guard", type=Path, default=DEFAULT_PAID_PILOT_SCOPE_GUARD)
+    parser.add_argument("--template-evidence-safety", type=Path, default=DEFAULT_TEMPLATE_EVIDENCE_SAFETY)
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -2465,6 +2522,7 @@ def main(argv: list[str] | None = None) -> int:
         ga_enterprise_readiness=args.ga_enterprise_readiness,
         ga_enterprise_signoff_intake=args.ga_enterprise_signoff_intake,
         paid_pilot_scope_guard=args.paid_pilot_scope_guard,
+        template_evidence_safety=args.template_evidence_safety,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

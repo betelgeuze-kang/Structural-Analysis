@@ -22,7 +22,7 @@
   },
   "claim_boundary": "This report verifies that license status evidence is populated and current; it does not create legal approval or substitute for counsel/product-owner signoff.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T16:12:56.687511+00:00",
+  "generated_at": "2026-06-16T20:59:08.158745+00:00",
   "license_status_path": "implementation/phase1/release/support_bundle/license_status.json",
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "schema_version": "license-status-closure-report.v1",
