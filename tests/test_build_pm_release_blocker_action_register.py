@@ -214,9 +214,12 @@ def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None
     assert row["resolution_type"] == "external_human_new_user_observation_required"
     assert row["owner_action"] == "Schedule and attach one observed new-user sample run."
     assert any("build_ux_new_user_observation_report.py" in command for command in row["reproduction_commands"])
+    assert any("build_ux_new_user_observation_intake_packet.py" in command for command in row["reproduction_commands"])
     assert any("build_ux_new_user_observation_report.py" in command for command in row["verification_commands"])
+    assert any("build_ux_new_user_observation_intake_packet.py" in command for command in row["verification_commands"])
     assert any("ux_new_user_observation_report.json.contract_pass" in item for item in row["acceptance_criteria"])
     assert "ux_new_user_observation_report" in row["evidence_artifacts"]
+    assert "ux_new_user_observation_intake_packet" in row["evidence_artifacts"]
     assert row["evidence_status"]["state"] == "missing_human_new_user_observation"
     assert row["evidence_status"]["source_policy"] == "human_new_user_observation_required"
     assert row["evidence_status"]["human_observation_reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"

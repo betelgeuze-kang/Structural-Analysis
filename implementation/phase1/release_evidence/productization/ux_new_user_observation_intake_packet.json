@@ -1,0 +1,170 @@
+{
+  "claim_boundary": "This intake packet is an owner handoff checklist. It does not create human observation evidence and does not make the PM UX release area pass until the observation report passes.",
+  "contract_pass": false,
+  "current_blockers": [
+    "observation_file_missing",
+    "contract_signal_not_pass",
+    "required_fields_missing",
+    "participant_not_new_user",
+    "new_to_product_not_confirmed",
+    "completion_minutes_missing",
+    "blocking_usability_issue_present",
+    "approval_decision_not_accepted"
+  ],
+  "field_rows": [
+    {
+      "current_value": "",
+      "field": "contract_pass",
+      "missing": true,
+      "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+      "placeholder": false,
+      "report_check": "contract_signal_pass",
+      "report_check_pass": false,
+      "required_value": "true",
+      "template_value": "true"
+    },
+    {
+      "current_value": "",
+      "field": "participant_role",
+      "missing": true,
+      "owner_note": "Participant must be new to the product workflow being released.",
+      "placeholder": false,
+      "report_check": "participant_role_new_user_pass",
+      "report_check_pass": false,
+      "required_value": "new_user | first_time_user | pilot_user",
+      "template_value": "new_user"
+    },
+    {
+      "current_value": "",
+      "field": "new_to_product",
+      "missing": true,
+      "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+      "placeholder": false,
+      "report_check": "new_to_product_pass",
+      "report_check_pass": false,
+      "required_value": "true",
+      "template_value": "true"
+    },
+    {
+      "current_value": "",
+      "field": "sample_project_id",
+      "missing": true,
+      "owner_note": "Must identify the exact sample project completed by the participant.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "sample project identifier used in the observed workflow",
+      "template_value": "SAMPLE-PROJECT-ID"
+    },
+    {
+      "current_value": "",
+      "field": "workflow_scope",
+      "missing": true,
+      "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "observed workflow steps, including reviewer package/report export",
+      "template_value": "open sample project, inspect engine/reviewer evidence package, export reviewer report"
+    },
+    {
+      "current_value": "",
+      "field": "observer",
+      "missing": true,
+      "owner_note": "Automated browser smoke tests do not satisfy this field.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "human observer or UX research owner",
+      "template_value": "UX-RESEARCH-OWNER"
+    },
+    {
+      "current_value": "",
+      "field": "started_at_utc",
+      "missing": true,
+      "owner_note": "Use ISO-8601 with timezone.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "observation start timestamp",
+      "template_value": "2026-06-16T09:00:00+00:00"
+    },
+    {
+      "current_value": "",
+      "field": "completed_at_utc",
+      "missing": true,
+      "owner_note": "Use ISO-8601 with timezone.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "observation completion timestamp",
+      "template_value": "2026-06-16T09:24:00+00:00"
+    },
+    {
+      "current_value": "",
+      "field": "completion_minutes",
+      "missing": true,
+      "owner_note": "Completion time must prove the PM 30-minute UX gate.",
+      "placeholder": false,
+      "report_check": "completion_30min_pass",
+      "report_check_pass": false,
+      "required_value": "<= 30.0",
+      "template_value": "24.0"
+    },
+    {
+      "current_value": "",
+      "field": "blocker_count",
+      "missing": true,
+      "owner_note": "Blocking usability issues keep the UX release area blocked.",
+      "placeholder": false,
+      "report_check": "blocker_count_zero_pass",
+      "report_check_pass": false,
+      "required_value": "0",
+      "template_value": "0"
+    },
+    {
+      "current_value": "",
+      "field": "evidence_ref",
+      "missing": true,
+      "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+      "placeholder": false,
+      "report_check": "required_fields_present",
+      "report_check_pass": false,
+      "required_value": "non-placeholder evidence reference",
+      "template_value": "UX-OBSERVATION-EVIDENCE-REF"
+    },
+    {
+      "current_value": "",
+      "field": "approval_decision",
+      "missing": true,
+      "owner_note": "Decision must explicitly accept the observation for release evidence.",
+      "placeholder": false,
+      "report_check": "approval_decision_pass",
+      "report_check_pass": false,
+      "required_value": "accepted | approved | pass | signed | approved_for_release",
+      "template_value": "accepted"
+    }
+  ],
+  "generated_at": "2026-06-16T18:32:46.270807+00:00",
+  "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
+  "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+  "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
+  "schema_version": "ux-new-user-observation-intake-packet.v1",
+  "summary": {
+    "completion_minutes": null,
+    "field_count": 12,
+    "field_pass_count": 0,
+    "max_completion_minutes": 30.0,
+    "observation_blocker_count": 8,
+    "observation_contract_pass": false,
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision."
+  },
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/12 | blockers=8",
+  "template_path": "docs/templates/ux_new_user_observation.template.json",
+  "validation_commands": [
+    "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+    "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+    "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+    "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+  ]
+}

@@ -50,6 +50,10 @@ python3 scripts/build_ux_new_user_observation_report.py \
   --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json \
   --out-md implementation/phase1/release_evidence/productization/ux_new_user_observation_report.md
 
+python3 scripts/build_ux_new_user_observation_intake_packet.py \
+  --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json \
+  --out-md implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.md
+
 python3 scripts/build_ai_orchestration_preflight_report.py \
   --out implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json
 
@@ -124,6 +128,7 @@ npm run ai:preflight
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
 `ux_new_user_observation_report.json`은 신규 사용자 30분 sample workflow 관찰 evidence를 고정한다. observation source가 없거나 placeholder, slow completion, blocker count, 승인 decision 누락이 있으면 UX release-area blocker로 남는다.
+`ux_new_user_observation_intake_packet.json`은 UX owner가 채워야 할 관찰 필드, `docs/templates/ux_new_user_observation.template.json`, 현재 blocker, 검증 command를 support bundle에 고정한다.
 `ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
 `ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드와 evidence path를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.
 `paid_pilot_scope_guard_report.json`은 constrained paid pilot에 필요한 검토 보조, 지정 구조군/workflow, engine/reviewer evidence package, unsupported/missing evidence blocker 문구와 evidence package artifact 존재를 검증한다.

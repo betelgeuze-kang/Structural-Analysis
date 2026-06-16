@@ -100,6 +100,9 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "ux_new_user_observation_report": (
                         "release/support_bundle/redacted/ux_new_user_observation_report.json"
                     ),
+                    "ux_new_user_observation_intake_packet": (
+                        "release/support_bundle/redacted/ux_new_user_observation_intake_packet.json"
+                    ),
                 },
             },
         ),
@@ -533,6 +536,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["validation_manual_in_failure_bundle"] is True
     assert support_area["checks"]["limitation_manual_in_failure_bundle"] is True
     assert support_area["checks"]["ux_new_user_observation_report_in_failure_bundle"] is True
+    assert support_area["checks"]["ux_new_user_observation_intake_packet_in_failure_bundle"] is True
     assert support_area["checks"]["known_issue_or_limitation_register_content_pass"] is True
     assert support_area["summary"]["license_status_intake_packet"].endswith("license_status_intake_packet.json")
     assert support_area["summary"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
@@ -545,12 +549,16 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["ux_new_user_observation_report"].endswith(
         "ux_new_user_observation_report.json"
     )
+    assert support_area["summary"]["ux_new_user_observation_intake_packet"].endswith(
+        "ux_new_user_observation_intake_packet.json"
+    )
     m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
     assert m5["checks"]["validation_manual_content_pass"] is True
     assert m5["checks"]["limitation_manual_content_pass"] is True
     assert m5["checks"]["support_bundle_validation_manual_present"] is True
     assert m5["checks"]["support_bundle_limitation_manual_present"] is True
     assert m5["checks"]["support_bundle_ux_new_user_observation_present"] is True
+    assert m5["checks"]["support_bundle_ux_new_user_observation_intake_present"] is True
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False
     assert payload["release_tiers"]["ga_enterprise_readiness_report"].endswith("ga_enterprise_readiness.json")

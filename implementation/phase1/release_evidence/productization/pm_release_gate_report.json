@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T18:26:01.164128+00:00",
+  "generated_at": "2026-06-16T18:33:01.842567+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -165,6 +165,7 @@
         "support_bundle_license_intake_packet_present": true,
         "support_bundle_limitation_manual_present": true,
         "support_bundle_pm_blocker_register_present": true,
+        "support_bundle_ux_new_user_observation_intake_present": true,
         "support_bundle_ux_new_user_observation_present": true,
         "support_bundle_validation_manual_present": true,
         "validation_manual_content_pass": true,
@@ -193,6 +194,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "support_bundle_ux_new_user_observation": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
+        "support_bundle_ux_new_user_observation_intake": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
         "support_bundle_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
         "validation_manual_required_terms": [
           "pm release gate",
@@ -553,6 +555,7 @@
         "limitation_manual_in_failure_bundle": true,
         "pm_blocker_action_register_in_failure_bundle": true,
         "rollback_runbook_present": true,
+        "ux_new_user_observation_intake_packet_in_failure_bundle": true,
         "ux_new_user_observation_report_in_failure_bundle": true,
         "validation_manual_in_failure_bundle": true
       },
@@ -567,6 +570,7 @@
         "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
         "support_bundle_missing_required_count": 0,
+        "ux_new_user_observation_intake_packet": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
         "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json"
       },
       "title": "Support"

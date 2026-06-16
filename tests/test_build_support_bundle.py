@@ -167,6 +167,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "blockers": ["observation_file_missing"],
             },
         ),
+        "ux_new_user_observation_intake_packet": _write_json(
+            tmp_path / "ux-new-user-observation-intake-packet.json",
+            {
+                "schema_version": "ux-new-user-observation-intake-packet.v1",
+                "contract_pass": False,
+                "current_blockers": ["observation_file_missing"],
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -216,6 +224,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "release_validation_manual" in payload["optional_sections"]
     assert "release_limitation_manual" in payload["optional_sections"]
     assert "ux_new_user_observation_report" in payload["optional_sections"]
+    assert "ux_new_user_observation_intake_packet" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -256,6 +265,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "observation_file_missing" in redacted_ux_observation
+    redacted_ux_intake = Path(payload["optional_sections"]["ux_new_user_observation_intake_packet"]).read_text(
+        encoding="utf-8"
+    )
+    assert "ux-new-user-observation-intake-packet.v1" in redacted_ux_intake
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

@@ -36,6 +36,9 @@ DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
 DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
 )
+DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+)
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -221,6 +224,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         return [
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT}",
+            f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
@@ -249,6 +253,7 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         return [
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT} --fail-blocked",
+            f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET} --fail-blocked",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
     return [
@@ -284,6 +289,7 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
         augmented["frontend_dependency_audit_report"] = str(DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT)
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         augmented["ux_new_user_observation_report"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_REPORT)
+        augmented["ux_new_user_observation_intake_packet"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET)
     return augmented
 
 

@@ -1,0 +1,16 @@
+{
+  "contract_pass": true,
+  "participant_role": "new_user",
+  "new_to_product": true,
+  "sample_project_id": "SAMPLE-PROJECT-ID",
+  "workflow_scope": "open sample project, inspect engine/reviewer evidence package, export reviewer report",
+  "observer": "UX-RESEARCH-OWNER",
+  "started_at_utc": "2026-06-16T09:00:00+00:00",
+  "completed_at_utc": "2026-06-16T09:24:00+00:00",
+  "completion_minutes": 24.0,
+  "blocker_count": 0,
+  "evidence_ref": "UX-OBSERVATION-EVIDENCE-REF",
+  "approval_decision": "accepted",
+  "template_only": true,
+  "note": "Template only. Do not use as release evidence until populated from an observed first-time user workflow run."
+}

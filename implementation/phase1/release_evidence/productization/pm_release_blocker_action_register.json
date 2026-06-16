@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:25:53.631854+00:00",
+  "generated_at": "2026-06-16T18:33:01.736002+00:00",
   "next_actions": [
     "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -154,6 +154,7 @@
       "evidence_artifacts": {
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_new_user_observation_intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
         "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
@@ -186,6 +187,7 @@
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
@@ -195,6 +197,7 @@
       "title": "UX",
       "verification_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json --fail-blocked",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
     },
@@ -210,6 +213,7 @@
       "evidence_artifacts": {
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "ux_new_user_observation_intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
         "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
         "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
@@ -242,6 +246,7 @@
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
       ],
@@ -251,6 +256,7 @@
       "title": "UX",
       "verification_commands": [
         "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json --fail-blocked",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
     },

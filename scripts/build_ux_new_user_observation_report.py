@@ -154,6 +154,8 @@ def build_report(
         "required_fields": list(REQUIRED_FIELDS),
         "validation_commands": [
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OUT}",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py "
+            "--out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
             "python3 scripts/report_pm_release_gate.py "
             "--out implementation/phase1/release_evidence/productization/pm_release_gate_report.json "
             "--out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",

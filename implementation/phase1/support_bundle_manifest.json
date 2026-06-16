@@ -200,11 +200,11 @@
     },
     {
       "available": true,
-      "bytes": 26111,
+      "bytes": 27147,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "9c7b8ebe7b921881a0d84ccf9cd5027c7a05dfd4c1cd2fd075a1d87f021707f5",
-      "sha256": "9c7b8ebe7b921881a0d84ccf9cd5027c7a05dfd4c1cd2fd075a1d87f021707f5",
+      "redacted_sha256": "71255c62c938a932405b177a709ace4f579a329e00db965093695171c01d1e3f",
+      "sha256": "71255c62c938a932405b177a709ace4f579a329e00db965093695171c01d1e3f",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -281,12 +281,21 @@
     },
     {
       "available": true,
-      "bytes": 2769,
+      "bytes": 2942,
       "label": "ux_new_user_observation_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
-      "redacted_sha256": "fa370b7ed6b484f994b1d6b996981b9776d5f573e2b41e02ebcbff522a7e561c",
-      "sha256": "fa370b7ed6b484f994b1d6b996981b9776d5f573e2b41e02ebcbff522a7e561c",
+      "redacted_sha256": "f07dc7688a53f63c09a088e6c2be714b799a76f5c2411b6cd8ab2ed0cf47fdc2",
+      "sha256": "f07dc7688a53f63c09a088e6c2be714b799a76f5c2411b6cd8ab2ed0cf47fdc2",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
+    },
+    {
+      "available": true,
+      "bytes": 7190,
+      "label": "ux_new_user_observation_intake_packet",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
+      "redacted_sha256": "c873002c17258d9e8a1bb00988b886e0c552e240ae435a84fc27ff0318f99204",
+      "sha256": "c873002c17258d9e8a1bb00988b886e0c552e240ae435a84fc27ff0318f99204",
+      "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
     }
   ],
   "audit_digest": {
@@ -294,16 +303,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T18:25:58.222104+00:00",
+    "generated_at": "2026-06-16T18:33:01.800208+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 32,
-    "available_artifact_count": 32,
+    "artifact_count": 33,
+    "available_artifact_count": 33,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "cecc45caf29bfc57b3797857c149279c431347db0cdab09e1961ad32d13379bc"
+    "sha256": "fe9091c481d15ff1a557dd76de7d304b60e20c8769b4f6806bd3b2da63e6e67c"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -319,7 +328,7 @@
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-06-16T18:25:58.222859+00:00",
+  "generated_at": "2026-06-16T18:33:01.800977+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -336,6 +345,7 @@
     "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
     "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
     "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
+    "ux_new_user_observation_intake_packet": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
     "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json"
   },
   "reason_code": "PASS",
@@ -364,5 +374,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=32/32 | redaction=True | roundtrip=True"
+  "summary_line": "Support bundle: PASS | artifacts=33/33 | redaction=True | roundtrip=True"
 }

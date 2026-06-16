@@ -700,6 +700,9 @@ def _packaging_milestone(
         "support_bundle_ux_new_user_observation_present": bool(
             support_optional_sections.get("ux_new_user_observation_report")
         ),
+        "support_bundle_ux_new_user_observation_intake_present": bool(
+            support_optional_sections.get("ux_new_user_observation_intake_packet")
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
         "validation_manual_content_pass": _contains_terms(
@@ -753,6 +756,11 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_ux_new_user_observation_present"]
             else []
         ),
+        *(
+            ["support_bundle_ux_new_user_observation_intake_missing"]
+            if not gate_checks["support_bundle_ux_new_user_observation_intake_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
         *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
@@ -788,6 +796,9 @@ def _packaging_milestone(
             ),
             "support_bundle_ux_new_user_observation": str(
                 support_optional_sections.get("ux_new_user_observation_report", "")
+            ),
+            "support_bundle_ux_new_user_observation_intake": str(
+                support_optional_sections.get("ux_new_user_observation_intake_packet", "")
             ),
             "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
             "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
@@ -1484,6 +1495,9 @@ def _build_release_area_matrix(
         "ux_new_user_observation_report_in_failure_bundle": bool(
             support_optional_sections.get("ux_new_user_observation_report")
         ),
+        "ux_new_user_observation_intake_packet_in_failure_bundle": bool(
+            support_optional_sections.get("ux_new_user_observation_intake_packet")
+        ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
@@ -1537,6 +1551,11 @@ def _build_release_area_matrix(
             if not support_area_checks["ux_new_user_observation_report_in_failure_bundle"]
             else []
         ),
+        *(
+            ["ux_new_user_observation_intake_packet_missing_from_failure_bundle"]
+            if not support_area_checks["ux_new_user_observation_intake_packet_in_failure_bundle"]
+            else []
+        ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
         *(["rollback_runbook_missing"] if not support_area_checks["rollback_runbook_present"] else []),
     ]
@@ -1569,6 +1588,9 @@ def _build_release_area_matrix(
                 ),
                 "ux_new_user_observation_report": str(
                     support_optional_sections.get("ux_new_user_observation_report", "")
+                ),
+                "ux_new_user_observation_intake_packet": str(
+                    support_optional_sections.get("ux_new_user_observation_intake_packet", "")
                 ),
             },
             artifacts={
