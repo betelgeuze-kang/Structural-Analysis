@@ -1,8 +1,8 @@
 {
   "archive_roundtrip": {
-    "actual_artifact_count": 37,
-    "artifact_count": 37,
-    "member_count": 40,
+    "actual_artifact_count": 38,
+    "artifact_count": 38,
+    "member_count": 41,
     "missing_members": [],
     "pass": true,
     "reason": "PASS"
@@ -211,9 +211,18 @@
       "bytes": 30666,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "acb2b86e3ff98ffa59269176bbfb25d074723ee64623e8d5df17fa7db8812f7f",
-      "sha256": "acb2b86e3ff98ffa59269176bbfb25d074723ee64623e8d5df17fa7db8812f7f",
+      "redacted_sha256": "b055e6eed97ef6ff5a0b3ba1d502595481cbab7054db66c8c6e1783b703e7bb6",
+      "sha256": "b055e6eed97ef6ff5a0b3ba1d502595481cbab7054db66c8c6e1783b703e7bb6",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+    },
+    {
+      "available": true,
+      "bytes": 19255,
+      "label": "pm_release_blocker_closure_board",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
+      "redacted_sha256": "13c02710538893cd8b31954f268a9c10364851b38093ee05a6b56ec3fa69e1c8",
+      "sha256": "13c02710538893cd8b31954f268a9c10364851b38093ee05a6b56ec3fa69e1c8",
+      "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
@@ -347,16 +356,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T19:07:15.950477+00:00",
+    "generated_at": "2026-06-16T19:17:43.311086+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 37,
-    "available_artifact_count": 37,
+    "artifact_count": 38,
+    "available_artifact_count": 38,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "33cb61c6c2eb36ebc723f2c2917f65bb8345ea026c1fe90ba756ac491d583b9c"
+    "sha256": "a2137ffeb39a55eee0c99d3b14fc045e84b5a94259da7eec5a85be3a7a754a20"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -377,9 +386,9 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 80690,
+    "bytes": 83221,
     "error": "",
-    "member_count": 40,
+    "member_count": 41,
     "members": [
       "audit_digest.json",
       "license_status.json",
@@ -400,6 +409,7 @@
       "redacted/package_json.json",
       "redacted/paid_pilot_scope_guard_report.json",
       "redacted/pm_release_blocker_action_register.json",
+      "redacted/pm_release_blocker_closure_board.json",
       "redacted/project_ops_deployment_drill.json",
       "redacted/project_ops_snapshot.json",
       "redacted/pyproject.toml",
@@ -423,9 +433,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "1daeda211fb76f4afd5ef7d25099717cb25cf50b65368a9041d8a9f5c8acd4d8"
+    "sha256": "dc08aabbc95cd172b6798e5c31b9651e247335b310bfea838835edfb933cfd46"
   },
-  "generated_at": "2026-06-16T19:07:15.959798+00:00",
+  "generated_at": "2026-06-16T19:17:43.320691+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -444,6 +454,7 @@
     "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
     "paid_pilot_scope_guard_report": "implementation/phase1/release/support_bundle/redacted/paid_pilot_scope_guard_report.json",
     "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+    "pm_release_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
     "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
     "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
     "ux_new_user_observation_intake_packet": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
@@ -475,5 +486,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=37/37 | redaction=True | roundtrip=True | archive=True"
+  "summary_line": "Support bundle: PASS | artifacts=38/38 | redaction=True | roundtrip=True | archive=True"
 }

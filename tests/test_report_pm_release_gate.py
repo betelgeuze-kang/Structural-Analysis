@@ -107,6 +107,7 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     ),
                     "license_status_template": "release/support_bundle/redacted/license_status_template.json",
                     "pm_release_blocker_action_register": "release/support_bundle/redacted/pm_release_blocker_action_register.json",
+                    "pm_release_blocker_closure_board": "release/support_bundle/redacted/pm_release_blocker_closure_board.json",
                     "frontend_dependency_audit_report": (
                         "release/support_bundle/redacted/frontend_dependency_audit_report.json"
                     ),
@@ -123,6 +124,20 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
         ),
         "pm_release_blocker_action_register": _write(
             tmp_path / "pm-release-blocker-action-register.json",
+            {
+                "contract_pass": True,
+                "summary": {
+                    "open_blocker_count": 0,
+                    "handoff_ready_count": 0,
+                    "handoff_not_ready_count": 0,
+                    "external_owner_input_ready_count": 0,
+                    "all_open_blockers_have_handoff": True,
+                },
+                "rows": [],
+            },
+        ),
+        "pm_release_blocker_closure_board": _write(
+            tmp_path / "pm-release-blocker-closure-board.json",
             {
                 "contract_pass": True,
                 "summary": {
@@ -565,7 +580,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["license_status_closure_report_in_failure_bundle"] is True
     assert support_area["checks"]["license_status_template_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_in_failure_bundle"] is True
+    assert support_area["checks"]["pm_blocker_closure_board_in_failure_bundle"] is True
     assert support_area["checks"]["pm_blocker_action_register_handoff_ready_pass"] is True
+    assert support_area["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
+    assert support_area["checks"]["pm_blocker_closure_board_register_count_match"] is True
     assert support_area["checks"]["frontend_dependency_audit_in_failure_bundle"] is True
     assert support_area["checks"]["validation_manual_in_failure_bundle"] is True
     assert support_area["checks"]["limitation_manual_in_failure_bundle"] is True
@@ -586,7 +604,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["pm_release_blocker_action_register"].endswith(
         "pm_release_blocker_action_register.json"
     )
+    assert support_area["summary"]["pm_release_blocker_closure_board"].endswith(
+        "pm_release_blocker_closure_board.json"
+    )
     assert support_area["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
+    assert support_area["summary"]["pm_blocker_closure_board_handoff_not_ready_count"] == 0
     assert support_area["summary"]["release_validation_manual"].endswith("release_validation_manual.md")
     assert support_area["summary"]["release_limitation_manual"].endswith("release_limitation_manual.md")
     assert support_area["summary"]["ux_new_user_observation_report"].endswith(
@@ -605,7 +627,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["support_bundle_license_status_closure_present"] is True
     assert m5["checks"]["support_bundle_license_status_template_present"] is True
     assert m5["checks"]["pm_blocker_register_handoff_ready_pass"] is True
+    assert m5["checks"]["support_bundle_pm_blocker_closure_board_present"] is True
+    assert m5["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
+    assert m5["checks"]["pm_blocker_closure_board_register_count_match"] is True
     assert m5["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
+    assert m5["summary"]["pm_blocker_closure_board_handoff_not_ready_count"] == 0
     assert m5["checks"]["support_bundle_validation_manual_present"] is True
     assert m5["checks"]["support_bundle_limitation_manual_present"] is True
     assert m5["checks"]["support_bundle_ux_new_user_observation_present"] is True
