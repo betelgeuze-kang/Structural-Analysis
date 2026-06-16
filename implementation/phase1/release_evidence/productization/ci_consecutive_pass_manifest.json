@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "pr:pr_pull_request_run_source_absent",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
     "nightly:nightly_github_actions_query_failed",
     "nightly:nightly_github_actions_workflow_not_registered",
@@ -14,7 +15,7 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-06-16T18:57:15.740944+00:00",
+  "generated_at": "2026-06-16T19:55:50.002963+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
@@ -36,6 +37,7 @@
       "missing_consecutive_pass_count": 30,
       "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
       "pass_count": 230,
+      "pull_request_run_source_present": null,
       "release_consecutive_pass_count": 0,
       "release_streak_source_policy": "github_actions_required",
       "report_count": 230,
@@ -1657,6 +1659,7 @@
     },
     "pr": {
       "blockers": [
+        "pr_pull_request_run_source_absent",
         "pr_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
@@ -1673,8 +1676,9 @@
       "local_consecutive_pass_count": 2,
       "local_workflow_present": true,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
       "pass_count": 2,
+      "pull_request_run_source_present": false,
       "release_consecutive_pass_count": 0,
       "release_streak_source_policy": "github_actions_required",
       "report_count": 2,
@@ -1694,7 +1698,7 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "missing_tracked_ci_evidence",
+      "streak_source": "no_pull_request_run_source",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -1713,7 +1717,8 @@
     "nightly_threshold_pass": false,
     "pr_consecutive_pass_count": 0,
     "pr_missing_consecutive_pass_count": 30,
-    "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+    "pr_owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+    "pr_pull_request_run_source_present": false,
     "pr_threshold_pass": false
   },
   "threshold": 30

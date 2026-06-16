@@ -70,6 +70,7 @@ def _lane_row(lane: str, manifest: dict[str, Any], github_actions: dict[str, Any
         "github_actions_query_error": str(manifest_lane.get("github_actions_query_error", "")),
         "github_actions_queried_run_count": _as_int(manifest_lane.get("github_actions_queried_run_count")),
         "github_actions_filtered_run_count": _as_int(manifest_lane.get("github_actions_filtered_run_count")),
+        "pull_request_run_source_present": manifest_lane.get("pull_request_run_source_present"),
         "github_actions_ignored_event_names": [
             str(item)
             for item in manifest_lane.get("github_actions_ignored_event_names", [])
@@ -121,6 +122,9 @@ def build_packet(
             ),
             "pr_github_actions_workflow_registered": next(
                 row["github_actions_workflow_registered"] for row in lane_rows if row["lane"] == "pr"
+            ),
+            "pr_pull_request_run_source_present": next(
+                row["pull_request_run_source_present"] for row in lane_rows if row["lane"] == "pr"
             ),
             "nightly_github_actions_workflow_registered": next(
                 row["github_actions_workflow_registered"] for row in lane_rows if row["lane"] == "nightly"

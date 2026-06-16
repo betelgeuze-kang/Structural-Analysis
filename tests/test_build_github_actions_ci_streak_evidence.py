@@ -70,7 +70,47 @@ def test_build_evidence_filters_pr_and_nightly_events_for_streaks() -> None:
     assert payload["lanes"]["pr"]["queried_run_count"] == 4
     assert payload["lanes"]["pr"]["ignored_event_count"] == 1
     assert payload["lanes"]["pr"]["workflow_registered"] is True
+    assert payload["lanes"]["pr"]["pull_request_run_source_present"] is True
+    assert "pr_pull_request_run_source_absent" not in payload["lanes"]["pr"]["blockers"]
     assert payload["summary"]["nightly_workflow_registered"] is True
+
+
+def test_build_evidence_flags_missing_pull_request_run_source_when_only_push_events() -> None:
+    base = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    pr_rows = [_run(i, "push", "success", base - timedelta(minutes=i)) for i in range(3)]
+
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        pr_rows=pr_rows,
+        nightly_rows=[],
+        registered_workflows=[
+            {"id": 1, "name": "CI", "path": ".github/workflows/ci.yml", "state": "active"},
+            {
+                "id": 2,
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "state": "active",
+            },
+        ],
+        local_workflows=[
+            {"name": "CI", "path": ".github/workflows/ci.yml", "exists": True},
+            {"name": "Nightly Full Quality", "path": ".github/workflows/nightly-full-quality.yml", "exists": True},
+        ],
+    )
+
+    pr = payload["lanes"]["pr"]
+
+    assert pr["workflow_registered"] is True
+    assert pr["queried_run_count"] == 3
+    assert pr["run_count"] == 0
+    assert pr["ignored_event_names"] == ["push"]
+    assert pr["pull_request_run_source_present"] is False
+    assert "pr_pull_request_run_source_absent" in pr["blockers"]
+    assert "pr_github_actions_3_consecutive_pass_evidence_missing" in pr["blockers"]
 
 
 def test_build_evidence_records_missing_registered_workflow_and_sanitized_query_error() -> None:

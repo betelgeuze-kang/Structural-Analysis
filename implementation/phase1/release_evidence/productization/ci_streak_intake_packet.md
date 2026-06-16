@@ -7,7 +7,7 @@
 
 | Lane | Streak | Missing | Source | Workflow Registered | Pass | Owner Action |
 |---|---:|---:|---|---|---|---|
-| `pr` | `0/30` | `30` | `missing_tracked_ci_evidence` | `True` | `False` | Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff. |
+| `pr` | `0/30` | `30` | `no_pull_request_run_source` | `True` | `False` | No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff. |
 | `nightly` | `0/30` | `30` | `github_actions_workflow_not_registered` | `False` | `False` | Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first. |
 
 ## Validation Commands

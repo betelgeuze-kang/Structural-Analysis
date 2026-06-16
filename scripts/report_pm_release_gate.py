@@ -280,6 +280,16 @@ def _manifest_lane_text(payload: dict[str, Any], lane: str, key: str) -> str:
     return str(lane_payload.get(key, "") or "")
 
 
+def _manifest_lane_value(payload: dict[str, Any], lane: str, key: str) -> Any:
+    lanes = payload.get("lanes")
+    if not isinstance(lanes, dict):
+        return None
+    lane_payload = lanes.get(lane)
+    if not isinstance(lane_payload, dict):
+        return None
+    return lane_payload.get(key)
+
+
 def _ci_lane_owner_action(lane: str, threshold: int, consecutive: int) -> str:
     if consecutive >= threshold:
         return "No release action required; consecutive pass threshold is satisfied."
@@ -1147,6 +1157,9 @@ def _build_release_area_matrix(
                 ),
                 "pr_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - pr_streak),
                 "nightly_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - nightly_streak),
+                "pr_pull_request_run_source_present": _manifest_lane_value(
+                    ci_streak_manifest, "pr", "pull_request_run_source_present"
+                ),
                 "pr_owner_action": pr_owner_action,
                 "nightly_owner_action": nightly_owner_action,
                 "pr_claim_boundary": pr_claim_boundary,

@@ -49,7 +49,8 @@ def _pm_report(path: Path, *, blockers: list[str] | None = None) -> Path:
                         "required_consecutive_pass_count": 30,
                         "pr_pass_streak_count": 2,
                         "pr_missing_consecutive_pass_count": 28,
-                        "pr_owner_action": "Collect 28 additional consecutive successful PR CI run(s).",
+                        "pr_pull_request_run_source_present": False,
+                        "pr_owner_action": "No pull_request-triggered CI runs have been observed.",
                         "pr_claim_boundary": "Tracked PR CI evidence is required.",
                     },
                     "artifacts": {
@@ -98,7 +99,7 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert ci_row["next_action"] == ci_row["owner_action"]
     assert ci_row["external_input_required"] is True
     assert ci_row["resolution_type"] == "external_tracked_ci_evidence_required"
-    assert ci_row["owner_action"] == "Collect 28 additional consecutive successful PR CI run(s)."
+    assert ci_row["owner_action"] == "No pull_request-triggered CI runs have been observed."
     assert ci_row["claim_boundary"] == "Tracked PR CI evidence is required."
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in ci_row["reproduction_commands"])
     assert any("build_ci_streak_intake_packet.py" in command for command in ci_row["reproduction_commands"])
@@ -110,9 +111,10 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert ci_row["handoff_state"] == "external_owner_input_ready"
     assert ci_row["handoff"]["expected_intake_artifact"] == "ci_streak_intake_packet"
     assert ci_row["handoff"]["checks"]["expected_intake_artifact_present"] is True
-    assert ci_row["evidence_status"]["state"] == "missing_tracked_ci_streak_evidence"
+    assert ci_row["evidence_status"]["state"] == "no_pull_request_run_source"
     assert ci_row["evidence_status"]["lane"] == "pr"
     assert ci_row["evidence_status"]["missing_consecutive_pass_count"] == 28
+    assert ci_row["evidence_status"]["pull_request_run_source_present"] is False
     assert ci_row["evidence_snapshot"]["pr_missing_consecutive_pass_count"] == 28
 
     security_row = rows["security::license_status_not_configured"]

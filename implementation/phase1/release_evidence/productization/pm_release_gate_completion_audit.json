@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:40:59.685899+00:00",
+  "generated_at": "2026-06-16T19:55:50.165691+00:00",
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
@@ -48,8 +48,9 @@
         "pr_github_actions_pass_streak_count": 0,
         "pr_local_pass_streak_count": 2,
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Collect 30 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+        "pr_owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
         "pr_pass_streak_count": 0,
+        "pr_pull_request_run_source_present": false,
         "required_consecutive_pass_count": 30
       },
       "title": "Basic CI"

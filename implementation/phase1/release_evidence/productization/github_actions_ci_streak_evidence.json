@@ -1,7 +1,7 @@
 {
   "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:57:15.031432+00:00",
+  "generated_at": "2026-06-16T19:55:48.528111+00:00",
   "lanes": {
     "nightly": {
       "allowed_events": [
@@ -24,6 +24,7 @@
       },
       "local_workflow_present": true,
       "pass_count": 0,
+      "pull_request_run_source_present": true,
       "queried_run_count": 0,
       "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
       "registered_workflow": {},
@@ -39,6 +40,7 @@
         "pull_request"
       ],
       "blockers": [
+        "pr_pull_request_run_source_absent",
         "pr_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
@@ -54,6 +56,7 @@
       },
       "local_workflow_present": true,
       "pass_count": 0,
+      "pull_request_run_source_present": false,
       "queried_run_count": 100,
       "query_error": "",
       "registered_workflow": {
@@ -80,6 +83,7 @@
     "nightly_threshold_pass": false,
     "nightly_workflow_registered": false,
     "pr_consecutive_pass_count": 0,
+    "pr_pull_request_run_source_present": false,
     "pr_threshold_pass": false,
     "pr_workflow_registered": true
   },

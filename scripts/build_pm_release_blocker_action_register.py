@@ -312,14 +312,19 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         local_count = int(summary.get(f"{lane}_local_pass_streak_count", 0) or 0)
         github_count = int(summary.get(f"{lane}_github_actions_pass_streak_count", 0) or 0)
         missing = int(summary.get(f"{lane}_missing_consecutive_pass_count", max(0, required - release_count)) or 0)
+        pull_request_source_present = summary.get("pr_pull_request_run_source_present")
+        state = "ready_for_pm_regeneration" if release_count >= required else "missing_tracked_ci_streak_evidence"
+        if lane == "pr" and pull_request_source_present is False and release_count < required:
+            state = "no_pull_request_run_source"
         return {
-            "state": "ready_for_pm_regeneration" if release_count >= required else "missing_tracked_ci_streak_evidence",
+            "state": state,
             "lane": lane,
             "required_consecutive_pass_count": required,
             "release_consecutive_pass_count": release_count,
             "github_actions_consecutive_pass_count": github_count,
             "local_consecutive_pass_count": local_count,
             "missing_consecutive_pass_count": missing,
+            "pull_request_run_source_present": pull_request_source_present,
             "source_policy": "github_actions_required",
         }
     if namespace == "security" and "license" in code:

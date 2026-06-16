@@ -156,6 +156,16 @@ def _lane_from_rows(
         for row in sorted(rows, key=lambda item: str(item.get("createdAt", "")), reverse=True)
         if str(row.get("event", "")).lower() in allowed_events
     ]
+    ignored_event_names = sorted(
+        {
+            str(row.get("event", "") or "")
+            for row in rows
+            if str(row.get("event", "")).lower() not in allowed_events
+        }
+    )
+    pull_request_run_source_present = True
+    if lane == "pr":
+        pull_request_run_source_present = bool(relevant)
     consecutive = 0
     for row in relevant:
         if not row["pass"]:
@@ -166,6 +176,8 @@ def _lane_from_rows(
         blockers.append("github_actions_query_failed")
     if registered_workflows and not registered_workflow:
         blockers.append("github_actions_workflow_not_registered")
+    if lane == "pr" and registered_workflow and rows and not pull_request_run_source_present:
+        blockers.append("pr_pull_request_run_source_absent")
     if consecutive < threshold:
         blockers.append(f"{lane}_github_actions_{threshold}_consecutive_pass_evidence_missing")
     return {
@@ -181,13 +193,8 @@ def _lane_from_rows(
         "queried_run_count": len(rows),
         "run_count": len(relevant),
         "ignored_event_count": max(0, len(rows) - len(relevant)),
-        "ignored_event_names": sorted(
-            {
-                str(row.get("event", "") or "")
-                for row in rows
-                if str(row.get("event", "")).lower() not in allowed_events
-            }
-        ),
+        "ignored_event_names": ignored_event_names,
+        "pull_request_run_source_present": pull_request_run_source_present,
         "pass_count": sum(1 for row in relevant if row["pass"]),
         "consecutive_pass_count": consecutive,
         "threshold_pass": consecutive >= threshold,
@@ -260,6 +267,7 @@ def build_evidence(
         "lanes": lanes,
         "summary": {
             "pr_consecutive_pass_count": lanes["pr"]["consecutive_pass_count"],
+            "pr_pull_request_run_source_present": lanes["pr"]["pull_request_run_source_present"],
             "nightly_consecutive_pass_count": lanes["nightly"]["consecutive_pass_count"],
             "pr_threshold_pass": lanes["pr"]["threshold_pass"],
             "nightly_threshold_pass": lanes["nightly"]["threshold_pass"],

@@ -184,6 +184,7 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                         "consecutive_pass_count": 30,
                         "local_consecutive_pass_count": 30,
                         "github_actions_consecutive_pass_count": 30,
+                        "pull_request_run_source_present": True,
                         "missing_consecutive_pass_count": 0,
                         "threshold_pass": True,
                         "streak_source": "github_actions",
@@ -557,6 +558,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     basic_ci_area = next(row for row in payload["release_area_matrix"] if row["area"] == "basic_ci")
     assert basic_ci_area["summary"]["pr_missing_consecutive_pass_count"] == 0
+    assert basic_ci_area["summary"]["pr_pull_request_run_source_present"] is True
     assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
     assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]
     assert basic_ci_area["artifacts"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
@@ -677,9 +679,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                     "consecutive_pass_count": 2,
                     "local_consecutive_pass_count": 2,
                     "github_actions_consecutive_pass_count": 0,
+                    "pull_request_run_source_present": False,
                     "missing_consecutive_pass_count": 28,
                     "threshold_pass": False,
-                    "owner_action": "Collect 28 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+                    "owner_action": "No pull_request-triggered CI runs have been observed.",
                     "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
                 },
                 "nightly": {
@@ -706,7 +709,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload_with_ci_gap["release_area_gate_ready"] is False
     assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing" in payload_with_ci_gap["release_area_blockers"]
     assert ci_gap_area["summary"]["pr_missing_consecutive_pass_count"] == 28
-    assert ci_gap_area["summary"]["pr_owner_action"].startswith("Collect 28 additional consecutive successful PR CI")
+    assert ci_gap_area["summary"]["pr_pull_request_run_source_present"] is False
+    assert ci_gap_area["summary"]["pr_owner_action"].startswith("No pull_request-triggered CI runs")
     assert "tracked PR CI evidence" in ci_gap_area["summary"]["pr_claim_boundary"]
 
     _write(base_kwargs["ci_require_hip"], {"reason_code": "ERR_HIP_KERNEL_SMOKE_FAIL"})
