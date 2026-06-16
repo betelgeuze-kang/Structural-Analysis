@@ -69,6 +69,10 @@ python3 scripts/build_license_status_intake_packet.py \
 python3 scripts/build_frontend_dependency_audit_report.py \
   --out implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json
 
+python3 scripts/build_ga_enterprise_readiness_report.py \
+  --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json \
+  --out-md implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.md
+
 python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
@@ -105,6 +109,7 @@ npm run ai:preflight
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.
 `license_status_intake_packet.json`은 security blocker를 닫기 위해 제품/법무 승인자가 채워야 할 필드, 현재 blocker, 검증 command를 따로 고정한다.
+`ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
 
 최근 닫힌 release-area blocker:
 
@@ -126,4 +131,4 @@ npm run ai:preflight
 
 OpenSees evidence는 topology edge-list canonicalization과 exact JSON reload trace까지이며 full OpenSees solver execution roundtrip 주장은 아니다.
 
-GA/Enterprise는 이 로컬 gate와 별개로 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence가 필요하다. 현재 measured cases는 `304`로 GA의 `300+` case-count 기준은 충족했지만, 독립 V&V와 고객 audit/failure bundle/SLA evidence가 없으므로 `ga_enterprise_ready=false`가 맞다.
+GA/Enterprise는 이 로컬 gate와 별개로 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence가 필요하다. 현재 `ga_enterprise_readiness_report.json` 기준 measured cases `304/300`, signed registry, support bundle은 통과하지만 독립 V&V, family signoff, 고객 audit/failure bundle/SLA evidence가 없으므로 `ga_enterprise_ready=false`가 맞다.

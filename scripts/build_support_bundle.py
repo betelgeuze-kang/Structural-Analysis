@@ -57,6 +57,9 @@ DEFAULT_LICENSE_STATUS_INTAKE_PACKET = Path(
 DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT = Path(
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json"
 )
+DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+)
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -283,6 +286,7 @@ def build_support_bundle(
     ci_streak_intake_packet: Path | None = DEFAULT_CI_STREAK_INTAKE_PACKET,
     license_status_intake_packet: Path | None = DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
     frontend_dependency_audit_report: Path | None = DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
+    ga_enterprise_readiness_report: Path | None = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -316,6 +320,7 @@ def build_support_bundle(
         ("ci_streak_intake_packet", ci_streak_intake_packet),
         ("license_status_intake_packet", license_status_intake_packet),
         ("frontend_dependency_audit_report", frontend_dependency_audit_report),
+        ("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -451,6 +456,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
     )
+    parser.add_argument(
+        "--ga-enterprise-readiness-report",
+        type=Path,
+        default=DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -489,6 +499,7 @@ def main(argv: list[str] | None = None) -> int:
         ci_streak_intake_packet=args.ci_streak_intake_packet,
         license_status_intake_packet=args.license_status_intake_packet,
         frontend_dependency_audit_report=args.frontend_dependency_audit_report,
+        ga_enterprise_readiness_report=args.ga_enterprise_readiness_report,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

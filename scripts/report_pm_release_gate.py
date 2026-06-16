@@ -68,6 +68,9 @@ DEFAULT_LICENSE_STATUS_CLOSURE = Path(
 DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
 )
+DEFAULT_GA_ENTERPRISE_READINESS = Path(
+    "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/commercial-structural-solver-product-gap-ledger.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/structural-analysis-ai-engine-gap-ledger.md")
 
@@ -121,6 +124,10 @@ def _as_float(value: Any, default: float = 0.0) -> float:
 
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
 
 
 def _in_release_evidence(path: Path) -> bool:
@@ -1529,6 +1536,7 @@ def build_report(
     license_status: Path = DEFAULT_LICENSE_STATUS,
     license_status_closure: Path = DEFAULT_LICENSE_STATUS_CLOSURE,
     ai_orchestration_preflight: Path = DEFAULT_AI_ORCHESTRATION_PREFLIGHT,
+    ga_enterprise_readiness: Path = DEFAULT_GA_ENTERPRISE_READINESS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -1586,7 +1594,6 @@ def build_report(
         and packaging_ok
         and measured_cases >= 20
     )
-    ga_enterprise_ready = False
     blockers = [
         f"{row['milestone']}::{blocker}"
         for row in milestones
@@ -1642,15 +1649,20 @@ def build_report(
     release_area_blockers = _release_area_blockers(release_area_matrix)
     release_area_ready = all(bool(row["ok"]) for row in release_area_matrix)
     full_release_gate_ready = bool(limited_ready and release_area_ready)
-    ga_blockers = [
-        "independent_vv_missing",
-        "family_validation_manual_signoff_missing",
-        "customer_audit_failure_bundle_sla_missing",
-        *(["ga_validation_case_count_lt_300"] if measured_cases < ga_validation_cases else []),
-        *release_area_blockers,
-    ]
+    ga_readiness = _load_json(ga_enterprise_readiness)
+    ga_readiness_blockers = [str(row) for row in _as_list(ga_readiness.get("blockers"))]
+    if not ga_readiness:
+        ga_readiness_blockers = [
+            "independent_vv_missing",
+            "family_validation_manual_signoff_missing",
+            "customer_audit_failure_bundle_sla_missing",
+            *(["ga_validation_case_count_lt_300"] if measured_cases < ga_validation_cases else []),
+        ]
+    ga_blockers = [*ga_readiness_blockers, *release_area_blockers]
+    ga_enterprise_ready = bool(full_release_gate_ready and _reason_pass(ga_readiness) and not ga_readiness_blockers)
     ai_orchestration = _load_json(ai_orchestration_preflight)
     ai_orchestration_summary = _summary(ai_orchestration)
+    ga_readiness_summary = _summary(ga_readiness)
     if full_release_gate_ready:
         recommended_scope = "Limited Commercial release candidate"
     elif limited_ready:
@@ -1708,9 +1720,13 @@ def build_report(
             "limited_commercial_milestone_ready": limited_ready,
             "limited_commercial_full_gate_ready": full_release_gate_ready,
             "ga_enterprise": ga_enterprise_ready,
+            "ga_enterprise_evidence_gate_pass": _reason_pass(ga_readiness),
+            "ga_enterprise_readiness_report": str(ga_enterprise_readiness),
+            "ga_enterprise_readiness_summary_line": str(ga_readiness.get("summary_line", "")),
             "ga_validation_case_threshold": ga_validation_cases,
             "ga_validation_case_threshold_met": measured_cases >= ga_validation_cases,
             "ga_enterprise_blockers": ga_blockers,
+            "ga_enterprise_owner_action": str(ga_readiness_summary.get("owner_action", "")),
             "ga_enterprise_note": (
                 "GA still requires independent V&V, family validation manuals, signed release registry, "
                 "customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs."
@@ -1790,6 +1806,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--license-status", type=Path, default=DEFAULT_LICENSE_STATUS)
     parser.add_argument("--license-status-closure", type=Path, default=DEFAULT_LICENSE_STATUS_CLOSURE)
     parser.add_argument("--ai-orchestration-preflight", type=Path, default=DEFAULT_AI_ORCHESTRATION_PREFLIGHT)
+    parser.add_argument("--ga-enterprise-readiness", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS)
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -1852,6 +1869,7 @@ def main(argv: list[str] | None = None) -> int:
         license_status=args.license_status,
         license_status_closure=args.license_status_closure,
         ai_orchestration_preflight=args.ai_orchestration_preflight,
+        ga_enterprise_readiness=args.ga_enterprise_readiness,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

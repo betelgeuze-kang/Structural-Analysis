@@ -290,6 +290,25 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 },
             },
         ),
+        "ga_enterprise_readiness": _write(
+            tmp_path / "ga_enterprise_readiness.json",
+            {
+                "contract_pass": False,
+                "reason_code": "ERR_GA_ENTERPRISE_EVIDENCE_PENDING",
+                "summary_line": "GA enterprise readiness: BLOCKED | independent_vv=False",
+                "summary": {
+                    "owner_action": (
+                        "Attach independent V&V attestation, family validation-manual signoff, "
+                        "and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release."
+                    )
+                },
+                "blockers": [
+                    "independent_vv_missing",
+                    "family_validation_manual_signoff_missing",
+                    "customer_audit_failure_bundle_sla_missing",
+                ],
+            },
+        ),
     }
 
 
@@ -472,6 +491,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "pm_release_blocker_action_register.json"
     )
     assert payload["ga_enterprise_ready"] is False
+    assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False
+    assert payload["release_tiers"]["ga_enterprise_readiness_report"].endswith("ga_enterprise_readiness.json")
+    assert "independent_vv_missing" in payload["release_tiers"]["ga_enterprise_blockers"]
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
 

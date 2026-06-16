@@ -1,0 +1,65 @@
+{
+  "artifacts": {
+    "customer_audit_failure_bundle_sla": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+    "family_validation_manual_signoff": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+    "independent_vv_attestation": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+    "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json",
+    "release_registry": "implementation/phase1/release/release_registry.json",
+    "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+    "validation_manual": "docs/commercial-structural-solver-product-gap-ledger.md"
+  },
+  "blockers": [
+    "independent_vv_missing",
+    "family_validation_manual_signoff_missing",
+    "customer_audit_failure_bundle_sla_missing"
+  ],
+  "checks": {
+    "customer_audit_failure_bundle_sla_pass": false,
+    "customer_audit_failure_bundle_sla_present": false,
+    "family_validation_manual_signoff_pass": false,
+    "family_validation_manual_signoff_present": false,
+    "ga_validation_case_threshold_pass": true,
+    "independent_vv_attestation_pass": false,
+    "independent_vv_attestation_present": false,
+    "signed_release_registry_pass": true,
+    "support_failure_bundle_export_pass": true,
+    "validation_manual_present": true
+  },
+  "claim_boundary": "This report is a readiness/evidence gate. It does not create independent V&V, legal approval, customer acceptance, or support SLA commitments.",
+  "contract_pass": false,
+  "generated_at": "2026-06-16T17:25:58.403430+00:00",
+  "owner_handoff_rows": [
+    {
+      "acceptance": "`independent_vv_attestation.contract_pass == true`",
+      "blocker": "independent_vv_missing",
+      "evidence_path": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+      "owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver."
+    },
+    {
+      "acceptance": "`family_validation_manual_signoff.contract_pass == true`",
+      "blocker": "family_validation_manual_signoff_missing",
+      "evidence_path": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
+      "owner_action": "Attach family-by-family validation manual signoff tied to the release registry."
+    },
+    {
+      "acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
+      "blocker": "customer_audit_failure_bundle_sla_missing",
+      "evidence_path": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
+      "owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence."
+    }
+  ],
+  "reason_code": "ERR_GA_ENTERPRISE_EVIDENCE_PENDING",
+  "schema_version": "ga-enterprise-readiness-report.v1",
+  "summary": {
+    "ga_validation_case_threshold": 300,
+    "measured_case_count": 304,
+    "owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+    "release_registry_signing_algorithm": "ed25519",
+    "support_bundle_missing_required_count": 0
+  },
+  "summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+  "validation_commands": [
+    "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+    "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+  ]
+}
