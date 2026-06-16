@@ -53,6 +53,40 @@ def _readiness(path: Path) -> Path:
     )
 
 
+def _complete_payload(signoff: str) -> dict[str, object]:
+    if signoff == "independent_vv_attestation":
+        return {
+            "contract_pass": True,
+            "attestation_scope": "GA release V&V",
+            "independent_reviewer": "third-party reviewer",
+            "independence_basis": "separate reporting chain",
+            "case_set_reference": "measured-breadth-304",
+            "report_reference": "vv-report-001",
+            "signed_at_utc": "2026-06-16T00:00:00+00:00",
+            "approval_decision": "approved",
+        }
+    if signoff == "family_validation_manual_signoff":
+        return {
+            "contract_pass": True,
+            "release_registry_ref": "release-registry-ed25519",
+            "validation_manual_ref": "validation-manual",
+            "family_rows": [{"family": "steel_frame", "decision": "approved"}],
+            "signoff_owner": "validation-owner",
+            "signed_at_utc": "2026-06-16T00:00:00+00:00",
+            "approval_decision": "approved",
+        }
+    return {
+        "contract_pass": True,
+        "customer_or_ops_approver": "ops-owner",
+        "audit_export_acceptance_ref": "audit-export-001",
+        "failure_bundle_export_ref": "failure-bundle-001",
+        "support_sla_ref": "sla-001",
+        "rollback_policy_ref": "rollback-001",
+        "signed_at_utc": "2026-06-16T00:00:00+00:00",
+        "approval_decision": "approved",
+    }
+
+
 def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> None:
     payload = build_ga_enterprise_signoff_intake_packet.build_packet(
         ga_readiness_report=_readiness(tmp_path / "ga_readiness.json")
@@ -64,6 +98,7 @@ def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> Non
     assert payload["summary"]["open_signoff_count"] == 3
     assert "independent_vv_missing" in payload["current_blockers"]
     assert "independence_basis" in rows["independent_vv_attestation"]["required_fields"]
+    assert "attestation_scope" in rows["independent_vv_attestation"]["missing_fields"]
     assert "support_sla_ref" in rows["customer_audit_failure_bundle_sla"]["required_fields"]
     assert any("build_ga_enterprise_readiness_report.py" in command for command in payload["validation_commands"])
 
@@ -75,7 +110,7 @@ def test_ga_signoff_intake_passes_when_readiness_and_evidence_pass(tmp_path: Pat
     payload["blockers"] = []
     readiness.write_text(json.dumps(payload), encoding="utf-8")
     for row in payload["owner_handoff_rows"]:
-        _write_json(Path(row["evidence_path"]), {"contract_pass": True})
+        _write_json(Path(row["evidence_path"]), _complete_payload(Path(row["evidence_path"]).stem))
 
     packet = build_ga_enterprise_signoff_intake_packet.build_packet(ga_readiness_report=readiness)
 

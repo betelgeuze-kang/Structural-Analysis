@@ -203,8 +203,8 @@
       "bytes": 8536,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "2ca73adbccab2f4e0a1cf60864f7a940c253e599861817eeed40d4b0cc778464",
-      "sha256": "2ca73adbccab2f4e0a1cf60864f7a940c253e599861817eeed40d4b0cc778464",
+      "redacted_sha256": "4b965c41798354b7fab2edb20ee278d31599fbf89a8e9cca2e4c6f61af77752b",
+      "sha256": "4b965c41798354b7fab2edb20ee278d31599fbf89a8e9cca2e4c6f61af77752b",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -236,20 +236,20 @@
     },
     {
       "available": true,
-      "bytes": 3913,
+      "bytes": 6757,
       "label": "ga_enterprise_readiness_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json",
-      "redacted_sha256": "52e35f3b4e44a9080a71f77ea0d77035a8911a5fe225a2506b6075db1d1adac3",
-      "sha256": "52e35f3b4e44a9080a71f77ea0d77035a8911a5fe225a2506b6075db1d1adac3",
+      "redacted_sha256": "0d814440081b87d7a8c0d29536869cd615d9e9f7a1ebd4425b6558e0ba85b43d",
+      "sha256": "0d814440081b87d7a8c0d29536869cd615d9e9f7a1ebd4425b6558e0ba85b43d",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
     },
     {
       "available": true,
-      "bytes": 4310,
+      "bytes": 5387,
       "label": "ga_enterprise_signoff_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
-      "redacted_sha256": "05bebb54007b989919357ec291f727fd3462cd3f77094c7a187c796be522e7c7",
-      "sha256": "05bebb54007b989919357ec291f727fd3462cd3f77094c7a187c796be522e7c7",
+      "redacted_sha256": "2b7c09d421977c6dd2293dd267ccd5f0efa060b43068b914870442fbaa26a91a",
+      "sha256": "2b7c09d421977c6dd2293dd267ccd5f0efa060b43068b914870442fbaa26a91a",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
     },
     {
@@ -267,7 +267,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T17:38:40.823277+00:00",
+    "generated_at": "2026-06-16T17:43:53.832843+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -276,7 +276,7 @@
     "artifact_count": 29,
     "available_artifact_count": 29,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "4bab041d468813cf2d6147214c8c674a42ff58c18cb42856a9c32755dfca0127"
+    "sha256": "632457fe6c436d253198fa4b42a437d1ce9836d0b78d0ecd73b20e24b4758282"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -292,7 +292,7 @@
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-06-16T17:38:40.823996+00:00",
+  "generated_at": "2026-06-16T17:43:53.833559+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",

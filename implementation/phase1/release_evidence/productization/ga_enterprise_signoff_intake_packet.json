@@ -7,18 +7,31 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T17:38:40.631971+00:00",
+  "generated_at": "2026-06-16T17:43:53.638093+00:00",
   "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
   "schema_version": "ga-enterprise-signoff-intake-packet.v1",
   "signoff_rows": [
     {
       "acceptance": "`independent_vv_attestation.contract_pass == true`",
+      "approval_decision": "",
+      "approval_decision_pass": false,
       "blocker": "independent_vv_missing",
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
       "evidence_present": false,
+      "missing_fields": [
+        "contract_pass",
+        "attestation_scope",
+        "independent_reviewer",
+        "independence_basis",
+        "case_set_reference",
+        "report_reference",
+        "signed_at_utc",
+        "approval_decision"
+      ],
       "owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
       "owner_note": "Attach independent V&V scope, reviewer identity, case set, report reference, and signed decision.",
+      "placeholder_fields": [],
       "required_fields": [
         "contract_pass",
         "attestation_scope",
@@ -33,12 +46,24 @@
     },
     {
       "acceptance": "`family_validation_manual_signoff.contract_pass == true`",
+      "approval_decision": "",
+      "approval_decision_pass": false,
       "blocker": "family_validation_manual_signoff_missing",
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
       "evidence_present": false,
+      "missing_fields": [
+        "contract_pass",
+        "release_registry_ref",
+        "validation_manual_ref",
+        "family_rows",
+        "signoff_owner",
+        "signed_at_utc",
+        "approval_decision"
+      ],
       "owner_action": "Attach family-by-family validation manual signoff tied to the release registry.",
       "owner_note": "Attach family-by-family validation manual signoff tied to the signed release registry.",
+      "placeholder_fields": [],
       "required_fields": [
         "contract_pass",
         "release_registry_ref",
@@ -52,12 +77,25 @@
     },
     {
       "acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
+      "approval_decision": "",
+      "approval_decision_pass": false,
       "blocker": "customer_audit_failure_bundle_sla_missing",
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
       "evidence_present": false,
+      "missing_fields": [
+        "contract_pass",
+        "customer_or_ops_approver",
+        "audit_export_acceptance_ref",
+        "failure_bundle_export_ref",
+        "support_sla_ref",
+        "rollback_policy_ref",
+        "signed_at_utc",
+        "approval_decision"
+      ],
       "owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
       "owner_note": "Attach customer/ops acceptance for audit export, failure bundle, support SLA, and rollback path.",
+      "placeholder_fields": [],
       "required_fields": [
         "contract_pass",
         "customer_or_ops_approver",

@@ -28,6 +28,48 @@ DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF = Path(
 DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA = Path(
     "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json"
 )
+ACCEPTED_SIGNOFF_DECISIONS = {"approved", "accepted", "pass", "signed", "approved_for_ga"}
+PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
+SIGNOFF_FIELD_SPECS = {
+    "independent_vv_attestation": {
+        "required_fields": [
+            "contract_pass",
+            "attestation_scope",
+            "independent_reviewer",
+            "independence_basis",
+            "case_set_reference",
+            "report_reference",
+            "signed_at_utc",
+            "approval_decision",
+        ],
+        "list_fields": [],
+    },
+    "family_validation_manual_signoff": {
+        "required_fields": [
+            "contract_pass",
+            "release_registry_ref",
+            "validation_manual_ref",
+            "family_rows",
+            "signoff_owner",
+            "signed_at_utc",
+            "approval_decision",
+        ],
+        "list_fields": ["family_rows"],
+    },
+    "customer_audit_failure_bundle_sla": {
+        "required_fields": [
+            "contract_pass",
+            "customer_or_ops_approver",
+            "audit_export_acceptance_ref",
+            "failure_bundle_export_ref",
+            "support_sla_ref",
+            "rollback_policy_ref",
+            "signed_at_utc",
+            "approval_decision",
+        ],
+        "list_fields": [],
+    },
+}
 
 
 def _now_utc_iso() -> str:
@@ -46,6 +88,10 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
 
 
 def _as_int(value: Any, default: int = 0) -> int:
@@ -67,6 +113,62 @@ def _summary(payload: dict[str, Any]) -> dict[str, Any]:
     return _as_dict(payload.get("summary"))
 
 
+def _looks_placeholder(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    upper = value.strip().upper()
+    return bool(not upper or any(marker in upper for marker in PLACEHOLDER_MARKERS))
+
+
+def _field_present(payload: dict[str, Any], field: str) -> bool:
+    value = payload.get(field)
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return bool(value)
+    return value is not None
+
+
+def _signoff_validation_row(label: str, path: Path, payload: dict[str, Any]) -> dict[str, Any]:
+    spec = SIGNOFF_FIELD_SPECS[label]
+    required_fields = [str(field) for field in spec["required_fields"]]
+    missing_fields = [field for field in required_fields if not _field_present(payload, field)]
+    placeholder_fields = [
+        field
+        for field in required_fields
+        if _looks_placeholder(payload.get(field))
+    ]
+    empty_list_fields = [
+        field
+        for field in _as_list(spec.get("list_fields"))
+        if not _as_list(payload.get(str(field)))
+    ]
+    decision = str(payload.get("approval_decision", "")).strip().lower()
+    approval_decision_pass = decision in ACCEPTED_SIGNOFF_DECISIONS
+    contract_signal_pass = _reason_pass(payload)
+    contract_pass = bool(
+        path.exists()
+        and contract_signal_pass
+        and not missing_fields
+        and not placeholder_fields
+        and not empty_list_fields
+        and approval_decision_pass
+    )
+    return {
+        "signoff": label,
+        "path": str(path),
+        "present": path.exists(),
+        "contract_signal_pass": contract_signal_pass,
+        "required_fields": required_fields,
+        "missing_fields": missing_fields,
+        "placeholder_fields": placeholder_fields,
+        "empty_list_fields": empty_list_fields,
+        "approval_decision": decision,
+        "approval_decision_pass": approval_decision_pass,
+        "contract_pass": contract_pass,
+    }
+
+
 def build_report(
     *,
     measured_benchmark_breadth: Path = DEFAULT_MEASURED_BREADTH,
@@ -84,6 +186,20 @@ def build_report(
     independent_vv = _load_json(independent_vv_attestation)
     family_signoff = _load_json(family_validation_manual_signoff)
     customer_sla = _load_json(customer_audit_failure_bundle_sla)
+    signoff_rows = [
+        _signoff_validation_row("independent_vv_attestation", independent_vv_attestation, independent_vv),
+        _signoff_validation_row(
+            "family_validation_manual_signoff",
+            family_validation_manual_signoff,
+            family_signoff,
+        ),
+        _signoff_validation_row(
+            "customer_audit_failure_bundle_sla",
+            customer_audit_failure_bundle_sla,
+            customer_sla,
+        ),
+    ]
+    signoff_by_label = {row["signoff"]: row for row in signoff_rows}
 
     measured_cases = _as_int(_summary(measured).get("measured_case_count"), 0)
     registry_summary = _summary(registry)
@@ -101,11 +217,15 @@ def build_report(
         ),
         "validation_manual_present": validation_manual.exists(),
         "independent_vv_attestation_present": independent_vv_attestation.exists(),
-        "independent_vv_attestation_pass": _reason_pass(independent_vv),
+        "independent_vv_attestation_pass": bool(signoff_by_label["independent_vv_attestation"]["contract_pass"]),
         "family_validation_manual_signoff_present": family_validation_manual_signoff.exists(),
-        "family_validation_manual_signoff_pass": _reason_pass(family_signoff),
+        "family_validation_manual_signoff_pass": bool(
+            signoff_by_label["family_validation_manual_signoff"]["contract_pass"]
+        ),
         "customer_audit_failure_bundle_sla_present": customer_audit_failure_bundle_sla.exists(),
-        "customer_audit_failure_bundle_sla_pass": _reason_pass(customer_sla),
+        "customer_audit_failure_bundle_sla_pass": bool(
+            signoff_by_label["customer_audit_failure_bundle_sla"]["contract_pass"]
+        ),
     }
     blockers = [
         *(["ga_validation_case_count_lt_300"] if not checks["ga_validation_case_threshold_pass"] else []),
@@ -146,11 +266,14 @@ def build_report(
             "ga_validation_case_threshold": ga_validation_cases,
             "release_registry_signing_algorithm": str(registry_summary.get("signing_algorithm", "")),
             "support_bundle_missing_required_count": _as_int(support_checks.get("missing_required_count"), -1),
+            "signoff_count": len(signoff_rows),
+            "signoff_pass_count": sum(1 for row in signoff_rows if row["contract_pass"]),
             "owner_action": (
                 "Attach independent V&V attestation, family validation-manual signoff, and customer "
                 "audit/failure-bundle/SLA approval evidence before GA/Enterprise release."
             ),
         },
+        "signoff_evidence_rows": signoff_rows,
         "owner_handoff_rows": [
             {
                 "blocker": "independent_vv_missing",

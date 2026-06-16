@@ -14,6 +14,8 @@ SCHEMA_VERSION = "ga-enterprise-signoff-intake-packet.v1"
 DEFAULT_GA_READINESS = Path("implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+ACCEPTED_SIGNOFF_DECISIONS = {"approved", "accepted", "pass", "signed", "approved_for_ga"}
+PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
 
 
 SIGNOFF_SPECS = {
@@ -87,6 +89,37 @@ def _reason_pass(payload: dict[str, Any]) -> bool:
     )
 
 
+def _looks_placeholder(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    upper = value.strip().upper()
+    return bool(not upper or any(marker in upper for marker in PLACEHOLDER_MARKERS))
+
+
+def _field_present(payload: dict[str, Any], field: str) -> bool:
+    value = payload.get(field)
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, list):
+        return bool(value)
+    return value is not None
+
+
+def _evidence_field_status(payload: dict[str, Any], required_fields: list[str]) -> dict[str, Any]:
+    missing_fields = [field for field in required_fields if not _field_present(payload, field)]
+    placeholder_fields = [
+        field for field in required_fields if _looks_placeholder(payload.get(field))
+    ]
+    decision = str(payload.get("approval_decision", "")).strip().lower()
+    approval_decision_pass = decision in ACCEPTED_SIGNOFF_DECISIONS
+    return {
+        "missing_fields": missing_fields,
+        "placeholder_fields": placeholder_fields,
+        "approval_decision": decision,
+        "approval_decision_pass": approval_decision_pass,
+    }
+
+
 def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[str, Any]:
     readiness = _load_json(ga_readiness_report)
     blockers = [str(item) for item in _as_list(readiness.get("blockers"))]
@@ -97,14 +130,27 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
         spec = SIGNOFF_SPECS.get(blocker, {})
         evidence_path = Path(str(owner_row.get("evidence_path", "")))
         evidence = _load_json(evidence_path)
+        required_fields = [str(field) for field in spec.get("required_fields", [])]
+        field_status = _evidence_field_status(evidence, required_fields)
+        evidence_contract_pass = bool(
+            evidence_path.exists()
+            and _reason_pass(evidence)
+            and not field_status["missing_fields"]
+            and not field_status["placeholder_fields"]
+            and field_status["approval_decision_pass"]
+        )
         rows.append(
             {
                 "blocker": blocker,
                 "signoff": str(spec.get("signoff", blocker)),
                 "evidence_path": str(evidence_path),
                 "evidence_present": evidence_path.exists(),
-                "evidence_contract_pass": _reason_pass(evidence),
-                "required_fields": list(spec.get("required_fields", [])),
+                "evidence_contract_pass": evidence_contract_pass,
+                "required_fields": required_fields,
+                "missing_fields": field_status["missing_fields"],
+                "placeholder_fields": field_status["placeholder_fields"],
+                "approval_decision": field_status["approval_decision"],
+                "approval_decision_pass": field_status["approval_decision_pass"],
                 "owner_action": str(owner_row.get("owner_action", "")),
                 "owner_note": str(spec.get("owner_note", "")),
                 "acceptance": str(owner_row.get("acceptance", "")),

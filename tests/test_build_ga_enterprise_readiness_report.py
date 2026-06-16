@@ -74,15 +74,71 @@ def test_ga_readiness_blocks_external_enterprise_signoffs(tmp_path: Path) -> Non
 def test_ga_readiness_passes_when_enterprise_signoffs_are_attached(tmp_path: Path) -> None:
     payload = build_ga_enterprise_readiness_report.build_report(
         **_base_inputs(tmp_path),
-        independent_vv_attestation=_write_json(tmp_path / "independent-vv.json", {"contract_pass": True}),
-        family_validation_manual_signoff=_write_json(tmp_path / "family-signoff.json", {"reason_code": "PASS"}),
-        customer_audit_failure_bundle_sla=_write_json(tmp_path / "customer-sla.json", {"pass": True}),
+        independent_vv_attestation=_write_json(
+            tmp_path / "independent-vv.json",
+            {
+                "contract_pass": True,
+                "attestation_scope": "GA release V&V",
+                "independent_reviewer": "third-party reviewer",
+                "independence_basis": "separate reporting chain",
+                "case_set_reference": "measured-breadth-304",
+                "report_reference": "vv-report-001",
+                "signed_at_utc": "2026-06-16T00:00:00+00:00",
+                "approval_decision": "approved",
+            },
+        ),
+        family_validation_manual_signoff=_write_json(
+            tmp_path / "family-signoff.json",
+            {
+                "contract_pass": True,
+                "release_registry_ref": "release-registry-ed25519",
+                "validation_manual_ref": "validation-manual",
+                "family_rows": [{"family": "steel_frame", "decision": "approved"}],
+                "signoff_owner": "validation-owner",
+                "signed_at_utc": "2026-06-16T00:00:00+00:00",
+                "approval_decision": "approved",
+            },
+        ),
+        customer_audit_failure_bundle_sla=_write_json(
+            tmp_path / "customer-sla.json",
+            {
+                "contract_pass": True,
+                "customer_or_ops_approver": "ops-owner",
+                "audit_export_acceptance_ref": "audit-export-001",
+                "failure_bundle_export_ref": "failure-bundle-001",
+                "support_sla_ref": "sla-001",
+                "rollback_policy_ref": "rollback-001",
+                "signed_at_utc": "2026-06-16T00:00:00+00:00",
+                "approval_decision": "approved",
+            },
+        ),
     )
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["blockers"] == []
     assert payload["summary_line"].startswith("GA enterprise readiness: PASS")
+    assert payload["summary"]["signoff_pass_count"] == 3
+
+
+def test_ga_readiness_rejects_bare_contract_pass_without_signoff_fields(tmp_path: Path) -> None:
+    payload = build_ga_enterprise_readiness_report.build_report(
+        **_base_inputs(tmp_path),
+        independent_vv_attestation=_write_json(tmp_path / "independent-vv.json", {"contract_pass": True}),
+        family_validation_manual_signoff=_write_json(tmp_path / "family-signoff.json", {"contract_pass": True}),
+        customer_audit_failure_bundle_sla=_write_json(tmp_path / "customer-sla.json", {"contract_pass": True}),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["blockers"] == [
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    ]
+    rows = {row["signoff"]: row for row in payload["signoff_evidence_rows"]}
+    assert "attestation_scope" in rows["independent_vv_attestation"]["missing_fields"]
+    assert "family_rows" in rows["family_validation_manual_signoff"]["missing_fields"]
+    assert rows["customer_audit_failure_bundle_sla"]["approval_decision_pass"] is False
 
 
 def test_ga_readiness_cli_writes_markdown(tmp_path: Path, capsys) -> None:
