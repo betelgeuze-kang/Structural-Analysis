@@ -71,6 +71,9 @@ DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
 DEFAULT_GA_ENTERPRISE_READINESS = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
 )
+DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/commercial-structural-solver-product-gap-ledger.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/structural-analysis-ai-engine-gap-ledger.md")
 
@@ -1537,6 +1540,7 @@ def build_report(
     license_status_closure: Path = DEFAULT_LICENSE_STATUS_CLOSURE,
     ai_orchestration_preflight: Path = DEFAULT_AI_ORCHESTRATION_PREFLIGHT,
     ga_enterprise_readiness: Path = DEFAULT_GA_ENTERPRISE_READINESS,
+    paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -1586,14 +1590,17 @@ def build_report(
     runtime_ok = bool(by_id["M3"]["ok"])
     packaging_ok = bool(by_id["M5"]["ok"])
     measured_cases = _as_int(by_id["M4"]["summary"].get("measured_case_count"), 0)
+    paid_pilot_scope = _load_json(paid_pilot_scope_guard)
+    paid_pilot_scope_pass = _reason_pass(paid_pilot_scope)
     limited_ready = all(bool(row["ok"]) for row in milestones)
-    paid_pilot_candidate = bool(
+    technical_paid_pilot_candidate = bool(
         residual_basic_ok
         and core_basic_ok
         and runtime_ok
         and packaging_ok
         and measured_cases >= 20
     )
+    paid_pilot_candidate = bool(technical_paid_pilot_candidate and paid_pilot_scope_pass)
     blockers = [
         f"{row['milestone']}::{blocker}"
         for row in milestones
@@ -1668,12 +1675,17 @@ def build_report(
     elif limited_ready:
         recommended_scope = (
             "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; "
-            "keep commercial use constrained until release-area blockers are closed."
+            "keep any use constrained to the paid-pilot scope guard until release-area blockers are closed."
         )
-    elif paid_pilot_candidate:
+    elif technical_paid_pilot_candidate and paid_pilot_scope_pass:
         recommended_scope = (
             "Paid pilot / constrained customer PoC only: review-assist, specified structure families, "
             "specified workflow, and engine/reviewer evidence package required."
+        )
+    elif technical_paid_pilot_candidate:
+        recommended_scope = (
+            "Technical paid-pilot evidence is present, but paid-pilot scope guard evidence is missing or blocked; "
+            "do not start a customer pilot until scoped product/contract language is attached."
         )
     else:
         recommended_scope = "Release blocked until core PM gates have green evidence."
@@ -1717,6 +1729,10 @@ def build_report(
         },
         "release_tiers": {
             "paid_pilot": paid_pilot_candidate,
+            "technical_paid_pilot_candidate": technical_paid_pilot_candidate,
+            "paid_pilot_scope_guard_pass": paid_pilot_scope_pass,
+            "paid_pilot_scope_guard_report": str(paid_pilot_scope_guard),
+            "paid_pilot_scope_guard_summary_line": str(paid_pilot_scope.get("summary_line", "")),
             "limited_commercial_milestone_ready": limited_ready,
             "limited_commercial_full_gate_ready": full_release_gate_ready,
             "ga_enterprise": ga_enterprise_ready,
@@ -1807,6 +1823,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--license-status-closure", type=Path, default=DEFAULT_LICENSE_STATUS_CLOSURE)
     parser.add_argument("--ai-orchestration-preflight", type=Path, default=DEFAULT_AI_ORCHESTRATION_PREFLIGHT)
     parser.add_argument("--ga-enterprise-readiness", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS)
+    parser.add_argument("--paid-pilot-scope-guard", type=Path, default=DEFAULT_PAID_PILOT_SCOPE_GUARD)
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -1870,6 +1887,7 @@ def main(argv: list[str] | None = None) -> int:
         license_status_closure=args.license_status_closure,
         ai_orchestration_preflight=args.ai_orchestration_preflight,
         ga_enterprise_readiness=args.ga_enterprise_readiness,
+        paid_pilot_scope_guard=args.paid_pilot_scope_guard,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

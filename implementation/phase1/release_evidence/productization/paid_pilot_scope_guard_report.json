@@ -1,0 +1,113 @@
+{
+  "artifact_rows": [
+    {
+      "contract_pass": true,
+      "label": "pm_release_gate_report",
+      "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+      "present": true,
+      "required_pass": false
+    },
+    {
+      "contract_pass": true,
+      "label": "support_bundle_manifest",
+      "path": "implementation/phase1/support_bundle_manifest.json",
+      "present": true,
+      "required_pass": true
+    },
+    {
+      "contract_pass": false,
+      "label": "pm_release_blocker_action_register",
+      "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "present": true,
+      "required_pass": false
+    },
+    {
+      "contract_pass": false,
+      "label": "ci_streak_intake_packet",
+      "path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+      "present": true,
+      "required_pass": false
+    },
+    {
+      "contract_pass": false,
+      "label": "license_status_intake_packet",
+      "path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+      "present": true,
+      "required_pass": false
+    },
+    {
+      "contract_pass": false,
+      "label": "ga_enterprise_readiness_report",
+      "path": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+      "present": true,
+      "required_pass": false
+    }
+  ],
+  "blockers": [],
+  "checks": {
+    "all_required_scope_terms_present": true,
+    "evidence_package_artifacts_present": true,
+    "required_evidence_package_artifacts_green": true,
+    "scope_source_present": true
+  },
+  "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T17:32:48.419307+00:00",
+  "reason_code": "PASS",
+  "schema_version": "paid-pilot-scope-guard-report.v1",
+  "scope_term_rows": [
+    {
+      "accepted_phrases": [
+        "검토 보조",
+        "review-assist",
+        "review assist",
+        "engineer-in-loop"
+      ],
+      "check": "review_assist_boundary",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "지정된 구조군",
+        "specified structure families",
+        "specified-structure-families"
+      ],
+      "check": "specified_structure_families",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "지정된 workflow",
+        "specified workflow",
+        "specified-workflows"
+      ],
+      "check": "specified_workflow",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "engine/reviewer evidence package",
+        "engine-and-reviewer-evidence-package"
+      ],
+      "check": "engine_reviewer_evidence_package",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "unsupported 또는 missing evidence 항목은 pass가 아니라 blocker",
+        "unsupported or missing evidence"
+      ],
+      "check": "unsupported_or_missing_evidence_blocker",
+      "pass": true
+    }
+  ],
+  "summary": {
+    "evidence_artifact_count": 6,
+    "evidence_artifact_present_count": 6,
+    "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package.",
+    "required_scope_term_count": 5,
+    "required_scope_term_pass_count": 5,
+    "scope_source": "docs/pm-release-gate-milestones.md"
+  },
+  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=6/6"
+}

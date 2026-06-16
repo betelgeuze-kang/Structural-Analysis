@@ -7,7 +7,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T17:25:58.571655+00:00",
+  "generated_at": "2026-06-16T17:32:48.655141+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -180,7 +180,7 @@
     }
   ],
   "paid_pilot_candidate": true,
-  "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep commercial use constrained until release-area blockers are closed.",
+  "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "security::license_status_not_configured"
@@ -584,7 +584,11 @@
     "ga_validation_case_threshold_met": true,
     "limited_commercial_full_gate_ready": false,
     "limited_commercial_milestone_ready": true,
-    "paid_pilot": true
+    "paid_pilot": true,
+    "paid_pilot_scope_guard_pass": true,
+    "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+    "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=6/6",
+    "technical_paid_pilot_candidate": true
   },
   "schema_version": "pm-release-gate-report.v1",
   "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=304"

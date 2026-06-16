@@ -135,6 +135,14 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "paid_pilot_scope_guard_report": _write_json(
+            tmp_path / "paid-pilot-scope-guard-report.json",
+            {
+                "schema_version": "paid-pilot-scope-guard-report.v1",
+                "contract_pass": True,
+                "summary_line": "Paid pilot scope guard: PASS",
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -179,6 +187,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "license_status_intake_packet" in payload["optional_sections"]
     assert "frontend_dependency_audit_report" in payload["optional_sections"]
     assert "ga_enterprise_readiness_report" in payload["optional_sections"]
+    assert "paid_pilot_scope_guard_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -199,6 +208,10 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "independent_vv_missing" in redacted_ga_readiness
+    redacted_scope_guard = Path(payload["optional_sections"]["paid_pilot_scope_guard_report"]).read_text(
+        encoding="utf-8"
+    )
+    assert "Paid pilot scope guard: PASS" in redacted_scope_guard
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )

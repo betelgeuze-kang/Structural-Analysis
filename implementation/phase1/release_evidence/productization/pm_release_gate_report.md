@@ -1,7 +1,7 @@
 # PM Release Gate
 
 - `summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/14 | measured_cases=304`
-- `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep commercial use constrained until release-area blockers are closed.
+- `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_ready`: `True`
 - `release_area_gate_ready`: `False`

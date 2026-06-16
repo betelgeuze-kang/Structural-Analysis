@@ -309,6 +309,14 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "paid_pilot_scope_guard": _write(
+            tmp_path / "paid_pilot_scope_guard.json",
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "summary_line": "Paid pilot scope guard: PASS",
+            },
+        ),
     }
 
 
@@ -458,6 +466,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     )
 
     assert payload["paid_pilot_candidate"] is True
+    assert payload["release_tiers"]["technical_paid_pilot_candidate"] is True
+    assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is True
+    assert payload["release_tiers"]["paid_pilot_scope_guard_report"].endswith("paid_pilot_scope_guard.json")
     assert payload["limited_commercial_ready"] is True
     assert payload["contract_pass"] is True
     assert payload["release_area_gate_ready"] is True
