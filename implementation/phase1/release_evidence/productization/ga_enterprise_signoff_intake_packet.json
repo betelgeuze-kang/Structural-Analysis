@@ -7,7 +7,7 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T17:43:53.638093+00:00",
+  "generated_at": "2026-06-16T18:03:36.516093+00:00",
   "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
   "schema_version": "ga-enterprise-signoff-intake-packet.v1",
   "signoff_rows": [
@@ -19,6 +19,14 @@
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
       "evidence_present": false,
+      "evidence_status": {
+        "approval_decision": "",
+        "approval_decision_pass": false,
+        "missing_field_count": 8,
+        "placeholder_field_count": 0,
+        "state": "missing_external_signoff_evidence"
+      },
+      "external_input_required": true,
       "missing_fields": [
         "contract_pass",
         "attestation_scope",
@@ -29,7 +37,10 @@
         "signed_at_utc",
         "approval_decision"
       ],
+      "next_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
+      "owner": "independent_vv_owner",
       "owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
+      "owner_input_required": true,
       "owner_note": "Attach independent V&V scope, reviewer identity, case set, report reference, and signed decision.",
       "placeholder_fields": [],
       "required_fields": [
@@ -42,7 +53,13 @@
         "signed_at_utc",
         "approval_decision"
       ],
-      "signoff": "independent_vv_attestation"
+      "resolution_type": "external_independent_vv_attestation_required",
+      "signoff": "independent_vv_attestation",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
     },
     {
       "acceptance": "`family_validation_manual_signoff.contract_pass == true`",
@@ -52,6 +69,14 @@
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/family_validation_manual_signoff.json",
       "evidence_present": false,
+      "evidence_status": {
+        "approval_decision": "",
+        "approval_decision_pass": false,
+        "missing_field_count": 7,
+        "placeholder_field_count": 0,
+        "state": "missing_external_signoff_evidence"
+      },
+      "external_input_required": true,
       "missing_fields": [
         "contract_pass",
         "release_registry_ref",
@@ -61,7 +86,10 @@
         "signed_at_utc",
         "approval_decision"
       ],
+      "next_action": "Attach family-by-family validation manual signoff tied to the release registry.",
+      "owner": "validation_manual_owner",
       "owner_action": "Attach family-by-family validation manual signoff tied to the release registry.",
+      "owner_input_required": true,
       "owner_note": "Attach family-by-family validation manual signoff tied to the signed release registry.",
       "placeholder_fields": [],
       "required_fields": [
@@ -73,7 +101,13 @@
         "signed_at_utc",
         "approval_decision"
       ],
-      "signoff": "family_validation_manual_signoff"
+      "resolution_type": "external_family_validation_manual_signoff_required",
+      "signoff": "family_validation_manual_signoff",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
     },
     {
       "acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
@@ -83,6 +117,14 @@
       "evidence_contract_pass": false,
       "evidence_path": "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json",
       "evidence_present": false,
+      "evidence_status": {
+        "approval_decision": "",
+        "approval_decision_pass": false,
+        "missing_field_count": 8,
+        "placeholder_field_count": 0,
+        "state": "missing_external_signoff_evidence"
+      },
+      "external_input_required": true,
       "missing_fields": [
         "contract_pass",
         "customer_or_ops_approver",
@@ -93,7 +135,10 @@
         "signed_at_utc",
         "approval_decision"
       ],
+      "next_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
+      "owner": "customer_success_ops_owner",
       "owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
+      "owner_input_required": true,
       "owner_note": "Attach customer/ops acceptance for audit export, failure bundle, support SLA, and rollback path.",
       "placeholder_fields": [],
       "required_fields": [
@@ -106,10 +151,17 @@
         "signed_at_utc",
         "approval_decision"
       ],
-      "signoff": "customer_audit_failure_bundle_sla"
+      "resolution_type": "external_customer_audit_failure_bundle_sla_required",
+      "signoff": "customer_audit_failure_bundle_sla",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
     }
   ],
   "summary": {
+    "external_input_required_count": 3,
     "open_signoff_count": 3,
     "owner_action": "Populate the referenced GA/Enterprise signoff evidence files from independent V&V, family validation manual signoff, and customer audit/failure-bundle/SLA approval records.",
     "readiness_blocker_count": 3,
@@ -118,8 +170,8 @@
   },
   "summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
   "validation_commands": [
-    "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-    "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+    "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+    "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
     "python3 scripts/report_pm_release_gate.py  --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
   ]
 }

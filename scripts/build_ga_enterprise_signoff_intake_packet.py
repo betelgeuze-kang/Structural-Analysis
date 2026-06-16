@@ -21,6 +21,8 @@ PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "
 SIGNOFF_SPECS = {
     "independent_vv_missing": {
         "signoff": "independent_vv_attestation",
+        "owner": "independent_vv_owner",
+        "resolution_type": "external_independent_vv_attestation_required",
         "required_fields": [
             "contract_pass",
             "attestation_scope",
@@ -35,6 +37,8 @@ SIGNOFF_SPECS = {
     },
     "family_validation_manual_signoff_missing": {
         "signoff": "family_validation_manual_signoff",
+        "owner": "validation_manual_owner",
+        "resolution_type": "external_family_validation_manual_signoff_required",
         "required_fields": [
             "contract_pass",
             "release_registry_ref",
@@ -48,6 +52,8 @@ SIGNOFF_SPECS = {
     },
     "customer_audit_failure_bundle_sla_missing": {
         "signoff": "customer_audit_failure_bundle_sla",
+        "owner": "customer_success_ops_owner",
+        "resolution_type": "external_customer_audit_failure_bundle_sla_required",
         "required_fields": [
             "contract_pass",
             "customer_or_ops_approver",
@@ -120,6 +126,28 @@ def _evidence_field_status(payload: dict[str, Any], required_fields: list[str]) 
     }
 
 
+def _evidence_state(*, evidence_present: bool, evidence_contract_pass: bool, field_status: dict[str, Any]) -> str:
+    if evidence_contract_pass:
+        return "ready_for_ga_readiness_regeneration"
+    if not evidence_present:
+        return "missing_external_signoff_evidence"
+    if field_status["placeholder_fields"]:
+        return "placeholder_external_signoff_evidence"
+    if field_status["missing_fields"] or not field_status["approval_decision_pass"]:
+        return "incomplete_external_signoff_evidence"
+    return "external_signoff_contract_signal_missing"
+
+
+def _verification_commands() -> list[str]:
+    return [
+        f"python3 scripts/build_ga_enterprise_readiness_report.py --out {DEFAULT_GA_READINESS} --fail-blocked",
+        f"python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out {DEFAULT_OUT} --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py "
+        " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+        " --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+    ]
+
+
 def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[str, Any]:
     readiness = _load_json(ga_readiness_report)
     blockers = [str(item) for item in _as_list(readiness.get("blockers"))]
@@ -139,21 +167,40 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
             and not field_status["placeholder_fields"]
             and field_status["approval_decision_pass"]
         )
+        evidence_state = _evidence_state(
+            evidence_present=evidence_path.exists(),
+            evidence_contract_pass=evidence_contract_pass,
+            field_status=field_status,
+        )
+        owner_action = str(owner_row.get("owner_action", ""))
         rows.append(
             {
                 "blocker": blocker,
                 "signoff": str(spec.get("signoff", blocker)),
+                "owner": str(spec.get("owner", "ga_release_owner")),
+                "owner_input_required": not evidence_contract_pass,
+                "external_input_required": not evidence_contract_pass,
+                "resolution_type": str(spec.get("resolution_type", "external_ga_signoff_required")),
                 "evidence_path": str(evidence_path),
                 "evidence_present": evidence_path.exists(),
                 "evidence_contract_pass": evidence_contract_pass,
+                "evidence_status": {
+                    "state": evidence_state,
+                    "missing_field_count": len(field_status["missing_fields"]),
+                    "placeholder_field_count": len(field_status["placeholder_fields"]),
+                    "approval_decision": field_status["approval_decision"],
+                    "approval_decision_pass": field_status["approval_decision_pass"],
+                },
                 "required_fields": required_fields,
                 "missing_fields": field_status["missing_fields"],
                 "placeholder_fields": field_status["placeholder_fields"],
                 "approval_decision": field_status["approval_decision"],
                 "approval_decision_pass": field_status["approval_decision_pass"],
-                "owner_action": str(owner_row.get("owner_action", "")),
+                "owner_action": owner_action,
+                "next_action": owner_action,
                 "owner_note": str(spec.get("owner_note", "")),
                 "acceptance": str(owner_row.get("acceptance", "")),
+                "verification_commands": _verification_commands(),
             }
         )
 
@@ -175,6 +222,7 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
             "signoff_pass_count": len(rows) - len(current_open),
             "open_signoff_count": len(current_open),
             "readiness_blocker_count": len(blockers),
+            "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
             "owner_action": (
                 "Populate the referenced GA/Enterprise signoff evidence files from independent V&V, "
                 "family validation manual signoff, and customer audit/failure-bundle/SLA approval records."
@@ -182,13 +230,7 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
         },
         "signoff_rows": rows,
         "current_blockers": current_open,
-        "validation_commands": [
-            f"python3 scripts/build_ga_enterprise_readiness_report.py --out {DEFAULT_GA_READINESS}",
-            f"python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out {DEFAULT_OUT}",
-            "python3 scripts/report_pm_release_gate.py "
-            " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-            " --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        ],
+        "validation_commands": _verification_commands(),
         "claim_boundary": (
             "This packet is an owner handoff checklist. It does not create independent V&V, customer "
             "acceptance, legal approval, or support SLA commitments."
@@ -203,12 +245,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         "",
-        "| Signoff | Evidence | Pass | Required Fields |",
-        "|---|---|---|---|",
+        "| Signoff | Owner | Evidence Status | Evidence | Pass | Next Action | Required Fields |",
+        "|---|---|---|---|---|---|---|",
     ]
     for row in payload["signoff_rows"]:
+        evidence_status = row.get("evidence_status", {})
+        status = evidence_status.get("state", "open") if isinstance(evidence_status, dict) else "open"
         lines.append(
-            f"| `{row['signoff']}` | `{row['evidence_path']}` | `{row['evidence_contract_pass']}` | "
+            f"| `{row['signoff']}` | `{row['owner']}` | `{status}` | `{row['evidence_path']}` | "
+            f"`{row['evidence_contract_pass']}` | {row['next_action']} | "
             f"{', '.join(f'`{field}`' for field in row['required_fields'])} |"
         )
     lines.extend(["", "## Validation Commands", ""])

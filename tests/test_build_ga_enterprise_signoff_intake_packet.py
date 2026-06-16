@@ -96,10 +96,19 @@ def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> Non
     assert payload["contract_pass"] is False
     assert payload["reason_code"] == "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED"
     assert payload["summary"]["open_signoff_count"] == 3
+    assert payload["summary"]["external_input_required_count"] == 3
     assert "independent_vv_missing" in payload["current_blockers"]
+    assert rows["independent_vv_attestation"]["owner"] == "independent_vv_owner"
+    assert rows["independent_vv_attestation"]["external_input_required"] is True
+    assert rows["independent_vv_attestation"]["resolution_type"] == "external_independent_vv_attestation_required"
+    assert rows["independent_vv_attestation"]["evidence_status"]["state"] == "missing_external_signoff_evidence"
     assert "independence_basis" in rows["independent_vv_attestation"]["required_fields"]
     assert "attestation_scope" in rows["independent_vv_attestation"]["missing_fields"]
+    assert rows["family_validation_manual_signoff"]["owner"] == "validation_manual_owner"
+    assert rows["family_validation_manual_signoff"]["evidence_status"]["state"] == "missing_external_signoff_evidence"
+    assert rows["customer_audit_failure_bundle_sla"]["owner"] == "customer_success_ops_owner"
     assert "support_sla_ref" in rows["customer_audit_failure_bundle_sla"]["required_fields"]
+    assert any("build_ga_enterprise_signoff_intake_packet.py" in command for command in rows["independent_vv_attestation"]["verification_commands"])
     assert any("build_ga_enterprise_readiness_report.py" in command for command in payload["validation_commands"])
 
 
@@ -117,6 +126,8 @@ def test_ga_signoff_intake_passes_when_readiness_and_evidence_pass(tmp_path: Pat
     assert packet["contract_pass"] is True
     assert packet["reason_code"] == "PASS"
     assert packet["current_blockers"] == []
+    assert packet["summary"]["external_input_required_count"] == 0
+    assert all(row["evidence_status"]["state"] == "ready_for_ga_readiness_regeneration" for row in packet["signoff_rows"])
 
 
 def test_ga_signoff_intake_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -138,4 +149,6 @@ def test_ga_signoff_intake_cli_writes_markdown(tmp_path: Path, capsys) -> None:
     assert exit_code == 0
     assert "GA Enterprise Signoff Intake Packet" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_signoff_count"] == 3
-    assert "Validation Commands" in out_md.read_text(encoding="utf-8")
+    markdown = out_md.read_text(encoding="utf-8")
+    assert "Validation Commands" in markdown
+    assert "independent_vv_owner" in markdown
