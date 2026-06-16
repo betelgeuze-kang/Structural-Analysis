@@ -107,6 +107,7 @@ def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> Non
     assert payload["summary"]["external_input_required_count"] == 3
     assert payload["summary"]["owner_packet_count"] == 3
     assert payload["summary"]["incomplete_owner_packet_count"] == 3
+    assert payload["summary"]["template_count"] == 3
     assert payload["source_artifacts"]["ga_enterprise_readiness_report"].endswith("ga_readiness.json")
     assert payload["source_artifacts"]["release_registry"].endswith("release_registry.json")
     assert "independent_vv_missing" in payload["current_blockers"]
@@ -114,6 +115,10 @@ def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> Non
     assert rows["independent_vv_attestation"]["external_input_required"] is True
     assert rows["independent_vv_attestation"]["resolution_type"] == "external_independent_vv_attestation_required"
     assert rows["independent_vv_attestation"]["evidence_status"]["state"] == "missing_external_signoff_evidence"
+    assert rows["independent_vv_attestation"]["template_path"].endswith(
+        "docs/templates/independent_vv_attestation.template.json"
+    )
+    assert rows["independent_vv_attestation"]["template_present"] is True
     assert rows["independent_vv_attestation"]["source_artifacts"]["support_bundle"].endswith(
         "support_bundle_manifest.json"
     )
@@ -131,6 +136,9 @@ def test_ga_signoff_intake_surfaces_required_owner_fields(tmp_path: Path) -> Non
     assert owner_packets["independent_vv_owner"]["source_artifacts"]["validation_manual"].endswith(
         "release-validation-manual.md"
     )
+    assert owner_packets["independent_vv_owner"]["template_paths"] == [
+        "docs/templates/independent_vv_attestation.template.json"
+    ]
     assert owner_packets["customer_success_ops_owner"]["acceptance_criteria"] == [
         "`customer_audit_failure_bundle_sla.contract_pass == true`"
     ]
@@ -183,6 +191,27 @@ def test_ga_signoff_intake_rejects_placeholder_and_incomplete_external_evidence(
     assert packet["summary"]["open_signoff_count"] == 3
 
 
+def test_ga_signoff_templates_do_not_pass_when_copied_to_evidence_paths(tmp_path: Path) -> None:
+    readiness = _readiness(tmp_path / "ga_readiness.json")
+    readiness_payload = json.loads(readiness.read_text(encoding="utf-8"))
+    template_by_signoff = {
+        str(spec["signoff"]): Path(str(spec["default_template_path"]))
+        for spec in build_ga_enterprise_signoff_intake_packet.SIGNOFF_SPECS.values()
+    }
+    for row in readiness_payload["owner_handoff_rows"]:
+        signoff = Path(row["evidence_path"]).stem
+        template_payload = json.loads(template_by_signoff[signoff].read_text(encoding="utf-8"))
+        _write_json(Path(row["evidence_path"]), template_payload)
+
+    packet = build_ga_enterprise_signoff_intake_packet.build_packet(ga_readiness_report=readiness)
+
+    assert packet["contract_pass"] is False
+    assert packet["summary"]["open_signoff_count"] == 3
+    assert all(row["evidence_contract_pass"] is False for row in packet["signoff_rows"])
+    assert all(row["evidence_status"]["state"] == "placeholder_external_signoff_evidence" for row in packet["signoff_rows"])
+    assert all("approval_decision" in row["placeholder_fields"] for row in packet["signoff_rows"])
+
+
 def test_ga_signoff_intake_keeps_required_rows_when_readiness_handoff_rows_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -230,6 +259,7 @@ def test_ga_signoff_intake_cli_writes_markdown(tmp_path: Path, capsys) -> None:
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_signoff_count"] == 3
     markdown = out_md.read_text(encoding="utf-8")
     assert "Owner Packets" in markdown
+    assert ".template.json" in markdown
     assert "Validation Commands" in markdown
     assert "independent_vv_owner" in markdown
 

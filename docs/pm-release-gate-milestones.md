@@ -158,7 +158,7 @@ npm run ai:preflight
 `ux_new_user_observation_intake_packet.json`은 UX owner가 채워야 할 관찰 필드, `docs/templates/ux_new_user_observation.template.json`, 현재 blocker, 검증 command를 support bundle에 고정한다.
 `support_bundle_manifest.json`은 redacted support bundle directory뿐 아니라 `implementation/phase1/release/support_bundle_export.zip`의 path, sha256, member count, archive roundtrip check를 고정한다. zip 자체는 ignored runtime artifact이고 manifest가 one-click export evidence다.
 `ga_enterprise_readiness_report.json`은 GA/Enterprise에 필요한 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence를 milestone/release-area gate와 분리해 owner handoff로 고정한다.
-`ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드, owner별 packet, evidence path, source artifact를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.
+`ga_enterprise_signoff_intake_packet.json`은 GA/Enterprise 외부 signoff 3종이 채워야 할 필드, owner별 packet, evidence path, source artifact, `docs/templates/*.template.json` template path를 고정하며, signoff evidence를 대체하지 않는다. GA readiness는 빈 `contract_pass=true`나 template copy만으로 통과하지 않고 필수 필드, placeholder 부재, 승인 decision을 함께 확인한다.
 `paid_pilot_scope_guard_report.json`은 constrained paid pilot에 필요한 검토 보조, 지정 구조군/workflow, engine/reviewer evidence package, unsupported/missing evidence blocker 문구와 evidence package artifact 존재를 검증한다.
 
 최근 닫힌 release-area blocker:

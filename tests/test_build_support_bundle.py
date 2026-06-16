@@ -245,6 +245,30 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "current_blockers": ["independent_vv_missing"],
             },
         ),
+        "independent_vv_attestation_template": _write_json(
+            tmp_path / "independent-vv-attestation-template.json",
+            {
+                "contract_pass": False,
+                "template_only": True,
+                "independent_reviewer": "OWNER_INPUT_REQUIRED",
+            },
+        ),
+        "family_validation_manual_signoff_template": _write_json(
+            tmp_path / "family-validation-manual-signoff-template.json",
+            {
+                "contract_pass": False,
+                "template_only": True,
+                "family_rows": [{"family": "OWNER_INPUT_REQUIRED"}],
+            },
+        ),
+        "customer_audit_failure_bundle_sla_template": _write_json(
+            tmp_path / "customer-audit-failure-bundle-sla-template.json",
+            {
+                "contract_pass": False,
+                "template_only": True,
+                "support_sla_ref": "OWNER_INPUT_REQUIRED",
+            },
+        ),
         "paid_pilot_scope_guard_report": _write_json(
             tmp_path / "paid-pilot-scope-guard-report.json",
             {
@@ -322,6 +346,9 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/pm_owner_evidence_request_packet.json" in members
         assert "redacted/license_status_closure_report.json" in members
         assert "redacted/license_status_template.json" in members
+        assert "redacted/independent_vv_attestation_template.json" in members
+        assert "redacted/family_validation_manual_signoff_template.json" in members
+        assert "redacted/customer_audit_failure_bundle_sla_template.json" in members
         assert "license_status.template.json" not in members
     assert "project_ops_deployment_drill" in payload["required_sections"]
     assert "viewer_performance_budget_manifest" in payload["required_sections"]
@@ -349,6 +376,9 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "frontend_dependency_audit_report" in payload["optional_sections"]
     assert "ga_enterprise_readiness_report" in payload["optional_sections"]
     assert "ga_enterprise_signoff_intake_packet" in payload["optional_sections"]
+    assert "independent_vv_attestation_template" in payload["optional_sections"]
+    assert "family_validation_manual_signoff_template" in payload["optional_sections"]
+    assert "customer_audit_failure_bundle_sla_template" in payload["optional_sections"]
     assert "paid_pilot_scope_guard_report" in payload["optional_sections"]
     assert "release_validation_manual" in payload["optional_sections"]
     assert "release_limitation_manual" in payload["optional_sections"]
@@ -412,6 +442,18 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         encoding="utf-8"
     )
     assert "independent_vv_missing" in redacted_ga_signoff
+    redacted_independent_vv_template = Path(
+        payload["optional_sections"]["independent_vv_attestation_template"]
+    ).read_text(encoding="utf-8")
+    assert "OWNER_INPUT_REQUIRED" in redacted_independent_vv_template
+    redacted_family_signoff_template = Path(
+        payload["optional_sections"]["family_validation_manual_signoff_template"]
+    ).read_text(encoding="utf-8")
+    assert "template_only" in redacted_family_signoff_template
+    redacted_customer_sla_template = Path(
+        payload["optional_sections"]["customer_audit_failure_bundle_sla_template"]
+    ).read_text(encoding="utf-8")
+    assert "support_sla_ref" in redacted_customer_sla_template
     redacted_scope_guard = Path(payload["optional_sections"]["paid_pilot_scope_guard_report"]).read_text(
         encoding="utf-8"
     )

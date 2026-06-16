@@ -1,0 +1,19 @@
+{
+  "contract_pass": false,
+  "release_registry_ref": "OWNER_INPUT_REQUIRED: signed release registry reference",
+  "validation_manual_ref": "OWNER_INPUT_REQUIRED: family validation manual reference",
+  "family_rows": [
+    {
+      "family": "OWNER_INPUT_REQUIRED: structure family",
+      "validation_section_ref": "OWNER_INPUT_REQUIRED: manual section",
+      "p95_error_pct": "OWNER_INPUT_REQUIRED: numeric p95 error percent",
+      "holdout_case_ref": "OWNER_INPUT_REQUIRED: holdout evidence reference",
+      "approval_decision": "OWNER_INPUT_REQUIRED"
+    }
+  ],
+  "signoff_owner": "OWNER_INPUT_REQUIRED: validation owner",
+  "signed_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T00:00:00+00:00",
+  "approval_decision": "OWNER_INPUT_REQUIRED",
+  "template_only": true,
+  "note": "Template only. Do not use as GA/Enterprise release evidence until populated from a family-by-family validation manual signoff."
+}

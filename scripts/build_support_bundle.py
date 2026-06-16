@@ -87,6 +87,13 @@ DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
 DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
 )
+DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE = Path("docs/templates/independent_vv_attestation.template.json")
+DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE = Path(
+    "docs/templates/family_validation_manual_signoff.template.json"
+)
+DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE = Path(
+    "docs/templates/customer_audit_failure_bundle_sla.template.json"
+)
 DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT = Path(
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
 )
@@ -401,6 +408,9 @@ def build_support_bundle(
     frontend_dependency_audit_report: Path | None = DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
     ga_enterprise_readiness_report: Path | None = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
     ga_enterprise_signoff_intake_packet: Path | None = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET,
+    independent_vv_attestation_template: Path | None = DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE,
+    family_validation_manual_signoff_template: Path | None = DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE,
+    customer_audit_failure_bundle_sla_template: Path | None = DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE,
     paid_pilot_scope_guard_report: Path | None = DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT,
     release_validation_manual: Path | None = DEFAULT_RELEASE_VALIDATION_MANUAL,
     release_limitation_manual: Path | None = DEFAULT_RELEASE_LIMITATION_MANUAL,
@@ -449,6 +459,9 @@ def build_support_bundle(
         ("frontend_dependency_audit_report", frontend_dependency_audit_report),
         ("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
         ("ga_enterprise_signoff_intake_packet", ga_enterprise_signoff_intake_packet),
+        ("independent_vv_attestation_template", independent_vv_attestation_template),
+        ("family_validation_manual_signoff_template", family_validation_manual_signoff_template),
+        ("customer_audit_failure_bundle_sla_template", customer_audit_failure_bundle_sla_template),
         ("paid_pilot_scope_guard_report", paid_pilot_scope_guard_report),
         ("release_validation_manual", release_validation_manual),
         ("release_limitation_manual", release_limitation_manual),
@@ -665,6 +678,21 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET,
     )
     parser.add_argument(
+        "--independent-vv-attestation-template",
+        type=Path,
+        default=DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE,
+    )
+    parser.add_argument(
+        "--family-validation-manual-signoff-template",
+        type=Path,
+        default=DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE,
+    )
+    parser.add_argument(
+        "--customer-audit-failure-bundle-sla-template",
+        type=Path,
+        default=DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE,
+    )
+    parser.add_argument(
         "--paid-pilot-scope-guard-report",
         type=Path,
         default=DEFAULT_PAID_PILOT_SCOPE_GUARD_REPORT,
@@ -738,6 +766,9 @@ def main(argv: list[str] | None = None) -> int:
         frontend_dependency_audit_report=args.frontend_dependency_audit_report,
         ga_enterprise_readiness_report=args.ga_enterprise_readiness_report,
         ga_enterprise_signoff_intake_packet=args.ga_enterprise_signoff_intake_packet,
+        independent_vv_attestation_template=args.independent_vv_attestation_template,
+        family_validation_manual_signoff_template=args.family_validation_manual_signoff_template,
+        customer_audit_failure_bundle_sla_template=args.customer_audit_failure_bundle_sla_template,
         paid_pilot_scope_guard_report=args.paid_pilot_scope_guard_report,
         release_validation_manual=args.release_validation_manual,
         release_limitation_manual=args.release_limitation_manual,

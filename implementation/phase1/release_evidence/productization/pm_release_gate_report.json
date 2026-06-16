@@ -10,7 +10,7 @@
   ],
   "full_release_gate_ready": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-16T20:26:35.798582+00:00",
+  "generated_at": "2026-06-16T20:36:46.977270+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -212,7 +212,7 @@
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "support_bundle_export_archive_sha256": "cee5a9206ded6512323a2441cb937aaf7230f9f8d9d81a39091e011c384e6c10",
+        "support_bundle_export_archive_sha256": "1edc6a977259a7c2eff18305e13e1968682944779a12dde97fe00c238e8a6cdc",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -619,7 +619,7 @@
         "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
         "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
         "one_click_failure_bundle_archive": "implementation/phase1/release/support_bundle_export.zip",
-        "one_click_failure_bundle_archive_sha256": "cee5a9206ded6512323a2441cb937aaf7230f9f8d9d81a39091e011c384e6c10",
+        "one_click_failure_bundle_archive_sha256": "1edc6a977259a7c2eff18305e13e1968682944779a12dde97fe00c238e8a6cdc",
         "pm_blocker_closure_board_external_owner_input_ready_count": 5,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
         "pm_blocker_closure_board_handoff_ready_count": 5,

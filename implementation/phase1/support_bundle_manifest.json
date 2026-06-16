@@ -1,8 +1,8 @@
 {
   "archive_roundtrip": {
-    "actual_artifact_count": 41,
-    "artifact_count": 41,
-    "member_count": 44,
+    "actual_artifact_count": 44,
+    "artifact_count": 44,
+    "member_count": 47,
     "missing_members": [],
     "pass": true,
     "reason": "PASS"
@@ -325,12 +325,39 @@
     },
     {
       "available": true,
-      "bytes": 32395,
+      "bytes": 33470,
       "label": "ga_enterprise_signoff_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
-      "redacted_sha256": "f4b41b06b17b5677e1923bb0831951a97cd24167fdac822316bc6085ec039817",
-      "sha256": "f4b41b06b17b5677e1923bb0831951a97cd24167fdac822316bc6085ec039817",
+      "redacted_sha256": "d3f93057204e281c5267b523183c1f6edf814c7a1a2fdc165d9332ee1ceb1af3",
+      "sha256": "d3f93057204e281c5267b523183c1f6edf814c7a1a2fdc165d9332ee1ceb1af3",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
+    },
+    {
+      "available": true,
+      "bytes": 731,
+      "label": "independent_vv_attestation_template",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/independent_vv_attestation_template.json",
+      "redacted_sha256": "774f124e5ef8186fad3432e71f655f8c28ceee4558fe5c5409cabd5eeda1abcb",
+      "sha256": "6a834475440b5387e24322aef879610efe3745cb42f01d4cebc377ec8bfbdd91",
+      "source_path": "docs/templates/independent_vv_attestation.template.json"
+    },
+    {
+      "available": true,
+      "bytes": 912,
+      "label": "family_validation_manual_signoff_template",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/family_validation_manual_signoff_template.json",
+      "redacted_sha256": "2ad638f5ef0230a11c27dd97c514eaee7ecc8b843541b3dac5d7a4b57e1abad3",
+      "sha256": "3c6e9cbe10c2e6cbc17267b1b71b60b52ae51dfab3e33a79238591cee7b5b620",
+      "source_path": "docs/templates/family_validation_manual_signoff.template.json"
+    },
+    {
+      "available": true,
+      "bytes": 745,
+      "label": "customer_audit_failure_bundle_sla_template",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/customer_audit_failure_bundle_sla_template.json",
+      "redacted_sha256": "0e3ced3a4b5dd7ee66dac006f2c589ecea6bc3ec600a037ca7c87ec2c621a988",
+      "sha256": "546b48d79f5df755d66d039f43e77241a83b9c673add1c067fdfc217cd4f62ec",
+      "source_path": "docs/templates/customer_audit_failure_bundle_sla.template.json"
     },
     {
       "available": true,
@@ -383,16 +410,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T20:26:31.413658+00:00",
+    "generated_at": "2026-06-16T20:36:46.922690+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 41,
-    "available_artifact_count": 41,
+    "artifact_count": 44,
+    "available_artifact_count": 44,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "c8d66706c294567b4a4c246db2230bf8edc93a1bcd6e38e5f2992be0d44ba969"
+    "sha256": "b54119957522fdfa47c732058ec11046f5d9a0c18711d7fba0dd2d2b87304cf6"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -413,20 +440,23 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 98044,
+    "bytes": 100063,
     "error": "",
-    "member_count": 44,
+    "member_count": 47,
     "members": [
       "audit_digest.json",
       "license_status.json",
       "redacted/ci_streak_intake_packet.json",
       "redacted/ci_streak_manifest.json",
       "redacted/client_input_validation_report.json",
+      "redacted/customer_audit_failure_bundle_sla_template.json",
       "redacted/external_benchmark_updates.json",
+      "redacted/family_validation_manual_signoff_template.json",
       "redacted/frontend_dependency_audit_report.json",
       "redacted/ga_enterprise_readiness_report.json",
       "redacted/ga_enterprise_signoff_intake_packet.json",
       "redacted/github_actions_ci_streak_evidence.json",
+      "redacted/independent_vv_attestation_template.json",
       "redacted/license_status_closure_report.json",
       "redacted/license_status_intake_packet.json",
       "redacted/license_status_template.json",
@@ -463,9 +493,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "cee5a9206ded6512323a2441cb937aaf7230f9f8d9d81a39091e011c384e6c10"
+    "sha256": "1edc6a977259a7c2eff18305e13e1968682944779a12dde97fe00c238e8a6cdc"
   },
-  "generated_at": "2026-06-16T20:26:31.424980+00:00",
+  "generated_at": "2026-06-16T20:36:46.934240+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -475,10 +505,13 @@
   "optional_sections": {
     "ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
     "ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+    "customer_audit_failure_bundle_sla_template": "implementation/phase1/release/support_bundle/redacted/customer_audit_failure_bundle_sla_template.json",
+    "family_validation_manual_signoff_template": "implementation/phase1/release/support_bundle/redacted/family_validation_manual_signoff_template.json",
     "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
     "ga_enterprise_readiness_report": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json",
     "ga_enterprise_signoff_intake_packet": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
     "github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
+    "independent_vv_attestation_template": "implementation/phase1/release/support_bundle/redacted/independent_vv_attestation_template.json",
     "license_status_closure_report": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
     "license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
     "license_status_template": "implementation/phase1/release/support_bundle/redacted/license_status_template.json",
@@ -519,5 +552,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=41/41 | redaction=True | roundtrip=True | archive=True"
+  "summary_line": "Support bundle: PASS | artifacts=44/44 | redaction=True | roundtrip=True | archive=True"
 }

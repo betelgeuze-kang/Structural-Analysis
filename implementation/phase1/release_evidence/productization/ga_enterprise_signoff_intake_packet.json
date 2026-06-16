@@ -7,7 +7,7 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T20:26:26.101603+00:00",
+  "generated_at": "2026-06-16T20:36:46.842649+00:00",
   "owner_packets": [
     {
       "acceptance_criteria": [
@@ -94,6 +94,8 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_path": "docs/templates/independent_vv_attestation.template.json",
+          "template_present": true,
           "verification_commands": [
             "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
             "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -127,6 +129,9 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_paths": [
+        "docs/templates/independent_vv_attestation.template.json"
+      ],
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -215,6 +220,8 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_path": "docs/templates/family_validation_manual_signoff.template.json",
+          "template_present": true,
           "verification_commands": [
             "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
             "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -247,6 +254,9 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_paths": [
+        "docs/templates/family_validation_manual_signoff.template.json"
+      ],
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -338,6 +348,8 @@
             "support_bundle": "implementation/phase1/support_bundle_manifest.json",
             "validation_manual": "docs/release-validation-manual.md"
           },
+          "template_path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
+          "template_present": true,
           "verification_commands": [
             "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
             "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -371,6 +383,9 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_paths": [
+        "docs/templates/customer_audit_failure_bundle_sla.template.json"
+      ],
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -435,6 +450,8 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_path": "docs/templates/independent_vv_attestation.template.json",
+      "template_present": true,
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -493,6 +510,8 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_path": "docs/templates/family_validation_manual_signoff.template.json",
+      "template_present": true,
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -553,6 +572,8 @@
         "support_bundle": "implementation/phase1/support_bundle_manifest.json",
         "validation_manual": "docs/release-validation-manual.md"
       },
+      "template_path": "docs/templates/customer_audit_failure_bundle_sla.template.json",
+      "template_present": true,
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --fail-blocked",
@@ -579,7 +600,8 @@
     "readiness_blocker_count": 3,
     "signoff_count": 3,
     "signoff_pass_count": 0,
-    "source_artifact_count": 8
+    "source_artifact_count": 8,
+    "template_count": 3
   },
   "summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
   "validation_commands": [

@@ -1,0 +1,12 @@
+{
+  "contract_pass": false,
+  "attestation_scope": "OWNER_INPUT_REQUIRED: GA release independent V&V scope",
+  "independent_reviewer": "OWNER_INPUT_REQUIRED: independent reviewer or review organization",
+  "independence_basis": "OWNER_INPUT_REQUIRED: independence basis and conflict check",
+  "case_set_reference": "OWNER_INPUT_REQUIRED: measured/holdout case set reference",
+  "report_reference": "OWNER_INPUT_REQUIRED: independent V&V report reference",
+  "signed_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T00:00:00+00:00",
+  "approval_decision": "OWNER_INPUT_REQUIRED",
+  "template_only": true,
+  "note": "Template only. Do not use as GA/Enterprise release evidence until populated from a signed independent V&V attestation."
+}

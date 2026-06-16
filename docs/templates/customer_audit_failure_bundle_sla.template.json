@@ -1,0 +1,12 @@
+{
+  "contract_pass": false,
+  "customer_or_ops_approver": "OWNER_INPUT_REQUIRED: customer success or support ops approver",
+  "audit_export_acceptance_ref": "OWNER_INPUT_REQUIRED: accepted customer audit export reference",
+  "failure_bundle_export_ref": "OWNER_INPUT_REQUIRED: accepted failure bundle export reference",
+  "support_sla_ref": "OWNER_INPUT_REQUIRED: support SLA reference",
+  "rollback_policy_ref": "OWNER_INPUT_REQUIRED: rollback policy reference",
+  "signed_at_utc": "OWNER_INPUT_REQUIRED: 2026-06-16T00:00:00+00:00",
+  "approval_decision": "OWNER_INPUT_REQUIRED",
+  "template_only": true,
+  "note": "Template only. Do not use as GA/Enterprise release evidence until populated from customer or support ops acceptance records."
+}

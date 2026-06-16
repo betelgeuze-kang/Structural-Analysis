@@ -23,6 +23,13 @@ DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF = Path(
 DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA = Path(
     "implementation/phase1/release_evidence/productization/customer_audit_failure_bundle_sla.json"
 )
+DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE = Path("docs/templates/independent_vv_attestation.template.json")
+DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE = Path(
+    "docs/templates/family_validation_manual_signoff.template.json"
+)
+DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE = Path(
+    "docs/templates/customer_audit_failure_bundle_sla.template.json"
+)
 ACCEPTED_SIGNOFF_DECISIONS = {"approved", "accepted", "pass", "signed", "approved_for_ga"}
 PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "OWNER_INPUT_REQUIRED")
 OWNER_ORDER = ("independent_vv_owner", "validation_manual_owner", "customer_success_ops_owner", "ga_release_owner")
@@ -45,6 +52,7 @@ SIGNOFF_SPECS = {
         ],
         "owner_note": "Attach independent V&V scope, reviewer identity, case set, report reference, and signed decision.",
         "default_evidence_path": DEFAULT_INDEPENDENT_VV_ATTESTATION,
+        "default_template_path": DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE,
         "default_acceptance": "`independent_vv_attestation.contract_pass == true`",
         "default_owner_action": "Attach third-party or independent V&V attestation with scope, case set, date, and approver.",
     },
@@ -63,6 +71,7 @@ SIGNOFF_SPECS = {
         ],
         "owner_note": "Attach family-by-family validation manual signoff tied to the signed release registry.",
         "default_evidence_path": DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF,
+        "default_template_path": DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE,
         "default_acceptance": "`family_validation_manual_signoff.contract_pass == true`",
         "default_owner_action": "Attach family-by-family validation manual signoff tied to the release registry.",
     },
@@ -82,6 +91,7 @@ SIGNOFF_SPECS = {
         ],
         "owner_note": "Attach customer/ops acceptance for audit export, failure bundle, support SLA, and rollback path.",
         "default_evidence_path": DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA,
+        "default_template_path": DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE,
         "default_acceptance": "`customer_audit_failure_bundle_sla.contract_pass == true`",
         "default_owner_action": "Attach customer audit/failure-bundle export acceptance and support SLA evidence.",
     },
@@ -213,6 +223,10 @@ def _evidence_path(owner_row: dict[str, Any], spec: dict[str, Any]) -> Path:
     return Path(str(path))
 
 
+def _template_path(spec: dict[str, Any]) -> Path:
+    return Path(str(spec.get("default_template_path", "")))
+
+
 def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     incomplete = [row["signoff"] for row in rows if not row["evidence_contract_pass"]]
     source_artifacts: dict[str, str] = {}
@@ -226,6 +240,7 @@ def _owner_packet(owner: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
         "blockers": [row["blocker"] for row in rows],
         "signoffs": [row["signoff"] for row in rows],
         "evidence_paths": [row["evidence_path"] for row in rows],
+        "template_paths": [row["template_path"] for row in rows],
         "evidence_states": _dedupe([str(_as_dict(row.get("evidence_status")).get("state", "")) for row in rows]),
         "source_artifacts": source_artifacts,
         "acceptance_criteria": _dedupe([row["acceptance"] for row in rows]),
@@ -252,6 +267,7 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
     for blocker, spec in SIGNOFF_SPECS.items():
         owner_row = owner_rows_by_blocker.get(blocker, {})
         evidence_path = _evidence_path(owner_row, spec)
+        template_path = _template_path(spec)
         evidence = _load_json(evidence_path)
         required_fields = [str(field) for field in spec.get("required_fields", [])]
         field_status = _evidence_field_status(evidence, required_fields)
@@ -279,6 +295,8 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
                 "resolution_type": str(spec.get("resolution_type", "external_ga_signoff_required")),
                 "evidence_path": str(evidence_path),
                 "evidence_present": evidence_path.exists(),
+                "template_path": str(template_path),
+                "template_present": template_path.exists(),
                 "evidence_contract_pass": evidence_contract_pass,
                 "evidence_status": {
                     "state": evidence_state,
@@ -332,6 +350,7 @@ def build_packet(*, ga_readiness_report: Path = DEFAULT_GA_READINESS) -> dict[st
             "readiness_blocker_count": len(blockers),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
             "source_artifact_count": len(source_artifacts),
+            "template_count": sum(1 for row in rows if row["template_present"]),
             "owner_action": (
                 "Populate the referenced GA/Enterprise signoff evidence files from independent V&V, "
                 "family validation manual signoff, and customer audit/failure-bundle/SLA approval records."
@@ -358,23 +377,25 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         "## Owner Packets",
         "",
-        "| Owner | State | Signoffs | Evidence | Acceptance |",
-        "|---|---|---|---|---|",
+        "| Owner | State | Signoffs | Evidence | Template | Acceptance |",
+        "|---|---|---|---|---|---|",
     ]
     for packet in payload["owner_packets"]:
         signoffs = "<br>".join(f"`{item}`" for item in packet["signoffs"])
         evidence = "<br>".join(f"`{item}`" for item in packet["evidence_paths"])
+        templates = "<br>".join(f"`{item}`" for item in packet["template_paths"])
         acceptance = "<br>".join(str(item) for item in packet["acceptance_criteria"])
         lines.append(
-            f"| `{packet['owner']}` | `{packet['request_state']}` | {signoffs} | {evidence} | {acceptance} |"
+            f"| `{packet['owner']}` | `{packet['request_state']}` | {signoffs} | {evidence} | {templates} | "
+            f"{acceptance} |"
         )
     lines.extend(
         [
             "",
             "## Signoff Rows",
             "",
-        "| Signoff | Owner | Evidence Status | Evidence | Pass | Next Action | Required Fields |",
-        "|---|---|---|---|---|---|---|",
+        "| Signoff | Owner | Evidence Status | Evidence | Template | Pass | Next Action | Required Fields |",
+        "|---|---|---|---|---|---|---|---|",
         ]
     )
     for row in payload["signoff_rows"]:
@@ -382,7 +403,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         status = evidence_status.get("state", "open") if isinstance(evidence_status, dict) else "open"
         lines.append(
             f"| `{row['signoff']}` | `{row['owner']}` | `{status}` | `{row['evidence_path']}` | "
-            f"`{row['evidence_contract_pass']}` | {row['next_action']} | "
+            f"`{row['template_path']}` | `{row['evidence_contract_pass']}` | {row['next_action']} | "
             f"{', '.join(f'`{field}`' for field in row['required_fields'])} |"
         )
     lines.extend(["", "## Validation Commands", ""])
