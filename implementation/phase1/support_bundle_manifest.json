@@ -1,4 +1,12 @@
 {
+  "archive_roundtrip": {
+    "actual_artifact_count": 33,
+    "artifact_count": 33,
+    "member_count": 37,
+    "missing_members": [],
+    "pass": true,
+    "reason": "PASS"
+  },
   "artifact_rows": [
     {
       "available": true,
@@ -203,8 +211,8 @@
       "bytes": 27147,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "71255c62c938a932405b177a709ace4f579a329e00db965093695171c01d1e3f",
-      "sha256": "71255c62c938a932405b177a709ace4f579a329e00db965093695171c01d1e3f",
+      "redacted_sha256": "682b722a05bde828abe448e1122b19a676ea19c6677b3f3872d6ae7fb165aa91",
+      "sha256": "682b722a05bde828abe448e1122b19a676ea19c6677b3f3872d6ae7fb165aa91",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -303,7 +311,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-16T18:33:01.800208+00:00",
+    "generated_at": "2026-06-16T18:38:39.098260+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -312,23 +320,73 @@
     "artifact_count": 33,
     "available_artifact_count": 33,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "fe9091c481d15ff1a557dd76de7d304b60e20c8769b4f6806bd3b2da63e6e67c"
+    "sha256": "96c55abe1a523db050cc601529a3e8995acf10eb5bbd836a7ecc35ff615a0dd7"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
+    "export_format": "zip",
     "include_private_keys": false,
     "include_tokens": false,
+    "one_click_export": true,
     "redact_secrets": true,
     "tenant_scoped": true
   },
   "checks": {
+    "archive_roundtrip_test_pass": true,
     "audit_event_digest_pass": true,
     "bundle_roundtrip_test_pass": true,
     "missing_required_count": 0,
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-06-16T18:33:01.800977+00:00",
+  "export_archive": {
+    "available": true,
+    "bytes": 74906,
+    "error": "",
+    "member_count": 37,
+    "members": [
+      "audit_digest.json",
+      "license_status.json",
+      "license_status.template.json",
+      "redacted/ci_streak_intake_packet.json",
+      "redacted/client_input_validation_report.json",
+      "redacted/external_benchmark_updates.json",
+      "redacted/frontend_dependency_audit_report.json",
+      "redacted/ga_enterprise_readiness_report.json",
+      "redacted/ga_enterprise_signoff_intake_packet.json",
+      "redacted/license_status_intake_packet.json",
+      "redacted/p0_status.json",
+      "redacted/p1_status.json",
+      "redacted/p1_strict_evidence_preflight.json",
+      "redacted/package_json.json",
+      "redacted/paid_pilot_scope_guard_report.json",
+      "redacted/pm_release_blocker_action_register.json",
+      "redacted/project_ops_deployment_drill.json",
+      "redacted/project_ops_snapshot.json",
+      "redacted/pyproject.toml",
+      "redacted/release_limitation_manual.md",
+      "redacted/release_validation_manual.md",
+      "redacted/residual_holdout_updates.json",
+      "redacted/runtime_packaging_manifest.json",
+      "redacted/runtime_probe.json",
+      "redacted/ux_new_user_observation_intake_packet.json",
+      "redacted/ux_new_user_observation_report.json",
+      "redacted/viewer_browser_performance_probe.json",
+      "redacted/viewer_performance_budget_manifest.json",
+      "redacted/viewer_visual_regression_baseline.json",
+      "redacted/workstation_delivery_package_manifest.json",
+      "redacted/workstation_delivery_readiness.json",
+      "redacted/workstation_delivery_viewer_smoke.json",
+      "redacted/workstation_hardware_profile.json",
+      "redacted/workstation_job_record.json",
+      "redacted/workstation_job_retention_policy.json",
+      "redacted/workstation_service_budget.json",
+      "support_bundle_index.json"
+    ],
+    "path": "implementation/phase1/release/support_bundle_export.zip",
+    "sha256": "4eb528b3b481806b7f3893114f42d196a3d7fa32d9d05b7b47aaf9858d606004"
+  },
+  "generated_at": "2026-06-16T18:38:39.109565+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -374,5 +432,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=33/33 | redaction=True | roundtrip=True"
+  "summary_line": "Support bundle: PASS | artifacts=33/33 | redaction=True | roundtrip=True | archive=True"
 }

@@ -10,10 +10,12 @@ import json
 from pathlib import Path
 import re
 from typing import Any
+import zipfile
 
 
 SCHEMA_VERSION = "support-bundle-manifest.v1"
 DEFAULT_BUNDLE_DIR = Path("implementation/phase1/release/support_bundle")
+DEFAULT_ARCHIVE_OUT = Path("implementation/phase1/release/support_bundle_export.zip")
 DEFAULT_MANIFEST_OUT = Path("implementation/phase1/support_bundle_manifest.json")
 DEFAULT_P0_STATUS = Path("implementation/phase1/release/publication_evidence/current/p0-status.json")
 DEFAULT_P1_STATUS = Path("implementation/phase1/release/publication_evidence/current/p1-readiness-status.json")
@@ -271,9 +273,80 @@ def _roundtrip_self_test(index: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _build_export_archive(*, bundle_dir: Path, archive_out: Path) -> dict[str, Any]:
+    if archive_out.exists():
+        archive_out.unlink()
+    archive_out.parent.mkdir(parents=True, exist_ok=True)
+    files = [
+        path
+        for path in bundle_dir.rglob("*")
+        if path.is_file() and path.resolve() != archive_out.resolve()
+    ]
+    members = [path.relative_to(bundle_dir).as_posix() for path in files]
+    try:
+        with zipfile.ZipFile(archive_out, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for path, member in sorted(zip(files, members), key=lambda item: item[1]):
+                info = zipfile.ZipInfo(member)
+                info.date_time = (2026, 1, 1, 0, 0, 0)
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o644 << 16
+                archive.writestr(info, path.read_bytes())
+    except Exception as exc:
+        return {
+            "path": str(archive_out),
+            "available": False,
+            "bytes": 0,
+            "sha256": "",
+            "member_count": 0,
+            "members": [],
+            "error": str(exc),
+        }
+    return {
+        "path": str(archive_out),
+        "available": archive_out.exists(),
+        "bytes": archive_out.stat().st_size if archive_out.exists() else 0,
+        "sha256": _sha256_path(archive_out) if archive_out.exists() else "",
+        "member_count": len(members),
+        "members": sorted(members),
+        "error": "",
+    }
+
+
+def _archive_roundtrip_self_test(archive_payload: dict[str, Any]) -> dict[str, Any]:
+    archive_path = Path(str(archive_payload.get("path", "")))
+    if not archive_path.exists():
+        return {"pass": False, "reason": "archive_missing", "member_count": 0}
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            names = archive.namelist()
+            index_bytes = archive.read("support_bundle_index.json")
+            index = json.loads(index_bytes.decode("utf-8"))
+    except Exception as exc:
+        return {"pass": False, "reason": f"archive_roundtrip_failed:{exc}", "member_count": 0}
+    artifact_count = int(index.get("artifact_count", -1))
+    artifact_rows = index.get("artifact_rows")
+    actual_artifact_count = len(artifact_rows) if isinstance(artifact_rows, list) else -1
+    required_members = {"support_bundle_index.json", "audit_digest.json", "license_status.json"}
+    missing_members = sorted(required_members.difference(names))
+    pass_roundtrip = bool(
+        not missing_members
+        and artifact_count == actual_artifact_count
+        and int(archive_payload.get("member_count", 0) or 0) == len(names)
+    )
+    return {
+        "pass": pass_roundtrip,
+        "reason": "PASS" if pass_roundtrip else "archive_member_or_index_mismatch",
+        "member_count": len(names),
+        "artifact_count": artifact_count,
+        "actual_artifact_count": actual_artifact_count,
+        "missing_members": missing_members,
+    }
+
+
 def build_support_bundle(
     *,
     bundle_dir: Path = DEFAULT_BUNDLE_DIR,
+    archive_out: Path = DEFAULT_ARCHIVE_OUT,
     audit_log_path: Path | None = None,
     license_status: Path | None = None,
     p0_status: Path = DEFAULT_P0_STATUS,
@@ -359,6 +432,8 @@ def build_support_bundle(
     redaction = _redaction_self_test()
     index = _build_index(bundle_dir=bundle_dir, artifact_rows=artifact_rows, audit_digest=audit_digest)
     roundtrip = _roundtrip_self_test(index)
+    export_archive = _build_export_archive(bundle_dir=bundle_dir, archive_out=archive_out)
+    archive_roundtrip = _archive_roundtrip_self_test(export_archive)
 
     missing_required = [row["label"] for row in artifact_rows[: len(required_specs)] if not row.get("available")]
     blockers = [
@@ -366,6 +441,8 @@ def build_support_bundle(
         *(["redaction_self_test_failed"] if not redaction["pass"] else []),
         *(["audit_event_digest_missing"] if not audit_digest.get("sha256") else []),
         *(["bundle_roundtrip_test_failed"] if not roundtrip["pass"] else []),
+        *(["archive_export_failed"] if not export_archive.get("available") else []),
+        *(["archive_roundtrip_test_failed"] if not archive_roundtrip["pass"] else []),
     ]
     contract_pass = not blockers
     return {
@@ -376,7 +453,8 @@ def build_support_bundle(
         "summary_line": (
             f"Support bundle: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"artifacts={index['available_artifact_count']}/{index['artifact_count']} | "
-            f"redaction={redaction['pass']} | roundtrip={roundtrip['pass']}"
+            f"redaction={redaction['pass']} | roundtrip={roundtrip['pass']} | "
+            f"archive={archive_roundtrip['pass']}"
         ),
         "bundle_policy": {
             "redact_secrets": True,
@@ -384,6 +462,8 @@ def build_support_bundle(
             "include_tokens": False,
             "tenant_scoped": True,
             "copy_mode": "redacted_evidence_plus_digest",
+            "one_click_export": True,
+            "export_format": "zip",
         },
         "required_sections": {
             row["label"]: row["redacted_bundle_path"] if row.get("available") else "missing"
@@ -397,6 +477,7 @@ def build_support_bundle(
             "redaction_self_test_pass": redaction["pass"],
             "audit_event_digest_pass": bool(audit_digest.get("sha256")),
             "bundle_roundtrip_test_pass": roundtrip["pass"],
+            "archive_roundtrip_test_pass": archive_roundtrip["pass"],
             "missing_required_count": len(missing_required),
         },
         "audit_digest": audit_digest,
@@ -407,6 +488,8 @@ def build_support_bundle(
             "artifact_count": index["artifact_count"],
             "available_artifact_count": index["available_artifact_count"],
         },
+        "export_archive": export_archive,
+        "archive_roundtrip": archive_roundtrip,
         "artifact_rows": artifact_rows,
         "blockers": blockers,
     }
@@ -415,6 +498,7 @@ def build_support_bundle(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--bundle-dir", type=Path, default=DEFAULT_BUNDLE_DIR)
+    parser.add_argument("--archive-out", type=Path, default=DEFAULT_ARCHIVE_OUT)
     parser.add_argument("--manifest-out", type=Path, default=DEFAULT_MANIFEST_OUT)
     parser.add_argument("--audit-log-path", type=Path)
     parser.add_argument("--license-status-json", type=Path)
@@ -529,6 +613,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_support_bundle(
         bundle_dir=args.bundle_dir,
+        archive_out=args.archive_out,
         audit_log_path=args.audit_log_path,
         license_status=args.license_status_json,
         p0_status=args.p0_status,

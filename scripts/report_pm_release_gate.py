@@ -652,6 +652,7 @@ def _packaging_milestone(
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
+    support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
     summary_line = str(workflow.get("summary_line", "") or "")
     validation_manual_text = _read_text_or_empty(validation_manual_path)
@@ -678,6 +679,10 @@ def _packaging_milestone(
             _truthy_contract(support)
             and support_checks.get("redaction_self_test_pass", False)
             and support_checks.get("bundle_roundtrip_test_pass", False)
+            and support_checks.get("archive_roundtrip_test_pass", False)
+        ),
+        "support_bundle_one_click_archive_present": bool(
+            support_export_archive.get("available") and support_export_archive.get("sha256")
         ),
         "support_bundle_pm_blocker_register_present": bool(
             support_optional_sections.get("pm_release_blocker_action_register")
@@ -721,6 +726,11 @@ def _packaging_milestone(
         *(["audit_trail_action_source_trace_missing"] if not gate_checks["audit_trail_action_source_trace_pass"] else []),
         *(["signed_release_registry_missing_or_failed"] if not gate_checks["signed_release_registry_pass"] else []),
         *(["support_bundle_export_missing_or_failed"] if not gate_checks["support_bundle_export_pass"] else []),
+        *(
+            ["support_bundle_one_click_archive_missing"]
+            if not gate_checks["support_bundle_one_click_archive_present"]
+            else []
+        ),
         *(
             ["support_bundle_pm_blocker_register_missing"]
             if not gate_checks["support_bundle_pm_blocker_register_present"]
@@ -776,6 +786,8 @@ def _packaging_milestone(
             "viewer_mode": str(workflow_summary.get("viewer_mode", "")),
             "release_registry_artifact_count": _as_int(registry_summary.get("artifact_count"), 0),
             "support_bundle_missing_required_count": _as_int(support_checks.get("missing_required_count"), -1),
+            "support_bundle_export_archive": str(support_export_archive.get("path", "")),
+            "support_bundle_export_archive_sha256": str(support_export_archive.get("sha256", "")),
             "support_bundle_pm_blocker_register": str(
                 support_optional_sections.get("pm_release_blocker_action_register", "")
             ),
@@ -1466,6 +1478,7 @@ def _build_release_area_matrix(
 
     runtime_packaging_checks = _checks(runtime_packaging)
     support_checks = _checks(support)
+    support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
     limitation_manual_text = _read_text_or_empty(limitation_manual_path)
     support_area_checks = {
@@ -1498,10 +1511,17 @@ def _build_release_area_matrix(
         "ux_new_user_observation_intake_packet_in_failure_bundle": bool(
             support_optional_sections.get("ux_new_user_observation_intake_packet")
         ),
+        "one_click_failure_bundle_archive_present": bool(
+            support_export_archive.get("available") and support_export_archive.get("sha256")
+        ),
+        "failure_bundle_archive_roundtrip_pass": bool(
+            support_checks.get("archive_roundtrip_test_pass", False)
+        ),
         "failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
             and support_checks.get("bundle_roundtrip_test_pass", False)
+            and support_checks.get("archive_roundtrip_test_pass", False)
         ),
         "rollback_runbook_present": bool(runtime_packaging_checks.get("rollback_runbook_present", False)),
     }
@@ -1556,6 +1576,16 @@ def _build_release_area_matrix(
             if not support_area_checks["ux_new_user_observation_intake_packet_in_failure_bundle"]
             else []
         ),
+        *(
+            ["one_click_failure_bundle_archive_missing"]
+            if not support_area_checks["one_click_failure_bundle_archive_present"]
+            else []
+        ),
+        *(
+            ["failure_bundle_archive_roundtrip_not_green"]
+            if not support_area_checks["failure_bundle_archive_roundtrip_pass"]
+            else []
+        ),
         *(["failure_bundle_export_not_green"] if not support_area_checks["failure_bundle_export_pass"] else []),
         *(["rollback_runbook_missing"] if not support_area_checks["rollback_runbook_present"] else []),
     ]
@@ -1592,6 +1622,8 @@ def _build_release_area_matrix(
                 "ux_new_user_observation_intake_packet": str(
                     support_optional_sections.get("ux_new_user_observation_intake_packet", "")
                 ),
+                "one_click_failure_bundle_archive": str(support_export_archive.get("path", "")),
+                "one_click_failure_bundle_archive_sha256": str(support_export_archive.get("sha256", "")),
             },
             artifacts={
                 "support_bundle": str(support_bundle_path),

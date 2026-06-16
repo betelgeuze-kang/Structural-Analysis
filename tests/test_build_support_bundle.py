@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import zipfile
 
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_support_bundle.py"
@@ -197,11 +198,20 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert payload["checks"]["redaction_self_test_pass"] is True
     assert payload["checks"]["audit_event_digest_pass"] is True
     assert payload["checks"]["bundle_roundtrip_test_pass"] is True
+    assert payload["checks"]["archive_roundtrip_test_pass"] is True
     assert payload["audit_digest"]["event_count"] == 1
     assert payload["blockers"] == []
 
     index_path = Path(payload["bundle_index"]["path"])
     assert index_path.exists()
+    archive_path = Path(payload["export_archive"]["path"])
+    assert archive_path.exists()
+    assert payload["export_archive"]["member_count"] >= payload["bundle_index"]["artifact_count"]
+    assert payload["archive_roundtrip"]["pass"] is True
+    with zipfile.ZipFile(archive_path) as archive:
+        assert "support_bundle_index.json" in archive.namelist()
+        assert "audit_digest.json" in archive.namelist()
+        assert "license_status.json" in archive.namelist()
     assert "project_ops_deployment_drill" in payload["required_sections"]
     assert "viewer_performance_budget_manifest" in payload["required_sections"]
     assert "viewer_browser_performance_probe" in payload["required_sections"]
