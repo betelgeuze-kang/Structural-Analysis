@@ -1,7 +1,7 @@
 {
   "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T15:55:28.257231+00:00",
+  "generated_at": "2026-06-16T16:05:50.344788+00:00",
   "lanes": {
     "nightly": {
       "allowed_events": [
@@ -15,7 +15,7 @@
       "consecutive_pass_count": 0,
       "lane": "nightly",
       "pass_count": 0,
-      "query_error": "* Request at 2026-06-17 00:55:27.244282021 +0900 KST m=+0.007560649\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/Nightly%20Full%20Quality\n* Request took 695.872168ms\n* Request at 2026-06-17 00:55:27.940285804 +0900 KST m=+0.703564422\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows?per_page=100&page=1\n* Request took 315.103216ms\nfailed to get runs: could not find any workflows named Nightly Full Quality",
+      "query_error": "* Request at 2026-06-17 01:05:49.668827437 +0900 KST m=+0.007292749\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/Nightly%20Full%20Quality\n* Request took 329.568478ms\n* Request at 2026-06-17 01:05:49.998537988 +0900 KST m=+0.337003290\n* Request to https://api.github.com/repos/betelgeuze-kang/Structural-Analysis/actions/workflows?per_page=100&page=1\n* Request took 344.226043ms\nfailed to get runs: could not find any workflows named Nightly Full Quality",
       "rows": [],
       "run_count": 0,
       "threshold": 30,

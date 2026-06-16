@@ -393,6 +393,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path)
     parser.add_argument("--out-md", type=Path)
     parser.add_argument("--fail-open", action="store_true")
+    parser.add_argument(
+        "--fail-core-open",
+        action="store_true",
+        help=(
+            "Fail only when P0 core evidence is open. Release-publication upload evidence "
+            "may remain open for source-repo PR CI and is still reported in the payload."
+        ),
+    )
     return parser
 
 
@@ -423,7 +431,11 @@ def main(argv: list[str] | None = None) -> int:
         args.out_md.parent.mkdir(parents=True, exist_ok=True)
         args.out_md.write_text(_markdown(status), encoding="utf-8")
     print(payload if args.json else _markdown(status))
-    return 1 if args.fail_open and not bool(status.get("p0_closed", False)) else 0
+    if args.fail_open and not bool(status.get("p0_closed", False)):
+        return 1
+    if args.fail_core_open and not bool(status.get("core_evidence_closed", False)):
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

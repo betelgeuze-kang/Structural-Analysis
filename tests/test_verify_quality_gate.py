@@ -17,7 +17,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "scripts/check_p0_closure_status.py --json --fail-open" in output
+    assert "scripts/check_p0_closure_status.py --json --fail-core-open" in output
     assert "scripts/check_p1_readiness_status.py --json --fail-blocked" in output
     assert "verify:viewer-manifest" in output
     assert "scripts/verify_structure_viewer_contracts.py" in output
@@ -33,6 +33,7 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
 
     output = capsys.readouterr().out
     assert exit_code == 0
+    assert "scripts/check_p0_closure_status.py --json --fail-open" in output
     assert "-m pytest -q" in output
     assert "verify:viewer-report-pdf" in output
     assert "verify:viewer-performance-probe" in output

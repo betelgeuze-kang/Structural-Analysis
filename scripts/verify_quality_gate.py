@@ -20,7 +20,7 @@ def _npm() -> str:
     return "npm.cmd" if sys.platform == "win32" else "npm"
 
 
-def _command_groups(mode: str) -> list[list[str]]:
+def _pr_commands() -> list[list[str]]:
     source_boundary = [
         _python(),
         "scripts/plan_source_boundary_cleanup.py",
@@ -30,13 +30,13 @@ def _command_groups(mode: str) -> list[list[str]]:
         "implementation/phase1/source_boundary_allowlist.json",
         "--fail-on-candidates",
     ]
-    pr_commands = [
+    return [
         [_python(), "scripts/check_repo_hygiene.py", "--show-ok"],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
         [_python(), "scripts/check_git_remote_safety.py", "--show-ok"],
         [_python(), "-m", "ruff", "check", "."],
-        [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
+        [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-core-open"],
         [_python(), "scripts/check_p1_readiness_status.py", "--json", "--fail-blocked"],
         [_python(), "scripts/check_p1_benchmark_breadth_status.py", "--json", "--fail-blocked"],
         [_npm(), "ci"],
@@ -69,9 +69,14 @@ def _command_groups(mode: str) -> list[list[str]]:
             "tests/test_source_boundary_footprint_report.py",
         ],
     ]
+
+
+def _command_groups(mode: str) -> list[list[str]]:
+    pr_commands = _pr_commands()
     if mode == "pr":
         return pr_commands
     return [
+        [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-open"],
         *pr_commands,
         [_python(), "-m", "pytest", "-q"],
         [_npm(), "run", "verify:frontend-browser-smoke"],

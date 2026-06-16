@@ -337,6 +337,20 @@ def test_p0_status_reports_missing_default_publication_evidence_index(tmp_path: 
     assert status["gates"][0]["reason"] == "default publication evidence missing"
 
 
+def test_p0_cli_can_fail_only_when_core_evidence_is_open(tmp_path: Path, monkeypatch) -> None:
+    manifest = tmp_path / "manifest.json"
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_MANIFEST", manifest)
+    monkeypatch.setattr(
+        check_p0_closure_status,
+        "DEFAULT_PUBLICATION_EVIDENCE_INDEX",
+        tmp_path / "missing-index.json",
+    )
+    monkeypatch.setattr(check_p0_closure_status, "DEFAULT_REPORTS", _reports(tmp_path))
+
+    assert check_p0_closure_status.main(["--fail-core-open"]) == 0
+    assert check_p0_closure_status.main(["--fail-open"]) == 1
+
+
 def test_p0_status_surfaces_upload_plan_and_metadata_preflight_evidence(tmp_path: Path) -> None:
     manifest, artifact_root, assets_json = _release_fixture(tmp_path)
     upload_plan_json = _upload_plan_json(tmp_path)
