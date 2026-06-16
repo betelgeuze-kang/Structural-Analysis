@@ -1,0 +1,350 @@
+{
+  "claim_boundary": "This packet groups open PM blocker evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, or any other external release evidence, and it does not convert missing evidence into a release pass.",
+  "contract_pass": true,
+  "generated_at": "2026-06-16T20:14:11.757474+00:00",
+  "incomplete_blockers": [],
+  "owner_packets": [
+    {
+      "acceptance_criteria": [
+        "`pr_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+        "`ci_streak_intake_packet.json.contract_pass == true`",
+        "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
+        "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window",
+        "`nightly_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+        "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_count": 2,
+      "blocker_ids": [
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing"
+      ],
+      "evidence_states": [
+        "no_pull_request_run_source",
+        "missing_tracked_ci_streak_evidence"
+      ],
+      "expected_intake_artifacts": [
+        "ci_streak_intake_packet"
+      ],
+      "expected_intake_paths": [
+        "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
+      ],
+      "external_input_required": true,
+      "incomplete_blockers": [],
+      "next_actions": [
+        "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+        "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first."
+      ],
+      "owner": "release_ci_owner",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+        "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+        "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "request_rows": [
+        {
+          "acceptance_criteria": [
+            "`pr_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+            "`ci_streak_intake_packet.json.contract_pass == true`",
+            "`basic_ci::pr_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
+            "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
+          ],
+          "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
+          "evidence_artifacts": {
+            "ci_streak_intake_packet": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+            "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+            "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
+          },
+          "evidence_state": "no_pull_request_run_source",
+          "expected_intake_artifact": "ci_streak_intake_packet",
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+            "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+            "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "Basic CI",
+          "verification_commands": [
+            "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "`nightly_pass_streak_count >= 30` in `pm_release_gate_report.json`",
+            "`ci_streak_intake_packet.json.contract_pass == true`",
+            "`basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` absent from `release_area_blockers`",
+            "`github_actions_ci_streak_evidence.json` refreshed for the release signoff window"
+          ],
+          "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+          "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
+          "evidence_artifacts": {
+            "ci_streak_intake_packet": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "ci_streak_manifest": "implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+            "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+            "nightly_ci": "implementation/phase1/ci_gate_report.nightly.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
+          },
+          "evidence_state": "missing_tracked_ci_streak_evidence",
+          "expected_intake_artifact": "ci_streak_intake_packet",
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
+            "python3 scripts/build_ci_consecutive_pass_manifest.py --out implementation/phase1/release_evidence/productization/ci_consecutive_pass_manifest.json",
+            "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "Basic CI",
+          "verification_commands": [
+            "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        }
+      ],
+      "request_state": "ready_for_owner_input",
+      "verification_commands": [
+        "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`ux_new_user_observation_report.json.contract_pass == true`",
+        "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+        "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`",
+        "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_count": 2,
+      "blocker_ids": [
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing"
+      ],
+      "evidence_states": [
+        "missing_human_new_user_observation",
+        "missing_human_new_user_completion_evidence"
+      ],
+      "expected_intake_artifacts": [
+        "ux_new_user_observation_intake_packet"
+      ],
+      "expected_intake_paths": [
+        "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
+      ],
+      "external_input_required": true,
+      "incomplete_blockers": [],
+      "next_actions": [
+        "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision."
+      ],
+      "owner": "ux_research_owner",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "request_rows": [
+        {
+          "acceptance_criteria": [
+            "`ux_new_user_observation_report.json.contract_pass == true`",
+            "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+            "`ux::human_new_user_observation_missing_or_failed` absent from `release_area_blockers`"
+          ],
+          "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+          "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
+          "evidence_artifacts": {
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "ux_new_user_observation_intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
+            "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+            "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+          },
+          "evidence_state": "missing_human_new_user_observation",
+          "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "UX",
+          "verification_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json --fail-blocked",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "`ux_new_user_observation_report.json.contract_pass == true`",
+            "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
+            "`ux::human_new_user_30min_sample_evidence_missing` absent from `release_area_blockers`"
+          ],
+          "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+          "claim_boundary": "Automated browser rehearsal proves workflow operability only. PM UX release-area pass requires human new-user sample workflow observation evidence.",
+          "evidence_artifacts": {
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "ux_new_user_observation_intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "ux_new_user_observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "ux_release_readiness": "implementation/phase1/release_evidence/productization/ux_release_readiness_report.json",
+            "viewer_performance_budget": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+            "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
+          },
+          "evidence_state": "missing_human_new_user_completion_evidence",
+          "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timestamps, completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "UX",
+          "verification_commands": [
+            "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+            "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json --fail-blocked",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        }
+      ],
+      "request_state": "ready_for_owner_input",
+      "verification_commands": [
+        "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json --fail-blocked",
+        "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`license_status_closure_report.json.contract_pass == true`",
+        "`license_status` is active and populated from approved product/legal evidence",
+        "`security::license_status_not_configured` absent from `release_area_blockers`"
+      ],
+      "blocker_count": 1,
+      "blocker_ids": [
+        "security::license_status_not_configured"
+      ],
+      "evidence_states": [
+        "not_configured"
+      ],
+      "expected_intake_artifacts": [
+        "license_status_intake_packet"
+      ],
+      "expected_intake_paths": [
+        "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
+      ],
+      "external_input_required": true,
+      "incomplete_blockers": [],
+      "next_actions": [
+        "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass."
+      ],
+      "owner": "product_legal_owner",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+        "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "request_rows": [
+        {
+          "acceptance_criteria": [
+            "`license_status_closure_report.json.contract_pass == true`",
+            "`license_status` is active and populated from approved product/legal evidence",
+            "`security::license_status_not_configured` absent from `release_area_blockers`"
+          ],
+          "blocker_id": "security::license_status_not_configured",
+          "claim_boundary": "Security area is release-gate evidence only; live deployment hardening remains governed by the runbook.",
+          "evidence_artifacts": {
+            "frontend_dependency_audit": "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
+            "license_status": "implementation/phase1/release/support_bundle/license_status.json",
+            "license_status_closure": "implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+            "license_status_intake_packet": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "reproducibility_lock": "implementation/phase1/reproducibility_version_lock_report.json",
+            "runtime_sbom": "implementation/phase1/runtime_sbom.json",
+            "security_runbook": "docs/production-ops-security.md"
+          },
+          "evidence_state": "not_configured",
+          "expected_intake_artifact": "license_status_intake_packet",
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Populate license_status.json from an approved product/legal decision, replacing all template placeholders with real approval evidence before release-area security can pass.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/build_license_status_intake_packet.py --out implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+            "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "Security",
+          "verification_commands": [
+            "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json --fail-blocked",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        }
+      ],
+      "request_state": "ready_for_owner_input",
+      "verification_commands": [
+        "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    }
+  ],
+  "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
+  "reason_code": "PASS",
+  "schema_version": "pm-owner-evidence-request-packet.v1",
+  "summary": {
+    "external_input_required_count": 5,
+    "full_release_gate_ready": false,
+    "incomplete_request_count": 0,
+    "limited_commercial_ready": true,
+    "open_blocker_count": 5,
+    "owner_input_required_count": 5,
+    "owner_packet_count": 3,
+    "paid_pilot_candidate": true,
+    "release_area_gate_ready": false
+  },
+  "summary_line": "PM owner evidence request packet: PASS | owners=3 | open_blockers=5 | incomplete=0"
+}

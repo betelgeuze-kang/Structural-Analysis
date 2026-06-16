@@ -746,6 +746,10 @@ def _packaging_milestone(
             support_optional_sections,
             "pm_release_gate_reviewer_handoff",
         ),
+        "support_bundle_pm_owner_evidence_request_packet_present": _support_section_present(
+            support_optional_sections,
+            "pm_owner_evidence_request_packet",
+        ),
         "pm_blocker_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
@@ -936,6 +940,9 @@ def _packaging_milestone(
             ),
             "support_bundle_pm_release_gate_reviewer_handoff": str(
                 support_optional_sections.get("pm_release_gate_reviewer_handoff", "")
+            ),
+            "support_bundle_pm_owner_evidence_request_packet": str(
+                support_optional_sections.get("pm_owner_evidence_request_packet", "")
             ),
             "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
             "pm_blocker_register_handoff_ready_count": _as_int(
@@ -1694,6 +1701,10 @@ def _build_release_area_matrix(
             support_optional_sections,
             "pm_release_gate_reviewer_handoff",
         ),
+        "pm_owner_evidence_request_packet_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "pm_owner_evidence_request_packet",
+        ),
         "pm_blocker_action_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
@@ -1891,6 +1902,9 @@ def _build_release_area_matrix(
                 ),
                 "pm_release_gate_reviewer_handoff": str(
                     support_optional_sections.get("pm_release_gate_reviewer_handoff", "")
+                ),
+                "pm_owner_evidence_request_packet": str(
+                    support_optional_sections.get("pm_owner_evidence_request_packet", "")
                 ),
                 "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
                 "pm_blocker_register_handoff_ready_count": _as_int(

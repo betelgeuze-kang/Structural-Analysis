@@ -150,6 +150,20 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "pm_owner_evidence_request_packet": _write_json(
+            tmp_path / "pm-owner-evidence-request-packet.json",
+            {
+                "schema_version": "pm-owner-evidence-request-packet.v1",
+                "contract_pass": True,
+                "summary": {"owner_packet_count": 1, "open_blocker_count": 2},
+                "owner_packets": [
+                    {
+                        "owner": "release_ci_owner",
+                        "blocker_ids": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+                    }
+                ],
+            },
+        ),
         "ci_streak_intake_packet": _write_json(
             tmp_path / "ci-streak-intake-packet.json",
             {
@@ -305,6 +319,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/pm_release_blocker_closure_board.json" in members
         assert "redacted/pm_release_gate_completion_audit.json" in members
         assert "redacted/pm_release_gate_reviewer_handoff.json" in members
+        assert "redacted/pm_owner_evidence_request_packet.json" in members
         assert "redacted/license_status_closure_report.json" in members
         assert "redacted/license_status_template.json" in members
         assert "license_status.template.json" not in members
@@ -324,6 +339,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "pm_release_blocker_closure_board" in payload["optional_sections"]
     assert "pm_release_gate_completion_audit" in payload["optional_sections"]
     assert "pm_release_gate_reviewer_handoff" in payload["optional_sections"]
+    assert "pm_owner_evidence_request_packet" in payload["optional_sections"]
     assert "ci_streak_intake_packet" in payload["optional_sections"]
     assert "ci_streak_manifest" in payload["optional_sections"]
     assert "github_actions_ci_streak_evidence" in payload["optional_sections"]
@@ -357,6 +373,11 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     )
     assert "pm-release-gate-reviewer-handoff.v1" in redacted_reviewer_handoff
     assert "verdict_change_conditions" in redacted_reviewer_handoff
+    redacted_owner_packet = Path(payload["optional_sections"]["pm_owner_evidence_request_packet"]).read_text(
+        encoding="utf-8"
+    )
+    assert "pm-owner-evidence-request-packet.v1" in redacted_owner_packet
+    assert "release_ci_owner" in redacted_owner_packet
     redacted_ci_streak = Path(payload["optional_sections"]["ci_streak_intake_packet"]).read_text(
         encoding="utf-8"
     )
