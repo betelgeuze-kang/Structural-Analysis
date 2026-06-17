@@ -127,6 +127,9 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "template_evidence_safety_report": (
                         "release/support_bundle/redacted/template_evidence_safety_report.json"
                     ),
+                    "pm_release_reproduction_command_audit": (
+                        "release/support_bundle/redacted/pm_release_reproduction_command_audit.json"
+                    ),
                 },
             },
         ),
@@ -165,6 +168,16 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
         "limitation_manual": _text(
             tmp_path / "limitations.md",
             "claim boundary paid pilot limited commercial ga/enterprise known issues support bundle rollback\n",
+        ),
+        "pm_release_reproduction_command_audit": _write(
+            tmp_path / "pm_release_reproduction_command_audit.json",
+            {
+                "schema_version": "pm-release-reproduction-command-audit.v1",
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=42 | violations=0",
+                "summary": {"artifact_count": 7, "command_count": 42, "violation_count": 0},
+            },
         ),
     }
 
@@ -667,6 +680,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["template_evidence_safety_report_present"] is True
     assert support_area["checks"]["template_evidence_safety_pass"] is True
     assert support_area["checks"]["template_evidence_safety_report_in_failure_bundle"] is True
+    assert support_area["checks"]["pm_release_reproduction_command_audit_present"] is True
+    assert support_area["checks"]["pm_release_reproduction_command_audit_pass"] is True
+    assert support_area["checks"]["pm_release_reproduction_command_audit_in_failure_bundle"] is True
     assert support_area["checks"]["one_click_failure_bundle_archive_present"] is True
     assert support_area["checks"]["failure_bundle_archive_roundtrip_pass"] is True
     assert support_area["checks"]["known_issue_or_limitation_register_content_pass"] is True
@@ -710,6 +726,14 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["template_evidence_safety_report_bundle_path"].endswith(
         "template_evidence_safety_report.json"
     )
+    assert support_area["summary"]["pm_release_reproduction_command_audit"].endswith(
+        "pm_release_reproduction_command_audit.json"
+    )
+    assert support_area["summary"]["pm_release_reproduction_command_audit_command_count"] == 42
+    assert support_area["summary"]["pm_release_reproduction_command_audit_violation_count"] == 0
+    assert support_area["summary"]["pm_release_reproduction_command_audit_bundle_path"].endswith(
+        "pm_release_reproduction_command_audit.json"
+    )
     assert support_area["summary"]["one_click_failure_bundle_archive"].endswith("support_bundle_export.zip")
     assert support_area["summary"]["one_click_failure_bundle_archive_sha256"] == "support-bundle-sha256"
     m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
@@ -735,6 +759,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["template_evidence_safety_report_present"] is True
     assert m5["checks"]["template_evidence_safety_pass"] is True
     assert m5["checks"]["support_bundle_template_evidence_safety_report_present"] is True
+    assert m5["checks"]["pm_release_reproduction_command_audit_present"] is True
+    assert m5["checks"]["pm_release_reproduction_command_audit_pass"] is True
+    assert m5["checks"]["support_bundle_pm_release_reproduction_command_audit_present"] is True
+    assert m5["summary"]["pm_release_reproduction_command_audit_command_count"] == 42
+    assert m5["summary"]["pm_release_reproduction_command_audit_violation_count"] == 0
     assert m5["checks"]["support_bundle_one_click_archive_present"] is True
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False

@@ -109,6 +109,9 @@ DEFAULT_UX_NEW_USER_OBSERVATION_TEMPLATE = Path("docs/templates/ux_new_user_obse
 DEFAULT_TEMPLATE_EVIDENCE_SAFETY_REPORT = Path(
     "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
 )
+DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
+)
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 
@@ -422,6 +425,7 @@ def build_support_bundle(
     ux_new_user_observation_intake_packet: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET,
     ux_new_user_observation_template: Path | None = DEFAULT_UX_NEW_USER_OBSERVATION_TEMPLATE,
     template_evidence_safety_report: Path | None = DEFAULT_TEMPLATE_EVIDENCE_SAFETY_REPORT,
+    pm_release_reproduction_command_audit: Path | None = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
@@ -475,6 +479,7 @@ def build_support_bundle(
         ("ux_new_user_observation_intake_packet", ux_new_user_observation_intake_packet),
         ("ux_new_user_observation_template", ux_new_user_observation_template),
         ("template_evidence_safety_report", template_evidence_safety_report),
+        ("pm_release_reproduction_command_audit", pm_release_reproduction_command_audit),
         ("viewer_report", viewer_report),
     ]
     artifact_rows = [_write_redacted_copy(label=label, source=path, bundle_dir=bundle_dir) for label, path in required_specs]
@@ -735,6 +740,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_TEMPLATE_EVIDENCE_SAFETY_REPORT,
     )
+    parser.add_argument(
+        "--pm-release-reproduction-command-audit",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
+    )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
@@ -794,6 +804,7 @@ def main(argv: list[str] | None = None) -> int:
         ux_new_user_observation_intake_packet=args.ux_new_user_observation_intake_packet,
         ux_new_user_observation_template=args.ux_new_user_observation_template,
         template_evidence_safety_report=args.template_evidence_safety_report,
+        pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
         package_json=args.package_json,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,

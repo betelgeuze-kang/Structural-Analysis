@@ -95,6 +95,9 @@ DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
 DEFAULT_TEMPLATE_EVIDENCE_SAFETY = Path(
     "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
 )
+DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
 VALIDATION_MANUAL_REQUIRED_TERMS = (
@@ -694,6 +697,7 @@ def _packaging_milestone(
     pm_blocker_action_register_path: Path,
     pm_blocker_closure_board_path: Path,
     template_evidence_safety_path: Path,
+    pm_release_reproduction_command_audit_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
 ) -> dict[str, Any]:
@@ -703,6 +707,7 @@ def _packaging_milestone(
     pm_blocker_register = _load_json(pm_blocker_action_register_path)
     pm_blocker_closure_board = _load_json(pm_blocker_closure_board_path)
     template_evidence_safety = _load_json(template_evidence_safety_path)
+    pm_release_reproduction_command_audit = _load_json(pm_release_reproduction_command_audit_path)
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
@@ -816,6 +821,12 @@ def _packaging_milestone(
         "support_bundle_template_evidence_safety_report_present": _support_section_present(
             support_optional_sections,
             "template_evidence_safety_report",
+        ),
+        "pm_release_reproduction_command_audit_present": pm_release_reproduction_command_audit_path.exists(),
+        "pm_release_reproduction_command_audit_pass": _truthy_contract(pm_release_reproduction_command_audit),
+        "support_bundle_pm_release_reproduction_command_audit_present": _support_section_present(
+            support_optional_sections,
+            "pm_release_reproduction_command_audit",
         ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
@@ -941,6 +952,21 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_template_evidence_safety_report_present"]
             else []
         ),
+        *(
+            ["pm_release_reproduction_command_audit_missing"]
+            if not gate_checks["pm_release_reproduction_command_audit_present"]
+            else []
+        ),
+        *(
+            ["pm_release_reproduction_command_audit_not_green"]
+            if not gate_checks["pm_release_reproduction_command_audit_pass"]
+            else []
+        ),
+        *(
+            ["support_bundle_pm_release_reproduction_command_audit_missing"]
+            if not gate_checks["support_bundle_pm_release_reproduction_command_audit_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
         *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
@@ -1031,6 +1057,19 @@ def _packaging_milestone(
             "support_bundle_template_evidence_safety_report": str(
                 support_optional_sections.get("template_evidence_safety_report", "")
             ),
+            "pm_release_reproduction_command_audit": str(pm_release_reproduction_command_audit_path),
+            "pm_release_reproduction_command_audit_summary_line": str(
+                pm_release_reproduction_command_audit.get("summary_line", "")
+            ),
+            "pm_release_reproduction_command_audit_command_count": _as_int(
+                _summary(pm_release_reproduction_command_audit).get("command_count"), 0
+            ),
+            "pm_release_reproduction_command_audit_violation_count": _as_int(
+                _summary(pm_release_reproduction_command_audit).get("violation_count"), 0
+            ),
+            "support_bundle_pm_release_reproduction_command_audit": str(
+                support_optional_sections.get("pm_release_reproduction_command_audit", "")
+            ),
             "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
             "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
         },
@@ -1041,6 +1080,7 @@ def _packaging_milestone(
             "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
             "pm_release_blocker_closure_board": str(pm_blocker_closure_board_path),
             "template_evidence_safety": str(template_evidence_safety_path),
+            "pm_release_reproduction_command_audit": str(pm_release_reproduction_command_audit_path),
             "validation_manual": str(validation_manual_path),
             "limitation_manual": str(limitation_manual_path),
         },
@@ -1088,6 +1128,7 @@ def _build_release_area_matrix(
     license_status_path: Path,
     license_status_closure_path: Path,
     template_evidence_safety_path: Path,
+    pm_release_reproduction_command_audit_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
     cpu_only_product_mode: bool,
@@ -1134,6 +1175,7 @@ def _build_release_area_matrix(
     license_status = _load_json(license_status_path)
     license_status_closure = _load_json(license_status_closure_path)
     template_evidence_safety = _load_json(template_evidence_safety_path)
+    pm_release_reproduction_command_audit = _load_json(pm_release_reproduction_command_audit_path)
 
     rows: list[dict[str, Any]] = []
 
@@ -1829,6 +1871,12 @@ def _build_release_area_matrix(
             support_optional_sections,
             "template_evidence_safety_report",
         ),
+        "pm_release_reproduction_command_audit_present": pm_release_reproduction_command_audit_path.exists(),
+        "pm_release_reproduction_command_audit_pass": _truthy_contract(pm_release_reproduction_command_audit),
+        "pm_release_reproduction_command_audit_in_failure_bundle": _support_section_present(
+            support_optional_sections,
+            "pm_release_reproduction_command_audit",
+        ),
         "one_click_failure_bundle_archive_present": bool(
             support_export_archive.get("available") and support_export_archive.get("sha256")
         ),
@@ -1956,6 +2004,21 @@ def _build_release_area_matrix(
             else []
         ),
         *(
+            ["pm_release_reproduction_command_audit_missing"]
+            if not support_area_checks["pm_release_reproduction_command_audit_present"]
+            else []
+        ),
+        *(
+            ["pm_release_reproduction_command_audit_not_green"]
+            if not support_area_checks["pm_release_reproduction_command_audit_pass"]
+            else []
+        ),
+        *(
+            ["pm_release_reproduction_command_audit_missing_from_failure_bundle"]
+            if not support_area_checks["pm_release_reproduction_command_audit_in_failure_bundle"]
+            else []
+        ),
+        *(
             ["one_click_failure_bundle_archive_missing"]
             if not support_area_checks["one_click_failure_bundle_archive_present"]
             else []
@@ -2050,6 +2113,19 @@ def _build_release_area_matrix(
                 "template_evidence_safety_report_bundle_path": str(
                     support_optional_sections.get("template_evidence_safety_report", "")
                 ),
+                "pm_release_reproduction_command_audit": str(pm_release_reproduction_command_audit_path),
+                "pm_release_reproduction_command_audit_summary_line": str(
+                    pm_release_reproduction_command_audit.get("summary_line", "")
+                ),
+                "pm_release_reproduction_command_audit_command_count": _as_int(
+                    _summary(pm_release_reproduction_command_audit).get("command_count"), 0
+                ),
+                "pm_release_reproduction_command_audit_violation_count": _as_int(
+                    _summary(pm_release_reproduction_command_audit).get("violation_count"), 0
+                ),
+                "pm_release_reproduction_command_audit_bundle_path": str(
+                    support_optional_sections.get("pm_release_reproduction_command_audit", "")
+                ),
                 "one_click_failure_bundle_archive": str(support_export_archive.get("path", "")),
                 "one_click_failure_bundle_archive_sha256": str(support_export_archive.get("sha256", "")),
             },
@@ -2058,6 +2134,7 @@ def _build_release_area_matrix(
                 "pm_release_blocker_action_register": str(pm_blocker_action_register_path),
                 "pm_release_blocker_closure_board": str(pm_blocker_closure_board_path),
                 "template_evidence_safety": str(template_evidence_safety_path),
+                "pm_release_reproduction_command_audit": str(pm_release_reproduction_command_audit_path),
                 "runtime_packaging": str(runtime_packaging_path),
                 "limitation_manual": str(limitation_manual_path),
             },
@@ -2187,6 +2264,7 @@ def build_report(
     ga_enterprise_signoff_intake: Path = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE,
     paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
     template_evidence_safety: Path = DEFAULT_TEMPLATE_EVIDENCE_SAFETY,
+    pm_release_reproduction_command_audit: Path = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -2228,6 +2306,7 @@ def build_report(
             pm_blocker_action_register_path=pm_release_blocker_action_register,
             pm_blocker_closure_board_path=pm_release_blocker_closure_board,
             template_evidence_safety_path=template_evidence_safety,
+            pm_release_reproduction_command_audit_path=pm_release_reproduction_command_audit,
             validation_manual_path=validation_manual,
             limitation_manual_path=limitation_manual,
         ),
@@ -2295,6 +2374,7 @@ def build_report(
         license_status_path=license_status,
         license_status_closure_path=license_status_closure,
         template_evidence_safety_path=template_evidence_safety,
+        pm_release_reproduction_command_audit_path=pm_release_reproduction_command_audit,
         validation_manual_path=validation_manual,
         limitation_manual_path=limitation_manual,
         cpu_only_product_mode=cpu_only_product_mode,
@@ -2493,6 +2573,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ga-enterprise-signoff-intake", type=Path, default=DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE)
     parser.add_argument("--paid-pilot-scope-guard", type=Path, default=DEFAULT_PAID_PILOT_SCOPE_GUARD)
     parser.add_argument("--template-evidence-safety", type=Path, default=DEFAULT_TEMPLATE_EVIDENCE_SAFETY)
+    parser.add_argument(
+        "--pm-release-reproduction-command-audit",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
+    )
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -2562,6 +2647,7 @@ def main(argv: list[str] | None = None) -> int:
         ga_enterprise_signoff_intake=args.ga_enterprise_signoff_intake,
         paid_pilot_scope_guard=args.paid_pilot_scope_guard,
         template_evidence_safety=args.template_evidence_safety,
+        pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

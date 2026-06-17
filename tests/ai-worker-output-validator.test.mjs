@@ -5,11 +5,14 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { validate } from '../scripts/validate-ai-worker-output.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const validator = path.join(repoRoot, 'scripts', 'validate-ai-worker-output.mjs');
 const cursorWrapper = path.join(repoRoot, 'scripts', 'ai-worker-cursor.sh');
 const opencodeWrapper = path.join(repoRoot, 'scripts', 'ai-worker-opencode.sh');
+const childSpawnProbe = spawnSync('bash', ['-lc', 'exit 0'], { encoding: 'utf8' });
+const spawnBackedTest =
+  !childSpawnProbe.error && childSpawnProbe.status === 0 ? test : test.skip;
 
 const validWorkerOutput = `Changed files
 
@@ -32,27 +35,11 @@ Blockers
 - None
 `;
 
-function tempFixture(contents) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-worker-output-'));
-  const input = path.join(dir, 'worker.md');
-  const summary = path.join(dir, 'summary.md');
-  fs.writeFileSync(input, contents);
-  return { input, summary };
-}
-
-function runValidator(args) {
-  return spawnSync(process.execPath, [validator, ...args], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-  });
-}
-
 function makeMockCommand(binDir, name, output, exitCode = 0) {
   const commandPath = path.join(binDir, name);
   fs.writeFileSync(
     commandPath,
     `#!/usr/bin/env bash
-cat >/dev/null || true
 cat <<'WORKER_OUTPUT'
 ${output}
 WORKER_OUTPUT
@@ -89,16 +76,15 @@ function runWrapper(wrapper, fixture) {
 }
 
 test('accepts concise worker output and writes canonical headings', () => {
-  const { input, summary } = tempFixture(`# ${validWorkerOutput.replace('Test results', '## Test results').replace('Failed tests', 'Failed tests:')}`);
+  const raw = `# ${validWorkerOutput.replace('Test results', '## Test results').replace('Failed tests', 'Failed tests:')}`;
 
-  const result = runValidator(['--sanitize-out', summary, input]);
+  const sanitized = validate(raw, 16000);
 
-  assert.equal(result.status, 0, result.stderr);
-  assert.match(fs.readFileSync(summary, 'utf8'), /^## Changed files\n\n- scripts\/example.py/m);
+  assert.match(sanitized, /^## Changed files\n\n- scripts\/example.py/m);
 });
 
 test('rejects extra prose before the first section', () => {
-  const { input } = tempFixture(`Here is the summary.
+  const raw = `Here is the summary.
 
 Changed files
 
@@ -119,16 +105,13 @@ Core diff summary
 Blockers
 
 - None
-`);
+`;
 
-  const result = runValidator([input]);
-
-  assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /non-empty content before the first allowed section/);
+  assert.throws(() => validate(raw, 16000), /non-empty content before the first allowed section/);
 });
 
 test('rejects full diffs', () => {
-  const { input } = tempFixture(`Changed files
+  const raw = `Changed files
 
 - scripts/example.py
 
@@ -148,15 +131,12 @@ diff --git a/scripts/example.py b/scripts/example.py
 Blockers
 
 - None
-`);
+`;
 
-  const result = runValidator([input]);
-
-  assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /must not include full unified diffs/);
+  assert.throws(() => validate(raw, 16000), /must not include full unified diffs/);
 });
 
-test('cursor wrapper prints only validated summaries and removes valid raw output', () => {
+spawnBackedTest('cursor wrapper prints only validated summaries and removes valid raw output', () => {
   const fixture = wrapperFixture();
   makeMockCommand(fixture.binDir, 'cursor-agent', validWorkerOutput);
 
@@ -168,7 +148,7 @@ test('cursor wrapper prints only validated summaries and removes valid raw outpu
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.summary.md')).length, 1);
 });
 
-test('opencode wrapper prints only validated summaries and removes valid raw output', () => {
+spawnBackedTest('opencode wrapper prints only validated summaries and removes valid raw output', () => {
   const fixture = wrapperFixture();
   makeMockCommand(fixture.binDir, 'opencode', validWorkerOutput);
 
@@ -180,7 +160,7 @@ test('opencode wrapper prints only validated summaries and removes valid raw out
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.summary.md')).length, 1);
 });
 
-test('wrapper rejects invalid worker output without printing raw output', () => {
+spawnBackedTest('wrapper rejects invalid worker output without printing raw output', () => {
   const fixture = wrapperFixture();
   makeMockCommand(fixture.binDir, 'cursor-agent', 'Here is a long unstructured answer.');
 

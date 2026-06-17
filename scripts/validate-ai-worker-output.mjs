@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
 
 const allowedSections = [
   'Changed files',
@@ -69,7 +70,7 @@ function stripAnsi(value) {
   return value.replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
 }
 
-function validate(raw, maxBytes) {
+export function validate(raw, maxBytes) {
   const byteLength = Buffer.byteLength(raw, 'utf8');
   if (byteLength > maxBytes) {
     fail(`worker output is ${byteLength} bytes; limit is ${maxBytes}`);
@@ -154,4 +155,6 @@ function main() {
   }
 }
 
-main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
