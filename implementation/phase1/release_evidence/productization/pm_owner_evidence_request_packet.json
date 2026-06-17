@@ -1,7 +1,7 @@
 {
   "claim_boundary": "This packet groups open PM blocker evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, or any other external release evidence, and it does not convert missing evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-17T15:25:52.685526+00:00",
+  "generated_at": "2026-06-17T15:50:20.006852+00:00",
   "incomplete_blockers": [],
   "owner_packets": [
     {
@@ -25,11 +25,186 @@
       "expected_intake_artifacts": [
         "ci_streak_intake_packet"
       ],
+      "expected_intake_details": [
+        {
+          "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
+          "contract_pass": false,
+          "current_blocker_count": 13,
+          "current_blockers": [
+            "pr:pr_pull_request_run_source_absent",
+            "pr:pr_ci_30_consecutive_pass_evidence_missing",
+            "pr:github_actions_lane_threshold_not_pass",
+            "pr:github_actions_lane_streak_below_threshold",
+            "pr:github_actions_filtered_run_count_below_threshold",
+            "nightly:nightly_github_actions_query_failed",
+            "nightly:nightly_github_actions_workflow_not_registered",
+            "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
+            "nightly:github_actions_lane_threshold_not_pass",
+            "nightly:github_actions_lane_streak_below_threshold",
+            "nightly:github_actions_workflow_not_registered",
+            "nightly:github_actions_query_error",
+            "nightly:github_actions_filtered_run_count_below_threshold"
+          ],
+          "field_request_count": 0,
+          "field_request_rows": [],
+          "lane_request_count": 2,
+          "lane_request_rows": [
+            {
+              "blockers": [
+                "pr_pull_request_run_source_absent",
+                "pr_ci_30_consecutive_pass_evidence_missing",
+                "github_actions_lane_threshold_not_pass",
+                "github_actions_lane_streak_below_threshold",
+                "github_actions_filtered_run_count_below_threshold"
+              ],
+              "consecutive_pass_count": 0,
+              "github_actions_consecutive_pass_count": 0,
+              "github_actions_workflow_registered": true,
+              "github_actions_workflow_state": "active",
+              "lane": "pr",
+              "local_required_trigger_present": true,
+              "local_workflow_trigger_events": [
+                "pull_request",
+                "push"
+              ],
+              "missing_consecutive_pass_count": 30,
+              "source_evidence_release_credit_pass": false,
+              "streak_source": "no_pull_request_run_source",
+              "threshold": 30,
+              "threshold_pass": false
+            },
+            {
+              "blockers": [
+                "nightly_github_actions_query_failed",
+                "nightly_github_actions_workflow_not_registered",
+                "nightly_ci_30_consecutive_pass_evidence_missing",
+                "github_actions_lane_threshold_not_pass",
+                "github_actions_lane_streak_below_threshold",
+                "github_actions_workflow_not_registered",
+                "github_actions_query_error",
+                "github_actions_filtered_run_count_below_threshold"
+              ],
+              "consecutive_pass_count": 0,
+              "github_actions_consecutive_pass_count": 0,
+              "github_actions_workflow_registered": false,
+              "github_actions_workflow_state": "",
+              "lane": "nightly",
+              "local_required_trigger_present": true,
+              "local_workflow_trigger_events": [
+                "schedule",
+                "workflow_dispatch"
+              ],
+              "missing_consecutive_pass_count": 30,
+              "source_evidence_release_credit_pass": false,
+              "streak_source": "github_actions_workflow_not_registered",
+              "threshold": 30,
+              "threshold_pass": false
+            }
+          ],
+          "path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+          "present": true,
+          "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+          "schema_version": "ci-streak-intake-packet.v1",
+          "summary": {
+            "lane_count": 2,
+            "lane_pass_count": 0,
+            "nightly_github_actions_workflow_registered": false,
+            "nightly_github_actions_workflow_state": "",
+            "nightly_local_required_trigger_present": true,
+            "nightly_local_workflow_present": true,
+            "nightly_missing_consecutive_pass_count": 30,
+            "nightly_source_threshold_pass": false,
+            "open_blocker_count": 13,
+            "pr_github_actions_workflow_registered": true,
+            "pr_github_actions_workflow_state": "active",
+            "pr_local_required_trigger_present": true,
+            "pr_missing_consecutive_pass_count": 30,
+            "pr_pull_request_run_source_present": false,
+            "pr_source_threshold_pass": false,
+            "source_evidence_age_hours": 19.49,
+            "source_evidence_freshness_pass": true,
+            "source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
+            "source_evidence_pass": false,
+            "source_evidence_schema_pass": true,
+            "threshold": 30
+          },
+          "summary_line": ""
+        }
+      ],
       "expected_intake_paths": [
         "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
       ],
       "external_input_required": true,
       "incomplete_blockers": [],
+      "intake_current_blockers": [
+        "pr:pr_pull_request_run_source_absent",
+        "pr:pr_ci_30_consecutive_pass_evidence_missing",
+        "pr:github_actions_lane_threshold_not_pass",
+        "pr:github_actions_lane_streak_below_threshold",
+        "pr:github_actions_filtered_run_count_below_threshold",
+        "nightly:nightly_github_actions_query_failed",
+        "nightly:nightly_github_actions_workflow_not_registered",
+        "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
+        "nightly:github_actions_lane_threshold_not_pass",
+        "nightly:github_actions_lane_streak_below_threshold",
+        "nightly:github_actions_workflow_not_registered",
+        "nightly:github_actions_query_error",
+        "nightly:github_actions_filtered_run_count_below_threshold"
+      ],
+      "intake_field_request_rows": [],
+      "intake_lane_request_rows": [
+        {
+          "blockers": [
+            "pr_pull_request_run_source_absent",
+            "pr_ci_30_consecutive_pass_evidence_missing",
+            "github_actions_lane_threshold_not_pass",
+            "github_actions_lane_streak_below_threshold",
+            "github_actions_filtered_run_count_below_threshold"
+          ],
+          "consecutive_pass_count": 0,
+          "github_actions_consecutive_pass_count": 0,
+          "github_actions_workflow_registered": true,
+          "github_actions_workflow_state": "active",
+          "lane": "pr",
+          "local_required_trigger_present": true,
+          "local_workflow_trigger_events": [
+            "pull_request",
+            "push"
+          ],
+          "missing_consecutive_pass_count": 30,
+          "source_evidence_release_credit_pass": false,
+          "streak_source": "no_pull_request_run_source",
+          "threshold": 30,
+          "threshold_pass": false
+        },
+        {
+          "blockers": [
+            "nightly_github_actions_query_failed",
+            "nightly_github_actions_workflow_not_registered",
+            "nightly_ci_30_consecutive_pass_evidence_missing",
+            "github_actions_lane_threshold_not_pass",
+            "github_actions_lane_streak_below_threshold",
+            "github_actions_workflow_not_registered",
+            "github_actions_query_error",
+            "github_actions_filtered_run_count_below_threshold"
+          ],
+          "consecutive_pass_count": 0,
+          "github_actions_consecutive_pass_count": 0,
+          "github_actions_workflow_registered": false,
+          "github_actions_workflow_state": "",
+          "lane": "nightly",
+          "local_required_trigger_present": true,
+          "local_workflow_trigger_events": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "missing_consecutive_pass_count": 30,
+          "source_evidence_release_credit_pass": false,
+          "streak_source": "github_actions_workflow_not_registered",
+          "threshold": 30,
+          "threshold_pass": false
+        }
+      ],
       "next_actions": [
         "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
         "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first."
@@ -63,6 +238,110 @@
           },
           "evidence_state": "no_pull_request_run_source",
           "expected_intake_artifact": "ci_streak_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
+            "contract_pass": false,
+            "current_blocker_count": 13,
+            "current_blockers": [
+              "pr:pr_pull_request_run_source_absent",
+              "pr:pr_ci_30_consecutive_pass_evidence_missing",
+              "pr:github_actions_lane_threshold_not_pass",
+              "pr:github_actions_lane_streak_below_threshold",
+              "pr:github_actions_filtered_run_count_below_threshold",
+              "nightly:nightly_github_actions_query_failed",
+              "nightly:nightly_github_actions_workflow_not_registered",
+              "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
+              "nightly:github_actions_lane_threshold_not_pass",
+              "nightly:github_actions_lane_streak_below_threshold",
+              "nightly:github_actions_workflow_not_registered",
+              "nightly:github_actions_query_error",
+              "nightly:github_actions_filtered_run_count_below_threshold"
+            ],
+            "field_request_count": 0,
+            "field_request_rows": [],
+            "lane_request_count": 2,
+            "lane_request_rows": [
+              {
+                "blockers": [
+                  "pr_pull_request_run_source_absent",
+                  "pr_ci_30_consecutive_pass_evidence_missing",
+                  "github_actions_lane_threshold_not_pass",
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_filtered_run_count_below_threshold"
+                ],
+                "consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 0,
+                "github_actions_workflow_registered": true,
+                "github_actions_workflow_state": "active",
+                "lane": "pr",
+                "local_required_trigger_present": true,
+                "local_workflow_trigger_events": [
+                  "pull_request",
+                  "push"
+                ],
+                "missing_consecutive_pass_count": 30,
+                "source_evidence_release_credit_pass": false,
+                "streak_source": "no_pull_request_run_source",
+                "threshold": 30,
+                "threshold_pass": false
+              },
+              {
+                "blockers": [
+                  "nightly_github_actions_query_failed",
+                  "nightly_github_actions_workflow_not_registered",
+                  "nightly_ci_30_consecutive_pass_evidence_missing",
+                  "github_actions_lane_threshold_not_pass",
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_workflow_not_registered",
+                  "github_actions_query_error",
+                  "github_actions_filtered_run_count_below_threshold"
+                ],
+                "consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 0,
+                "github_actions_workflow_registered": false,
+                "github_actions_workflow_state": "",
+                "lane": "nightly",
+                "local_required_trigger_present": true,
+                "local_workflow_trigger_events": [
+                  "schedule",
+                  "workflow_dispatch"
+                ],
+                "missing_consecutive_pass_count": 30,
+                "source_evidence_release_credit_pass": false,
+                "streak_source": "github_actions_workflow_not_registered",
+                "threshold": 30,
+                "threshold_pass": false
+              }
+            ],
+            "path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "present": true,
+            "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+            "schema_version": "ci-streak-intake-packet.v1",
+            "summary": {
+              "lane_count": 2,
+              "lane_pass_count": 0,
+              "nightly_github_actions_workflow_registered": false,
+              "nightly_github_actions_workflow_state": "",
+              "nightly_local_required_trigger_present": true,
+              "nightly_local_workflow_present": true,
+              "nightly_missing_consecutive_pass_count": 30,
+              "nightly_source_threshold_pass": false,
+              "open_blocker_count": 13,
+              "pr_github_actions_workflow_registered": true,
+              "pr_github_actions_workflow_state": "active",
+              "pr_local_required_trigger_present": true,
+              "pr_missing_consecutive_pass_count": 30,
+              "pr_pull_request_run_source_present": false,
+              "pr_source_threshold_pass": false,
+              "source_evidence_age_hours": 19.49,
+              "source_evidence_freshness_pass": true,
+              "source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
+              "source_evidence_pass": false,
+              "source_evidence_schema_pass": true,
+              "threshold": 30
+            },
+            "summary_line": ""
+          },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
@@ -102,6 +381,110 @@
           },
           "evidence_state": "missing_tracked_ci_streak_evidence",
           "expected_intake_artifact": "ci_streak_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
+            "contract_pass": false,
+            "current_blocker_count": 13,
+            "current_blockers": [
+              "pr:pr_pull_request_run_source_absent",
+              "pr:pr_ci_30_consecutive_pass_evidence_missing",
+              "pr:github_actions_lane_threshold_not_pass",
+              "pr:github_actions_lane_streak_below_threshold",
+              "pr:github_actions_filtered_run_count_below_threshold",
+              "nightly:nightly_github_actions_query_failed",
+              "nightly:nightly_github_actions_workflow_not_registered",
+              "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
+              "nightly:github_actions_lane_threshold_not_pass",
+              "nightly:github_actions_lane_streak_below_threshold",
+              "nightly:github_actions_workflow_not_registered",
+              "nightly:github_actions_query_error",
+              "nightly:github_actions_filtered_run_count_below_threshold"
+            ],
+            "field_request_count": 0,
+            "field_request_rows": [],
+            "lane_request_count": 2,
+            "lane_request_rows": [
+              {
+                "blockers": [
+                  "pr_pull_request_run_source_absent",
+                  "pr_ci_30_consecutive_pass_evidence_missing",
+                  "github_actions_lane_threshold_not_pass",
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_filtered_run_count_below_threshold"
+                ],
+                "consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 0,
+                "github_actions_workflow_registered": true,
+                "github_actions_workflow_state": "active",
+                "lane": "pr",
+                "local_required_trigger_present": true,
+                "local_workflow_trigger_events": [
+                  "pull_request",
+                  "push"
+                ],
+                "missing_consecutive_pass_count": 30,
+                "source_evidence_release_credit_pass": false,
+                "streak_source": "no_pull_request_run_source",
+                "threshold": 30,
+                "threshold_pass": false
+              },
+              {
+                "blockers": [
+                  "nightly_github_actions_query_failed",
+                  "nightly_github_actions_workflow_not_registered",
+                  "nightly_ci_30_consecutive_pass_evidence_missing",
+                  "github_actions_lane_threshold_not_pass",
+                  "github_actions_lane_streak_below_threshold",
+                  "github_actions_workflow_not_registered",
+                  "github_actions_query_error",
+                  "github_actions_filtered_run_count_below_threshold"
+                ],
+                "consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 0,
+                "github_actions_workflow_registered": false,
+                "github_actions_workflow_state": "",
+                "lane": "nightly",
+                "local_required_trigger_present": true,
+                "local_workflow_trigger_events": [
+                  "schedule",
+                  "workflow_dispatch"
+                ],
+                "missing_consecutive_pass_count": 30,
+                "source_evidence_release_credit_pass": false,
+                "streak_source": "github_actions_workflow_not_registered",
+                "threshold": 30,
+                "threshold_pass": false
+              }
+            ],
+            "path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
+            "present": true,
+            "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
+            "schema_version": "ci-streak-intake-packet.v1",
+            "summary": {
+              "lane_count": 2,
+              "lane_pass_count": 0,
+              "nightly_github_actions_workflow_registered": false,
+              "nightly_github_actions_workflow_state": "",
+              "nightly_local_required_trigger_present": true,
+              "nightly_local_workflow_present": true,
+              "nightly_missing_consecutive_pass_count": 30,
+              "nightly_source_threshold_pass": false,
+              "open_blocker_count": 13,
+              "pr_github_actions_workflow_registered": true,
+              "pr_github_actions_workflow_state": "active",
+              "pr_local_required_trigger_present": true,
+              "pr_missing_consecutive_pass_count": 30,
+              "pr_pull_request_run_source_present": false,
+              "pr_source_threshold_pass": false,
+              "source_evidence_age_hours": 19.49,
+              "source_evidence_freshness_pass": true,
+              "source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
+              "source_evidence_pass": false,
+              "source_evidence_schema_pass": true,
+              "threshold": 30
+            },
+            "summary_line": ""
+          },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
@@ -148,11 +531,303 @@
       "expected_intake_artifacts": [
         "ux_new_user_observation_intake_packet"
       ],
+      "expected_intake_details": [
+        {
+          "claim_boundary": "This intake packet is an owner handoff checklist. It does not create human observation evidence and does not make the PM UX release area pass until the observation report passes.",
+          "contract_pass": false,
+          "current_blocker_count": 8,
+          "current_blockers": [
+            "observation_file_missing",
+            "contract_signal_not_pass",
+            "required_fields_missing",
+            "participant_not_new_user",
+            "new_to_product_not_confirmed",
+            "completion_minutes_missing",
+            "blocking_usability_issue_present",
+            "approval_decision_not_accepted"
+          ],
+          "field_request_count": 12,
+          "field_request_rows": [
+            {
+              "check": "contract_signal_pass",
+              "check_pass": false,
+              "field": "contract_pass",
+              "missing": true,
+              "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+              "placeholder": false,
+              "required_value": "true",
+              "template_value": "false"
+            },
+            {
+              "check": "participant_role_new_user_pass",
+              "check_pass": false,
+              "field": "participant_role",
+              "missing": true,
+              "owner_note": "Participant must be new to the product workflow being released.",
+              "placeholder": false,
+              "required_value": "new_user | first_time_user | pilot_user",
+              "template_value": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user"
+            },
+            {
+              "check": "new_to_product_pass",
+              "check_pass": false,
+              "field": "new_to_product",
+              "missing": true,
+              "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+              "placeholder": false,
+              "required_value": "true",
+              "template_value": "OWNER_INPUT_REQUIRED: true"
+            },
+            {
+              "check": "required_fields_present",
+              "check_pass": false,
+              "field": "sample_project_id",
+              "missing": true,
+              "owner_note": "Must identify the exact sample project completed by the participant.",
+              "placeholder": false,
+              "required_value": "sample project identifier used in the observed workflow",
+              "template_value": "OWNER_INPUT_REQUIRED: sample project identifier"
+            },
+            {
+              "check": "required_fields_present",
+              "check_pass": false,
+              "field": "workflow_scope",
+              "missing": true,
+              "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+              "placeholder": false,
+              "required_value": "observed workflow steps, including reviewer package/report export",
+              "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
+            },
+            {
+              "check": "required_fields_present",
+              "check_pass": false,
+              "field": "observer",
+              "missing": true,
+              "owner_note": "Automated browser smoke tests do not satisfy this field.",
+              "placeholder": false,
+              "required_value": "human observer or UX research owner",
+              "template_value": "OWNER_INPUT_REQUIRED: UX research owner or human observer"
+            },
+            {
+              "check": "started_at_utc_valid",
+              "check_pass": false,
+              "field": "started_at_utc",
+              "missing": true,
+              "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+              "placeholder": false,
+              "required_value": "timezone-aware ISO-8601 observation start timestamp",
+              "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z"
+            },
+            {
+              "check": "completed_at_utc_valid",
+              "check_pass": false,
+              "field": "completed_at_utc",
+              "missing": true,
+              "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+              "placeholder": false,
+              "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+              "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z"
+            },
+            {
+              "check": "completion_30min_pass",
+              "check_pass": false,
+              "field": "completion_minutes",
+              "missing": true,
+              "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
+              "placeholder": false,
+              "required_value": "<= 30.0 and matches timestamp elapsed minutes",
+              "template_value": "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
+            },
+            {
+              "check": "blocker_count_zero_pass",
+              "check_pass": false,
+              "field": "blocker_count",
+              "missing": true,
+              "owner_note": "Blocking usability issues keep the UX release area blocked.",
+              "placeholder": false,
+              "required_value": "0",
+              "template_value": "OWNER_INPUT_REQUIRED: 0"
+            },
+            {
+              "check": "required_fields_present",
+              "check_pass": false,
+              "field": "evidence_ref",
+              "missing": true,
+              "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+              "placeholder": false,
+              "required_value": "non-placeholder evidence reference",
+              "template_value": "OWNER_INPUT_REQUIRED: observation note, ticket, recording, or signed evidence bundle"
+            },
+            {
+              "check": "approval_decision_pass",
+              "check_pass": false,
+              "field": "approval_decision",
+              "missing": true,
+              "owner_note": "Decision must explicitly accept the observation for release evidence.",
+              "placeholder": false,
+              "required_value": "accepted | approved | pass | signed | approved_for_release",
+              "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
+            }
+          ],
+          "lane_request_count": 0,
+          "lane_request_rows": [],
+          "path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+          "present": true,
+          "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
+          "schema_version": "ux-new-user-observation-intake-packet.v1",
+          "summary": {
+            "completion_minutes": null,
+            "declared_completion_minutes": null,
+            "elapsed_minutes": null,
+            "field_count": 15,
+            "field_pass_count": 0,
+            "max_completion_minutes": 30.0,
+            "observation_blocker_count": 8,
+            "observation_contract_pass": false,
+            "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+            "timestamp_tolerance_minutes": 1.0
+          },
+          "summary_line": "UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8"
+        }
+      ],
       "expected_intake_paths": [
         "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
       ],
       "external_input_required": true,
       "incomplete_blockers": [],
+      "intake_current_blockers": [
+        "observation_file_missing",
+        "contract_signal_not_pass",
+        "required_fields_missing",
+        "participant_not_new_user",
+        "new_to_product_not_confirmed",
+        "completion_minutes_missing",
+        "blocking_usability_issue_present",
+        "approval_decision_not_accepted"
+      ],
+      "intake_field_request_rows": [
+        {
+          "check": "contract_signal_pass",
+          "check_pass": false,
+          "field": "contract_pass",
+          "missing": true,
+          "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+          "placeholder": false,
+          "required_value": "true",
+          "template_value": "false"
+        },
+        {
+          "check": "participant_role_new_user_pass",
+          "check_pass": false,
+          "field": "participant_role",
+          "missing": true,
+          "owner_note": "Participant must be new to the product workflow being released.",
+          "placeholder": false,
+          "required_value": "new_user | first_time_user | pilot_user",
+          "template_value": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user"
+        },
+        {
+          "check": "new_to_product_pass",
+          "check_pass": false,
+          "field": "new_to_product",
+          "missing": true,
+          "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+          "placeholder": false,
+          "required_value": "true",
+          "template_value": "OWNER_INPUT_REQUIRED: true"
+        },
+        {
+          "check": "required_fields_present",
+          "check_pass": false,
+          "field": "sample_project_id",
+          "missing": true,
+          "owner_note": "Must identify the exact sample project completed by the participant.",
+          "placeholder": false,
+          "required_value": "sample project identifier used in the observed workflow",
+          "template_value": "OWNER_INPUT_REQUIRED: sample project identifier"
+        },
+        {
+          "check": "required_fields_present",
+          "check_pass": false,
+          "field": "workflow_scope",
+          "missing": true,
+          "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+          "placeholder": false,
+          "required_value": "observed workflow steps, including reviewer package/report export",
+          "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
+        },
+        {
+          "check": "required_fields_present",
+          "check_pass": false,
+          "field": "observer",
+          "missing": true,
+          "owner_note": "Automated browser smoke tests do not satisfy this field.",
+          "placeholder": false,
+          "required_value": "human observer or UX research owner",
+          "template_value": "OWNER_INPUT_REQUIRED: UX research owner or human observer"
+        },
+        {
+          "check": "started_at_utc_valid",
+          "check_pass": false,
+          "field": "started_at_utc",
+          "missing": true,
+          "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+          "placeholder": false,
+          "required_value": "timezone-aware ISO-8601 observation start timestamp",
+          "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z"
+        },
+        {
+          "check": "completed_at_utc_valid",
+          "check_pass": false,
+          "field": "completed_at_utc",
+          "missing": true,
+          "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+          "placeholder": false,
+          "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+          "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z"
+        },
+        {
+          "check": "completion_30min_pass",
+          "check_pass": false,
+          "field": "completion_minutes",
+          "missing": true,
+          "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
+          "placeholder": false,
+          "required_value": "<= 30.0 and matches timestamp elapsed minutes",
+          "template_value": "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
+        },
+        {
+          "check": "blocker_count_zero_pass",
+          "check_pass": false,
+          "field": "blocker_count",
+          "missing": true,
+          "owner_note": "Blocking usability issues keep the UX release area blocked.",
+          "placeholder": false,
+          "required_value": "0",
+          "template_value": "OWNER_INPUT_REQUIRED: 0"
+        },
+        {
+          "check": "required_fields_present",
+          "check_pass": false,
+          "field": "evidence_ref",
+          "missing": true,
+          "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+          "placeholder": false,
+          "required_value": "non-placeholder evidence reference",
+          "template_value": "OWNER_INPUT_REQUIRED: observation note, ticket, recording, or signed evidence bundle"
+        },
+        {
+          "check": "approval_decision_pass",
+          "check_pass": false,
+          "field": "approval_decision",
+          "missing": true,
+          "owner_note": "Decision must explicitly accept the observation for release evidence.",
+          "placeholder": false,
+          "required_value": "accepted | approved | pass | signed | approved_for_release",
+          "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
+        }
+      ],
+      "intake_lane_request_rows": [],
       "next_actions": [
         "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision."
       ],
@@ -184,6 +859,163 @@
           },
           "evidence_state": "missing_human_new_user_observation",
           "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This intake packet is an owner handoff checklist. It does not create human observation evidence and does not make the PM UX release area pass until the observation report passes.",
+            "contract_pass": false,
+            "current_blocker_count": 8,
+            "current_blockers": [
+              "observation_file_missing",
+              "contract_signal_not_pass",
+              "required_fields_missing",
+              "participant_not_new_user",
+              "new_to_product_not_confirmed",
+              "completion_minutes_missing",
+              "blocking_usability_issue_present",
+              "approval_decision_not_accepted"
+            ],
+            "field_request_count": 12,
+            "field_request_rows": [
+              {
+                "check": "contract_signal_pass",
+                "check_pass": false,
+                "field": "contract_pass",
+                "missing": true,
+                "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+                "placeholder": false,
+                "required_value": "true",
+                "template_value": "false"
+              },
+              {
+                "check": "participant_role_new_user_pass",
+                "check_pass": false,
+                "field": "participant_role",
+                "missing": true,
+                "owner_note": "Participant must be new to the product workflow being released.",
+                "placeholder": false,
+                "required_value": "new_user | first_time_user | pilot_user",
+                "template_value": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user"
+              },
+              {
+                "check": "new_to_product_pass",
+                "check_pass": false,
+                "field": "new_to_product",
+                "missing": true,
+                "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+                "placeholder": false,
+                "required_value": "true",
+                "template_value": "OWNER_INPUT_REQUIRED: true"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "sample_project_id",
+                "missing": true,
+                "owner_note": "Must identify the exact sample project completed by the participant.",
+                "placeholder": false,
+                "required_value": "sample project identifier used in the observed workflow",
+                "template_value": "OWNER_INPUT_REQUIRED: sample project identifier"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "workflow_scope",
+                "missing": true,
+                "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+                "placeholder": false,
+                "required_value": "observed workflow steps, including reviewer package/report export",
+                "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "observer",
+                "missing": true,
+                "owner_note": "Automated browser smoke tests do not satisfy this field.",
+                "placeholder": false,
+                "required_value": "human observer or UX research owner",
+                "template_value": "OWNER_INPUT_REQUIRED: UX research owner or human observer"
+              },
+              {
+                "check": "started_at_utc_valid",
+                "check_pass": false,
+                "field": "started_at_utc",
+                "missing": true,
+                "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+                "placeholder": false,
+                "required_value": "timezone-aware ISO-8601 observation start timestamp",
+                "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z"
+              },
+              {
+                "check": "completed_at_utc_valid",
+                "check_pass": false,
+                "field": "completed_at_utc",
+                "missing": true,
+                "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+                "placeholder": false,
+                "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+                "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z"
+              },
+              {
+                "check": "completion_30min_pass",
+                "check_pass": false,
+                "field": "completion_minutes",
+                "missing": true,
+                "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
+                "placeholder": false,
+                "required_value": "<= 30.0 and matches timestamp elapsed minutes",
+                "template_value": "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
+              },
+              {
+                "check": "blocker_count_zero_pass",
+                "check_pass": false,
+                "field": "blocker_count",
+                "missing": true,
+                "owner_note": "Blocking usability issues keep the UX release area blocked.",
+                "placeholder": false,
+                "required_value": "0",
+                "template_value": "OWNER_INPUT_REQUIRED: 0"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "evidence_ref",
+                "missing": true,
+                "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+                "placeholder": false,
+                "required_value": "non-placeholder evidence reference",
+                "template_value": "OWNER_INPUT_REQUIRED: observation note, ticket, recording, or signed evidence bundle"
+              },
+              {
+                "check": "approval_decision_pass",
+                "check_pass": false,
+                "field": "approval_decision",
+                "missing": true,
+                "owner_note": "Decision must explicitly accept the observation for release evidence.",
+                "placeholder": false,
+                "required_value": "accepted | approved | pass | signed | approved_for_release",
+                "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
+              }
+            ],
+            "lane_request_count": 0,
+            "lane_request_rows": [],
+            "path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "present": true,
+            "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
+            "schema_version": "ux-new-user-observation-intake-packet.v1",
+            "summary": {
+              "completion_minutes": null,
+              "declared_completion_minutes": null,
+              "elapsed_minutes": null,
+              "field_count": 15,
+              "field_pass_count": 0,
+              "max_completion_minutes": 30.0,
+              "observation_blocker_count": 8,
+              "observation_contract_pass": false,
+              "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+              "timestamp_tolerance_minutes": 1.0
+            },
+            "summary_line": "UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8"
+          },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
@@ -223,6 +1055,163 @@
           },
           "evidence_state": "missing_human_new_user_completion_evidence",
           "expected_intake_artifact": "ux_new_user_observation_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This intake packet is an owner handoff checklist. It does not create human observation evidence and does not make the PM UX release area pass until the observation report passes.",
+            "contract_pass": false,
+            "current_blocker_count": 8,
+            "current_blockers": [
+              "observation_file_missing",
+              "contract_signal_not_pass",
+              "required_fields_missing",
+              "participant_not_new_user",
+              "new_to_product_not_confirmed",
+              "completion_minutes_missing",
+              "blocking_usability_issue_present",
+              "approval_decision_not_accepted"
+            ],
+            "field_request_count": 12,
+            "field_request_rows": [
+              {
+                "check": "contract_signal_pass",
+                "check_pass": false,
+                "field": "contract_pass",
+                "missing": true,
+                "owner_note": "Observation source must explicitly opt into release evidence, not remain draft or template-only.",
+                "placeholder": false,
+                "required_value": "true",
+                "template_value": "false"
+              },
+              {
+                "check": "participant_role_new_user_pass",
+                "check_pass": false,
+                "field": "participant_role",
+                "missing": true,
+                "owner_note": "Participant must be new to the product workflow being released.",
+                "placeholder": false,
+                "required_value": "new_user | first_time_user | pilot_user",
+                "template_value": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user"
+              },
+              {
+                "check": "new_to_product_pass",
+                "check_pass": false,
+                "field": "new_to_product",
+                "missing": true,
+                "owner_note": "Do not use expert/operator rehearsals as PM UX release-area evidence.",
+                "placeholder": false,
+                "required_value": "true",
+                "template_value": "OWNER_INPUT_REQUIRED: true"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "sample_project_id",
+                "missing": true,
+                "owner_note": "Must identify the exact sample project completed by the participant.",
+                "placeholder": false,
+                "required_value": "sample project identifier used in the observed workflow",
+                "template_value": "OWNER_INPUT_REQUIRED: sample project identifier"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "workflow_scope",
+                "missing": true,
+                "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+                "placeholder": false,
+                "required_value": "observed workflow steps, including reviewer package/report export",
+                "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "observer",
+                "missing": true,
+                "owner_note": "Automated browser smoke tests do not satisfy this field.",
+                "placeholder": false,
+                "required_value": "human observer or UX research owner",
+                "template_value": "OWNER_INPUT_REQUIRED: UX research owner or human observer"
+              },
+              {
+                "check": "started_at_utc_valid",
+                "check_pass": false,
+                "field": "started_at_utc",
+                "missing": true,
+                "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+                "placeholder": false,
+                "required_value": "timezone-aware ISO-8601 observation start timestamp",
+                "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z"
+              },
+              {
+                "check": "completed_at_utc_valid",
+                "check_pass": false,
+                "field": "completed_at_utc",
+                "missing": true,
+                "owner_note": "Use a timezone-aware ISO-8601 timestamp with Z or an explicit UTC offset.",
+                "placeholder": false,
+                "required_value": "timezone-aware ISO-8601 observation completion timestamp",
+                "template_value": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z"
+              },
+              {
+                "check": "completion_30min_pass",
+                "check_pass": false,
+                "field": "completion_minutes",
+                "missing": true,
+                "owner_note": "Completion time must prove the PM 30-minute UX gate and match wall-clock timestamps.",
+                "placeholder": false,
+                "required_value": "<= 30.0 and matches timestamp elapsed minutes",
+                "template_value": "OWNER_INPUT_REQUIRED: wall-clock minutes matching completed_at_utc - started_at_utc, numeric <= 30.0"
+              },
+              {
+                "check": "blocker_count_zero_pass",
+                "check_pass": false,
+                "field": "blocker_count",
+                "missing": true,
+                "owner_note": "Blocking usability issues keep the UX release area blocked.",
+                "placeholder": false,
+                "required_value": "0",
+                "template_value": "OWNER_INPUT_REQUIRED: 0"
+              },
+              {
+                "check": "required_fields_present",
+                "check_pass": false,
+                "field": "evidence_ref",
+                "missing": true,
+                "owner_note": "Reference the observation note, ticket, recording, or signed evidence bundle.",
+                "placeholder": false,
+                "required_value": "non-placeholder evidence reference",
+                "template_value": "OWNER_INPUT_REQUIRED: observation note, ticket, recording, or signed evidence bundle"
+              },
+              {
+                "check": "approval_decision_pass",
+                "check_pass": false,
+                "field": "approval_decision",
+                "missing": true,
+                "owner_note": "Decision must explicitly accept the observation for release evidence.",
+                "placeholder": false,
+                "required_value": "accepted | approved | pass | signed | approved_for_release",
+                "template_value": "OWNER_INPUT_REQUIRED: accepted | approved | pass | signed | approved_for_release"
+              }
+            ],
+            "lane_request_count": 0,
+            "lane_request_rows": [],
+            "path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+            "present": true,
+            "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
+            "schema_version": "ux-new-user-observation-intake-packet.v1",
+            "summary": {
+              "completion_minutes": null,
+              "declared_completion_minutes": null,
+              "elapsed_minutes": null,
+              "field_count": 15,
+              "field_pass_count": 0,
+              "max_completion_minutes": 30.0,
+              "observation_blocker_count": 8,
+              "observation_contract_pass": false,
+              "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+              "timestamp_tolerance_minutes": 1.0
+            },
+            "summary_line": "UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8"
+          },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
@@ -267,11 +1256,304 @@
       "expected_intake_artifacts": [
         "license_status_intake_packet"
       ],
+      "expected_intake_details": [
+        {
+          "claim_boundary": "This intake packet is an owner handoff checklist. It does not create legal approval and does not make the PM security release area pass until the closure report passes.",
+          "contract_pass": false,
+          "current_blocker_count": 10,
+          "current_blockers": [
+            "license_status_not_active",
+            "license_tier_missing",
+            "license_id_missing",
+            "license_issuer_or_approver_missing",
+            "license_approver_role_missing",
+            "license_approval_reference_missing",
+            "license_approved_at_missing",
+            "license_evidence_ref_missing",
+            "license_product_scope_missing",
+            "license_expiry_missing_or_invalid"
+          ],
+          "field_request_count": 12,
+          "field_request_rows": [
+            {
+              "check": "status_active_pass",
+              "check_pass": false,
+              "field": "status",
+              "missing": null,
+              "owner_note": "Must reflect an approved product/legal decision, not a draft state.",
+              "placeholder": null,
+              "required_value": "active | approved | valid",
+              "template_value": "active"
+            },
+            {
+              "check": "tier_allowed_pass",
+              "check_pass": false,
+              "field": "tier",
+              "missing": null,
+              "owner_note": "Must stay inside the PM-approved paid-pilot or limited-commercial boundary.",
+              "placeholder": null,
+              "required_value": "paid-pilot | limited-commercial",
+              "template_value": "limited-commercial"
+            },
+            {
+              "check": "license_id_present_pass",
+              "check_pass": false,
+              "field": "license_id",
+              "missing": null,
+              "owner_note": "Template values such as LICENSE-ID are rejected.",
+              "placeholder": null,
+              "required_value": "non-placeholder license or approval identifier",
+              "template_value": "LICENSE-ID"
+            },
+            {
+              "check": "issuer_or_approver_present_pass",
+              "check_pass": false,
+              "field": "issuer_or_approver",
+              "missing": null,
+              "owner_note": "Template values such as product-or-legal-owner are rejected.",
+              "placeholder": null,
+              "required_value": "product/legal owner or approval authority",
+              "template_value": "product-or-legal-owner"
+            },
+            {
+              "check": "approver_role_allowed_pass",
+              "check_pass": false,
+              "field": "approver_role",
+              "missing": null,
+              "owner_note": "Role is separate from the human approver identity and must be one of the allowed release roles.",
+              "placeholder": null,
+              "required_value": "product_owner | legal_counsel | product_and_legal | delegated_product_owner",
+              "template_value": "APPROVER-ROLE"
+            },
+            {
+              "check": "approval_reference_present_pass",
+              "check_pass": false,
+              "field": "approval_ref",
+              "missing": null,
+              "owner_note": "Template values such as LEGAL-OR-PRODUCT-APPROVAL-ID are rejected.",
+              "placeholder": null,
+              "required_value": "legal/product approval reference",
+              "template_value": "LEGAL-OR-PRODUCT-APPROVAL-ID"
+            },
+            {
+              "check": "approved_at_not_future_pass",
+              "check_pass": false,
+              "field": "approved_at_utc",
+              "missing": null,
+              "owner_note": "Approval timestamp must be timezone-aware and no later than the report generation time.",
+              "placeholder": null,
+              "required_value": "timezone-aware approval timestamp, not future",
+              "template_value": "APPROVED-AT-UTC"
+            },
+            {
+              "check": "evidence_ref_resolvable_pass",
+              "check_pass": false,
+              "field": "evidence_ref",
+              "missing": null,
+              "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+              "placeholder": null,
+              "required_value": "https URL, supported external ref, or existing local evidence path",
+              "template_value": "EVIDENCE-REF"
+            },
+            {
+              "check": "product_scope_boundary_pass",
+              "check_pass": false,
+              "field": "product_scope",
+              "missing": null,
+              "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
+              "placeholder": null,
+              "required_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package",
+              "template_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package"
+            },
+            {
+              "check": "expiry_valid_pass",
+              "check_pass": false,
+              "field": "expiry_or_perpetual",
+              "missing": null,
+              "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+              "placeholder": null,
+              "required_value": "future expiry timestamp or perpetual=true",
+              "template_value": "2027-06-16T00:00:00+00:00"
+            },
+            {
+              "check": "approval_timeline_pass",
+              "check_pass": false,
+              "field": "approval_timeline",
+              "missing": null,
+              "owner_note": "Approval date must be internally consistent with current validity.",
+              "placeholder": null,
+              "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+              "template_value": "derived from closure report"
+            },
+            {
+              "check": "approval_ref_distinct_pass",
+              "check_pass": false,
+              "field": "approval_ref_distinct",
+              "missing": null,
+              "owner_note": "A license identifier cannot also serve as the approval decision evidence reference.",
+              "placeholder": null,
+              "required_value": "approval_ref differs from license_id",
+              "template_value": "derived from closure report"
+            }
+          ],
+          "lane_request_count": 0,
+          "lane_request_rows": [],
+          "path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+          "present": true,
+          "reason_code": "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
+          "schema_version": "license-status-intake-packet.v1",
+          "summary": {
+            "closure_blocker_count": 10,
+            "closure_contract_pass": false,
+            "field_count": 13,
+            "field_pass_count": 0,
+            "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+            "placeholder_values_absent_pass": true,
+            "provenance_complete_pass": false
+          },
+          "summary_line": ""
+        }
+      ],
       "expected_intake_paths": [
         "implementation/phase1/release_evidence/productization/license_status_intake_packet.json"
       ],
       "external_input_required": true,
       "incomplete_blockers": [],
+      "intake_current_blockers": [
+        "license_status_not_active",
+        "license_tier_missing",
+        "license_id_missing",
+        "license_issuer_or_approver_missing",
+        "license_approver_role_missing",
+        "license_approval_reference_missing",
+        "license_approved_at_missing",
+        "license_evidence_ref_missing",
+        "license_product_scope_missing",
+        "license_expiry_missing_or_invalid"
+      ],
+      "intake_field_request_rows": [
+        {
+          "check": "status_active_pass",
+          "check_pass": false,
+          "field": "status",
+          "missing": null,
+          "owner_note": "Must reflect an approved product/legal decision, not a draft state.",
+          "placeholder": null,
+          "required_value": "active | approved | valid",
+          "template_value": "active"
+        },
+        {
+          "check": "tier_allowed_pass",
+          "check_pass": false,
+          "field": "tier",
+          "missing": null,
+          "owner_note": "Must stay inside the PM-approved paid-pilot or limited-commercial boundary.",
+          "placeholder": null,
+          "required_value": "paid-pilot | limited-commercial",
+          "template_value": "limited-commercial"
+        },
+        {
+          "check": "license_id_present_pass",
+          "check_pass": false,
+          "field": "license_id",
+          "missing": null,
+          "owner_note": "Template values such as LICENSE-ID are rejected.",
+          "placeholder": null,
+          "required_value": "non-placeholder license or approval identifier",
+          "template_value": "LICENSE-ID"
+        },
+        {
+          "check": "issuer_or_approver_present_pass",
+          "check_pass": false,
+          "field": "issuer_or_approver",
+          "missing": null,
+          "owner_note": "Template values such as product-or-legal-owner are rejected.",
+          "placeholder": null,
+          "required_value": "product/legal owner or approval authority",
+          "template_value": "product-or-legal-owner"
+        },
+        {
+          "check": "approver_role_allowed_pass",
+          "check_pass": false,
+          "field": "approver_role",
+          "missing": null,
+          "owner_note": "Role is separate from the human approver identity and must be one of the allowed release roles.",
+          "placeholder": null,
+          "required_value": "product_owner | legal_counsel | product_and_legal | delegated_product_owner",
+          "template_value": "APPROVER-ROLE"
+        },
+        {
+          "check": "approval_reference_present_pass",
+          "check_pass": false,
+          "field": "approval_ref",
+          "missing": null,
+          "owner_note": "Template values such as LEGAL-OR-PRODUCT-APPROVAL-ID are rejected.",
+          "placeholder": null,
+          "required_value": "legal/product approval reference",
+          "template_value": "LEGAL-OR-PRODUCT-APPROVAL-ID"
+        },
+        {
+          "check": "approved_at_not_future_pass",
+          "check_pass": false,
+          "field": "approved_at_utc",
+          "missing": null,
+          "owner_note": "Approval timestamp must be timezone-aware and no later than the report generation time.",
+          "placeholder": null,
+          "required_value": "timezone-aware approval timestamp, not future",
+          "template_value": "APPROVED-AT-UTC"
+        },
+        {
+          "check": "evidence_ref_resolvable_pass",
+          "check_pass": false,
+          "field": "evidence_ref",
+          "missing": null,
+          "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+          "placeholder": null,
+          "required_value": "https URL, supported external ref, or existing local evidence path",
+          "template_value": "EVIDENCE-REF"
+        },
+        {
+          "check": "product_scope_boundary_pass",
+          "check_pass": false,
+          "field": "product_scope",
+          "missing": null,
+          "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
+          "placeholder": null,
+          "required_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package",
+          "template_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package"
+        },
+        {
+          "check": "expiry_valid_pass",
+          "check_pass": false,
+          "field": "expiry_or_perpetual",
+          "missing": null,
+          "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+          "placeholder": null,
+          "required_value": "future expiry timestamp or perpetual=true",
+          "template_value": "2027-06-16T00:00:00+00:00"
+        },
+        {
+          "check": "approval_timeline_pass",
+          "check_pass": false,
+          "field": "approval_timeline",
+          "missing": null,
+          "owner_note": "Approval date must be internally consistent with current validity.",
+          "placeholder": null,
+          "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+          "template_value": "derived from closure report"
+        },
+        {
+          "check": "approval_ref_distinct_pass",
+          "check_pass": false,
+          "field": "approval_ref_distinct",
+          "missing": null,
+          "owner_note": "A license identifier cannot also serve as the approval decision evidence reference.",
+          "placeholder": null,
+          "required_value": "approval_ref differs from license_id",
+          "template_value": "derived from closure report"
+        }
+      ],
+      "intake_lane_request_rows": [],
       "next_actions": [
         "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass."
       ],
@@ -304,6 +1586,162 @@
           },
           "evidence_state": "not_configured",
           "expected_intake_artifact": "license_status_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This intake packet is an owner handoff checklist. It does not create legal approval and does not make the PM security release area pass until the closure report passes.",
+            "contract_pass": false,
+            "current_blocker_count": 10,
+            "current_blockers": [
+              "license_status_not_active",
+              "license_tier_missing",
+              "license_id_missing",
+              "license_issuer_or_approver_missing",
+              "license_approver_role_missing",
+              "license_approval_reference_missing",
+              "license_approved_at_missing",
+              "license_evidence_ref_missing",
+              "license_product_scope_missing",
+              "license_expiry_missing_or_invalid"
+            ],
+            "field_request_count": 12,
+            "field_request_rows": [
+              {
+                "check": "status_active_pass",
+                "check_pass": false,
+                "field": "status",
+                "missing": null,
+                "owner_note": "Must reflect an approved product/legal decision, not a draft state.",
+                "placeholder": null,
+                "required_value": "active | approved | valid",
+                "template_value": "active"
+              },
+              {
+                "check": "tier_allowed_pass",
+                "check_pass": false,
+                "field": "tier",
+                "missing": null,
+                "owner_note": "Must stay inside the PM-approved paid-pilot or limited-commercial boundary.",
+                "placeholder": null,
+                "required_value": "paid-pilot | limited-commercial",
+                "template_value": "limited-commercial"
+              },
+              {
+                "check": "license_id_present_pass",
+                "check_pass": false,
+                "field": "license_id",
+                "missing": null,
+                "owner_note": "Template values such as LICENSE-ID are rejected.",
+                "placeholder": null,
+                "required_value": "non-placeholder license or approval identifier",
+                "template_value": "LICENSE-ID"
+              },
+              {
+                "check": "issuer_or_approver_present_pass",
+                "check_pass": false,
+                "field": "issuer_or_approver",
+                "missing": null,
+                "owner_note": "Template values such as product-or-legal-owner are rejected.",
+                "placeholder": null,
+                "required_value": "product/legal owner or approval authority",
+                "template_value": "product-or-legal-owner"
+              },
+              {
+                "check": "approver_role_allowed_pass",
+                "check_pass": false,
+                "field": "approver_role",
+                "missing": null,
+                "owner_note": "Role is separate from the human approver identity and must be one of the allowed release roles.",
+                "placeholder": null,
+                "required_value": "product_owner | legal_counsel | product_and_legal | delegated_product_owner",
+                "template_value": "APPROVER-ROLE"
+              },
+              {
+                "check": "approval_reference_present_pass",
+                "check_pass": false,
+                "field": "approval_ref",
+                "missing": null,
+                "owner_note": "Template values such as LEGAL-OR-PRODUCT-APPROVAL-ID are rejected.",
+                "placeholder": null,
+                "required_value": "legal/product approval reference",
+                "template_value": "LEGAL-OR-PRODUCT-APPROVAL-ID"
+              },
+              {
+                "check": "approved_at_not_future_pass",
+                "check_pass": false,
+                "field": "approved_at_utc",
+                "missing": null,
+                "owner_note": "Approval timestamp must be timezone-aware and no later than the report generation time.",
+                "placeholder": null,
+                "required_value": "timezone-aware approval timestamp, not future",
+                "template_value": "APPROVED-AT-UTC"
+              },
+              {
+                "check": "evidence_ref_resolvable_pass",
+                "check_pass": false,
+                "field": "evidence_ref",
+                "missing": null,
+                "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+                "placeholder": null,
+                "required_value": "https URL, supported external ref, or existing local evidence path",
+                "template_value": "EVIDENCE-REF"
+              },
+              {
+                "check": "product_scope_boundary_pass",
+                "check_pass": false,
+                "field": "product_scope",
+                "missing": null,
+                "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
+                "placeholder": null,
+                "required_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package",
+                "template_value": "review-assist, specified-structure-families, specified-workflows, engine-and-reviewer-evidence-package"
+              },
+              {
+                "check": "expiry_valid_pass",
+                "check_pass": false,
+                "field": "expiry_or_perpetual",
+                "missing": null,
+                "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+                "placeholder": null,
+                "required_value": "future expiry timestamp or perpetual=true",
+                "template_value": "2027-06-16T00:00:00+00:00"
+              },
+              {
+                "check": "approval_timeline_pass",
+                "check_pass": false,
+                "field": "approval_timeline",
+                "missing": null,
+                "owner_note": "Approval date must be internally consistent with current validity.",
+                "placeholder": null,
+                "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+                "template_value": "derived from closure report"
+              },
+              {
+                "check": "approval_ref_distinct_pass",
+                "check_pass": false,
+                "field": "approval_ref_distinct",
+                "missing": null,
+                "owner_note": "A license identifier cannot also serve as the approval decision evidence reference.",
+                "placeholder": null,
+                "required_value": "approval_ref differs from license_id",
+                "template_value": "derived from closure report"
+              }
+            ],
+            "lane_request_count": 0,
+            "lane_request_rows": [],
+            "path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
+            "present": true,
+            "reason_code": "ERR_LICENSE_STATUS_OWNER_INPUT_REQUIRED",
+            "schema_version": "license-status-intake-packet.v1",
+            "summary": {
+              "closure_blocker_count": 10,
+              "closure_contract_pass": false,
+              "field_count": 13,
+              "field_pass_count": 0,
+              "owner_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+              "placeholder_values_absent_pass": true,
+              "provenance_complete_pass": false
+            },
+            "summary_line": ""
+          },
           "expected_intake_path": "implementation/phase1/release_evidence/productization/license_status_intake_packet.json",
           "external_input_required": true,
           "handoff_ready": true,
@@ -336,8 +1774,15 @@
   "reason_code": "PASS",
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
+    "evidence_closure_pass": false,
+    "expected_intake_contract_pass_count": 0,
+    "expected_intake_count": 3,
+    "expected_intake_field_request_count": 24,
+    "expected_intake_lane_request_count": 2,
+    "expected_intake_open_blocker_count": 31,
     "external_input_required_count": 5,
     "full_release_gate_ready": false,
+    "handoff_contract_pass": true,
     "incomplete_request_count": 0,
     "limited_commercial_ready": true,
     "open_blocker_count": 5,
