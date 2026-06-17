@@ -17,7 +17,7 @@
     "nightly:github_actions_query_error",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-16T21:12:17.463387+00:00",
+  "generated_at": "2026-06-17T15:25:13.694595+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -43,7 +43,15 @@
       "github_actions_workflow_state": "active",
       "lane": "pr",
       "local_consecutive_pass_count": 2,
+      "local_pull_request_trigger_present": true,
+      "local_required_trigger_present": true,
+      "local_schedule_trigger_present": false,
+      "local_workflow_dispatch_trigger_present": false,
       "local_workflow_present": true,
+      "local_workflow_trigger_events": [
+        "pull_request",
+        "push"
+      ],
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
@@ -84,7 +92,15 @@
       "github_actions_workflow_state": "",
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
+      "local_pull_request_trigger_present": false,
+      "local_required_trigger_present": true,
+      "local_schedule_trigger_present": true,
+      "local_workflow_dispatch_trigger_present": true,
       "local_workflow_present": true,
+      "local_workflow_trigger_events": [
+        "schedule",
+        "workflow_dispatch"
+      ],
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
@@ -106,7 +122,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 1.275,
+    "age_hours": 19.49,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -131,6 +147,15 @@
           "github_actions_filtered_run_count_below_threshold"
         ],
         "lane": "nightly",
+        "local_pull_request_trigger_present": false,
+        "local_required_trigger_present": true,
+        "local_schedule_trigger_present": true,
+        "local_workflow_dispatch_trigger_present": true,
+        "local_workflow_present": true,
+        "local_workflow_trigger_events": [
+          "schedule",
+          "workflow_dispatch"
+        ],
         "pull_request_run_source_present": null,
         "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
         "source_consecutive_pass_count": 0,
@@ -152,6 +177,15 @@
           "github_actions_filtered_run_count_below_threshold"
         ],
         "lane": "pr",
+        "local_pull_request_trigger_present": true,
+        "local_required_trigger_present": true,
+        "local_schedule_trigger_present": false,
+        "local_workflow_dispatch_trigger_present": false,
+        "local_workflow_present": true,
+        "local_workflow_trigger_events": [
+          "pull_request",
+          "push"
+        ],
         "pull_request_run_source_present": false,
         "query_error": "",
         "source_consecutive_pass_count": 0,
@@ -182,16 +216,18 @@
     "lane_pass_count": 0,
     "nightly_github_actions_workflow_registered": false,
     "nightly_github_actions_workflow_state": "",
+    "nightly_local_required_trigger_present": true,
     "nightly_local_workflow_present": true,
     "nightly_missing_consecutive_pass_count": 30,
     "nightly_source_threshold_pass": false,
     "open_blocker_count": 13,
     "pr_github_actions_workflow_registered": true,
     "pr_github_actions_workflow_state": "active",
+    "pr_local_required_trigger_present": true,
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": false,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 1.275,
+    "source_evidence_age_hours": 19.49,
     "source_evidence_freshness_pass": true,
     "source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
     "source_evidence_pass": false,

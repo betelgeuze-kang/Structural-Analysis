@@ -249,10 +249,14 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                         "pr": {
                             "source_release_credit_pass": True,
                             "workflow_state": "active",
+                            "local_workflow_trigger_events": ["pull_request", "push"],
+                            "local_required_trigger_present": True,
                         },
                         "nightly": {
                             "source_release_credit_pass": True,
                             "workflow_state": "active",
+                            "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
+                            "local_required_trigger_present": True,
                         },
                     },
                 },
@@ -639,6 +643,13 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert basic_ci_area["checks"]["ci_streak_source_evidence_pass"] is True
     assert basic_ci_area["summary"]["pr_source_evidence_release_credit_pass"] is True
     assert basic_ci_area["summary"]["nightly_source_evidence_release_credit_pass"] is True
+    assert basic_ci_area["summary"]["pr_local_required_trigger_present"] is True
+    assert basic_ci_area["summary"]["nightly_local_required_trigger_present"] is True
+    assert basic_ci_area["summary"]["pr_local_workflow_trigger_events"] == ["pull_request", "push"]
+    assert basic_ci_area["summary"]["nightly_local_workflow_trigger_events"] == [
+        "schedule",
+        "workflow_dispatch",
+    ]
     assert basic_ci_area["summary"]["pr_github_actions_workflow_state"] == "active"
     assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
     assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]

@@ -1,5 +1,5 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
   "generated_at": "2026-06-16T19:55:48.528111+00:00",
   "lanes": {
@@ -17,12 +17,27 @@
       "ignored_event_count": 0,
       "ignored_event_names": [],
       "lane": "nightly",
+      "local_pull_request_trigger_present": false,
+      "local_required_trigger_present": true,
+      "local_schedule_trigger_present": true,
       "local_workflow": {
         "exists": true,
         "name": "Nightly Full Quality",
-        "path": ".github/workflows/nightly-full-quality.yml"
+        "path": ".github/workflows/nightly-full-quality.yml",
+        "pull_request_trigger_present": false,
+        "schedule_trigger_present": true,
+        "trigger_events": [
+          "schedule",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
       },
+      "local_workflow_dispatch_trigger_present": true,
       "local_workflow_present": true,
+      "local_workflow_trigger_events": [
+        "schedule",
+        "workflow_dispatch"
+      ],
       "pass_count": 0,
       "pull_request_run_source_present": true,
       "queried_run_count": 0,
@@ -49,12 +64,27 @@
         "push"
       ],
       "lane": "pr",
+      "local_pull_request_trigger_present": true,
+      "local_required_trigger_present": true,
+      "local_schedule_trigger_present": false,
       "local_workflow": {
         "exists": true,
         "name": "CI",
-        "path": ".github/workflows/ci.yml"
+        "path": ".github/workflows/ci.yml",
+        "pull_request_trigger_present": true,
+        "schedule_trigger_present": false,
+        "trigger_events": [
+          "pull_request",
+          "push"
+        ],
+        "workflow_dispatch_trigger_present": false
       },
+      "local_workflow_dispatch_trigger_present": false,
       "local_workflow_present": true,
+      "local_workflow_trigger_events": [
+        "pull_request",
+        "push"
+      ],
       "pass_count": 0,
       "pull_request_run_source_present": false,
       "queried_run_count": 100,
@@ -79,10 +109,12 @@
   "schema_version": "github-actions-ci-streak-evidence.v1",
   "summary": {
     "nightly_consecutive_pass_count": 0,
+    "nightly_local_required_trigger_present": true,
     "nightly_local_workflow_present": true,
     "nightly_threshold_pass": false,
     "nightly_workflow_registered": false,
     "pr_consecutive_pass_count": 0,
+    "pr_local_required_trigger_present": true,
     "pr_pull_request_run_source_present": false,
     "pr_threshold_pass": false,
     "pr_workflow_registered": true
@@ -90,21 +122,42 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 3,
+    "local_workflow_metadata_generated_at": "2026-06-17T15:24:59.717198+00:00",
     "local_workflows": [
       {
         "exists": true,
         "name": "CI",
-        "path": ".github/workflows/ci.yml"
+        "path": ".github/workflows/ci.yml",
+        "pull_request_trigger_present": true,
+        "schedule_trigger_present": false,
+        "trigger_events": [
+          "pull_request",
+          "push"
+        ],
+        "workflow_dispatch_trigger_present": false
       },
       {
         "exists": true,
         "name": "Nightly Full Quality",
-        "path": ".github/workflows/nightly-full-quality.yml"
+        "path": ".github/workflows/nightly-full-quality.yml",
+        "pull_request_trigger_present": false,
+        "schedule_trigger_present": true,
+        "trigger_events": [
+          "schedule",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
       },
       {
         "exists": true,
         "name": "Publish Release Assets",
-        "path": ".github/workflows/release-publish.yml"
+        "path": ".github/workflows/release-publish.yml",
+        "pull_request_trigger_present": false,
+        "schedule_trigger_present": false,
+        "trigger_events": [
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
       }
     ],
     "query_error": "",

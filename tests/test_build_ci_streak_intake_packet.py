@@ -37,6 +37,10 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "queried_run_count": threshold,
                     "workflow_registered": True,
                     "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["pull_request", "push"],
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
                     "query_error": "",
                     "pull_request_run_source_present": True,
                 },
@@ -48,6 +52,11 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "queried_run_count": threshold,
                     "workflow_registered": True,
                     "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "local_workflow_dispatch_trigger_present": True,
                     "query_error": "",
                 },
             },
@@ -115,6 +124,10 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
                     "threshold_pass": False,
                     "workflow_registered": True,
                     "registered_workflow": {"state": "active"},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["pull_request", "push"],
+                    "local_required_trigger_present": True,
+                    "local_pull_request_trigger_present": True,
                     "run_count": 0,
                     "pull_request_run_source_present": False,
                     "query_error": "",
@@ -125,6 +138,11 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
                     "threshold_pass": False,
                     "workflow_registered": False,
                     "registered_workflow": {},
+                    "local_workflow_present": True,
+                    "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
+                    "local_required_trigger_present": True,
+                    "local_schedule_trigger_present": True,
+                    "local_workflow_dispatch_trigger_present": True,
                     "run_count": 0,
                     "query_error": "failed to get runs",
                 },
@@ -150,15 +168,21 @@ def test_ci_streak_intake_packet_surfaces_missing_pr_streak(tmp_path: Path) -> N
     assert rows["pr"]["github_actions_consecutive_pass_count"] == 0
     assert rows["pr"]["github_actions_workflow_registered"] is True
     assert rows["pr"]["github_actions_workflow_state"] == "active"
+    assert rows["pr"]["local_required_trigger_present"] is True
+    assert rows["pr"]["local_workflow_trigger_events"] == ["pull_request", "push"]
     assert rows["pr"]["pull_request_run_source_present"] is False
     assert rows["pr"]["github_actions_ignored_event_names"] == ["push"]
     assert rows["nightly"]["threshold_pass"] is False
     assert rows["nightly"]["github_actions_workflow_registered"] is False
+    assert rows["nightly"]["local_required_trigger_present"] is True
+    assert rows["nightly"]["local_workflow_trigger_events"] == ["schedule", "workflow_dispatch"]
     assert rows["nightly"]["github_actions_query_error"].startswith("failed to get runs")
     assert "pr:pr_ci_30_consecutive_pass_evidence_missing" in payload["current_blockers"]
     assert "pr:pr_pull_request_run_source_absent" in payload["current_blockers"]
     assert "nightly:github_actions_query_error" in payload["current_blockers"]
     assert payload["summary"]["nightly_github_actions_workflow_registered"] is False
+    assert payload["summary"]["pr_local_required_trigger_present"] is True
+    assert payload["summary"]["nightly_local_required_trigger_present"] is True
     assert any("build_ci_consecutive_pass_manifest.py" in command for command in payload["validation_commands"])
 
 
@@ -217,6 +241,8 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     assert payload["summary"]["lane_pass_count"] == 2
     assert payload["summary"]["source_evidence_pass"] is True
     assert payload["summary"]["pr_source_threshold_pass"] is True
+    assert payload["summary"]["pr_local_required_trigger_present"] is True
+    assert payload["summary"]["nightly_local_required_trigger_present"] is True
     assert payload["source_evidence"]["lanes"]["pr"]["workflow_active"] is True
 
 

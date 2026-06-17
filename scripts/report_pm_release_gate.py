@@ -1273,6 +1273,18 @@ def _build_release_area_matrix(
                 "nightly_github_actions_workflow_state": _as_dict(ci_streak_source_lanes.get("nightly")).get(
                     "workflow_state"
                 ),
+                "pr_local_workflow_trigger_events": _as_dict(ci_streak_source_lanes.get("pr")).get(
+                    "local_workflow_trigger_events", []
+                ),
+                "nightly_local_workflow_trigger_events": _as_dict(ci_streak_source_lanes.get("nightly")).get(
+                    "local_workflow_trigger_events", []
+                ),
+                "pr_local_required_trigger_present": _as_dict(ci_streak_source_lanes.get("pr")).get(
+                    "local_required_trigger_present"
+                ),
+                "nightly_local_required_trigger_present": _as_dict(ci_streak_source_lanes.get("nightly")).get(
+                    "local_required_trigger_present"
+                ),
                 "pr_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - pr_streak),
                 "nightly_missing_consecutive_pass_count": max(0, ci_pass_streak_threshold - nightly_streak),
                 "pr_pull_request_run_source_present": _manifest_lane_value(

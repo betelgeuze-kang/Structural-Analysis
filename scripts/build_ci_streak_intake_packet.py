@@ -94,6 +94,16 @@ def _source_lane(
     workflow_registered = github_lane.get("workflow_registered") is True
     workflow_state = str(_as_dict(github_lane.get("registered_workflow")).get("state", "") or "")
     workflow_active = workflow_state == "active"
+    local_workflow_present = github_lane.get("local_workflow_present") is True
+    local_workflow_trigger_events = [
+        str(item)
+        for item in github_lane.get("local_workflow_trigger_events", [])
+        if isinstance(item, str)
+    ]
+    local_required_trigger_present = github_lane.get("local_required_trigger_present") is True
+    local_pull_request_trigger_present = github_lane.get("local_pull_request_trigger_present") is True
+    local_schedule_trigger_present = github_lane.get("local_schedule_trigger_present") is True
+    local_workflow_dispatch_trigger_present = github_lane.get("local_workflow_dispatch_trigger_present") is True
     pull_request_run_source_present = (
         github_lane.get("pull_request_run_source_present") is True if lane == "pr" else None
     )
@@ -131,6 +141,12 @@ def _source_lane(
         "workflow_registered": workflow_registered,
         "workflow_state": workflow_state,
         "workflow_active": workflow_active,
+        "local_workflow_present": local_workflow_present,
+        "local_workflow_trigger_events": local_workflow_trigger_events,
+        "local_required_trigger_present": local_required_trigger_present,
+        "local_pull_request_trigger_present": local_pull_request_trigger_present,
+        "local_schedule_trigger_present": local_schedule_trigger_present,
+        "local_workflow_dispatch_trigger_present": local_workflow_dispatch_trigger_present,
         "query_error": query_error,
         "pull_request_run_source_present": pull_request_run_source_present,
         "blockers": blockers,
@@ -229,6 +245,16 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
         ),
         "github_actions_workflow_state": str(source_lane.get("workflow_state", "")),
         "github_actions_workflow_active": source_lane.get("workflow_active") is True,
+        "local_workflow_present": bool(source_lane.get("local_workflow_present", False)),
+        "local_workflow_trigger_events": [
+            str(item)
+            for item in source_lane.get("local_workflow_trigger_events", [])
+            if isinstance(item, str)
+        ],
+        "local_required_trigger_present": source_lane.get("local_required_trigger_present") is True,
+        "local_pull_request_trigger_present": source_lane.get("local_pull_request_trigger_present") is True,
+        "local_schedule_trigger_present": source_lane.get("local_schedule_trigger_present") is True,
+        "local_workflow_dispatch_trigger_present": source_lane.get("local_workflow_dispatch_trigger_present") is True,
         "github_actions_query_error": str(source_lane.get("query_error", "") or manifest_lane.get("github_actions_query_error", "")),
         "github_actions_queried_run_count": _as_int(manifest_lane.get("github_actions_queried_run_count")),
         "github_actions_filtered_run_count": _as_int(
@@ -243,7 +269,6 @@ def _lane_row(lane: str, manifest: dict[str, Any], source_evidence: dict[str, An
             for item in manifest_lane.get("github_actions_ignored_event_names", [])
             if isinstance(item, str)
         ],
-        "local_workflow_present": bool(manifest_lane.get("local_workflow_present", False)),
         "source_evidence_release_credit_pass": source_credit_pass,
         "source_evidence_blockers": [str(item) for item in source_lane.get("blockers", []) if isinstance(item, str)],
         "streak_source": str(manifest_lane.get("streak_source", "")),
@@ -336,6 +361,12 @@ def build_packet(
             ),
             "nightly_local_workflow_present": next(
                 row["local_workflow_present"] for row in lane_rows if row["lane"] == "nightly"
+            ),
+            "pr_local_required_trigger_present": next(
+                row["local_required_trigger_present"] for row in lane_rows if row["lane"] == "pr"
+            ),
+            "nightly_local_required_trigger_present": next(
+                row["local_required_trigger_present"] for row in lane_rows if row["lane"] == "nightly"
             ),
         },
         "lane_rows": lane_rows,

@@ -167,6 +167,15 @@ def _lane(
     )
     github_query_error = str(github_lane.get("query_error", "") or "")
     local_workflow_present = bool(github_lane.get("local_workflow_present", False))
+    local_workflow_trigger_events = [
+        str(item)
+        for item in github_lane.get("local_workflow_trigger_events", [])
+        if isinstance(item, str)
+    ]
+    local_required_trigger_present = github_lane.get("local_required_trigger_present") is True
+    local_pull_request_trigger_present = github_lane.get("local_pull_request_trigger_present") is True
+    local_schedule_trigger_present = github_lane.get("local_schedule_trigger_present") is True
+    local_workflow_dispatch_trigger_present = github_lane.get("local_workflow_dispatch_trigger_present") is True
     pull_request_run_source_present = (
         bool(github_lane.get("pull_request_run_source_present"))
         if label == "pr" and "pull_request_run_source_present" in github_lane
@@ -210,6 +219,11 @@ def _lane(
             str(item) for item in github_lane.get("ignored_event_names", []) if isinstance(item, str)
         ],
         "local_workflow_present": local_workflow_present,
+        "local_workflow_trigger_events": local_workflow_trigger_events,
+        "local_required_trigger_present": local_required_trigger_present,
+        "local_pull_request_trigger_present": local_pull_request_trigger_present,
+        "local_schedule_trigger_present": local_schedule_trigger_present,
+        "local_workflow_dispatch_trigger_present": local_workflow_dispatch_trigger_present,
         "release_consecutive_pass_count": release_consecutive,
         "consecutive_pass_count": release_consecutive,
         "missing_consecutive_pass_count": max(0, threshold - release_consecutive),
