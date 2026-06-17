@@ -42,6 +42,7 @@ def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
                 "locally_closable": bool(row.get("locally_closable")),
                 "blockers": list(row.get("blockers") or []),
                 "next_gate": row.get("next_gate"),
+                "claim_boundary": row.get("claim_boundary"),
             }
         )
     return compact

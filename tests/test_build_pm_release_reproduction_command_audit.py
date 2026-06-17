@@ -160,6 +160,8 @@ def test_cli_writes_json_and_markdown_and_fail_blocked(tmp_path: Path) -> None:
             str(blocked),
             "--out",
             str(tmp_path / "blocked.json"),
+            "--out-md",
+            str(tmp_path / "blocked.md"),
             "--fail-blocked",
         ]
     ) == 1

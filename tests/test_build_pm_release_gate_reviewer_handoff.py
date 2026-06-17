@@ -89,6 +89,14 @@ def test_build_handoff_packages_open_blocker_review_actions(tmp_path: Path) -> N
     assert any("Current false audit check" in item for item in row["verdict_change_conditions"])
     assert "does not convert missing tracked CI streak" in payload["claim_boundary"]
 
+    markdown = build_handoff_module._markdown(payload)
+    assert "## Blocker Details" in markdown
+    assert "### `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`" in markdown
+    assert "`ci_streak_manifest`: `ci_streak_manifest.json`" in markdown
+    assert "`python3 scripts/build_ci_streak_intake_packet.py`" in markdown
+    assert "`python3 scripts/build_ci_streak_intake_packet.py --fail-blocked`" in markdown
+    assert "Verdict change conditions:" in markdown
+
 
 def test_build_handoff_blocks_when_required_review_fields_are_missing(tmp_path: Path) -> None:
     pm_report = _write_json(tmp_path / "pm_release_gate_report.json", {"summary_line": "PM release gate"})
@@ -143,4 +151,6 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert exit_code == 0
     assert "PM Release Gate Reviewer Handoff" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 0
-    assert "No open PM release blockers" in out_md.read_text(encoding="utf-8")
+    markdown = out_md.read_text(encoding="utf-8")
+    assert "No open PM release blockers" in markdown
+    assert "## Blocker Details" not in markdown

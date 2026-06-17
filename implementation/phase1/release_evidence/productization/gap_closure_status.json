@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-10T12:06:15.245128+00:00",
+  "generated_at": "2026-06-17T16:10:41.155089+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
@@ -15,6 +15,7 @@
     "open_count": 0,
     "external_blocked_count": 1,
     "locally_closable_open_count": 1,
+    "nonclosed_claim_boundary_missing_count": 0,
     "missing_doc_id_count": 0,
     "missing_status_id_count": 0
   },
@@ -120,7 +121,8 @@
         "direct_residual_newton_not_closed",
         "equilibrium_newton_not_closed"
       ],
-      "next_gate": "consistent full-load Newton/Jacobian plus material Newton closure"
+      "next_gate": "consistent full-load Newton/Jacobian plus material Newton closure",
+      "claim_boundary": "G1 remains partial: current evidence includes representative component nonlinear solve, full-line/frame elastic and linearized-geometric sparse equilibrium, scaled P-Delta/frontier diagnostics, shell/material tangent probes, and direct-residual descent diagnostics. It does not close full-mesh full-load 3D nonlinear equilibrium until physical direct residual, increment, and full-load Newton/Jacobian gates pass without fallback."
     },
     {
       "id": "G2",
@@ -130,7 +132,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "full-building native modal/buckling solve after G1 expands beyond representative component"
+      "next_gate": "full-building native modal/buckling solve after G1 expands beyond representative component",
+      "claim_boundary": ""
     },
     {
       "id": "G3",
@@ -140,7 +143,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "attach source rows for currently unsupported hazard families before making those hazard-specific solver claims"
+      "next_gate": "attach source rows for currently unsupported hazard families before making those hazard-specific solver claims",
+      "claim_boundary": ""
     },
     {
       "id": "G4",
@@ -150,7 +154,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "promote full shell/plate/contact and path-dependent material Newton families only after tangent benchmarks"
+      "next_gate": "promote full shell/plate/contact and path-dependent material Newton families only after tangent benchmarks",
+      "claim_boundary": ""
     },
     {
       "id": "G5",
@@ -160,7 +165,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "promote unsupported steel/composite/seismic/project-specific detailing only after clause/source/review evidence"
+      "next_gate": "promote unsupported steel/composite/seismic/project-specific detailing only after clause/source/review evidence",
+      "claim_boundary": ""
     },
     {
       "id": "G6",
@@ -180,7 +186,8 @@
         "residual_closure_pending:RH-003",
         "residual_holdout_closure_pending"
       ],
-      "next_gate": "attach EB receipts 4/4 and strict RH closures 3/3"
+      "next_gate": "attach EB receipts 4/4 and strict RH closures 3/3",
+      "claim_boundary": "G6 is externally blocked: local dry-run packages, signed templates, and readiness queues do not close external benchmark receipts or strict residual holdout approvals. Full V&V closure requires attached external receipt/closure evidence for the expected benchmark and RH items."
     },
     {
       "id": "G7",
@@ -194,7 +201,8 @@
         "metadata_only_sources_present",
         "operator_attached_real_mgt_header_ok_below_target"
       ],
-      "next_gate": "replace bridge lanes with permitted real operator-attached MGT/IFC/PDF-derived artifacts"
+      "next_gate": "replace bridge lanes with permitted real operator-attached MGT/IFC/PDF-derived artifacts",
+      "claim_boundary": "G7 remains partial: benchmark-bridge, metadata-only, curated, or source-unmatched repository artifacts are not counted as operator-attached real-project corpus closure. Promotion requires permitted real MGT/IFC/PDF-derived attachments with source mapping, rights clearance where needed, and enough operator-attached real MGT header-ok evidence."
     },
     {
       "id": "G8",
@@ -204,7 +212,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "production optimization proposals replay through solver/code/cost gates with governed ML/Pareto promotion"
+      "next_gate": "production optimization proposals replay through solver/code/cost gates with governed ML/Pareto promotion",
+      "claim_boundary": ""
     },
     {
       "id": "G9",
@@ -214,7 +223,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "promote nonlinear/full-load GPU paths, pure-device preconditioners, and scale evidence beyond shell/coupled smoke probes"
+      "next_gate": "promote nonlinear/full-load GPU paths, pure-device preconditioners, and scale evidence beyond shell/coupled smoke probes",
+      "claim_boundary": ""
     },
     {
       "id": "G10",
@@ -224,7 +234,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "customer report separates solver/proxy/unsupported states and signed engineer review workflow"
+      "next_gate": "customer report separates solver/proxy/unsupported states and signed engineer review workflow",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G1",
@@ -234,7 +245,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "AI-generated typed structure entities include source provenance, confidence, repair diff, and unsupported queue"
+      "next_gate": "AI-generated typed structure entities include source provenance, confidence, repair diff, and unsupported queue",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G2",
@@ -244,7 +256,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "validated checkpoint plus dataset/model card, OOD gate, uncertainty, and solver fallback"
+      "next_gate": "validated checkpoint plus dataset/model card, OOD gate, uncertainty, and solver fallback",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G3",
@@ -254,7 +267,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "action/state/reward/constraint vector with hard action mask and solver/code replay evidence"
+      "next_gate": "action/state/reward/constraint vector with hard action mask and solver/code replay evidence",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G4",
@@ -264,7 +278,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "equilibrium, energy monotonicity, BC violation, and OOD unsupported gates for AI corrections"
+      "next_gate": "equilibrium, energy monotonicity, BC violation, and OOD unsupported gates for AI corrections",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G5",
@@ -274,7 +289,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "clause citation, edition, governing-combo trace, unsupported queue, and engineer review workflow"
+      "next_gate": "clause citation, edition, governing-combo trace, unsupported queue, and engineer review workflow",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G6",
@@ -284,7 +300,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "AI suggestion traces include alternatives, sensitivity, solver/code replay, and human decision log"
+      "next_gate": "AI suggestion traces include alternatives, sensitivity, solver/code replay, and human decision log",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G7",
@@ -294,7 +311,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "checkpoint registry with candidate/shadow/production states, dataset/model cards, drift monitoring"
+      "next_gate": "checkpoint registry with candidate/shadow/production states, dataset/model cards, drift monitoring",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G8",
@@ -304,7 +322,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "AI result state contract distinguishes auto_applied, suggested_only, blocked, review_required, unsupported"
+      "next_gate": "AI result state contract distinguishes auto_applied, suggested_only, blocked, review_required, unsupported",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G9",
@@ -314,7 +333,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "AI inference receipt records backend, checkpoint hash, latency, memory, OOD/confidence, and fallback reason when fallback is required"
+      "next_gate": "AI inference receipt records backend, checkpoint hash, latency, memory, OOD/confidence, and fallback reason when fallback is required",
+      "claim_boundary": ""
     },
     {
       "id": "AI-G10",
@@ -324,7 +344,8 @@
       "closed": true,
       "locally_closable": true,
       "blockers": [],
-      "next_gate": "review queue and grounded assistant answers link to evidence, confidence, caveat, and next review action"
+      "next_gate": "review queue and grounded assistant answers link to evidence, confidence, caveat, and next review action",
+      "claim_boundary": ""
     }
   ],
   "artifacts": {

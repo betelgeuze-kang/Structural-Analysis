@@ -211,7 +211,55 @@ def _markdown(payload: dict[str, Any]) -> str:
         )
     if not payload["rows"]:
         lines.append("| none | `release_owner` | `closed` | No open PM release blockers. |")
-    lines.extend(["", payload["claim_boundary"]])
+    lines.append("")
+    if payload["rows"]:
+        lines.extend(["## Blocker Details", ""])
+    for row in payload["rows"]:
+        lines.extend(
+            [
+                f"### `{row['blocker_id']}`",
+                "",
+                f"- Owner: `{row['owner']}`",
+                f"- Release area status: `{row['release_area_status']}`",
+                f"- Closure state: `{row['closure_state']}`",
+                f"- Evidence state: `{row['evidence_state']}`",
+                f"- External input required: `{row['external_input_required']}`",
+                f"- Owner input required: `{row['owner_input_required']}`",
+                f"- Next action: {row['next_action']}",
+                "",
+                "Acceptance criteria:",
+            ]
+        )
+        for item in row.get("acceptance_criteria", []):
+            lines.append(f"- {item}")
+        if not row.get("acceptance_criteria"):
+            lines.append("- none")
+        lines.extend(["", "Evidence artifact paths:"])
+        artifact_paths = row.get("evidence_artifact_paths", {})
+        if artifact_paths:
+            for key, value in artifact_paths.items():
+                lines.append(f"- `{key}`: `{value}`")
+        else:
+            lines.append("- none")
+        lines.extend(["", "Reproduction commands:"])
+        reproduction_commands = row.get("reproduction_commands", [])
+        if reproduction_commands:
+            for command in reproduction_commands:
+                lines.append(f"- `{command}`")
+        else:
+            lines.append("- none")
+        lines.extend(["", "Verification commands:"])
+        verification_commands = row.get("verification_commands", [])
+        if verification_commands:
+            for command in verification_commands:
+                lines.append(f"- `{command}`")
+        else:
+            lines.append("- none")
+        lines.extend(["", "Verdict change conditions:"])
+        for item in row.get("verdict_change_conditions", []):
+            lines.append(f"- {item}")
+        lines.append("")
+    lines.append(payload["claim_boundary"])
     return "\n".join(lines) + "\n"
 
 

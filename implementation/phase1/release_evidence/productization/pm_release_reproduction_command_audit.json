@@ -3130,7 +3130,7 @@
     }
   ],
   "contract_pass": true,
-  "generated_at": "2026-06-17T15:50:20.200635+00:00",
+  "generated_at": "2026-06-17T15:58:25.945428+00:00",
   "mode": "static_command_audit",
   "reason_code": "PASS",
   "schema_version": "pm-release-reproduction-command-audit.v1",

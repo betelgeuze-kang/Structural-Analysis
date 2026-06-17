@@ -26,6 +26,8 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     assert {f"AI-G{idx}" for idx in range(1, 11)} <= ids
     assert payload["summary"]["total_count"] == len(payload["rows"])
     assert payload["summary"]["total_count"] >= 20
+    assert payload["summary"]["nonclosed_claim_boundary_missing_count"] == 0
+    assert payload["doc_requirements"]["nonclosed_claim_boundary_missing_ids"] == []
     assert payload["full_gap_ledger_ready"] is False
     assert payload["status"] == "open"
 
@@ -55,6 +57,9 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     payload = build_commercial_gap_ledger_status()
     rows = {row["id"]: row for row in payload["rows"]}
     assert rows["G1"]["status"] in {"open", "partial"}
+    assert "G1 remains partial" in rows["G1"]["claim_boundary"]
+    assert "does not close full-mesh full-load 3D nonlinear equilibrium" in rows["G1"]["claim_boundary"]
+    assert "without fallback" in rows["G1"]["claim_boundary"]
     assert rows["G1"]["evidence"]["nonlinear_equilibrium"] is False
     assert rows["G1"]["evidence"]["partial_connected_component_mesh"] is True
     assert rows["G1"]["evidence"]["full_line_mesh_sparse_elastic_equilibrium_ready"] is True
@@ -8317,7 +8322,12 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     }
     assert (
         nonlinear_rows["nonlinear_rc_steel_composite_material_laws"]["status"]
-        == "bounded_frame_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
+        == "bounded_frame_shell_material_nonlinear_tangent_smoke_ready_full_newton_unsupported"
+    )
+    assert nonlinear_rows["nonlinear_rc_steel_composite_material_laws"]["shell_material_nonlinear_tangent_ready"] is True
+    assert (
+        nonlinear_rows["nonlinear_rc_steel_composite_material_laws"]["full_material_nonlinear_newton_equilibrium"]
+        is False
     )
     assert rows["G5"]["status"] == "closed"
     assert rows["G5"]["evidence"]["kds_detailing_support_status"] == "ready"
@@ -8326,7 +8336,12 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G5"]["evidence"]["trace_ready"] is True
     assert rows["G6"]["status"] == "external_blocked"
     assert rows["G6"]["locally_closable"] is False
+    assert "G6 is externally blocked" in rows["G6"]["claim_boundary"]
+    assert "do not close external benchmark receipts" in rows["G6"]["claim_boundary"]
     assert rows["G7"]["status"] == "partial"
+    assert "G7 remains partial" in rows["G7"]["claim_boundary"]
+    assert "benchmark-bridge" in rows["G7"]["claim_boundary"]
+    assert "operator-attached real-project corpus closure" in rows["G7"]["claim_boundary"]
     assert rows["G7"]["evidence"]["operator_attached_ifc_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_artifact_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_mgt_header_ok_count"] == 0

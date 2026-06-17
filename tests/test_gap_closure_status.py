@@ -29,6 +29,13 @@ def test_report_gap_closure_status() -> None:
     assert payload["full_gap_ledger_ready"] is False
     assert payload["full_gap_ledger_summary"]["total_count"] == len(payload["ledger_requirements"])
     assert payload["full_gap_ledger_summary"]["total_count"] >= 20
+    assert payload["full_gap_ledger_summary"]["nonclosed_claim_boundary_missing_count"] == 0
+    nonclosed_rows = [row for row in payload["ledger_requirements"] if not row["closed"]]
+    assert nonclosed_rows
+    assert all(str(row["claim_boundary"]).strip() for row in nonclosed_rows)
+    g1 = next(row for row in payload["ledger_requirements"] if row["id"] == "G1")
+    assert "G1 remains partial" in g1["claim_boundary"]
+    assert "does not close full-mesh full-load 3D nonlinear equilibrium" in g1["claim_boundary"]
 
 
 def test_report_gap_closure_status_uses_explicit_productization_dir(tmp_path: Path) -> None:

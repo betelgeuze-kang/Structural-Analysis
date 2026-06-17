@@ -1262,6 +1262,7 @@ def _row(
     evidence: dict[str, Any] | None = None,
     locally_closable: bool = True,
     next_gate: str = "",
+    claim_boundary: str = "",
 ) -> dict[str, Any]:
     return {
         "id": gap_id,
@@ -1273,6 +1274,7 @@ def _row(
         "blockers": blockers,
         "evidence": evidence or {},
         "next_gate": next_gate,
+        "claim_boundary": claim_boundary,
     }
 
 
@@ -4695,6 +4697,13 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 if surface_source_thickness_ready
                 else "source-thickness full shell benchmarks and consistent full-load Newton/Jacobian plus material Newton closure"
             ),
+            claim_boundary=(
+                "G1 remains partial: current evidence includes representative component nonlinear solve, "
+                "full-line/frame elastic and linearized-geometric sparse equilibrium, scaled P-Delta/frontier "
+                "diagnostics, shell/material tangent probes, and direct-residual descent diagnostics. It does "
+                "not close full-mesh full-load 3D nonlinear equilibrium until physical direct residual, "
+                "increment, and full-load Newton/Jacobian gates pass without fallback."
+            ),
         ),
         _row(
             "G2",
@@ -4836,6 +4845,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
             },
             locally_closable=False,
             next_gate="attach EB receipts 4/4 and strict RH closures 3/3",
+            claim_boundary=(
+                "G6 is externally blocked: local dry-run packages, signed templates, and readiness queues do "
+                "not close external benchmark receipts or strict residual holdout approvals. Full V&V closure "
+                "requires attached external receipt/closure evidence for the expected benchmark and RH items."
+            ),
         ),
         _row(
             "G7",
@@ -5100,6 +5114,12 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
             },
             locally_closable=False,
             next_gate="replace bridge lanes with permitted real operator-attached MGT/IFC/PDF-derived artifacts",
+            claim_boundary=(
+                "G7 remains partial: benchmark-bridge, metadata-only, curated, or source-unmatched repository "
+                "artifacts are not counted as operator-attached real-project corpus closure. Promotion requires "
+                "permitted real MGT/IFC/PDF-derived attachments with source mapping, rights clearance where "
+                "needed, and enough operator-attached real MGT header-ok evidence."
+            ),
         ),
         _row(
             "G8",
@@ -5958,6 +5978,11 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
     locally_closable_open_count = sum(
         1 for row in rows if row["locally_closable"] and row["status"] in {"open", "partial"}
     )
+    nonclosed_claim_boundary_missing_ids = [
+        row["id"]
+        for row in rows
+        if row["status"] != "closed" and not str(row.get("claim_boundary") or "").strip()
+    ]
     blockers = [
         f"{row['id']}:{blocker}"
         for row in rows
@@ -5966,6 +5991,9 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
     ]
     blockers.extend([f"doc_gap_id_missing:{gap_id}" for gap_id in missing_doc_ids])
     blockers.extend([f"status_gap_id_missing:{gap_id}" for gap_id in missing_status_ids])
+    blockers.extend(
+        f"claim_boundary_missing:{gap_id}" for gap_id in nonclosed_claim_boundary_missing_ids
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -5985,6 +6013,7 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
             "open_count": open_count,
             "external_blocked_count": external_count,
             "locally_closable_open_count": locally_closable_open_count,
+            "nonclosed_claim_boundary_missing_count": len(nonclosed_claim_boundary_missing_ids),
             "missing_doc_id_count": len(missing_doc_ids),
             "missing_status_id_count": len(missing_status_ids),
         },
@@ -5995,6 +6024,7 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
             "ai_doc_ids": ai_doc_ids,
             "missing_doc_ids": missing_doc_ids,
             "missing_status_ids": missing_status_ids,
+            "nonclosed_claim_boundary_missing_ids": nonclosed_claim_boundary_missing_ids,
         },
         "rows": rows,
         "blockers": blockers,
