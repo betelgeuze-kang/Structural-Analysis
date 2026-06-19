@@ -137,14 +137,14 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-19T15:33:30.711225+00:00",
+  "generated_at": "2026-06-19T17:38:56.361972+00:00",
   "input_checksums": {
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:715a4e52f66d32e7cbc1f556a8c246accb9abc75155984b8a90dd2e3b666d3e9",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:fbe1ec48a4d2e397cb8eafdfb5a5e12576c79d0e2f872265316cc7aaebe2e4d6",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:890ea7db8a749cab90d9c2afd2b39bbce022beeb0b561cd5f87d501b9a7ea59e",
-    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:073b350298a6973e8d2e3939eab2e61054b7d9aae3e46c4446be2cdd59e041ec",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:ace5fec134f3094b1b0f65745f1c22e928938e20711a8e3b2b75cded1c3fe044",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:cac785b46d135aa453665ab045a7df46b85d8b718644646ff3e350ef0c462074"
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:a723b6e6c92a7865113968c0f51bf904e467981535d4eee190a902faa7d38df9",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:96f757519af3d1cbdf3b3807b00f9c6a10858fe99508484bea1bdbfd792cee0d",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:f98f4f2cae4af0ea1c42bc1393e7155e86fc910692fb53c93915d3e96edd1318"
   },
   "launch_ready": false,
   "prerequisite_rows": [
@@ -226,7 +226,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "a495b253edacf8b9d4d8a917a61db675b70ca209",
+  "source_commit_sha": "6b6df11a0da1066d4d2d049009a21ffccde377a5",
   "status": "blocked",
   "summary": {
     "customer_shadow_completed_case_count": 0,
