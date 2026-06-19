@@ -87,6 +87,14 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py"),
     ),
+    (
+        "evidence_console_scope_status",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "evidence_console_scope_status.json"
+        ),
+        Path("scripts/build_evidence_console_scope_status.py"),
+    ),
 )
 
 
