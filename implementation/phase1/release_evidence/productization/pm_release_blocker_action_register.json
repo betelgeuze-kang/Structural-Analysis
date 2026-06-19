@@ -1,12 +1,23 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-19T16:02:06.184058+00:00",
+  "generated_at": "2026-06-19T16:15:24.513115+00:00",
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-    "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass."
+    "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+    "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence.",
+    "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence.",
+    "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
+    "Run the `torch_capable_benchmark_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `heavy_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+    "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/15 | measured_cases=304",
@@ -469,23 +480,691 @@
         "python3 scripts/build_license_status_closure_report.py --out implementation/phase1/release_evidence/productization/license_status_closure_report.json --fail-blocked",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
+    },
+    {
+      "acceptance_criteria": [
+        "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
+        "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
+        "`independent_vv_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "independent_vv_missing",
+      "blocker_id": "independent_vv_missing",
+      "claim_boundary": "GA/Enterprise signoff blockers require approved external or owner-signed evidence; local test artifacts and templates do not close these approvals.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "ga_enterprise_blocker": "independent_vv_missing",
+        "source_policy": "external_or_owner_signed_ga_evidence_required",
+        "state": "missing_external_ga_enterprise_signoff_evidence"
+      },
+      "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "namespace": "",
+      "next_action": "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence.",
+      "owner": "independent_vv_owner",
+      "owner_action": "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_ga_enterprise_signoff_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`ga_enterprise_readiness_report.json.contract_pass == true` or no `family_validation_manual_signoff_missing` blocker",
+        "`ga_enterprise_signoff_intake_packet.json` shows family validation manual signoff accepted",
+        "`family_validation_manual_signoff_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "family_validation_manual_signoff_missing",
+      "blocker_id": "family_validation_manual_signoff_missing",
+      "claim_boundary": "GA/Enterprise signoff blockers require approved external or owner-signed evidence; local test artifacts and templates do not close these approvals.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "ga_enterprise_blocker": "family_validation_manual_signoff_missing",
+        "source_policy": "external_or_owner_signed_ga_evidence_required",
+        "state": "missing_external_ga_enterprise_signoff_evidence"
+      },
+      "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "namespace": "",
+      "next_action": "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence.",
+      "owner": "validation_manual_owner",
+      "owner_action": "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_ga_enterprise_signoff_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`ga_enterprise_readiness_report.json.contract_pass == true` or no `customer_audit_failure_bundle_sla_missing` blocker",
+        "`ga_enterprise_signoff_intake_packet.json` shows customer audit/failure-bundle/SLA evidence accepted",
+        "`customer_audit_failure_bundle_sla_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "customer_audit_failure_bundle_sla_missing",
+      "blocker_id": "customer_audit_failure_bundle_sla_missing",
+      "claim_boundary": "GA/Enterprise signoff blockers require approved external or owner-signed evidence; local test artifacts and templates do not close these approvals.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "ga_enterprise_blocker": "customer_audit_failure_bundle_sla_missing",
+        "source_policy": "external_or_owner_signed_ga_evidence_required",
+        "state": "missing_external_ga_enterprise_signoff_evidence"
+      },
+      "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "namespace": "",
+      "next_action": "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
+      "owner": "customer_success_ops_owner",
+      "owner_action": "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_ga_enterprise_signoff_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "",
+      "verification_commands": [
+        "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "commercial_benchmark_torch",
+        "runner": "torch_capable_benchmark_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `torch_capable_benchmark_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `torch_capable_benchmark_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "gpu_hip_solver::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "gpu_hip_solver",
+        "runner": "gpu_capable_rocm_hip_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::performance_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "performance_profile::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "performance_profile",
+        "runner": "performance_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "surface_material_contact::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "surface_material_contact",
+        "runner": "heavy_surface_material_contact_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `heavy_surface_material_contact_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "midas_exact_refresh::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "midas_exact_refresh",
+        "runner": "midas_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "productization_heavy_profile::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "productization_heavy_profile",
+        "runner": "heavy_productization_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `heavy_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `heavy_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "external_benchmark_refresh::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "external_benchmark_refresh",
+        "runner": "benchmark_productization_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "design_optimization_refresh::fresh_validation_receipt_missing",
+      "blocker_id": "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
+      "claim_boundary": "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation.",
+      "evidence_artifacts": {
+        "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {},
+      "evidence_status": {
+        "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_contract_pass": false,
+        "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_present": false,
+        "lane_id": "design_optimization_refresh",
+        "runner": "design_optimization_validation",
+        "source_policy": "fresh_lane_execution_required",
+        "state": "fresh_validation_receipt_missing"
+      },
+      "external_input_required": false,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "local_remediation_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "local_remediation_ready",
+      "namespace": "fresh_full_validation",
+      "next_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner": "validation_lane_owner",
+      "owner_action": "Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
+      "owner_input_required": false,
+      "reproduction_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "fresh_validation_receipt_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "fresh_full_validation",
+      "verification_commands": [
+        "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
     "all_open_blockers_have_handoff": true,
-    "external_input_required_count": 5,
-    "external_owner_input_ready_count": 5,
+    "external_input_required_count": 8,
+    "external_owner_input_ready_count": 8,
     "full_release_gate_ready": false,
+    "ga_enterprise_blocker_count": 16,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 5,
+    "handoff_ready_count": 16,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "local_remediation_ready_count": 0,
+    "local_remediation_ready_count": 8,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 5,
-    "owner_input_required_count": 5,
+    "open_blocker_count": 16,
+    "owner_input_required_count": 8,
     "paid_pilot_candidate": true,
     "release_area_blocker_count": 5,
     "release_area_gate_ready": false

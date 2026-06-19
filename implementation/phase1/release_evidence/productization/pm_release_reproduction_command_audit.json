@@ -3,7 +3,7 @@
     {
       "artifact": "pm_release_blocker_action_register",
       "blockers": [],
-      "command_count": 34,
+      "command_count": 100,
       "contract_pass": true,
       "exists": true,
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -677,6 +677,1270 @@
       "execution_class": "local_static_or_report",
       "field": "verification_commands",
       "json_path": "$.rows[4].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[5].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[5].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[5].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 3,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[5].reproduction_commands[3]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[5].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[5].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[6].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[6].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[6].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 3,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[6].reproduction_commands[3]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[6].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[6].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[7].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[7].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[7].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 3,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[7].reproduction_commands[3]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[7].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_readiness_report.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[7].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_ga_enterprise_signoff_intake_packet.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[8].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[8].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[8].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[8].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[8].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[8].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[9].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[9].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[9].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[9].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[9].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[9].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[10].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[10].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[10].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[10].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[10].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[10].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[11].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[11].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[11].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[11].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[11].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[11].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[12].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[12].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[12].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[12].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[12].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[12].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[13].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[13].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[13].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[13].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[13].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[13].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[14].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[14].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[14].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[14].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[14].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[14].verification_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[15].reproduction_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[15].reproduction_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "reproduction_commands",
+      "json_path": "$.rows[15].reproduction_commands[2]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_pm_release_blocker_action_register.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_fresh_full_validation_lane_status.py --out implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json --out-md implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md --fail-blocked",
+      "command_index": 0,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[15].verification_commands[0]",
+      "parsed_argv": [
+        "python3",
+        "scripts/build_fresh_full_validation_lane_status.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.md",
+        "--fail-blocked"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+      "command_index": 1,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[15].verification_commands[1]",
+      "parsed_argv": [
+        "python3",
+        "scripts/report_pm_release_gate.py",
+        "--out",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "--out-md",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+      ]
+    },
+    {
+      "artifact": "pm_release_blocker_action_register",
+      "artifact_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "blockers": [],
+      "command": "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked",
+      "command_index": 2,
+      "contract_pass": true,
+      "execution_class": "local_static_or_report",
+      "field": "verification_commands",
+      "json_path": "$.rows[15].verification_commands[2]",
       "parsed_argv": [
         "python3",
         "scripts/build_pm_release_blocker_action_register.py",
@@ -3671,7 +4935,7 @@
     }
   ],
   "contract_pass": true,
-  "generated_at": "2026-06-18T13:33:21.831538+00:00",
+  "generated_at": "2026-06-19T16:15:56.120951+00:00",
   "mode": "static_command_audit",
   "package_regeneration_command_rows": [
     {
@@ -4164,7 +5428,7 @@
   "summary": {
     "artifact_count": 7,
     "artifact_pass_count": 7,
-    "command_count": 197,
+    "command_count": 263,
     "command_violation_count": 0,
     "external_owner_command_count": 10,
     "npm_script_count": 17,
@@ -4175,7 +5439,7 @@
     "package_regeneration_violation_count": 0,
     "violation_count": 0
   },
-  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
+  "summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=263 | violations=0",
   "validation_commands": [
     "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
     "python3 scripts/build_pm_release_blocker_closure_board.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md",

@@ -42,6 +42,15 @@ DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
+DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+)
+DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
+)
+DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
+)
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -87,6 +96,23 @@ def _indexed_rows(rows: list[Any], key: str) -> dict[str, dict[str, Any]]:
 
 def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     summary = _as_dict(row.get("summary"))
+    if namespace == "fresh_full_validation":
+        lane_id = code.split("::", 1)[0]
+        runner = str(row.get("runner", "") or summary.get("runner", "") or lane_id)
+        receipt = str(row.get("fresh_validation_receipt", "") or "")
+        return (
+            f"Run the `{runner}` fresh validation lane, attach `{receipt}` with "
+            "`reused_evidence=false`, required provenance metadata, and a green contract result, "
+            "then regenerate fresh full-validation and PM release evidence."
+        )
+    if namespace == "ga_enterprise":
+        return str(row.get("owner_action", "") or "")
+    if not namespace and code == "independent_vv_missing":
+        return "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence."
+    if not namespace and code == "family_validation_manual_signoff_missing":
+        return "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence."
+    if not namespace and code == "customer_audit_failure_bundle_sla_missing":
+        return "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release."
     if namespace == "basic_ci":
         if code.startswith("pr_ci"):
             return str(summary.get("pr_owner_action", "") or "")
@@ -120,6 +146,14 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
 
 
 def _owner(*, namespace: str, code: str) -> str:
+    if namespace == "fresh_full_validation":
+        return "validation_lane_owner"
+    if not namespace and code == "independent_vv_missing":
+        return "independent_vv_owner"
+    if not namespace and code == "family_validation_manual_signoff_missing":
+        return "validation_manual_owner"
+    if not namespace and code == "customer_audit_failure_bundle_sla_missing":
+        return "customer_success_ops_owner"
     if namespace == "basic_ci":
         return "release_ci_owner"
     if namespace == "security" and "license" in code:
@@ -132,6 +166,14 @@ def _owner(*, namespace: str, code: str) -> str:
 
 
 def _resolution_type(*, namespace: str, code: str) -> str:
+    if namespace == "fresh_full_validation":
+        return "fresh_validation_receipt_required"
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        return "external_ga_enterprise_signoff_required"
     if namespace == "basic_ci" and "consecutive_pass" in code:
         return "external_tracked_ci_evidence_required"
     if namespace == "security" and "license" in code:
@@ -147,6 +189,20 @@ def _resolution_type(*, namespace: str, code: str) -> str:
 
 def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
     summary = _as_dict(row.get("summary"))
+    if namespace == "fresh_full_validation":
+        return (
+            "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, "
+            "publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation."
+        )
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        return (
+            "GA/Enterprise signoff blockers require approved external or owner-signed evidence; local "
+            "test artifacts and templates do not close these approvals."
+        )
     if namespace == "basic_ci":
         if code.startswith("pr_ci"):
             direct = str(summary.get("pr_claim_boundary", "") or "")
@@ -164,6 +220,32 @@ def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
 
 def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> list[str]:
     summary = _as_dict(row.get("summary"))
+    if namespace == "fresh_full_validation":
+        lane_id = code.split("::", 1)[0]
+        return [
+            f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_present == true`",
+            f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_fresh == true`",
+            f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_contract_pass == true`",
+            f"`fresh_full_validation::{code}` absent from `ga_enterprise_blockers`",
+        ]
+    if not namespace and code == "independent_vv_missing":
+        return [
+            "`ga_enterprise_readiness_report.json.contract_pass == true` or no `independent_vv_missing` blocker",
+            "`ga_enterprise_signoff_intake_packet.json` shows independent V&V evidence accepted",
+            "`independent_vv_missing` absent from `ga_enterprise_blockers`",
+        ]
+    if not namespace and code == "family_validation_manual_signoff_missing":
+        return [
+            "`ga_enterprise_readiness_report.json.contract_pass == true` or no `family_validation_manual_signoff_missing` blocker",
+            "`ga_enterprise_signoff_intake_packet.json` shows family validation manual signoff accepted",
+            "`family_validation_manual_signoff_missing` absent from `ga_enterprise_blockers`",
+        ]
+    if not namespace and code == "customer_audit_failure_bundle_sla_missing":
+        return [
+            "`ga_enterprise_readiness_report.json.contract_pass == true` or no `customer_audit_failure_bundle_sla_missing` blocker",
+            "`ga_enterprise_signoff_intake_packet.json` shows customer audit/failure-bundle/SLA evidence accepted",
+            "`customer_audit_failure_bundle_sla_missing` absent from `ga_enterprise_blockers`",
+        ]
     if namespace == "basic_ci" and code.startswith("pr_ci"):
         required = int(summary.get("required_consecutive_pass_count", 30) or 30)
         return [
@@ -219,6 +301,23 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         "python3 scripts/report_pm_release_gate.py "
         f"--out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}"
     )
+    if namespace == "fresh_full_validation":
+        return [
+            f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        return [
+            f"python3 scripts/build_ga_enterprise_readiness_report.py --out {DEFAULT_GA_ENTERPRISE_READINESS_REPORT}",
+            f"python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out {DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET} --out-md {DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET.with_suffix('.md')}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     if namespace == "basic_ci":
         return [
             f"python3 scripts/build_github_actions_ci_streak_evidence.py --out {DEFAULT_GITHUB_ACTIONS_CI_STREAK_EVIDENCE}",
@@ -261,6 +360,21 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
 
 
 def _verification_commands(*, namespace: str, code: str) -> list[str]:
+    if namespace == "fresh_full_validation":
+        return [
+            f"python3 scripts/build_fresh_full_validation_lane_status.py --out {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS} --out-md {DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS.with_suffix('.md')} --fail-blocked",
+            f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        return [
+            f"python3 scripts/build_ga_enterprise_readiness_report.py --out {DEFAULT_GA_ENTERPRISE_READINESS_REPORT} --fail-blocked",
+            f"python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out {DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET} --out-md {DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET.with_suffix('.md')} --fail-blocked",
+        ]
     if namespace == "basic_ci":
         return [
             f"python3 scripts/build_ci_streak_intake_packet.py --out {DEFAULT_CI_STREAK_INTAKE_PACKET} --fail-blocked",
@@ -298,6 +412,15 @@ def _owner_input_required(*, namespace: str, code: str) -> bool:
         (namespace == "basic_ci" and "consecutive_pass" in code)
         or (namespace == "security" and "license" in code)
         or _is_ux_human_new_user_blocker(namespace=namespace, code=code)
+        or (
+            not namespace
+            and code
+            in {
+                "independent_vv_missing",
+                "family_validation_manual_signoff_missing",
+                "customer_audit_failure_bundle_sla_missing",
+            }
+        )
     )
 
 
@@ -313,6 +436,15 @@ def _evidence_artifacts(row: dict[str, Any]) -> dict[str, str]:
 
 def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[str, str]) -> dict[str, str]:
     augmented = dict(artifacts)
+    if namespace == "fresh_full_validation":
+        augmented["fresh_full_validation_lane_status"] = str(DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS)
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        augmented["ga_enterprise_readiness_report"] = str(DEFAULT_GA_ENTERPRISE_READINESS_REPORT)
+        augmented["ga_enterprise_signoff_intake_packet"] = str(DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET)
     if namespace == "basic_ci" and "consecutive_pass" in code:
         augmented["ci_streak_intake_packet"] = str(DEFAULT_CI_STREAK_INTAKE_PACKET)
     if namespace == "security" and "license" in code:
@@ -339,6 +471,39 @@ def _expected_intake_artifact(*, namespace: str, code: str) -> str:
 
 def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(row.get("summary"))
+    if namespace == "fresh_full_validation":
+        lane_id = code.split("::", 1)[0]
+        present = bool(row.get("fresh_validation_receipt_present", False))
+        fresh = bool(row.get("fresh_validation_receipt_fresh", False))
+        contract_pass = bool(row.get("fresh_validation_receipt_contract_pass", False))
+        if not present:
+            state = "fresh_validation_receipt_missing"
+        elif not fresh:
+            state = "fresh_validation_receipt_reuses_evidence"
+        elif not contract_pass:
+            state = "fresh_validation_receipt_not_green"
+        else:
+            state = "ready_for_pm_regeneration"
+        return {
+            "state": state,
+            "lane_id": lane_id,
+            "runner": str(row.get("runner", "") or ""),
+            "fresh_validation_receipt": str(row.get("fresh_validation_receipt", "") or ""),
+            "fresh_validation_receipt_present": present,
+            "fresh_validation_receipt_fresh": fresh,
+            "fresh_validation_receipt_contract_pass": contract_pass,
+            "source_policy": "fresh_lane_execution_required",
+        }
+    if not namespace and code in {
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+    }:
+        return {
+            "state": "missing_external_ga_enterprise_signoff_evidence",
+            "ga_enterprise_blocker": code,
+            "source_policy": "external_or_owner_signed_ga_evidence_required",
+        }
     if namespace == "basic_ci":
         lane = "nightly" if code.startswith("nightly_ci") else "pr"
         required = int(summary.get("required_consecutive_pass_count", 30) or 30)
@@ -472,15 +637,22 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     report = _load_json(pm_report)
     release_area_rows = _indexed_rows(_as_list(report.get("release_area_matrix")), "area")
     milestone_rows = _indexed_rows(_as_list(report.get("milestones")), "milestone")
+    release_tiers = _as_dict(report.get("release_tiers"))
+    fresh_status_path = Path(
+        str(release_tiers.get("fresh_full_validation_lane_status", "") or DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS)
+    )
+    fresh_lane_rows = _indexed_rows(_as_list(_load_json(fresh_status_path).get("rows")), "lane_id")
     full_blockers = [str(row) for row in _as_list(report.get("full_release_blockers"))]
     if not full_blockers:
         full_blockers = [
             *[str(row) for row in _as_list(report.get("blockers"))],
             *[str(row) for row in _as_list(report.get("release_area_blockers"))],
         ]
+    ga_enterprise_blockers = [str(row) for row in _as_list(release_tiers.get("ga_enterprise_blockers"))]
+    all_blockers = list(dict.fromkeys([*full_blockers, *ga_enterprise_blockers]))
 
     rows: list[dict[str, Any]] = []
-    for blocker_id in full_blockers:
+    for blocker_id in all_blockers:
         namespace, code = _split_blocker(blocker_id)
         if namespace in release_area_rows:
             scope = "release_area"
@@ -488,6 +660,13 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
         elif namespace in milestone_rows:
             scope = "milestone"
             source_row = milestone_rows[namespace]
+        elif blocker_id in ga_enterprise_blockers:
+            scope = "ga_enterprise"
+            if namespace == "fresh_full_validation":
+                lane_id = code.split("::", 1)[0]
+                source_row = fresh_lane_rows.get(lane_id, {})
+            else:
+                source_row = {}
         else:
             scope = "unknown"
             source_row = {}
@@ -554,6 +733,7 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "open_blocker_count": len(rows),
             "release_area_blocker_count": len(release_area_blockers),
             "milestone_blocker_count": len(milestone_blockers),
+            "ga_enterprise_blocker_count": len(ga_enterprise_blockers),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "full_release_gate_ready": bool(report.get("full_release_gate_ready", False)),
             "release_area_gate_ready": bool(report.get("release_area_gate_ready", False)),

@@ -87,6 +87,9 @@ DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
 DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
 )
+DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+)
 DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE = Path("docs/templates/independent_vv_attestation.template.json")
 DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE = Path(
     "docs/templates/family_validation_manual_signoff.template.json"
@@ -141,6 +144,7 @@ PM_FAILURE_BUNDLE_REQUIRED_SECTION_LABELS = (
     "template_evidence_safety_report",
     "ga_enterprise_readiness_report",
     "ga_enterprise_signoff_intake_packet",
+    "fresh_full_validation_lane_status",
     "commercial_gap_ledger_status",
     "gap_closure_status",
     "independent_vv_attestation_template",
@@ -197,6 +201,13 @@ def _load_json(path: Path) -> dict[str, Any] | list[Any] | None:
 def _load_json_dict(path: Path | None) -> dict[str, Any]:
     loaded = _load_json(path) if path else None
     return loaded if isinstance(loaded, dict) else {}
+
+
+def _load_optional_section_json(optional_sections: dict[str, str], label: str) -> dict[str, Any]:
+    path_text = str(optional_sections.get(label, "") or "")
+    if not path_text or path_text == "missing":
+        return {}
+    return _load_json_dict(Path(path_text))
 
 
 def _is_sensitive_key(key: str) -> bool:
@@ -448,6 +459,26 @@ def _release_tier_blocker_ids(payload: dict[str, Any]) -> list[str]:
     return _unique_sorted(blocker_ids)
 
 
+def _blocker_ids_from_key(payload: dict[str, Any], key: str) -> list[str]:
+    values = payload.get(key)
+    return _unique_sorted([str(item) for item in values if item]) if isinstance(values, list) else []
+
+
+def _fresh_full_validation_blocker_ids(payload: dict[str, Any]) -> list[str]:
+    return _unique_sorted(
+        [
+            f"fresh_full_validation::{blocker}"
+            for blocker in _blocker_ids_from_key(payload, "blockers")
+            if not blocker.startswith("fresh_full_validation::")
+        ]
+        + [
+            blocker
+            for blocker in _blocker_ids_from_key(payload, "blockers")
+            if blocker.startswith("fresh_full_validation::")
+        ]
+    )
+
+
 def _int_from_summary(summary: dict[str, Any], key: str) -> int:
     value = summary.get(key, 0)
     return int(value) if isinstance(value, int | float | str) and str(value).isdigit() else 0
@@ -492,19 +523,36 @@ def _build_pm_failure_bundle_coverage(
     completion_audit = _load_json_dict(pm_release_gate_completion_audit)
     reviewer_handoff = _load_json_dict(pm_release_gate_reviewer_handoff)
     owner_packet = _load_json_dict(pm_owner_evidence_request_packet)
+    ga_enterprise_readiness = _load_optional_section_json(optional_sections, "ga_enterprise_readiness_report")
+    ga_enterprise_signoff = _load_optional_section_json(optional_sections, "ga_enterprise_signoff_intake_packet")
+    fresh_full_validation = _load_optional_section_json(optional_sections, "fresh_full_validation_lane_status")
     action_blocker_ids = _blocker_ids_from_rows(action_register)
     closure_blocker_ids = _blocker_ids_from_rows(closure_board)
     handoff_blocker_ids = _blocker_ids_from_rows(reviewer_handoff)
     owner_packet_blocker_ids = _blocker_ids_from_owner_packet(owner_packet)
     release_tier_blocker_ids = _release_tier_blocker_ids(reviewer_handoff)
+    ga_covered_blocker_ids = _unique_sorted(
+        [
+            *release_tier_blocker_ids,
+            *_blocker_ids_from_key(ga_enterprise_readiness, "blockers"),
+            *_blocker_ids_from_key(ga_enterprise_signoff, "current_blockers"),
+            *_fresh_full_validation_blocker_ids(fresh_full_validation),
+        ]
+    )
+    core_blocker_ids = owner_packet_blocker_ids
+    action_extra_blocker_ids = _unique_sorted(
+        [blocker for blocker in action_blocker_ids if blocker not in set(core_blocker_ids)]
+    )
+    core_blocker_id_sources_match = bool(
+        core_blocker_ids
+        and core_blocker_ids == closure_blocker_ids
+        and core_blocker_ids == handoff_blocker_ids
+        and set(core_blocker_ids).issubset(set(action_blocker_ids))
+    )
+    action_extra_blocker_ids_covered = set(action_extra_blocker_ids).issubset(set(ga_covered_blocker_ids))
     section_rows = _section_rows(optional_sections)
     missing_section_labels = [row["label"] for row in section_rows if not row["present"]]
-    blocker_id_sources_match = bool(
-        action_blocker_ids
-        and action_blocker_ids == closure_blocker_ids
-        and action_blocker_ids == handoff_blocker_ids
-        and action_blocker_ids == owner_packet_blocker_ids
-    )
+    blocker_id_sources_match = bool(core_blocker_id_sources_match and action_extra_blocker_ids_covered)
     release_tier_rows_present = bool(_rows(reviewer_handoff, "release_tier_rows"))
     owner_packets_present = bool(_rows(owner_packet, "owner_packets"))
     release_tier_owner_packets_present = bool(_rows(owner_packet, "release_tier_owner_packets"))
@@ -547,6 +595,9 @@ def _build_pm_failure_bundle_coverage(
             "required_section_count": len(section_rows),
             "missing_required_section_count": len(missing_section_labels),
             "blocker_id_sources_match": blocker_id_sources_match,
+            "core_blocker_id_sources_match": core_blocker_id_sources_match,
+            "action_extra_blocker_count": len(action_extra_blocker_ids),
+            "action_extra_blocker_ids_covered": action_extra_blocker_ids_covered,
             "release_tier_rows_present": release_tier_rows_present,
             "owner_packets_present": owner_packets_present,
             "release_tier_owner_packets_present": release_tier_owner_packets_present,
@@ -557,6 +608,8 @@ def _build_pm_failure_bundle_coverage(
         },
         "open_blocker_ids": action_blocker_ids,
         "release_tier_blocker_ids": release_tier_blocker_ids,
+        "ga_covered_blocker_ids": ga_covered_blocker_ids,
+        "action_extra_blocker_ids": action_extra_blocker_ids,
         "blocked_requirement_ids": _blocked_requirement_ids(completion_audit),
         "source_blocker_ids": {
             "pm_release_blocker_action_register": action_blocker_ids,
@@ -622,6 +675,7 @@ def build_support_bundle(
     frontend_dependency_audit_report: Path | None = DEFAULT_FRONTEND_DEPENDENCY_AUDIT_REPORT,
     ga_enterprise_readiness_report: Path | None = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
     ga_enterprise_signoff_intake_packet: Path | None = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET,
+    fresh_full_validation_lane_status: Path | None = DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     independent_vv_attestation_template: Path | None = DEFAULT_INDEPENDENT_VV_ATTESTATION_TEMPLATE,
     family_validation_manual_signoff_template: Path | None = DEFAULT_FAMILY_VALIDATION_MANUAL_SIGNOFF_TEMPLATE,
     customer_audit_failure_bundle_sla_template: Path | None = DEFAULT_CUSTOMER_AUDIT_FAILURE_BUNDLE_SLA_TEMPLATE,
@@ -679,6 +733,7 @@ def build_support_bundle(
         ("frontend_dependency_audit_report", frontend_dependency_audit_report),
         ("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
         ("ga_enterprise_signoff_intake_packet", ga_enterprise_signoff_intake_packet),
+        ("fresh_full_validation_lane_status", fresh_full_validation_lane_status),
         ("independent_vv_attestation_template", independent_vv_attestation_template),
         ("family_validation_manual_signoff_template", family_validation_manual_signoff_template),
         ("customer_audit_failure_bundle_sla_template", customer_audit_failure_bundle_sla_template),

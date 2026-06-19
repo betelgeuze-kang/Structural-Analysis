@@ -148,6 +148,68 @@ def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) ->
     assert payload["next_actions"] == []
 
 
+def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
+    fresh_status = _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "rows": [
+                {
+                    "lane_id": "gpu_hip_solver",
+                    "runner": "gpu_capable_rocm_hip_validation",
+                    "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+                    "fresh_validation_receipt_present": False,
+                    "fresh_validation_receipt_fresh": False,
+                    "fresh_validation_receipt_contract_pass": False,
+                }
+            ]
+        },
+    )
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | ga=BLOCKED",
+            "full_release_blockers": [],
+            "release_area_blockers": [],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [],
+            "release_tiers": {
+                "ga_enterprise_blockers": [
+                    "independent_vv_missing",
+                    "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+                ],
+                "fresh_full_validation_lane_status": str(fresh_status),
+            },
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    rows = {row["blocker_id"]: row for row in payload["rows"]}
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["open_blocker_count"] == 2
+    assert payload["summary"]["ga_enterprise_blocker_count"] == 2
+
+    vv_row = rows["independent_vv_missing"]
+    assert vv_row["scope"] == "ga_enterprise"
+    assert vv_row["owner"] == "independent_vv_owner"
+    assert vv_row["owner_input_required"] is True
+    assert vv_row["handoff_state"] == "external_owner_input_ready"
+    assert vv_row["resolution_type"] == "external_ga_enterprise_signoff_required"
+    assert "ga_enterprise_signoff_intake_packet" in vv_row["evidence_artifacts"]
+    assert vv_row["evidence_status"]["state"] == "missing_external_ga_enterprise_signoff_evidence"
+
+    fresh_row = rows["fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"]
+    assert fresh_row["scope"] == "ga_enterprise"
+    assert fresh_row["owner"] == "validation_lane_owner"
+    assert fresh_row["owner_input_required"] is False
+    assert fresh_row["handoff_state"] == "local_remediation_ready"
+    assert fresh_row["resolution_type"] == "fresh_validation_receipt_required"
+    assert fresh_row["evidence_status"]["state"] == "fresh_validation_receipt_missing"
+    assert fresh_row["evidence_status"]["lane_id"] == "gpu_hip_solver"
+    assert any("build_fresh_full_validation_lane_status.py" in command for command in fresh_row["reproduction_commands"])
+
+
 def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -> None:
     report = _pm_report(tmp_path / "pm_release_gate_report.json")
     payload = json.loads(report.read_text(encoding="utf-8"))

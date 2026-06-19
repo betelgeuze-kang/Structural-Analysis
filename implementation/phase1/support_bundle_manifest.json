@@ -1,8 +1,8 @@
 {
   "archive_roundtrip": {
-    "actual_artifact_count": 50,
-    "artifact_count": 50,
-    "member_count": 54,
+    "actual_artifact_count": 51,
+    "artifact_count": 51,
+    "member_count": 55,
     "missing_members": [],
     "pass": true,
     "reason": "PASS"
@@ -208,11 +208,11 @@
     },
     {
       "available": true,
-      "bytes": 34060,
+      "bytes": 89842,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "9fd9672845cd7c4f5d099f969c8c11f72a6b7a8e89696047a3267dee26c9299a",
-      "sha256": "9fd9672845cd7c4f5d099f969c8c11f72a6b7a8e89696047a3267dee26c9299a",
+      "redacted_sha256": "571cd61fb781d54a933bac912b74a833f7f422803776084af6fb287609d168bd",
+      "sha256": "571cd61fb781d54a933bac912b74a833f7f422803776084af6fb287609d168bd",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
@@ -334,6 +334,15 @@
     },
     {
       "available": true,
+      "bytes": 10824,
+      "label": "fresh_full_validation_lane_status",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/fresh_full_validation_lane_status.json",
+      "redacted_sha256": "0492ab5160add173ffc0f39298eaccf5124c4d92dc02ddfa3d3ee285f4ebfe28",
+      "sha256": "0492ab5160add173ffc0f39298eaccf5124c4d92dc02ddfa3d3ee285f4ebfe28",
+      "source_path": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+    },
+    {
+      "available": true,
       "bytes": 731,
       "label": "independent_vv_attestation_template",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/independent_vv_attestation_template.json",
@@ -424,11 +433,11 @@
     },
     {
       "available": true,
-      "bytes": 215177,
+      "bytes": 282452,
       "label": "pm_release_reproduction_command_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json",
-      "redacted_sha256": "c7d714a541da976749abca87bc8dc5a248a3eba8e98431ee400d696f73c2cbed",
-      "sha256": "c7d714a541da976749abca87bc8dc5a248a3eba8e98431ee400d696f73c2cbed",
+      "redacted_sha256": "cd998020e8a8d57135b385c62b85c22b7318a31ef124f69ff2e0834415cfb1d9",
+      "sha256": "cd998020e8a8d57135b385c62b85c22b7318a31ef124f69ff2e0834415cfb1d9",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
     },
     {
@@ -464,16 +473,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-19T16:02:06.501681+00:00",
+    "generated_at": "2026-06-19T16:18:03.660467+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 50,
-    "available_artifact_count": 50,
+    "artifact_count": 51,
+    "available_artifact_count": 51,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "17826f87b9441a7a5adf0a857db74ac3f11a4b65c92c80ef47b186e63f418b94"
+    "sha256": "c67833df426d63910978547d94f65c816f757afe7c708ec74e73ff555493e66f"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -495,9 +504,9 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 392853,
+    "bytes": 398640,
     "error": "",
-    "member_count": 54,
+    "member_count": 55,
     "members": [
       "audit_digest.json",
       "license_status.json",
@@ -510,6 +519,7 @@
       "redacted/customer_audit_failure_bundle_sla_template.json",
       "redacted/external_benchmark_updates.json",
       "redacted/family_validation_manual_signoff_template.json",
+      "redacted/fresh_full_validation_lane_status.json",
       "redacted/frontend_dependency_audit_report.json",
       "redacted/ga_enterprise_readiness_report.json",
       "redacted/ga_enterprise_signoff_intake_packet.json",
@@ -555,9 +565,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "cd15428e5c1f41b28e7d59eeeaebef30dcef10d13aa41c01a13ae909ae8f43d1"
+    "sha256": "fe5e60462ead86ebb6a2cdcd59bd4eed2a6df6096947333849a7f6fbdefa865a"
   },
-  "generated_at": "2026-06-19T16:02:06.553418+00:00",
+  "generated_at": "2026-06-19T16:18:03.714121+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -571,6 +581,7 @@
     "commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
     "customer_audit_failure_bundle_sla_template": "implementation/phase1/release/support_bundle/redacted/customer_audit_failure_bundle_sla_template.json",
     "family_validation_manual_signoff_template": "implementation/phase1/release/support_bundle/redacted/family_validation_manual_signoff_template.json",
+    "fresh_full_validation_lane_status": "implementation/phase1/release/support_bundle/redacted/fresh_full_validation_lane_status.json",
     "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
     "ga_enterprise_readiness_report": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json",
     "ga_enterprise_signoff_intake_packet": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
@@ -595,6 +606,19 @@
     "ux_new_user_observation_template": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_template.json"
   },
   "pm_failure_bundle_coverage": {
+    "action_extra_blocker_ids": [
+      "customer_audit_failure_bundle_sla_missing",
+      "family_validation_manual_signoff_missing",
+      "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+      "independent_vv_missing"
+    ],
     "blocked_requirement_ids": [
       "release_area.basic_ci",
       "release_area.security",
@@ -605,11 +629,40 @@
     "bundle_path": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
     "claim_boundary": "This index proves support-bundle coverage for open PM blocker handoff artifacts only. It does not close tracked CI streak, human UX observation, license, Limited Commercial, GA/Enterprise, or other external release evidence blockers.",
     "coverage_pass": true,
-    "generated_at": "2026-06-19T16:02:06.503488+00:00",
+    "ga_covered_blocker_ids": [
+      "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "customer_audit_failure_bundle_sla_missing",
+      "family_validation_manual_signoff_missing",
+      "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+      "independent_vv_missing",
+      "security::license_status_not_configured",
+      "ux::human_new_user_30min_sample_evidence_missing",
+      "ux::human_new_user_observation_missing_or_failed"
+    ],
+    "generated_at": "2026-06-19T16:18:03.662644+00:00",
     "missing_required_section_labels": [],
     "open_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "customer_audit_failure_bundle_sla_missing",
+      "family_validation_manual_signoff_missing",
+      "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+      "independent_vv_missing",
       "security::license_status_not_configured",
       "ux::human_new_user_30min_sample_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed"
@@ -722,6 +775,11 @@
         "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json"
       },
       {
+        "label": "fresh_full_validation_lane_status",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/fresh_full_validation_lane_status.json"
+      },
+      {
         "label": "commercial_gap_ledger_status",
         "present": true,
         "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json"
@@ -768,7 +826,7 @@
       }
     ],
     "schema_version": "pm-failure-bundle-coverage.v1",
-    "sha256": "0dff2e2ff6307200fd53941380c7b4b400acaa82739f44e5b92fe5ef72cc87e2",
+    "sha256": "3dfc1a1b36218b45eb68d996f5678f04b6c322daf83f769775d9b086574d36b5",
     "source_artifacts": {
       "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -787,6 +845,17 @@
       "pm_release_blocker_action_register": [
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "customer_audit_failure_bundle_sla_missing",
+        "family_validation_manual_signoff_missing",
+        "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+        "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+        "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+        "independent_vv_missing",
         "security::license_status_not_configured",
         "ux::human_new_user_30min_sample_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed"
@@ -807,9 +876,12 @@
       ]
     },
     "summary": {
+      "action_extra_blocker_count": 11,
+      "action_extra_blocker_ids_covered": true,
       "blocker_id_sources_match": true,
+      "core_blocker_id_sources_match": true,
       "missing_required_section_count": 0,
-      "open_blocker_count": 5,
+      "open_blocker_count": 16,
       "owner_packet_blocked_release_tier_impact_count": 10,
       "owner_packet_missing_release_tier_impact_count": 0,
       "owner_packet_tier_impact_complete": true,
@@ -818,7 +890,7 @@
       "release_tier_blocker_count": 8,
       "release_tier_owner_packets_present": true,
       "release_tier_rows_present": true,
-      "required_section_count": 28
+      "required_section_count": 29
     }
   },
   "reason_code": "PASS",
@@ -847,5 +919,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=50/50 | redaction=True | roundtrip=True | archive=True"
+  "summary_line": "Support bundle: PASS | artifacts=51/51 | redaction=True | roundtrip=True | archive=True"
 }
