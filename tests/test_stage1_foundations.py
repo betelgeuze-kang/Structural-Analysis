@@ -121,8 +121,9 @@ def test_kds_rc_rule_engine_supports_foundation() -> None:
     demand = RCMemberDemand(footing_bearing_kPa=180.0, footing_shear_kN=220.0)
     capacity = RCMemberCapacity(footing_bearing_kPa=240.0, footing_shear_kN=300.0)
     results = evaluate_rc_member(member_type="foundation", demand=demand, capacity=capacity)
-    assert len(results) == 2
+    assert len(results) == 3
     assert all(r.clause.startswith("KDS-RC-FOUND-") for r in results)
+    assert {r.component for r in results} == {"bearing", "shear", "flexure"}
 
 
 def test_kds_rc_rule_engine_supports_connection() -> None:

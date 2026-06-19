@@ -1,0 +1,47 @@
+{
+  "artifacts": {
+    "direct_replay": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
+    "gate_summary": "implementation/phase1/release_evidence/productization/mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json",
+    "terminal_equilibrium": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup375_structural_terminal_increment_gate_probe.json"
+  },
+  "blockers": [],
+  "checks": {
+    "direct_replay_not_promoted_without_increment": true,
+    "direct_replay_present": true,
+    "direct_replay_residual_gate_passed": true,
+    "direct_replay_schema_pass": true,
+    "gate_summary_present": true,
+    "gate_summary_schema_pass": true,
+    "residuals_match": true,
+    "strict_residual_gate_passed": true,
+    "summary_direct_residual_gate_passed": true,
+    "summary_increment_gap_matches_replay": true,
+    "summary_keeps_full_g1_partial": true,
+    "terminal_equilibrium_present": true,
+    "terminal_equilibrium_ready": true,
+    "terminal_equilibrium_schema_pass": true,
+    "terminal_increment_gate_passed": true
+  },
+  "claim_boundary": "This report closes only the G1 attached-policy terminal direct-residual residual+increment gate at the retained 0.656 checkpoint by cross-checking the direct residual replay against the terminal equilibrium Newton increment-gate receipt. It does not close full-mesh/full-load 3D nonlinear equilibrium, production ROCm/HIP residency, material Newton breadth, or full G1.",
+  "direct_residual_newton_gate_ready": true,
+  "direct_residual_terminal_gate_ready": true,
+  "generated_at": "2026-06-18T14:01:01.544110+00:00",
+  "measurements": {
+    "direct_replay_final_residual_inf_n": 1.787703126865381e-06,
+    "summary_latest_direct_residual_inf_n": 1.787703126865381e-06,
+    "terminal_equilibrium_final_residual_inf_n": 1.787703126865381e-06,
+    "terminal_relative_increment": 0.0,
+    "terminal_stop_reason": "residual_gate_stationary_no_descent_increment_gate_met"
+  },
+  "reason_code": "PASS",
+  "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+  "status": "ready",
+  "summary_line": "G1 direct residual terminal gate: PASS | direct_residual=1.787703126865381e-06 | increment=0.0",
+  "thresholds": {
+    "direct_residual_replay_tolerance_n": 0.001,
+    "relative_increment_tolerance": 0.0001,
+    "residual_match_abs_tolerance_n": 1e-12,
+    "strict_residual_tolerance_n": 0.0005,
+    "terminal_equilibrium_tolerance_n": 0.0005
+  }
+}

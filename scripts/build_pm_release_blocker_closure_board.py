@@ -110,10 +110,21 @@ def _state_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
+def _pm_blocker_ids(pm_payload: dict[str, Any]) -> list[str]:
+    full_blockers = [str(item) for item in _as_list(pm_payload.get("full_release_blockers"))]
+    if full_blockers:
+        return full_blockers
+    return [
+        *[str(item) for item in _as_list(pm_payload.get("blockers"))],
+        *[str(item) for item in _as_list(pm_payload.get("release_area_blockers"))],
+    ]
+
+
 def _reason_code(
     *,
     action_register_loaded: bool,
     pm_report_loaded: bool,
+    action_register_matches_pm_report: bool,
     rows: list[dict[str, Any]],
     full_release_gate_ready: bool,
 ) -> str:
@@ -121,6 +132,8 @@ def _reason_code(
         return "ERR_PM_BLOCKER_ACTION_REGISTER_MISSING"
     if not pm_report_loaded:
         return "ERR_PM_RELEASE_GATE_REPORT_MISSING"
+    if not action_register_matches_pm_report:
+        return "ERR_PM_BLOCKER_ACTION_REGISTER_STALE"
     if rows:
         return "ERR_PM_RELEASE_BLOCKERS_OPEN"
     if not full_release_gate_ready:
@@ -146,14 +159,39 @@ def build_board(
     limited_commercial_ready = bool(
         pm_payload.get("limited_commercial_ready", register_summary.get("limited_commercial_ready", False))
     )
+    limited_commercial_milestone_ready = bool(
+        pm_payload.get(
+            "limited_commercial_milestone_ready",
+            register_summary.get("limited_commercial_milestone_ready", limited_commercial_ready),
+        )
+    )
+    limited_commercial_release_ready = bool(
+        pm_payload.get(
+            "limited_commercial_release_ready",
+            register_summary.get("limited_commercial_release_ready", limited_commercial_ready),
+        )
+    )
     paid_pilot_candidate = bool(
         pm_payload.get("paid_pilot_candidate", register_summary.get("paid_pilot_candidate", False))
     )
     action_register_loaded = bool(register_payload)
     pm_report_loaded = bool(pm_payload)
+    pm_blocker_ids = _pm_blocker_ids(pm_payload)
+    register_blocker_ids = [str(row.get("blocker_id", "")) for row in rows if str(row.get("blocker_id", ""))]
+    pm_blocker_set = set(pm_blocker_ids)
+    register_blocker_set = set(register_blocker_ids)
+    missing_from_action_register = sorted(pm_blocker_set - register_blocker_set)
+    stale_action_register_blockers = sorted(register_blocker_set - pm_blocker_set)
+    action_register_matches_pm_report = (
+        action_register_loaded
+        and pm_report_loaded
+        and not missing_from_action_register
+        and not stale_action_register_blockers
+    )
     reason_code = _reason_code(
         action_register_loaded=action_register_loaded,
         pm_report_loaded=pm_report_loaded,
+        action_register_matches_pm_report=action_register_matches_pm_report,
         rows=rows,
         full_release_gate_ready=full_release_gate_ready,
     )
@@ -191,9 +229,18 @@ def build_board(
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "release_area_gate_ready": release_area_gate_ready,
             "full_release_gate_ready": full_release_gate_ready,
+            "limited_commercial_milestone_ready": limited_commercial_milestone_ready,
+            "limited_commercial_release_ready": limited_commercial_release_ready,
             "limited_commercial_ready": limited_commercial_ready,
             "paid_pilot_candidate": paid_pilot_candidate,
             "register_open_blocker_count": _as_int(register_summary.get("open_blocker_count"), len(rows)),
+            "pm_report_blocker_count": len(pm_blocker_ids),
+            "register_blocker_count": len(register_blocker_ids),
+            "action_register_matches_pm_report": action_register_matches_pm_report,
+            "missing_from_action_register_count": len(missing_from_action_register),
+            "stale_action_register_blocker_count": len(stale_action_register_blockers),
+            "missing_from_action_register": missing_from_action_register,
+            "stale_action_register_blockers": stale_action_register_blockers,
             "action_register_loaded": action_register_loaded,
             "pm_report_loaded": pm_report_loaded,
         },
@@ -214,6 +261,7 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `open_blocker_count`: `{payload['summary']['open_blocker_count']}`",
         f"- `all_open_blockers_have_handoff`: `{payload['summary']['all_open_blockers_have_handoff']}`",
+        f"- `action_register_matches_pm_report`: `{payload['summary']['action_register_matches_pm_report']}`",
         "",
         "| Blocker | Owner | Closure State | Evidence State | Next Action |",
         "|---|---|---|---|---|",

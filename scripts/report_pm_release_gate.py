@@ -83,6 +83,10 @@ DEFAULT_LICENSE_STATUS_CLOSURE = Path(
 DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
 )
+DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
+)
+DEFAULT_GAP_CLOSURE_STATUS = Path("implementation/phase1/release_evidence/productization/gap_closure_status.json")
 DEFAULT_GA_ENTERPRISE_READINESS = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
 )
@@ -711,6 +715,7 @@ def _packaging_milestone(
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
+    support_pm_failure_bundle_coverage = _as_dict(support.get("pm_failure_bundle_coverage"))
     pm_blocker_summary = _summary(pm_blocker_register)
     pm_blocker_closure_summary = _summary(pm_blocker_closure_board)
     pm_blocker_register_open_count = _as_int(pm_blocker_summary.get("open_blocker_count"), 0)
@@ -766,6 +771,10 @@ def _packaging_milestone(
         "support_bundle_pm_owner_evidence_request_packet_present": _support_section_present(
             support_optional_sections,
             "pm_owner_evidence_request_packet",
+        ),
+        "support_bundle_pm_failure_bundle_coverage_pass": bool(
+            support_checks.get("pm_failure_bundle_coverage_pass", False)
+            and support_pm_failure_bundle_coverage.get("coverage_pass", False)
         ),
         "pm_blocker_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
@@ -828,6 +837,14 @@ def _packaging_milestone(
             support_optional_sections,
             "pm_release_reproduction_command_audit",
         ),
+        "support_bundle_commercial_gap_ledger_status_present": _support_section_present(
+            support_optional_sections,
+            "commercial_gap_ledger_status",
+        ),
+        "support_bundle_gap_closure_status_present": _support_section_present(
+            support_optional_sections,
+            "gap_closure_status",
+        ),
         "validation_manual_present": validation_manual_path.exists(),
         "limitation_manual_present": limitation_manual_path.exists(),
         "validation_manual_content_pass": _contains_terms(
@@ -869,6 +886,11 @@ def _packaging_milestone(
         *(
             ["support_bundle_pm_release_gate_reviewer_handoff_missing"]
             if not gate_checks["support_bundle_pm_release_gate_reviewer_handoff_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_pm_failure_bundle_coverage_incomplete"]
+            if not gate_checks["support_bundle_pm_failure_bundle_coverage_pass"]
             else []
         ),
         *(
@@ -967,6 +989,16 @@ def _packaging_milestone(
             if not gate_checks["support_bundle_pm_release_reproduction_command_audit_present"]
             else []
         ),
+        *(
+            ["support_bundle_commercial_gap_ledger_status_missing"]
+            if not gate_checks["support_bundle_commercial_gap_ledger_status_present"]
+            else []
+        ),
+        *(
+            ["support_bundle_gap_closure_status_missing"]
+            if not gate_checks["support_bundle_gap_closure_status_present"]
+            else []
+        ),
         *(["validation_manual_missing"] if not gate_checks["validation_manual_present"] else []),
         *(["limitation_manual_missing"] if not gate_checks["limitation_manual_present"] else []),
         *(["validation_manual_incomplete"] if not gate_checks["validation_manual_content_pass"] else []),
@@ -998,6 +1030,12 @@ def _packaging_milestone(
             ),
             "support_bundle_pm_owner_evidence_request_packet": str(
                 support_optional_sections.get("pm_owner_evidence_request_packet", "")
+            ),
+            "support_bundle_pm_failure_bundle_coverage": str(
+                support_pm_failure_bundle_coverage.get("bundle_path", "")
+            ),
+            "support_bundle_pm_failure_bundle_coverage_sha256": str(
+                support_pm_failure_bundle_coverage.get("sha256", "")
             ),
             "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
             "pm_blocker_register_handoff_ready_count": _as_int(
@@ -1070,6 +1108,10 @@ def _packaging_milestone(
             "support_bundle_pm_release_reproduction_command_audit": str(
                 support_optional_sections.get("pm_release_reproduction_command_audit", "")
             ),
+            "support_bundle_commercial_gap_ledger_status": str(
+                support_optional_sections.get("commercial_gap_ledger_status", "")
+            ),
+            "support_bundle_gap_closure_status": str(support_optional_sections.get("gap_closure_status", "")),
             "validation_manual_required_terms": list(VALIDATION_MANUAL_REQUIRED_TERMS),
             "limitation_manual_required_terms": list(LIMITATION_MANUAL_REQUIRED_TERMS),
         },
@@ -1795,6 +1837,7 @@ def _build_release_area_matrix(
 
     runtime_packaging_checks = _checks(runtime_packaging)
     support_checks = _checks(support)
+    support_pm_failure_bundle_coverage = _as_dict(support.get("pm_failure_bundle_coverage"))
     pm_blocker_summary = _summary(pm_blocker_register)
     pm_blocker_closure_summary = _summary(pm_blocker_closure_board)
     pm_blocker_register_open_count = _as_int(pm_blocker_summary.get("open_blocker_count"), 0)
@@ -1827,6 +1870,10 @@ def _build_release_area_matrix(
         "pm_owner_evidence_request_packet_in_failure_bundle": _support_section_present(
             support_optional_sections,
             "pm_owner_evidence_request_packet",
+        ),
+        "pm_failure_bundle_coverage_index_pass": bool(
+            support_checks.get("pm_failure_bundle_coverage_pass", False)
+            and support_pm_failure_bundle_coverage.get("coverage_pass", False)
         ),
         "pm_blocker_action_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
@@ -1932,6 +1979,11 @@ def _build_release_area_matrix(
         *(
             ["pm_release_gate_reviewer_handoff_missing_from_failure_bundle"]
             if not support_area_checks["pm_release_gate_reviewer_handoff_in_failure_bundle"]
+            else []
+        ),
+        *(
+            ["pm_failure_bundle_coverage_index_incomplete"]
+            if not support_area_checks["pm_failure_bundle_coverage_index_pass"]
             else []
         ),
         *(
@@ -2066,6 +2118,12 @@ def _build_release_area_matrix(
                 ),
                 "pm_owner_evidence_request_packet": str(
                     support_optional_sections.get("pm_owner_evidence_request_packet", "")
+                ),
+                "pm_failure_bundle_coverage_index": str(
+                    support_pm_failure_bundle_coverage.get("bundle_path", "")
+                ),
+                "pm_failure_bundle_coverage_index_sha256": str(
+                    support_pm_failure_bundle_coverage.get("sha256", "")
                 ),
                 "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
                 "pm_blocker_register_handoff_ready_count": _as_int(
@@ -2272,6 +2330,8 @@ def build_report(
     license_status: Path = DEFAULT_LICENSE_STATUS,
     license_status_closure: Path = DEFAULT_LICENSE_STATUS_CLOSURE,
     ai_orchestration_preflight: Path = DEFAULT_AI_ORCHESTRATION_PREFLIGHT,
+    commercial_gap_ledger_status: Path = DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS,
+    gap_closure_status: Path = DEFAULT_GAP_CLOSURE_STATUS,
     ga_enterprise_readiness: Path = DEFAULT_GA_ENTERPRISE_READINESS,
     ga_enterprise_signoff_intake: Path = DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE,
     paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
@@ -2414,8 +2474,18 @@ def build_report(
     ga_enterprise_ready = bool(full_release_gate_ready and _reason_pass(ga_readiness) and not ga_readiness_blockers)
     ai_orchestration = _load_json(ai_orchestration_preflight)
     ai_orchestration_summary = _summary(ai_orchestration)
+    commercial_gap_status = _load_json(commercial_gap_ledger_status)
+    gap_closure = _load_json(gap_closure_status)
+    commercial_gap_summary = _summary(commercial_gap_status)
+    gap_closure_summary = _as_dict(gap_closure.get("full_gap_ledger_summary"))
     ga_readiness_summary = _summary(ga_readiness)
     ga_signoff_intake = _load_json(ga_enterprise_signoff_intake)
+    if full_release_gate_ready:
+        release_status = "LIMITED_RELEASE_READY"
+    elif limited_ready:
+        release_status = "LIMITED_MILESTONE_READY"
+    else:
+        release_status = "BLOCKED"
     if full_release_gate_ready:
         recommended_scope = "Limited Commercial release candidate"
     elif limited_ready:
@@ -2444,11 +2514,13 @@ def build_report(
         "release_area_gate_ready": release_area_ready,
         "full_release_gate_ready": full_release_gate_ready,
         "paid_pilot_candidate": paid_pilot_candidate,
-        "limited_commercial_ready": limited_ready,
+        "limited_commercial_milestone_ready": limited_ready,
+        "limited_commercial_release_ready": full_release_gate_ready,
+        "limited_commercial_ready": full_release_gate_ready,
         "ga_enterprise_ready": ga_enterprise_ready,
         "recommended_scope": recommended_scope,
         "summary_line": (
-            f"PM release gate: {'LIMITED_READY' if limited_ready else 'BLOCKED'} | "
+            f"PM release gate: {release_status} | "
             f"release_areas={'READY' if release_area_ready else 'BLOCKED'} | "
             f"paid_pilot_candidate={paid_pilot_candidate} | "
             f"milestones={sum(1 for row in milestones if row['ok'])}/{len(milestones)} | "
@@ -2467,10 +2539,48 @@ def build_report(
                 "cursor_worker_cli": str(ai_orchestration_summary.get("cursor_worker_cli", "")),
                 "opencode_worker_cli": str(ai_orchestration_summary.get("opencode_worker_cli", "")),
                 "opencode_version": str(ai_orchestration_summary.get("opencode_version", "")),
+                "opencode_configured_model": str(ai_orchestration_summary.get("opencode_configured_model", "")),
+                "opencode_configured_model_available": bool(
+                    ai_orchestration_summary.get("opencode_configured_model_available", False)
+                ),
             },
             "claim_boundary": (
-                "Cursor/OpenCode are implementation workers for scoped slices; Codex still owns PM gate "
-                "review, verification, and final acceptance."
+                "Cursor/OpenCode are implementation workers for scoped slices. OpenCode model availability is "
+                "local provider-registry evidence only, not proof of remote credentials or successful inference. "
+                "Codex still owns PM gate review, verification, and final acceptance."
+            ),
+        },
+        "gap_ledger_status": {
+            "full_gap_ledger_ready": bool(gap_closure.get("full_gap_ledger_ready")),
+            "full_gap_ledger_status": str(gap_closure.get("full_gap_ledger_status", "")),
+            "commercial_gap_status": str(commercial_gap_status.get("status", "")),
+            "commercial_solver_gap_ready": bool(commercial_gap_status.get("commercial_solver_gap_ready", False)),
+            "ai_engine_gap_ready": bool(commercial_gap_status.get("ai_engine_gap_ready", False)),
+            "summary": {
+                "total_count": _as_int(commercial_gap_summary.get("total_count"), 0),
+                "closed_count": _as_int(commercial_gap_summary.get("closed_count"), 0),
+                "partial_count": _as_int(commercial_gap_summary.get("partial_count"), 0),
+                "open_count": _as_int(commercial_gap_summary.get("open_count"), 0),
+                "external_blocked_count": _as_int(commercial_gap_summary.get("external_blocked_count"), 0),
+                "gap_closure_closed_count": _as_int(gap_closure_summary.get("closed_count"), 0),
+                "gap_closure_partial_count": _as_int(gap_closure_summary.get("partial_count"), 0),
+                "gap_closure_external_blocked_count": _as_int(
+                    gap_closure_summary.get("external_blocked_count"),
+                    0,
+                ),
+            },
+            "next_locally_closable_gaps": [
+                str(item) for item in _as_list(commercial_gap_status.get("next_locally_closable_gaps"))
+            ],
+            "blockers": [str(item) for item in _as_list(commercial_gap_status.get("blockers"))],
+            "artifacts": {
+                "commercial_gap_ledger_status": str(commercial_gap_ledger_status),
+                "gap_closure_status": str(gap_closure_status),
+            },
+            "claim_boundary": (
+                "G1-G10 and AI-G1-AI-G10 ledger status is reported separately from PM M1-M5 milestone "
+                "readiness. Partial, external-blocked, benchmark-bridge, and diagnostic frontier evidence "
+                "must remain non-closing until the ledger status artifact marks the row closed."
             ),
         },
         "release_tiers": {
@@ -2506,12 +2616,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `summary_line`: `{payload['summary_line']}`",
         f"- `recommended_scope`: {payload['recommended_scope']}",
         f"- `paid_pilot_candidate`: `{payload['paid_pilot_candidate']}`",
+        f"- `limited_commercial_milestone_ready`: `{payload['limited_commercial_milestone_ready']}`",
         f"- `limited_commercial_ready`: `{payload['limited_commercial_ready']}`",
+        f"- `limited_commercial_release_ready`: `{payload['limited_commercial_release_ready']}`",
         f"- `release_area_gate_ready`: `{payload['release_area_gate_ready']}`",
         f"- `full_release_gate_ready`: `{payload['full_release_gate_ready']}`",
         f"- `ga_enterprise_ready`: `{payload['ga_enterprise_ready']}`",
         f"- `cursor_opencode_worker_preflight_pass`: "
         f"`{payload['implementation_orchestration']['cursor_opencode_worker_preflight_pass']}`",
+        f"- `full_gap_ledger_status`: `{payload['gap_ledger_status']['full_gap_ledger_status']}`",
+        f"- `commercial_gap_status`: `{payload['gap_ledger_status']['commercial_gap_status']}`",
+        f"- `commercial_solver_gap_ready`: `{payload['gap_ledger_status']['commercial_solver_gap_ready']}`",
+        f"- `ai_engine_gap_ready`: `{payload['gap_ledger_status']['ai_engine_gap_ready']}`",
+        f"- `next_locally_closable_gaps`: "
+        f"`{', '.join(payload['gap_ledger_status'].get('next_locally_closable_gaps', [])) or 'none'}`",
         "",
         "| Milestone | Status | Blockers |",
         "|---|---|---|",
@@ -2581,6 +2699,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--license-status", type=Path, default=DEFAULT_LICENSE_STATUS)
     parser.add_argument("--license-status-closure", type=Path, default=DEFAULT_LICENSE_STATUS_CLOSURE)
     parser.add_argument("--ai-orchestration-preflight", type=Path, default=DEFAULT_AI_ORCHESTRATION_PREFLIGHT)
+    parser.add_argument("--commercial-gap-ledger-status", type=Path, default=DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS)
+    parser.add_argument("--gap-closure-status", type=Path, default=DEFAULT_GAP_CLOSURE_STATUS)
     parser.add_argument("--ga-enterprise-readiness", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS)
     parser.add_argument("--ga-enterprise-signoff-intake", type=Path, default=DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE)
     parser.add_argument("--paid-pilot-scope-guard", type=Path, default=DEFAULT_PAID_PILOT_SCOPE_GUARD)
@@ -2655,6 +2775,8 @@ def main(argv: list[str] | None = None) -> int:
         license_status=args.license_status,
         license_status_closure=args.license_status_closure,
         ai_orchestration_preflight=args.ai_orchestration_preflight,
+        commercial_gap_ledger_status=args.commercial_gap_ledger_status,
+        gap_closure_status=args.gap_closure_status,
         ga_enterprise_readiness=args.ga_enterprise_readiness,
         ga_enterprise_signoff_intake=args.ga_enterprise_signoff_intake,
         paid_pilot_scope_guard=args.paid_pilot_scope_guard,

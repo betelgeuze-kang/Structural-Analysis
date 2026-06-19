@@ -1286,6 +1286,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     full_line_sparse = _load(productization / "mgt_full_line_mesh_sparse_equilibrium.json")
     full_frame_6dof = _load(productization / "mgt_full_frame_6dof_sparse_equilibrium.json")
     pdelta_continuation = _load(productization / "mgt_pdelta_continuation_probe.json")
+    g1_shell_material_budgeted_continuation = _load(
+        productization / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
+    )
     coarsened_authored_support_pdelta = _load(
         productization / "mgt_coarsened_authored_support_pdelta_probe.json"
     )
@@ -1343,6 +1346,10 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     equilibrium_newton_support128_followup42_state_scale_only = _load(
         productization
         / "mgt_equilibrium_newton_support128_followup42_state_scale_only_probe.json"
+    )
+    equilibrium_newton_structural_terminal_increment = _load(
+        productization
+        / "mgt_equilibrium_newton_focused_followup375_structural_terminal_increment_gate_probe.json"
     )
     translation_frontier_followup57_timeout_diagnostic = _load(
         productization
@@ -1568,6 +1575,16 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     boundary_spring_tangent = _load(productization / "mgt_boundary_spring_tangent_receipt.json")
     boundary_global = _load(productization / "mgt_uncoarsened_boundary_global_equilibrium.json")
     direct_residual_newton = _load(productization / "mgt_direct_residual_newton_probe.json")
+    direct_residual_attached_policy_gate_replay = _load(
+        productization / "mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json"
+    )
+    g1_attached_equilibrium_newton_gate_summary = _load(
+        productization
+        / "mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
+    )
+    g1_direct_residual_terminal_gate = _load(
+        productization / "mgt_g1_direct_residual_terminal_gate_report.json"
+    )
     direct_residual_newton_followup48_replay = _load(
         productization / "mgt_direct_residual_newton_followup48_replay_probe.json"
     )
@@ -2606,6 +2623,15 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
         gpu.get("gpu_newton_terminal_proven")
     )
 
+    equilibrium_newton_closed = bool(
+        equilibrium_newton_structural_terminal_increment.get("status") == "ready"
+        and equilibrium_newton_structural_terminal_increment.get("equilibrium_newton_ready")
+    )
+    direct_residual_newton_closed = bool(
+        g1_direct_residual_terminal_gate.get("status") == "ready"
+        and g1_direct_residual_terminal_gate.get("direct_residual_newton_gate_ready")
+    )
+
     return [
         _row(
             "G1",
@@ -2618,12 +2644,12 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "full_mesh_nonlinear_equilibrium_not_closed",
                 *(
                     ["direct_residual_newton_not_closed"]
-                    if direct_residual_newton.get("status") == "partial"
+                    if not direct_residual_newton_closed
                     else []
                 ),
                 *(
                     ["equilibrium_newton_not_closed"]
-                    if equilibrium_newton_focused.get("status") == "partial"
+                    if not equilibrium_newton_closed
                     else []
                 ),
             ],
@@ -2748,6 +2774,62 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "direct_residual_current_tangent_residual_row_correction": direct_residual_newton.get(
                     "current_tangent_residual_row_correction"
                 ),
+                "direct_residual_attached_policy_gate_replay": (
+                    _direct_residual_probe_summary(direct_residual_attached_policy_gate_replay)
+                ),
+                "g1_attached_equilibrium_newton_gate_summary": {
+                    "schema_version": g1_attached_equilibrium_newton_gate_summary.get(
+                        "schema_version"
+                    ),
+                    "status": g1_attached_equilibrium_newton_gate_summary.get("status"),
+                    "latest_direct_residual_inf_n": _float_or_none(
+                        g1_attached_equilibrium_newton_gate_summary.get(
+                            "latest_direct_residual_inf_n"
+                        )
+                    ),
+                    "direct_residual_gate_passed": (
+                        g1_attached_equilibrium_newton_gate_summary.get(
+                            "direct_residual_gate_passed"
+                        )
+                    ),
+                    "accepted_history_count": (
+                        g1_attached_equilibrium_newton_gate_summary.get(
+                            "accepted_history_count"
+                        )
+                    ),
+                    "direct_residual_gate_replay": (
+                        g1_attached_equilibrium_newton_gate_summary.get(
+                            "direct_residual_gate_replay"
+                        )
+                    ),
+                    "claim_boundary": g1_attached_equilibrium_newton_gate_summary.get(
+                        "claim_boundary"
+                    ),
+                },
+                "g1_direct_residual_terminal_gate_report": {
+                    "schema_version": g1_direct_residual_terminal_gate.get("schema_version"),
+                    "status": g1_direct_residual_terminal_gate.get("status"),
+                    "direct_residual_terminal_gate_ready": (
+                        g1_direct_residual_terminal_gate.get(
+                            "direct_residual_terminal_gate_ready"
+                        )
+                    ),
+                    "direct_residual_newton_gate_ready": (
+                        g1_direct_residual_terminal_gate.get(
+                            "direct_residual_newton_gate_ready"
+                        )
+                    ),
+                    "measurements": g1_direct_residual_terminal_gate.get(
+                        "measurements"
+                    ),
+                    "thresholds": g1_direct_residual_terminal_gate.get("thresholds"),
+                    "checks": g1_direct_residual_terminal_gate.get("checks"),
+                    "blockers": g1_direct_residual_terminal_gate.get("blockers"),
+                    "artifacts": g1_direct_residual_terminal_gate.get("artifacts"),
+                    "claim_boundary": g1_direct_residual_terminal_gate.get(
+                        "claim_boundary"
+                    ),
+                },
                 "direct_residual_newton_followup48_replay": _direct_residual_probe_summary(
                     direct_residual_newton_followup48_replay
                 ),
@@ -3333,6 +3415,56 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
                 "direct_residual_adaptive_preconditioned_global_newton_runtime_budget_smoke": _adaptive_preconditioned_global_newton_summary(
                     direct_residual_adaptive_preconditioned_global_newton_runtime_budget
+                ),
+                "g1_shell_material_budgeted_continuation_status": (
+                    g1_shell_material_budgeted_continuation.get("status")
+                ),
+                "g1_shell_material_budgeted_continuation_schema": (
+                    g1_shell_material_budgeted_continuation.get("schema_version")
+                ),
+                "g1_shell_material_budgeted_latest_frontier_receipt": (
+                    g1_shell_material_budgeted_continuation.get("latest_frontier_receipt")
+                ),
+                "g1_shell_material_budgeted_latest_frontier_compact_checkpoint": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "latest_frontier_compact_checkpoint"
+                    )
+                ),
+                "g1_shell_material_budgeted_latest_frontier_compact_checkpoint_exists": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "latest_frontier_compact_checkpoint_exists"
+                    )
+                ),
+                "g1_shell_material_budgeted_latest_frontier_direct_residual_inf_n": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "latest_frontier_direct_residual_inf_n"
+                    )
+                ),
+                "g1_shell_material_budgeted_residual_gap_to_tolerance_n": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "residual_gap_to_tolerance_n"
+                    )
+                ),
+                "g1_shell_material_budgeted_residual_gap_ratio_to_tolerance": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "residual_gap_ratio_to_tolerance"
+                    )
+                ),
+                "g1_shell_material_budgeted_direct_residual_gate_passed": (
+                    g1_shell_material_budgeted_continuation.get("direct_residual_gate_passed")
+                ),
+                "g1_shell_material_budgeted_frontier_chain_monotonic_nonincreasing": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "frontier_chain_monotonic_nonincreasing"
+                    )
+                ),
+                "g1_shell_material_budgeted_non_promoting_launch_receipts": (
+                    g1_shell_material_budgeted_continuation.get(
+                        "non_promoting_launch_receipts"
+                    )
+                ),
+                "g1_shell_material_budgeted_blockers": (
+                    g1_shell_material_budgeted_continuation.get("blockers")
                 ),
                 "direct_residual_current_checkpoint_single_largest_row_current_tangent": _direct_residual_probe_summary(
                     direct_residual_current_checkpoint_single_largest_row_current_tangent
@@ -4042,6 +4174,11 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 "equilibrium_newton_support128_followup42_state_scale_only": (
                     _equilibrium_newton_probe_summary(
                         equilibrium_newton_support128_followup42_state_scale_only
+                    )
+                ),
+                "equilibrium_newton_structural_terminal_increment_gate": (
+                    _equilibrium_newton_probe_summary(
+                        equilibrium_newton_structural_terminal_increment
                     )
                 ),
                 "equilibrium_newton_focused_regdirect_checkpoint": (

@@ -128,7 +128,7 @@ npm run ai:preflight
 
 ## 현재 판정
 
-현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_ready=true`, `ga_enterprise_ready=false`다.
+현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_milestone_ready=true`, `limited_commercial_ready=false`, `ga_enterprise_ready=false`다.
 다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `11/14` green이다.
 
 합격한 마일스톤:
@@ -138,7 +138,7 @@ npm run ai:preflight
 - M3 Strict Runtime Closure: NDTHA long profile, HIP e2e, CPU fallback 금지, device residency, host copy share가 통과했다.
 - M4 Benchmark Breadth Expansion: measured breadth `304` cases, `22` families, family별 holdout, coverage-risk worst-case report가 통과했다. PEER/E-Defense blind prediction measured-response family `10` cases는 `peer_blind_delta=1/10`으로 별도 집계한다.
 - M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle one-click export archive, validation/limitation manuals가 통과했다. 전용 manual은 `docs/release-validation-manual.md`와 `docs/release-limitation-manual.md`이며, CI/license source evidence와 함께 support bundle의 redacted reviewer package에 포함된다.
-- Implementation orchestration: Cursor Agent와 OpenCode worker bridge preflight가 통과했다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
+- Implementation orchestration: Cursor Agent와 OpenCode worker bridge 파일/CLI preflight가 구성되어 있고, OpenCode wrapper 기본 모델은 MiniMax M3 registry id `opencode-go/minimax-m3`다. Model availability evidence는 실행 환경의 writable `XDG_DATA_HOME` 계정 store에 의존하므로, sandbox가 `/tmp` fallback registry만 볼 때는 blocked로 남는다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
 
 남은 M1-M5 milestone blocker는 없다.
 

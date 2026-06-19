@@ -505,6 +505,12 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "full_release_gate_ready": bool(report.get("full_release_gate_ready", False)),
             "release_area_gate_ready": bool(report.get("release_area_gate_ready", False)),
+            "limited_commercial_milestone_ready": bool(
+                report.get("limited_commercial_milestone_ready", False)
+            ),
+            "limited_commercial_release_ready": bool(
+                report.get("limited_commercial_release_ready", report.get("limited_commercial_ready", False))
+            ),
             "limited_commercial_ready": bool(report.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(report.get("paid_pilot_candidate", False)),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),

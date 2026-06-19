@@ -1,95 +1,553 @@
 {
-  "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v2",
-  "status": "partial",
-  "generated_at": "2026-06-16T01:30:18+09:00",
-  "target_model": "midas_generator_33.optimized.roundtrip.json",
-  "direct_residual_gate_tolerance_n": 0.0005,
-  "direct_residual_gate_passed": false,
-  "compact_checkpoint_ready": true,
-  "shell_material_tangent_applied": true,
-  "budgeted_controller_ready": true,
-  "frontier_chain": [
-    {
-      "receipt": "mgt_direct_residual_shell_material_tangent_base_followup379_probe.json",
-      "direct_residual_inf_n": 18.969329986783087,
-      "note": "shell material tangent consumed by physical residual path"
-    },
-    {
-      "receipt": "mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
-      "direct_residual_inf_n": 14.90754179546407,
-      "target_row_count": 1,
-      "support_column_count": 4
-    },
-    {
-      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json",
-      "direct_residual_inf_n": 14.155544299510074,
-      "target_row_count": 2,
-      "support_column_count": 4
-    },
-    {
-      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4.json",
-      "direct_residual_inf_n": 10.403522164941286,
-      "target_row_count": 2,
-      "support_column_count": 4,
-      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_compact_checkpoint.npz"
-    },
-    {
-      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4.json",
-      "direct_residual_inf_n": 10.240967131025435,
-      "target_row_count": 2,
-      "support_column_count": 4,
-      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz"
-    },
-    {
-      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4.json",
-      "direct_residual_inf_n": 10.08095402628286,
-      "target_row_count": 4,
-      "support_column_count": 4,
-      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz"
-    },
-    {
-      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4.json",
-      "direct_residual_inf_n": 9.465515735677663,
-      "target_row_count": 4,
-      "support_column_count": 4,
-      "max_row_promotions": 4,
-      "internal_pass_finals_n": [
-        9.923441094488489,
-        9.768389271824425,
-        9.615760103715992,
-        9.465515735677663
-      ],
-      "compact_checkpoint": "mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4_compact_checkpoint.npz"
-    }
+  "blockers": [
+    "direct_residual_gate_not_closed",
+    "full_mesh_nonlinear_equilibrium_not_closed",
+    "production_rocm_hip_residual_row_backend_not_closed",
+    "consistent_residual_jacobian_newton_not_closed"
   ],
+  "budgeted_controller_ready": true,
+  "claim_boundary": {
+    "cpu_diagnostic_only": true,
+    "direct_residual_newton_closed": false,
+    "equilibrium_newton_closed": false,
+    "full_mesh_nonlinear_equilibrium_closed": false,
+    "launch_only_receipts_do_not_claim_descent": true,
+    "official_rocm_hip_closure_required": true
+  },
+  "compact_checkpoint_ready": true,
+  "contract_pass": false,
   "counter_evidence": [
     {
+      "available": true,
+      "direct_residual_inf_n": 14.90754179546407,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json",
       "receipt": "mgt_shell_material_rowcorr_budget_controller_followup382_support8_checkpointed.json",
       "result": "support8_replay_matched_seed_frontier",
-      "direct_residual_inf_n": 14.90754179546407
+      "status": "partial"
     }
   ],
+  "direct_residual_gate_passed": false,
+  "direct_residual_gate_tolerance_n": 0.0005,
+  "frontier_chain": [
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 18.969329986783087,
+      "checkpoint_compact": null,
+      "compact_checkpoint": null,
+      "compact_checkpoint_exists": null,
+      "controller": {
+        "internal_pass_finals_n": [],
+        "max_row_promotions": null,
+        "promoted_row_count": 0,
+        "promotion_count": null,
+        "row_count": 0,
+        "runtime_budget_exceeded": null,
+        "stop_reason": null
+      },
+      "direct_residual_inf_n": 18.969329986783087,
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_tangent_base_followup379_probe.json",
+      "receipt": "mgt_direct_residual_shell_material_tangent_base_followup379_probe.json",
+      "row_correction_accepted": false,
+      "row_correction_promotion_count": 0,
+      "schema_version": "mgt-direct-residual-newton-probe.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 18.969329986783087,
+      "checkpoint_compact": null,
+      "compact_checkpoint": null,
+      "compact_checkpoint_exists": null,
+      "controller": {
+        "internal_pass_finals_n": [],
+        "max_row_promotions": null,
+        "promoted_row_count": 0,
+        "promotion_count": null,
+        "row_count": 0,
+        "runtime_budget_exceeded": null,
+        "stop_reason": null
+      },
+      "direct_residual_inf_n": 14.90754179546407,
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
+      "receipt": "mgt_direct_residual_shell_material_tangent_rowcorr_min_followup380_probe.json",
+      "row_correction_accepted": true,
+      "row_correction_promotion_count": 1,
+      "schema_version": "mgt-direct-residual-newton-probe.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 14.90754179546407,
+      "checkpoint_compact": null,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          14.155544299510074
+        ],
+        "max_row_promotions": 1,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 14.155544299510074,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup383_target2_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 14.90754179546407,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          14.155544299510074
+        ],
+        "max_row_promotions": 1,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 14.155544299510074,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 14.155544299510074,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          10.403522164941286
+        ],
+        "max_row_promotions": 1,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 10.403522164941286,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup385_continue_target2_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 10.403522164941286,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          10.240967131025435
+        ],
+        "max_row_promotions": 1,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 10.240967131025435,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 10.240967131025435,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          10.08095402628286
+        ],
+        "max_row_promotions": 1,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 10.08095402628286,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 10.08095402628286,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          9.923441094488489,
+          9.768389271824425,
+          9.615760103715992,
+          9.465515735677663
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 9.465515735677663,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 9.465515735677663,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          9.317618908056183,
+          9.17203293787069,
+          9.028721720241528,
+          8.887649712433166
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 8.887649712433166,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 8.887649712433166,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          8.748781925041193,
+          8.612083919588521,
+          8.477521794183566,
+          8.345062176806358
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 8.345062176806358,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 8.345062176806358,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          8.21467221396896,
+          8.086319567914224,
+          7.959972407229806,
+          7.835599421240012
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 7.835599421240012,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 7.835599421240012,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          7.713169713195647,
+          7.5926529466153525,
+          7.474019230263629,
+          7.357239142571679
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 7.357239142571679,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 7.357239142571679,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          7.242283720972672,
+          7.129124479585052,
+          7.017733304283219,
+          6.908082594771521
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 6.908082594771521,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 6.908082594771521,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          6.800145180767039,
+          6.693894242865362,
+          6.589303455565904,
+          6.486346878826488
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 6.486346878826488,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 6.486346878826488,
+      "checkpoint_compact": false,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_final_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [],
+        "max_row_promotions": null,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "max_controller_steps_reached"
+      },
+      "direct_residual_inf_n": 6.117776861921165,
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke.json",
+      "receipt": "mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 6.117776861921165,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_final_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [],
+        "max_row_promotions": null,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "max_controller_steps_reached"
+      },
+      "direct_residual_inf_n": 6.117752205061414,
+      "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke.json",
+      "receipt": "mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-direct-residual-adaptive-preconditioned-global-newton.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    },
+    {
+      "available": true,
+      "base_direct_residual_inf_n": 6.117752205061414,
+      "checkpoint_compact": true,
+      "compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+      "compact_checkpoint_exists": true,
+      "controller": {
+        "internal_pass_finals_n": [
+          6.022163510398322,
+          5.928068369998336,
+          5.835443470797408,
+          5.74426714604332
+        ],
+        "max_row_promotions": 4,
+        "promoted_row_count": 1,
+        "promotion_count": 1,
+        "row_count": 1,
+        "runtime_budget_exceeded": false,
+        "stop_reason": "candidate_promoted"
+      },
+      "direct_residual_inf_n": 5.74426714604332,
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+      "row_correction_accepted": null,
+      "row_correction_promotion_count": null,
+      "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+      "status": "partial",
+      "support_column_count": null,
+      "target_row_count": null
+    }
+  ],
+  "frontier_chain_monotonic_nonincreasing": true,
+  "frontier_improvement_inf_n": 13.225062840739767,
+  "frontier_relative_improvement": 0.6971813369240955,
+  "generated_at": "2026-06-18T15:46:13.623656+00:00",
+  "latest_frontier_checkpoint_compact": true,
+  "latest_frontier_compact_checkpoint": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+  "latest_frontier_compact_checkpoint_exists": true,
+  "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+  "latest_frontier_receipt": "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+  "next_actions": [
+    "continue from latest compact checkpoint implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz (mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json) only through completed child receipts",
+    "port residual-row batch replay with state-dependent shell material tangent to the production ROCm/HIP lane",
+    "replace row-only correction with a consistent residual/Jacobian Newton path before claiming commercial closure"
+  ],
+  "non_promoting_launch_receipts": [
+    {
+      "available": true,
+      "claim_boundary": "Launch receipt only. A completed child direct-residual receipt is required before claiming residual progress.",
+      "counted_in_frontier": false,
+      "non_count_reason": "completed child direct-residual receipt required",
+      "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+      "receipt": "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+      "status": "in_progress"
+    }
+  ],
+  "residual_gap_ratio_to_tolerance": 11488.53429208664,
+  "residual_gap_to_tolerance_n": 5.743767146043321,
+  "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v3",
+  "shell_material_tangent_applied": true,
+  "status": "partial",
   "storage_policy": {
-    "full_history_checkpoint_avoided": true,
-    "compact_checkpoint_size_bytes_approx": 451700,
+    "checkpoint_compactness_unknown_count": 1,
     "compact_checkpoint_contents": [
       "displacement_u",
       "load_scale",
       "direct_residual_inf_n",
       "max_translation_m",
       "source_checkpoint_path"
-    ]
+    ],
+    "frontier_chain_full_history_checkpoint_present": true,
+    "full_history_checkpoint_avoided": false,
+    "latest_frontier_checkpoint_compact": true
   },
-  "claim_boundary": {
-    "full_mesh_nonlinear_equilibrium_closed": false,
-    "direct_residual_newton_closed": false,
-    "equilibrium_newton_closed": false,
-    "cpu_diagnostic_only": true,
-    "official_rocm_hip_closure_required": true
-  },
-  "next_actions": [
-    "continue from followup387 compact checkpoint with stronger globalization or updated row target policy",
-    "port residual-row batch replay with state-dependent shell material tangent to a production ROCm/HIP lane",
-    "replace row-only correction with a consistent residual/Jacobian Newton path before claiming commercial closure"
-  ]
+  "summary_line": "G1 shell-material budgeted continuation: PARTIAL | frontier=5.74426714604332 N | gate=0.0005 N | latest=mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+  "target_model": "midas_generator_33.optimized.roundtrip.json"
 }

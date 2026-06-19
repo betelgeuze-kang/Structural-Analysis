@@ -84,7 +84,9 @@ def test_build_packet_groups_ci_blockers_by_owner_and_dedupes_commands(tmp_path:
                 "open_blocker_count": 2,
                 "release_area_gate_ready": False,
                 "full_release_gate_ready": False,
-                "limited_commercial_ready": True,
+                "limited_commercial_milestone_ready": True,
+                "limited_commercial_release_ready": False,
+                "limited_commercial_ready": False,
                 "paid_pilot_candidate": True,
             },
             "rows": [
@@ -107,6 +109,9 @@ def test_build_packet_groups_ci_blockers_by_owner_and_dedupes_commands(tmp_path:
     assert payload["summary"]["expected_intake_contract_pass_count"] == 0
     assert payload["summary"]["expected_intake_open_blocker_count"] == 1
     assert payload["summary"]["expected_intake_lane_request_count"] == 1
+    assert payload["summary"]["limited_commercial_milestone_ready"] is True
+    assert payload["summary"]["limited_commercial_release_ready"] is False
+    assert payload["summary"]["limited_commercial_ready"] is False
     assert packet["owner"] == "release_ci_owner"
     assert packet["blocker_count"] == 2
     assert packet["blocker_ids"] == [
@@ -198,8 +203,200 @@ def test_build_packet_emits_closed_release_owner_packet_when_no_blockers(tmp_pat
     assert payload["summary"]["handoff_contract_pass"] is True
     assert payload["summary"]["evidence_closure_pass"] is True
     assert payload["summary"]["expected_intake_count"] == 0
+    assert payload["summary"]["release_tier_request_count"] == 0
     assert payload["owner_packets"][0]["owner"] == "release_owner"
     assert payload["owner_packets"][0]["blocker_ids"] == []
+
+
+def test_build_packet_maps_open_blockers_to_blocked_release_tiers(tmp_path: Path) -> None:
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY",
+            "summary": {"open_blocker_count": 1},
+            "rows": [_row("basic_ci::pr_ci_30_consecutive_pass_evidence_missing")],
+        },
+    )
+    reviewer_handoff = _write_json(
+        tmp_path / "pm_release_gate_reviewer_handoff.json",
+        {
+            "release_tier_rows": [
+                {
+                    "requirement_id": "release_tier.technical_paid_pilot_candidate",
+                    "status": "pass",
+                    "blockers": [],
+                },
+                {
+                    "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+                    "status": "blocked",
+                    "blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+                    "next_action": "Close release-area blockers.",
+                    "claim_boundary": "Limited Commercial cannot be promoted while blockers remain.",
+                },
+                {
+                    "requirement_id": "release_tier.ga_enterprise_evidence_gate_pass",
+                    "status": "blocked",
+                    "blockers": [
+                        "independent_vv_missing",
+                        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+                    ],
+                    "next_action": "Attach GA signoffs and close release-area blockers.",
+                    "claim_boundary": "GA still requires independent V&V and release-area closure.",
+                },
+            ]
+        },
+    )
+
+    payload = build_packet_module.build_packet(
+        action_register=action_register,
+        reviewer_handoff=reviewer_handoff,
+    )
+    packet = payload["owner_packets"][0]
+    request_row = packet["request_rows"][0]
+
+    assert payload["summary"]["open_blocker_with_release_tier_impact_count"] == 1
+    assert payload["summary"]["blocked_release_tier_impact_count"] == 2
+    assert request_row["blocked_release_tiers"] == [
+        "release_tier.limited_commercial_full_gate_ready",
+        "release_tier.ga_enterprise_evidence_gate_pass",
+    ]
+    assert packet["blocked_release_tiers"] == request_row["blocked_release_tiers"]
+    markdown = build_packet_module._markdown(payload)
+    assert "Release Tiers" in markdown
+    assert "`release_tier.limited_commercial_full_gate_ready`" in markdown
+
+
+def test_build_packet_blocks_when_reviewer_handoff_omits_release_tier_impact(tmp_path: Path) -> None:
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY",
+            "summary": {"open_blocker_count": 1},
+            "rows": [_row("basic_ci::pr_ci_30_consecutive_pass_evidence_missing")],
+        },
+    )
+    reviewer_handoff = _write_json(
+        tmp_path / "pm_release_gate_reviewer_handoff.json",
+        {
+            "release_tier_rows": [
+                {
+                    "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+                    "status": "blocked",
+                    "blockers": ["security::license_status_not_configured"],
+                    "next_action": "Close release-area blockers.",
+                    "claim_boundary": "Limited Commercial cannot be promoted while blockers remain.",
+                }
+            ]
+        },
+    )
+
+    payload = build_packet_module.build_packet(
+        action_register=action_register,
+        reviewer_handoff=reviewer_handoff,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PM_OWNER_EVIDENCE_REQUEST_INCOMPLETE"
+    assert payload["summary"]["release_tier_impact_contract_pass"] is False
+    assert payload["summary"]["missing_release_tier_impact_count"] == 1
+    assert payload["missing_release_tier_impacts"] == [
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    ]
+    assert payload["owner_packets"][0]["request_rows"][0]["blocked_release_tiers"] == []
+
+
+def test_build_packet_surfaces_blocked_release_tier_owner_requests(tmp_path: Path) -> None:
+    ga_intake = _write_json(
+        tmp_path / "ga_enterprise_signoff_intake_packet.json",
+        {
+            "schema_version": "ga-enterprise-signoff-intake-packet.v1",
+            "contract_pass": False,
+            "reason_code": "ERR_GA_ENTERPRISE_SIGNOFF_OWNER_INPUT_REQUIRED",
+            "current_blockers": ["independent_vv_missing"],
+            "signoff_rows": [
+                {
+                    "blocker": "independent_vv_missing",
+                    "signoff": "independent_vv_attestation",
+                    "owner": "independent_vv_owner",
+                    "evidence_status": {"state": "missing_external_signoff_evidence"},
+                    "evidence_path": "implementation/phase1/release_evidence/productization/independent_vv_attestation.json",
+                    "template_path": "docs/templates/independent_vv_attestation.template.json",
+                    "evidence_contract_pass": False,
+                    "next_action": "Attach independent V&V attestation.",
+                    "acceptance": "`independent_vv_attestation.contract_pass == true`",
+                    "required_fields": ["contract_pass", "approval_decision"],
+                    "missing_fields": ["contract_pass", "approval_decision"],
+                }
+            ],
+        },
+    )
+    reviewer_handoff = _write_json(
+        tmp_path / "pm_release_gate_reviewer_handoff.json",
+        {
+            "release_tier_rows": [
+                {
+                    "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+                    "status": "blocked",
+                    "blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+                    "next_action": "Close all release-area blockers before Limited Commercial promotion.",
+                    "claim_boundary": "Limited Commercial cannot be promoted while release-area blockers remain open.",
+                },
+                {
+                    "requirement_id": "release_tier.ga_enterprise_evidence_gate_pass",
+                    "status": "blocked",
+                    "blockers": ["independent_vv_missing"],
+                    "next_action": "Attach independent V&V before GA/Enterprise release.",
+                    "claim_boundary": "GA still requires independent V&V and support evidence.",
+                },
+            ]
+        },
+    )
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY",
+            "summary": {
+                "open_blocker_count": 0,
+                "limited_commercial_milestone_ready": True,
+                "limited_commercial_release_ready": False,
+                "limited_commercial_ready": False,
+                "paid_pilot_candidate": True,
+            },
+            "rows": [],
+        },
+    )
+
+    payload = build_packet_module.build_packet(
+        action_register=action_register,
+        reviewer_handoff=reviewer_handoff,
+        ga_signoff_intake_packet=ga_intake,
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["evidence_closure_pass"] is False
+    assert payload["summary"]["release_tier_owner_packet_count"] == 2
+    assert payload["summary"]["release_tier_request_count"] == 2
+    assert payload["summary"]["release_tier_incomplete_request_count"] == 0
+    assert payload["summary"]["expected_intake_count"] == 1
+    assert payload["summary"]["expected_intake_open_blocker_count"] == 1
+    assert payload["summary"]["expected_intake_signoff_request_count"] == 1
+    assert [packet["owner"] for packet in payload["release_tier_owner_packets"]] == [
+        "release_owner",
+        "ga_release_owner",
+    ]
+    ga_packet = payload["release_tier_owner_packets"][1]
+    assert ga_packet["expected_intake_paths"] == [str(ga_intake)]
+    assert ga_packet["intake_current_blockers"] == ["independent_vv_missing"]
+    assert ga_packet["intake_signoff_request_rows"][0]["signoff"] == "independent_vv_attestation"
+    assert ga_packet["intake_signoff_request_rows"][0]["missing_fields"] == [
+        "contract_pass",
+        "approval_decision",
+    ]
+    markdown = build_packet_module._markdown(payload)
+    assert "## Release Tier Owner Requests" in markdown
+    assert "`release_tier.ga_enterprise_evidence_gate_pass`" in markdown
+    assert "| `independent_vv_attestation` | `independent_vv_owner` |" in markdown
+    assert "independent V&V" in payload["claim_boundary"]
 
 
 def test_build_packet_blocks_when_owner_request_is_incomplete(tmp_path: Path) -> None:
@@ -232,11 +429,14 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     )
     out = tmp_path / "owner-packet.json"
     out_md = tmp_path / "owner-packet.md"
+    reviewer_handoff = _write_json(tmp_path / "empty_handoff.json", {"release_tier_rows": []})
 
     exit_code = build_packet_module.main(
         [
             "--action-register",
             str(action_register),
+            "--reviewer-handoff",
+            str(reviewer_handoff),
             "--out",
             str(out),
             "--out-md",

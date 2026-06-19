@@ -29,9 +29,11 @@ def _pm_report(path: Path, *, blockers: list[str] | None = None) -> Path:
         path,
         {
             "schema_version": "pm-release-gate.v1",
-            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED",
             "paid_pilot_candidate": True,
-            "limited_commercial_ready": True,
+            "limited_commercial_milestone_ready": True,
+            "limited_commercial_release_ready": False,
+            "limited_commercial_ready": False,
             "release_area_gate_ready": False,
             "full_release_gate_ready": False,
             "blockers": [],
@@ -93,6 +95,9 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     assert payload["summary"]["external_owner_input_ready_count"] == 2
     assert payload["summary"]["local_remediation_ready_count"] == 0
     assert payload["summary"]["all_open_blockers_have_handoff"] is True
+    assert payload["summary"]["limited_commercial_milestone_ready"] is True
+    assert payload["summary"]["limited_commercial_release_ready"] is False
+    assert payload["summary"]["limited_commercial_ready"] is False
 
     ci_row = rows["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"]
     assert ci_row["owner"] == "release_ci_owner"

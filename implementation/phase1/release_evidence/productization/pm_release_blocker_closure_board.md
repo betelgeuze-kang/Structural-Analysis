@@ -1,10 +1,11 @@
 # PM Release Blocker Closure Board
 
 - `summary_line`: `PM release blocker closure board: BLOCKED | open=5 | external_owner_ready=5 | handoff_not_ready=0`
-- `pm_summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
 - `contract_pass`: `False`
 - `open_blocker_count`: `5`
 - `all_open_blockers_have_handoff`: `True`
+- `action_register_matches_pm_report`: `True`
 
 | Blocker | Owner | Closure State | Evidence State | Next Action |
 |---|---|---|---|---|

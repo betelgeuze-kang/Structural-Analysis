@@ -50,6 +50,43 @@ exit ${exitCode}
   return commandPath;
 }
 
+function makeModelCheckingMockOpencode(binDir, expectedModel) {
+  const commandPath = path.join(binDir, 'opencode');
+  fs.writeFileSync(
+    commandPath,
+    `#!/usr/bin/env bash
+case "\${1:-}" in
+  models)
+    printf '%s\\n' '${expectedModel}'
+    ;;
+  run)
+    seen=''
+    while [ "$#" -gt 0 ]; do
+      if [ "$1" = '--model' ]; then
+        seen="\${2:-}"
+        break
+      fi
+      shift
+    done
+    if [ "$seen" != '${expectedModel}' ]; then
+      echo 'unexpected model' >&2
+      exit 9
+    fi
+    cat <<'WORKER_OUTPUT'
+${validWorkerOutput}
+WORKER_OUTPUT
+    ;;
+  *)
+    echo 'unexpected opencode args' >&2
+    exit 2
+    ;;
+esac
+`,
+    { mode: 0o755 },
+  );
+  return commandPath;
+}
+
 function wrapperFixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-worker-wrapper-'));
   const binDir = path.join(dir, 'bin');
@@ -61,17 +98,22 @@ function wrapperFixture() {
   return { dir, binDir, outDir, prompt };
 }
 
-function runWrapper(wrapper, fixture) {
+function wrapperEnv(fixture) {
+  return {
+    ...process.env,
+    PATH: `${fixture.binDir}:${process.env.PATH || ''}`,
+    AI_WORKER_OUTPUT_DIR: fixture.outDir,
+    CURSOR_AGENT_MODEL: 'mock',
+    OPENCODE_MODEL: 'mock',
+    AI_WORKER_OPENCODE_MODEL_CHECK: '0',
+  };
+}
+
+function runWrapper(wrapper, fixture, env = wrapperEnv(fixture)) {
   return spawnSync(wrapper, [fixture.prompt], {
     cwd: repoRoot,
     encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATH: `${fixture.binDir}:${process.env.PATH || ''}`,
-      AI_WORKER_OUTPUT_DIR: fixture.outDir,
-      CURSOR_AGENT_MODEL: 'mock',
-      OPENCODE_MODEL: 'mock',
-    },
+    env,
   });
 }
 
@@ -158,6 +200,23 @@ spawnBackedTest('opencode wrapper prints only validated summaries and removes va
   assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.raw.md')).length, 0);
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.summary.md')).length, 1);
+});
+
+spawnBackedTest('opencode wrapper defaults to MiniMax M3 model', () => {
+  const fixture = wrapperFixture();
+  const expectedModel = 'opencode-go/minimax-m3';
+  makeModelCheckingMockOpencode(fixture.binDir, expectedModel);
+  const env = wrapperEnv(fixture);
+  delete env.OPENCODE_MODEL;
+  delete env.AI_WORKER_OPENCODE_MODEL;
+  env.AI_WORKER_OPENCODE_MODEL_CHECK = '1';
+  env.AI_WORKER_OPENCODE_NETWORK_PREFLIGHT = '0';
+  env.AI_WORKER_OPENCODE_XDG_DATA_HOME = path.join(fixture.dir, 'xdg');
+
+  const result = runWrapper(opencodeWrapper, fixture, env);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
 });
 
 spawnBackedTest('wrapper rejects invalid worker output without printing raw output', () => {

@@ -1,7 +1,7 @@
 # PM Release Gate Reviewer Handoff
 
-- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=5 | incomplete=0`
-- `pm_summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
+- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=5 | incomplete=0 | release_tiers=2/4`
+- `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
 - `contract_pass`: `True`
 
 | Blocker | Owner | Closure | Verdict Change Conditions |
@@ -11,6 +11,15 @@
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_observation_missing_or_failed` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_observation_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `release_area.ux` status is `pass` in `pm_release_gate_completion_audit.json`<br>`ux::human_new_user_30min_sample_evidence_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.ux::human_new_user_sample_30min_evidence_present` is `true` in `pm_release_gate_report.json`<br>`release_area.ux::human_new_user_sample_30min_pass` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `human_new_user_observation_pass`, `human_new_user_sample_30min_evidence_present`, `human_new_user_sample_30min_pass` |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `release_area.security` status is `pass` in `pm_release_gate_completion_audit.json`<br>`security::license_status_not_configured` is absent from `pm_release_gate_report.json.release_area_blockers`<br>`release_area.security::license_status_configured_pass` is `true` in `pm_release_gate_report.json`<br>`release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`<br>Current false audit check(s): `license_status_configured_pass` |
+
+## Release Tier Boundaries
+
+| Release Tier | Status | Blockers | Next Action | Claim Boundary |
+|---|---|---|---|---|
+| `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `pass` | none | none | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
+| `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
+| `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
@@ -221,4 +230,4 @@ Verdict change conditions:
 - `release_area.security::license_status_closure_report_present` is `true` in `pm_release_gate_report.json`
 - Current false audit check(s): `license_status_configured_pass`
 
-This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, or other external evidence into a release pass.
+This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.

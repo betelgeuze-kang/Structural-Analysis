@@ -141,6 +141,31 @@ def _handoff_row(
     }
 
 
+def _release_tier_rows(audit_rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for source in audit_rows.values():
+        if str(source.get("group", "")) != "release_tier":
+            continue
+        requirement_id = str(source.get("requirement_id", ""))
+        rows.append(
+            {
+                "requirement_id": requirement_id,
+                "title": str(source.get("title", "")),
+                "status": str(source.get("status", "")),
+                "pass": bool(source.get("pass", False)),
+                "blockers": [str(item) for item in _as_list(source.get("blockers"))],
+                "next_action": str(source.get("next_action", "")),
+                "claim_boundary": str(source.get("claim_boundary", "")),
+                "evidence_artifact_paths": {
+                    str(key): str(value)
+                    for key, value in _as_dict(source.get("evidence_artifacts")).items()
+                    if str(value)
+                },
+            }
+        )
+    return rows
+
+
 def build_handoff(
     *,
     pm_report: Path = DEFAULT_PM_REPORT,
@@ -156,8 +181,14 @@ def build_handoff(
         for row in _as_list(closure_payload.get("rows"))
         if isinstance(row, dict)
     ]
+    release_tier_rows = _release_tier_rows(audit_rows)
     incomplete_rows = [row["blocker_id"] for row in rows if not _required_fields_present(row)]
-    contract_pass = bool(not incomplete_rows)
+    incomplete_release_tiers = [
+        row["requirement_id"]
+        for row in release_tier_rows
+        if not row["pass"] and (not row["next_action"] or not row["claim_boundary"])
+    ]
+    contract_pass = bool(not incomplete_rows and not incomplete_release_tiers)
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -170,25 +201,38 @@ def build_handoff(
         "summary_line": (
             "PM release gate reviewer handoff: "
             f"{'PASS' if contract_pass else 'BLOCKED'} | "
-            f"open_blockers={len(rows)} | incomplete={len(incomplete_rows)}"
+            f"open_blockers={len(rows)} | incomplete={len(incomplete_rows)} | "
+            f"release_tiers={sum(1 for row in release_tier_rows if row['pass'])}/{len(release_tier_rows)}"
         ),
         "summary": {
             "open_blocker_count": len(rows),
             "handoff_complete_count": len(rows) - len(incomplete_rows),
             "handoff_incomplete_count": len(incomplete_rows),
+            "release_tier_count": len(release_tier_rows),
+            "release_tier_pass_count": sum(1 for row in release_tier_rows if row["pass"]),
+            "release_tier_blocked_count": sum(1 for row in release_tier_rows if not row["pass"]),
+            "release_tier_handoff_incomplete_count": len(incomplete_release_tiers),
             "external_input_required_count": sum(1 for row in rows if row["external_input_required"]),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "release_area_gate_ready": bool(pm_payload.get("release_area_gate_ready", False)),
             "full_release_gate_ready": bool(pm_payload.get("full_release_gate_ready", False)),
+            "limited_commercial_milestone_ready": bool(
+                pm_payload.get("limited_commercial_milestone_ready", False)
+            ),
+            "limited_commercial_release_ready": bool(
+                pm_payload.get("limited_commercial_release_ready", pm_payload.get("limited_commercial_ready", False))
+            ),
             "limited_commercial_ready": bool(pm_payload.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(pm_payload.get("paid_pilot_candidate", False)),
         },
         "incomplete_blockers": incomplete_rows,
+        "incomplete_release_tiers": incomplete_release_tiers,
+        "release_tier_rows": release_tier_rows,
         "rows": rows,
         "claim_boundary": (
             "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not "
-            "convert missing tracked CI streak, human UX observation, license approval, or other external evidence "
-            "into a release pass."
+            "convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, "
+            "or other external evidence into a release pass."
         ),
     }
 
@@ -212,6 +256,25 @@ def _markdown(payload: dict[str, Any]) -> str:
     if not payload["rows"]:
         lines.append("| none | `release_owner` | `closed` | No open PM release blockers. |")
     lines.append("")
+    release_tier_rows = payload.get("release_tier_rows", [])
+    if release_tier_rows:
+        lines.extend(
+            [
+                "## Release Tier Boundaries",
+                "",
+                "| Release Tier | Status | Blockers | Next Action | Claim Boundary |",
+                "|---|---|---|---|---|",
+            ]
+        )
+        for row in release_tier_rows:
+            blockers = ", ".join(f"`{item}`" for item in row.get("blockers", [])) or "none"
+            next_action = str(row.get("next_action", "")) or "none"
+            claim_boundary = str(row.get("claim_boundary", "")) or "none"
+            lines.append(
+                f"| `{row['requirement_id']}` {row['title']} | `{row['status']}` | "
+                f"{blockers} | {next_action} | {claim_boundary} |"
+            )
+        lines.append("")
     if payload["rows"]:
         lines.extend(["## Blocker Details", ""])
     for row in payload["rows"]:

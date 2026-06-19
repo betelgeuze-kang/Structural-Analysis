@@ -98,7 +98,7 @@ def probe_ml_surrogate_production_gate() -> dict[str, Any]:
         and solver_fallback_ready
         and hard_gate_bypass_prevented
     )
-    wired = bool(not forced_disabled and activation_enabled and checkpoint_validated)
+    wired = bool(opt_in and not forced_disabled and activation_enabled and checkpoint_validated)
     if wired:
         status = "production_ready_shadow_solver_gated"
     elif forced_disabled:

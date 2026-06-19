@@ -142,6 +142,13 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "schema_version": "pm-release-gate-reviewer-handoff.v1",
                 "contract_pass": True,
                 "summary": {"open_blocker_count": 2, "handoff_incomplete_count": 0},
+                "release_tier_rows": [
+                    {
+                        "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+                        "status": "blocked",
+                        "blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+                    }
+                ],
                 "rows": [
                     {
                         "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
@@ -155,11 +162,24 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
             {
                 "schema_version": "pm-owner-evidence-request-packet.v1",
                 "contract_pass": True,
-                "summary": {"owner_packet_count": 1, "open_blocker_count": 2},
+                "summary": {
+                    "owner_packet_count": 1,
+                    "open_blocker_count": 1,
+                    "open_blocker_with_release_tier_impact_count": 1,
+                    "blocked_release_tier_impact_count": 1,
+                    "missing_release_tier_impact_count": 0,
+                    "release_tier_impact_contract_pass": True,
+                },
                 "owner_packets": [
                     {
                         "owner": "release_ci_owner",
                         "blocker_ids": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+                    }
+                ],
+                "release_tier_owner_packets": [
+                    {
+                        "owner": "release_owner",
+                        "requirement_ids": ["release_tier.limited_commercial_full_gate_ready"],
                     }
                 ],
             },
@@ -326,6 +346,52 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "summary": {"artifact_count": 7, "command_count": 42, "violation_count": 0},
             },
         ),
+        "commercial_gap_ledger_status": _write_json(
+            tmp_path / "commercial-gap-ledger-status.json",
+            {
+                "schema_version": "commercial-gap-ledger-status.v1",
+                "status": "open",
+                "full_gap_ledger_ready": False,
+                "commercial_solver_gap_ready": False,
+                "ai_engine_gap_ready": True,
+                "summary": {
+                    "total_count": 20,
+                    "closed_count": 17,
+                    "partial_count": 2,
+                    "external_blocked_count": 1,
+                },
+                "next_locally_closable_gaps": ["G1"],
+                "blockers": ["G1:direct_residual_newton_not_closed"],
+            },
+        ),
+        "gap_closure_status": _write_json(
+            tmp_path / "gap-closure-status.json",
+            {
+                "schema_version": "gap-closure-status.v1",
+                "full_gap_ledger_status": "open",
+                "full_gap_ledger_ready": False,
+                "full_gap_ledger_summary": {
+                    "total_count": 20,
+                    "closed_count": 17,
+                    "partial_count": 2,
+                    "external_blocked_count": 1,
+                },
+                "next_locally_closable_gaps": ["G1"],
+            },
+        ),
+        "ai_orchestration_preflight_report": _write_json(
+            tmp_path / "ai-orchestration-preflight-report.json",
+            {
+                "schema_version": "ai-orchestration-preflight-report.v1",
+                "contract_pass": False,
+                "blockers": ["opencode_worker_configured_model_unavailable"],
+                "summary": {
+                    "cursor_worker_cli": "cursor-agent",
+                    "opencode_configured_model": "opencode-go/minimax-m3",
+                    "opencode_configured_model_available": False,
+                },
+            },
+        ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
@@ -349,11 +415,33 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert payload["checks"]["audit_event_digest_pass"] is True
     assert payload["checks"]["bundle_roundtrip_test_pass"] is True
     assert payload["checks"]["archive_roundtrip_test_pass"] is True
+    assert payload["checks"]["pm_failure_bundle_coverage_pass"] is True
     assert payload["audit_digest"]["event_count"] == 1
     assert payload["blockers"] == []
+    assert payload["pm_failure_bundle_coverage"]["coverage_pass"] is True
+    assert payload["pm_failure_bundle_coverage"]["summary"]["open_blocker_count"] == 1
+    assert payload["pm_failure_bundle_coverage"]["summary"]["release_tier_rows_present"] is True
+    assert payload["pm_failure_bundle_coverage"]["summary"]["release_tier_owner_packets_present"] is True
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_tier_impact_contract_pass"] is True
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_missing_release_tier_impact_count"] == 0
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_blocked_release_tier_impact_count"] == 1
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_tier_impact_complete"] is True
+    required_failure_sections = {
+        row["label"]: row["present"]
+        for row in payload["pm_failure_bundle_coverage"]["required_section_rows"]
+    }
+    assert required_failure_sections["pm_release_blocker_action_register"] is True
+    assert required_failure_sections["pm_release_gate_reviewer_handoff"] is True
+    assert required_failure_sections["pm_owner_evidence_request_packet"] is True
+    assert required_failure_sections["pm_release_reproduction_command_audit"] is True
+    assert required_failure_sections["paid_pilot_scope_guard_report"] is True
+    assert required_failure_sections["commercial_gap_ledger_status"] is True
+    assert required_failure_sections["gap_closure_status"] is True
 
     index_path = Path(payload["bundle_index"]["path"])
     assert index_path.exists()
+    coverage_path = Path(payload["pm_failure_bundle_coverage"]["bundle_path"])
+    assert coverage_path.exists()
     archive_path = Path(payload["export_archive"]["path"])
     assert archive_path.exists()
     assert payload["export_archive"]["member_count"] >= payload["bundle_index"]["artifact_count"]
@@ -363,6 +451,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "support_bundle_index.json" in members
         assert "audit_digest.json" in members
         assert "license_status.json" in members
+        assert "pm_failure_bundle_coverage.json" in members
         assert "redacted/ci_streak_manifest.json" in members
         assert "redacted/github_actions_ci_streak_evidence.json" in members
         assert "redacted/pm_release_blocker_closure_board.json" in members
@@ -377,6 +466,9 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
         assert "redacted/ux_new_user_observation_template.json" in members
         assert "redacted/template_evidence_safety_report.json" in members
         assert "redacted/pm_release_reproduction_command_audit.json" in members
+        assert "redacted/commercial_gap_ledger_status.json" in members
+        assert "redacted/gap_closure_status.json" in members
+        assert "redacted/ai_orchestration_preflight_report.json" in members
         assert "license_status.template.json" not in members
     assert "project_ops_deployment_drill" in payload["required_sections"]
     assert "viewer_performance_budget_manifest" in payload["required_sections"]
@@ -415,6 +507,9 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "ux_new_user_observation_template" in payload["optional_sections"]
     assert "template_evidence_safety_report" in payload["optional_sections"]
     assert "pm_release_reproduction_command_audit" in payload["optional_sections"]
+    assert "commercial_gap_ledger_status" in payload["optional_sections"]
+    assert "gap_closure_status" in payload["optional_sections"]
+    assert "ai_orchestration_preflight_report" in payload["optional_sections"]
     redacted_pm_blockers = Path(payload["optional_sections"]["pm_release_blocker_action_register"]).read_text(
         encoding="utf-8"
     )
@@ -518,6 +613,19 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     ).read_text(encoding="utf-8")
     assert "pm-release-reproduction-command-audit.v1" in redacted_reproduction_audit
     assert "commands=42" in redacted_reproduction_audit
+    redacted_commercial_gap = Path(payload["optional_sections"]["commercial_gap_ledger_status"]).read_text(
+        encoding="utf-8"
+    )
+    assert "commercial-gap-ledger-status.v1" in redacted_commercial_gap
+    assert "direct_residual_newton_not_closed" in redacted_commercial_gap
+    redacted_gap_closure = Path(payload["optional_sections"]["gap_closure_status"]).read_text(encoding="utf-8")
+    assert "gap-closure-status.v1" in redacted_gap_closure
+    assert '"full_gap_ledger_ready": false' in redacted_gap_closure
+    redacted_ai_orchestration = Path(payload["optional_sections"]["ai_orchestration_preflight_report"]).read_text(
+        encoding="utf-8"
+    )
+    assert "ai-orchestration-preflight-report.v1" in redacted_ai_orchestration
+    assert "opencode_worker_configured_model_unavailable" in redacted_ai_orchestration
     redacted_preflight = Path(payload["required_sections"]["p1_strict_evidence_preflight"]).read_text(
         encoding="utf-8"
     )
@@ -536,3 +644,24 @@ def test_support_bundle_blocks_when_required_artifact_missing(tmp_path: Path) ->
 
     assert payload["contract_pass"] is False
     assert "required_artifact_missing:runtime_probe" in payload["blockers"]
+
+
+def test_support_bundle_blocks_when_owner_packet_tier_impact_is_incomplete(tmp_path: Path) -> None:
+    inputs = _support_inputs(tmp_path)
+    owner_packet_path = inputs["pm_owner_evidence_request_packet"]
+    owner_packet = json.loads(owner_packet_path.read_text(encoding="utf-8"))
+    owner_packet["summary"]["release_tier_impact_contract_pass"] = False
+    owner_packet["summary"]["missing_release_tier_impact_count"] = 1
+    owner_packet_path.write_text(json.dumps(owner_packet, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    payload = build_support_bundle.build_support_bundle(
+        bundle_dir=tmp_path / "bundle",
+        **inputs,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["pm_failure_bundle_coverage_pass"] is False
+    assert "pm_failure_bundle_coverage_incomplete" in payload["blockers"]
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_tier_impact_contract_pass"] is False
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_missing_release_tier_impact_count"] == 1
+    assert payload["pm_failure_bundle_coverage"]["summary"]["owner_packet_tier_impact_complete"] is False

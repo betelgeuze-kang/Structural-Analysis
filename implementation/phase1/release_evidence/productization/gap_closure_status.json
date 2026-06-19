@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-17T16:10:41.155089+00:00",
+  "generated_at": "2026-06-18T15:46:30.760914+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
@@ -21,8 +21,6 @@
   },
   "full_gap_ledger_blockers": [
     "G1:full_mesh_nonlinear_equilibrium_not_closed",
-    "G1:direct_residual_newton_not_closed",
-    "G1:equilibrium_newton_not_closed",
     "G6:external_receipt_or_closure_pending:hardest_external_10case",
     "G6:external_receipt_or_closure_pending:korean_public_structures",
     "G6:external_receipt_or_closure_pending:peer_spd_hinge",
@@ -117,9 +115,7 @@
       "closed": false,
       "locally_closable": true,
       "blockers": [
-        "full_mesh_nonlinear_equilibrium_not_closed",
-        "direct_residual_newton_not_closed",
-        "equilibrium_newton_not_closed"
+        "full_mesh_nonlinear_equilibrium_not_closed"
       ],
       "next_gate": "consistent full-load Newton/Jacobian plus material Newton closure",
       "claim_boundary": "G1 remains partial: current evidence includes representative component nonlinear solve, full-line/frame elastic and linearized-geometric sparse equilibrium, scaled P-Delta/frontier diagnostics, shell/material tangent probes, and direct-residual descent diagnostics. It does not close full-mesh full-load 3D nonlinear equilibrium until physical direct residual, increment, and full-load Newton/Jacobian gates pass without fallback."

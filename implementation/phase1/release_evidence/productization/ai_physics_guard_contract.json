@@ -1,6 +1,6 @@
 {
   "schema_version": "ai-physics-guard-contract.v1",
-  "generated_at": "2026-06-05T13:34:30.914285+00:00",
+  "generated_at": "2026-06-18T15:01:37.002051+00:00",
   "status": "contract_ready_model_not_promoted",
   "production_gate_ready": false,
   "required_gates": [

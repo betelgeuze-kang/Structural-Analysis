@@ -114,9 +114,11 @@ def _run_child_subprocess(
     checkpoint_npz: Path,
     child_json: Path,
     child_checkpoint: Path,
+    compact_output_final_checkpoint: bool,
     factor: float,
     preconditioner_input_scale: float,
     shell_pressure_load_path_policy: str,
+    apply_shell_material_tangent: bool,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
     matrix_free_global_krylov_max_iterations: int,
@@ -182,6 +184,12 @@ def _run_child_subprocess(
         str(float(matrix_free_global_krylov_min_relative_improvement)),
         "--allow-cpu-diagnostic",
     ]
+    if compact_output_final_checkpoint:
+        insertion = cmd.index("--shell-pressure-load-path-policy")
+        cmd[insertion:insertion] = ["--compact-output-final-checkpoint"]
+    if apply_shell_material_tangent:
+        insertion = cmd.index("--residual-tolerance-n")
+        cmd[insertion:insertion] = ["--apply-shell-material-tangent"]
     if enable_secant_family_seed:
         cmd.extend(
             [
@@ -234,6 +242,7 @@ def _run_child_subprocess(
             },
             "tangent_regularization_factor": float(factor),
             "preconditioner_input_scale": float(preconditioner_input_scale),
+            "apply_shell_material_tangent": bool(apply_shell_material_tangent),
             "matrix_free_global_krylov": {
                 "enabled": True,
                 "attempted": True,
@@ -291,6 +300,7 @@ def run_adaptive_preconditioned_global_newton(
     checkpoint_npz: Path = DEFAULT_CHECKPOINT,
     output_json: Path | None = None,
     output_final_checkpoint_npz: Path | None = None,
+    compact_output_final_checkpoint: bool = False,
     child_output_dir: Path | None = None,
     tangent_regularization_factors: tuple[float, ...] = (1.0e-6, 3.0e-6),
     max_controller_steps: int = 1,
@@ -322,6 +332,7 @@ def run_adaptive_preconditioned_global_newton(
     ),
     secant_family_min_relative_improvement: float = 1.0e-6,
     shell_pressure_load_path_policy: str = "all_components",
+    apply_shell_material_tangent: bool = False,
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_controller_runtime_seconds: float | None = None,
@@ -381,9 +392,11 @@ def run_adaptive_preconditioned_global_newton(
                         checkpoint_npz=current_checkpoint,
                         child_json=child_json,
                         child_checkpoint=child_checkpoint,
+                        compact_output_final_checkpoint=bool(compact_output_final_checkpoint),
                         factor=float(factor),
                         preconditioner_input_scale=float(preconditioner_input_scale),
                         shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+                        apply_shell_material_tangent=bool(apply_shell_material_tangent),
                         residual_tolerance_n=residual_tolerance_n,
                         relative_increment_tolerance=relative_increment_tolerance,
                         matrix_free_global_krylov_max_iterations=(
@@ -423,7 +436,9 @@ def run_adaptive_preconditioned_global_newton(
                         checkpoint_npz=current_checkpoint,
                         output_json=child_json,
                         output_final_checkpoint_npz=child_checkpoint,
+                        compact_output_final_checkpoint=bool(compact_output_final_checkpoint),
                         shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+                        apply_shell_material_tangent=bool(apply_shell_material_tangent),
                         residual_tolerance_n=residual_tolerance_n,
                         relative_increment_tolerance=relative_increment_tolerance,
                         max_trust_iterations=0,
@@ -640,6 +655,8 @@ def run_adaptive_preconditioned_global_newton(
                 secant_family_min_relative_improvement
             ),
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "apply_shell_material_tangent": bool(apply_shell_material_tangent),
+            "compact_output_final_checkpoint": bool(compact_output_final_checkpoint),
             "runtime_budget_seconds": runtime_budget_seconds,
             "runtime_budget_exceeded": bool(runtime_budget_exceeded),
             "child_timeout_seconds": (
@@ -672,6 +689,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
     parser.add_argument("--output-json", type=Path, default=None)
     parser.add_argument("--output-final-checkpoint-npz", type=Path, default=None)
+    parser.add_argument(
+        "--compact-output-final-checkpoint",
+        action="store_true",
+        help="Forward compact checkpoint writing to child direct-residual probes.",
+    )
     parser.add_argument("--child-output-dir", type=Path, default=None)
     parser.add_argument(
         "--adaptive-tangent-regularization-factors",
@@ -726,6 +748,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         choices=("all_components", "attached_components_only", "structural_components_only"),
         default="all_components",
     )
+    parser.add_argument(
+        "--apply-shell-material-tangent",
+        action="store_true",
+        help=(
+            "Forward the shell-material tangent/residual mode to child direct-residual "
+            "probes. Required when continuing shell-material G1 frontier checkpoints."
+        ),
+    )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
     parser.add_argument(
@@ -769,6 +799,7 @@ def main(argv: list[str] | None = None) -> int:
         checkpoint_npz=args.checkpoint_npz,
         output_json=args.output_json,
         output_final_checkpoint_npz=args.output_final_checkpoint_npz,
+        compact_output_final_checkpoint=args.compact_output_final_checkpoint,
         child_output_dir=args.child_output_dir,
         tangent_regularization_factors=_parse_float_csv(
             args.adaptive_tangent_regularization_factors
@@ -801,6 +832,7 @@ def main(argv: list[str] | None = None) -> int:
         secant_family_alpha_values=_parse_float_csv(args.secant_family_alpha_values),
         secant_family_min_relative_improvement=args.secant_family_min_relative_improvement,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+        apply_shell_material_tangent=args.apply_shell_material_tangent,
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_controller_runtime_seconds=args.max_controller_runtime_seconds,

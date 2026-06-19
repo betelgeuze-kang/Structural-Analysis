@@ -1,6 +1,6 @@
 {
   "schema_version": "load-stage-semantics-contract.v1",
-  "generated_at": "2026-06-09T15:42:17.513760+00:00",
+  "generated_at": "2026-06-18T14:53:46.072305+00:00",
   "status": "ready",
   "typed_runtime_entities_ready": true,
   "stage_semantics_ready": true,

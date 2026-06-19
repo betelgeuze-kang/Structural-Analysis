@@ -137,6 +137,62 @@ def test_shell_material_rowcorr_budget_promotes_completed_child(
     assert final_checkpoint.read_bytes() == b"checkpoint"
 
 
+def test_shell_material_rowcorr_budget_uses_controller_json_as_seed(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    def completed_run(command, **_kwargs):
+        output_path = Path(command[command.index("--output-json") + 1])
+        output_path.write_text(
+            json.dumps(
+                {
+                    "status": "partial",
+                    "base_direct_residual": {"direct_residual_inf_n": 8.0},
+                    "final_direct_residual": {
+                        "direct_residual_inf_n": 7.0,
+                        "residual_gate_passed": False,
+                    },
+                    "current_tangent_residual_row_correction": {
+                        "accepted": True,
+                        "promotion_count": 1,
+                        "stop_reason": "max_promotions_exhausted",
+                    },
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return controller.subprocess.CompletedProcess(command, 0, stdout="", stderr="")
+
+    monkeypatch.setattr(controller.subprocess, "run", completed_run)
+    seed = tmp_path / "seed_controller.json"
+    seed.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+                "status": "partial",
+                "initial_frontier_direct_residual_inf_n": 9.0,
+                "final_direct_residual_inf_n": 8.0,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = controller.run_shell_material_rowcorr_budget_controller(
+        seed_probe_json=seed,
+        output_json=tmp_path / "controller.json",
+        child_output_dir=tmp_path / "children",
+        python_exe=tmp_path / "python",
+        child_timeout_seconds=1.0,
+    )
+
+    assert payload["seed_probe"]["final_direct_residual_inf_n"] == 8.0
+    assert payload["initial_frontier_direct_residual_inf_n"] == 8.0
+    assert payload["rows"][0]["seed_frontier_direct_residual_inf_n"] == 8.0
+    assert payload["rows"][0]["frontier_improvement_inf_n"] == 1.0
+
+
 def test_shell_material_rowcorr_budget_child_timeout_writes_receipt(
     monkeypatch,
     tmp_path: Path,

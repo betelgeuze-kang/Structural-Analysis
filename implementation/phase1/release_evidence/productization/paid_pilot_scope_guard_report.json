@@ -15,6 +15,27 @@
       "required_pass": true
     },
     {
+      "contract_pass": true,
+      "label": "pm_owner_evidence_request_packet",
+      "path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+      "present": true,
+      "required_pass": true
+    },
+    {
+      "contract_pass": true,
+      "label": "pm_release_gate_reviewer_handoff",
+      "path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json",
+      "present": true,
+      "required_pass": true
+    },
+    {
+      "contract_pass": true,
+      "label": "pm_release_reproduction_command_audit",
+      "path": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
+      "present": true,
+      "required_pass": true
+    },
+    {
       "contract_pass": false,
       "label": "pm_release_blocker_action_register",
       "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -47,12 +68,72 @@
   "checks": {
     "all_required_scope_terms_present": true,
     "evidence_package_artifacts_present": true,
+    "no_prohibited_scope_claims_present": true,
     "required_evidence_package_artifacts_green": true,
-    "scope_source_present": true
+    "scope_source_present": true,
+    "support_bundle_required_sections_present": true
   },
   "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T17:32:48.419307+00:00",
+  "forbidden_claim_rows": [
+    {
+      "check": "limited_commercial_ready_true",
+      "pass": true,
+      "prohibited_phrases": [
+        "limited_commercial_ready=true",
+        "`limited_commercial_ready`: `true`",
+        "\"limited_commercial_ready\": true"
+      ]
+    },
+    {
+      "check": "limited_commercial_release_ready_true",
+      "pass": true,
+      "prohibited_phrases": [
+        "limited_commercial_release_ready=true",
+        "`limited_commercial_release_ready`: `true`",
+        "\"limited_commercial_release_ready\": true"
+      ]
+    },
+    {
+      "check": "ga_enterprise_ready_true",
+      "pass": true,
+      "prohibited_phrases": [
+        "ga_enterprise_ready=true",
+        "`ga_enterprise_ready`: `true`",
+        "\"ga_enterprise_ready\": true"
+      ]
+    },
+    {
+      "check": "full_commercial_replacement_ready_true",
+      "pass": true,
+      "prohibited_phrases": [
+        "full_commercial_replacement_ready=true",
+        "`full_commercial_replacement_ready`: `true`",
+        "\"full_commercial_replacement_ready\": true"
+      ]
+    },
+    {
+      "check": "engineer_of_record_replacement",
+      "pass": true,
+      "prohibited_phrases": [
+        "engineer-of-record replacement ready",
+        "structural engineer replacement ready",
+        "구조기술사 검토 대체",
+        "기술사 검토 대체"
+      ]
+    },
+    {
+      "check": "autonomous_approval",
+      "pass": true,
+      "prohibited_phrases": [
+        "autonomous approval",
+        "automatic permit approval",
+        "인허가 자동 승인",
+        "자동 승인"
+      ]
+    }
+  ],
+  "generated_at": "2026-06-18T15:01:37.481531+00:00",
   "reason_code": "PASS",
   "schema_version": "paid-pilot-scope-guard-report.v1",
   "scope_term_rows": [
@@ -102,12 +183,33 @@
     }
   ],
   "summary": {
-    "evidence_artifact_count": 6,
-    "evidence_artifact_present_count": 6,
+    "evidence_artifact_count": 9,
+    "evidence_artifact_present_count": 9,
     "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package.",
+    "prohibited_scope_claim_count": 6,
+    "prohibited_scope_claim_present_count": 0,
     "required_scope_term_count": 5,
     "required_scope_term_pass_count": 5,
-    "scope_source": "docs/pm-release-gate-milestones.md"
+    "scope_source": "docs/pm-release-gate-milestones.md",
+    "support_bundle_required_section_count": 3,
+    "support_bundle_required_section_present_count": 3
   },
-  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=6/6"
+  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+  "support_bundle_section_rows": [
+    {
+      "label": "pm_owner_evidence_request_packet",
+      "present": true,
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json"
+    },
+    {
+      "label": "pm_release_gate_reviewer_handoff",
+      "present": true,
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json"
+    },
+    {
+      "label": "pm_release_reproduction_command_audit",
+      "present": true,
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json"
+    }
+  ]
 }

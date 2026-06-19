@@ -1,13 +1,20 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
-- `limited_commercial_ready`: `True`
+- `limited_commercial_milestone_ready`: `True`
+- `limited_commercial_ready`: `False`
+- `limited_commercial_release_ready`: `False`
 - `release_area_gate_ready`: `False`
 - `full_release_gate_ready`: `False`
 - `ga_enterprise_ready`: `False`
 - `cursor_opencode_worker_preflight_pass`: `True`
+- `full_gap_ledger_status`: `open`
+- `commercial_gap_status`: `open`
+- `commercial_solver_gap_ready`: `False`
+- `ai_engine_gap_ready`: `True`
+- `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |
 |---|---|---|

@@ -148,6 +148,8 @@ def test_materialize_p1_operational_queues_writes_backlog_and_packet_templates(t
             str(external),
             "--external-benchmark-submission-updates",
             str(tmp_path / "missing_eb_updates.json"),
+            "--residual-holdout-closure-updates",
+            str(tmp_path / "missing_rh_updates.json"),
             "--p1-benchmark-breadth-status",
             str(p1_breadth),
             "--out",

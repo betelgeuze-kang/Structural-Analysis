@@ -19,6 +19,15 @@ DEFAULT_SUPPORT_BUNDLE = Path("implementation/phase1/support_bundle_manifest.jso
 DEFAULT_PM_BLOCKER_REGISTER = Path(
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
 )
+DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
+)
+DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
+)
+DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
+)
 DEFAULT_CI_STREAK_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"
 )
@@ -43,6 +52,47 @@ REQUIRED_SCOPE_TERMS = {
         "unsupported or missing evidence",
     ],
 }
+
+PROHIBITED_SCOPE_CLAIMS = {
+    "limited_commercial_ready_true": [
+        "limited_commercial_ready=true",
+        "`limited_commercial_ready`: `true`",
+        '"limited_commercial_ready": true',
+    ],
+    "limited_commercial_release_ready_true": [
+        "limited_commercial_release_ready=true",
+        "`limited_commercial_release_ready`: `true`",
+        '"limited_commercial_release_ready": true',
+    ],
+    "ga_enterprise_ready_true": [
+        "ga_enterprise_ready=true",
+        "`ga_enterprise_ready`: `true`",
+        '"ga_enterprise_ready": true',
+    ],
+    "full_commercial_replacement_ready_true": [
+        "full_commercial_replacement_ready=true",
+        "`full_commercial_replacement_ready`: `true`",
+        '"full_commercial_replacement_ready": true',
+    ],
+    "engineer_of_record_replacement": [
+        "engineer-of-record replacement ready",
+        "structural engineer replacement ready",
+        "구조기술사 검토 대체",
+        "기술사 검토 대체",
+    ],
+    "autonomous_approval": [
+        "autonomous approval",
+        "automatic permit approval",
+        "인허가 자동 승인",
+        "자동 승인",
+    ],
+}
+
+REQUIRED_SUPPORT_BUNDLE_SECTIONS = (
+    "pm_owner_evidence_request_packet",
+    "pm_release_gate_reviewer_handoff",
+    "pm_release_reproduction_command_audit",
+)
 
 
 def _now_utc_iso() -> str:
@@ -89,12 +139,29 @@ def _artifact_row(label: str, path: Path, *, required_pass: bool = False) -> dic
     }
 
 
+def _support_bundle_section_rows(support_bundle: Path) -> list[dict[str, Any]]:
+    payload = _load_json(support_bundle)
+    optional_sections = payload.get("optional_sections")
+    optional_sections = optional_sections if isinstance(optional_sections, dict) else {}
+    return [
+        {
+            "label": label,
+            "present": bool(str(optional_sections.get(label, "") or "")),
+            "redacted_bundle_path": str(optional_sections.get(label, "") or ""),
+        }
+        for label in REQUIRED_SUPPORT_BUNDLE_SECTIONS
+    ]
+
+
 def build_report(
     *,
     scope_source: Path = DEFAULT_SCOPE_SOURCE,
     pm_release_gate_report: Path = DEFAULT_PM_RELEASE_GATE_REPORT,
     support_bundle: Path = DEFAULT_SUPPORT_BUNDLE,
     pm_blocker_register: Path = DEFAULT_PM_BLOCKER_REGISTER,
+    pm_owner_evidence_request_packet: Path = DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET,
+    pm_release_gate_reviewer_handoff: Path = DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF,
+    pm_release_reproduction_command_audit: Path = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     ci_streak_intake_packet: Path = DEFAULT_CI_STREAK_INTAKE_PACKET,
     license_status_intake_packet: Path = DEFAULT_LICENSE_STATUS_INTAKE_PACKET,
     ga_enterprise_readiness_report: Path = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
@@ -108,16 +175,36 @@ def build_report(
         }
         for check, phrases in REQUIRED_SCOPE_TERMS.items()
     ]
+    forbidden_claim_rows = [
+        {
+            "check": check,
+            "pass": not _contains_any(scope_text, phrases),
+            "prohibited_phrases": phrases,
+        }
+        for check, phrases in PROHIBITED_SCOPE_CLAIMS.items()
+    ]
     artifact_rows = [
         _artifact_row("pm_release_gate_report", pm_release_gate_report),
         _artifact_row("support_bundle_manifest", support_bundle, required_pass=True),
+        _artifact_row("pm_owner_evidence_request_packet", pm_owner_evidence_request_packet, required_pass=True),
+        _artifact_row("pm_release_gate_reviewer_handoff", pm_release_gate_reviewer_handoff, required_pass=True),
+        _artifact_row(
+            "pm_release_reproduction_command_audit",
+            pm_release_reproduction_command_audit,
+            required_pass=True,
+        ),
         _artifact_row("pm_release_blocker_action_register", pm_blocker_register),
         _artifact_row("ci_streak_intake_packet", ci_streak_intake_packet),
         _artifact_row("license_status_intake_packet", license_status_intake_packet),
         _artifact_row("ga_enterprise_readiness_report", ga_enterprise_readiness_report),
     ]
+    support_bundle_section_rows = _support_bundle_section_rows(support_bundle)
     missing_terms = [row["check"] for row in term_rows if not row["pass"]]
+    present_forbidden_claims = [row["check"] for row in forbidden_claim_rows if not row["pass"]]
     missing_artifacts = [row["label"] for row in artifact_rows if not row["present"]]
+    missing_support_sections = [
+        row["label"] for row in support_bundle_section_rows if not row["present"]
+    ]
     failed_required_artifacts = [
         row["label"]
         for row in artifact_rows
@@ -125,7 +212,9 @@ def build_report(
     ]
     blockers = [
         *(f"scope_term_missing:{label}" for label in missing_terms),
+        *(f"forbidden_scope_claim_present:{label}" for label in present_forbidden_claims),
         *(f"evidence_artifact_missing:{label}" for label in missing_artifacts),
+        *(f"support_bundle_section_missing:{label}" for label in missing_support_sections),
         *(f"required_evidence_artifact_not_green:{label}" for label in failed_required_artifacts),
     ]
     contract_pass = not blockers
@@ -142,22 +231,32 @@ def build_report(
         "checks": {
             "scope_source_present": scope_source.exists(),
             "all_required_scope_terms_present": not missing_terms,
+            "no_prohibited_scope_claims_present": not present_forbidden_claims,
             "evidence_package_artifacts_present": not missing_artifacts,
+            "support_bundle_required_sections_present": not missing_support_sections,
             "required_evidence_package_artifacts_green": not failed_required_artifacts,
         },
         "summary": {
             "scope_source": str(scope_source),
             "required_scope_term_count": len(term_rows),
             "required_scope_term_pass_count": len(term_rows) - len(missing_terms),
+            "prohibited_scope_claim_count": len(forbidden_claim_rows),
+            "prohibited_scope_claim_present_count": len(present_forbidden_claims),
             "evidence_artifact_count": len(artifact_rows),
             "evidence_artifact_present_count": len(artifact_rows) - len(missing_artifacts),
+            "support_bundle_required_section_count": len(support_bundle_section_rows),
+            "support_bundle_required_section_present_count": (
+                len(support_bundle_section_rows) - len(missing_support_sections)
+            ),
             "owner_action": (
                 "Keep paid-pilot product/contract language constrained to review assist, specified "
                 "structure families/workflows, and attached engine/reviewer evidence package."
             ),
         },
         "scope_term_rows": term_rows,
+        "forbidden_claim_rows": forbidden_claim_rows,
         "artifact_rows": artifact_rows,
+        "support_bundle_section_rows": support_bundle_section_rows,
         "blockers": blockers,
         "claim_boundary": (
             "This guard validates scoped paid-pilot language and evidence-package references. It does not "
@@ -178,10 +277,18 @@ def _markdown(payload: dict[str, Any]) -> str:
     ]
     for row in payload["scope_term_rows"]:
         lines.append(f"| `{row['check']}` | `{row['pass']}` |")
+    lines.extend(["", "| Forbidden Claim Check | Pass |", "|---|---|"])
+    for row in payload["forbidden_claim_rows"]:
+        lines.append(f"| `{row['check']}` | `{row['pass']}` |")
     lines.extend(["", "| Evidence Artifact | Present | Required Pass | Contract Pass |", "|---|---|---|---|"])
     for row in payload["artifact_rows"]:
         lines.append(
             f"| `{row['label']}` | `{row['present']}` | `{row['required_pass']}` | `{row['contract_pass']}` |"
+        )
+    lines.extend(["", "| Support Bundle Section | Present | Redacted Bundle Path |", "|---|---|---|"])
+    for row in payload["support_bundle_section_rows"]:
+        lines.append(
+            f"| `{row['label']}` | `{row['present']}` | `{row['redacted_bundle_path']}` |"
         )
     return "\n".join(lines) + "\n"
 
@@ -192,6 +299,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pm-release-gate-report", type=Path, default=DEFAULT_PM_RELEASE_GATE_REPORT)
     parser.add_argument("--support-bundle", type=Path, default=DEFAULT_SUPPORT_BUNDLE)
     parser.add_argument("--pm-blocker-register", type=Path, default=DEFAULT_PM_BLOCKER_REGISTER)
+    parser.add_argument("--pm-owner-evidence-request-packet", type=Path, default=DEFAULT_PM_OWNER_EVIDENCE_REQUEST_PACKET)
+    parser.add_argument("--pm-release-gate-reviewer-handoff", type=Path, default=DEFAULT_PM_RELEASE_GATE_REVIEWER_HANDOFF)
+    parser.add_argument(
+        "--pm-release-reproduction-command-audit",
+        type=Path,
+        default=DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
+    )
     parser.add_argument("--ci-streak-intake-packet", type=Path, default=DEFAULT_CI_STREAK_INTAKE_PACKET)
     parser.add_argument("--license-status-intake-packet", type=Path, default=DEFAULT_LICENSE_STATUS_INTAKE_PACKET)
     parser.add_argument("--ga-enterprise-readiness-report", type=Path, default=DEFAULT_GA_ENTERPRISE_READINESS_REPORT)
@@ -209,6 +323,9 @@ def main(argv: list[str] | None = None) -> int:
         pm_release_gate_report=args.pm_release_gate_report,
         support_bundle=args.support_bundle,
         pm_blocker_register=args.pm_blocker_register,
+        pm_owner_evidence_request_packet=args.pm_owner_evidence_request_packet,
+        pm_release_gate_reviewer_handoff=args.pm_release_gate_reviewer_handoff,
+        pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
         ci_streak_intake_packet=args.ci_streak_intake_packet,
         license_status_intake_packet=args.license_status_intake_packet,
         ga_enterprise_readiness_report=args.ga_enterprise_readiness_report,

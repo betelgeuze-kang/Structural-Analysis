@@ -10,10 +10,46 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_rh_signed_closure_template_lists_open_packets() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template_test.json"
+def _open_rh_updates(path: Path) -> Path:
+    payload = {
+        "schema_version": "residual-holdout-closure-updates.v1",
+        "updates": {
+            "RH-001": {
+                "status": "open",
+                "closure_evidence_required": "signed_engineer_review_packet",
+                "supplementary_evidence_path": "",
+                "supplementary_metric_note": "",
+            },
+            "RH-002": {
+                "status": "open",
+                "closure_evidence_required": "legacy_tool_cross_validation_report",
+                "supplementary_evidence_path": "",
+                "supplementary_metric_note": "",
+            },
+            "RH-003": {
+                "status": "open",
+                "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+                "supplementary_evidence_path": "",
+                "supplementary_metric_note": "",
+            },
+        },
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
+def test_rh_signed_closure_template_lists_open_packets(tmp_path: Path) -> None:
+    out = tmp_path / "rh_signed_closure_packet_template.json"
+    rh_json = _open_rh_updates(tmp_path / "residual_holdout_closure_updates.json")
     proc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/build_rh_signed_closure_packet_template.py"), "--output-json", str(out)],
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_signed_closure_packet_template.py"),
+            "--rh-json",
+            str(rh_json),
+            "--output-json",
+            str(out),
+        ],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,

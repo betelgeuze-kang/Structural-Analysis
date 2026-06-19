@@ -14,29 +14,30 @@ Operating model:
 2. Run `./scripts/ai-preflight.sh`.
 3. Keep the goal in this Codex thread and pursue it until complete or genuinely blocked.
 4. You own design, task slicing, code review, verification planning, and final acceptance.
-5. Use Cursor auto mode and OpenCode Minimax M3 only as implementation workers for clear, local, scoped edits.
-6. Prefer OpenCode Minimax M3 for large-context implementation slices, broad repository/document sweeps, long logs, multi-file mechanical edits, and repeated implementation passes.
+5. Use Cursor auto mode and OpenCode worker only as implementation workers for clear, local, scoped edits. The OpenCode wrapper default model is MiniMax M3 via `opencode-go/minimax-m3` unless overridden by `OPENCODE_MODEL` or `AI_WORKER_OPENCODE_MODEL`.
+6. Prefer OpenCode for large-context implementation slices, broad repository/document sweeps, long logs, multi-file mechanical edits, and repeated implementation passes.
 7. Prefer Cursor auto for IDE-attached edits where current editor state, selections, UI affordances, or Cursor-specific tooling matter more than maximum context length.
-8. Do not delegate simple docs, small tests, clear fixes, or changes expected to stay under roughly 100-200 LOC.
-9. Delegate only broad exploration, large mechanical edits, repeated test-fix cycles, or multi-file refactors.
-10. Delegated TASK files must stay short and include only goal, scope, candidate files, and verification criteria.
-11. Worker output must be limited to changed files, test results, failed test names, core diff summary, and blockers.
-12. Do not read full worker logs by default. Inspect targeted files, named failing tests, and diffs only when needed.
-13. When delegating to Cursor, create a prompt file under `docs/ai/dispatch/`, using `docs/ai/prompts/cursor_worker_slice.md` as the shape, then run:
+8. Treat a slice as a worker candidate when it is expected to involve 50+ LOC of implementation or mechanical edits, 3+ files, 10+ minutes of exploration, broad grep/sweep, repeated test-fix cycles, or long logs/evidence/readiness-gate diagnosis.
+9. Do not delegate simple docs, small tests, or clear fixes unless one of the worker-candidate triggers applies.
+10. Delegate only scoped exploration, large mechanical edits, repeated test-fix cycles, or multi-file refactors.
+11. Delegated TASK files must stay short and include only goal, scope, candidate files, and verification criteria.
+12. Worker output must be limited to changed files, test results, failed test names, core diff summary, and blockers.
+13. Do not read full worker logs by default. Inspect targeted files, named failing tests, and diffs only when needed.
+14. When delegating to Cursor, create a prompt file under `docs/ai/dispatch/`, using `docs/ai/prompts/cursor_worker_slice.md` as the shape, then run:
 
    ```bash
    ./scripts/ai-worker-cursor.sh docs/ai/dispatch/<task-id>.md
    ```
 
-14. When delegating to OpenCode, create a prompt file under `docs/ai/dispatch/`, using `docs/ai/prompts/opencode_worker_slice.md` as the shape, then run:
+15. When delegating to OpenCode, create a prompt file under `docs/ai/dispatch/`, using `docs/ai/prompts/opencode_worker_slice.md` as the shape, then run:
 
    ```bash
    ./scripts/ai-worker-opencode.sh docs/ai/dispatch/<task-id>.md
    ```
 
-15. You may use both workers in the same goal, but only one scoped slice at a time.
-16. After worker output, inspect the targeted diff yourself, run `./scripts/ai-verify.sh`, and decide the next step.
-17. For product readiness edits, run the relevant project gates from `.betelgeuze/project_contract.yaml` and the affected gap/status reporters.
+16. You may use both workers in the same goal, but only one scoped slice at a time.
+17. After worker output, inspect the targeted diff yourself, run `./scripts/ai-verify.sh`, and decide the next step.
+18. For product readiness edits, run the relevant project gates from `.betelgeuze/project_contract.yaml` and the affected gap/status reporters.
 
 Hard constraints:
 

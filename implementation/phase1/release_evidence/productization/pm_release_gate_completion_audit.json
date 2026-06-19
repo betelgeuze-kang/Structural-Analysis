@@ -1,10 +1,10 @@
 {
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
-  "generated_at": "2026-06-17T15:37:40.907186+00:00",
+  "generated_at": "2026-06-18T14:03:04.222971+00:00",
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
   "reason_code": "ERR_PM_REQUIREMENTS_BLOCKED",
   "rows": [
     {
@@ -34,6 +34,23 @@
         "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
       },
       "group": "release_area",
+      "next_action": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing: No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.; basic_ci::nightly_ci_30_consecutive_pass_evidence_missing: Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+      "next_actions": [
+        {
+          "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "no_pull_request_run_source",
+          "next_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+          "owner": "release_ci_owner"
+        },
+        {
+          "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "missing_tracked_ci_streak_evidence",
+          "next_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+          "owner": "release_ci_owner"
+        }
+      ],
       "pass": false,
       "requirement": "PR/nightly 30 consecutive PASS evidence",
       "requirement_id": "release_area.basic_ci",
@@ -92,6 +109,8 @@
         "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "require NDTHA and require HIP or explicit CPU product mode",
       "requirement_id": "release_area.strict_ci",
@@ -122,6 +141,8 @@
         "core_family_p95_accuracy": "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "family p95 error within Limited/GA budget",
       "requirement_id": "release_area.core_engine",
@@ -150,6 +171,8 @@
         "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "no collapse false-pass, all converged, long profile pass",
       "requirement_id": "release_area.ndtha",
@@ -176,6 +199,8 @@
         "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "hard and recommended residual pass with fallback limits",
       "requirement_id": "release_area.residual",
@@ -203,6 +228,8 @@
         "measured_benchmark_breadth": "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "Paid Pilot/Limited/GA validation case breadth",
       "requirement_id": "release_area.benchmark_breadth",
@@ -234,6 +261,8 @@
         "workstation_budget": "implementation/phase1/workstation_service_budget.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "p95 runtime budget exceed rate within budget",
       "requirement_id": "release_area.runtime",
@@ -263,6 +292,8 @@
         "workstation_budget": "implementation/phase1/workstation_service_budget.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "OOM zero and peak memory budget report",
       "requirement_id": "release_area.memory",
@@ -290,6 +321,8 @@
         "solver_hip_e2e": "implementation/phase1/solver_hip_e2e_contract_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "release mode CPU fallback forbidden or scoped CPU-only product mode",
       "requirement_id": "release_area.gpu_device",
@@ -324,6 +357,8 @@
         "opensees_topology": "implementation/phase1/opensees_topology_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "MIDAS/KDS/OpenSees roundtrip trace evidence",
       "requirement_id": "release_area.interop",
@@ -352,6 +387,8 @@
         "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "reviewer package and reproduction commands",
       "requirement_id": "release_area.report",
@@ -391,6 +428,23 @@
         "viewer_quality": "implementation/phase1/commercialization_status/real_drawing_viewer_quality_gate.json"
       },
       "group": "release_area",
+      "next_action": "ux::human_new_user_observation_missing_or_failed: Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.; ux::human_new_user_30min_sample_evidence_missing: Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+      "next_actions": [
+        {
+          "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "missing_human_new_user_observation",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "owner": "ux_research_owner"
+        },
+        {
+          "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "missing_human_new_user_completion_evidence",
+          "next_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+          "owner": "ux_research_owner"
+        }
+      ],
       "pass": false,
       "requirement": "new user completes sample project within 30 minutes",
       "requirement_id": "release_area.ux",
@@ -430,6 +484,7 @@
         "pm_blocker_closure_board_handoff_ready_pass": true,
         "pm_blocker_closure_board_in_failure_bundle": true,
         "pm_blocker_closure_board_register_count_match": true,
+        "pm_failure_bundle_coverage_index_pass": true,
         "pm_owner_evidence_request_packet_in_failure_bundle": true,
         "pm_release_gate_completion_audit_in_failure_bundle": true,
         "pm_release_gate_reviewer_handoff_in_failure_bundle": true,
@@ -456,6 +511,8 @@
         "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
       },
       "group": "release_area",
+      "next_action": "",
+      "next_actions": [],
       "pass": true,
       "requirement": "known issues, failure bundle, and rollback evidence",
       "requirement_id": "release_area.support",
@@ -478,6 +535,7 @@
         "pm_blocker_register_handoff_not_ready_count": 0,
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
+        "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "pm_release_blocker_action_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
         "pm_release_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
@@ -485,8 +543,8 @@
         "pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_limitation_manual": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
         "release_validation_manual": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md",
@@ -527,6 +585,16 @@
         "security_runbook": "docs/production-ops-security.md"
       },
       "group": "release_area",
+      "next_action": "security::license_status_not_configured: Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+      "next_actions": [
+        {
+          "blocker_id": "security::license_status_not_configured",
+          "closure_state": "external_owner_input_ready",
+          "evidence_state": "not_configured",
+          "next_action": "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+          "owner": "product_legal_owner"
+        }
+      ],
       "pass": false,
       "requirement": "secrets/license/SBOM/repro build pass",
       "requirement_id": "release_area.security",
@@ -1327,14 +1395,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1343,6 +1413,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1411,14 +1482,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1427,6 +1500,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1495,14 +1569,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1511,6 +1587,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1579,14 +1656,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1595,6 +1674,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1663,14 +1743,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1679,6 +1761,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1747,14 +1830,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1763,6 +1848,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1831,14 +1917,16 @@
         "pm_blocker_register_handoff_ready_count": 5,
         "pm_blocker_register_open_blocker_count": 5,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
-        "pm_release_reproduction_command_audit_command_count": 168,
-        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=168 | violations=0",
+        "pm_release_reproduction_command_audit_command_count": 197,
+        "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=197 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
         "support_bundle_ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+        "support_bundle_commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
         "support_bundle_export_archive": "implementation/phase1/release/support_bundle_export.zip",
         "support_bundle_frontend_dependency_audit": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
+        "support_bundle_gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
         "support_bundle_github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
         "support_bundle_license_status_closure": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
         "support_bundle_license_status_intake_packet": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json",
@@ -1847,6 +1935,7 @@
         "support_bundle_missing_required_count": 0,
         "support_bundle_pm_blocker_closure_board": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
         "support_bundle_pm_blocker_register": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
+        "support_bundle_pm_failure_bundle_coverage": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "support_bundle_pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
         "support_bundle_pm_release_gate_completion_audit": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
         "support_bundle_pm_release_gate_reviewer_handoff": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
@@ -1869,6 +1958,334 @@
         "viewer_mode": "static_release_artifact_viewer"
       },
       "title": "Commercial Packaging"
+    },
+    {
+      "blockers": [],
+      "check_key": "technical_paid_pilot_candidate",
+      "check_value": true,
+      "checks": {
+        "technical_paid_pilot_candidate": true
+      },
+      "claim_boundary": "Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+      },
+      "group": "release_tier",
+      "next_action": "",
+      "next_actions": [],
+      "pass": true,
+      "requirement": "limited milestone evidence supports only a constrained paid pilot candidate",
+      "requirement_id": "release_tier.technical_paid_pilot_candidate",
+      "source_present": true,
+      "status": "pass",
+      "summary_snapshot": {
+        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "release_tiers": {
+          "ga_enterprise": false,
+          "ga_enterprise_blockers": [
+            "independent_vv_missing",
+            "family_validation_manual_signoff_missing",
+            "customer_audit_failure_bundle_sla_missing",
+            "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "ux::human_new_user_observation_missing_or_failed",
+            "ux::human_new_user_30min_sample_evidence_missing",
+            "security::license_status_not_configured"
+          ],
+          "ga_enterprise_evidence_gate_pass": false,
+          "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+          "ga_enterprise_owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+          "ga_enterprise_readiness_summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+          "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+          "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
+          "ga_validation_case_threshold": 300,
+          "ga_validation_case_threshold_met": true,
+          "limited_commercial_full_gate_ready": false,
+          "limited_commercial_milestone_ready": true,
+          "paid_pilot": true,
+          "paid_pilot_scope_guard_pass": true,
+          "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+          "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+          "technical_paid_pilot_candidate": true
+        }
+      },
+      "title": "Technical Paid Pilot Candidate"
+    },
+    {
+      "blockers": [],
+      "check_key": "paid_pilot_scope_guard_pass",
+      "check_value": true,
+      "checks": {
+        "paid_pilot_scope_guard_pass": true
+      },
+      "claim_boundary": "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+      },
+      "group": "release_tier",
+      "next_action": "",
+      "next_actions": [],
+      "pass": true,
+      "requirement": "paid pilot use is constrained by the scope guard and evidence-package references",
+      "requirement_id": "release_tier.paid_pilot_scope_guard_pass",
+      "source_present": true,
+      "status": "pass",
+      "summary_snapshot": {
+        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "release_tiers": {
+          "ga_enterprise": false,
+          "ga_enterprise_blockers": [
+            "independent_vv_missing",
+            "family_validation_manual_signoff_missing",
+            "customer_audit_failure_bundle_sla_missing",
+            "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "ux::human_new_user_observation_missing_or_failed",
+            "ux::human_new_user_30min_sample_evidence_missing",
+            "security::license_status_not_configured"
+          ],
+          "ga_enterprise_evidence_gate_pass": false,
+          "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+          "ga_enterprise_owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+          "ga_enterprise_readiness_summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+          "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+          "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
+          "ga_validation_case_threshold": 300,
+          "ga_validation_case_threshold_met": true,
+          "limited_commercial_full_gate_ready": false,
+          "limited_commercial_milestone_ready": true,
+          "paid_pilot": true,
+          "paid_pilot_scope_guard_pass": true,
+          "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+          "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+          "technical_paid_pilot_candidate": true
+        }
+      },
+      "title": "Paid Pilot Scope Guard"
+    },
+    {
+      "blockers": [
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "security::license_status_not_configured"
+      ],
+      "check_key": "limited_commercial_full_gate_ready",
+      "check_value": false,
+      "checks": {
+        "limited_commercial_full_gate_ready": false
+      },
+      "claim_boundary": "Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+      },
+      "group": "release_tier",
+      "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+      "next_actions": [
+        {
+          "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "security::license_status_not_configured",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
+      "requirement": "Limited Commercial release requires full release-area gate readiness",
+      "requirement_id": "release_tier.limited_commercial_full_gate_ready",
+      "source_present": true,
+      "status": "blocked",
+      "summary_snapshot": {
+        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "release_tiers": {
+          "ga_enterprise": false,
+          "ga_enterprise_blockers": [
+            "independent_vv_missing",
+            "family_validation_manual_signoff_missing",
+            "customer_audit_failure_bundle_sla_missing",
+            "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "ux::human_new_user_observation_missing_or_failed",
+            "ux::human_new_user_30min_sample_evidence_missing",
+            "security::license_status_not_configured"
+          ],
+          "ga_enterprise_evidence_gate_pass": false,
+          "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+          "ga_enterprise_owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+          "ga_enterprise_readiness_summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+          "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+          "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
+          "ga_validation_case_threshold": 300,
+          "ga_validation_case_threshold_met": true,
+          "limited_commercial_full_gate_ready": false,
+          "limited_commercial_milestone_ready": true,
+          "paid_pilot": true,
+          "paid_pilot_scope_guard_pass": true,
+          "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+          "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+          "technical_paid_pilot_candidate": true
+        }
+      },
+      "title": "Limited Commercial Full Gate"
+    },
+    {
+      "blockers": [
+        "independent_vv_missing",
+        "family_validation_manual_signoff_missing",
+        "customer_audit_failure_bundle_sla_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "security::license_status_not_configured"
+      ],
+      "check_key": "ga_enterprise_evidence_gate_pass",
+      "check_value": false,
+      "checks": {
+        "ga_enterprise_evidence_gate_pass": false
+      },
+      "claim_boundary": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+      "evidence_artifacts": {
+        "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+        "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+      },
+      "group": "release_tier",
+      "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+      "next_actions": [
+        {
+          "blocker_id": "independent_vv_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "family_validation_manual_signoff_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "customer_audit_failure_bundle_sla_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "ux::human_new_user_30min_sample_evidence_missing",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        },
+        {
+          "blocker_id": "security::license_status_not_configured",
+          "closure_state": "blocked",
+          "evidence_state": "release_tier_blocked",
+          "next_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "owner": "release_owner"
+        }
+      ],
+      "pass": false,
+      "requirement": "GA/Enterprise requires independent V&V, family signoff, customer audit/failure bundle, and SLA evidence",
+      "requirement_id": "release_tier.ga_enterprise_evidence_gate_pass",
+      "source_present": true,
+      "status": "blocked",
+      "summary_snapshot": {
+        "recommended_scope": "Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.",
+        "release_tiers": {
+          "ga_enterprise": false,
+          "ga_enterprise_blockers": [
+            "independent_vv_missing",
+            "family_validation_manual_signoff_missing",
+            "customer_audit_failure_bundle_sla_missing",
+            "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "ux::human_new_user_observation_missing_or_failed",
+            "ux::human_new_user_30min_sample_evidence_missing",
+            "security::license_status_not_configured"
+          ],
+          "ga_enterprise_evidence_gate_pass": false,
+          "ga_enterprise_note": "GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs.",
+          "ga_enterprise_owner_action": "Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release.",
+          "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
+          "ga_enterprise_readiness_summary_line": "GA enterprise readiness: BLOCKED | cases=304/300 | signed_registry=True | support_bundle=True | independent_vv=False | family_signoff=False | customer_sla=False",
+          "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
+          "ga_enterprise_signoff_intake_summary_line": "GA enterprise signoff intake: BLOCKED | signoffs=0/3 | readiness_pass=False",
+          "ga_validation_case_threshold": 300,
+          "ga_validation_case_threshold_met": true,
+          "limited_commercial_full_gate_ready": false,
+          "limited_commercial_milestone_ready": true,
+          "paid_pilot": true,
+          "paid_pilot_scope_guard_pass": true,
+          "paid_pilot_scope_guard_report": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json",
+          "paid_pilot_scope_guard_summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+          "technical_paid_pilot_candidate": true
+        }
+      },
+      "title": "GA / Enterprise Evidence Gate"
     }
   ],
   "schema_version": "pm-release-gate-completion-audit.v1",
@@ -1884,24 +2301,38 @@
     "blocked_external_owner_input_ready_count": 3,
     "blocked_handoff_incomplete_count": 0,
     "blocked_local_remediation_ready_count": 0,
-    "blocked_requirement_count": 3,
-    "explicit_requirement_count": 46,
+    "blocked_release_area_claim_boundary_missing_count": 0,
+    "blocked_release_area_claim_boundary_missing_ids": [],
+    "blocked_release_area_next_action_missing_count": 0,
+    "blocked_release_area_next_action_missing_ids": [],
+    "blocked_release_tier_claim_boundary_missing_count": 0,
+    "blocked_release_tier_claim_boundary_missing_ids": [],
+    "blocked_release_tier_next_action_missing_count": 0,
+    "blocked_release_tier_next_action_missing_ids": [],
+    "blocked_requirement_count": 5,
+    "explicit_requirement_count": 50,
     "full_release_gate_ready": false,
-    "limited_commercial_ready": true,
+    "limited_commercial_milestone_ready": true,
+    "limited_commercial_ready": false,
+    "limited_commercial_release_ready": false,
     "milestone_subrequirement_blocked_count": 0,
     "milestone_subrequirement_count": 32,
     "milestone_subrequirement_pass_count": 32,
     "missing_evidence_count": 0,
     "paid_pilot_candidate": true,
-    "pass_requirement_count": 43,
+    "pass_requirement_count": 45,
     "release_area_blocked_count": 3,
     "release_area_gate_ready": false,
     "release_area_pass_count": 11,
     "release_area_requirement_count": 14,
+    "release_tier_blocked_count": 2,
+    "release_tier_pass_count": 2,
+    "release_tier_requirement_count": 4,
     "status_counts": {
+      "blocked": 2,
       "blocked_external_owner_input_ready": 3,
-      "pass": 43
+      "pass": 45
     }
   },
-  "summary_line": "PM release gate completion audit: BLOCKED | requirements=46 | pass=43 | blocked=3"
+  "summary_line": "PM release gate completion audit: BLOCKED | requirements=50 | pass=45 | blocked=5"
 }

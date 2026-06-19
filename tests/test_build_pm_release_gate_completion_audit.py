@@ -59,6 +59,19 @@ def _passing_milestones() -> list[dict[str, object]]:
     return [_milestone(milestone_id, {key: True for key in keys}) for milestone_id, keys in required.items()]
 
 
+def _passing_release_tiers() -> dict[str, object]:
+    return {
+        "technical_paid_pilot_candidate": True,
+        "paid_pilot_scope_guard_pass": True,
+        "paid_pilot_scope_guard_report": "paid_pilot_scope_guard_report.json",
+        "limited_commercial_full_gate_ready": True,
+        "ga_enterprise_evidence_gate_pass": True,
+        "ga_enterprise_readiness_report": "ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "ga_enterprise_signoff_intake_packet.json",
+        "ga_enterprise_blockers": [],
+    }
+
+
 def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: Path) -> None:
     release_areas = [
         _area(area_id)
@@ -78,11 +91,15 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
     pm_report = _write_json(
         tmp_path / "pm_release_gate_report.json",
         {
-            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED",
             "full_release_gate_ready": False,
             "release_area_gate_ready": False,
-            "limited_commercial_ready": True,
+            "limited_commercial_milestone_ready": True,
+            "limited_commercial_release_ready": False,
+            "limited_commercial_ready": False,
             "paid_pilot_candidate": True,
+            "recommended_scope": "Paid Pilot / constrained customer PoC only",
+            "release_tiers": _passing_release_tiers(),
             "release_area_matrix": release_areas,
             "milestones": _passing_milestones(),
         },
@@ -94,11 +111,17 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
             "rows": [
                 {
                     "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+                    "owner": "release_ci_owner",
                     "closure_state": "external_owner_input_ready",
+                    "evidence_state": "external_evidence_missing",
+                    "next_action": "Attach 30 consecutive PR CI PASS run records.",
                 },
                 {
                     "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+                    "owner": "release_ci_owner",
                     "closure_state": "external_owner_input_ready",
+                    "evidence_state": "external_evidence_missing",
+                    "next_action": "Attach 30 consecutive nightly CI PASS run records.",
                 },
             ],
         },
@@ -114,13 +137,44 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
     )
     assert payload["summary"]["release_area_blocked_count"] == 1
     assert payload["summary"]["milestone_subrequirement_blocked_count"] == 0
+    assert payload["summary"]["release_tier_requirement_count"] == len(
+        build_audit_module.RELEASE_TIER_REQUIREMENTS
+    )
+    assert payload["summary"]["release_tier_blocked_count"] == 0
     assert payload["summary"]["blocked_external_owner_input_ready_count"] == 1
+    assert payload["summary"]["blocked_release_area_claim_boundary_missing_count"] == 0
+    assert payload["summary"]["blocked_release_area_next_action_missing_count"] == 0
+    assert payload["summary"]["limited_commercial_milestone_ready"] is True
+    assert payload["summary"]["limited_commercial_release_ready"] is False
+    assert payload["summary"]["limited_commercial_ready"] is False
     assert rows["release_area.basic_ci"]["status"] == "blocked_external_owner_input_ready"
     assert rows["release_area.basic_ci"]["closure_states"] == {
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing": "external_owner_input_ready",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing": "external_owner_input_ready",
     }
+    assert rows["release_area.basic_ci"]["next_actions"] == [
+        {
+            "blocker_id": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+            "owner": "release_ci_owner",
+            "closure_state": "external_owner_input_ready",
+            "evidence_state": "external_evidence_missing",
+            "next_action": "Attach 30 consecutive PR CI PASS run records.",
+        },
+        {
+            "blocker_id": "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+            "owner": "release_ci_owner",
+            "closure_state": "external_owner_input_ready",
+            "evidence_state": "external_evidence_missing",
+            "next_action": "Attach 30 consecutive nightly CI PASS run records.",
+        },
+    ]
+    assert "basic_ci::pr_ci_30_consecutive_pass_evidence_missing: Attach 30 consecutive PR CI PASS" in rows[
+        "release_area.basic_ci"
+    ]["next_action"]
     assert rows["m1_residual_report_fixed"]["status"] == "pass"
+    assert rows["release_tier.paid_pilot_scope_guard_pass"]["status"] == "pass"
+    assert "constrained customer PoC" in rows["release_tier.paid_pilot_scope_guard_pass"]["claim_boundary"]
+    assert rows["release_tier.ga_enterprise_evidence_gate_pass"]["status"] == "pass"
     assert rows["release_area.support"]["summary_snapshot"]["evidence_source"] == "support_report.json"
     assert "generated_at" not in rows["release_area.support"]["summary_snapshot"]
     assert "support_bundle_export_archive_sha256" not in rows["release_area.support"]["summary_snapshot"]
@@ -138,6 +192,7 @@ def test_build_audit_passes_only_when_full_gate_and_rows_pass(tmp_path: Path) ->
             "release_area_gate_ready": True,
             "limited_commercial_ready": True,
             "paid_pilot_candidate": True,
+            "release_tiers": _passing_release_tiers(),
             "release_area_matrix": [
                 _area(area_id) for area_id, _, _ in build_audit_module.RELEASE_AREA_REQUIREMENTS
             ],
@@ -151,6 +206,64 @@ def test_build_audit_passes_only_when_full_gate_and_rows_pass(tmp_path: Path) ->
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["summary"]["blocked_requirement_count"] == 0
+
+
+def test_build_audit_surfaces_release_tier_boundaries(tmp_path: Path) -> None:
+    release_tiers = {
+        "technical_paid_pilot_candidate": True,
+        "paid_pilot_scope_guard_pass": True,
+        "paid_pilot_scope_guard_report": "paid_pilot_scope_guard_report.json",
+        "limited_commercial_full_gate_ready": False,
+        "ga_enterprise_evidence_gate_pass": False,
+        "ga_enterprise_readiness_report": "ga_enterprise_readiness_report.json",
+        "ga_enterprise_signoff_intake_packet": "ga_enterprise_signoff_intake_packet.json",
+        "ga_enterprise_blockers": ["independent_vv_missing", "customer_sla_missing"],
+        "ga_enterprise_note": "GA still requires independent V&V and customer SLA evidence.",
+    }
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_gate_ready": False,
+            "release_area_gate_ready": False,
+            "release_area_blockers": ["security::license_status_not_configured"],
+            "recommended_scope": "Limited milestone evidence is green; keep use constrained to paid pilot.",
+            "release_tiers": release_tiers,
+            "release_area_matrix": [
+                _area(area_id) for area_id, _, _ in build_audit_module.RELEASE_AREA_REQUIREMENTS
+            ],
+            "milestones": _passing_milestones(),
+        },
+    )
+    closure_board = _write_json(tmp_path / "pm_release_blocker_closure_board.json", {"rows": []})
+
+    payload = build_audit_module.build_audit(pm_report=pm_report, closure_board=closure_board)
+    rows = {row["requirement_id"]: row for row in payload["rows"]}
+
+    assert payload["summary"]["release_tier_requirement_count"] == 4
+    assert payload["summary"]["release_tier_pass_count"] == 2
+    assert payload["summary"]["release_tier_blocked_count"] == 2
+    assert payload["summary"]["blocked_release_tier_claim_boundary_missing_count"] == 0
+    assert payload["summary"]["blocked_release_tier_next_action_missing_count"] == 0
+    assert rows["release_tier.technical_paid_pilot_candidate"]["status"] == "pass"
+    assert rows["release_tier.paid_pilot_scope_guard_pass"]["status"] == "pass"
+    assert rows["release_tier.limited_commercial_full_gate_ready"]["status"] == "blocked"
+    assert rows["release_tier.limited_commercial_full_gate_ready"]["blockers"] == [
+        "security::license_status_not_configured"
+    ]
+    assert "release-area blockers remain open" in rows[
+        "release_tier.limited_commercial_full_gate_ready"
+    ]["claim_boundary"]
+    assert "Close all release-area blockers" in rows[
+        "release_tier.limited_commercial_full_gate_ready"
+    ]["next_action"]
+    assert rows["release_tier.ga_enterprise_evidence_gate_pass"]["status"] == "blocked"
+    assert rows["release_tier.ga_enterprise_evidence_gate_pass"]["blockers"] == [
+        "independent_vv_missing",
+        "customer_sla_missing",
+    ]
+    assert "independent V&V" in rows["release_tier.ga_enterprise_evidence_gate_pass"]["claim_boundary"]
+    assert "independent V&V" in rows["release_tier.ga_enterprise_evidence_gate_pass"]["next_action"]
 
 
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
@@ -184,4 +297,6 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert exit_code == 0
     assert "PM Release Gate Completion Audit" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["explicit_requirement_count"] > 0
-    assert "release_area.basic_ci" in out_md.read_text(encoding="utf-8")
+    out_markdown = out_md.read_text(encoding="utf-8")
+    assert "release_area.basic_ci" in out_markdown
+    assert "Next Action" in out_markdown

@@ -23,24 +23,33 @@ def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> No
     pm_report = _write_json(
         tmp_path / "pm_release_gate_report.json",
         {
-            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED",
             "paid_pilot_candidate": True,
-            "limited_commercial_ready": True,
+            "limited_commercial_milestone_ready": True,
+            "limited_commercial_release_ready": False,
+            "limited_commercial_ready": False,
             "release_area_gate_ready": False,
             "full_release_gate_ready": False,
+            "full_release_blockers": [
+                "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+                "security::frontend_dependency_audit_missing_or_failed",
+            ],
         },
     )
     action_register = _write_json(
         tmp_path / "pm_release_blocker_action_register.json",
         {
             "contract_pass": False,
-            "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED",
             "summary": {
                 "open_blocker_count": 2,
                 "handoff_ready_count": 2,
                 "handoff_not_ready_count": 0,
                 "all_open_blockers_have_handoff": True,
                 "full_release_gate_ready": False,
+                "limited_commercial_milestone_ready": True,
+                "limited_commercial_release_ready": False,
+                "limited_commercial_ready": False,
             },
             "rows": [
                 {
@@ -92,6 +101,12 @@ def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> No
     assert payload["summary"]["handoff_not_ready_count"] == 0
     assert payload["summary"]["all_open_blockers_have_handoff"] is True
     assert payload["summary"]["paid_pilot_candidate"] is True
+    assert payload["summary"]["limited_commercial_milestone_ready"] is True
+    assert payload["summary"]["limited_commercial_release_ready"] is False
+    assert payload["summary"]["limited_commercial_ready"] is False
+    assert payload["summary"]["action_register_matches_pm_report"] is True
+    assert payload["summary"]["missing_from_action_register_count"] == 0
+    assert payload["summary"]["stale_action_register_blocker_count"] == 0
 
     ci_row = rows["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"]
     assert ci_row["closure_state"] == "external_owner_input_ready"
@@ -123,13 +138,57 @@ def test_build_board_passes_when_gate_and_register_are_closed(tmp_path: Path) ->
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["summary"]["open_blocker_count"] == 0
+    assert payload["summary"]["action_register_matches_pm_report"] is True
     assert payload["rows"] == []
+
+
+def test_build_board_blocks_stale_action_register(tmp_path: Path) -> None:
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_gate_ready": False,
+            "full_release_blockers": ["security::license_status_not_configured"],
+        },
+    )
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "contract_pass": False,
+            "summary": {"open_blocker_count": 1, "all_open_blockers_have_handoff": True},
+            "rows": [
+                {
+                    "blocker_id": "ux::human_new_user_observation_missing_or_failed",
+                    "owner": "ux_research_owner",
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                    "next_action": "Attach observed UX sample workflow evidence.",
+                    "handoff_ready": True,
+                    "handoff_state": "external_owner_input_ready",
+                }
+            ],
+        },
+    )
+
+    payload = build_board_module.build_board(action_register=action_register, pm_report=pm_report)
+
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PM_BLOCKER_ACTION_REGISTER_STALE"
+    assert payload["summary"]["action_register_matches_pm_report"] is False
+    assert payload["summary"]["missing_from_action_register"] == ["security::license_status_not_configured"]
+    assert payload["summary"]["stale_action_register_blockers"] == [
+        "ux::human_new_user_observation_missing_or_failed"
+    ]
 
 
 def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     pm_report = _write_json(
         tmp_path / "pm_release_gate_report.json",
-        {"summary_line": "PM release gate: LIMITED_READY", "full_release_gate_ready": False},
+        {
+            "summary_line": "PM release gate: LIMITED_READY",
+            "full_release_gate_ready": False,
+            "full_release_blockers": ["ux::human_new_user_observation_missing_or_failed"],
+        },
     )
     action_register = _write_json(
         tmp_path / "pm_release_blocker_action_register.json",
@@ -170,3 +229,4 @@ def test_cli_writes_json_and_markdown(tmp_path: Path, capsys) -> None:
     assert "PM Release Blocker Closure Board" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["summary"]["open_blocker_count"] == 1
     assert "ux::human_new_user_observation_missing_or_failed" in out_md.read_text(encoding="utf-8")
+    assert "action_register_matches_pm_report" in out_md.read_text(encoding="utf-8")

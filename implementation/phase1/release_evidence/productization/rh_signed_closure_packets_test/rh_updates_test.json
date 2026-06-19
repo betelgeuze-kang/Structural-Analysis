@@ -27,7 +27,7 @@
       "supplementary_attached_at_utc": "2026-06-05T13:35:54.604547+00:00",
       "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified",
       "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-09T15:41:04.073464+00:00"
+      "closed_at_utc": "2026-06-18T14:52:29.418153+00:00"
     },
     "RH-002": {
       "closure_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-002.signed_closure.json",
@@ -47,7 +47,7 @@
       "supplementary_attached_at_utc": "2026-06-05T13:35:54.604564+00:00",
       "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1",
       "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-09T15:41:04.077722+00:00"
+      "closed_at_utc": "2026-06-18T14:52:29.423319+00:00"
     },
     "RH-003": {
       "closure_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-003.signed_closure.json",
@@ -67,7 +67,7 @@
       "supplementary_attached_at_utc": "2026-06-05T13:35:54.604567+00:00",
       "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass",
       "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-09T15:41:04.081869+00:00"
+      "closed_at_utc": "2026-06-18T14:52:29.428482+00:00"
     }
   },
   "supplementary_evidence_basis": {
@@ -79,5 +79,5 @@
   },
   "actual_closure_evidence_attached": true,
   "rh_closure_status": "closed",
-  "signed_closure_applied_at_utc": "2026-06-09T15:41:04.081875+00:00"
+  "signed_closure_applied_at_utc": "2026-06-18T14:52:29.428489+00:00"
 }

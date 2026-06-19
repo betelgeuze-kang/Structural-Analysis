@@ -1,6 +1,6 @@
 {
   "schema_version": "ai-input-code-guard-artifacts.v1",
-  "generated_at": "2026-06-09T15:39:34.834649+00:00",
+  "generated_at": "2026-06-18T14:51:05.723570+00:00",
   "status": "ready",
   "input_semantic_normalization_ready": true,
   "code_reasoning_guard_ready": true,

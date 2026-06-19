@@ -74,6 +74,29 @@ MILESTONE_REQUIREMENTS = [
     ("M5", "m5_limitation_manual", "limitation manual is present and complete", "limitation_manual_content_pass"),
 ]
 
+RELEASE_TIER_REQUIREMENTS = [
+    (
+        "technical_paid_pilot_candidate",
+        "Technical Paid Pilot Candidate",
+        "limited milestone evidence supports only a constrained paid pilot candidate",
+    ),
+    (
+        "paid_pilot_scope_guard_pass",
+        "Paid Pilot Scope Guard",
+        "paid pilot use is constrained by the scope guard and evidence-package references",
+    ),
+    (
+        "limited_commercial_full_gate_ready",
+        "Limited Commercial Full Gate",
+        "Limited Commercial release requires full release-area gate readiness",
+    ),
+    (
+        "ga_enterprise_evidence_gate_pass",
+        "GA / Enterprise Evidence Gate",
+        "GA/Enterprise requires independent V&V, family signoff, customer audit/failure bundle, and SLA evidence",
+    ),
+]
+
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -141,6 +164,34 @@ def _blocked_status(blocker_ids: list[str], closure_rows: dict[str, dict[str, An
     return "blocked_mixed_closure_ready"
 
 
+def _blocker_next_actions(
+    blocker_ids: list[str],
+    closure_rows: dict[str, dict[str, Any]],
+) -> list[dict[str, str]]:
+    actions: list[dict[str, str]] = []
+    for blocker_id in blocker_ids:
+        closure = _as_dict(closure_rows.get(blocker_id))
+        actions.append(
+            {
+                "blocker_id": blocker_id,
+                "owner": str(closure.get("owner", "")),
+                "closure_state": str(closure.get("closure_state", "missing")),
+                "evidence_state": str(closure.get("evidence_state", "")),
+                "next_action": str(closure.get("next_action", "")),
+            }
+        )
+    return actions
+
+
+def _next_action_summary(actions: list[dict[str, str]]) -> str:
+    parts = [
+        f"{action['blocker_id']}: {action['next_action']}"
+        for action in actions
+        if action.get("next_action")
+    ]
+    return "; ".join(parts)
+
+
 def _release_area_audit_rows(
     *,
     pm_report: dict[str, Any],
@@ -162,6 +213,7 @@ def _release_area_audit_rows(
             status = "missing_evidence"
         else:
             status = _blocked_status(blocker_ids, closure_rows)
+        next_actions = _blocker_next_actions(blocker_ids, closure_rows)
         rows.append(
             {
                 "requirement_id": f"release_area.{area_id}",
@@ -177,6 +229,8 @@ def _release_area_audit_rows(
                     blocker: str(_as_dict(closure_rows.get(blocker)).get("closure_state", "missing"))
                     for blocker in blocker_ids
                 },
+                "next_action": _next_action_summary(next_actions),
+                "next_actions": next_actions,
                 "checks": checks,
                 "summary_snapshot": _stable_snapshot(summary),
                 "evidence_artifacts": {
@@ -225,6 +279,103 @@ def _milestone_audit_rows(pm_report: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def _release_tier_audit_rows(pm_report: dict[str, Any]) -> list[dict[str, Any]]:
+    release_tiers = _as_dict(pm_report.get("release_tiers"))
+    release_area_blockers = [str(item) for item in _as_list(pm_report.get("release_area_blockers"))]
+    ga_blockers = [str(item) for item in _as_list(release_tiers.get("ga_enterprise_blockers"))]
+    rows: list[dict[str, Any]] = []
+    for check_key, title, requirement in RELEASE_TIER_REQUIREMENTS:
+        source_present = check_key in release_tiers
+        check_value = bool(release_tiers.get(check_key, False))
+        status = "pass" if check_value else ("missing_evidence" if not source_present else "blocked")
+        if check_key == "limited_commercial_full_gate_ready":
+            blockers = release_area_blockers
+            claim_boundary = (
+                "Limited Commercial cannot be promoted while release-area blockers remain open, even when "
+                "milestone evidence is green."
+            )
+            next_action = (
+                "Close all release-area blockers, regenerate the PM release gate, and verify "
+                "`release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion."
+            )
+        elif check_key == "ga_enterprise_evidence_gate_pass":
+            blockers = ga_blockers
+            claim_boundary = str(
+                release_tiers.get(
+                    "ga_enterprise_note",
+                    "GA/Enterprise requires independent V&V, family signoff, customer audit/failure bundle, and SLA evidence.",
+                )
+            )
+            next_action = str(
+                release_tiers.get(
+                    "ga_enterprise_owner_action",
+                    "Attach independent V&V, family validation-manual signoff, customer audit/failure bundle, and support SLA evidence.",
+                )
+            )
+        elif check_key == "paid_pilot_scope_guard_pass":
+            blockers = ["paid_pilot_scope_guard_missing_or_failed"] if not check_value else []
+            claim_boundary = (
+                "Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, "
+                "or engineer-of-record replacement readiness."
+            )
+            next_action = (
+                "Regenerate the paid pilot scope guard and keep all customer-facing use constrained to the "
+                "scope guard until release-area blockers close."
+            )
+        else:
+            blockers = ["technical_paid_pilot_candidate_false"] if not check_value else []
+            claim_boundary = (
+                "Technical paid pilot candidate status depends on local milestone evidence and still requires "
+                "the paid-pilot scope guard before customer use."
+            )
+            next_action = "Regenerate the PM release gate after milestone or scope-guard evidence changes."
+        rows.append(
+            {
+                "requirement_id": f"release_tier.{check_key}",
+                "group": "release_tier",
+                "title": title,
+                "requirement": requirement,
+                "status": status,
+                "pass": status == "pass",
+                "source_present": source_present,
+                "check_key": check_key,
+                "check_value": check_value,
+                "blockers": blockers,
+                "next_action": "" if check_value else next_action,
+                "next_actions": [
+                    {
+                        "blocker_id": blocker,
+                        "owner": "release_owner",
+                        "closure_state": "blocked",
+                        "evidence_state": "release_tier_blocked",
+                        "next_action": next_action,
+                    }
+                    for blocker in blockers
+                ],
+                "checks": {check_key: check_value},
+                "summary_snapshot": _stable_snapshot(
+                    {
+                        "recommended_scope": pm_report.get("recommended_scope", ""),
+                        "release_tiers": release_tiers,
+                    }
+                ),
+                "evidence_artifacts": {
+                    "paid_pilot_scope_guard_report": str(
+                        release_tiers.get("paid_pilot_scope_guard_report", "")
+                    ),
+                    "ga_enterprise_readiness_report": str(
+                        release_tiers.get("ga_enterprise_readiness_report", "")
+                    ),
+                    "ga_enterprise_signoff_intake_packet": str(
+                        release_tiers.get("ga_enterprise_signoff_intake_packet", "")
+                    ),
+                },
+                "claim_boundary": claim_boundary,
+            }
+        )
+    return rows
+
+
 def build_audit(
     *,
     pm_report: Path = DEFAULT_PM_REPORT,
@@ -235,8 +386,25 @@ def build_audit(
     closure_rows = _closure_by_blocker(closure_payload)
     release_rows = _release_area_audit_rows(pm_report=pm_payload, closure_rows=closure_rows)
     milestone_rows = _milestone_audit_rows(pm_payload)
-    rows = [*release_rows, *milestone_rows]
+    release_tier_rows = _release_tier_audit_rows(pm_payload)
+    rows = [*release_rows, *milestone_rows, *release_tier_rows]
     blocked_rows = [row for row in rows if not row["pass"]]
+    blocked_release_rows = [row for row in release_rows if not row["pass"]]
+    blocked_release_tier_rows = [row for row in release_tier_rows if not row["pass"]]
+    blocked_release_area_claim_boundary_missing_ids = [
+        str(row["requirement_id"]) for row in blocked_release_rows if not str(row.get("claim_boundary", ""))
+    ]
+    blocked_release_area_next_action_missing_ids = [
+        str(row["requirement_id"]) for row in blocked_release_rows if not str(row.get("next_action", ""))
+    ]
+    blocked_release_tier_claim_boundary_missing_ids = [
+        str(row["requirement_id"])
+        for row in blocked_release_tier_rows
+        if not str(row.get("claim_boundary", ""))
+    ]
+    blocked_release_tier_next_action_missing_ids = [
+        str(row["requirement_id"]) for row in blocked_release_tier_rows if not str(row.get("next_action", ""))
+    ]
     contract_pass = bool(pm_payload.get("full_release_gate_ready", False) and not blocked_rows)
     status_counts: dict[str, int] = {}
     for row in rows:
@@ -262,9 +430,24 @@ def build_audit(
             "release_area_requirement_count": len(release_rows),
             "release_area_pass_count": sum(1 for row in release_rows if row["pass"]),
             "release_area_blocked_count": sum(1 for row in release_rows if not row["pass"]),
+            "blocked_release_area_claim_boundary_missing_count": len(
+                blocked_release_area_claim_boundary_missing_ids
+            ),
+            "blocked_release_area_next_action_missing_count": len(blocked_release_area_next_action_missing_ids),
+            "blocked_release_area_claim_boundary_missing_ids": blocked_release_area_claim_boundary_missing_ids,
+            "blocked_release_area_next_action_missing_ids": blocked_release_area_next_action_missing_ids,
             "milestone_subrequirement_count": len(milestone_rows),
             "milestone_subrequirement_pass_count": sum(1 for row in milestone_rows if row["pass"]),
             "milestone_subrequirement_blocked_count": sum(1 for row in milestone_rows if not row["pass"]),
+            "release_tier_requirement_count": len(release_tier_rows),
+            "release_tier_pass_count": sum(1 for row in release_tier_rows if row["pass"]),
+            "release_tier_blocked_count": sum(1 for row in release_tier_rows if not row["pass"]),
+            "blocked_release_tier_claim_boundary_missing_count": len(
+                blocked_release_tier_claim_boundary_missing_ids
+            ),
+            "blocked_release_tier_next_action_missing_count": len(blocked_release_tier_next_action_missing_ids),
+            "blocked_release_tier_claim_boundary_missing_ids": blocked_release_tier_claim_boundary_missing_ids,
+            "blocked_release_tier_next_action_missing_ids": blocked_release_tier_next_action_missing_ids,
             "blocked_external_owner_input_ready_count": status_counts.get(
                 "blocked_external_owner_input_ready", 0
             ),
@@ -274,6 +457,12 @@ def build_audit(
             "status_counts": status_counts,
             "full_release_gate_ready": bool(pm_payload.get("full_release_gate_ready", False)),
             "release_area_gate_ready": bool(pm_payload.get("release_area_gate_ready", False)),
+            "limited_commercial_milestone_ready": bool(
+                pm_payload.get("limited_commercial_milestone_ready", False)
+            ),
+            "limited_commercial_release_ready": bool(
+                pm_payload.get("limited_commercial_release_ready", pm_payload.get("limited_commercial_ready", False))
+            ),
             "limited_commercial_ready": bool(pm_payload.get("limited_commercial_ready", False)),
             "paid_pilot_candidate": bool(pm_payload.get("paid_pilot_candidate", False)),
         },
@@ -294,6 +483,10 @@ def build_audit(
     }
 
 
+def _markdown_cell(value: Any) -> str:
+    return str(value).replace("\n", " ").replace("|", "\\|")
+
+
 def _markdown(payload: dict[str, Any]) -> str:
     lines = [
         "# PM Release Gate Completion Audit",
@@ -303,15 +496,17 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `explicit_requirement_count`: `{payload['summary']['explicit_requirement_count']}`",
         f"- `blocked_requirement_count`: `{payload['summary']['blocked_requirement_count']}`",
+        f"- `blocked_release_area_next_action_missing_count`: `{payload['summary']['blocked_release_area_next_action_missing_count']}`",
         "",
-        "| Requirement | Group | Status | Blockers |",
-        "|---|---|---|---|",
+        "| Requirement | Group | Status | Blockers | Next Action |",
+        "|---|---|---|---|---|",
     ]
     for row in payload["rows"]:
         blockers = ", ".join(f"`{item}`" for item in row.get("blockers", [])) or "none"
+        next_action = _markdown_cell(row.get("next_action", "")) or "none"
         lines.append(
             f"| `{row['requirement_id']}` {row['requirement']} | `{row['group']}` | "
-            f"`{row['status']}` | {blockers} |"
+            f"`{row['status']}` | {blockers} | {next_action} |"
         )
     lines.extend(["", payload["claim_boundary"]])
     return "\n".join(lines) + "\n"

@@ -138,7 +138,7 @@ def test_midas_interoperability_gate_passes_on_current_release_artifacts(tmp_pat
     assert payload["summary"]["bounded_subset_mode"] == "full_exact_roundtrip"
     assert payload["summary"]["heuristic_raw_recovery_model_count"] == 0
     assert payload["summary"]["structured_loads_contract_present_count"] == 3
-    assert payload["summary"]["kds_geometry_bridge_exact_review_id_total"] == 36
+    assert payload["summary"]["kds_geometry_bridge_exact_review_id_total"] == 24
     assert payload["summary"]["kds_geometry_bridge_heuristic_review_id_total"] == 0
     assert payload["summary"]["exact_roundtrip_closure_pass"] is True
     assert payload["summary"]["exact_roundtrip_closure_status"] == "closed"

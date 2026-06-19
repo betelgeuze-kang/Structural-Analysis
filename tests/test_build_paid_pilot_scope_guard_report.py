@@ -38,11 +38,29 @@ def _scope_text() -> str:
 
 
 def _artifact_inputs(tmp_path: Path) -> dict[str, Path]:
+    support_optional_sections = {
+        "pm_owner_evidence_request_packet": "redacted/pm_owner_evidence_request_packet.json",
+        "pm_release_gate_reviewer_handoff": "redacted/pm_release_gate_reviewer_handoff.json",
+        "pm_release_reproduction_command_audit": "redacted/pm_release_reproduction_command_audit.json",
+    }
     return {
         "pm_release_gate_report": _write_json(tmp_path / "pm_release_gate_report.json", {"contract_pass": True}),
         "support_bundle": _write_json(
             tmp_path / "support_bundle.json",
-            {"contract_pass": True, "checks": {"bundle_roundtrip_test_pass": True}},
+            {
+                "contract_pass": True,
+                "checks": {"bundle_roundtrip_test_pass": True},
+                "optional_sections": support_optional_sections,
+            },
+        ),
+        "pm_owner_evidence_request_packet": _write_json(
+            tmp_path / "pm_owner_evidence_request_packet.json", {"contract_pass": True}
+        ),
+        "pm_release_gate_reviewer_handoff": _write_json(
+            tmp_path / "pm_release_gate_reviewer_handoff.json", {"contract_pass": True}
+        ),
+        "pm_release_reproduction_command_audit": _write_json(
+            tmp_path / "pm_release_reproduction_command_audit.json", {"contract_pass": True}
         ),
         "pm_blocker_register": _write_json(tmp_path / "pm_blocker_register.json", {"contract_pass": False}),
         "ci_streak_intake_packet": _write_json(tmp_path / "ci_streak.json", {"contract_pass": False}),
@@ -60,7 +78,16 @@ def test_paid_pilot_scope_guard_passes_constrained_scope_and_artifacts(tmp_path:
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["checks"]["all_required_scope_terms_present"] is True
+    assert payload["checks"]["no_prohibited_scope_claims_present"] is True
     assert payload["checks"]["evidence_package_artifacts_present"] is True
+    assert payload["checks"]["support_bundle_required_sections_present"] is True
+    assert payload["summary"]["support_bundle_required_section_present_count"] == 3
+    assert payload["summary"]["prohibited_scope_claim_present_count"] == 0
+    assert any(row["label"] == "pm_release_gate_reviewer_handoff" for row in payload["artifact_rows"])
+    assert any(
+        row["label"] == "pm_owner_evidence_request_packet" and row["present"]
+        for row in payload["support_bundle_section_rows"]
+    )
     assert payload["summary_line"].startswith("Paid pilot scope guard: PASS")
 
 
@@ -74,6 +101,45 @@ def test_paid_pilot_scope_guard_blocks_missing_scope_terms(tmp_path: Path) -> No
     assert payload["reason_code"] == "ERR_PAID_PILOT_SCOPE_GUARD_BLOCKED"
     assert "scope_term_missing:review_assist_boundary" in payload["blockers"]
     assert "scope_term_missing:engine_reviewer_evidence_package" in payload["blockers"]
+
+
+def test_paid_pilot_scope_guard_blocks_forbidden_scope_claims(tmp_path: Path) -> None:
+    payload = build_paid_pilot_scope_guard_report.build_report(
+        scope_source=_write_text(
+            tmp_path / "scope.md",
+            _scope_text() + "\n- full_commercial_replacement_ready=true\n- 인허가 자동 승인\n",
+        ),
+        **_artifact_inputs(tmp_path),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["no_prohibited_scope_claims_present"] is False
+    assert payload["summary"]["prohibited_scope_claim_present_count"] == 2
+    assert "forbidden_scope_claim_present:full_commercial_replacement_ready_true" in payload["blockers"]
+    assert "forbidden_scope_claim_present:autonomous_approval" in payload["blockers"]
+
+
+def test_paid_pilot_scope_guard_blocks_missing_reviewer_package_sections(tmp_path: Path) -> None:
+    inputs = _artifact_inputs(tmp_path)
+    _write_json(
+        inputs["support_bundle"],
+        {
+            "contract_pass": True,
+            "checks": {"bundle_roundtrip_test_pass": True},
+            "optional_sections": {},
+        },
+    )
+
+    payload = build_paid_pilot_scope_guard_report.build_report(
+        scope_source=_write_text(tmp_path / "scope.md", _scope_text()),
+        **inputs,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["support_bundle_required_sections_present"] is False
+    assert "support_bundle_section_missing:pm_owner_evidence_request_packet" in payload["blockers"]
+    assert "support_bundle_section_missing:pm_release_gate_reviewer_handoff" in payload["blockers"]
+    assert "support_bundle_section_missing:pm_release_reproduction_command_audit" in payload["blockers"]
 
 
 def test_paid_pilot_scope_guard_cli_writes_markdown(tmp_path: Path, capsys) -> None:
@@ -91,6 +157,12 @@ def test_paid_pilot_scope_guard_cli_writes_markdown(tmp_path: Path, capsys) -> N
             str(inputs["support_bundle"]),
             "--pm-blocker-register",
             str(inputs["pm_blocker_register"]),
+            "--pm-owner-evidence-request-packet",
+            str(inputs["pm_owner_evidence_request_packet"]),
+            "--pm-release-gate-reviewer-handoff",
+            str(inputs["pm_release_gate_reviewer_handoff"]),
+            "--pm-release-reproduction-command-audit",
+            str(inputs["pm_release_reproduction_command_audit"]),
             "--ci-streak-intake-packet",
             str(inputs["ci_streak_intake_packet"]),
             "--license-status-intake-packet",
@@ -109,3 +181,4 @@ def test_paid_pilot_scope_guard_cli_writes_markdown(tmp_path: Path, capsys) -> N
     assert "Paid pilot scope guard: PASS" in captured.out
     assert json.loads(out.read_text(encoding="utf-8"))["contract_pass"] is True
     assert "Paid Pilot Scope Guard Report" in out_md.read_text(encoding="utf-8")
+    assert "Forbidden Claim Check" in out_md.read_text(encoding="utf-8")

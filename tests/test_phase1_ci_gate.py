@@ -25,6 +25,58 @@ def _touch(path: Path, content: str = "ok") -> str:
     return str(path)
 
 
+def _passing_midas_kds_geometry_bridge_validation(artifact_paths: list[str] | None = None) -> dict:
+    artifacts = list(artifact_paths or [])
+    summary_line = (
+        "MIDAS kds-geometry-bridge: ok | mapped_review_ids=36/36 | exact=36 | heuristic=0 | rows=3168 | "
+        "load_crosswalk=36/36 PASS | semantic_crosswalk=36/36 PASS | "
+        "full_member_crosswalk=242/242 PASS | full_section_crosswalk=200/200 PASS | "
+        "full_load_crosswalk=51/51 PASS"
+    )
+    return {
+        "command": ["stubbed-kds-geometry-bridge-validator"],
+        "validator_path": "stubbed-kds-geometry-bridge-validator",
+        "checked": True,
+        "artifact_paths": artifacts,
+        "checked_artifact_count": len(artifacts),
+        "missing_input_paths": [],
+        "min_mapped_review_ids": 0,
+        "structured_report_available": True,
+        "exit_code": 0,
+        "stdout": summary_line,
+        "stderr": "",
+        "stdout_lines": [summary_line],
+        "stderr_lines": [],
+        "summary_line": summary_line,
+        "summary": {
+            "exact_review_load_crosswalk_count_total": 36,
+            "exact_review_load_crosswalk_expected_total": 36,
+            "exact_review_semantic_crosswalk_count_total": 36,
+            "exact_review_semantic_crosswalk_expected_total": 36,
+            "full_member_crosswalk_count_total": 242,
+            "full_member_crosswalk_expected_total": 242,
+            "full_section_crosswalk_count_total": 200,
+            "full_section_crosswalk_expected_total": 200,
+            "full_load_crosswalk_count_total": 51,
+            "full_load_crosswalk_expected_total": 51,
+        },
+        "checks": {
+            "exact_load_crosswalk_pass": True,
+            "exact_semantic_crosswalk_pass": True,
+            "full_member_crosswalk_pass": True,
+            "full_section_crosswalk_pass": True,
+            "full_load_crosswalk_pass": True,
+        },
+    }
+
+
+def _patch_kds_geometry_bridge_validator_pass(module, monkeypatch) -> None:
+    def _run_validator(validator_path: str, artifact_paths: list[str], **kwargs) -> tuple[bool, dict]:
+        return True, _passing_midas_kds_geometry_bridge_validation(artifact_paths)
+
+    monkeypatch.setattr(module, "_run_midas_kds_geometry_bridge_validator", _run_validator)
+
+
 def _passing_gate_payload(tmp_path: Path) -> dict:
     pbd_artifacts = {
         "drift_envelope_png": _touch(tmp_path / "drift.png"),
@@ -927,6 +979,7 @@ def test_phase1_ci_gate_reports_nonlinear_generalization_failure(tmp_path: Path,
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -972,6 +1025,7 @@ def test_phase1_ci_gate_reports_workflow_productization_failure(tmp_path: Path, 
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1041,6 +1095,7 @@ def test_phase1_ci_gate_surfaces_solver_truthfulness_summary(tmp_path: Path, mon
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1138,6 +1193,7 @@ def test_phase1_ci_gate_surfaces_performance_profiling_summary(tmp_path: Path, m
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1219,6 +1275,7 @@ def test_phase1_ci_gate_surfaces_hardest_external_10case_kickoff_summary(tmp_pat
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1338,6 +1395,7 @@ def test_phase1_ci_gate_surfaces_midas_native_roundtrip_summary(tmp_path: Path, 
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1436,6 +1494,7 @@ def test_phase1_ci_gate_surfaces_midas_exact_roundtrip_closure_scope_details(
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1499,6 +1558,7 @@ def test_phase1_ci_gate_surfaces_load_combination_engine_gate_when_absent(
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", lambda path: dict(passing_payload))
 
     exit_code = module.main(
@@ -1573,6 +1633,7 @@ def test_phase1_ci_gate_surfaces_load_combination_engine_gate_summary_when_prese
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", lambda path: dict(passing_payload))
 
     exit_code = module.main(
@@ -1667,6 +1728,7 @@ def test_phase1_ci_gate_surfaces_panel_zone_clash_status_when_present(
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", lambda path: dict(passing_payload))
 
     exit_code = module.main(
@@ -1766,6 +1828,7 @@ def test_phase1_ci_gate_surfaces_measured_benchmark_breadth_summary(
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -1856,6 +1919,7 @@ def test_phase1_ci_gate_surfaces_korean_source_ingest_summary(tmp_path: Path, mo
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(
@@ -2020,6 +2084,7 @@ def test_phase1_ci_gate_surfaces_irregular_collection_summary(tmp_path: Path, mo
     monkeypatch.setattr(module, "_validate_contract_artifacts", lambda paths: (True, []))
     monkeypatch.setattr(module, "_validate_priority3", lambda path: (True, None, None))
     monkeypatch.setattr(module, "_validate_extended_contracts", lambda *args: tuple([True] * 21))
+    _patch_kds_geometry_bridge_validator_pass(module, monkeypatch)
     monkeypatch.setattr(module, "_load_json", _load_json)
 
     exit_code = module.main(

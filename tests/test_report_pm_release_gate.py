@@ -88,6 +88,12 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "redaction_self_test_pass": True,
                     "bundle_roundtrip_test_pass": True,
                     "missing_required_count": 0,
+                    "pm_failure_bundle_coverage_pass": True,
+                },
+                "pm_failure_bundle_coverage": {
+                    "coverage_pass": True,
+                    "bundle_path": "release/support_bundle/pm_failure_bundle_coverage.json",
+                    "sha256": "pm-failure-bundle-coverage-sha256",
                 },
                 "export_archive": {
                     "available": True,
@@ -130,6 +136,8 @@ def _packaging_inputs(tmp_path: Path) -> dict[str, Path]:
                     "pm_release_reproduction_command_audit": (
                         "release/support_bundle/redacted/pm_release_reproduction_command_audit.json"
                     ),
+                    "commercial_gap_ledger_status": "release/support_bundle/redacted/commercial_gap_ledger_status.json",
+                    "gap_closure_status": "release/support_bundle/redacted/gap_closure_status.json",
                 },
             },
         ),
@@ -433,6 +441,8 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                     "cursor_worker_cli": "cursor-agent",
                     "opencode_worker_cli": "opencode",
                     "opencode_version": "1.17.7",
+                    "opencode_configured_model": "opencode-go/minimax-m3",
+                    "opencode_configured_model_available": True,
                 },
             },
         ),
@@ -477,6 +487,41 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 "contract_pass": True,
                 "reason_code": "PASS",
                 "summary_line": "Template evidence safety: PASS | templates=5 | validator_probes=5 | blockers=0",
+            },
+        ),
+        "commercial_gap_ledger_status": _write(
+            tmp_path / "commercial_gap_ledger_status.json",
+            {
+                "schema_version": "commercial-gap-ledger-status.v1",
+                "status": "open",
+                "full_gap_ledger_ready": False,
+                "commercial_solver_gap_ready": False,
+                "ai_engine_gap_ready": True,
+                "summary": {
+                    "total_count": 20,
+                    "closed_count": 17,
+                    "partial_count": 2,
+                    "open_count": 0,
+                    "external_blocked_count": 1,
+                },
+                "next_locally_closable_gaps": ["G1"],
+                "blockers": ["G1:direct_residual_newton_not_closed"],
+            },
+        ),
+        "gap_closure_status": _write(
+            tmp_path / "gap_closure_status.json",
+            {
+                "schema_version": "gap-closure-status.v1",
+                "full_gap_ledger_status": "open",
+                "full_gap_ledger_ready": False,
+                "full_gap_ledger_summary": {
+                    "total_count": 20,
+                    "closed_count": 17,
+                    "partial_count": 2,
+                    "open_count": 0,
+                    "external_blocked_count": 1,
+                },
+                "next_locally_closable_gaps": ["G1"],
             },
         ),
     }
@@ -551,6 +596,8 @@ def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp
     )
 
     assert payload["paid_pilot_candidate"] is True
+    assert payload["limited_commercial_milestone_ready"] is False
+    assert payload["limited_commercial_release_ready"] is False
     assert payload["limited_commercial_ready"] is False
     assert payload["ga_enterprise_ready"] is False
     assert "M1::corrected_state_recompute_missing_or_failed" in payload["blockers"]
@@ -631,11 +678,24 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["release_tiers"]["technical_paid_pilot_candidate"] is True
     assert payload["release_tiers"]["paid_pilot_scope_guard_pass"] is True
     assert payload["release_tiers"]["paid_pilot_scope_guard_report"].endswith("paid_pilot_scope_guard.json")
+    assert payload["limited_commercial_milestone_ready"] is True
+    assert payload["limited_commercial_release_ready"] is True
     assert payload["limited_commercial_ready"] is True
     assert payload["contract_pass"] is True
     assert payload["release_area_gate_ready"] is True
     assert payload["full_release_gate_ready"] is True
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
+    assert (
+        payload["implementation_orchestration"]["summary"]["opencode_configured_model"]
+        == "opencode-go/minimax-m3"
+    )
+    assert payload["implementation_orchestration"]["summary"]["opencode_configured_model_available"] is True
+    assert payload["gap_ledger_status"]["full_gap_ledger_status"] == "open"
+    assert payload["gap_ledger_status"]["commercial_gap_status"] == "open"
+    assert payload["gap_ledger_status"]["commercial_solver_gap_ready"] is False
+    assert payload["gap_ledger_status"]["ai_engine_gap_ready"] is True
+    assert payload["gap_ledger_status"]["next_locally_closable_gaps"] == ["G1"]
+    assert "G1:direct_residual_newton_not_closed" in payload["gap_ledger_status"]["blockers"]
     basic_ci_area = next(row for row in payload["release_area_matrix"] if row["area"] == "basic_ci")
     assert basic_ci_area["summary"]["pr_missing_consecutive_pass_count"] == 0
     assert basic_ci_area["summary"]["pr_pull_request_run_source_present"] is True
@@ -680,6 +740,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["checks"]["pm_release_gate_completion_audit_in_failure_bundle"] is True
     assert support_area["checks"]["pm_release_gate_reviewer_handoff_in_failure_bundle"] is True
     assert support_area["checks"]["pm_owner_evidence_request_packet_in_failure_bundle"] is True
+    assert support_area["checks"]["pm_failure_bundle_coverage_index_pass"] is True
     assert support_area["checks"]["pm_blocker_action_register_handoff_ready_pass"] is True
     assert support_area["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
     assert support_area["checks"]["pm_blocker_closure_board_register_count_match"] is True
@@ -721,6 +782,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert support_area["summary"]["pm_owner_evidence_request_packet"].endswith(
         "pm_owner_evidence_request_packet.json"
     )
+    assert support_area["summary"]["pm_failure_bundle_coverage_index"].endswith(
+        "pm_failure_bundle_coverage.json"
+    )
+    assert support_area["summary"]["pm_failure_bundle_coverage_index_sha256"] == "pm-failure-bundle-coverage-sha256"
     assert support_area["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
     assert support_area["summary"]["pm_blocker_closure_board_handoff_not_ready_count"] == 0
     assert support_area["summary"]["release_validation_manual"].endswith("release_validation_manual.md")
@@ -759,8 +824,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["support_bundle_pm_release_gate_completion_audit_present"] is True
     assert m5["checks"]["support_bundle_pm_release_gate_reviewer_handoff_present"] is True
     assert m5["checks"]["support_bundle_pm_owner_evidence_request_packet_present"] is True
+    assert m5["checks"]["support_bundle_pm_failure_bundle_coverage_pass"] is True
     assert m5["checks"]["pm_blocker_closure_board_handoff_ready_pass"] is True
     assert m5["checks"]["pm_blocker_closure_board_register_count_match"] is True
+    assert m5["summary"]["support_bundle_pm_failure_bundle_coverage"].endswith(
+        "pm_failure_bundle_coverage.json"
+    )
     assert m5["summary"]["pm_blocker_register_handoff_not_ready_count"] == 0
     assert m5["summary"]["pm_blocker_closure_board_handoff_not_ready_count"] == 0
     assert m5["checks"]["support_bundle_validation_manual_present"] is True
@@ -773,6 +842,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["checks"]["pm_release_reproduction_command_audit_present"] is True
     assert m5["checks"]["pm_release_reproduction_command_audit_pass"] is True
     assert m5["checks"]["support_bundle_pm_release_reproduction_command_audit_present"] is True
+    assert m5["checks"]["support_bundle_commercial_gap_ledger_status_present"] is True
+    assert m5["checks"]["support_bundle_gap_closure_status_present"] is True
+    assert m5["summary"]["support_bundle_commercial_gap_ledger_status"].endswith(
+        "commercial_gap_ledger_status.json"
+    )
+    assert m5["summary"]["support_bundle_gap_closure_status"].endswith("gap_closure_status.json")
     assert m5["summary"]["pm_release_reproduction_command_audit_command_count"] == 42
     assert m5["summary"]["pm_release_reproduction_command_audit_violation_count"] == 0
     assert m5["checks"]["support_bundle_one_click_archive_present"] is True
@@ -897,7 +972,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         **base_kwargs,
     )
 
-    assert payload_with_stale_strict_ci["limited_commercial_ready"] is True
+    assert payload_with_stale_strict_ci["limited_commercial_milestone_ready"] is True
+    assert payload_with_stale_strict_ci["limited_commercial_release_ready"] is False
+    assert payload_with_stale_strict_ci["limited_commercial_ready"] is False
     assert payload_with_stale_strict_ci["release_area_gate_ready"] is False
     assert (
         "strict_ci::strict_ci_require_hip_artifact_failed_or_stale"
@@ -985,3 +1062,4 @@ def test_pm_release_gate_cli_writes_default_markdown_next_to_json(tmp_path: Path
 
     assert f"- `summary_line`: `{payload['summary_line']}`" in markdown
     assert "release_areas=READY" in markdown
+    assert "- `full_gap_ledger_status`: `open`" in markdown

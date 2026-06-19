@@ -5,7 +5,7 @@
 This repository is operated from the Codex VS Code extension using the Codex goal feature.
 
 - Codex owns goal tracking, design, task slicing, review, verification planning, and final acceptance.
-- Cursor Agent auto mode and OpenCode Minimax M3 may be used only as implementation workers for scoped local edits.
+- Cursor Agent auto mode and OpenCode worker may be used only as implementation workers for scoped local edits. The OpenCode wrapper default model is MiniMax M3 via registry id `opencode-go/minimax-m3`.
 - Human owner owns push, merge, deployment, release publication, production mutation, billing changes, and final accountability.
 
 ## Active Product Goal
@@ -24,12 +24,13 @@ Every G1-G10 and AI-G1-AI-G10 row must have authoritative evidence before it is 
 - Before substantial work, read `.betelgeuze/intent_spec.md`, `.betelgeuze/project_contract.yaml`, and the relevant gap ledger rows.
 - For Cursor delegation, create a run-specific prompt file under `docs/ai/dispatch/` and call `./scripts/ai-worker-cursor.sh <prompt-file>`.
 - For OpenCode delegation, create a run-specific prompt file under `docs/ai/dispatch/` and call `./scripts/ai-worker-opencode.sh <prompt-file>`.
-- Prefer OpenCode Minimax M3 for large-context work, long logs/docs, broad repository sweeps, large diffs, and repeated low-cost implementation passes.
+- Prefer OpenCode worker on MiniMax M3 (`opencode-go/minimax-m3`) for large-context work, long logs/docs, broad repository sweeps, large diffs, and repeated implementation passes.
 - Prefer Cursor auto for IDE-attached work where open files, selections, current UI state, or Cursor-specific tooling matter most.
 - Use workers sequentially, one scoped slice at a time.
 - Codex delegation tasks must stay short and include only goal, scope, candidate files, and verification criteria.
-- Do not delegate simple docs, small tests, clear fixes, or changes expected to stay under roughly 100-200 LOC.
-- Delegate only broad exploration, large mechanical edits, repeated test-fix cycles, or multi-file refactors.
+- Treat a slice as a worker candidate when it is expected to involve 50+ LOC of implementation or mechanical edits, 3+ files, 10+ minutes of exploration, a broad grep/sweep, repeated test-fix cycles, or long logs/evidence/readiness-gate diagnosis.
+- Do not delegate simple docs, small tests, or clear fixes unless one of the worker-candidate triggers applies.
+- Delegate only scoped exploration, large mechanical edits, repeated test-fix cycles, or multi-file refactors.
 - Workers own exploration, implementation, focused tests, and concise summary for the assigned slice.
 - Worker output must be limited to changed files, test results, failed test names, core diff summary, and blockers.
 - Codex does not read full worker logs by default. Inspect targeted files, named failing tests, and diffs only when needed.

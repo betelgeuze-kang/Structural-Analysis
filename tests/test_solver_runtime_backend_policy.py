@@ -33,7 +33,8 @@ def test_solver_runtime_backend_policy_marks_rocm_as_official_lane() -> None:
     assert payload["cpu_reference_allowed_for_validation_replay"] is True
     assert payload["rocm_sparse_probe_present"] is True
     assert payload["line_frame_rocm_sparse_solver_ready"] is True
-    assert payload["rocm_sparse_solver_probe_ready"] is False
+    assert payload["rocm_sparse_solver_probe_ready"] is True
+    assert payload["shell_coupled_rocm_sparse_solver_ready"] is True
     assert not payload["blockers"]
 
 

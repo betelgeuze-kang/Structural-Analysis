@@ -16,10 +16,52 @@ DEFAULT_OUT = Path(
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
 )
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
+DEFAULT_ACTION_REGISTER = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
+)
+DEFAULT_ACTION_REGISTER_MD = DEFAULT_ACTION_REGISTER.with_suffix(".md")
+DEFAULT_CLOSURE_BOARD = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
+)
+DEFAULT_CLOSURE_BOARD_MD = DEFAULT_CLOSURE_BOARD.with_suffix(".md")
+DEFAULT_COMPLETION_AUDIT = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
+)
+DEFAULT_COMPLETION_AUDIT_MD = DEFAULT_COMPLETION_AUDIT.with_suffix(".md")
+DEFAULT_REVIEWER_HANDOFF = Path(
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
+)
+DEFAULT_REVIEWER_HANDOFF_MD = DEFAULT_REVIEWER_HANDOFF.with_suffix(".md")
+DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
+)
+DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET_MD = DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET.with_suffix(".md")
+DEFAULT_PAID_PILOT_SCOPE_GUARD = Path(
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
+)
+DEFAULT_PAID_PILOT_SCOPE_GUARD_MD = DEFAULT_PAID_PILOT_SCOPE_GUARD.with_suffix(".md")
+DEFAULT_PM_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
+DEFAULT_PM_REPORT_MD = DEFAULT_PM_REPORT.with_suffix(".md")
+DEFAULT_SUPPORT_BUNDLE_MANIFEST = Path("implementation/phase1/support_bundle_manifest.json")
+DEFAULT_SUPPORT_BUNDLE_PM_FAILURE_COVERAGE = Path(
+    "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json"
+)
+DEFAULT_SUPPORT_BUNDLE_ARCHIVE = Path("implementation/phase1/release/support_bundle_export.zip")
+DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
+)
+DEFAULT_GAP_CLOSURE_STATUS = Path("implementation/phase1/release_evidence/productization/gap_closure_status.json")
+DEFAULT_G1_DIRECT_RESIDUAL_TERMINAL_GATE_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json"
+)
+DEFAULT_G1_SHELL_MATERIAL_BUDGETED_CONTINUATION_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
+)
 DEFAULT_INPUT_PATHS = (
-    Path("implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"),
-    Path("implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"),
-    Path("implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"),
+    DEFAULT_ACTION_REGISTER,
+    DEFAULT_CLOSURE_BOARD,
+    DEFAULT_REVIEWER_HANDOFF,
     Path("implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"),
     Path("implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json"),
     Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"),
@@ -28,7 +70,9 @@ DEFAULT_INPUT_PATHS = (
 DEFAULT_PACKAGE_JSON = Path("package.json")
 COMMAND_FIELDS = frozenset(("reproduction_commands", "verification_commands", "validation_commands"))
 SHELL_COMPOSITION_MARKERS = ("&&", "||", ";", "|", ">>", ">", "<", "$(", "`", "\n", "\r")
-OUTPUT_PATH_FLAGS = frozenset(("--out", "--out-md", "--out-json", "--manifest-out", "--archive-out"))
+OUTPUT_PATH_FLAGS = frozenset(
+    ("--out", "--out-md", "--out-json", "--output-json", "--manifest-out", "--archive-out")
+)
 OUTPUT_DIRECTORY_FLAGS = frozenset(("--bundle-dir",))
 EXTERNAL_OWNER_NETWORK_SCRIPTS = frozenset(("build_github_actions_ci_streak_evidence.py",))
 NPM_AUDIT_LEVELS = frozenset(("info", "low", "moderate", "high", "critical"))
@@ -244,11 +288,94 @@ def _artifact_label(path: Path) -> str:
     return path.stem.replace("-", "_")
 
 
+def _package_regeneration_commands() -> list[str]:
+    return [
+        f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_ACTION_REGISTER} --out-md {DEFAULT_ACTION_REGISTER_MD}",
+        f"python3 scripts/build_pm_release_blocker_closure_board.py --out {DEFAULT_CLOSURE_BOARD} --out-md {DEFAULT_CLOSURE_BOARD_MD}",
+        f"python3 scripts/build_pm_release_gate_completion_audit.py --out {DEFAULT_COMPLETION_AUDIT} --out-md {DEFAULT_COMPLETION_AUDIT_MD}",
+        f"python3 scripts/build_pm_release_gate_reviewer_handoff.py --out {DEFAULT_REVIEWER_HANDOFF} --out-md {DEFAULT_REVIEWER_HANDOFF_MD}",
+        f"python3 scripts/build_pm_owner_evidence_request_packet.py --out {DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET} --out-md {DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET_MD}",
+        f"python3 scripts/build_mgt_g1_direct_residual_terminal_gate_report.py --out {DEFAULT_G1_DIRECT_RESIDUAL_TERMINAL_GATE_REPORT}",
+        f"python3 scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py --out {DEFAULT_G1_SHELL_MATERIAL_BUDGETED_CONTINUATION_STATUS}",
+        f"python3 scripts/report_commercial_gap_ledger_status.py --output-json {DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS}",
+        f"python3 scripts/report_gap_closure_status.py --output-json {DEFAULT_GAP_CLOSURE_STATUS}",
+        "python3 scripts/build_support_bundle.py",
+        f"python3 scripts/build_paid_pilot_scope_guard_report.py --out {DEFAULT_PAID_PILOT_SCOPE_GUARD} --out-md {DEFAULT_PAID_PILOT_SCOPE_GUARD_MD}",
+        f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
+        f"python3 scripts/build_pm_release_reproduction_command_audit.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+    ]
+
+
+def _package_regeneration_output_specs() -> list[tuple[str, Path, str]]:
+    return [
+        ("pm_release_blocker_action_register_json", DEFAULT_ACTION_REGISTER, "build_pm_release_blocker_action_register.py"),
+        ("pm_release_blocker_action_register_md", DEFAULT_ACTION_REGISTER_MD, "build_pm_release_blocker_action_register.py"),
+        ("pm_release_blocker_closure_board_json", DEFAULT_CLOSURE_BOARD, "build_pm_release_blocker_closure_board.py"),
+        ("pm_release_blocker_closure_board_md", DEFAULT_CLOSURE_BOARD_MD, "build_pm_release_blocker_closure_board.py"),
+        ("pm_release_gate_completion_audit_json", DEFAULT_COMPLETION_AUDIT, "build_pm_release_gate_completion_audit.py"),
+        ("pm_release_gate_completion_audit_md", DEFAULT_COMPLETION_AUDIT_MD, "build_pm_release_gate_completion_audit.py"),
+        ("pm_release_gate_reviewer_handoff_json", DEFAULT_REVIEWER_HANDOFF, "build_pm_release_gate_reviewer_handoff.py"),
+        ("pm_release_gate_reviewer_handoff_md", DEFAULT_REVIEWER_HANDOFF_MD, "build_pm_release_gate_reviewer_handoff.py"),
+        ("pm_owner_evidence_request_packet_json", DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET, "build_pm_owner_evidence_request_packet.py"),
+        ("pm_owner_evidence_request_packet_md", DEFAULT_OWNER_EVIDENCE_REQUEST_PACKET_MD, "build_pm_owner_evidence_request_packet.py"),
+        (
+            "g1_direct_residual_terminal_gate_report",
+            DEFAULT_G1_DIRECT_RESIDUAL_TERMINAL_GATE_REPORT,
+            "build_mgt_g1_direct_residual_terminal_gate_report.py",
+        ),
+        (
+            "g1_shell_material_budgeted_continuation_status",
+            DEFAULT_G1_SHELL_MATERIAL_BUDGETED_CONTINUATION_STATUS,
+            "build_mgt_g1_shell_material_budgeted_continuation_status.py",
+        ),
+        ("commercial_gap_ledger_status", DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS, "report_commercial_gap_ledger_status.py"),
+        ("gap_closure_status", DEFAULT_GAP_CLOSURE_STATUS, "report_gap_closure_status.py"),
+        ("support_bundle_manifest", DEFAULT_SUPPORT_BUNDLE_MANIFEST, "build_support_bundle.py"),
+        ("pm_failure_bundle_coverage", DEFAULT_SUPPORT_BUNDLE_PM_FAILURE_COVERAGE, "build_support_bundle.py"),
+        ("support_bundle_export_archive", DEFAULT_SUPPORT_BUNDLE_ARCHIVE, "build_support_bundle.py"),
+        ("paid_pilot_scope_guard_json", DEFAULT_PAID_PILOT_SCOPE_GUARD, "build_paid_pilot_scope_guard_report.py"),
+        ("paid_pilot_scope_guard_md", DEFAULT_PAID_PILOT_SCOPE_GUARD_MD, "build_paid_pilot_scope_guard_report.py"),
+        ("pm_release_gate_report_json", DEFAULT_PM_REPORT, "report_pm_release_gate.py"),
+        ("pm_release_gate_report_md", DEFAULT_PM_REPORT_MD, "report_pm_release_gate.py"),
+        ("pm_release_reproduction_command_audit_json", DEFAULT_OUT, "build_pm_release_reproduction_command_audit.py"),
+        ("pm_release_reproduction_command_audit_md", DEFAULT_OUT_MD, "build_pm_release_reproduction_command_audit.py"),
+    ]
+
+
+def _expected_output_row(*, label: str, path: Path, producer: str, repo_root: Path) -> dict[str, Any]:
+    path_text = str(path)
+    row: dict[str, Any] = {
+        "label": label,
+        "path": path_text,
+        "producer": producer,
+        "exists": False,
+        "is_file": False,
+        "contract_pass": False,
+        "blockers": [],
+    }
+    blockers: list[str] = []
+    if not _path_inside_repo(path_text, repo_root=repo_root):
+        blockers.append("package_output_path_escapes_repo")
+        row["blockers"] = blockers
+        return row
+    candidate = path if path.is_absolute() else repo_root / path
+    row["exists"] = candidate.exists()
+    row["is_file"] = candidate.is_file()
+    if not candidate.exists():
+        blockers.append("package_output_missing")
+    elif not candidate.is_file():
+        blockers.append("package_output_not_file")
+    row["blockers"] = blockers
+    row["contract_pass"] = not blockers
+    return row
+
+
 def build_report(
     *,
     input_paths: list[Path] | None = None,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     repo_root: Path = Path("."),
+    include_package_recipe: bool = True,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     paths = list(input_paths) if input_paths is not None else list(DEFAULT_INPUT_PATHS)
@@ -256,6 +383,13 @@ def build_report(
     artifact_rows: list[dict[str, Any]] = []
     command_rows: list[dict[str, Any]] = []
     artifact_blockers: list[str] = []
+    package_regeneration_commands = _package_regeneration_commands() if include_package_recipe else []
+    package_regeneration_output_rows = [
+        _expected_output_row(label=label, path=path, producer=producer, repo_root=repo_root)
+        for label, path, producer in (
+            _package_regeneration_output_specs() if include_package_recipe else []
+        )
+    ]
     for input_path in paths:
         path = input_path if input_path.is_absolute() else repo_root / input_path
         label = _artifact_label(input_path)
@@ -313,8 +447,28 @@ def build_report(
         artifact_row["contract_pass"] = not artifact_row["blockers"] and not artifact_violations
         artifact_rows.append(artifact_row)
 
+    package_command_rows = [
+        _validate_command(
+            command,
+            artifact_label="pm_release_package_regeneration_recipe",
+            artifact_path=DEFAULT_OUT,
+            field_name="package_regeneration_commands",
+            json_path="$.package_regeneration_commands",
+            command_index=index,
+            repo_root=repo_root,
+            npm_scripts=npm_scripts,
+        )
+        for index, command in enumerate(package_regeneration_commands)
+    ]
+    command_rows.extend(package_command_rows)
     command_blockers = [blocker for row in command_rows for blocker in row["blockers"]]
-    blockers = sorted({*artifact_blockers, *command_blockers})
+    package_output_blockers = [
+        f"{row['label']}:{blocker}"
+        for row in package_regeneration_output_rows
+        for blocker in row["blockers"]
+    ]
+    total_violation_count = len(command_blockers) + len(package_output_blockers)
+    blockers = sorted({*artifact_blockers, *command_blockers, *package_output_blockers})
     contract_pass = not blockers
     external_owner_command_count = sum(
         1 for row in command_rows if row.get("execution_class") == "external_owner_network"
@@ -328,31 +482,36 @@ def build_report(
         "summary_line": (
             f"PM reproduction command audit: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"artifacts={sum(1 for row in artifact_rows if row['contract_pass'])}/{len(artifact_rows)} | "
-            f"commands={len(command_rows)} | violations={len(command_blockers)}"
+            f"commands={len(command_rows)} | violations={total_violation_count}"
         ),
         "summary": {
             "artifact_count": len(artifact_rows),
             "artifact_pass_count": sum(1 for row in artifact_rows if row["contract_pass"]),
             "command_count": len(command_rows),
-            "violation_count": len(command_blockers),
+            "violation_count": total_violation_count,
+            "command_violation_count": len(command_blockers),
             "external_owner_command_count": external_owner_command_count,
             "npm_script_count": len(npm_scripts),
+            "package_regeneration_command_count": len(package_command_rows),
+            "package_regeneration_violation_count": sum(
+                len(row["blockers"]) for row in package_command_rows
+            ),
+            "package_regeneration_expected_output_count": len(package_regeneration_output_rows),
+            "package_regeneration_expected_output_pass_count": sum(
+                1 for row in package_regeneration_output_rows if row["contract_pass"]
+            ),
+            "package_regeneration_output_violation_count": len(package_output_blockers),
         },
         "artifact_rows": artifact_rows,
+        "package_regeneration_commands": package_regeneration_commands,
+        "package_regeneration_command_rows": package_command_rows,
+        "package_regeneration_expected_outputs": [
+            str(path) for _, path, _ in (_package_regeneration_output_specs() if include_package_recipe else [])
+        ],
+        "package_regeneration_output_rows": package_regeneration_output_rows,
         "command_rows": command_rows,
         "blockers": blockers,
-        "validation_commands": [
-            (
-                "python3 scripts/build_pm_release_reproduction_command_audit.py "
-                f"--out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}"
-            ),
-            "python3 scripts/build_support_bundle.py",
-            (
-                "python3 scripts/report_pm_release_gate.py "
-                " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
-                " --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
-            ),
-        ],
+        "validation_commands": package_regeneration_commands,
         "claim_boundary": (
             "This audit is a static allowlist and path-safety check for embedded reproduction commands. "
             "It does not execute commands, contact GitHub/npm, or create owner-provided release evidence."
@@ -377,6 +536,15 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| `{row['artifact']}` | `{row['contract_pass']}` | "
             f"`{row['command_count']}` | `{row['violation_count']}` |"
         )
+    lines.extend(["", "## Package Regeneration Recipe", ""])
+    for command in payload.get("package_regeneration_commands", []):
+        lines.append(f"- `{command}`")
+    lines.extend(["", "## Expected Outputs", "", "| Label | Pass | Path | Producer |", "|---|---:|---|---|"])
+    for row in payload.get("package_regeneration_output_rows", []):
+        lines.append(
+            f"| `{row['label']}` | `{row['contract_pass']}` | `{row['path']}` | "
+            f"`{row['producer']}` |"
+        )
     lines.extend(["", "## Commands", "", "| Artifact | Field | Pass | Class | Blockers | Command |", "|---|---|---:|---|---|---|"])
     for row in payload["command_rows"]:
         blockers = ", ".join(f"`{item}`" for item in row["blockers"]) or "`none`"
@@ -399,6 +567,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--repo-root", type=Path, default=Path("."))
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--no-package-recipe", action="store_false", dest="include_package_recipe")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
@@ -410,6 +579,7 @@ def main(argv: list[str] | None = None) -> int:
         input_paths=args.input_paths,
         package_json=args.package_json,
         repo_root=args.repo_root,
+        include_package_recipe=args.include_package_recipe,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")

@@ -224,11 +224,29 @@ Budgeted shell-material continuation:
   `10.403522164941286 -> 10.240967131025435 N`.
 - Widening the target to `4` at followup387 still promotes but only lowers
   `10.240967131025435 -> 10.08095402628286 N`.
-- A multi-promotion child then reduces restart overhead. Followup388 starts from
+- Multi-promotion children then reduce restart overhead. Followup388 starts from
   the followup387 compact checkpoint, allows `4` row-correction promotions in
   one child, and lowers `10.08095402628286 -> 9.465515735677663 N` through
   internal pass finals `9.923441094488489`, `9.768389271824425`,
-  `9.615760103715992`, and `9.465515735677663 N`.
+  `9.615760103715992`, and `9.465515735677663 N`. Followup389 repeats the
+  completed controller pattern from the followup388 compact checkpoint and lowers
+  the frontier again to `8.887649712433166 N`. The followup390 child launch
+  receipt is `in_progress`/launch-only and must not be counted as residual
+  progress until a completed child direct-residual receipt exists. Followup391
+  then starts from the followup389 compact checkpoint and completes another
+  multi-promotion child, lowering the frontier to `8.345062176806358 N` through
+  internal pass finals `8.748781925041193`, `8.612083919588521`,
+  `8.477521794183566`, and `8.345062176806358 N`. Followup392 starts from
+  that compact checkpoint and lowers the frontier to `7.835599421240012 N`
+  through internal pass finals `8.21467221396896`, `8.086319567914224`,
+  `7.959972407229806`, and `7.835599421240012 N`. Followup393 continues from
+  the followup392 compact checkpoint and lowers the frontier to
+  `7.357239142571679 N` through internal pass finals `7.713169713195647`,
+  `7.5926529466153525`, `7.474019230263629`, and `7.357239142571679 N`.
+  Followup394 continues from the followup393 compact checkpoint and lowers the
+  frontier to `6.908082594771521 N` through internal pass finals
+  `7.242283720972672`, `7.129124479585052`, `7.017733304283219`, and
+  `6.908082594771521 N`.
 
 This is real residual-gated progress, but not closure: the direct residual gate
 is still `5e-4 N`. The route now has a bounded continuation/checkpoint mechanism;

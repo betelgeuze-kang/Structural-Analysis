@@ -1,6 +1,6 @@
 {
   "schema_version": "validate-productization-delivery-evidence.v1",
-  "generated_at": "2026-06-05T13:36:08.931898+00:00",
+  "generated_at": "2026-06-18T15:46:23.314751+00:00",
   "status": "pass",
   "productization_dir": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization",
   "files_checked": 57,
@@ -39,7 +39,7 @@
     "gpu_solver_claim_receipt.json": "present",
     "gpu_rocm_workstation_receipt.json": "ready",
     "solver_runtime_backend_policy.json": "ready",
-    "mgt_rocm_sparse_solver_probe.json": "partial",
+    "mgt_rocm_sparse_solver_probe.json": "ready",
     "gpu_newton_certification_checklist.json": "certified",
     "rh_closure_checklist.json": "complete",
     "rh_signed_closure_packet_template.json": "template_only",

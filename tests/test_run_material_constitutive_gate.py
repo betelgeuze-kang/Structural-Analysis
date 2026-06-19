@@ -1154,7 +1154,7 @@ def test_material_constitutive_gate_passes_with_damage_cyclic_and_bond_evidence(
     assert bridge_row["context"]["bridge_mode"] == "topology_projected"
     assert "wind_pressure_coupled_transfer=" in payload["summary"]["calibration_matrix_group_label"]
     assert "coverage=cd[t=3,h=2,s=2,sf=19],cyc[t=2,h=2,store=2,sf=18],bond[t=3,h=2,s=2,sf=18]" in payload["summary_line"]
-    assert "core=cd[states=5,res=0.20],cyc[states=4,tags=6],bond[states=3,slip=1.14,res=0.25]" in payload["summary_line"]
+    assert "core=cd[states=5,res=0.20],cyc[states=4,tags=7],bond[states=3,slip=1.14,res=0.25]" in payload["summary_line"]
 
 
 def test_material_constitutive_gate_fails_when_bond_interface_is_missing(tmp_path: Path) -> None:

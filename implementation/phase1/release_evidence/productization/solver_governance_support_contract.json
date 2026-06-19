@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-06-05T13:36:10.201383+00:00",
+  "generated_at": "2026-06-18T15:00:15.245854+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -27,8 +27,7 @@
     "unsupported_or_external": [
       "G1",
       "G6",
-      "G7",
-      "G9"
+      "G7"
     ]
   },
   "headline_trace_contract": {
@@ -78,8 +77,7 @@
       "title": "Full 3D Global FEA Core",
       "status": "partial",
       "blockers": [
-        "full_mesh_nonlinear_equilibrium_not_closed",
-        "direct_residual_newton_not_closed"
+        "full_mesh_nonlinear_equilibrium_not_closed"
       ]
     },
     {
@@ -106,14 +104,6 @@
         "repo_benchmark_bridge_mgt_present",
         "metadata_only_sources_present",
         "operator_attached_real_mgt_header_ok_below_target"
-      ]
-    },
-    {
-      "id": "G9",
-      "title": "Runtime, GPU, Performance, And Scale",
-      "status": "partial",
-      "blockers": [
-        "full_solver_gpu_evidence_not_closed"
       ]
     }
   ],

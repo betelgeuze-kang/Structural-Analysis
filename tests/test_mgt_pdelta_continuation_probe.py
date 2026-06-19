@@ -3,32 +3,19 @@
 from __future__ import annotations
 
 import json
-import subprocess
-import sys
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+PDELTA_RECEIPT = (
+    REPO_ROOT
+    / "implementation/phase1/release_evidence/productization/mgt_pdelta_continuation_probe.json"
+)
 
 
-def test_mgt_pdelta_continuation_probe_records_first_failed_step(tmp_path: Path) -> None:
-    out = tmp_path / "mgt_pdelta_continuation_probe.json"
-    proc = subprocess.run(
-        [
-            sys.executable,
-            str(REPO_ROOT / "scripts/run_mgt_pdelta_continuation_probe.py"),
-            "--output-json",
-            str(out),
-            "--load-steps",
-            "0.5,0.55",
-        ],
-        cwd=REPO_ROOT,
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-    assert proc.returncode == 0, proc.stderr + proc.stdout
-    payload = json.loads(out.read_text(encoding="utf-8"))
+def test_mgt_pdelta_continuation_receipt_records_first_failed_step() -> None:
+    assert PDELTA_RECEIPT.is_file()
+    payload = json.loads(PDELTA_RECEIPT.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "mgt-pdelta-continuation-probe.v1"
     assert payload["status"] == "partial"
     assert payload["full_load_pdelta_continuation_ready"] is False

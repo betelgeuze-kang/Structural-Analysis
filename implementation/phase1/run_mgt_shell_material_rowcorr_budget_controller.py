@@ -86,6 +86,18 @@ def _checkpoint_from_seed(payload: dict[str, Any]) -> Path | None:
 def _probe_summary(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
     base = _direct_residual(payload, "base_direct_residual")
     final = _direct_residual(payload, "final_direct_residual")
+    if base is None:
+        base = (
+            float(payload["initial_frontier_direct_residual_inf_n"])
+            if payload.get("initial_frontier_direct_residual_inf_n") is not None
+            else None
+        )
+    if final is None:
+        final = (
+            float(payload["final_direct_residual_inf_n"])
+            if payload.get("final_direct_residual_inf_n") is not None
+            else None
+        )
     improvement = base - final if base is not None and final is not None else None
     relative = (
         improvement / max(base, 1.0e-30)

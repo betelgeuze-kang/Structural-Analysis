@@ -57,6 +57,9 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     payload = build_commercial_gap_ledger_status()
     rows = {row["id"]: row for row in payload["rows"]}
     assert rows["G1"]["status"] in {"open", "partial"}
+    assert "full_mesh_nonlinear_equilibrium_not_closed" in rows["G1"]["blockers"]
+    assert "direct_residual_newton_not_closed" not in rows["G1"]["blockers"]
+    assert "equilibrium_newton_not_closed" not in rows["G1"]["blockers"]
     assert "G1 remains partial" in rows["G1"]["claim_boundary"]
     assert "does not close full-mesh full-load 3D nonlinear equilibrium" in rows["G1"]["claim_boundary"]
     assert "without fallback" in rows["G1"]["claim_boundary"]
@@ -362,6 +365,12 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == "state_scale_line_search"
     )
+    terminal_equilibrium = rows["G1"]["evidence"][
+        "equilibrium_newton_structural_terminal_increment_gate"
+    ]
+    assert terminal_equilibrium["status"] == "ready"
+    assert terminal_equilibrium["ready"] is True
+    assert terminal_equilibrium["final_residual_inf_n"] <= 5.0e-4
     assert rows["G1"]["evidence"]["equilibrium_preconditioned_zero_status"] == "ready"
     assert (
         rows["G1"]["evidence"]["equilibrium_preconditioned_zero_residual_gate_passed"]
@@ -531,6 +540,39 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert direct_trust["best_candidate"]["residual_gate_passed"] is False
     assert direct_trust["best_candidate"]["relative_increment_gate_passed"] is True
+    direct_gate_replay = rows["G1"]["evidence"][
+        "direct_residual_attached_policy_gate_replay"
+    ]
+    assert direct_gate_replay["status"] == "partial"
+    assert direct_gate_replay["ready"] is False
+    assert direct_gate_replay["final_direct_residual_inf_n"] <= 5.0e-4
+    assert direct_gate_replay["blockers"] == [
+        "relative_increment_gate_not_closed_or_not_verified",
+        "consistent_jacobian_or_globalization_required",
+        "regularized_fixed_point_residual_must_not_be_used_as_physical_residual",
+    ]
+    g1_gate_summary = rows["G1"]["evidence"][
+        "g1_attached_equilibrium_newton_gate_summary"
+    ]
+    assert g1_gate_summary["status"] == "partial"
+    assert g1_gate_summary["direct_residual_gate_passed"] is True
+    assert (
+        g1_gate_summary["direct_residual_gate_replay"]["gate_assessment"][
+            "relative_increment_gate_verified"
+        ]
+        is False
+    )
+    direct_terminal_gate = rows["G1"]["evidence"][
+        "g1_direct_residual_terminal_gate_report"
+    ]
+    assert direct_terminal_gate["status"] == "ready"
+    assert direct_terminal_gate["direct_residual_terminal_gate_ready"] is True
+    assert direct_terminal_gate["direct_residual_newton_gate_ready"] is True
+    assert (
+        direct_terminal_gate["measurements"]["direct_replay_final_residual_inf_n"]
+        == direct_gate_replay["final_direct_residual_inf_n"]
+    )
+    assert "does not close full-mesh/full-load" in direct_terminal_gate["claim_boundary"]
     direct_secant = rows["G1"]["evidence"][
         "direct_residual_secant_subspace_globalization"
     ]
@@ -3433,6 +3475,40 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert support128_followup33_jvp["min_action_cosine"] >= 0.999999999999
     assert "direct_residual_gate_not_closed" in rows["G1"]["evidence"][
         "direct_residual_newton_blockers"
+    ]
+    g1_shell_material_budgeted = rows["G1"]["evidence"]
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_latest_frontier_receipt"
+        ]
+        == "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json"
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_latest_frontier_compact_checkpoint_exists"
+        ]
+        is True
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_latest_frontier_direct_residual_inf_n"
+        ]
+        == 5.74426714604332
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_residual_gap_ratio_to_tolerance"
+        ]
+        > 11000.0
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_direct_residual_gate_passed"
+        ]
+        is False
+    )
+    assert "direct_residual_gate_not_closed" in g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_blockers"
     ]
     g1_element_block = rows["G1"]["evidence"][
         "direct_residual_row_element_block_target_smoke"

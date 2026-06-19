@@ -48,3 +48,12 @@ def inline_structure_viewer_stylesheets(html: str) -> str:
     for filename, css_path in STRUCTURE_VIEWER_STYLE_SHEETS:
         html = _inline_stylesheet_link(html, filename, css_path)
     return html
+
+
+def inline_design_theme_stylesheet(html: str) -> str:
+    """Inline the shared design-theme layer for compact single-file viewers."""
+    return _inline_stylesheet_link(
+        html,
+        "design-theme.css",
+        REPO_ROOT / "src" / "structure-viewer" / "design-theme.css",
+    )

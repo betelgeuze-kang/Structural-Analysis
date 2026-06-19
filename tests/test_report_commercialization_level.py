@@ -144,6 +144,7 @@ def test_report_commercialization_level_marks_engineer_in_loop_commercial_assist
         commercial_readiness=_commercial(tmp_path / "commercial.json"),
         external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
         external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
+        residual_holdout_closure_updates=_residual_pending_updates(tmp_path / "rh-updates.json"),
         p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
         p1_operational_queues=tmp_path / "missing-ops.json",
     )

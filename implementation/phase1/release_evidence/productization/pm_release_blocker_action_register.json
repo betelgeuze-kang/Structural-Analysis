@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-17T15:37:40.849163+00:00",
+  "generated_at": "2026-06-18T15:01:37.418895+00:00",
   "next_actions": [
     "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
     "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
@@ -9,7 +9,7 @@
     "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass."
   ],
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
   "rows": [
     {
@@ -467,7 +467,9 @@
     "full_release_gate_ready": false,
     "handoff_not_ready_count": 0,
     "handoff_ready_count": 5,
-    "limited_commercial_ready": true,
+    "limited_commercial_milestone_ready": true,
+    "limited_commercial_ready": false,
+    "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 0,
     "milestone_blocker_count": 0,
     "open_blocker_count": 5,

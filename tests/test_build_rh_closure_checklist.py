@@ -10,10 +10,46 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_build_rh_closure_checklist_lists_open_rows() -> None:
-    out = REPO_ROOT / "implementation/phase1/release_evidence/productization/rh_closure_checklist_test.json"
+def _open_rh_updates(path: Path) -> Path:
+    payload = {
+        "schema_version": "residual-holdout-closure-updates.v1",
+        "updates": {
+            "RH-001": {
+                "status": "open",
+                "owner": "licensed_engineer",
+                "closure_evidence_required": "signed_engineer_review_packet",
+                "closure_evidence_status": "pending",
+            },
+            "RH-002": {
+                "status": "open",
+                "owner": "legacy_tool_owner",
+                "closure_evidence_required": "legacy_tool_cross_validation_report",
+                "closure_evidence_status": "pending",
+            },
+            "RH-003": {
+                "status": "open",
+                "owner": "authority_workflow_owner",
+                "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+                "closure_evidence_status": "pending",
+            },
+        },
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    return path
+
+
+def test_build_rh_closure_checklist_lists_open_rows(tmp_path: Path) -> None:
+    out = tmp_path / "rh_closure_checklist.json"
+    rh_json = _open_rh_updates(tmp_path / "residual_holdout_closure_updates.json")
     proc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/build_rh_closure_checklist.py"), "--output-json", str(out)],
+        [
+            sys.executable,
+            str(REPO_ROOT / "scripts/build_rh_closure_checklist.py"),
+            "--rh-json",
+            str(rh_json),
+            "--output-json",
+            str(out),
+        ],
         cwd=REPO_ROOT,
         check=False,
         capture_output=True,

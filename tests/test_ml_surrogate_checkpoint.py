@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -55,6 +56,7 @@ def test_ml_status_and_contracts_promote_only_shadow_solver_gated_checkpoint() -
         check=False,
         capture_output=True,
         text=True,
+        env={**os.environ, "PHASE1_ML_SURROGATE_OPT_IN": "1"},
     )
     assert proc.returncode == 0, proc.stderr + proc.stdout
     status = json.loads((PRODUCTIZATION / "ml_multi_objective_status.json").read_text(encoding="utf-8"))

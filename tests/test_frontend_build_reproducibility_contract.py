@@ -46,7 +46,7 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         "@types/react-dom": "18.2.7",
         "@vitejs/plugin-react": "6.0.1",
         "typescript": "5.0.2",
-        "vite": "8.0.8",
+        "vite": "8.0.16",
     }
     assert not (ROOT / "pakage.json").exists()
 

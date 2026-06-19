@@ -236,7 +236,7 @@ def _block_lstsq_row_matches_filter(row: dict[str, Any], *, component_filter: st
         return False
     dominant = str(row.get("dominant_component") or "")
     if component_filter == "frame":
-        return dominant == "frame"
+        return dominant in {"frame", "external_only_unassembled"}
     if component_filter == "shell_bending_drilling":
         return dominant == "shell_bending_drilling"
     if component_filter == "shell_membrane":

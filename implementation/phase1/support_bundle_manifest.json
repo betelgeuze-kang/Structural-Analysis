@@ -1,8 +1,8 @@
 {
   "archive_roundtrip": {
-    "actual_artifact_count": 47,
-    "artifact_count": 47,
-    "member_count": 50,
+    "actual_artifact_count": 50,
+    "artifact_count": 50,
+    "member_count": 54,
     "missing_members": [],
     "pass": true,
     "reason": "PASS"
@@ -208,47 +208,47 @@
     },
     {
       "available": true,
-      "bytes": 33937,
+      "bytes": 34043,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "44a6b2b2e0d853d63af2ded7f37b86ffcda7dd2d93c8208692bced287db6b1cb",
-      "sha256": "44a6b2b2e0d853d63af2ded7f37b86ffcda7dd2d93c8208692bced287db6b1cb",
+      "redacted_sha256": "37ec5640077a61b36a413876cc24c1847d706163434c1a7a090d78a0c96d5dbd",
+      "sha256": "37ec5640077a61b36a413876cc24c1847d706163434c1a7a090d78a0c96d5dbd",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
       "available": true,
-      "bytes": 19522,
+      "bytes": 19915,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "316b10a9f369964d57efe06baa83b6f2dba9614e69b2f34d2a6360062186e514",
-      "sha256": "316b10a9f369964d57efe06baa83b6f2dba9614e69b2f34d2a6360062186e514",
+      "redacted_sha256": "de70736a068b0bce4b47cd7efd567cfea19a94655d169e0750eb0a37f0d4c9b5",
+      "sha256": "de70736a068b0bce4b47cd7efd567cfea19a94655d169e0750eb0a37f0d4c9b5",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
-      "bytes": 97893,
+      "bytes": 127897,
       "label": "pm_release_gate_completion_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
-      "redacted_sha256": "ae839a6841f286ee34f7161a1c236395e164e6f8afb1fd5acbc8b3a3a5751e0f",
-      "sha256": "cce4b483745b8d3355f0e726d1129421c4f1e61554e08830a445341347834f66",
+      "redacted_sha256": "f3f5c1c7d02fe91ae8c703b6e968dd401b0c63c2a37cbb85b2994d1b0e6b8e93",
+      "sha256": "32edd46ffb0201b7f159effb75d33bfc7db993a73eaacc836adf87e381e0554f",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
     },
     {
       "available": true,
-      "bytes": 22181,
+      "bytes": 27030,
       "label": "pm_release_gate_reviewer_handoff",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
-      "redacted_sha256": "6ed01866623067c3a67bbc5b79fd0d1828b26d164ba839fd50af3b443b5fc9fc",
-      "sha256": "6ed01866623067c3a67bbc5b79fd0d1828b26d164ba839fd50af3b443b5fc9fc",
+      "redacted_sha256": "bc05d38f2eab19088937a7b00831d910022e06d5cdba5bde7ba1d6396ca33305",
+      "sha256": "bc05d38f2eab19088937a7b00831d910022e06d5cdba5bde7ba1d6396ca33305",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
     },
     {
       "available": true,
-      "bytes": 99881,
+      "bytes": 130211,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "6fe28b1b777e0bcbb517fc26957f8b7ae553ebe479b66d1e164a08096b67cdbf",
-      "sha256": "6fe28b1b777e0bcbb517fc26957f8b7ae553ebe479b66d1e164a08096b67cdbf",
+      "redacted_sha256": "efca17fb31fdd6fd30d8102a24799cd4ff9196ea5ce35e7fe2ec478ab54bf97a",
+      "sha256": "efca17fb31fdd6fd30d8102a24799cd4ff9196ea5ce35e7fe2ec478ab54bf97a",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -361,11 +361,11 @@
     },
     {
       "available": true,
-      "bytes": 3646,
+      "bytes": 7001,
       "label": "paid_pilot_scope_guard_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/paid_pilot_scope_guard_report.json",
-      "redacted_sha256": "b8240486e7584321bb640705a98ed237cf15ed84d2484d342214e961ac024251",
-      "sha256": "b8240486e7584321bb640705a98ed237cf15ed84d2484d342214e961ac024251",
+      "redacted_sha256": "e54f83ee1e48194c7178fa16fa32b6f3883e4ce69b1cdf944b131ba7a128cadf",
+      "sha256": "e54f83ee1e48194c7178fa16fa32b6f3883e4ce69b1cdf944b131ba7a128cadf",
       "source_path": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
     },
     {
@@ -424,12 +424,39 @@
     },
     {
       "available": true,
-      "bytes": 158187,
+      "bytes": 215177,
       "label": "pm_release_reproduction_command_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json",
-      "redacted_sha256": "664244332c4649c62504662ffa7eb635fb91e5bd9187a1c2dd281163cb4b72a6",
-      "sha256": "664244332c4649c62504662ffa7eb635fb91e5bd9187a1c2dd281163cb4b72a6",
+      "redacted_sha256": "c7d714a541da976749abca87bc8dc5a248a3eba8e98431ee400d696f73c2cbed",
+      "sha256": "c7d714a541da976749abca87bc8dc5a248a3eba8e98431ee400d696f73c2cbed",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
+    },
+    {
+      "available": true,
+      "bytes": 3489,
+      "label": "ai_orchestration_preflight_report",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ai_orchestration_preflight_report.json",
+      "redacted_sha256": "f91035fa28f3492e7f1964d03e8abf15d8b2b48c9a1b8f22e211ceed4a939b18",
+      "sha256": "f91035fa28f3492e7f1964d03e8abf15d8b2b48c9a1b8f22e211ceed4a939b18",
+      "source_path": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
+    },
+    {
+      "available": true,
+      "bytes": 4799723,
+      "label": "commercial_gap_ledger_status",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
+      "redacted_sha256": "b22daabd3b87375d96591d4908171dfc4d42dae77d1affd6eb749cb2ec6d3aa6",
+      "sha256": "6396d4dbe7094c3b0fe88c3dbc91e155f280eab0b213d4a9e042407bb1c297a7",
+      "source_path": "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
+    },
+    {
+      "available": true,
+      "bytes": 13196,
+      "label": "gap_closure_status",
+      "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
+      "redacted_sha256": "d1e19aaaf5b96202c36f6acc15a68110c00fffd7056101a16a7b9519e1cc69ef",
+      "sha256": "08122bf844211731d67813c1a1bcfe0dff9c1780dbb12459b85e53bde1c7e2dc",
+      "source_path": "implementation/phase1/release_evidence/productization/gap_closure_status.json"
     }
   ],
   "audit_digest": {
@@ -437,16 +464,16 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-17T15:58:26.040973+00:00",
+    "generated_at": "2026-06-18T14:01:18.322858+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
   "blockers": [],
   "bundle_index": {
-    "artifact_count": 47,
-    "available_artifact_count": 47,
+    "artifact_count": 50,
+    "available_artifact_count": 50,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "9164c46c537b967864c61174cbc820e0bf61a8265129735f93ffc3aa415274d3"
+    "sha256": "33fd4d878e165dd270fca73d0ec02f4eac9d223bde4b1275a1c843225aeec2f9"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -462,26 +489,31 @@
     "audit_event_digest_pass": true,
     "bundle_roundtrip_test_pass": true,
     "missing_required_count": 0,
+    "pm_failure_bundle_coverage_pass": true,
     "redaction_self_test_pass": true
   },
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 115076,
+    "bytes": 390657,
     "error": "",
-    "member_count": 50,
+    "member_count": 54,
     "members": [
       "audit_digest.json",
       "license_status.json",
+      "pm_failure_bundle_coverage.json",
+      "redacted/ai_orchestration_preflight_report.json",
       "redacted/ci_streak_intake_packet.json",
       "redacted/ci_streak_manifest.json",
       "redacted/client_input_validation_report.json",
+      "redacted/commercial_gap_ledger_status.json",
       "redacted/customer_audit_failure_bundle_sla_template.json",
       "redacted/external_benchmark_updates.json",
       "redacted/family_validation_manual_signoff_template.json",
       "redacted/frontend_dependency_audit_report.json",
       "redacted/ga_enterprise_readiness_report.json",
       "redacted/ga_enterprise_signoff_intake_packet.json",
+      "redacted/gap_closure_status.json",
       "redacted/github_actions_ci_streak_evidence.json",
       "redacted/independent_vv_attestation_template.json",
       "redacted/license_status_closure_report.json",
@@ -523,9 +555,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "1e877872804c3bd7597f08c20fd4cabae89136f00984229819ab013f8bfb7b4f"
+    "sha256": "91b47acd2fee4c9207aa2e7462ccf395198ac7d9e31528ff2025858b66d355ef"
   },
-  "generated_at": "2026-06-17T15:58:26.054517+00:00",
+  "generated_at": "2026-06-18T14:01:18.374083+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -533,13 +565,16 @@
     "sha256": "147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
   },
   "optional_sections": {
+    "ai_orchestration_preflight_report": "implementation/phase1/release/support_bundle/redacted/ai_orchestration_preflight_report.json",
     "ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
     "ci_streak_manifest": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json",
+    "commercial_gap_ledger_status": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json",
     "customer_audit_failure_bundle_sla_template": "implementation/phase1/release/support_bundle/redacted/customer_audit_failure_bundle_sla_template.json",
     "family_validation_manual_signoff_template": "implementation/phase1/release/support_bundle/redacted/family_validation_manual_signoff_template.json",
     "frontend_dependency_audit_report": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json",
     "ga_enterprise_readiness_report": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json",
     "ga_enterprise_signoff_intake_packet": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
+    "gap_closure_status": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
     "github_actions_ci_streak_evidence": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
     "independent_vv_attestation_template": "implementation/phase1/release/support_bundle/redacted/independent_vv_attestation_template.json",
     "license_status_closure_report": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
@@ -558,6 +593,233 @@
     "ux_new_user_observation_intake_packet": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json",
     "ux_new_user_observation_report": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
     "ux_new_user_observation_template": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_template.json"
+  },
+  "pm_failure_bundle_coverage": {
+    "blocked_requirement_ids": [
+      "release_area.basic_ci",
+      "release_area.security",
+      "release_area.ux",
+      "release_tier.ga_enterprise_evidence_gate_pass",
+      "release_tier.limited_commercial_full_gate_ready"
+    ],
+    "bundle_path": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
+    "claim_boundary": "This index proves support-bundle coverage for open PM blocker handoff artifacts only. It does not close tracked CI streak, human UX observation, license, Limited Commercial, GA/Enterprise, or other external release evidence blockers.",
+    "coverage_pass": true,
+    "generated_at": "2026-06-18T14:01:18.324681+00:00",
+    "missing_required_section_labels": [],
+    "open_blocker_ids": [
+      "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "security::license_status_not_configured",
+      "ux::human_new_user_30min_sample_evidence_missing",
+      "ux::human_new_user_observation_missing_or_failed"
+    ],
+    "reason_code": "PASS",
+    "release_tier_blocker_ids": [
+      "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+      "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+      "customer_audit_failure_bundle_sla_missing",
+      "family_validation_manual_signoff_missing",
+      "independent_vv_missing",
+      "security::license_status_not_configured",
+      "ux::human_new_user_30min_sample_evidence_missing",
+      "ux::human_new_user_observation_missing_or_failed"
+    ],
+    "required_section_rows": [
+      {
+        "label": "pm_release_blocker_action_register",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json"
+      },
+      {
+        "label": "pm_release_blocker_closure_board",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json"
+      },
+      {
+        "label": "pm_release_gate_completion_audit",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json"
+      },
+      {
+        "label": "pm_release_gate_reviewer_handoff",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json"
+      },
+      {
+        "label": "pm_owner_evidence_request_packet",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json"
+      },
+      {
+        "label": "pm_release_reproduction_command_audit",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_reproduction_command_audit.json"
+      },
+      {
+        "label": "ci_streak_intake_packet",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json"
+      },
+      {
+        "label": "ci_streak_manifest",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ci_streak_manifest.json"
+      },
+      {
+        "label": "github_actions_ci_streak_evidence",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json"
+      },
+      {
+        "label": "license_status_intake_packet",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_intake_packet.json"
+      },
+      {
+        "label": "license_status_closure_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json"
+      },
+      {
+        "label": "license_status_template",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_template.json"
+      },
+      {
+        "label": "frontend_dependency_audit_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/frontend_dependency_audit_report.json"
+      },
+      {
+        "label": "ux_new_user_observation_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json"
+      },
+      {
+        "label": "ux_new_user_observation_intake_packet",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_intake_packet.json"
+      },
+      {
+        "label": "ux_new_user_observation_template",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_template.json"
+      },
+      {
+        "label": "template_evidence_safety_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/template_evidence_safety_report.json"
+      },
+      {
+        "label": "ga_enterprise_readiness_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json"
+      },
+      {
+        "label": "ga_enterprise_signoff_intake_packet",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json"
+      },
+      {
+        "label": "commercial_gap_ledger_status",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/commercial_gap_ledger_status.json"
+      },
+      {
+        "label": "gap_closure_status",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json"
+      },
+      {
+        "label": "independent_vv_attestation_template",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/independent_vv_attestation_template.json"
+      },
+      {
+        "label": "family_validation_manual_signoff_template",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/family_validation_manual_signoff_template.json"
+      },
+      {
+        "label": "customer_audit_failure_bundle_sla_template",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/customer_audit_failure_bundle_sla_template.json"
+      },
+      {
+        "label": "paid_pilot_scope_guard_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/paid_pilot_scope_guard_report.json"
+      },
+      {
+        "label": "release_validation_manual",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/release_validation_manual.md"
+      },
+      {
+        "label": "release_limitation_manual",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md"
+      },
+      {
+        "label": "ai_orchestration_preflight_report",
+        "present": true,
+        "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ai_orchestration_preflight_report.json"
+      }
+    ],
+    "schema_version": "pm-failure-bundle-coverage.v1",
+    "sha256": "fb02f098852b2757e2746ef0841d222c167fac36b4386c3307646bc652adebca",
+    "source_artifacts": {
+      "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+      "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+      "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+      "pm_release_gate_reviewer_handoff": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
+    },
+    "source_blocker_ids": {
+      "pm_owner_evidence_request_packet": [
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "security::license_status_not_configured",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed"
+      ],
+      "pm_release_blocker_action_register": [
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "security::license_status_not_configured",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed"
+      ],
+      "pm_release_blocker_closure_board": [
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "security::license_status_not_configured",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed"
+      ],
+      "pm_release_gate_reviewer_handoff": [
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "security::license_status_not_configured",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed"
+      ]
+    },
+    "summary": {
+      "blocker_id_sources_match": true,
+      "missing_required_section_count": 0,
+      "open_blocker_count": 5,
+      "owner_packet_blocked_release_tier_impact_count": 10,
+      "owner_packet_missing_release_tier_impact_count": 0,
+      "owner_packet_tier_impact_complete": true,
+      "owner_packet_tier_impact_contract_pass": true,
+      "owner_packets_present": true,
+      "release_tier_blocker_count": 8,
+      "release_tier_owner_packets_present": true,
+      "release_tier_rows_present": true,
+      "required_section_count": 28
+    }
   },
   "reason_code": "PASS",
   "required_sections": {
@@ -585,5 +847,5 @@
     "workstation_service_budget": "implementation/phase1/release/support_bundle/redacted/workstation_service_budget.json"
   },
   "schema_version": "support-bundle-manifest.v1",
-  "summary_line": "Support bundle: PASS | artifacts=47/47 | redaction=True | roundtrip=True | archive=True"
+  "summary_line": "Support bundle: PASS | artifacts=50/50 | redaction=True | roundtrip=True | archive=True"
 }
