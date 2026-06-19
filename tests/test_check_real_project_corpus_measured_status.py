@@ -32,12 +32,17 @@ def _write_json(path: Path, payload: object) -> Path:
 def _measured_row(idx: int, fmt: str = "mgt") -> dict[str, object]:
     return {
         "artifact_status": "measured_local_artifact_attached",
-        "checksum_status_or_withheld_reason": f"sha256-{idx}",
+        "checksum_status_or_withheld_reason": f"{idx:064x}",
         "stable_row_pointer": f"row-{idx}",
         "manual_review_status": "pending_artifact_level_review",
         "release_eligibility": "blocked_pending_artifact_review",
         "release_surface_allowed": False,
-        "parser_contract": {"format": fmt},
+        "parser_contract": {
+            "byte_count": 100 + idx,
+            "format": fmt,
+            "measured_local_artifact": True,
+            "source_file": f"case-{idx}.json",
+        },
     }
 
 
@@ -107,6 +112,58 @@ def test_real_project_measured_status_passes_complete_exit_criteria(tmp_path: Pa
 
     assert payload["contract_pass"] is True
     assert payload["blockers"] == []
+    assert payload["checks"]["checksum_or_withheld_coverage_pass"] is True
+    assert payload["checks"]["stable_row_pointer_unique_pass"] is True
+    assert payload["checks"]["measured_parser_contract_pass"] is True
+    assert payload["summary"]["measured_parser_contract_valid_count"] == 10
+
+
+def test_real_project_measured_status_blocks_placeholder_like_measured_rows(
+    tmp_path: Path,
+) -> None:
+    bad_row = _measured_row(0, "mgt")
+    bad_row["checksum_status_or_withheld_reason"] = "TODO"
+    bad_row["stable_row_pointer"] = "duplicate-row"
+    bad_row["parser_contract"] = {"format": "mgt"}
+    duplicate_row = _measured_row(1, "ifc")
+    duplicate_row["stable_row_pointer"] = "duplicate-row"
+    row_provenance = _write_json(
+        tmp_path / "rows.json",
+        {
+            "source_provenance_rows": [
+                bad_row,
+                duplicate_row,
+                *[_measured_row(idx, "mgt") for idx in range(2, 6)],
+                *[_measured_row(idx, "ifc") for idx in range(6, 10)],
+            ]
+        },
+    )
+    peer_metric_records = _write_json(
+        tmp_path / "peer.json",
+        {
+            "metric_records": [
+                {"metric_group": "period", "value": 1.2},
+                {"metric_group": "base_shear", "value": 123.0},
+                {"metric_group": "story_drift", "value": 0.01},
+                {"metric_group": "nonlinear_response", "value": "converged"},
+                {"metric_group": "citation", "value": "citation"},
+            ]
+        },
+    )
+
+    payload = measured_status.build_status(
+        row_provenance_path=row_provenance,
+        peer_metric_records_path=peer_metric_records,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["checksum_or_withheld_coverage_pass"] is False
+    assert payload["checks"]["stable_row_pointer_unique_pass"] is False
+    assert payload["checks"]["measured_parser_contract_pass"] is False
+    assert payload["summary"]["duplicate_measured_stable_pointers"] == ["duplicate-row"]
+    assert "checksum_or_withheld_coverage_pass" in payload["blockers"]
+    assert "stable_row_pointer_unique_pass" in payload["blockers"]
+    assert "measured_parser_contract_pass" in payload["blockers"]
 
 
 def test_real_project_measured_status_exposes_release_evidence_metadata(tmp_path: Path) -> None:

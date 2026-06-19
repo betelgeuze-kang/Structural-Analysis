@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import sys
 from typing import Any
 
@@ -23,6 +24,14 @@ DEFAULT_ROW_PROVENANCE = Path("implementation/phase1/real_project_row_provenance
 DEFAULT_PEER_METRIC_RECORDS = Path("implementation/phase1/peer_tbi_benchmark_metric_records.json")
 DEFAULT_OUT = Path("implementation/phase1/real_project_corpus_measured_status.json")
 REQUIRED_PEER_GROUPS = {"period", "base_shear", "story_drift", "nonlinear_response", "citation"}
+SHA256_HEX_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+WITHHELD_REASON_PREFIXES = (
+    "withheld_",
+    "raw_",
+    "validation_",
+    "trace_",
+    "no_raw_",
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -51,6 +60,25 @@ def _value_present(value: Any) -> bool:
     return True
 
 
+def _checksum_or_withheld_valid(value: Any) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    if SHA256_HEX_RE.match(text):
+        return True
+    return text.startswith(WITHHELD_REASON_PREFIXES)
+
+
+def _measured_parser_contract_valid(row: dict[str, Any]) -> bool:
+    parser_contract = _as_dict(row.get("parser_contract"))
+    return (
+        parser_contract.get("measured_local_artifact") is True
+        and bool(str(parser_contract.get("format", "") or "").strip())
+        and bool(str(parser_contract.get("source_file", "") or "").strip())
+        and int(parser_contract.get("byte_count", 0) or 0) > 0
+    )
+
+
 def build_status(
     *,
     row_provenance_path: Path = DEFAULT_ROW_PROVENANCE,
@@ -73,6 +101,16 @@ def build_status(
             str(_as_dict(row.get("parser_contract")).get("format", "") or "")
             for row in measured_rows
             if str(_as_dict(row.get("parser_contract")).get("format", "") or "")
+        }
+    )
+    measured_stable_pointers = [
+        str(row.get("stable_row_pointer", "") or "").strip() for row in measured_rows
+    ]
+    duplicate_measured_stable_pointers = sorted(
+        {
+            pointer
+            for pointer in measured_stable_pointers
+            if pointer and measured_stable_pointers.count(pointer) > 1
         }
     )
     peer_rows = [
@@ -109,17 +147,20 @@ def build_status(
         "koneps_measured_format_count_pass": len(measured_formats) >= min_measured_formats,
         "peer_metric_bearing_groups_pass": REQUIRED_PEER_GROUPS <= set(peer_groups_with_value),
         "checksum_or_withheld_coverage_pass": all(
-            bool(str(row.get("checksum_status_or_withheld_reason", "") or "")) for row in measured_rows
+            _checksum_or_withheld_valid(row.get("checksum_status_or_withheld_reason"))
+            for row in measured_rows
         ),
         "stable_row_pointer_coverage_pass": all(
             bool(str(row.get("stable_row_pointer", "") or "")) for row in measured_rows
         ),
+        "stable_row_pointer_unique_pass": not duplicate_measured_stable_pointers,
         "manual_review_status_coverage_pass": all(
             bool(str(row.get("manual_review_status", "") or "")) for row in measured_rows
         ),
         "release_eligibility_coverage_pass": all(
             bool(str(row.get("release_eligibility", "") or "")) for row in measured_rows
         ),
+        "measured_parser_contract_pass": all(_measured_parser_contract_valid(row) for row in measured_rows),
         "raw_redistribution_blocked_pass": all(row.get("release_surface_allowed") is False for row in measured_rows),
     }
     blockers = [key for key, passed in checks.items() if not passed]
@@ -141,6 +182,10 @@ def build_status(
             "measured_file_format_count": len(measured_formats),
             "min_measured_file_formats": min_measured_formats,
             "measured_file_formats": measured_formats,
+            "measured_parser_contract_valid_count": sum(
+                1 for row in measured_rows if _measured_parser_contract_valid(row)
+            ),
+            "duplicate_measured_stable_pointers": duplicate_measured_stable_pointers,
             "peer_metric_group_count": len(REQUIRED_PEER_GROUPS),
             "peer_metric_groups_with_value_count": len(peer_groups_with_value),
             "peer_metric_groups_with_value": peer_groups_with_value,
