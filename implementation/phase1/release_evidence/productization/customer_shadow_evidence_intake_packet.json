@@ -1,0 +1,131 @@
+{
+  "blockers": [],
+  "checks": {
+    "current_status_blocked_until_evidence_attached": true,
+    "intake_slot_count_covers_target": true,
+    "raw_data_policy_fixed": true,
+    "required_fields_present": true,
+    "reviewer_decisions_present": true,
+    "schema_present": true,
+    "status_present": true,
+    "template_has_required_fields": true,
+    "template_present": true
+  },
+  "claim_boundary": "This packet creates owner-input slots and validation commands only. It does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target. Each slot must be filled with real customer-retained derived metadata and pass the validator.",
+  "commands": {
+    "refresh_evidence_console_scope": "python3 scripts/build_evidence_console_scope_status.py --json",
+    "refresh_status": "python3 implementation/phase1/check_customer_shadow_evidence_status.py --json",
+    "validate_one_evidence_file": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence <filled-customer-shadow-evidence.json> --json --fail-blocked"
+  },
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-19T15:46:16.749612+00:00",
+  "input_checksums": {
+    "docs/templates/customer_shadow_evidence.template.json": "sha256:3fbf9f07b8a5c2461a2187470b6d8b40bd447b63aa9695959f9b2446beeead30",
+    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:715a4e52f66d32e7cbc1f556a8c246accb9abc75155984b8a90dd2e3b666d3e9"
+  },
+  "intake_slots": [
+    {
+      "evidence_path": "implementation/phase1/customer_shadow_evidence/customer-shadow-case-001.json",
+      "owner_actions": [
+        "copy template without committing customer raw data",
+        "replace every OWNER_INPUT_REQUIRED value with derived evidence metadata",
+        "keep raw_data_retained_by_customer=true",
+        "keep redistribution_allowed=false",
+        "attach reviewer_decision PASS, REVIEW, or FAIL",
+        "run validator and attach only the metadata JSON when customer permits derived evidence storage"
+      ],
+      "required": true,
+      "slot_id": "customer-shadow-case-001",
+      "source_template": "docs/templates/customer_shadow_evidence.template.json",
+      "status": "owner_input_required",
+      "validation_command": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence implementation/phase1/customer_shadow_evidence/customer-shadow-case-001.json --json --fail-blocked"
+    },
+    {
+      "evidence_path": "implementation/phase1/customer_shadow_evidence/customer-shadow-case-002.json",
+      "owner_actions": [
+        "copy template without committing customer raw data",
+        "replace every OWNER_INPUT_REQUIRED value with derived evidence metadata",
+        "keep raw_data_retained_by_customer=true",
+        "keep redistribution_allowed=false",
+        "attach reviewer_decision PASS, REVIEW, or FAIL",
+        "run validator and attach only the metadata JSON when customer permits derived evidence storage"
+      ],
+      "required": true,
+      "slot_id": "customer-shadow-case-002",
+      "source_template": "docs/templates/customer_shadow_evidence.template.json",
+      "status": "owner_input_required",
+      "validation_command": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence implementation/phase1/customer_shadow_evidence/customer-shadow-case-002.json --json --fail-blocked"
+    },
+    {
+      "evidence_path": "implementation/phase1/customer_shadow_evidence/customer-shadow-case-003.json",
+      "owner_actions": [
+        "copy template without committing customer raw data",
+        "replace every OWNER_INPUT_REQUIRED value with derived evidence metadata",
+        "keep raw_data_retained_by_customer=true",
+        "keep redistribution_allowed=false",
+        "attach reviewer_decision PASS, REVIEW, or FAIL",
+        "run validator and attach only the metadata JSON when customer permits derived evidence storage"
+      ],
+      "required": true,
+      "slot_id": "customer-shadow-case-003",
+      "source_template": "docs/templates/customer_shadow_evidence.template.json",
+      "status": "owner_input_required",
+      "validation_command": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence implementation/phase1/customer_shadow_evidence/customer-shadow-case-003.json --json --fail-blocked"
+    },
+    {
+      "evidence_path": "implementation/phase1/customer_shadow_evidence/customer-shadow-case-004.json",
+      "owner_actions": [
+        "copy template without committing customer raw data",
+        "replace every OWNER_INPUT_REQUIRED value with derived evidence metadata",
+        "keep raw_data_retained_by_customer=true",
+        "keep redistribution_allowed=false",
+        "attach reviewer_decision PASS, REVIEW, or FAIL",
+        "run validator and attach only the metadata JSON when customer permits derived evidence storage"
+      ],
+      "required": true,
+      "slot_id": "customer-shadow-case-004",
+      "source_template": "docs/templates/customer_shadow_evidence.template.json",
+      "status": "owner_input_required",
+      "validation_command": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence implementation/phase1/customer_shadow_evidence/customer-shadow-case-004.json --json --fail-blocked"
+    },
+    {
+      "evidence_path": "implementation/phase1/customer_shadow_evidence/customer-shadow-case-005.json",
+      "owner_actions": [
+        "copy template without committing customer raw data",
+        "replace every OWNER_INPUT_REQUIRED value with derived evidence metadata",
+        "keep raw_data_retained_by_customer=true",
+        "keep redistribution_allowed=false",
+        "attach reviewer_decision PASS, REVIEW, or FAIL",
+        "run validator and attach only the metadata JSON when customer permits derived evidence storage"
+      ],
+      "required": true,
+      "slot_id": "customer-shadow-case-005",
+      "source_template": "docs/templates/customer_shadow_evidence.template.json",
+      "status": "owner_input_required",
+      "validation_command": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence implementation/phase1/customer_shadow_evidence/customer-shadow-case-005.json --json --fail-blocked"
+    }
+  ],
+  "reason_code": "PASS",
+  "reuse_policy": "intake_packet_rebuilt_from_schema_template_and_current_shadow_status",
+  "reused_evidence": true,
+  "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
+  "schema_version": "customer-shadow-evidence-intake-packet.v1",
+  "source_commit_sha": "cda0f6fde687af6ea8ba4bc755c9b64328247f34",
+  "status": "implementation/phase1/customer_shadow_evidence_status.json",
+  "summary": {
+    "allowed_reviewer_decisions": [
+      "PASS",
+      "REVIEW",
+      "FAIL"
+    ],
+    "current_completed_shadow_case_count": 0,
+    "current_status_contract_pass": false,
+    "intake_slot_count": 5,
+    "min_completed_shadow_cases": 3,
+    "required_field_count": 14,
+    "target_completed_shadow_cases": 5
+  },
+  "template": "docs/templates/customer_shadow_evidence.template.json"
+}

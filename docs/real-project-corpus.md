@@ -93,6 +93,8 @@ P1-3 closes the handoff from parsed rows to P2 release/report surfaces.
 
 Customer completed-project shadow evidence must not put customer raw data into Git. Use `implementation/phase1/customer_shadow_evidence.schema.json` and validate a filled evidence file with `implementation/phase1/validate_customer_shadow_evidence.py`.
 
+Generate the owner handoff packet with `python3 scripts/build_customer_shadow_evidence_intake_packet.py --json`. The tracked packet fixes five owner-input slots and per-slot validation commands, but it only prepares intake; it does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target.
+
 Required evidence fields include `case_id`, `project_status=completed`, structure family, reference solver/version, reference output checksum, our engine commit, delta metrics, residual metrics, reviewer decision, limitations, and reproduce bundle id. The validator requires `raw_data_retained_by_customer=true` and `redistribution_allowed=false`, rejects placeholders, and only accepts reviewer decisions `PASS`, `REVIEW`, or `FAIL`.
 
 Track the 3-5 completed-project shadow-case target with `implementation/phase1/check_customer_shadow_evidence_status.py`. The current tracked status is intentionally blocked at `0/3` because no real customer-retained evidence files are attached under `implementation/phase1/customer_shadow_evidence/`; synthetic or placeholder cases must not be used to close this gate.

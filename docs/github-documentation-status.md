@@ -48,7 +48,7 @@ Commercial v1 separate-validation exclusions (must stay visible):
 | Release evidence freshness | pass: `6/6` artifacts include generated_at/source commit/engine version/input checksum/reuse marker and producer mtime recency; customer shadow/full-validation freshness does not close the `0/3` shadow-case or `0/8` fresh-receipt blockers |
 | Fresh full-validation lanes | blocked: lane contracts `8/8`, fresh receipts `0/8`; hydrated CPU-required release evidence does not replace Level 3 fresh validation receipts |
 | Real-project corpus measured status | pass for initial metadata/value gate: KR measured rows `10/10`, formats `2/2`, PEER metric-bearing values `5/5`; official PEER reference-truth groups `1`, measured-run bridge groups `3` |
-| Customer shadow evidence | schema/validator ready; status gate blocked at `0/3` completed-project shadow cases until real customer-retained evidence files are attached |
+| Customer shadow evidence | schema/validator/intake packet ready; five owner-input slots fixed; status gate blocked at `0/3` completed-project shadow cases until real customer-retained evidence files are attached |
 | Residual Level 3 status | ready for attached NDTHA residual slice: hard `3/3`, recommended rate `1.0`, fallback `0.0`, solver_raw `1.0`, corrected-state recompute `3/3`; does not close independent V&V or GA breadth |
 | Evidence Console scope | scope fixed: features `7/7`, deferred full-GUI surfaces `5/5`; launch blocked because customer shadow evidence remains `0/3` |
 | Strict EB/RH evidence | blocked: EB `0/4`, RH signed closure `3/3` |
