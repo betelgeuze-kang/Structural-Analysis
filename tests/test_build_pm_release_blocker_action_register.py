@@ -159,7 +159,10 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
                     "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
                     "fresh_validation_receipt_present": False,
                     "fresh_validation_receipt_fresh": False,
+                    "fresh_validation_receipt_lane_matches": False,
+                    "fresh_validation_receipt_runner_matches": False,
                     "fresh_validation_receipt_contract_pass": False,
+                    "fresh_validation_receipt_blockers": ["fresh_validation_receipt_missing"],
                 }
             ]
         },
@@ -207,7 +210,12 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
     assert fresh_row["resolution_type"] == "fresh_validation_receipt_required"
     assert fresh_row["evidence_status"]["state"] == "fresh_validation_receipt_missing"
     assert fresh_row["evidence_status"]["lane_id"] == "gpu_hip_solver"
+    assert fresh_row["evidence_status"]["fresh_validation_receipt_lane_matches"] is False
+    assert fresh_row["evidence_status"]["fresh_validation_receipt_runner_matches"] is False
+    assert fresh_row["evidence_status"]["receipt_validator"] == "implementation/phase1/validate_fresh_validation_receipt.py"
     assert any("build_fresh_full_validation_lane_status.py" in command for command in fresh_row["reproduction_commands"])
+    assert any("fresh_validation_receipt_lane_matches == true" in item for item in fresh_row["acceptance_criteria"])
+    assert any("validate_fresh_validation_receipt.py" in item for item in fresh_row["acceptance_criteria"])
 
 
 def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -> None:

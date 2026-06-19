@@ -8,6 +8,7 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
+    "github_sync::github_sync_preflight::worktree_not_clean",
     "github_sync::github_sync_preflight::remote_mutation_approval_required",
     "github_sync::github_sync_remote_sync_pending",
     "github_sync::github_sync_preflight_not_synced"
@@ -50,7 +51,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T18:47:19.874946+00:00",
+  "generated_at": "2026-06-19T19:00:09.185105+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -88,7 +89,7 @@
     "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:f80ec114cb6a27e6ebd27f6a195ccecf86546c2edf48b3349908fcb62afc86ea",
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:c114cd2bc4f5894d2c563a2626cce246faf7693804b050bfc483805c159a8d37",
     "implementation/phase1/release_evidence/productization/core_family_p95_accuracy_report.json": "sha256:a09a6f069955dc132241f1cf62a09410fa22e829cdce922ea88ca69bc0cd5b6c",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:6f9b0532919e83b6b300d7f07d76fede710dd94facd8f893b4931be5f55870e1",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:22dcc4ad476ba8b1d0dd9e915cb7e856260de48d2e52c6d97102cc417fc29fa8",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json": "sha256:60766fe101aaac8fe37a5228f7f31dfd193b1320a9844f5d9996a8afb710c364",
     "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:7cd712e826ec97dfc0392b749c584a6f8d6f2583e032daa0411503ac0cc8362c",
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json": "sha256:dceb743b8214fd965c28ca308160b0e4c29a96fc384be17dff21c573a154f84b",
@@ -104,7 +105,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:e42dd3b58dff303fabf8c3be4cf88f5ecbdacfeeec598ba34a5ecded72f92eab",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:49d021907f7e6cddf3d7d16c2787ebd1eb109f4f5158b261e584e5b2ce792c3d",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:7ebd294ebf9af82e222b31159178c34465deaa3d8aae36e6f59c14211bc6f2d2",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:61c38da6d08e12b681b5931e6a5edca9f4e233aa4b61553f8d16684ecae6fc60",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -378,6 +379,7 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
+    "github_sync::github_sync_preflight::worktree_not_clean",
     "github_sync::github_sync_preflight::remote_mutation_approval_required",
     "github_sync::github_sync_remote_sync_pending",
     "github_sync::github_sync_preflight_not_synced"
@@ -493,7 +495,7 @@
       "summary": {
         "artifact_count": 11,
         "blocker_count": 0,
-        "current_source_commit_sha": "0bec54dd36238791110912ac822593a0f83539cd",
+        "current_source_commit_sha": "9ca2df84f1d1b8b83ec583437af763ffba5709f1",
         "max_age_days": 30.0,
         "pass_count": 11
       },
@@ -902,6 +904,7 @@
         "github_development_sync_preflight": "<live-git-state>"
       },
       "blockers": [
+        "github_sync_preflight::worktree_not_clean",
         "github_sync_preflight::remote_mutation_approval_required",
         "github_sync_remote_sync_pending",
         "github_sync_preflight_not_synced"
@@ -911,25 +914,25 @@
         "github_sync_main_fast_forward_possible": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": false,
-        "github_sync_preflight_status": "approval_required",
+        "github_sync_preflight_status": "blocked",
         "github_sync_remote_mutation_approval_pending": true,
         "github_sync_remote_safety_ok": true,
         "github_sync_remote_sync_needed": true,
-        "github_sync_worktree_clean": true
+        "github_sync_worktree_clean": false
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 16,
-        "main_ahead_count": 64,
+        "feature_ahead_count": 18,
+        "main_ahead_count": 66,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
         "remote_mutation_approved": false,
         "remote_sync_needed": true,
-        "status": "approval_required"
+        "status": "blocked"
       },
       "title": "GitHub Development Sync"
     }
@@ -962,6 +965,7 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
+      "github_sync::github_sync_preflight::worktree_not_clean",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
@@ -986,6 +990,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "de9997f67662d602b3f71dfaf41f96bb3bf8b703",
+  "source_commit_sha": "9ca2df84f1d1b8b83ec583437af763ffba5709f1",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }

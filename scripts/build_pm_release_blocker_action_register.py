@@ -233,7 +233,10 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
         return [
             f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_present == true`",
             f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_fresh == true`",
+            f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_lane_matches == true`",
+            f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_runner_matches == true`",
             f"`fresh_full_validation_lane_status.json.rows[{lane_id}].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             f"`fresh_full_validation::{code}` absent from `ga_enterprise_blockers`",
         ]
     if not namespace and code == "independent_vv_missing":
@@ -503,13 +506,20 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         lane_id = code.split("::", 1)[0]
         present = bool(row.get("fresh_validation_receipt_present", False))
         fresh = bool(row.get("fresh_validation_receipt_fresh", False))
+        lane_matches = bool(row.get("fresh_validation_receipt_lane_matches", False))
+        runner_matches = bool(row.get("fresh_validation_receipt_runner_matches", False))
         contract_pass = bool(row.get("fresh_validation_receipt_contract_pass", False))
+        validator_blockers = list(row.get("fresh_validation_receipt_blockers", []))
         if not present:
             state = "fresh_validation_receipt_missing"
         elif not fresh:
             state = "fresh_validation_receipt_reuses_evidence"
+        elif not lane_matches:
+            state = "fresh_validation_receipt_lane_mismatch"
+        elif not runner_matches:
+            state = "fresh_validation_receipt_runner_mismatch"
         elif not contract_pass:
-            state = "fresh_validation_receipt_not_green"
+            state = "fresh_validation_receipt_invalid"
         else:
             state = "ready_for_pm_regeneration"
         return {
@@ -519,7 +529,11 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "fresh_validation_receipt": str(row.get("fresh_validation_receipt", "") or ""),
             "fresh_validation_receipt_present": present,
             "fresh_validation_receipt_fresh": fresh,
+            "fresh_validation_receipt_lane_matches": lane_matches,
+            "fresh_validation_receipt_runner_matches": runner_matches,
             "fresh_validation_receipt_contract_pass": contract_pass,
+            "fresh_validation_receipt_blockers": validator_blockers,
+            "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
             "source_policy": "fresh_lane_execution_required",
         }
     if not namespace and code in {
