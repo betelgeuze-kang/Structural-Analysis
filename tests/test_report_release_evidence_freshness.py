@@ -65,6 +65,18 @@ def test_release_evidence_freshness_passes_complete_metadata(tmp_path: Path) -> 
     assert row["dependency_mtime_pass"] is True
 
 
+def test_release_evidence_freshness_out_md_defaults_to_out_sibling(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "checks" / "freshness.json"
+
+    assert freshness._resolve_out_md(out, None) == tmp_path / "checks" / "freshness.md"
+    assert (
+        freshness._resolve_out_md(out, tmp_path / "explicit.md")
+        == tmp_path / "explicit.md"
+    )
+
+
 def test_release_evidence_freshness_blocks_missing_release_metadata(
     tmp_path: Path,
 ) -> None:

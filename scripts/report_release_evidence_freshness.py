@@ -16,7 +16,6 @@ SCHEMA_VERSION = "release-evidence-freshness-report.v1"
 DEFAULT_OUT = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
-DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ARTIFACTS = (
     (
         "p0_closure_status",
@@ -546,22 +545,27 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--max-age-days", type=float, default=30.0)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
-    parser.add_argument("--out-md", type=Path, default=DEFAULT_OUT_MD)
+    parser.add_argument("--out-md", type=Path)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     return parser
 
 
+def _resolve_out_md(out: Path, out_md: Path | None) -> Path:
+    return out_md if out_md is not None else out.with_suffix(".md")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    out_md = _resolve_out_md(args.out, args.out_md)
     payload = build_report(max_age_days=args.max_age_days)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    args.out_md.parent.mkdir(parents=True, exist_ok=True)
-    args.out_md.write_text(_markdown(payload), encoding="utf-8")
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(_markdown(payload), encoding="utf-8")
     summary = (
         f"release-evidence-freshness: {'PASS' if payload['contract_pass'] else 'BLOCKED'} "
         f"pass={payload['summary']['pass_count']}/{payload['summary']['artifact_count']} "
