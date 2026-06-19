@@ -2,7 +2,7 @@
 
 - `contract_pass`: `True`
 - `reason_code`: `PASS`
-- `current_source_commit_sha`: `9bffa3ad34b9376b18c61769b1fac7281344178a`
+- `current_source_commit_sha`: `f55e3c6c91f9e7927762c92ac55cfc92c4165a98`
 - `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
@@ -12,6 +12,7 @@
 | `p1_benchmark_breadth_status` | `pass` | `none` | none |
 | `real_project_corpus_measured_status` | `pass` | `none` | none |
 | `customer_shadow_evidence_status` | `pass` | `none` | none |
+| `customer_shadow_evidence_intake_packet` | `pass` | `none` | none |
 | `fresh_full_validation_lane_status` | `pass` | `none` | none |
 | `residual_level3_status` | `pass` | `none` | none |
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
