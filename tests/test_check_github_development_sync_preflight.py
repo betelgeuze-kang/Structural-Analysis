@@ -82,6 +82,36 @@ def test_sync_preflight_allows_ready_push_only_with_explicit_approval() -> None:
     assert payload["blockers"] == []
 
 
+def test_sync_preflight_records_successful_remote_fetch() -> None:
+    payload = sync_preflight.build_report(
+        _state(),
+        remote_mutation_approved=True,
+        remote_fetch_attempted=True,
+        remote_fetch_ok=True,
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["remote_fetch_attempted"] is True
+    assert payload["remote_fetch_ok"] is True
+    assert payload["checks"]["remote_fetch_ok"] is True
+    assert "remote_fetch_failed" not in payload["blockers"]
+
+
+def test_sync_preflight_blocks_failed_remote_fetch() -> None:
+    payload = sync_preflight.build_report(
+        _state(),
+        remote_mutation_approved=True,
+        remote_fetch_attempted=True,
+        remote_fetch_ok=False,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["preflight_pass"] is False
+    assert payload["checks"]["remote_fetch_ok"] is False
+    assert "remote_fetch_failed" in payload["blockers"]
+
+
 def test_sync_preflight_blocks_dirty_or_non_fast_forward_state() -> None:
     payload = sync_preflight.build_report(
         _state(

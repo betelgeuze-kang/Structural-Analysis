@@ -21,6 +21,7 @@ import check_git_remote_safety  # noqa: E402
 
 DEFAULT_FEATURE_REF = "origin/codex/create-architecture-definition-document-for-hybrid-ai"
 DEFAULT_MAIN_REF = "origin/main"
+DEFAULT_FETCH_REMOTE = "origin"
 
 
 def _git_output(args: list[str], *, cwd: Path = Path(".")) -> str:
@@ -44,6 +45,10 @@ def _git_success(args: list[str], *, cwd: Path = Path(".")) -> bool:
         ).returncode
         == 0
     )
+
+
+def refresh_remote_refs(remote: str = DEFAULT_FETCH_REMOTE, *, cwd: Path = Path(".")) -> bool:
+    return _git_success(["fetch", remote], cwd=cwd)
 
 
 def _ahead_count(base_ref: str, *, cwd: Path = Path(".")) -> int:
@@ -83,6 +88,8 @@ def build_report(
     state: dict[str, Any],
     *,
     remote_mutation_approved: bool = False,
+    remote_fetch_attempted: bool = False,
+    remote_fetch_ok: bool | None = None,
 ) -> dict[str, Any]:
     worktree_clean = not bool(str(state.get("worktree_status_short", "")).strip())
     feature_ahead_count = int(state.get("feature_ahead_count", 0) or 0)
@@ -105,6 +112,7 @@ def build_report(
         and remote_safety_ok
         and feature_ff
         and main_ff
+        and (not remote_fetch_attempted or remote_fetch_ok is True)
     )
     remote_sync_authorized = bool(preflight_pass and (not remote_sync_needed or remote_mutation_approved))
     blockers: list[str] = []
@@ -112,6 +120,8 @@ def build_report(
         blockers.append("worktree_not_clean")
     if not remote_safety_ok:
         blockers.append("remote_safety_failed")
+    if remote_fetch_attempted and remote_fetch_ok is not True:
+        blockers.append("remote_fetch_failed")
     if not feature_ff:
         blockers.append("feature_remote_not_ancestor_of_head")
     if not main_ff:
@@ -131,6 +141,8 @@ def build_report(
         "contract_pass": remote_sync_authorized and not blockers,
         "preflight_pass": preflight_pass,
         "remote_mutation_approved": remote_mutation_approved,
+        "remote_fetch_attempted": remote_fetch_attempted,
+        "remote_fetch_ok": remote_fetch_ok,
         "remote_sync_needed": remote_sync_needed,
         "reason_code": "PASS" if remote_sync_authorized and not blockers else "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "blockers": blockers,
@@ -138,6 +150,7 @@ def build_report(
         "checks": {
             "worktree_clean": worktree_clean,
             "remote_safety_ok": remote_safety_ok,
+            "remote_fetch_ok": remote_fetch_ok,
             "feature_fast_forward_possible": feature_ff,
             "main_fast_forward_possible": main_ff,
             "feature_synced_to_head": feature_synced,
@@ -178,6 +191,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--feature-ref", default=DEFAULT_FEATURE_REF)
     parser.add_argument("--main-ref", default=DEFAULT_MAIN_REF)
+    parser.add_argument("--fetch", action="store_true")
+    parser.add_argument("--fetch-remote", default=DEFAULT_FETCH_REMOTE)
     parser.add_argument("--remote-mutation-approved", action="store_true")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--json", action="store_true")
@@ -187,9 +202,12 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    remote_fetch_ok = refresh_remote_refs(args.fetch_remote) if args.fetch else None
     payload = build_report(
         collect_git_state(feature_ref=args.feature_ref, main_ref=args.main_ref),
         remote_mutation_approved=args.remote_mutation_approved,
+        remote_fetch_attempted=args.fetch,
+        remote_fetch_ok=remote_fetch_ok,
     )
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)
