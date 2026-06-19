@@ -86,7 +86,7 @@ python3 scripts/report_release_evidence_freshness.py
 python3 scripts/check_github_development_sync_preflight.py --fetch --json
 # The GitHub sync preflight is read-only and reports only unsynced refs in pending_remote_updates.
 # report_pm_release_gate.py also evaluates the read-only github_sync release area; use --github-sync-preflight to pin this JSON.
-python3 implementation/phase1/check_real_project_corpus_measured_status.py
+python3 implementation/phase1/check_real_project_corpus_measured_status.py --out /tmp/real_project_corpus_measured_status.verify.json
 python3 scripts/check_independent_product_readiness.py --json
 python3 scripts/verify_structure_viewer_contracts.py --dry-run
 python3 scripts/verify_quality_gate.py --mode full --dry-run

@@ -150,8 +150,15 @@ def build_packet(
                 "python3 implementation/phase1/validate_customer_shadow_evidence.py "
                 "--evidence <filled-customer-shadow-evidence.json> --json --fail-blocked"
             ),
-            "refresh_status": "python3 implementation/phase1/check_customer_shadow_evidence_status.py --json",
-            "refresh_evidence_console_scope": "python3 scripts/build_evidence_console_scope_status.py --json",
+            "refresh_status": (
+                "python3 scripts/check_customer_shadow_evidence_status.py "
+                "--out implementation/phase1/customer_shadow_evidence_status.json --json"
+            ),
+            "refresh_evidence_console_scope": (
+                "python3 scripts/build_evidence_console_scope_status.py "
+                "--out implementation/phase1/release_evidence/productization/evidence_console_scope_status.json "
+                "--out-md implementation/phase1/release_evidence/productization/evidence_console_scope_status.md --json"
+            ),
         },
         "claim_boundary": (
             "This packet creates owner-input slots and validation commands only. It does not create "

@@ -173,6 +173,16 @@ def test_intake_packet_passes_as_structure_artifact_while_status_is_blocked(tmp_
         assert "OWNER_INPUT_REQUIRED" not in slot["evidence_path"]
         assert any("raw_data_retained_by_customer=true" in action for action in slot["owner_actions"])
         assert any("redistribution_allowed=false" in action for action in slot["owner_actions"])
+    assert payload["commands"]["refresh_status"] == (
+        "python3 scripts/check_customer_shadow_evidence_status.py "
+        "--out implementation/phase1/customer_shadow_evidence_status.json --json"
+    )
+    assert "implementation/phase1/check_customer_shadow_evidence_status.py --json" not in payload["commands"][
+        "refresh_status"
+    ]
+    assert "--out implementation/phase1/release_evidence/productization/evidence_console_scope_status.json" in payload[
+        "commands"
+    ]["refresh_evidence_console_scope"]
 
 
 def test_intake_packet_claim_boundary_does_not_create_or_close_customer_evidence(tmp_path: Path) -> None:
