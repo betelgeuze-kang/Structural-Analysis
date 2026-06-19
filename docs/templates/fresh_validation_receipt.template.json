@@ -1,0 +1,28 @@
+{
+  "schema_version": "fresh-validation-receipt.v1",
+  "lane_id": "OWNER_INPUT_REQUIRED_LANE_ID",
+  "runner": "OWNER_INPUT_REQUIRED_RUNNER_NAME",
+  "generated_at": "OWNER_INPUT_REQUIRED_ISO_TIMESTAMP",
+  "source_commit_sha": "OWNER_INPUT_REQUIRED_SOURCE_COMMIT_SHA",
+  "engine_version": "OWNER_INPUT_REQUIRED_ENGINE_VERSION",
+  "input_checksums": {
+    "OWNER_INPUT_REQUIRED_INPUT_PATH": "sha256:OWNER_INPUT_REQUIRED_INPUT_DIGEST"
+  },
+  "reused_evidence": false,
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "validation_command": "OWNER_INPUT_REQUIRED_VALIDATION_COMMAND",
+  "receipt_artifacts": [
+    {
+      "path": "OWNER_INPUT_REQUIRED_ARTIFACT_PATH",
+      "sha256": "sha256:OWNER_INPUT_REQUIRED_ARTIFACT_DIGEST",
+      "kind": "OWNER_INPUT_REQUIRED_ARTIFACT_KIND"
+    }
+  ],
+  "summary": {
+    "case_count": 0,
+    "passed_case_count": 0,
+    "duration_seconds": 0.0
+  },
+  "claim_boundary": "OWNER_INPUT_REQUIRED_CLAIM_BOUNDARY_DESCRIPTION"
+}

@@ -16,6 +16,15 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
+REPO_ROOT = SCRIPT_DIR.parent
+PHASE1_DIR = REPO_ROOT / "implementation" / "phase1"
+if str(PHASE1_DIR) not in sys.path:
+    sys.path.insert(0, str(PHASE1_DIR))
+
+from validate_fresh_validation_receipt import validate_payload as validate_receipt_payload  # noqa: E402
+
+DEFAULT_RECEIPT_SCHEMA = PHASE1_DIR / "fresh_validation_receipt.schema.json"
+
 
 SCHEMA_VERSION = "fresh-full-validation-lane-status.v1"
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json")
@@ -117,11 +126,33 @@ def _has_metadata(payload: dict[str, Any]) -> bool:
     ) and "reused_evidence" in payload
 
 
+def _load_receipt_schema() -> dict[str, Any]:
+    return _load_json(DEFAULT_RECEIPT_SCHEMA)
+
+
+def _validate_receipt(receipt_path: Path, schema: dict[str, Any]) -> dict[str, Any]:
+    payload = _load_json(receipt_path)
+    if not payload:
+        return {
+            "contract_pass": False,
+            "reason_code": "ERR_FRESH_VALIDATION_RECEIPT_INVALID",
+            "blockers": ["fresh_validation_receipt_invalid:payload_unreadable"],
+        }
+    if not schema:
+        return {
+            "contract_pass": False,
+            "reason_code": "ERR_FRESH_VALIDATION_RECEIPT_INVALID",
+            "blockers": ["fresh_validation_receipt_invalid:schema_unreadable"],
+        }
+    return validate_receipt_payload(payload, schema)
+
+
 def _lane_row(
     lane: dict[str, Any],
     *,
     docs_text: str,
     receipt_root: Path,
+    receipt_schema: dict[str, Any],
 ) -> dict[str, Any]:
     lane_id = str(lane["lane_id"])
     materialized_paths = [Path(path) for path in lane.get("materialized_paths", [])]
@@ -134,14 +165,26 @@ def _lane_row(
     receipt_metadata_present = _has_metadata(receipt_payload)
     receipt_reused_evidence = receipt_payload.get("reused_evidence")
     receipt_fresh = receipt_present and receipt_reused_evidence is False
-    receipt_contract_pass = _truthy_contract(receipt_payload)
+    receipt_self_asserted = _truthy_contract(receipt_payload)
+    receipt_lane_matches = receipt_present and receipt_payload.get("lane_id") == lane_id
+    receipt_runner_matches = receipt_present and receipt_payload.get("runner") == str(lane.get("runner", ""))
+    validation = _validate_receipt(receipt_path, receipt_schema) if receipt_present else {
+        "contract_pass": False,
+        "reason_code": "ERR_FRESH_VALIDATION_RECEIPT_INVALID",
+        "blockers": ["fresh_validation_receipt_missing"],
+    }
+    receipt_validator_pass = bool(validation.get("contract_pass"))
+    receipt_validator_blockers = list(validation.get("blockers", []))
     lane_pass = bool(
         materialized_present
         and doc_boundary_present
         and receipt_present
         and receipt_metadata_present
         and receipt_fresh
-        and receipt_contract_pass
+        and receipt_self_asserted
+        and receipt_validator_pass
+        and receipt_lane_matches
+        and receipt_runner_matches
     )
     blockers = [
         *(["materialized_publication_evidence_missing"] if not materialized_present else []),
@@ -149,7 +192,19 @@ def _lane_row(
         *(["fresh_validation_receipt_missing"] if not receipt_present else []),
         *(["fresh_validation_receipt_metadata_missing"] if receipt_present and not receipt_metadata_present else []),
         *(["fresh_validation_receipt_reuses_evidence"] if receipt_present and not receipt_fresh else []),
-        *(["fresh_validation_receipt_not_green"] if receipt_present and not receipt_contract_pass else []),
+        *(["fresh_validation_receipt_not_green"] if receipt_present and not receipt_self_asserted else []),
+        *(["fresh_validation_receipt_lane_mismatch"] if receipt_present and not receipt_lane_matches else []),
+        *(["fresh_validation_receipt_runner_mismatch"] if receipt_present and not receipt_runner_matches else []),
+        *(
+            ["fresh_validation_receipt_invalid"]
+            if receipt_present and not receipt_validator_pass
+            else []
+        ),
+        *(
+            [f"fresh_validation_receipt_invalid:{blocker}" for blocker in receipt_validator_blockers]
+            if receipt_present and not receipt_validator_pass
+            else []
+        ),
     ]
     return {
         "lane_id": lane_id,
@@ -163,7 +218,12 @@ def _lane_row(
         "fresh_validation_receipt_metadata_present": receipt_metadata_present,
         "fresh_validation_receipt_reused_evidence": receipt_reused_evidence,
         "fresh_validation_receipt_fresh": receipt_fresh,
-        "fresh_validation_receipt_contract_pass": receipt_contract_pass,
+        "fresh_validation_receipt_self_asserted": receipt_self_asserted,
+        "fresh_validation_receipt_lane_matches": receipt_lane_matches,
+        "fresh_validation_receipt_runner_matches": receipt_runner_matches,
+        "fresh_validation_receipt_contract_pass": receipt_validator_pass,
+        "fresh_validation_receipt_reason_code": validation.get("reason_code"),
+        "fresh_validation_receipt_blockers": receipt_validator_blockers,
         "pass": lane_pass,
         "blockers": blockers,
     }
@@ -174,9 +234,14 @@ def build_status(
     docs: tuple[Path, ...] = DEFAULT_DOCS,
     receipt_root: Path = DEFAULT_RECEIPT_ROOT,
     lanes: tuple[dict[str, Any], ...] = DEFAULT_LANES,
+    receipt_schema: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     docs_text = _read_docs(docs)
-    rows = [_lane_row(lane, docs_text=docs_text, receipt_root=receipt_root) for lane in lanes]
+    schema = receipt_schema if receipt_schema is not None else _load_receipt_schema()
+    rows = [
+        _lane_row(lane, docs_text=docs_text, receipt_root=receipt_root, receipt_schema=schema)
+        for lane in lanes
+    ]
     blockers = [f"{row['lane_id']}::{blocker}" for row in rows for blocker in row["blockers"]]
     lane_contract_blockers = [
         f"{row['lane_id']}::{blocker}"
@@ -187,7 +252,12 @@ def build_status(
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[*docs, *[path for lane in lanes for path in lane.get("materialized_paths", [])], receipt_root],
+            input_paths=[
+                *docs,
+                *[path for lane in lanes for path in lane.get("materialized_paths", [])],
+                receipt_root,
+                DEFAULT_RECEIPT_SCHEMA,
+            ],
             reused_evidence=True,
             reuse_policy="status_rebuilt_from_docs_materialized_evidence_and_optional_fresh_validation_receipts",
         ),
@@ -197,6 +267,7 @@ def build_status(
         "fresh_full_validation_ready": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_FRESH_FULL_VALIDATION_LANES_INCOMPLETE",
         "receipt_root": str(receipt_root),
+        "receipt_schema": str(DEFAULT_RECEIPT_SCHEMA),
         "summary": {
             "lane_count": len(rows),
             "lane_pass_count": sum(1 for row in rows if row["pass"]),
@@ -211,7 +282,7 @@ def build_status(
             "fresh_validation_receipt_pass_count": sum(
                 1
                 for row in rows
-                if row["fresh_validation_receipt_fresh"] and row["fresh_validation_receipt_contract_pass"]
+                if row["pass"]
             ),
             "blocker_count": len(blockers),
         },
@@ -220,8 +291,9 @@ def build_status(
         "claim_boundary": (
             "This status separates release publication materialization from fresh full-validation. "
             "A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion "
-            "still requires fresh validation receipts for each named lane, with reused_evidence=false. "
-            "Missing receipts must stay blocked and must not be replaced by CPU-required hydrated reports."
+            "still requires fresh validation receipts for each named lane, with reused_evidence=false, "
+            "validated by implementation/phase1/validate_fresh_validation_receipt.py. Missing or invalid "
+            "receipts must stay blocked and must not be replaced by CPU-required hydrated reports."
         ),
     }
 
