@@ -28,8 +28,8 @@
 | Support bundle | ready |
 | Viewer workflow packaging | ready: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package, static performance budget manifest, local browser performance probe, 11-case render-mode/core/advanced workflow-state visual regression baseline |
 | Workstation delivery service | local gate: hardware profile, service budget, delivery package manifest, client input validation, package restore/checksum smoke |
-| PM release-area gate | blocked: `11/15` green; CI streak, evidence freshness metadata, human UX observation, license status remain open |
-| Release evidence freshness | blocked: producer mtime `3/3`, metadata completeness `0/3` for generated_at/source commit/engine version/input checksum/reuse marker |
+| PM release-area gate | blocked: `12/15` green; CI streak, human UX observation, license status remain open |
+| Release evidence freshness | pass: `3/3` artifacts include generated_at/source commit/engine version/input checksum/reuse marker and producer mtime recency |
 | Real-project corpus measured status | blocked: KR measured rows `10/10`, formats `2/2`, PEER metric-bearing values `1/5` |
 | Customer shadow evidence schema | ready: schema and validator require completed project metadata, checksums/metrics/reviewer decision, customer-retained raw data, and `redistribution_allowed=false` |
 | Strict EB/RH evidence | blocked: EB `0/4`, RH signed closure `3/3` |
