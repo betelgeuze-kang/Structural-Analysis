@@ -142,6 +142,69 @@ def test_build_board_passes_when_gate_and_register_are_closed(tmp_path: Path) ->
     assert payload["rows"] == []
 
 
+def test_build_board_compares_ga_enterprise_blockers_with_action_register(tmp_path: Path) -> None:
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: BLOCKED | release_areas=BLOCKED",
+            "full_release_gate_ready": False,
+            "full_release_blockers": ["security::license_status_not_configured"],
+            "release_tiers": {
+                "ga_enterprise_blockers": [
+                    "independent_vv_missing",
+                    "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+                ]
+            },
+        },
+    )
+    action_register = _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "contract_pass": False,
+            "summary": {"open_blocker_count": 3, "all_open_blockers_have_handoff": True},
+            "rows": [
+                {
+                    "blocker_id": "security::license_status_not_configured",
+                    "owner": "product_legal_owner",
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                    "next_action": "Attach license approval evidence.",
+                    "handoff_ready": True,
+                    "handoff_state": "external_owner_input_ready",
+                },
+                {
+                    "blocker_id": "independent_vv_missing",
+                    "owner": "independent_vv_owner",
+                    "external_input_required": True,
+                    "owner_input_required": True,
+                    "next_action": "Attach independent V&V evidence.",
+                    "handoff_ready": True,
+                    "handoff_state": "external_owner_input_ready",
+                },
+                {
+                    "blocker_id": "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+                    "owner": "validation_lane_owner",
+                    "external_input_required": False,
+                    "owner_input_required": False,
+                    "next_action": "Run the GPU HIP fresh validation lane.",
+                    "handoff_ready": True,
+                    "handoff_state": "local_remediation_ready",
+                },
+            ],
+        },
+    )
+
+    payload = build_board_module.build_board(action_register=action_register, pm_report=pm_report)
+
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
+    assert payload["summary"]["action_register_matches_pm_report"] is True
+    assert payload["summary"]["pm_report_blocker_count"] == 3
+    assert payload["summary"]["register_blocker_count"] == 3
+    assert payload["summary"]["missing_from_action_register"] == []
+    assert payload["summary"]["stale_action_register_blockers"] == []
+
+
 def test_build_board_blocks_stale_action_register(tmp_path: Path) -> None:
     pm_report = _write_json(
         tmp_path / "pm_release_gate_report.json",

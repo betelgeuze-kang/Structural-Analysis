@@ -112,12 +112,14 @@ def _state_counts(rows: list[dict[str, Any]]) -> dict[str, int]:
 
 def _pm_blocker_ids(pm_payload: dict[str, Any]) -> list[str]:
     full_blockers = [str(item) for item in _as_list(pm_payload.get("full_release_blockers"))]
-    if full_blockers:
-        return full_blockers
-    return [
-        *[str(item) for item in _as_list(pm_payload.get("blockers"))],
-        *[str(item) for item in _as_list(pm_payload.get("release_area_blockers"))],
-    ]
+    if not full_blockers:
+        full_blockers = [
+            *[str(item) for item in _as_list(pm_payload.get("blockers"))],
+            *[str(item) for item in _as_list(pm_payload.get("release_area_blockers"))],
+        ]
+    release_tiers = _as_dict(pm_payload.get("release_tiers"))
+    ga_blockers = [str(item) for item in _as_list(release_tiers.get("ga_enterprise_blockers"))]
+    return list(dict.fromkeys([*full_blockers, *ga_blockers]))
 
 
 def _reason_code(
