@@ -51,6 +51,7 @@ DEFAULT_GA_ENTERPRISE_READINESS_REPORT = Path(
 DEFAULT_GA_ENTERPRISE_SIGNOFF_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
 )
+GITHUB_SYNC_APPROVAL_PHRASE = "feature push + main fast-forward 승인"
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -138,6 +139,11 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, "
             "input checksum, and reuse marker metadata, then rerun the freshness and PM release reports."
         )
+    if namespace == "github_sync":
+        return (
+            f"Obtain explicit R4 approval phrase `{GITHUB_SYNC_APPROVAL_PHRASE}`, then run the pending "
+            "remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
+        )
     direct = str(summary.get("owner_action", "") or row.get("owner_action", "") or "")
     if direct:
         return direct
@@ -184,6 +190,8 @@ def _resolution_type(*, namespace: str, code: str) -> str:
         return "external_human_new_user_observation_required"
     if namespace == "evidence_freshness":
         return "release_evidence_metadata_required"
+    if namespace == "github_sync":
+        return "r4_remote_mutation_approval_required"
     return "release_evidence_remediation_required"
 
 
@@ -290,6 +298,13 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
             f"`{blocker_id}` absent from `release_area_blockers`",
         ]
+    if namespace == "github_sync":
+        return [
+            f"Explicit R4 approval phrase received: `{GITHUB_SYNC_APPROVAL_PHRASE}`",
+            "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+            "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD",
+        ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
@@ -353,6 +368,12 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
+    if namespace == "github_sync":
+        return [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     return [
         pm_report_command,
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -402,6 +423,12 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
+    if namespace == "github_sync":
+        return [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
     return [
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
     ]
@@ -412,6 +439,7 @@ def _owner_input_required(*, namespace: str, code: str) -> bool:
         (namespace == "basic_ci" and "consecutive_pass" in code)
         or (namespace == "security" and "license" in code)
         or _is_ux_human_new_user_blocker(namespace=namespace, code=code)
+        or namespace == "github_sync"
         or (
             not namespace
             and code
@@ -592,6 +620,26 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "input_checksum_rows_present": checks.get("input_checksum_rows_present"),
             "reuse_marker_rows_present": checks.get("reuse_marker_rows_present"),
             "dependency_mtime_rows_pass": checks.get("dependency_mtime_rows_pass"),
+        }
+    if namespace == "github_sync":
+        summary = _as_dict(row.get("summary"))
+        checks = _as_dict(row.get("checks"))
+        return {
+            "state": str(summary.get("status", "") or "approval_required"),
+            "reason_code": str(summary.get("reason_code", "") or ""),
+            "remote_sync_needed": bool(summary.get("remote_sync_needed", False)),
+            "remote_mutation_approval_pending": bool(
+                summary.get("remote_mutation_approval_pending", False)
+            ),
+            "remote_mutation_approved": bool(summary.get("remote_mutation_approved", False)),
+            "feature_ahead_count": summary.get("feature_ahead_count"),
+            "main_ahead_count": summary.get("main_ahead_count"),
+            "pending_remote_update_count": summary.get("pending_remote_update_count"),
+            "feature_fast_forward_possible": checks.get("github_sync_feature_fast_forward_possible"),
+            "main_fast_forward_possible": checks.get("github_sync_main_fast_forward_possible"),
+            "remote_safety_ok": checks.get("github_sync_remote_safety_ok"),
+            "source_policy": "explicit_r4_approval_required_before_remote_mutation",
+            "approval_phrase": GITHUB_SYNC_APPROVAL_PHRASE,
         }
     return {"state": "open_release_evidence_blocker"}
 

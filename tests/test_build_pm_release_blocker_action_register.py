@@ -329,6 +329,70 @@ def test_build_register_guides_release_evidence_freshness_blocker(tmp_path: Path
     assert row["handoff_state"] == "local_remediation_ready"
 
 
+def test_build_register_guides_github_sync_r4_blocker(tmp_path: Path) -> None:
+    blocker_id = "github_sync::github_sync_preflight::remote_mutation_approval_required"
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": [blocker_id],
+            "release_area_blockers": [blocker_id],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "github_sync",
+                    "title": "GitHub Development Sync",
+                    "status": "blocked",
+                    "blockers": ["github_sync_preflight::remote_mutation_approval_required"],
+                    "checks": {
+                        "github_sync_feature_fast_forward_possible": True,
+                        "github_sync_main_fast_forward_possible": True,
+                        "github_sync_remote_safety_ok": True,
+                    },
+                    "summary": {
+                        "status": "approval_required",
+                        "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+                        "remote_sync_needed": True,
+                        "remote_mutation_approval_pending": True,
+                        "remote_mutation_approved": False,
+                        "feature_ahead_count": 11,
+                        "main_ahead_count": 59,
+                        "pending_remote_update_count": 2,
+                    },
+                    "artifacts": {
+                        "github_development_sync_preflight": "<live-git-state>",
+                    },
+                    "claim_boundary": "The GitHub development sync preflight is read-only.",
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == blocker_id
+    assert row["namespace"] == "github_sync"
+    assert row["scope"] == "release_area"
+    assert row["owner"] == "release_owner"
+    assert row["owner_input_required"] is True
+    assert row["external_input_required"] is True
+    assert row["resolution_type"] == "r4_remote_mutation_approval_required"
+    assert row["handoff_state"] == "external_owner_input_ready"
+    assert "feature push + main fast-forward 승인" in row["owner_action"]
+    assert any("check_github_development_sync_preflight.py --fetch --json" in command for command in row["reproduction_commands"])
+    assert any("remote_sync_needed == false" in item for item in row["acceptance_criteria"])
+    assert any("origin/main" in item for item in row["acceptance_criteria"])
+    assert row["claim_boundary"] == "The GitHub development sync preflight is read-only."
+    assert row["evidence_status"]["state"] == "approval_required"
+    assert row["evidence_status"]["remote_sync_needed"] is True
+    assert row["evidence_status"]["remote_mutation_approval_pending"] is True
+    assert row["evidence_status"]["feature_ahead_count"] == 11
+    assert row["evidence_status"]["main_ahead_count"] == 59
+    assert row["evidence_status"]["approval_phrase"] == "feature push + main fast-forward 승인"
+
+
 def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None:
     report = _write_json(
         tmp_path / "pm_release_gate_report.json",

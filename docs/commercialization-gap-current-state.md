@@ -5,7 +5,7 @@
 
 ## 한 줄 요약
 
-source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다. 그래서 P0 closed, P1 now unblocked이고 PM release milestones M1-M5와 release evidence freshness는 pass다. 다만 full release-area gate는 CI 30회 연속 evidence, human UX observation, license status 때문에 blocked이며, GA/Enterprise handoff는 independent V&V, family validation manual signoff, customer audit/failure-bundle/SLA, fresh full-validation receipt 0/8 때문에 blocked다. 독립 상용제품 claim은 EB receipt 0/4 때문에 아직 blocked다.
+source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다. 그래서 P0 closed, P1 now unblocked이고 PM release milestones M1-M5와 release evidence freshness는 pass다. 다만 full release-area gate는 CI 30회 연속 evidence, human UX observation, license status, feature/main GitHub remote sync pending 때문에 blocked이며, GA/Enterprise handoff는 independent V&V, family validation manual signoff, customer audit/failure-bundle/SLA, fresh full-validation receipt 0/8 때문에 blocked다. 독립 상용제품 claim은 EB receipt 0/4 때문에 아직 blocked다.
 
 ## 현재 상태
 
