@@ -1,5 +1,6 @@
 {
   "default_publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "gates": [
     {
       "blocks_p1_execution": false,
@@ -48,17 +49,29 @@
       "ok": true,
       "raw_redistribution_default_blocked": true,
       "release_surface_allowed_count": 0,
-      "row_count": 3,
+      "row_count": 13,
       "row_provenance_coverage": 1.0,
       "status": "ready"
     }
   ],
+  "generated_at": "2026-06-19T14:20:06.141434+00:00",
+  "input_checksums": {
+    "implementation/phase1/open_data_external_artifacts_manifest.json": "sha256:b8144a8e22fb7d91cb846113ce56e834b2505853697795db24e3c9d9dc344d14",
+    "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:d2ab8a0f9cb8d2218f29b5817b5abfe8dbf4d35c9ab0c135499823e205f03540",
+    "implementation/phase1/real_project_parser_coverage_matrix.json": "sha256:0c2945fbbaa09d53929f80477a4136f85a9570982118a74eecb0cc473b014b93",
+    "implementation/phase1/real_project_row_provenance_report.json": "sha256:c8a5e39083440d86495d476854fe5f931749b4a9589c6de34030f2cdba376231",
+    "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json": "sha256:733fe07afff3d607e059aea4d77889a2b6da3572f583cd13694e6d7714859657",
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:073b350298a6973e8d2e3939eab2e61054b7d9aae3e46c4446be2cdd59e041ec"
+  },
   "next_action": "start P1 quality/fallback/benchmark breadth",
   "p0_core_evidence_closed": true,
   "p0_release_blocker": false,
   "p1_execution_unblocked": true,
   "p1_inputs_ready": true,
   "publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "reuse_policy": "status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts",
+  "reused_evidence": true,
   "schema_version": "p1-readiness-status.v1",
+  "source_commit_sha": "d2b228db465abd740dd4ded66242e6e50b70595c",
   "status": "ready"
 }
