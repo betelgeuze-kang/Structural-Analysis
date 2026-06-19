@@ -1,0 +1,198 @@
+#!/usr/bin/env python3
+"""Read-only preflight for syncing local development state to GitHub."""
+
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import subprocess
+from typing import Any
+
+
+DEFAULT_FEATURE_REF = "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+DEFAULT_MAIN_REF = "origin/main"
+
+
+def _git_output(args: list[str], *, cwd: Path = Path(".")) -> str:
+    return subprocess.check_output(
+        ["git", *args],
+        cwd=cwd,
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
+
+
+def _git_success(args: list[str], *, cwd: Path = Path(".")) -> bool:
+    return (
+        subprocess.run(
+            ["git", *args],
+            cwd=cwd,
+            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        ).returncode
+        == 0
+    )
+
+
+def _ahead_count(base_ref: str, *, cwd: Path = Path(".")) -> int:
+    text = _git_output(["rev-list", "--count", f"{base_ref}..HEAD"], cwd=cwd)
+    return int(text)
+
+
+def collect_git_state(
+    *,
+    cwd: Path = Path("."),
+    feature_ref: str = DEFAULT_FEATURE_REF,
+    main_ref: str = DEFAULT_MAIN_REF,
+) -> dict[str, Any]:
+    return {
+        "branch": _git_output(["rev-parse", "--abbrev-ref", "HEAD"], cwd=cwd),
+        "local_head_sha": _git_output(["rev-parse", "HEAD"], cwd=cwd),
+        "remote_feature_ref": feature_ref,
+        "remote_feature_sha": _git_output(["rev-parse", feature_ref], cwd=cwd),
+        "remote_main_ref": main_ref,
+        "remote_main_sha": _git_output(["rev-parse", main_ref], cwd=cwd),
+        "worktree_status_short": _git_output(["status", "--short"], cwd=cwd),
+        "feature_ahead_count": _ahead_count(feature_ref, cwd=cwd),
+        "main_ahead_count": _ahead_count(main_ref, cwd=cwd),
+        "feature_fast_forward_possible": _git_success(
+            ["merge-base", "--is-ancestor", feature_ref, "HEAD"], cwd=cwd
+        ),
+        "main_fast_forward_possible": _git_success(
+            ["merge-base", "--is-ancestor", main_ref, "HEAD"], cwd=cwd
+        ),
+    }
+
+
+def build_report(
+    state: dict[str, Any],
+    *,
+    remote_mutation_approved: bool = False,
+) -> dict[str, Any]:
+    worktree_clean = not bool(str(state.get("worktree_status_short", "")).strip())
+    feature_ahead_count = int(state.get("feature_ahead_count", 0) or 0)
+    main_ahead_count = int(state.get("main_ahead_count", 0) or 0)
+    feature_ff = bool(state.get("feature_fast_forward_possible", False))
+    main_ff = bool(state.get("main_fast_forward_possible", False))
+    local_head = str(state.get("local_head_sha", "") or "")
+    remote_feature = str(state.get("remote_feature_sha", "") or "")
+    remote_main = str(state.get("remote_main_sha", "") or "")
+    feature_synced = local_head == remote_feature
+    main_synced = local_head == remote_main
+    remote_sync_needed = bool(feature_ahead_count or main_ahead_count or not feature_synced or not main_synced)
+    preflight_pass = bool(
+        local_head
+        and remote_feature
+        and remote_main
+        and worktree_clean
+        and feature_ff
+        and main_ff
+    )
+    remote_sync_authorized = bool(preflight_pass and (not remote_sync_needed or remote_mutation_approved))
+    blockers: list[str] = []
+    if not worktree_clean:
+        blockers.append("worktree_not_clean")
+    if not feature_ff:
+        blockers.append("feature_remote_not_ancestor_of_head")
+    if not main_ff:
+        blockers.append("main_remote_not_ancestor_of_head")
+    if remote_sync_needed and not remote_mutation_approved:
+        blockers.append("remote_mutation_approval_required")
+    status = "synced"
+    if blockers:
+        status = "approval_required" if blockers == ["remote_mutation_approval_required"] else "blocked"
+    elif remote_sync_needed:
+        status = "ready_to_push"
+
+    return {
+        "schema_version": "github-development-sync-preflight.v1",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": status,
+        "contract_pass": remote_sync_authorized and not blockers,
+        "preflight_pass": preflight_pass,
+        "remote_mutation_approved": remote_mutation_approved,
+        "remote_sync_needed": remote_sync_needed,
+        "reason_code": "PASS" if remote_sync_authorized and not blockers else "ERR_GITHUB_SYNC_NOT_COMPLETE",
+        "blockers": blockers,
+        "state": state,
+        "checks": {
+            "worktree_clean": worktree_clean,
+            "feature_fast_forward_possible": feature_ff,
+            "main_fast_forward_possible": main_ff,
+            "feature_synced_to_head": feature_synced,
+            "main_synced_to_head": main_synced,
+            "explicit_remote_mutation_approval": remote_mutation_approved,
+        },
+        "commands": {
+            "feature_push": (
+                "git push origin "
+                f"{str(state.get('branch', '') or 'HEAD')}:"
+                "codex/create-architecture-definition-document-for-hybrid-ai"
+            ),
+            "main_fast_forward_push": "git push origin HEAD:main",
+            "post_push_verify": (
+                "git fetch origin && git rev-parse HEAD "
+                f"{state.get('remote_feature_ref')} {state.get('remote_main_ref')}"
+            ),
+        },
+        "r4_disclosure": {
+            "target": [
+                str(state.get("remote_feature_ref", "") or DEFAULT_FEATURE_REF),
+                str(state.get("remote_main_ref", "") or DEFAULT_MAIN_REF),
+            ],
+            "action": "push current HEAD to feature, then fast-forward push HEAD to main",
+            "impact": "GitHub feature/main refs become externally visible at the local development state.",
+            "risk": "Main CI and external reviewers immediately see the current commits.",
+            "rollback": f"restore main to previous remote SHA {remote_main} with an approved revert/restore action",
+            "verification": "fetch origin and compare remote feature/main refs with local HEAD after push",
+        },
+        "claim_boundary": (
+            "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. "
+            "A remote update still requires explicit human R4 approval."
+        ),
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--feature-ref", default=DEFAULT_FEATURE_REF)
+    parser.add_argument("--main-ref", default=DEFAULT_MAIN_REF)
+    parser.add_argument("--remote-mutation-approved", action="store_true")
+    parser.add_argument("--out", type=Path)
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--fail-blocked", action="store_true")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    payload = build_report(
+        collect_git_state(feature_ref=args.feature_ref, main_ref=args.main_ref),
+        remote_mutation_approved=args.remote_mutation_approved,
+    )
+    if args.out is not None:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        state = payload["state"]
+        print(
+            "github-development-sync-preflight: "
+            f"{payload['status'].upper()} | "
+            f"feature_ahead={state['feature_ahead_count']} | "
+            f"main_ahead={state['main_ahead_count']} | "
+            f"preflight_pass={payload['preflight_pass']}"
+        )
+    return 1 if args.fail_blocked and not payload["contract_pass"] else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
