@@ -105,3 +105,24 @@ def test_evidence_console_scope_blocks_missing_scope_and_prohibited_claim(tmp_pa
     assert payload["contract_pass"] is False
     assert "evidence_console_feature_missing:residual_audit" in payload["blockers"]
     assert "prohibited_first_scope_claim_present:full_gui_ready_true" in payload["blockers"]
+
+
+def test_evidence_console_scope_scans_claim_boundary_docs_for_prohibited_claims(
+    tmp_path: Path,
+) -> None:
+    readme = _write_text(tmp_path / "README.md", "model_editor_ready=true\n")
+    current_state = _write_text(tmp_path / "current-state.md", "collaboration_ready=true\n")
+
+    payload = scope_status.build_status(
+        scope_source=_write_text(tmp_path / "scope.md", _scope_text()),
+        claim_boundary_docs=(readme, current_state),
+        **_inputs(tmp_path, customer_shadow_pass=True),
+    )
+
+    assert payload["scope_contract_pass"] is False
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["claim_boundary_docs"] == [str(readme), str(current_state)]
+    assert payload["input_checksums"][str(readme)].startswith("sha256:")
+    assert payload["input_checksums"][str(current_state)].startswith("sha256:")
+    assert "prohibited_first_scope_claim_present:model_editor_ready_true" in payload["blockers"]
+    assert "prohibited_first_scope_claim_present:collaboration_ready_true" in payload["blockers"]

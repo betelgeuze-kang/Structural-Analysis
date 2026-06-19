@@ -19,6 +19,10 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 SCHEMA_VERSION = "evidence-console-scope-status.v1"
 DEFAULT_SCOPE_SOURCE = Path("docs/structure-viewer-product-workspace.md")
+DEFAULT_CLAIM_BOUNDARY_DOCS = (
+    Path("README.md"),
+    Path("docs/commercialization-gap-current-state.md"),
+)
 DEFAULT_P0_STATUS = Path("implementation/phase1/release_evidence/productization/p0_closure_status.json")
 DEFAULT_P1_READINESS = Path("implementation/phase1/release_evidence/productization/p1_readiness_status.json")
 DEFAULT_P1_BENCHMARK_BREADTH = Path(
@@ -130,6 +134,7 @@ def _prerequisite_row(label: str, ok: bool, path: Path, *, summary: dict[str, An
 def build_status(
     *,
     scope_source: Path = DEFAULT_SCOPE_SOURCE,
+    claim_boundary_docs: tuple[Path, ...] = DEFAULT_CLAIM_BOUNDARY_DOCS,
     p0_status: Path = DEFAULT_P0_STATUS,
     p1_readiness: Path = DEFAULT_P1_READINESS,
     p1_benchmark_breadth: Path = DEFAULT_P1_BENCHMARK_BREADTH,
@@ -137,9 +142,10 @@ def build_status(
     customer_shadow_status: Path = DEFAULT_CUSTOMER_SHADOW_STATUS,
 ) -> dict[str, Any]:
     scope_text = _read_text(scope_source)
+    claim_boundary_text = "\n".join([scope_text, *(_read_text(path) for path in claim_boundary_docs)])
     feature_rows = _row_terms(scope_text, REQUIRED_EVIDENCE_CONSOLE_FEATURES, pass_when_present=True)
     deferred_rows = _row_terms(scope_text, DEFERRED_GUI_SURFACES, pass_when_present=True)
-    prohibited_rows = _row_terms(scope_text, PROHIBITED_FIRST_SCOPE_CLAIMS, pass_when_present=False)
+    prohibited_rows = _row_terms(claim_boundary_text, PROHIBITED_FIRST_SCOPE_CLAIMS, pass_when_present=False)
 
     p0_payload = _load_json(p0_status)
     p1_payload = _load_json(p1_readiness)
@@ -190,6 +196,7 @@ def build_status(
         **release_evidence_metadata(
             input_paths=[
                 scope_source,
+                *claim_boundary_docs,
                 p0_status,
                 p1_readiness,
                 p1_benchmark_breadth,
@@ -212,6 +219,7 @@ def build_status(
         ),
         "summary": {
             "scope_source": str(scope_source),
+            "claim_boundary_docs": [str(path) for path in claim_boundary_docs],
             "evidence_console_feature_count": len(feature_rows),
             "evidence_console_feature_pass_count": len(feature_rows) - len(missing_features),
             "deferred_gui_surface_count": len(deferred_rows),
@@ -276,6 +284,13 @@ def _markdown(payload: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope-source", type=Path, default=DEFAULT_SCOPE_SOURCE)
+    parser.add_argument(
+        "--claim-boundary-doc",
+        action="append",
+        type=Path,
+        dest="claim_boundary_docs",
+        default=None,
+    )
     parser.add_argument("--p0-status", type=Path, default=DEFAULT_P0_STATUS)
     parser.add_argument("--p1-readiness", type=Path, default=DEFAULT_P1_READINESS)
     parser.add_argument("--p1-benchmark-breadth", type=Path, default=DEFAULT_P1_BENCHMARK_BREADTH)
@@ -292,6 +307,9 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_status(
         scope_source=args.scope_source,
+        claim_boundary_docs=tuple(args.claim_boundary_docs)
+        if args.claim_boundary_docs is not None
+        else DEFAULT_CLAIM_BOUNDARY_DOCS,
         p0_status=args.p0_status,
         p1_readiness=args.p1_readiness,
         p1_benchmark_breadth=args.p1_benchmark_breadth,
