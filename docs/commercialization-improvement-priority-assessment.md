@@ -9,7 +9,7 @@
 현재 단계는 **strict evidence-aware 상용 운영 L4, 8.0/10**으로 본다.
 
 - 게이트 기반 공식 점수: **8.0/10** (`scripts/report_commercialization_level.py --closure-mode strict`)
-- PM release milestone gate: **M1-M5 5/5 pass**, release areas는 CI streak, human UX observation, license status 때문에 blocked
+- PM release milestone gate: **M1-M5 5/5 pass**, release areas는 CI streak, release evidence freshness/provenance metadata, human UX observation, license status 때문에 blocked (`11/15` green)
 - 실무자 검토 전제 상용 보조툴 readiness: **상용 운영 가능**
 - 독립 상용 구조해석제품 readiness: **blocked, 80/100** (`scripts/check_independent_product_readiness.py`)
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**

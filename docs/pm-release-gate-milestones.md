@@ -89,6 +89,10 @@ python3 scripts/build_paid_pilot_scope_guard_report.py \
   --out implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json \
   --out-md implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.md
 
+python3 scripts/report_release_evidence_freshness.py \
+  --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json \
+  --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md
+
 python3 scripts/report_pm_release_gate.py \
   --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json \
   --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md
@@ -129,7 +133,7 @@ npm run ai:preflight
 ## 현재 판정
 
 현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_milestone_ready=true`, `limited_commercial_ready=false`, `ga_enterprise_ready=false`다.
-다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `11/14` green이다.
+다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `11/15` green이다.
 
 합격한 마일스톤:
 
@@ -145,13 +149,14 @@ npm run ai:preflight
 전체 PM release-area blocker는 다음과 같다.
 
 - Basic CI: local artifacts는 PR `2`회, nightly `230`회 연속 PASS를 보여주지만 release streak credit은 GitHub Actions tracked evidence를 요구한다. 현재 GitHub Actions PR/nightly streak evidence가 `0/30`이므로 두 lane 모두 `30`회 연속 PASS release evidence가 아직 없다. PR은 원격 `CI` workflow가 등록됐지만 tracked `pull_request` streak가 없고, nightly는 로컬 `.github/workflows/nightly-full-quality.yml` 파일은 있으나 원격 GitHub Actions registry에 아직 등록되지 않았다.
+- Evidence Freshness: `release_evidence_freshness_report.json`은 `p0_closure_status.json`, `p1_readiness_status.json`, `p1_benchmark_breadth_status.json` 3개 core release evidence를 감사한다. 현재 3개 artifact 모두 producer mtime은 통과하지만 `generated_at`, source commit, engine version, input checksum, reuse marker metadata가 없어 15개 세부 blocker로 남는다. 이는 local remediation ready이며, 실제 P0/P1 producer가 해당 metadata를 발행하고 freshness/PM gate를 재생성해야 닫힌다.
 - UX: automated browser rehearsal는 sample workflow가 30분 예산 안에 끝난다는 workflow evidence로만 인정한다. PM UX release-area pass는 실제 신규 사용자 human observation record, completion minutes, blocker count, observer, evidence reference, accepted decision이 들어간 `ux_new_user_observation_report.json.contract_pass=true`를 요구한다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
 
 `pm_release_blocker_action_register.json`은 위 blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
-각 open blocker는 `handoff_state=external_owner_input_ready`로 분류된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
+현재 open blocker는 총 `20`개이며, CI/UX/Security 5개는 `external_owner_input_ready`, evidence freshness 15개는 `local_remediation_ready`로 분류된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval evidence나 fresh P0/P1 producer metadata를 대체하지 않는다.
 `pm_release_blocker_closure_board.json`은 open blocker를 `external_owner_input_ready`, `local_remediation_ready`, `handoff_incomplete` closure state로 다시 묶는 PM daily board다. 이 board도 blocker를 해제하지 않으며, action register의 open blocker count와 handoff readiness가 support bundle에서 바로 확인되는지를 고정한다.
-`pm_release_gate_completion_audit.json`은 PM release-area 14개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `11/14` pass, Basic CI/UX/Security 3개 top-level row가 external owner input ready 상태로 blocked임을 기록한다.
+`pm_release_gate_completion_audit.json`은 PM release-area 15개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `11/15` pass, Basic CI/UX/Security 3개 top-level row가 external owner input ready, Evidence Freshness 1개 top-level row가 local remediation ready 상태로 blocked임을 기록한다.
 `pm_release_gate_reviewer_handoff.json`은 open blocker별 owner, closure state, reproduction/verification command, verdict-change condition을 reviewer package로 묶는다. 이 handoff는 reviewer가 어떤 evidence가 들어오면 판정이 바뀌는지 확인하는 산출물이며, CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `pm_owner_evidence_request_packet.json`은 같은 open blocker를 owner별로 다시 묶어 owner가 제출해야 할 intake artifact, acceptance criteria, reproduction/verification command를 한 곳에 고정한다. 이 packet도 external evidence를 생성하거나 blocker를 해제하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.

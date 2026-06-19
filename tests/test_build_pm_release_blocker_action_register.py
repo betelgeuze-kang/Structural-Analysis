@@ -192,6 +192,59 @@ def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path)
     assert "frontend_dependency_audit_report" in row["evidence_artifacts"]
 
 
+def test_build_register_guides_release_evidence_freshness_blocker(tmp_path: Path) -> None:
+    blocker_id = "evidence_freshness::p0_closure_status::source_commit_missing"
+    report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_blockers": [blocker_id],
+            "release_area_blockers": [blocker_id],
+            "blockers": [],
+            "milestones": [],
+            "release_area_matrix": [
+                {
+                    "area": "evidence_freshness",
+                    "title": "Evidence Freshness",
+                    "status": "blocked",
+                    "blockers": ["p0_closure_status::source_commit_missing"],
+                    "checks": {
+                        "source_commit_rows_match": False,
+                        "engine_version_rows_present": False,
+                        "input_checksum_rows_present": False,
+                        "reuse_marker_rows_present": False,
+                        "dependency_mtime_rows_pass": True,
+                    },
+                    "summary": {"artifact_count": 3, "pass_count": 0, "blocker_count": 15},
+                    "artifacts": {
+                        "release_evidence_freshness": "release_evidence_freshness_report.json",
+                    },
+                    "claim_boundary": "Freshness audit only; it does not rerun heavy validation.",
+                }
+            ],
+        },
+    )
+
+    payload = build_register_module.build_register(pm_report=report)
+    row = payload["rows"][0]
+
+    assert row["blocker_id"] == blocker_id
+    assert row["owner"] == "release_owner"
+    assert row["owner_input_required"] is False
+    assert row["resolution_type"] == "release_evidence_metadata_required"
+    assert "source commit" in row["owner_action"]
+    assert any("report_release_evidence_freshness.py" in command for command in row["reproduction_commands"])
+    assert any("report_release_evidence_freshness.py" in command for command in row["verification_commands"])
+    assert any("release_evidence_freshness_report.json.contract_pass" in item for item in row["acceptance_criteria"])
+    assert "release_evidence_freshness_report" in row["evidence_artifacts"]
+    assert row["claim_boundary"] == "Freshness audit only; it does not rerun heavy validation."
+    assert row["evidence_status"]["state"] == "release_evidence_metadata_missing"
+    assert row["evidence_status"]["source_commit_rows_match"] is False
+    assert row["evidence_status"]["dependency_mtime_rows_pass"] is True
+    assert row["handoff_ready"] is True
+    assert row["handoff_state"] == "local_remediation_ready"
+
+
 def test_build_register_guides_human_new_user_ux_blocker(tmp_path: Path) -> None:
     report = _write_json(
         tmp_path / "pm_release_gate_report.json",

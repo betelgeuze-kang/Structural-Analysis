@@ -1,13 +1,13 @@
 {
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-18T15:01:37.450064+00:00",
+  "generated_at": "2026-06-19T13:48:35.447910+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
   "pm_release_gate_completion_audit": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304",
+  "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/15 | measured_cases=304",
   "reason_code": "PASS",
   "release_tier_rows": [
     {
@@ -42,6 +42,21 @@
       "blockers": [
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "evidence_freshness::p0_closure_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p0_closure_status::source_commit_missing",
+        "evidence_freshness::p0_closure_status::engine_version_missing",
+        "evidence_freshness::p0_closure_status::input_checksum_missing",
+        "evidence_freshness::p0_closure_status::reuse_marker_missing",
+        "evidence_freshness::p1_readiness_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p1_readiness_status::source_commit_missing",
+        "evidence_freshness::p1_readiness_status::engine_version_missing",
+        "evidence_freshness::p1_readiness_status::input_checksum_missing",
+        "evidence_freshness::p1_readiness_status::reuse_marker_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p1_benchmark_breadth_status::source_commit_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::engine_version_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::input_checksum_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::reuse_marker_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured"
@@ -65,6 +80,21 @@
         "customer_audit_failure_bundle_sla_missing",
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "evidence_freshness::p0_closure_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p0_closure_status::source_commit_missing",
+        "evidence_freshness::p0_closure_status::engine_version_missing",
+        "evidence_freshness::p0_closure_status::input_checksum_missing",
+        "evidence_freshness::p0_closure_status::reuse_marker_missing",
+        "evidence_freshness::p1_readiness_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p1_readiness_status::source_commit_missing",
+        "evidence_freshness::p1_readiness_status::engine_version_missing",
+        "evidence_freshness::p1_readiness_status::input_checksum_missing",
+        "evidence_freshness::p1_readiness_status::reuse_marker_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::generated_at_missing_or_invalid",
+        "evidence_freshness::p1_benchmark_breadth_status::source_commit_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::engine_version_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::input_checksum_missing",
+        "evidence_freshness::p1_benchmark_breadth_status::reuse_marker_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured"
@@ -168,6 +198,591 @@
       ],
       "verification_commands": [
         "python3 scripts/build_ci_streak_intake_packet.py --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json --fail-blocked",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p0_closure_status::generated_at_missing_or_invalid` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p0_closure_status::generated_at_missing_or_invalid",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p0_closure_status::generated_at_missing_or_invalid` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p0_closure_status::source_commit_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p0_closure_status::source_commit_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p0_closure_status::source_commit_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p0_closure_status::engine_version_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p0_closure_status::engine_version_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p0_closure_status::engine_version_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p0_closure_status::input_checksum_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p0_closure_status::input_checksum_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p0_closure_status::input_checksum_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p0_closure_status::reuse_marker_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p0_closure_status::reuse_marker_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p0_closure_status::reuse_marker_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_readiness_status::generated_at_missing_or_invalid` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_readiness_status::generated_at_missing_or_invalid",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_readiness_status::generated_at_missing_or_invalid` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_readiness_status::source_commit_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_readiness_status::source_commit_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_readiness_status::source_commit_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_readiness_status::engine_version_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_readiness_status::engine_version_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_readiness_status::engine_version_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_readiness_status::input_checksum_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_readiness_status::input_checksum_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_readiness_status::input_checksum_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_readiness_status::reuse_marker_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_readiness_status::reuse_marker_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_readiness_status::reuse_marker_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::generated_at_missing_or_invalid` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::generated_at_missing_or_invalid",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::generated_at_missing_or_invalid` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::source_commit_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::source_commit_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::source_commit_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::engine_version_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::engine_version_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::engine_version_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::input_checksum_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::input_checksum_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::input_checksum_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`release_evidence_freshness_report.json.contract_pass == true`",
+        "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, `reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::reuse_marker_missing` absent from `release_area_blockers`"
+      ],
+      "blocker_id": "evidence_freshness::p1_benchmark_breadth_status::reuse_marker_missing",
+      "claim_boundary": "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun heavy validation; fresh full-validation lanes remain required for Level 3 promotion.",
+      "closure_state": "local_remediation_ready",
+      "evidence_artifact_paths": {
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+        "release_evidence_freshness_report": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+      },
+      "evidence_state": "release_evidence_metadata_missing",
+      "external_input_required": false,
+      "handoff_state": "local_remediation_ready",
+      "next_action": "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports.",
+      "owner": "release_owner",
+      "owner_input_required": false,
+      "release_area_requirement_id": "release_area.evidence_freshness",
+      "release_area_status": "blocked_local_remediation_ready",
+      "reproduction_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "verdict_change_conditions": [
+        "`release_area.evidence_freshness` status is `pass` in `pm_release_gate_completion_audit.json`",
+        "`evidence_freshness::p1_benchmark_breadth_status::reuse_marker_missing` is absent from `pm_release_gate_report.json.release_area_blockers`",
+        "The owning release-area row has no blocker-specific false check in the PM report.",
+        "Current false audit check(s): `engine_version_rows_present`, `input_checksum_rows_present`, `release_evidence_freshness_contract_pass`, `reuse_marker_rows_present`, `source_commit_rows_match`"
+      ],
+      "verification_commands": [
+        "python3 scripts/report_release_evidence_freshness.py --out implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json --out-md implementation/phase1/release_evidence/productization/release_evidence_freshness_report.md --fail-blocked",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
       ]
     },
@@ -310,12 +925,12 @@
   "summary": {
     "external_input_required_count": 5,
     "full_release_gate_ready": false,
-    "handoff_complete_count": 5,
+    "handoff_complete_count": 20,
     "handoff_incomplete_count": 0,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "open_blocker_count": 5,
+    "open_blocker_count": 20,
     "owner_input_required_count": 5,
     "paid_pilot_candidate": true,
     "release_area_gate_ready": false,
@@ -324,5 +939,5 @@
     "release_tier_handoff_incomplete_count": 0,
     "release_tier_pass_count": 2
   },
-  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=5 | incomplete=0 | release_tiers=2/4"
+  "summary_line": "PM release gate reviewer handoff: PASS | open_blockers=20 | incomplete=0 | release_tiers=2/4"
 }

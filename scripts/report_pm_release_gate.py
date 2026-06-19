@@ -102,6 +102,9 @@ DEFAULT_TEMPLATE_EVIDENCE_SAFETY = Path(
 DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json"
 )
+DEFAULT_RELEASE_EVIDENCE_FRESHNESS = Path(
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
 VALIDATION_MANUAL_REQUIRED_TERMS = (
@@ -702,6 +705,7 @@ def _packaging_milestone(
     pm_blocker_closure_board_path: Path,
     template_evidence_safety_path: Path,
     pm_release_reproduction_command_audit_path: Path,
+    release_evidence_freshness_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
 ) -> dict[str, Any]:
@@ -712,6 +716,7 @@ def _packaging_milestone(
     pm_blocker_closure_board = _load_json(pm_blocker_closure_board_path)
     template_evidence_safety = _load_json(template_evidence_safety_path)
     pm_release_reproduction_command_audit = _load_json(pm_release_reproduction_command_audit_path)
+    release_evidence_freshness = _load_json(release_evidence_freshness_path)
     workflow_summary = _summary(workflow)
     registry_summary = _summary(registry)
     support_checks = _checks(support)
@@ -1108,6 +1113,11 @@ def _packaging_milestone(
             "support_bundle_pm_release_reproduction_command_audit": str(
                 support_optional_sections.get("pm_release_reproduction_command_audit", "")
             ),
+            "release_evidence_freshness": str(release_evidence_freshness_path),
+            "release_evidence_freshness_contract_pass": _truthy_contract(release_evidence_freshness),
+            "release_evidence_freshness_blocker_count": _as_int(
+                _summary(release_evidence_freshness).get("blocker_count"), 0
+            ),
             "support_bundle_commercial_gap_ledger_status": str(
                 support_optional_sections.get("commercial_gap_ledger_status", "")
             ),
@@ -1123,6 +1133,7 @@ def _packaging_milestone(
             "pm_release_blocker_closure_board": str(pm_blocker_closure_board_path),
             "template_evidence_safety": str(template_evidence_safety_path),
             "pm_release_reproduction_command_audit": str(pm_release_reproduction_command_audit_path),
+            "release_evidence_freshness": str(release_evidence_freshness_path),
             "validation_manual": str(validation_manual_path),
             "limitation_manual": str(limitation_manual_path),
         },
@@ -1171,6 +1182,7 @@ def _build_release_area_matrix(
     license_status_closure_path: Path,
     template_evidence_safety_path: Path,
     pm_release_reproduction_command_audit_path: Path,
+    release_evidence_freshness_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
     cpu_only_product_mode: bool,
@@ -1218,6 +1230,7 @@ def _build_release_area_matrix(
     license_status_closure = _load_json(license_status_closure_path)
     template_evidence_safety = _load_json(template_evidence_safety_path)
     pm_release_reproduction_command_audit = _load_json(pm_release_reproduction_command_audit_path)
+    release_evidence_freshness = _load_json(release_evidence_freshness_path)
 
     rows: list[dict[str, Any]] = []
 
@@ -1397,6 +1410,48 @@ def _build_release_area_matrix(
                 "ndtha_long_profile": str(ndtha_long_profile_path),
                 "solver_hip_e2e": str(solver_hip_e2e_path),
             },
+        )
+    )
+
+    freshness_summary = _summary(release_evidence_freshness)
+    freshness_checks = {
+        "release_evidence_freshness_report_present": bool(release_evidence_freshness),
+        "release_evidence_freshness_contract_pass": _reason_pass(release_evidence_freshness),
+        "source_commit_rows_match": _as_int(freshness_summary.get("source_commit_match_count"), 0)
+        >= _as_int(freshness_summary.get("artifact_count"), 1),
+        "engine_version_rows_present": _as_int(freshness_summary.get("engine_version_present_count"), 0)
+        >= _as_int(freshness_summary.get("artifact_count"), 1),
+        "input_checksum_rows_present": _as_int(freshness_summary.get("input_checksum_present_count"), 0)
+        >= _as_int(freshness_summary.get("artifact_count"), 1),
+        "reuse_marker_rows_present": _as_int(freshness_summary.get("reuse_marker_present_count"), 0)
+        >= _as_int(freshness_summary.get("artifact_count"), 1),
+        "dependency_mtime_rows_pass": _as_int(freshness_summary.get("dependency_mtime_pass_count"), 0)
+        >= _as_int(freshness_summary.get("artifact_count"), 1),
+    }
+    freshness_blockers = (
+        [str(row) for row in _as_list(release_evidence_freshness.get("blockers"))]
+        if release_evidence_freshness
+        else ["release_evidence_freshness_report_missing"]
+    )
+    rows.append(
+        _area(
+            "evidence_freshness",
+            "Evidence Freshness",
+            ok=bool(release_evidence_freshness and _reason_pass(release_evidence_freshness)),
+            blockers=freshness_blockers,
+            checks=freshness_checks,
+            summary={
+                "artifact_count": freshness_summary.get("artifact_count"),
+                "pass_count": freshness_summary.get("pass_count"),
+                "blocker_count": freshness_summary.get("blocker_count"),
+                "current_source_commit_sha": release_evidence_freshness.get("current_source_commit_sha", ""),
+                "max_age_days": release_evidence_freshness.get("max_age_days"),
+            },
+            artifacts={"release_evidence_freshness": str(release_evidence_freshness_path)},
+            claim_boundary=(
+                "Release evidence freshness is a metadata and dependency-recency audit. It does not rerun "
+                "heavy validation; fresh full-validation lanes remain required for Level 3 promotion."
+            ),
         )
     )
 
@@ -2337,6 +2392,7 @@ def build_report(
     paid_pilot_scope_guard: Path = DEFAULT_PAID_PILOT_SCOPE_GUARD,
     template_evidence_safety: Path = DEFAULT_TEMPLATE_EVIDENCE_SAFETY,
     pm_release_reproduction_command_audit: Path = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
+    release_evidence_freshness: Path = DEFAULT_RELEASE_EVIDENCE_FRESHNESS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -2379,6 +2435,7 @@ def build_report(
             pm_blocker_closure_board_path=pm_release_blocker_closure_board,
             template_evidence_safety_path=template_evidence_safety,
             pm_release_reproduction_command_audit_path=pm_release_reproduction_command_audit,
+            release_evidence_freshness_path=release_evidence_freshness,
             validation_manual_path=validation_manual,
             limitation_manual_path=limitation_manual,
         ),
@@ -2447,6 +2504,7 @@ def build_report(
         license_status_closure_path=license_status_closure,
         template_evidence_safety_path=template_evidence_safety,
         pm_release_reproduction_command_audit_path=pm_release_reproduction_command_audit,
+        release_evidence_freshness_path=release_evidence_freshness,
         validation_manual_path=validation_manual,
         limitation_manual_path=limitation_manual,
         cpu_only_product_mode=cpu_only_product_mode,
@@ -2710,6 +2768,7 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     )
+    parser.add_argument("--release-evidence-freshness", type=Path, default=DEFAULT_RELEASE_EVIDENCE_FRESHNESS)
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -2782,6 +2841,7 @@ def main(argv: list[str] | None = None) -> int:
         paid_pilot_scope_guard=args.paid_pilot_scope_guard,
         template_evidence_safety=args.template_evidence_safety,
         pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
+        release_evidence_freshness=args.release_evidence_freshness,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

@@ -28,6 +28,8 @@
 | Support bundle | ready |
 | Viewer workflow packaging | ready: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package, static performance budget manifest, local browser performance probe, 11-case render-mode/core/advanced workflow-state visual regression baseline |
 | Workstation delivery service | local gate: hardware profile, service budget, delivery package manifest, client input validation, package restore/checksum smoke |
+| PM release-area gate | blocked: `11/15` green; CI streak, evidence freshness metadata, human UX observation, license status remain open |
+| Release evidence freshness | blocked: producer mtime `3/3`, metadata completeness `0/3` for generated_at/source commit/engine version/input checksum/reuse marker |
 | Strict EB/RH evidence | blocked: EB `0/4`, RH signed closure `3/3` |
 | Independent product readiness | blocked, `80/100` |
 
@@ -59,6 +61,7 @@ npm run verify:viewer-performance-probe
 npm run verify:viewer-visual-regression
 python3 scripts/build_support_bundle.py --json
 python3 scripts/build_onprem_deployment_packaging_manifest.py --json
+python3 scripts/report_release_evidence_freshness.py
 python3 scripts/check_independent_product_readiness.py --json
 python3 scripts/verify_structure_viewer_contracts.py --dry-run
 python3 scripts/verify_quality_gate.py --mode full --dry-run

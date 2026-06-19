@@ -489,6 +489,26 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 "summary_line": "Template evidence safety: PASS | templates=5 | validator_probes=5 | blockers=0",
             },
         ),
+        "release_evidence_freshness": _write(
+            tmp_path / "release_evidence_freshness_report.json",
+            {
+                "contract_pass": True,
+                "reason_code": "PASS",
+                "current_source_commit_sha": "abcdef123456",
+                "max_age_days": 30,
+                "summary": {
+                    "artifact_count": 3,
+                    "pass_count": 3,
+                    "blocker_count": 0,
+                    "source_commit_match_count": 3,
+                    "engine_version_present_count": 3,
+                    "input_checksum_present_count": 3,
+                    "reuse_marker_present_count": 3,
+                    "dependency_mtime_pass_count": 3,
+                },
+                "blockers": [],
+            },
+        ),
         "commercial_gap_ledger_status": _write(
             tmp_path / "commercial_gap_ledger_status.json",
             {
@@ -714,6 +734,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert basic_ci_area["summary"]["pr_owner_action"].startswith("No release action required")
     assert "tracked PR CI evidence" in basic_ci_area["claim_boundary"]
     assert basic_ci_area["artifacts"]["ci_streak_intake_packet"].endswith("ci_streak_intake_packet.json")
+    freshness_area = next(row for row in payload["release_area_matrix"] if row["area"] == "evidence_freshness")
+    assert freshness_area["ok"] is True
+    assert freshness_area["checks"]["release_evidence_freshness_contract_pass"] is True
+    assert freshness_area["summary"]["artifact_count"] == 3
     core_area = next(row for row in payload["release_area_matrix"] if row["area"] == "core_engine")
     assert core_area["summary"]["p95_evidence_source"] == "core_family_p95_accuracy_report"
     assert core_area["summary"]["max_family_p95_error_pct"] == 3.5
@@ -850,6 +874,10 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["summary"]["support_bundle_gap_closure_status"].endswith("gap_closure_status.json")
     assert m5["summary"]["pm_release_reproduction_command_audit_command_count"] == 42
     assert m5["summary"]["pm_release_reproduction_command_audit_violation_count"] == 0
+    assert m5["summary"]["release_evidence_freshness"].endswith("release_evidence_freshness_report.json")
+    assert m5["summary"]["release_evidence_freshness_contract_pass"] is True
+    assert m5["summary"]["release_evidence_freshness_blocker_count"] == 0
+    assert m5["artifacts"]["release_evidence_freshness"].endswith("release_evidence_freshness_report.json")
     assert m5["checks"]["support_bundle_one_click_archive_present"] is True
     assert payload["ga_enterprise_ready"] is False
     assert payload["release_tiers"]["ga_enterprise_evidence_gate_pass"] is False
@@ -861,6 +889,26 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert "independent_vv_missing" in payload["release_tiers"]["ga_enterprise_blockers"]
     assert payload["blockers"] == []
     assert payload["release_area_blockers"] == []
+
+    missing_freshness_kwargs = dict(base_kwargs)
+    missing_freshness_kwargs["release_evidence_freshness"] = tmp_path / "missing_freshness.json"
+    payload_missing_freshness = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **missing_freshness_kwargs,
+    )
+    freshness_area = next(
+        row for row in payload_missing_freshness["release_area_matrix"] if row["area"] == "evidence_freshness"
+    )
+    assert freshness_area["ok"] is False
+    assert freshness_area["blockers"] == ["release_evidence_freshness_report_missing"]
+    assert (
+        "evidence_freshness::release_evidence_freshness_report_missing"
+        in payload_missing_freshness["release_area_blockers"]
+    )
+    assert payload_missing_freshness["release_area_gate_ready"] is False
 
     ci_gap_kwargs = dict(base_kwargs)
     ci_gap_kwargs["ci_pr"] = _write(

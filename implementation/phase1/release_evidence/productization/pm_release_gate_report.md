@@ -1,6 +1,6 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/14 | measured_cases=304`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/15 | measured_cases=304`
 - `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
 - `paid_pilot_candidate`: `True`
 - `limited_commercial_milestone_ready`: `True`
@@ -28,6 +28,7 @@
 |---|---|---|
 | basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | pass | none |
+| evidence_freshness Evidence Freshness | blocked | p0_closure_status::generated_at_missing_or_invalid, p0_closure_status::source_commit_missing, p0_closure_status::engine_version_missing, p0_closure_status::input_checksum_missing, p0_closure_status::reuse_marker_missing, p1_readiness_status::generated_at_missing_or_invalid, p1_readiness_status::source_commit_missing, p1_readiness_status::engine_version_missing, p1_readiness_status::input_checksum_missing, p1_readiness_status::reuse_marker_missing, p1_benchmark_breadth_status::generated_at_missing_or_invalid, p1_benchmark_breadth_status::source_commit_missing, p1_benchmark_breadth_status::engine_version_missing, p1_benchmark_breadth_status::input_checksum_missing, p1_benchmark_breadth_status::reuse_marker_missing |
 | core_engine Core Engine | pass | none |
 | ndtha NDTHA | pass | none |
 | residual Residual | pass | none |

@@ -39,6 +39,9 @@ DEFAULT_UX_NEW_USER_OBSERVATION_REPORT = Path(
 DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json"
 )
+DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT = Path(
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+)
 
 
 def _is_ux_human_new_user_blocker(*, namespace: str, code: str) -> bool:
@@ -104,6 +107,11 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             "Attach a human new-user observation record for the sample project workflow, rerun "
             "`build_ux_new_user_observation_report.py`, and regenerate the PM release gate evidence."
         )
+    if namespace == "evidence_freshness":
+        return (
+            "Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, "
+            "input checksum, and reuse marker metadata, then rerun the freshness and PM release reports."
+        )
     direct = str(summary.get("owner_action", "") or row.get("owner_action", "") or "")
     if direct:
         return direct
@@ -132,6 +140,8 @@ def _resolution_type(*, namespace: str, code: str) -> str:
         return "local_dependency_remediation_required"
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         return "external_human_new_user_observation_required"
+    if namespace == "evidence_freshness":
+        return "release_evidence_metadata_required"
     return "release_evidence_remediation_required"
 
 
@@ -190,6 +200,14 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`human_new_user_sample_30min_pass == true` in `pm_release_gate_report.json`",
             blocker_absence_criterion,
         ]
+    if namespace == "evidence_freshness":
+        blocker_id = f"{namespace}::{code}"
+        return [
+            "`release_evidence_freshness_report.json.contract_pass == true`",
+            "`source_commit_rows_match`, `engine_version_rows_present`, `input_checksum_rows_present`, "
+            "`reuse_marker_rows_present`, and `dependency_mtime_rows_pass` are true in `pm_release_gate_report.json`",
+            f"`{blocker_id}` absent from `release_area_blockers`",
+        ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
@@ -230,6 +248,12 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
+    if namespace == "evidence_freshness":
+        return [
+            f"python3 scripts/report_release_evidence_freshness.py --out {DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT} --out-md {DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT.with_suffix('.md')}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     return [
         pm_report_command,
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -256,6 +280,12 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
         return [
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_REPORT} --fail-blocked",
             f"python3 scripts/build_ux_new_user_observation_intake_packet.py --out {DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET} --fail-blocked",
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
+        ]
+    if namespace == "evidence_freshness":
+        return [
+            f"python3 scripts/report_release_evidence_freshness.py --out {DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT} --out-md {DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT.with_suffix('.md')} --fail-blocked",
+            f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
     return [
@@ -292,6 +322,8 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         augmented["ux_new_user_observation_report"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_REPORT)
         augmented["ux_new_user_observation_intake_packet"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET)
+    if namespace == "evidence_freshness":
+        augmented["release_evidence_freshness_report"] = str(DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT)
     return augmented
 
 
@@ -375,6 +407,20 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "automated_sample_completion_minutes": summary.get("automated_sample_completion_minutes"),
             "human_observation_reason_code": str(summary.get("human_observation_reason_code", "")),
             "source_policy": "human_new_user_observation_required",
+        }
+    if namespace == "evidence_freshness":
+        summary = _as_dict(row.get("summary"))
+        checks = _as_dict(row.get("checks"))
+        return {
+            "state": "release_evidence_metadata_missing",
+            "artifact_count": summary.get("artifact_count"),
+            "pass_count": summary.get("pass_count"),
+            "blocker_count": summary.get("blocker_count"),
+            "source_commit_rows_match": checks.get("source_commit_rows_match"),
+            "engine_version_rows_present": checks.get("engine_version_rows_present"),
+            "input_checksum_rows_present": checks.get("input_checksum_rows_present"),
+            "reuse_marker_rows_present": checks.get("reuse_marker_rows_present"),
+            "dependency_mtime_rows_pass": checks.get("dependency_mtime_rows_pass"),
         }
     return {"state": "open_release_evidence_blocker"}
 

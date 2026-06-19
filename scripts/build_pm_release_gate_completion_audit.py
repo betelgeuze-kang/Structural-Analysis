@@ -25,6 +25,11 @@ SNAPSHOT_EXCLUDED_KEY_MARKERS = (
 RELEASE_AREA_REQUIREMENTS = [
     ("basic_ci", "Basic CI", "PR/nightly 30 consecutive PASS evidence"),
     ("strict_ci", "Strict CI", "require NDTHA and require HIP or explicit CPU product mode"),
+    (
+        "evidence_freshness",
+        "Evidence Freshness",
+        "release evidence generated_at/source commit/engine version/input checksum/reuse marker and producer recency",
+    ),
     ("core_engine", "Core Engine", "family p95 error within Limited/GA budget"),
     ("ndtha", "NDTHA", "no collapse false-pass, all converged, long profile pass"),
     ("residual", "Residual", "hard and recommended residual pass with fallback limits"),
@@ -148,7 +153,10 @@ def _closure_by_blocker(closure_board: dict[str, Any]) -> dict[str, dict[str, An
 
 
 def _blocker_ids(area_id: str, blockers: list[str]) -> list[str]:
-    return [f"{area_id}::{blocker}" if "::" not in blocker else blocker for blocker in blockers]
+    return [
+        blocker if blocker.startswith(f"{area_id}::") else f"{area_id}::{blocker}"
+        for blocker in blockers
+    ]
 
 
 def _blocked_status(blocker_ids: list[str], closure_rows: dict[str, dict[str, Any]]) -> str:
@@ -184,11 +192,18 @@ def _blocker_next_actions(
 
 
 def _next_action_summary(actions: list[dict[str, str]]) -> str:
-    parts = [
-        f"{action['blocker_id']}: {action['next_action']}"
-        for action in actions
-        if action.get("next_action")
-    ]
+    grouped: dict[str, list[str]] = {}
+    for action in actions:
+        next_action = action.get("next_action")
+        if not next_action:
+            continue
+        grouped.setdefault(next_action, []).append(action["blocker_id"])
+    parts: list[str] = []
+    for next_action, blocker_ids in grouped.items():
+        if len(blocker_ids) == 1:
+            parts.append(f"{blocker_ids[0]}: {next_action}")
+        else:
+            parts.append(f"{len(blocker_ids)} blockers: {next_action}")
     return "; ".join(parts)
 
 

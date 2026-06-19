@@ -208,6 +208,56 @@ def test_build_audit_passes_only_when_full_gate_and_rows_pass(tmp_path: Path) ->
     assert payload["summary"]["blocked_requirement_count"] == 0
 
 
+def test_build_audit_prefixes_nested_release_area_blockers(tmp_path: Path) -> None:
+    release_areas = [
+        _area(area_id)
+        for area_id, _, _ in build_audit_module.RELEASE_AREA_REQUIREMENTS
+        if area_id != "evidence_freshness"
+    ]
+    release_areas.append(
+        _area(
+            "evidence_freshness",
+            ok=False,
+            blockers=["p0_closure_status::source_commit_missing"],
+        )
+    )
+    pm_report = _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "summary_line": "PM release gate: LIMITED_READY | release_areas=BLOCKED",
+            "full_release_gate_ready": False,
+            "release_area_matrix": release_areas,
+            "milestones": _passing_milestones(),
+            "release_tiers": _passing_release_tiers(),
+        },
+    )
+    closure_board = _write_json(
+        tmp_path / "pm_release_blocker_closure_board.json",
+        {
+            "rows": [
+                {
+                    "blocker_id": "evidence_freshness::p0_closure_status::source_commit_missing",
+                    "owner": "release_owner",
+                    "closure_state": "local_remediation_ready",
+                    "evidence_state": "release_evidence_metadata_missing",
+                    "next_action": "Regenerate the release evidence freshness report.",
+                }
+            ]
+        },
+    )
+
+    payload = build_audit_module.build_audit(pm_report=pm_report, closure_board=closure_board)
+    rows = {row["requirement_id"]: row for row in payload["rows"]}
+    freshness = rows["release_area.evidence_freshness"]
+
+    assert freshness["status"] == "blocked_local_remediation_ready"
+    assert freshness["blockers"] == ["evidence_freshness::p0_closure_status::source_commit_missing"]
+    assert freshness["closure_states"] == {
+        "evidence_freshness::p0_closure_status::source_commit_missing": "local_remediation_ready"
+    }
+    assert "Regenerate the release evidence freshness report" in freshness["next_action"]
+
+
 def test_build_audit_surfaces_release_tier_boundaries(tmp_path: Path) -> None:
     release_tiers = {
         "technical_paid_pilot_candidate": True,
