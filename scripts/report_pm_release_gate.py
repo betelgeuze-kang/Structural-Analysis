@@ -15,6 +15,7 @@ SCHEMA_VERSION = "pm-release-gate-report.v1"
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_NDTHA_RESIDUAL = Path("implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json")
+DEFAULT_RESIDUAL_LEVEL3_STATUS = Path("implementation/phase1/release_evidence/productization/residual_level3_status.json")
 DEFAULT_ELEMENT_MATERIAL_BREADTH = Path("implementation/phase1/element_material_breadth_gate_report.json")
 DEFAULT_NDTHA_LONG_PROFILE = Path("implementation/phase1/ndtha_long_profile_report.json")
 DEFAULT_SOLVER_HIP_E2E = Path("implementation/phase1/solver_hip_e2e_contract_report.json")
@@ -1160,6 +1161,7 @@ def _build_release_area_matrix(
     commercial_readiness_path: Path,
     core_family_p95_report_path: Path,
     ndtha_residual_path: Path,
+    residual_level3_status_path: Path,
     ndtha_long_profile_path: Path,
     solver_hip_e2e_path: Path,
     runtime_policy_path: Path,
@@ -1211,6 +1213,7 @@ def _build_release_area_matrix(
     commercial = _load_json(commercial_readiness_path)
     core_family_p95 = _load_json(core_family_p95_report_path)
     residual = _load_json(ndtha_residual_path)
+    residual_level3 = _load_json(residual_level3_status_path)
     ndtha_long = _load_json(ndtha_long_profile_path)
     runtime_policy = _load_json(runtime_policy_path)
     measured_breadth = _load_json(measured_benchmark_breadth_path)
@@ -1549,6 +1552,18 @@ def _build_release_area_matrix(
     )
 
     fallback_rate = _as_float(residual_summary.get("fallback_rate"), 1.0)
+    residual_level3_contract_pass = bool(residual_level3.get("contract_pass", False))
+    residual_level3_status = str(residual_level3.get("status", "")).strip().lower()
+    residual_level3_reason_code = str(residual_level3.get("reason_code", "")).strip().upper()
+    residual_level3_blockers = [
+        str(item) for item in _as_list(residual_level3.get("blockers")) if str(item).strip()
+    ]
+    residual_level3_green = bool(
+        residual_level3_contract_pass
+        and residual_level3_status == "ready"
+        and residual_level3_reason_code == "PASS"
+    )
+    residual_level3_artifact_present = residual_level3_status_path.exists()
     residual_area_checks = {
         "hard_residual_pass": bool(
             residual_checks.get("residual_top_hard_pass", False)
@@ -1557,11 +1572,23 @@ def _build_release_area_matrix(
         "recommended_residual_pass": bool(residual_checks.get("recommended_residual_pass", False)),
         "fallback_rate_limited_pass": fallback_rate <= max_residual_fallback_rate,
         "fallback_rate_ga_pass": fallback_rate <= ga_residual_fallback_rate,
+        "residual_level3_status_present": residual_level3_artifact_present,
+        "residual_level3_status_green": residual_level3_green,
     }
     residual_area_blockers = [
         *(["hard_residual_not_green"] if not residual_area_checks["hard_residual_pass"] else []),
         *(["recommended_residual_not_green"] if not residual_area_checks["recommended_residual_pass"] else []),
         *(["fallback_rate_gt_5pct"] if not residual_area_checks["fallback_rate_limited_pass"] else []),
+        *(
+            ["residual_level3_status_missing"]
+            if not residual_area_checks["residual_level3_status_present"]
+            else []
+        ),
+        *(
+            ["residual_level3_status_not_green"] + residual_level3_blockers
+            if residual_level3_artifact_present and not residual_level3_green
+            else []
+        ),
     ]
     rows.append(
         _area(
@@ -1574,8 +1601,14 @@ def _build_release_area_matrix(
                 "fallback_rate": fallback_rate,
                 "limited_fallback_rate_limit": max_residual_fallback_rate,
                 "ga_fallback_rate_limit": ga_residual_fallback_rate,
+                "residual_level3_status": residual_level3_status,
+                "residual_level3_reason_code": residual_level3_reason_code,
+                "residual_level3_blocker_count": len(residual_level3_blockers),
             },
-            artifacts={"ndtha_residual": str(ndtha_residual_path)},
+            artifacts={
+                "ndtha_residual": str(ndtha_residual_path),
+                "residual_level3_status": str(residual_level3_status_path),
+            },
         )
     )
 
@@ -2366,6 +2399,7 @@ def _build_release_area_matrix(
 def build_report(
     *,
     ndtha_residual: Path = DEFAULT_NDTHA_RESIDUAL,
+    residual_level3_status: Path = DEFAULT_RESIDUAL_LEVEL3_STATUS,
     element_material_breadth: Path = DEFAULT_ELEMENT_MATERIAL_BREADTH,
     ndtha_long_profile: Path = DEFAULT_NDTHA_LONG_PROFILE,
     solver_hip_e2e: Path = DEFAULT_SOLVER_HIP_E2E,
@@ -2496,6 +2530,7 @@ def build_report(
         commercial_readiness_path=commercial_readiness,
         core_family_p95_report_path=core_family_p95_report,
         ndtha_residual_path=ndtha_residual,
+        residual_level3_status_path=residual_level3_status,
         ndtha_long_profile_path=ndtha_long_profile,
         solver_hip_e2e_path=solver_hip_e2e,
         runtime_policy_path=runtime_policy,
@@ -2760,6 +2795,9 @@ def _markdown(payload: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ndtha-residual", type=Path, default=DEFAULT_NDTHA_RESIDUAL)
+    parser.add_argument(
+        "--residual-level3-status", type=Path, default=DEFAULT_RESIDUAL_LEVEL3_STATUS
+    )
     parser.add_argument("--element-material-breadth", type=Path, default=DEFAULT_ELEMENT_MATERIAL_BREADTH)
     parser.add_argument("--ndtha-long-profile", type=Path, default=DEFAULT_NDTHA_LONG_PROFILE)
     parser.add_argument("--solver-hip-e2e", type=Path, default=DEFAULT_SOLVER_HIP_E2E)
@@ -2850,6 +2888,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_report(
         ndtha_residual=args.ndtha_residual,
+        residual_level3_status=args.residual_level3_status,
         element_material_breadth=args.element_material_breadth,
         ndtha_long_profile=args.ndtha_long_profile,
         solver_hip_e2e=args.solver_hip_e2e,

@@ -119,12 +119,83 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "p1_readiness_status" in labels
     assert "p1_benchmark_breadth_status" in labels
     assert "fresh_full_validation_lane_status" in labels
-    assert len(artifacts) == 6
+    assert "residual_level3_status" in labels
+    assert len(artifacts) == 7
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)
         assert isinstance(producer_path, Path)
         assert str(artifact_path).endswith(".json"), label
+
+
+def test_release_evidence_freshness_audits_residual_level3_status(tmp_path: Path) -> None:
+    freshness._git_head = lambda _repo_root: "abcdef1234567890"
+    artifact_relpath = (
+        "implementation/phase1/release_evidence/productization/residual_level3_status.json"
+    )
+    producer_relpath = "implementation/phase1/check_residual_level3_status.py"
+    artifact_path = tmp_path / artifact_relpath
+    producer_path = tmp_path / producer_relpath
+    artifact_path.parent.mkdir(parents=True, exist_ok=True)
+    producer_path.parent.mkdir(parents=True, exist_ok=True)
+    producer_path.write_text("print('producer')\n", encoding="utf-8")
+    _write_json(
+        artifact_path,
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source_commit_sha": "abcdef123456",
+            "engine_version": "structural-optimization-workbench@1.0.0",
+            "input_checksums": {
+                "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": (
+                    "sha256:abc"
+                )
+            },
+            "reused_evidence": True,
+            "reuse_policy": "status_rebuilt_from_existing_ndtha_residual_gate_report",
+            "contract_pass": True,
+        },
+    )
+    os.utime(
+        producer_path,
+        (artifact_path.stat().st_mtime - 5, artifact_path.stat().st_mtime - 5),
+    )
+
+    artifacts = freshness.DEFAULT_ARTIFACTS
+    target = next(entry for entry in artifacts if entry[0] == "residual_level3_status")
+    target_artifact = (tmp_path / target[1]).resolve()
+    target_producer = (tmp_path / target[2]).resolve()
+    target_artifact.parent.mkdir(parents=True, exist_ok=True)
+    target_producer.parent.mkdir(parents=True, exist_ok=True)
+    target_producer.write_text("print('producer')\n", encoding="utf-8")
+    payload = _write_json(target_artifact, json.loads(artifact_path.read_text(encoding="utf-8")))
+    os.utime(
+        target_producer,
+        (payload.stat().st_mtime - 5, payload.stat().st_mtime - 5),
+    )
+
+    payload_report = freshness.build_report(
+        repo_root=tmp_path,
+        artifacts=(
+            (
+                "residual_level3_status",
+                target_artifact,
+                target_producer,
+            ),
+        ),
+        max_age_days=30,
+    )
+    row = payload_report["rows"][0]
+
+    assert payload_report["contract_pass"] is True
+    assert row["label"] == "residual_level3_status"
+    assert row["ok"] is True
+    assert row["source_commit_match"] is True
+    assert row["engine_version_present"] is True
+    assert row["input_checksum_present"] is True
+    assert row["reuse_marker_present"] is True
+    assert row["dependency_mtime_pass"] is True
+    assert str(target_artifact).endswith("residual_level3_status.json")
+    assert str(target_producer).endswith("check_residual_level3_status.py")
 
 
 def test_release_evidence_freshness_audits_real_project_and_customer_shadow_artifacts(

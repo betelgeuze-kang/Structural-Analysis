@@ -56,6 +56,13 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_fresh_full_validation_lane_status.py"),
     ),
+    (
+        "residual_level3_status",
+        Path(
+            "implementation/phase1/release_evidence/productization/residual_level3_status.json"
+        ),
+        Path("implementation/phase1/check_residual_level3_status.py"),
+    ),
 )
 
 

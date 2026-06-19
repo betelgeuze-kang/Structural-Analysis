@@ -323,6 +323,22 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 ],
             },
         ),
+        "residual_level3_status": _write(
+            tmp_path / "residual_level3_status.json",
+            {
+                "contract_pass": True,
+                "status": "ready",
+                "reason_code": "PASS",
+                "blockers": [],
+                "summary": {
+                    "case_count": 3,
+                    "hard_pass_rate": 1.0,
+                    "recommended_pass_rate": 1.0,
+                    "fallback_rate": 0.0,
+                    "solver_raw_ratio": 1.0,
+                },
+            },
+        ),
         "runtime_packaging": _write(
             tmp_path / "runtime_packaging.json",
             {"contract_pass": True, "checks": {"rollback_runbook_present": True}},
@@ -1172,3 +1188,144 @@ def test_pm_release_gate_cli_writes_default_markdown_next_to_json(tmp_path: Path
     assert f"- `summary_line`: `{payload['summary_line']}`" in markdown
     assert "release_areas=READY" in markdown
     assert "- `full_gap_ledger_status`: `open`" in markdown
+
+
+def test_pm_release_gate_residual_area_consumes_residual_level3_status(tmp_path: Path) -> None:
+    ndtha = _write(
+        tmp_path / "release_evidence" / "productization" / "ndtha_residual_gate_report.json",
+        {
+            "contract_pass": True,
+            "checks": {
+                "ndtha_no_collapse_pass": True,
+                "residual_top_hard_pass": True,
+                "residual_drift_hard_pass": True,
+                "recommended_residual_pass": True,
+                "strict_recommended_residual_hard_fail_enabled": True,
+                "strict_recommended_residual_pass": True,
+                "corrected_state_recompute_pass": True,
+                "solver_control_rollup_pass": True,
+            },
+            "summary": {
+                "case_count": 12,
+                "fallback_rate": 0.0,
+                "solver_raw_ratio": 1.0,
+                "corrected_state_recompute_required": True,
+                "corrected_state_recompute_present_count": 12,
+                "corrected_state_recompute_pass_count": 12,
+                "solver_control_nonconverged_step_total": 0,
+            },
+            "rows": [{"normalized_residual": {"recommended_max_ratio": 0.1}}],
+        },
+    )
+    element = _write(
+        tmp_path / "element.json",
+        {
+            "contract_pass": True,
+            "checks": {
+                "structural_contact_direct_contract_pass": True,
+                "foundation_soil_link_direct_contract_pass": True,
+                "panel_contact_failure_mode_reason_code_pass": True,
+            },
+            "summary": {
+                "contact_material_coupled_case_count": 12,
+                "nonlinear_residual_integrated_case_count": 2,
+                "material_model_types": ["rc_composite", "steel_elastic_plastic", "composite_steel_rc"],
+            },
+        },
+    )
+    breadth = _write(
+        tmp_path / "breadth.json",
+        {
+            "contract_pass": True,
+            "summary": {
+                "measured_case_count": 150,
+                "measured_family_count": 6,
+                "holdout_family_count": 6,
+                "baseline_measured_case_count": 50,
+                "opensees_incremental_case_count": 20,
+            },
+        },
+    )
+    worst = _write(tmp_path / "worst.json", {"contract_pass": True})
+
+    green_kwargs = dict(_base_kwargs(tmp_path))
+    green_kwargs["residual_level3_status"] = _write(
+        tmp_path / "green_residual_level3.json",
+        {
+            "contract_pass": True,
+            "status": "ready",
+            "reason_code": "PASS",
+            "blockers": [],
+            "summary": {
+                "case_count": 3,
+                "hard_pass_rate": 1.0,
+                "recommended_pass_rate": 1.0,
+                "fallback_rate": 0.0,
+                "solver_raw_ratio": 1.0,
+            },
+        },
+    )
+    green_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **green_kwargs,
+    )
+    residual_area = next(row for row in green_payload["release_area_matrix"] if row["area"] == "residual")
+    assert residual_area["ok"] is True
+    assert residual_area["checks"]["residual_level3_status_present"] is True
+    assert residual_area["checks"]["residual_level3_status_green"] is True
+    assert residual_area["summary"]["residual_level3_status"] == "ready"
+    assert residual_area["summary"]["residual_level3_reason_code"] == "PASS"
+    assert residual_area["artifacts"]["residual_level3_status"].endswith("green_residual_level3.json")
+    assert residual_area["artifacts"]["ndtha_residual"].endswith("ndtha_residual_gate_report.json")
+    assert "residual::residual_level3_status_not_green" not in green_payload["release_area_blockers"]
+
+    blocked_kwargs = dict(_base_kwargs(tmp_path))
+    blocked_kwargs["residual_level3_status"] = _write(
+        tmp_path / "blocked_residual_level3.json",
+        {
+            "contract_pass": False,
+            "status": "blocked",
+            "reason_code": "ERR_RESIDUAL_LEVEL3_INCOMPLETE",
+            "blockers": ["fallback_rate_gt_5pct", "normalized_residual_missing"],
+        },
+    )
+    blocked_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **blocked_kwargs,
+    )
+    blocked_residual_area = next(
+        row for row in blocked_payload["release_area_matrix"] if row["area"] == "residual"
+    )
+    assert blocked_residual_area["ok"] is False
+    assert blocked_residual_area["checks"]["residual_level3_status_green"] is False
+    assert "residual::residual_level3_status_not_green" in blocked_payload["release_area_blockers"]
+    assert "residual::fallback_rate_gt_5pct" in blocked_payload["release_area_blockers"]
+    assert "residual::normalized_residual_missing" in blocked_payload["release_area_blockers"]
+    assert blocked_residual_area["artifacts"]["residual_level3_status"].endswith(
+        "blocked_residual_level3.json"
+    )
+    assert blocked_payload["release_area_gate_ready"] is False
+    assert blocked_payload["full_release_gate_ready"] is False
+
+    missing_kwargs = dict(_base_kwargs(tmp_path))
+    missing_kwargs["residual_level3_status"] = tmp_path / "missing_residual_level3.json"
+    missing_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **missing_kwargs,
+    )
+    missing_residual_area = next(
+        row for row in missing_payload["release_area_matrix"] if row["area"] == "residual"
+    )
+    assert missing_residual_area["ok"] is False
+    assert missing_residual_area["checks"]["residual_level3_status_present"] is False
+    assert "residual::residual_level3_status_missing" in missing_payload["release_area_blockers"]
+    assert missing_payload["release_area_gate_ready"] is False

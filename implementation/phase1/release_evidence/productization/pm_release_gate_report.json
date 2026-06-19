@@ -46,7 +46,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T16:48:05.807812+00:00",
+  "generated_at": "2026-06-19T17:01:56.976553+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -428,11 +428,11 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "artifact_count": 6,
+        "artifact_count": 7,
         "blocker_count": 0,
-        "current_source_commit_sha": "537d463c5f4cb23d8b4821d65121cf30f8b39980",
+        "current_source_commit_sha": "62bd1bbc45294aacb58269c36372c485570a92c3",
         "max_age_days": 30.0,
-        "pass_count": 6
+        "pass_count": 7
       },
       "title": "Evidence Freshness"
     },
@@ -487,14 +487,17 @@
     {
       "area": "residual",
       "artifacts": {
-        "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+        "ndtha_residual": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json",
+        "residual_level3_status": "implementation/phase1/release_evidence/productization/residual_level3_status.json"
       },
       "blockers": [],
       "checks": {
         "fallback_rate_ga_pass": true,
         "fallback_rate_limited_pass": true,
         "hard_residual_pass": true,
-        "recommended_residual_pass": true
+        "recommended_residual_pass": true,
+        "residual_level3_status_green": true,
+        "residual_level3_status_present": true
       },
       "claim_boundary": "",
       "ok": true,
@@ -502,7 +505,10 @@
       "summary": {
         "fallback_rate": 0.0,
         "ga_fallback_rate_limit": 0.01,
-        "limited_fallback_rate_limit": 0.05
+        "limited_fallback_rate_limit": 0.05,
+        "residual_level3_blocker_count": 0,
+        "residual_level3_reason_code": "PASS",
+        "residual_level3_status": "ready"
       },
       "title": "Residual"
     },
