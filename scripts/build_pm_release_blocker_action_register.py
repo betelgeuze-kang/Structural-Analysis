@@ -412,7 +412,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "customer_shadow":
         return [
-            f"python3 implementation/phase1/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json",
+            f"python3 scripts/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json",
             f"python3 scripts/build_customer_shadow_evidence_intake_packet.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET} --out-md {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET.with_suffix('.md')}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -474,7 +474,7 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "customer_shadow":
         return [
-            f"python3 implementation/phase1/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json --fail-blocked",
+            f"python3 scripts/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json --fail-blocked",
             f"python3 scripts/build_customer_shadow_evidence_intake_packet.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET} --out-md {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET.with_suffix('.md')}",
             f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
         ]
