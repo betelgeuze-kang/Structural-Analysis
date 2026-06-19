@@ -139,6 +139,14 @@ def test_intake_packet_passes_as_structure_artifact_while_status_is_blocked(tmp_
     assert payload["summary"]["min_completed_shadow_cases"] == 3
     assert payload["summary"]["target_completed_shadow_cases"] == 5
     assert payload["summary"]["intake_slot_count"] == 5
+    assert payload["summary"]["fixed_values"] == {
+        "project_status": "completed",
+        "raw_data_retained_by_customer": True,
+        "redistribution_allowed": False,
+    }
+    assert payload["required_schema_fields"] == _schema_payload()["required_fields"]
+    assert payload["fixed_values"] == payload["summary"]["fixed_values"]
+    assert payload["allowed_reviewer_decisions"] == ["PASS", "REVIEW", "FAIL"]
     assert payload["blockers"] == []
     assert payload["checks"]["raw_data_policy_fixed"] is True
     assert payload["checks"]["reviewer_decisions_present"] is True

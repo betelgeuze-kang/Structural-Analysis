@@ -6,11 +6,14 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 
 DEFAULT_SCHEMA = Path("implementation/phase1/customer_shadow_evidence.schema.json")
 PLACEHOLDER_MARKERS = ("TODO", "OWNER_INPUT_REQUIRED", "PLACEHOLDER", "<", ">")
+SHA256_REF_RE = re.compile(r"^sha256:[0-9a-fA-F]{64}$")
+COMMIT_SHA_RE = re.compile(r"^[0-9a-fA-F]{7,40}$")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -42,6 +45,18 @@ def _value_present(value: Any) -> bool:
     return True
 
 
+def _has_numeric_leaf(value: Any) -> bool:
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, (int, float)):
+        return True
+    if isinstance(value, dict):
+        return any(_has_numeric_leaf(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_has_numeric_leaf(item) for item in value)
+    return False
+
+
 def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     required = [str(field) for field in schema.get("required_fields", [])]
     missing = [field for field in required if field not in payload]
@@ -67,8 +82,19 @@ def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[st
     if _has_placeholder(payload):
         blockers.append("placeholder_marker_present")
     checksum = str(payload.get("reference_output_checksum", "") or "")
-    if checksum and not checksum.startswith("sha256:"):
+    if checksum and not SHA256_REF_RE.match(checksum):
         blockers.append("reference_output_checksum_not_sha256")
+    engine_commit = str(payload.get("our_engine_commit", "") or "")
+    if engine_commit and not COMMIT_SHA_RE.match(engine_commit):
+        blockers.append("our_engine_commit_not_commit_sha")
+    if isinstance(payload.get("delta_metrics"), dict) and payload.get("delta_metrics") and not _has_numeric_leaf(
+        payload.get("delta_metrics")
+    ):
+        blockers.append("delta_metrics_missing_numeric_value")
+    if isinstance(payload.get("residual_metrics"), dict) and payload.get("residual_metrics") and not _has_numeric_leaf(
+        payload.get("residual_metrics")
+    ):
+        blockers.append("residual_metrics_missing_numeric_value")
 
     return {
         "schema_version": "customer-shadow-evidence-validation.v1",
@@ -83,6 +109,8 @@ def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[st
             "reviewer_decision": reviewer_decision,
             "raw_data_retained_by_customer": payload.get("raw_data_retained_by_customer"),
             "redistribution_allowed": payload.get("redistribution_allowed"),
+            "reference_output_checksum_sha256_pass": bool(checksum and SHA256_REF_RE.match(checksum)),
+            "our_engine_commit_sha_pass": bool(engine_commit and COMMIT_SHA_RE.match(engine_commit)),
         },
         "claim_boundary": str(schema.get("claim_boundary", "")),
     }

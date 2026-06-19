@@ -1,4 +1,9 @@
 {
+  "allowed_reviewer_decisions": [
+    "PASS",
+    "REVIEW",
+    "FAIL"
+  ],
   "blockers": [],
   "checks": {
     "current_status_blocked_until_evidence_attached": true,
@@ -19,11 +24,16 @@
   },
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-19T15:46:16.749612+00:00",
+  "fixed_values": {
+    "project_status": "completed",
+    "raw_data_retained_by_customer": true,
+    "redistribution_allowed": false
+  },
+  "generated_at": "2026-06-19T16:46:52.357729+00:00",
   "input_checksums": {
     "docs/templates/customer_shadow_evidence.template.json": "sha256:3fbf9f07b8a5c2461a2187470b6d8b40bd447b63aa9695959f9b2446beeead30",
     "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:715a4e52f66d32e7cbc1f556a8c246accb9abc75155984b8a90dd2e3b666d3e9"
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:bce8f33e85e464a07941073afbc2d919774e0dd0df98480c580208f0caab8c1c"
   },
   "intake_slots": [
     {
@@ -108,11 +118,27 @@
     }
   ],
   "reason_code": "PASS",
+  "required_schema_fields": [
+    "case_id",
+    "project_status",
+    "structure_family",
+    "reference_solver",
+    "reference_solver_version",
+    "reference_output_checksum",
+    "our_engine_commit",
+    "delta_metrics",
+    "residual_metrics",
+    "reviewer_decision",
+    "known_limitations",
+    "reproduce_bundle_id",
+    "raw_data_retained_by_customer",
+    "redistribution_allowed"
+  ],
   "reuse_policy": "intake_packet_rebuilt_from_schema_template_and_current_shadow_status",
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-intake-packet.v1",
-  "source_commit_sha": "cda0f6fde687af6ea8ba4bc755c9b64328247f34",
+  "source_commit_sha": "537d463c5f4cb23d8b4821d65121cf30f8b39980",
   "status": "implementation/phase1/customer_shadow_evidence_status.json",
   "summary": {
     "allowed_reviewer_decisions": [
@@ -122,6 +148,11 @@
     ],
     "current_completed_shadow_case_count": 0,
     "current_status_contract_pass": false,
+    "fixed_values": {
+      "project_status": "completed",
+      "raw_data_retained_by_customer": true,
+      "redistribution_allowed": false
+    },
     "intake_slot_count": 5,
     "min_completed_shadow_cases": 3,
     "required_field_count": 14,

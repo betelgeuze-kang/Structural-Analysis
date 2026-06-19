@@ -127,6 +127,7 @@ def test_customer_shadow_status_exposes_release_evidence_metadata(tmp_path: Path
         assert field in payload, f"missing release evidence metadata field: {field}"
     assert isinstance(payload["input_checksums"], dict)
     assert str(SCHEMA_PATH) in payload["input_checksums"]
+    assert str(status_gate.DEFAULT_VALIDATOR) in payload["input_checksums"]
     assert str(evidence_dir) in payload["input_checksums"]
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"]

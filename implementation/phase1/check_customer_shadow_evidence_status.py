@@ -27,6 +27,7 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 SCHEMA_VERSION = "customer-shadow-evidence-status.v1"
 DEFAULT_EVIDENCE_DIR = Path("implementation/phase1/customer_shadow_evidence")
+DEFAULT_VALIDATOR = Path("implementation/phase1/validate_customer_shadow_evidence.py")
 DEFAULT_OUT = Path("implementation/phase1/customer_shadow_evidence_status.json")
 DEFAULT_MIN_COMPLETED_CASES = 3
 DEFAULT_TARGET_COMPLETED_CASES = 5
@@ -124,7 +125,7 @@ def build_status(
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[schema_path, evidence_dir],
+            input_paths=[schema_path, DEFAULT_VALIDATOR, evidence_dir],
             reused_evidence=True,
             reuse_policy="status_rebuilt_from_existing_shadow_evidence_schema_and_directory_metadata",
             repo_root=REPO_ROOT,

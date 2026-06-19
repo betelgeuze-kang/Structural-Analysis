@@ -17,17 +17,18 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_dir": "implementation/phase1/customer_shadow_evidence",
   "evidence_rows": [],
-  "generated_at": "2026-06-19T15:33:30.674694+00:00",
+  "generated_at": "2026-06-19T16:46:52.322393+00:00",
   "input_checksums": {
     "implementation/phase1/customer_shadow_evidence": "missing",
-    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5"
+    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
+    "implementation/phase1/validate_customer_shadow_evidence.py": "sha256:d7cb7521421e52f4b7d8316fad6e56ffaf4b3687cf361b965a98680be768dad5"
   },
   "reason_code": "ERR_CUSTOMER_SHADOW_EVIDENCE_INCOMPLETE",
   "reuse_policy": "status_rebuilt_from_existing_shadow_evidence_schema_and_directory_metadata",
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-status.v1",
-  "source_commit_sha": "a495b253edacf8b9d4d8a917a61db675b70ca209",
+  "source_commit_sha": "537d463c5f4cb23d8b4821d65121cf30f8b39980",
   "summary": {
     "completed_shadow_case_count": 0,
     "completed_shadow_case_ids": [],

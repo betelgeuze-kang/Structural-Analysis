@@ -25,7 +25,7 @@ def _valid_payload() -> dict[str, object]:
         "structure_family": "wall-frame",
         "reference_solver": "MIDAS",
         "reference_solver_version": "v1",
-        "reference_output_checksum": "sha256:abcdef123456",
+        "reference_output_checksum": "sha256:" + "a" * 64,
         "our_engine_commit": "7a40f599",
         "delta_metrics": {"max_relative_error_pct": 2.1},
         "residual_metrics": {"normalized_equilibrium_residual": 0.0004},
@@ -44,9 +44,11 @@ def test_customer_shadow_evidence_validator_accepts_valid_payload() -> None:
     assert payload["blockers"] == []
     assert payload["summary"]["raw_data_retained_by_customer"] is True
     assert payload["summary"]["redistribution_allowed"] is False
+    assert payload["summary"]["reference_output_checksum_sha256_pass"] is True
+    assert payload["summary"]["our_engine_commit_sha_pass"] is True
 
 
-def test_customer_shadow_evidence_validator_rejects_raw_redistribution_and_placeholders() -> None:
+def test_customer_shadow_evidence_validator_rejects_raw_redistribution_bad_checksum_and_placeholders() -> None:
     bad = _valid_payload()
     bad["case_id"] = "OWNER_INPUT_REQUIRED_CASE_ID"
     bad["redistribution_allowed"] = True
@@ -58,6 +60,16 @@ def test_customer_shadow_evidence_validator_rejects_raw_redistribution_and_place
     assert "fixed_value_mismatch:redistribution_allowed" in payload["blockers"]
     assert "placeholder_marker_present" in payload["blockers"]
     assert "reference_output_checksum_not_sha256" in payload["blockers"]
+
+
+def test_customer_shadow_evidence_validator_rejects_bad_engine_commit() -> None:
+    bad = _valid_payload()
+    bad["our_engine_commit"] = "not-a-commit"
+
+    payload = validator.validate_payload(bad, _schema())
+
+    assert payload["contract_pass"] is False
+    assert "our_engine_commit_not_commit_sha" in payload["blockers"]
 
 
 def test_customer_shadow_evidence_validator_rejects_missing_metrics() -> None:
@@ -72,6 +84,18 @@ def test_customer_shadow_evidence_validator_rejects_missing_metrics() -> None:
     assert "empty_required_field:delta_metrics" in payload["blockers"]
     assert "delta_metrics_missing_or_empty" in payload["blockers"]
     assert "residual_metrics_missing_or_empty" in payload["blockers"]
+
+
+def test_customer_shadow_evidence_validator_rejects_non_numeric_metrics() -> None:
+    bad = _valid_payload()
+    bad["delta_metrics"] = {"max_relative_error_pct": "derived-but-not-numeric"}
+    bad["residual_metrics"] = {"normalized_equilibrium_residual": "derived-but-not-numeric"}
+
+    payload = validator.validate_payload(bad, _schema())
+
+    assert payload["contract_pass"] is False
+    assert "delta_metrics_missing_numeric_value" in payload["blockers"]
+    assert "residual_metrics_missing_numeric_value" in payload["blockers"]
 
 
 def test_customer_shadow_evidence_validator_rejects_empty_required_fields() -> None:
