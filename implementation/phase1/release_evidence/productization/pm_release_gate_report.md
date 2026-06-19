@@ -22,7 +22,7 @@
 | M2 Core Engine Depth Closure | pass | none |
 | M3 Strict Runtime Closure | pass | none |
 | M4 Benchmark Breadth Expansion | pass | none |
-| M5 Commercial Packaging | blocked | pm_release_reproduction_command_audit_not_green |
+| M5 Commercial Packaging | blocked | support_bundle_export_missing_or_failed, support_bundle_pm_failure_bundle_coverage_incomplete |
 
 | Release Area | Status | Blockers |
 |---|---|---|
@@ -39,6 +39,6 @@
 | interop Interop | pass | none |
 | report Report | blocked | commercial_packaging_milestone_not_green |
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
-| support Support | blocked | pm_release_reproduction_command_audit_not_green |
+| support Support | blocked | pm_failure_bundle_coverage_index_incomplete, failure_bundle_export_not_green |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |
+| github_sync GitHub Development Sync | blocked | github_sync_preflight::worktree_not_clean, github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |

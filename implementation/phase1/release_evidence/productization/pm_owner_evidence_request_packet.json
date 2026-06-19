@@ -2,11 +2,12 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": false,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-19T19:23:12.809759+00:00",
+  "generated_at": "2026-06-19T19:25:43.680470+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [
-    "M5::pm_release_reproduction_command_audit_not_green"
+    "M5::support_bundle_export_missing_or_failed",
+    "M5::support_bundle_pm_failure_bundle_coverage_incomplete"
   ],
   "owner_packets": [
     {
@@ -1802,10 +1803,12 @@
     },
     {
       "acceptance_criteria": [
-        "`M5::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
+        "`M5::support_bundle_export_missing_or_failed` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
+        "`M5::support_bundle_pm_failure_bundle_coverage_incomplete` absent from `full_release_blockers`",
         "`report::commercial_packaging_milestone_not_green` absent from `full_release_blockers`",
-        "`support::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
+        "`support::pm_failure_bundle_coverage_index_incomplete` absent from `full_release_blockers`",
+        "`support::failure_bundle_export_not_green` absent from `full_release_blockers`",
         "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
         "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
         "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
@@ -1815,18 +1818,21 @@
         "release_tier.limited_commercial_full_gate_ready",
         "release_tier.ga_enterprise_evidence_gate_pass"
       ],
-      "blocker_count": 6,
+      "blocker_count": 9,
       "blocker_ids": [
-        "M5::pm_release_reproduction_command_audit_not_green",
+        "M5::support_bundle_export_missing_or_failed",
+        "M5::support_bundle_pm_failure_bundle_coverage_incomplete",
         "report::commercial_packaging_milestone_not_green",
-        "support::pm_release_reproduction_command_audit_not_green",
+        "support::pm_failure_bundle_coverage_index_incomplete",
+        "support::failure_bundle_export_not_green",
+        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
       ],
       "evidence_states": [
         "open_release_evidence_blocker",
-        "approval_required"
+        "blocked"
       ],
       "expected_intake_artifacts": [],
       "expected_intake_details": [],
@@ -1838,9 +1844,11 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Resolve `pm_release_reproduction_command_audit_not_green` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
+        "Resolve `support_bundle_export_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
+        "Resolve `support_bundle_pm_failure_bundle_coverage_incomplete` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
         "Resolve `commercial_packaging_milestone_not_green` in Report evidence, regenerate PM release reports, and attach the updated evidence.",
-        "Resolve `pm_release_reproduction_command_audit_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+        "Resolve `pm_failure_bundle_coverage_index_incomplete` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+        "Resolve `failure_bundle_export_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
         "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
       ],
       "owner": "release_owner",
@@ -1853,11 +1861,11 @@
       "request_rows": [
         {
           "acceptance_criteria": [
-            "`M5::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
+            "`M5::support_bundle_export_missing_or_failed` absent from `full_release_blockers`",
             "`full_release_gate_ready == true` after PM report regeneration"
           ],
           "blocked_release_tiers": [],
-          "blocker_id": "M5::pm_release_reproduction_command_audit_not_green",
+          "blocker_id": "M5::support_bundle_export_missing_or_failed",
           "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
           "evidence_artifacts": {
             "limitation_manual": "docs/release-limitation-manual.md",
@@ -1879,7 +1887,47 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Resolve `pm_release_reproduction_command_audit_not_green` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
+          "next_action": "Resolve `support_bundle_export_missing_or_failed` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner_input_required": false,
+          "reproduction_commands": [
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "milestone",
+          "title": "Commercial Packaging",
+          "verification_commands": [
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "`M5::support_bundle_pm_failure_bundle_coverage_incomplete` absent from `full_release_blockers`",
+            "`full_release_gate_ready == true` after PM report regeneration"
+          ],
+          "blocked_release_tiers": [],
+          "blocker_id": "M5::support_bundle_pm_failure_bundle_coverage_incomplete",
+          "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
+          "evidence_artifacts": {
+            "limitation_manual": "docs/release-limitation-manual.md",
+            "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+            "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
+            "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
+            "release_registry": "implementation/phase1/release/release_registry.json",
+            "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+            "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json",
+            "validation_manual": "docs/release-validation-manual.md",
+            "workflow_productization": "implementation/phase1/workflow_productization_gate_report.json"
+          },
+          "evidence_state": "open_release_evidence_blocker",
+          "expected_intake_artifact": "",
+          "expected_intake_detail": {},
+          "expected_intake_path": "",
+          "external_input_required": false,
+          "handoff_ready": true,
+          "handoff_state": "local_remediation_ready",
+          "next_action": "Resolve `support_bundle_pm_failure_bundle_coverage_incomplete` in Commercial Packaging evidence, regenerate PM release reports, and attach the updated evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -1929,14 +1977,14 @@
         },
         {
           "acceptance_criteria": [
-            "`support::pm_release_reproduction_command_audit_not_green` absent from `full_release_blockers`",
+            "`support::pm_failure_bundle_coverage_index_incomplete` absent from `full_release_blockers`",
             "`full_release_gate_ready == true` after PM report regeneration"
           ],
           "blocked_release_tiers": [
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
-          "blocker_id": "support::pm_release_reproduction_command_audit_not_green",
+          "blocker_id": "support::pm_failure_bundle_coverage_index_incomplete",
           "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
           "evidence_artifacts": {
             "limitation_manual": "docs/release-limitation-manual.md",
@@ -1955,7 +2003,47 @@
           "external_input_required": false,
           "handoff_ready": true,
           "handoff_state": "local_remediation_ready",
-          "next_action": "Resolve `pm_release_reproduction_command_audit_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+          "next_action": "Resolve `pm_failure_bundle_coverage_index_incomplete` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
+          "owner_input_required": false,
+          "reproduction_commands": [
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "Support",
+          "verification_commands": [
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "`support::failure_bundle_export_not_green` absent from `full_release_blockers`",
+            "`full_release_gate_ready == true` after PM report regeneration"
+          ],
+          "blocked_release_tiers": [
+            "release_tier.limited_commercial_full_gate_ready",
+            "release_tier.ga_enterprise_evidence_gate_pass"
+          ],
+          "blocker_id": "support::failure_bundle_export_not_green",
+          "claim_boundary": "This register is a blocker handoff artifact; it does not convert missing evidence into a release pass.",
+          "evidence_artifacts": {
+            "limitation_manual": "docs/release-limitation-manual.md",
+            "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+            "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+            "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
+            "runtime_packaging": "implementation/phase1/production_runtime_packaging_manifest.json",
+            "support_bundle": "implementation/phase1/support_bundle_manifest.json",
+            "template_evidence_safety": "implementation/phase1/release_evidence/productization/template_evidence_safety_report.json"
+          },
+          "evidence_state": "open_release_evidence_blocker",
+          "expected_intake_artifact": "",
+          "expected_intake_detail": {},
+          "expected_intake_path": "",
+          "external_input_required": false,
+          "handoff_ready": true,
+          "handoff_state": "local_remediation_ready",
+          "next_action": "Resolve `failure_bundle_export_not_green` in Support evidence, regenerate PM release reports, and attach the updated evidence.",
           "owner_input_required": false,
           "reproduction_commands": [
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
@@ -1978,13 +2066,52 @@
             "release_tier.limited_commercial_full_gate_ready",
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
+          "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
+          "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+          "evidence_artifacts": {
+            "github_development_sync_preflight": "<live-git-state>",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+          },
+          "evidence_state": "blocked",
+          "expected_intake_artifact": "",
+          "expected_intake_detail": {},
+          "expected_intake_path": "",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "GitHub Development Sync",
+          "verification_commands": [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+            "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+            "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+          ],
+          "blocked_release_tiers": [
+            "release_tier.limited_commercial_full_gate_ready",
+            "release_tier.ga_enterprise_evidence_gate_pass"
+          ],
           "blocker_id": "github_sync::github_sync_preflight::remote_mutation_approval_required",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "<live-git-state>",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
@@ -2023,7 +2150,7 @@
             "github_development_sync_preflight": "<live-git-state>",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
@@ -2062,7 +2189,7 @@
             "github_development_sync_preflight": "<live-git-state>",
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
           },
-          "evidence_state": "approval_required",
+          "evidence_state": "blocked",
           "expected_intake_artifact": "",
           "expected_intake_detail": {},
           "expected_intake_path": "",
@@ -2328,7 +2455,7 @@
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
         "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
-        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
+        "python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
         "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md"
       ],
       "request_rows": [
@@ -2421,7 +2548,7 @@
           "next_action": "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.",
           "owner_input_required": true,
           "reproduction_commands": [
-            "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
+            "python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
             "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
             "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
@@ -2429,7 +2556,7 @@
           "scope": "ga_enterprise",
           "title": "Customer Shadow Evidence",
           "verification_commands": [
-            "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
+            "python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
             "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
             "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
           ]
@@ -2439,7 +2566,7 @@
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked",
-        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
+        "python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
         "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
       ]
@@ -2895,8 +3022,10 @@
         "report::commercial_packaging_milestone_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "support::pm_release_reproduction_command_audit_not_green",
+        "support::pm_failure_bundle_coverage_index_incomplete",
+        "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -2957,8 +3086,10 @@
             "report::commercial_packaging_milestone_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "support::pm_release_reproduction_command_audit_not_green",
+            "support::pm_failure_bundle_coverage_index_incomplete",
+            "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
+            "github_sync::github_sync_preflight::worktree_not_clean",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
@@ -3015,8 +3146,10 @@
         "report::commercial_packaging_milestone_not_green",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "support::pm_release_reproduction_command_audit_not_green",
+        "support::pm_failure_bundle_coverage_index_incomplete",
+        "support::failure_bundle_export_not_green",
         "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::worktree_not_clean",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -3295,8 +3428,10 @@
             "report::commercial_packaging_milestone_not_green",
             "ux::human_new_user_observation_missing_or_failed",
             "ux::human_new_user_30min_sample_evidence_missing",
-            "support::pm_release_reproduction_command_audit_not_green",
+            "support::pm_failure_bundle_coverage_index_incomplete",
+            "support::failure_bundle_export_not_green",
             "security::license_status_not_configured",
+            "github_sync::github_sync_preflight::worktree_not_clean",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
@@ -3462,7 +3597,7 @@
   ],
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
-    "blocked_release_tier_impact_count": 32,
+    "blocked_release_tier_impact_count": 36,
     "evidence_closure_pass": false,
     "expected_intake_contract_pass_count": 1,
     "expected_intake_count": 5,
@@ -3470,17 +3605,17 @@
     "expected_intake_lane_request_count": 2,
     "expected_intake_open_blocker_count": 31,
     "expected_intake_signoff_request_count": 3,
-    "external_input_required_count": 12,
+    "external_input_required_count": 13,
     "full_release_gate_ready": false,
     "handoff_contract_pass": false,
     "incomplete_request_count": 0,
     "limited_commercial_milestone_ready": false,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
-    "missing_release_tier_impact_count": 1,
-    "open_blocker_count": 23,
-    "open_blocker_with_release_tier_impact_count": 22,
-    "owner_input_required_count": 12,
+    "missing_release_tier_impact_count": 2,
+    "open_blocker_count": 26,
+    "open_blocker_with_release_tier_impact_count": 24,
+    "owner_input_required_count": 13,
     "owner_packet_count": 8,
     "paid_pilot_candidate": false,
     "release_area_gate_ready": false,
@@ -3491,5 +3626,5 @@
     "release_tier_owner_packet_count": 2,
     "release_tier_request_count": 3
   },
-  "summary_line": "PM owner evidence request packet: BLOCKED | owners=8 | open_blockers=23 | tier_requests=3 | incomplete=1"
+  "summary_line": "PM owner evidence request packet: BLOCKED | owners=8 | open_blockers=26 | tier_requests=3 | incomplete=2"
 }
