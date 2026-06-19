@@ -249,6 +249,7 @@
     }
   ],
   "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "forbidden_claim_rows": [
     {
       "check": "limited_commercial_ready_true",
@@ -307,8 +308,22 @@
       ]
     }
   ],
-  "generated_at": "2026-06-19T15:15:35.778727+00:00",
+  "generated_at": "2026-06-19T17:35:58.541295+00:00",
+  "input_checksums": {
+    "docs/pm-release-gate-milestones.md": "sha256:5f172c4bec9937bf23765e722adf64ccd8a734c2c62003801719fac6e901662b",
+    "implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json": "sha256:f80ec114cb6a27e6ebd27f6a195ccecf86546c2edf48b3349908fcb62afc86ea",
+    "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json": "sha256:7cd712e826ec97dfc0392b749c584a6f8d6f2583e032daa0411503ac0cc8362c",
+    "implementation/phase1/release_evidence/productization/license_status_intake_packet.json": "sha256:e4b554d70eb56f31f6c2ef936ac19900174215cb659c6aa9b3b009ccf59d44de",
+    "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json": "sha256:cbd3ce06d7def93fa220e223732f578a8cab62375453ebbb1d3e2e1f7a48bf1a",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:571cd61fb781d54a933bac912b74a833f7f422803776084af6fb287609d168bd",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:0dd8833a499d6f5d4e3457094897ada64b96d86e00b50fd070d82847e94eddfe",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json": "sha256:8cc74ff4672d6a440c16137a0a509175e6ab2b421b8b1f8bfde75f1c0f8995b1",
+    "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:e42dd3b58dff303fabf8c3be4cf88f5ecbdacfeeec598ba34a5ecded72f92eab",
+    "implementation/phase1/support_bundle_manifest.json": "sha256:0788c112f9f2ca795547a072149c2b47058a15fd079b6d6667e28827a4f6b4cf"
+  },
   "reason_code": "PASS",
+  "reuse_policy": "scope_guard_rebuilt_from_scope_source_and_release_evidence_artifacts",
+  "reused_evidence": true,
   "schema_version": "paid-pilot-scope-guard-report.v1",
   "scope_term_rows": [
     {
@@ -356,6 +371,7 @@
       "pass": true
     }
   ],
+  "source_commit_sha": "4f17dce02a5c9b61a66c0998b87197e99a1298f4",
   "summary": {
     "commercial_v1_separate_validation_exclusion_count": 5,
     "commercial_v1_separate_validation_exclusion_pass_count": 5,
