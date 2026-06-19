@@ -137,7 +137,7 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-19T19:22:01.393555+00:00",
+  "generated_at": "2026-06-19T19:22:44.015028+00:00",
   "input_checksums": {
     "README.md": "sha256:7e5e518b8b226bcaf4192d1572691bc83dcf0d24cfb93e46371b3a1d3065be1d",
     "docs/commercialization-gap-current-state.md": "sha256:656ada9374ef3f09a83f76b1df63bc36a84425f5fbbab4d0f0a855f9fdff00ee",
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "c58b884151c3e248da08aa2d145628c48554c867",
+  "source_commit_sha": "c7115dccd32ee26bbce394f9fe1c8c079171f3ea",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
