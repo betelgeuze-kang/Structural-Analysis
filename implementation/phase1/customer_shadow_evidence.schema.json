@@ -21,6 +21,12 @@
     "raw_data_retained_by_customer": true,
     "redistribution_allowed": false
   },
+  "required_delta_metric_keys": [
+    "max_relative_error_pct"
+  ],
+  "required_residual_metric_keys": [
+    "normalized_equilibrium_residual"
+  ],
   "allowed_reviewer_decisions": [
     "PASS",
     "REVIEW",

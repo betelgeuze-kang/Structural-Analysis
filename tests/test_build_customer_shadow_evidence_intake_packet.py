@@ -55,6 +55,8 @@ def _schema_payload() -> dict[str, object]:
             "raw_data_retained_by_customer": True,
             "redistribution_allowed": False,
         },
+        "required_delta_metric_keys": ["max_relative_error_pct"],
+        "required_residual_metric_keys": ["normalized_equilibrium_residual"],
         "allowed_reviewer_decisions": ["PASS", "REVIEW", "FAIL"],
         "claim_boundary": (
             "Customer shadow evidence records derived checksums, metrics, reviewer decision, "
@@ -147,9 +149,14 @@ def test_intake_packet_passes_as_structure_artifact_while_status_is_blocked(tmp_
     assert payload["required_schema_fields"] == _schema_payload()["required_fields"]
     assert payload["fixed_values"] == payload["summary"]["fixed_values"]
     assert payload["allowed_reviewer_decisions"] == ["PASS", "REVIEW", "FAIL"]
+    assert payload["required_delta_metric_keys"] == ["max_relative_error_pct"]
+    assert payload["required_residual_metric_keys"] == ["normalized_equilibrium_residual"]
     assert payload["blockers"] == []
     assert payload["checks"]["raw_data_policy_fixed"] is True
     assert payload["checks"]["reviewer_decisions_present"] is True
+    assert payload["checks"]["required_delta_metric_keys_present"] is True
+    assert payload["checks"]["required_residual_metric_keys_present"] is True
+    assert payload["checks"]["template_has_required_metric_keys"] is True
     assert payload["checks"]["template_has_required_fields"] is True
     assert payload["checks"]["current_status_blocked_until_evidence_attached"] is True
     slots = {slot["slot_id"] for slot in payload["intake_slots"]}
@@ -251,6 +258,42 @@ def test_intake_packet_blocks_when_reviewer_decisions_missing(tmp_path: Path) ->
     assert payload["contract_pass"] is False
     assert payload["checks"]["reviewer_decisions_present"] is False
     assert "reviewer_decisions_present" in payload["blockers"]
+
+
+def test_intake_packet_blocks_when_required_metric_keys_are_missing(tmp_path: Path) -> None:
+    schema = _schema_payload()
+    schema["required_delta_metric_keys"] = []
+    schema["required_residual_metric_keys"] = []
+    inputs = _inputs(tmp_path, schema=schema)
+
+    payload = intake_packet.build_packet(
+        schema_path=inputs["schema"],
+        template_path=inputs["template"],
+        status_path=inputs["status"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["required_delta_metric_keys_present"] is False
+    assert payload["checks"]["required_residual_metric_keys_present"] is False
+    assert "required_delta_metric_keys_present" in payload["blockers"]
+    assert "required_residual_metric_keys_present" in payload["blockers"]
+
+
+def test_intake_packet_blocks_when_template_omits_required_metric_keys(tmp_path: Path) -> None:
+    template = _template_payload()
+    template["delta_metrics"] = {"mean_relative_error_pct": "OWNER_INPUT_REQUIRED"}
+    template["residual_metrics"] = {"raw_residual_norm": "OWNER_INPUT_REQUIRED"}
+    inputs = _inputs(tmp_path, template=template)
+
+    payload = intake_packet.build_packet(
+        schema_path=inputs["schema"],
+        template_path=inputs["template"],
+        status_path=inputs["status"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["template_has_required_metric_keys"] is False
+    assert "template_has_required_metric_keys" in payload["blockers"]
 
 
 def test_intake_packet_blocks_when_min_greater_than_target(tmp_path: Path) -> None:

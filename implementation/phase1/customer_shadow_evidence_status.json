@@ -1,12 +1,11 @@
 {
   "blockers": [
-    "evidence_directory_missing",
     "completed_shadow_case_count_below_minimum"
   ],
   "checks": {
     "all_evidence_files_valid_pass": true,
     "completed_case_ids_unique_pass": true,
-    "evidence_directory_present": false,
+    "evidence_directory_present": true,
     "min_completed_shadow_cases_pass": false,
     "raw_data_policy_pass": true,
     "schema_present": true,
@@ -17,18 +16,18 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_dir": "implementation/phase1/customer_shadow_evidence",
   "evidence_rows": [],
-  "generated_at": "2026-06-19T17:47:06.226718+00:00",
+  "generated_at": "2026-06-19T19:05:59.017704+00:00",
   "input_checksums": {
-    "implementation/phase1/customer_shadow_evidence": "missing",
-    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
-    "implementation/phase1/validate_customer_shadow_evidence.py": "sha256:dfdc8267bc33a523f11028c756e11374b697678220f6bc06b45c4f07482a5372"
+    "implementation/phase1/customer_shadow_evidence": "dir-sha256:7b1448a062479f7a246558dae718700d2beea6b4a611566c96bb63c5ae409dc2",
+    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:db530761321ba8a1bd3e16ba81c5ea4579aeecea296ea0bda34ee070f530e802",
+    "implementation/phase1/validate_customer_shadow_evidence.py": "sha256:a43bbda7f05ce1cb25dcad2c5fe29e60a55af3dcd79d03d57b257c348dfd4f24"
   },
   "reason_code": "ERR_CUSTOMER_SHADOW_EVIDENCE_INCOMPLETE",
   "reuse_policy": "status_rebuilt_from_existing_shadow_evidence_schema_and_directory_metadata",
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-status.v1",
-  "source_commit_sha": "ad728a0d34931906aa3038167def457d1e7bb33e",
+  "source_commit_sha": "a09a857d4ed33617f80029a9d431a443d474e889",
   "summary": {
     "completed_shadow_case_count": 0,
     "completed_shadow_case_ids": [],

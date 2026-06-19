@@ -89,6 +89,8 @@ def build_packet(
     required_fields = [str(field) for field in schema.get("required_fields", [])]
     fixed_values = _as_dict(schema.get("fixed_values"))
     allowed_decisions = [str(value) for value in schema.get("allowed_reviewer_decisions", [])]
+    required_delta_metric_keys = [str(value) for value in schema.get("required_delta_metric_keys", [])]
+    required_residual_metric_keys = [str(value) for value in schema.get("required_residual_metric_keys", [])]
     slots = [_slot(idx, template_path, evidence_dir) for idx in range(1, slot_count + 1)]
     checks = {
         "schema_present": schema_path.exists(),
@@ -99,6 +101,14 @@ def build_packet(
         "raw_data_policy_fixed": fixed_values.get("raw_data_retained_by_customer") is True
         and fixed_values.get("redistribution_allowed") is False,
         "reviewer_decisions_present": bool({"PASS", "REVIEW", "FAIL"} <= set(allowed_decisions)),
+        "required_delta_metric_keys_present": "max_relative_error_pct" in required_delta_metric_keys,
+        "required_residual_metric_keys_present": "normalized_equilibrium_residual" in required_residual_metric_keys,
+        "template_has_required_metric_keys": (
+            isinstance(template.get("delta_metrics"), dict)
+            and all(key in template["delta_metrics"] for key in required_delta_metric_keys)
+            and isinstance(template.get("residual_metrics"), dict)
+            and all(key in template["residual_metrics"] for key in required_residual_metric_keys)
+        ),
         "intake_slot_count_covers_target": slot_count >= target_cases >= min_cases,
         "current_status_blocked_until_evidence_attached": status.get("contract_pass") is not True,
     }
@@ -122,12 +132,16 @@ def build_packet(
             "intake_slot_count": slot_count,
             "required_field_count": len(required_fields),
             "allowed_reviewer_decisions": allowed_decisions,
+            "required_delta_metric_keys": required_delta_metric_keys,
+            "required_residual_metric_keys": required_residual_metric_keys,
             "fixed_values": fixed_values,
             "current_status_contract_pass": status.get("contract_pass"),
         },
         "required_schema_fields": required_fields,
         "fixed_values": fixed_values,
         "allowed_reviewer_decisions": allowed_decisions,
+        "required_delta_metric_keys": required_delta_metric_keys,
+        "required_residual_metric_keys": required_residual_metric_keys,
         "checks": checks,
         "blockers": blockers,
         "intake_slots": slots,

@@ -44,6 +44,8 @@ def test_customer_shadow_evidence_validator_accepts_valid_payload() -> None:
     assert payload["blockers"] == []
     assert payload["summary"]["raw_data_retained_by_customer"] is True
     assert payload["summary"]["redistribution_allowed"] is False
+    assert payload["summary"]["required_delta_metric_keys"] == ["max_relative_error_pct"]
+    assert payload["summary"]["required_residual_metric_keys"] == ["normalized_equilibrium_residual"]
     assert payload["summary"]["reference_output_checksum_sha256_pass"] is True
     assert payload["summary"]["our_engine_commit_sha_pass"] is True
 
@@ -96,6 +98,20 @@ def test_customer_shadow_evidence_validator_rejects_non_numeric_metrics() -> Non
     assert payload["contract_pass"] is False
     assert "delta_metrics_missing_numeric_value" in payload["blockers"]
     assert "residual_metrics_missing_numeric_value" in payload["blockers"]
+    assert "delta_metrics_required_numeric_key_missing:max_relative_error_pct" in payload["blockers"]
+    assert "residual_metrics_required_numeric_key_missing:normalized_equilibrium_residual" in payload["blockers"]
+
+
+def test_customer_shadow_evidence_validator_rejects_missing_required_metric_keys() -> None:
+    bad = _valid_payload()
+    bad["delta_metrics"] = {"mean_relative_error_pct": 1.2}
+    bad["residual_metrics"] = {"raw_residual_norm": 0.0004}
+
+    payload = validator.validate_payload(bad, _schema())
+
+    assert payload["contract_pass"] is False
+    assert "delta_metrics_required_numeric_key_missing:max_relative_error_pct" in payload["blockers"]
+    assert "residual_metrics_required_numeric_key_missing:normalized_equilibrium_residual" in payload["blockers"]
 
 
 def test_customer_shadow_evidence_validator_rejects_empty_required_fields() -> None:

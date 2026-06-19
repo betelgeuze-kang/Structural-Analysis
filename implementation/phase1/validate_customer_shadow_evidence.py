@@ -67,6 +67,17 @@ def _has_numeric_leaf(value: Any) -> bool:
     return False
 
 
+def _numeric_metric_keys_missing(metrics: Any, required_keys: list[str]) -> list[str]:
+    if not isinstance(metrics, dict):
+        return required_keys
+    missing: list[str] = []
+    for key in required_keys:
+        value = metrics.get(key)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            missing.append(key)
+    return missing
+
+
 def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     required = [str(field) for field in schema.get("required_fields", [])]
     missing = [field for field in required if field not in payload]
@@ -83,6 +94,8 @@ def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[st
         if field in payload and payload.get(field) != expected
     ]
     allowed_decisions = {str(value) for value in schema.get("allowed_reviewer_decisions", [])}
+    required_delta_metric_keys = [str(value) for value in schema.get("required_delta_metric_keys", [])]
+    required_residual_metric_keys = [str(value) for value in schema.get("required_residual_metric_keys", [])]
     reviewer_decision = str(payload.get("reviewer_decision", ""))
     blockers: list[str] = []
     blockers.extend([f"missing_field:{field}" for field in missing])
@@ -110,6 +123,10 @@ def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[st
         payload.get("residual_metrics")
     ):
         blockers.append("residual_metrics_missing_numeric_value")
+    for key in _numeric_metric_keys_missing(payload.get("delta_metrics"), required_delta_metric_keys):
+        blockers.append(f"delta_metrics_required_numeric_key_missing:{key}")
+    for key in _numeric_metric_keys_missing(payload.get("residual_metrics"), required_residual_metric_keys):
+        blockers.append(f"residual_metrics_required_numeric_key_missing:{key}")
 
     return {
         "schema_version": "customer-shadow-evidence-validation.v1",
@@ -124,6 +141,8 @@ def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[st
             "reviewer_decision": reviewer_decision,
             "raw_data_retained_by_customer": payload.get("raw_data_retained_by_customer"),
             "redistribution_allowed": payload.get("redistribution_allowed"),
+            "required_delta_metric_keys": required_delta_metric_keys,
+            "required_residual_metric_keys": required_residual_metric_keys,
             "reference_output_checksum_sha256_pass": bool(checksum and SHA256_REF_RE.match(checksum)),
             "our_engine_commit_sha_pass": bool(engine_commit and COMMIT_SHA_RE.match(engine_commit)),
         },

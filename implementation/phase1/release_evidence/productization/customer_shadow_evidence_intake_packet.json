@@ -9,11 +9,14 @@
     "current_status_blocked_until_evidence_attached": true,
     "intake_slot_count_covers_target": true,
     "raw_data_policy_fixed": true,
+    "required_delta_metric_keys_present": true,
     "required_fields_present": true,
+    "required_residual_metric_keys_present": true,
     "reviewer_decisions_present": true,
     "schema_present": true,
     "status_present": true,
     "template_has_required_fields": true,
+    "template_has_required_metric_keys": true,
     "template_present": true
   },
   "claim_boundary": "This packet creates owner-input slots and validation commands only. It does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target. Each slot must be filled with real customer-retained derived metadata and pass the validator.",
@@ -29,11 +32,11 @@
     "raw_data_retained_by_customer": true,
     "redistribution_allowed": false
   },
-  "generated_at": "2026-06-19T17:47:25.195592+00:00",
+  "generated_at": "2026-06-19T19:06:08.387388+00:00",
   "input_checksums": {
     "docs/templates/customer_shadow_evidence.template.json": "sha256:3fbf9f07b8a5c2461a2187470b6d8b40bd447b63aa9695959f9b2446beeead30",
-    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:458fb180bc5a348315834fc21c6083d52d5ccb1a7529f11e374fcda46cdc1a6f"
+    "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:db530761321ba8a1bd3e16ba81c5ea4579aeecea296ea0bda34ee070f530e802",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:f657bf84696705ebf5b17310e116296d49c60e91173dd0841425c2a9f6cbbce6"
   },
   "intake_slots": [
     {
@@ -118,6 +121,12 @@
     }
   ],
   "reason_code": "PASS",
+  "required_delta_metric_keys": [
+    "max_relative_error_pct"
+  ],
+  "required_residual_metric_keys": [
+    "normalized_equilibrium_residual"
+  ],
   "required_schema_fields": [
     "case_id",
     "project_status",
@@ -138,7 +147,7 @@
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-intake-packet.v1",
-  "source_commit_sha": "0d5144aa45e7117e17240344baf076167337b8b7",
+  "source_commit_sha": "a09a857d4ed33617f80029a9d431a443d474e889",
   "status": "implementation/phase1/customer_shadow_evidence_status.json",
   "summary": {
     "allowed_reviewer_decisions": [
@@ -155,7 +164,13 @@
     },
     "intake_slot_count": 5,
     "min_completed_shadow_cases": 3,
+    "required_delta_metric_keys": [
+      "max_relative_error_pct"
+    ],
     "required_field_count": 14,
+    "required_residual_metric_keys": [
+      "normalized_equilibrium_residual"
+    ],
     "target_completed_shadow_cases": 5
   },
   "template": "docs/templates/customer_shadow_evidence.template.json"
