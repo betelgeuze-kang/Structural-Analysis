@@ -34,6 +34,10 @@ target/
 *.log
 *.tmp
 
+# Local Codex/Betelgeuze runtime logs
+.betelgeuze/trace.jsonl
+.betelgeuze/worker_outputs/
+
 # Local screenshots
 Code_Generated_Image*.png
 스크린샷 *.png
