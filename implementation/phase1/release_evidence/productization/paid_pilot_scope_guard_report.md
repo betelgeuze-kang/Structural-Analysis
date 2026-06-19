@@ -1,6 +1,6 @@
 # Paid Pilot Scope Guard Report
 
-- `summary_line`: `Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9`
+- `summary_line`: `Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9`
 - `contract_pass`: `True`
 
 | Scope Check | Pass |
@@ -10,6 +10,29 @@
 | `specified_workflow` | `True` |
 | `engine_reviewer_evidence_package` | `True` |
 | `unsupported_or_missing_evidence_blocker` | `True` |
+
+| Commercial v1 Supported Scope | Pass |
+|---|---|
+| `frame_families` | `True` |
+| `wall_frame_families` | `True` |
+| `outrigger_families` | `True` |
+| `truss_families` | `True` |
+| `midas_interop` | `True` |
+| `opensees_interop` | `True` |
+| `kds_interop` | `True` |
+| `nonlinear_static` | `True` |
+| `bounded_ndtha` | `True` |
+| `residual_audit` | `True` |
+| `reference_comparison` | `True` |
+| `reviewer_package` | `True` |
+
+| Commercial v1 Separate-Validation Exclusion | Pass |
+|---|---|
+| `rail_tunnel` | `True` |
+| `special_ssi` | `True` |
+| `nonstandard_contact` | `True` |
+| `legal_authority_approval_automation` | `True` |
+| `special_construction_stages` | `True` |
 
 | Forbidden Claim Check | Pass |
 |---|---|

@@ -53,6 +53,112 @@ REQUIRED_SCOPE_TERMS = {
     ],
 }
 
+COMMERCIAL_V1_SUPPORTED_SCOPE_TERMS = {
+    "frame_families": [
+        "frame structures",
+        "frame families",
+        "frame 구조",
+        "골조 구조",
+        "frame family",
+    ],
+    "wall_frame_families": [
+        "wall-frame",
+        "wall frame",
+        "wall-frame structures",
+        "벽-골조",
+        "벽식 골조",
+    ],
+    "outrigger_families": [
+        "outrigger",
+        "outrigger systems",
+        "outrigger structures",
+        "아웃리거",
+    ],
+    "truss_families": [
+        "truss",
+        "truss systems",
+        "truss structures",
+        "트러스",
+    ],
+    "midas_interop": [
+        "MIDAS interop",
+        "MIDAS interoperability",
+        "midas interop",
+    ],
+    "opensees_interop": [
+        "OpenSees interop",
+        "OpenSees interoperability",
+        "opensees interop",
+    ],
+    "kds_interop": [
+        "KDS interop",
+        "KDS interoperability",
+        "kds interop",
+    ],
+    "nonlinear_static": [
+        "nonlinear static",
+        "비선형 정적",
+        "비선형정적",
+        "nonlinear static analysis",
+    ],
+    "bounded_ndtha": [
+        "bounded NDTHA",
+        "Bounded NDTHA",
+        "경계 NDTHA",
+        "bounded non-linear time history",
+    ],
+    "residual_audit": [
+        "residual audit",
+        "residual auditing",
+        "잔차 감사",
+        "잔차 검증",
+    ],
+    "reference_comparison": [
+        "reference comparison",
+        "reference-comparison",
+        "기준 비교",
+        "reference benchmarking",
+    ],
+    "reviewer_package": [
+        "reviewer package",
+        "reviewer-package",
+        "검토자 패키지",
+        "reviewer handoff package",
+    ],
+}
+
+COMMERCIAL_V1_SEPARATE_VALIDATION_EXCLUSIONS = {
+    "rail_tunnel": [
+        "rail/tunnel",
+        "rail-tunnel",
+        "rail tunnel",
+        "철도/터널",
+    ],
+    "special_ssi": [
+        "special SSI",
+        "special-ssi",
+        "special soil-structure interaction",
+        "특수 SSI",
+    ],
+    "nonstandard_contact": [
+        "nonstandard contact",
+        "non-standard contact",
+        "비표준 접촉",
+    ],
+    "legal_authority_approval_automation": [
+        "legal/authority approval automation",
+        "legal approval automation",
+        "authority approval automation",
+        "인허가 자동화",
+    ],
+    "special_construction_stages": [
+        "special construction stages",
+        "special-construction-stages",
+        "special construction stage",
+        "특수 시공 단계",
+    ],
+}
+
 PROHIBITED_SCOPE_CLAIMS = {
     "limited_commercial_ready_true": [
         "limited_commercial_ready=true",
@@ -175,6 +281,22 @@ def build_report(
         }
         for check, phrases in REQUIRED_SCOPE_TERMS.items()
     ]
+    supported_scope_rows = [
+        {
+            "check": check,
+            "pass": _contains_any(scope_text, phrases),
+            "accepted_phrases": phrases,
+        }
+        for check, phrases in COMMERCIAL_V1_SUPPORTED_SCOPE_TERMS.items()
+    ]
+    separate_validation_exclusion_rows = [
+        {
+            "check": check,
+            "pass": _contains_any(scope_text, phrases),
+            "accepted_phrases": phrases,
+        }
+        for check, phrases in COMMERCIAL_V1_SEPARATE_VALIDATION_EXCLUSIONS.items()
+    ]
     forbidden_claim_rows = [
         {
             "check": check,
@@ -200,6 +322,12 @@ def build_report(
     ]
     support_bundle_section_rows = _support_bundle_section_rows(support_bundle)
     missing_terms = [row["check"] for row in term_rows if not row["pass"]]
+    missing_supported_scope = [row["check"] for row in supported_scope_rows if not row["pass"]]
+    missing_separate_validation_exclusions = [
+        row["check"]
+        for row in separate_validation_exclusion_rows
+        if not row["pass"]
+    ]
     present_forbidden_claims = [row["check"] for row in forbidden_claim_rows if not row["pass"]]
     missing_artifacts = [row["label"] for row in artifact_rows if not row["present"]]
     missing_support_sections = [
@@ -212,6 +340,11 @@ def build_report(
     ]
     blockers = [
         *(f"scope_term_missing:{label}" for label in missing_terms),
+        *(f"commercial_v1_supported_scope_missing:{label}" for label in missing_supported_scope),
+        *(
+            f"commercial_v1_separate_validation_exclusion_missing:{label}"
+            for label in missing_separate_validation_exclusions
+        ),
         *(f"forbidden_scope_claim_present:{label}" for label in present_forbidden_claims),
         *(f"evidence_artifact_missing:{label}" for label in missing_artifacts),
         *(f"support_bundle_section_missing:{label}" for label in missing_support_sections),
@@ -226,11 +359,20 @@ def build_report(
         "summary_line": (
             f"Paid pilot scope guard: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"scope_terms={len(term_rows) - len(missing_terms)}/{len(term_rows)} | "
+            f"commercial_v1_supported_scope="
+            f"{len(supported_scope_rows) - len(missing_supported_scope)}/{len(supported_scope_rows)} | "
+            f"commercial_v1_separate_validation_exclusions="
+            f"{len(separate_validation_exclusion_rows) - len(missing_separate_validation_exclusions)}"
+            f"/{len(separate_validation_exclusion_rows)} | "
             f"artifacts={len(artifact_rows) - len(missing_artifacts)}/{len(artifact_rows)}"
         ),
         "checks": {
             "scope_source_present": scope_source.exists(),
             "all_required_scope_terms_present": not missing_terms,
+            "commercial_v1_supported_scope_present": not missing_supported_scope,
+            "commercial_v1_separate_validation_exclusions_present": (
+                not missing_separate_validation_exclusions
+            ),
             "no_prohibited_scope_claims_present": not present_forbidden_claims,
             "evidence_package_artifacts_present": not missing_artifacts,
             "support_bundle_required_sections_present": not missing_support_sections,
@@ -240,6 +382,17 @@ def build_report(
             "scope_source": str(scope_source),
             "required_scope_term_count": len(term_rows),
             "required_scope_term_pass_count": len(term_rows) - len(missing_terms),
+            "commercial_v1_supported_scope_count": len(supported_scope_rows),
+            "commercial_v1_supported_scope_pass_count": (
+                len(supported_scope_rows) - len(missing_supported_scope)
+            ),
+            "commercial_v1_separate_validation_exclusion_count": (
+                len(separate_validation_exclusion_rows)
+            ),
+            "commercial_v1_separate_validation_exclusion_pass_count": (
+                len(separate_validation_exclusion_rows)
+                - len(missing_separate_validation_exclusions)
+            ),
             "prohibited_scope_claim_count": len(forbidden_claim_rows),
             "prohibited_scope_claim_present_count": len(present_forbidden_claims),
             "evidence_artifact_count": len(artifact_rows),
@@ -250,17 +403,22 @@ def build_report(
             ),
             "owner_action": (
                 "Keep paid-pilot product/contract language constrained to review assist, specified "
-                "structure families/workflows, and attached engine/reviewer evidence package."
+                "structure families/workflows, and attached engine/reviewer evidence package. "
+                "Commercial v1 supported scope and separate-validation exclusions must stay visible."
             ),
         },
         "scope_term_rows": term_rows,
+        "commercial_v1_supported_scope_rows": supported_scope_rows,
+        "commercial_v1_separate_validation_exclusion_rows": separate_validation_exclusion_rows,
         "forbidden_claim_rows": forbidden_claim_rows,
         "artifact_rows": artifact_rows,
         "support_bundle_section_rows": support_bundle_section_rows,
         "blockers": blockers,
         "claim_boundary": (
             "This guard validates scoped paid-pilot language and evidence-package references. It does not "
-            "create legal approval, customer acceptance, or GA/Enterprise readiness."
+            "create legal approval, customer acceptance, or GA/Enterprise readiness. Commercial v1 supported "
+            "scope and separate-validation exclusions describe the productization surface, not external V&V, "
+            "authority approval, or signoff evidence."
         ),
     }
 
@@ -276,6 +434,24 @@ def _markdown(payload: dict[str, Any]) -> str:
         "|---|---|",
     ]
     for row in payload["scope_term_rows"]:
+        lines.append(f"| `{row['check']}` | `{row['pass']}` |")
+    lines.extend(
+        [
+            "",
+            "| Commercial v1 Supported Scope | Pass |",
+            "|---|---|",
+        ]
+    )
+    for row in payload["commercial_v1_supported_scope_rows"]:
+        lines.append(f"| `{row['check']}` | `{row['pass']}` |")
+    lines.extend(
+        [
+            "",
+            "| Commercial v1 Separate-Validation Exclusion | Pass |",
+            "|---|---|",
+        ]
+    )
+    for row in payload["commercial_v1_separate_validation_exclusion_rows"]:
         lines.append(f"| `{row['check']}` | `{row['pass']}` |")
     lines.extend(["", "| Forbidden Claim Check | Pass |", "|---|---|"])
     for row in payload["forbidden_claim_rows"]:

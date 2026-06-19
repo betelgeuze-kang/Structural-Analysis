@@ -33,6 +33,13 @@ def _scope_text() -> str:
             "- 지정된 구조군과 지정된 workflow",
             "- engine/reviewer evidence package 포함",
             "- unsupported 또는 missing evidence 항목은 pass가 아니라 blocker로 표시",
+            "- Commercial v1 supported scope: frame structures, wall-frame structures, "
+            "outrigger systems, truss systems.",
+            "- Commercial v1 supported interop: MIDAS interop, OpenSees interop, KDS interop.",
+            "- Commercial v1 supported analysis: nonlinear static, bounded NDTHA.",
+            "- Commercial v1 supported audit: residual audit, reference comparison, reviewer package.",
+            "- Commercial v1 separate-validation exclusions: rail/tunnel, special SSI, "
+            "nonstandard contact, legal/authority approval automation, special construction stages.",
         ]
     )
 
@@ -78,9 +85,13 @@ def test_paid_pilot_scope_guard_passes_constrained_scope_and_artifacts(tmp_path:
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
     assert payload["checks"]["all_required_scope_terms_present"] is True
+    assert payload["checks"]["commercial_v1_supported_scope_present"] is True
+    assert payload["checks"]["commercial_v1_separate_validation_exclusions_present"] is True
     assert payload["checks"]["no_prohibited_scope_claims_present"] is True
     assert payload["checks"]["evidence_package_artifacts_present"] is True
     assert payload["checks"]["support_bundle_required_sections_present"] is True
+    assert payload["summary"]["commercial_v1_supported_scope_pass_count"] == 12
+    assert payload["summary"]["commercial_v1_separate_validation_exclusion_pass_count"] == 5
     assert payload["summary"]["support_bundle_required_section_present_count"] == 3
     assert payload["summary"]["prohibited_scope_claim_present_count"] == 0
     assert any(row["label"] == "pm_release_gate_reviewer_handoff" for row in payload["artifact_rows"])
@@ -101,6 +112,35 @@ def test_paid_pilot_scope_guard_blocks_missing_scope_terms(tmp_path: Path) -> No
     assert payload["reason_code"] == "ERR_PAID_PILOT_SCOPE_GUARD_BLOCKED"
     assert "scope_term_missing:review_assist_boundary" in payload["blockers"]
     assert "scope_term_missing:engine_reviewer_evidence_package" in payload["blockers"]
+
+
+def test_paid_pilot_scope_guard_blocks_missing_commercial_v1_scope_terms(tmp_path: Path) -> None:
+    scope = "\n".join(
+        [
+            "현재 권장 범위는 제한된 paid pilot이다.",
+            "- 구조 엔지니어 검토 보조",
+            "- 지정된 구조군과 지정된 workflow",
+            "- engine/reviewer evidence package 포함",
+            "- unsupported 또는 missing evidence 항목은 pass가 아니라 blocker로 표시",
+            "- Commercial v1 supported scope: frame structures.",
+            "- Commercial v1 separate-validation exclusions: rail/tunnel.",
+        ]
+    )
+    payload = build_paid_pilot_scope_guard_report.build_report(
+        scope_source=_write_text(tmp_path / "scope.md", scope),
+        **_artifact_inputs(tmp_path),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["commercial_v1_supported_scope_present"] is False
+    assert payload["checks"]["commercial_v1_separate_validation_exclusions_present"] is False
+    assert "commercial_v1_supported_scope_missing:wall_frame_families" in payload["blockers"]
+    assert "commercial_v1_supported_scope_missing:bounded_ndtha" in payload["blockers"]
+    assert "commercial_v1_separate_validation_exclusion_missing:special_ssi" in payload["blockers"]
+    assert (
+        "commercial_v1_separate_validation_exclusion_missing:legal_authority_approval_automation"
+        in payload["blockers"]
+    )
 
 
 def test_paid_pilot_scope_guard_blocks_forbidden_scope_claims(tmp_path: Path) -> None:

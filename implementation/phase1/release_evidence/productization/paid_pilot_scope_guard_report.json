@@ -67,13 +67,187 @@
   "blockers": [],
   "checks": {
     "all_required_scope_terms_present": true,
+    "commercial_v1_separate_validation_exclusions_present": true,
+    "commercial_v1_supported_scope_present": true,
     "evidence_package_artifacts_present": true,
     "no_prohibited_scope_claims_present": true,
     "required_evidence_package_artifacts_green": true,
     "scope_source_present": true,
     "support_bundle_required_sections_present": true
   },
-  "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness.",
+  "claim_boundary": "This guard validates scoped paid-pilot language and evidence-package references. It does not create legal approval, customer acceptance, or GA/Enterprise readiness. Commercial v1 supported scope and separate-validation exclusions describe the productization surface, not external V&V, authority approval, or signoff evidence.",
+  "commercial_v1_separate_validation_exclusion_rows": [
+    {
+      "accepted_phrases": [
+        "rail/tunnel",
+        "rail-tunnel",
+        "rail tunnel",
+        "철도/터널"
+      ],
+      "check": "rail_tunnel",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "special SSI",
+        "special-ssi",
+        "special soil-structure interaction",
+        "특수 SSI"
+      ],
+      "check": "special_ssi",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "nonstandard contact",
+        "non-standard contact",
+        "비표준 접촉"
+      ],
+      "check": "nonstandard_contact",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "legal/authority approval automation",
+        "legal approval automation",
+        "authority approval automation",
+        "인허가 자동화"
+      ],
+      "check": "legal_authority_approval_automation",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "special construction stages",
+        "special-construction-stages",
+        "special construction stage",
+        "특수 시공 단계"
+      ],
+      "check": "special_construction_stages",
+      "pass": true
+    }
+  ],
+  "commercial_v1_supported_scope_rows": [
+    {
+      "accepted_phrases": [
+        "frame structures",
+        "frame families",
+        "frame 구조",
+        "골조 구조",
+        "frame family"
+      ],
+      "check": "frame_families",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "wall-frame",
+        "wall frame",
+        "wall-frame structures",
+        "벽-골조",
+        "벽식 골조"
+      ],
+      "check": "wall_frame_families",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "outrigger",
+        "outrigger systems",
+        "outrigger structures",
+        "아웃리거"
+      ],
+      "check": "outrigger_families",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "truss",
+        "truss systems",
+        "truss structures",
+        "트러스"
+      ],
+      "check": "truss_families",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "MIDAS interop",
+        "MIDAS interoperability",
+        "midas interop"
+      ],
+      "check": "midas_interop",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "OpenSees interop",
+        "OpenSees interoperability",
+        "opensees interop"
+      ],
+      "check": "opensees_interop",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "KDS interop",
+        "KDS interoperability",
+        "kds interop"
+      ],
+      "check": "kds_interop",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "nonlinear static",
+        "비선형 정적",
+        "비선형정적",
+        "nonlinear static analysis"
+      ],
+      "check": "nonlinear_static",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "bounded NDTHA",
+        "Bounded NDTHA",
+        "경계 NDTHA",
+        "bounded non-linear time history"
+      ],
+      "check": "bounded_ndtha",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "residual audit",
+        "residual auditing",
+        "잔차 감사",
+        "잔차 검증"
+      ],
+      "check": "residual_audit",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "reference comparison",
+        "reference-comparison",
+        "기준 비교",
+        "reference benchmarking"
+      ],
+      "check": "reference_comparison",
+      "pass": true
+    },
+    {
+      "accepted_phrases": [
+        "reviewer package",
+        "reviewer-package",
+        "검토자 패키지",
+        "reviewer handoff package"
+      ],
+      "check": "reviewer_package",
+      "pass": true
+    }
+  ],
   "contract_pass": true,
   "forbidden_claim_rows": [
     {
@@ -133,7 +307,7 @@
       ]
     }
   ],
-  "generated_at": "2026-06-18T15:01:37.481531+00:00",
+  "generated_at": "2026-06-19T15:02:39.012760+00:00",
   "reason_code": "PASS",
   "schema_version": "paid-pilot-scope-guard-report.v1",
   "scope_term_rows": [
@@ -183,9 +357,13 @@
     }
   ],
   "summary": {
+    "commercial_v1_separate_validation_exclusion_count": 5,
+    "commercial_v1_separate_validation_exclusion_pass_count": 5,
+    "commercial_v1_supported_scope_count": 12,
+    "commercial_v1_supported_scope_pass_count": 12,
     "evidence_artifact_count": 9,
     "evidence_artifact_present_count": 9,
-    "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package.",
+    "owner_action": "Keep paid-pilot product/contract language constrained to review assist, specified structure families/workflows, and attached engine/reviewer evidence package. Commercial v1 supported scope and separate-validation exclusions must stay visible.",
     "prohibited_scope_claim_count": 6,
     "prohibited_scope_claim_present_count": 0,
     "required_scope_term_count": 5,
@@ -194,7 +372,7 @@
     "support_bundle_required_section_count": 3,
     "support_bundle_required_section_present_count": 3
   },
-  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | artifacts=9/9",
+  "summary_line": "Paid pilot scope guard: PASS | scope_terms=5/5 | commercial_v1_supported_scope=12/12 | commercial_v1_separate_validation_exclusions=5/5 | artifacts=9/9",
   "support_bundle_section_rows": [
     {
       "label": "pm_owner_evidence_request_packet",

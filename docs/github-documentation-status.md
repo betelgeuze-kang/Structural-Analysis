@@ -9,6 +9,22 @@
 
 별도 허용 claim으로 **workstation delivery service**가 추가됐다: 내 워크스테이션에서 HTML/PDF/SVG/JSON/CSV 납품 패키지를 생성하고 구조 엔지니어 검토 전제로 전달하는 서비스다. 이 claim은 독립 SaaS/독립 구조해석제품 claim이 아니다.
 
+Commercial v1 supported scope (machine-checked by `scripts/build_paid_pilot_scope_guard_report.py`):
+
+- Structure families: frame, wall-frame, outrigger, truss
+- Interop: MIDAS interop, OpenSees interop, KDS interop
+- Analysis: nonlinear static, bounded NDTHA
+- Audit: residual audit, reference comparison
+- Reviewer package
+
+Commercial v1 separate-validation exclusions (must stay visible):
+
+- rail/tunnel
+- special SSI
+- nonstandard contact
+- legal/authority approval automation
+- special construction stages
+
 금지 claim:
 
 - full autonomous commercial replacement

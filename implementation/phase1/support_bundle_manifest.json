@@ -361,11 +361,11 @@
     },
     {
       "available": true,
-      "bytes": 7001,
+      "bytes": 11442,
       "label": "paid_pilot_scope_guard_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/paid_pilot_scope_guard_report.json",
-      "redacted_sha256": "10e3522b87af31d3affd7cbb87032c5a7a5d728109c7b06ddf9095d47985be10",
-      "sha256": "10e3522b87af31d3affd7cbb87032c5a7a5d728109c7b06ddf9095d47985be10",
+      "redacted_sha256": "fde9a0f8a7f20f924cb8c886b840e53b168145167f4c3eb483a7c54db042c767",
+      "sha256": "fde9a0f8a7f20f924cb8c886b840e53b168145167f4c3eb483a7c54db042c767",
       "source_path": "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json"
     },
     {
@@ -379,11 +379,11 @@
     },
     {
       "available": true,
-      "bytes": 1625,
+      "bytes": 2857,
       "label": "release_limitation_manual",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/release_limitation_manual.md",
-      "redacted_sha256": "1f65e66e7adbe0f57c9f430e7ea54df023ce1b139095a912dcbdda45baa2772b",
-      "sha256": "943c31c7997f713c6da525dd1ee463107f343f6aec0827b2d0ebf5864a69d8d5",
+      "redacted_sha256": "db831bf735ad5e8d1c770bd69c679448da2c993301377774038b5198884c7079",
+      "sha256": "0fe581812eab78fdfb0bd8f0027f8b2329d5cf3454638cd0f97cb3872c1a8281",
       "source_path": "docs/release-limitation-manual.md"
     },
     {
@@ -464,7 +464,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-19T14:40:11.529213+00:00",
+    "generated_at": "2026-06-19T15:03:09.427980+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -473,7 +473,7 @@
     "artifact_count": 50,
     "available_artifact_count": 50,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "e511771aa62e1f273a72afe63cf76c0414414a39413d78b70059973790cda9fe"
+    "sha256": "1682bfd18404b5f8e5012651429028063e41e8b6f5c79e54b1de1238f33ea762"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -495,7 +495,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 390939,
+    "bytes": 392376,
     "error": "",
     "member_count": 54,
     "members": [
@@ -555,9 +555,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "cc06ccff01753f042455fbcac5931729780479c413bada4b4b9610f58fdf9efc"
+    "sha256": "5479705e7d79ecfb72a7dc9b6e0f91db3818cca6fbe99a608f8733134b86504a"
   },
-  "generated_at": "2026-06-19T14:40:11.580960+00:00",
+  "generated_at": "2026-06-19T15:03:09.479665+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -605,7 +605,7 @@
     "bundle_path": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
     "claim_boundary": "This index proves support-bundle coverage for open PM blocker handoff artifacts only. It does not close tracked CI streak, human UX observation, license, Limited Commercial, GA/Enterprise, or other external release evidence blockers.",
     "coverage_pass": true,
-    "generated_at": "2026-06-19T14:40:11.531051+00:00",
+    "generated_at": "2026-06-19T15:03:09.429816+00:00",
     "missing_required_section_labels": [],
     "open_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -768,7 +768,7 @@
       }
     ],
     "schema_version": "pm-failure-bundle-coverage.v1",
-    "sha256": "de956612ddb02deed2e1c586385608092e0733aca590cdd7ce70dbb6a01f62c3",
+    "sha256": "90d48958ef41ecc616c3f1d5049210c8045b2353d7dab895f61aa90afe37d37d",
     "source_artifacts": {
       "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",

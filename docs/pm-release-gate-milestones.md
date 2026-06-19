@@ -191,6 +191,22 @@ CI streak intake는 `github_actions_ci_streak_evidence.json`의 schema, freshnes
 - engine/reviewer evidence package 포함
 - unsupported 또는 missing evidence 항목은 pass가 아니라 blocker로 표시
 
+상용 v1 지원 범위 (commercial v1 supported scope): paid-pilot scope guard는 다음 항목이 scope source에 명시돼야 PASS다.
+
+- frame structures, wall-frame structures, outrigger systems, truss systems (골조, 벽-골조, 아웃리거, 트러스 구조군)
+- MIDAS interop, OpenSees interop, KDS interop
+- nonlinear static, bounded NDTHA
+- residual audit, reference comparison
+- reviewer package (reviewer handoff package)
+
+상용 v1 분리 검증 제외 (commercial v1 separate-validation exclusions): paid-pilot scope guard는 다음 항목이 scope source에 별도 검증 표기로 명시돼야 PASS다.
+
+- rail/tunnel (철도/터널)
+- special SSI (special soil-structure interaction, 특수 SSI)
+- nonstandard contact (비표준 접촉)
+- legal/authority approval automation (인허가 자동화)
+- special construction stages (특수 시공 단계)
+
 OpenSees evidence는 topology edge-list canonicalization과 exact JSON reload trace까지이며 full OpenSees solver execution roundtrip 주장은 아니다.
 
 GA/Enterprise는 이 로컬 gate와 별개로 독립 V&V, family validation manual signoff, 고객 audit/failure bundle, support SLA evidence가 필요하다. 현재 `ga_enterprise_readiness_report.json` 기준 measured cases `304/300`, signed registry, support bundle은 통과하지만 독립 V&V, family signoff, 고객 audit/failure bundle/SLA evidence가 없으므로 `ga_enterprise_ready=false`가 맞다.

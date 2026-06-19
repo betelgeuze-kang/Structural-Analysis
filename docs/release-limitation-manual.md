@@ -13,6 +13,31 @@ expectations for the PM release gate.
   manual signoff, customer audit/failure bundle acceptance, support SLA, and
   release-area blockers are closed.
 
+## Commercial v1 Supported Scope
+
+The commercial v1 product surface is intentionally bounded. The paid-pilot
+scope guard (`scripts/build_paid_pilot_scope_guard_report.py`) blocks when any
+of the following are missing from the scope source:
+
+- Structure families: frame structures, wall-frame structures, outrigger
+  systems, truss systems.
+- Interop: MIDAS interop, OpenSees interop, KDS interop.
+- Analysis: nonlinear static, bounded NDTHA.
+- Audit: residual audit, reference comparison.
+- Reviewer package: reviewer package (reviewer handoff package).
+
+## Commercial v1 Separate-Validation Exclusions
+
+The following are explicitly excluded from commercial v1 and require separate
+validation. The paid-pilot scope guard blocks when any of the following are
+missing from the scope source as explicit separate-validation exclusions:
+
+- rail/tunnel (rail-tunnel / 철도/터널)
+- special SSI (special soil-structure interaction / 특수 SSI)
+- nonstandard contact (비표준 접촉)
+- legal/authority approval automation (인허가 자동화)
+- special construction stages (특수 시공 단계)
+
 ## Known Issues
 
 - CI streak evidence: PR and nightly release credit requires tracked GitHub
@@ -21,6 +46,8 @@ expectations for the PM release gate.
   status evidence is populated and current.
 - GA signoff: independent V&V, family validation manual signoff, and customer
   audit/failure bundle/SLA evidence remain external owner inputs.
+- Commercial v1 supported scope and separate-validation exclusions are
+  contract-only; missing items are blocker, not silent omission.
 
 ## Support Bundle And Failure Bundle
 

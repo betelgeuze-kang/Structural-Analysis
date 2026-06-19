@@ -34,6 +34,32 @@ The README image is captured from the actual `src/structure-viewer/index.html?pr
 - [Phase 1 material mapping report](implementation/phase1/material_map_report.json)
 - [Phase 1 priority 1/2/3 summary](implementation/phase1/priority3_summary.json)
 
+## Commercial v1 Scope
+
+The paid-pilot scope guard (`scripts/build_paid_pilot_scope_guard_report.py`)
+machine-checks both the constrained paid-pilot language and the commercial v1
+product surface. The supported commercial v1 scope and the explicit
+separate-validation exclusions are recorded together in
+`docs/pm-release-gate-milestones.md` and `docs/release-limitation-manual.md`,
+and the guard blocks if any required supported-scope term or
+separate-validation exclusion is missing from the scope source.
+
+Supported commercial v1 scope (must stay visible in scope source):
+
+- Structure families: frame, wall-frame, outrigger, truss
+- Interop: MIDAS interop, OpenSees interop, KDS interop
+- Analysis: nonlinear static, bounded NDTHA
+- Audit: residual audit, reference comparison
+- Reviewer package
+
+Separate-validation exclusions (must stay visible in scope source):
+
+- rail/tunnel
+- special SSI
+- nonstandard contact
+- legal/authority approval automation
+- special construction stages
+
 ## Commercial Priority Snapshot
 
 - Current state: P0/P1/P1 breadth status commands converge on the same release-publication evidence index, PM release milestones M1-M5 pass, release evidence freshness passes, and the source structure viewer has a real Playwright browser smoke for the registered optimized/real-drawing 3D preset. The broader release-area gate is still blocked by CI streak, human UX observation, and license-status evidence.
