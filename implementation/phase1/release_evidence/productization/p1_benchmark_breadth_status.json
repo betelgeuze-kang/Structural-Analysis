@@ -1,5 +1,6 @@
 {
   "benchmark_breadth_inputs_ready": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "gates": [
     {
       "label": "P1 execution prerequisite",
@@ -384,12 +385,33 @@
       "summary_line": "Korean source collect: PASS | sources=22 | collected=10 | metadata_only=12 | rejected=0 | bytes=6628988 | seed_complete=22 | exact_topology=7 | native_writeback=7 | curated_local_ifc=5/7 | p0_focus=18"
     }
   ],
+  "generated_at": "2026-06-19T14:20:20.557362+00:00",
+  "input_checksums": {
+    "implementation/phase1/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
+    "implementation/phase1/hf_benchmark_report.atwood_open.json": "sha256:5cf552c1aa8c5ca61b5677bf2dad3fc13c5876a962034a882e5834c2e5229320",
+    "implementation/phase1/hf_benchmark_report.from_csv.json": "sha256:397036ca3bf2632dcdb491269194d203e44bc49b9526069339212639112abd3d",
+    "implementation/phase1/hf_benchmark_report.json": "sha256:0179c483cd36f859e74c4c71000e1630ad9581e741b017039045b1cdef5aa1c4",
+    "implementation/phase1/hf_benchmark_report.opstool_nightly.json": "sha256:5c3a54d8a68fe73648294727231dde98e88b01726004592583f1f3f12d584288",
+    "implementation/phase1/hf_benchmark_report.opstool_pr.json": "sha256:b761bb01dbe19e7e57e1c58f51895cd1f08b01a89db1056e1ae32babe44c799f",
+    "implementation/phase1/hf_benchmark_report.rwth_zenodo.json": "sha256:3e490c17ff638df233fb2b6dc5619d23ac89436a5fc583e153492cec8d8b9aa7",
+    "implementation/phase1/open_data/irregular/irregular_top5_execution_manifest.json": "sha256:e0b6346e54afe4741b4c904ea31c7832ac1c8dd0cf7406fcfb6e0b34d54e2eca",
+    "implementation/phase1/open_data/korea/korean_public_structure_collection_report.json": "sha256:5f440ab967a05a6303c30acb4b1f68bb86c9229219989ebef0aec0d1ddc1f711",
+    "implementation/phase1/open_data/pbd_hinge/peer_spd_hinge_benchmark_gate_report.json": "sha256:23ff66874024c15d800a9f2b359bb11435d9520899a719100821487be0bb0962",
+    "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
+    "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:766c82ad63a7a08eabdd6de56da842463b23d4ebc8a1994ee836fd53823f57e9",
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:423185574830819ba26ebfb0d929b612f451f5ce6f7734739467ea67a70cf552",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:d10abe475188c15a65720481a09d2afeae570b426e578d26566e0921a4a2078c",
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:b44f81a417626a0c3723c171322329d43aa05e004cffd24c3d3103e355d11f57"
+  },
   "next_action": "run P1 quality/fallback/benchmark breadth execution",
   "p0_release_blocker": false,
   "p1_benchmark_execution_unblocked": true,
   "p1_execution_unblocked": true,
   "publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "reuse_policy": "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
+  "reused_evidence": true,
   "schema_version": "p1-benchmark-breadth-status.v1",
+  "source_commit_sha": "1c55c8bcb46d692fe674814fbfd71d4164a07afe",
   "status": "ready",
   "summary": {
     "benchmark_report_count": 10,
