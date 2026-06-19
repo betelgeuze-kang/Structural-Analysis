@@ -1,0 +1,228 @@
+{
+  "blockers": [
+    "commercial_benchmark_torch::fresh_validation_receipt_missing",
+    "gpu_hip_solver::fresh_validation_receipt_missing",
+    "performance_profile::fresh_validation_receipt_missing",
+    "surface_material_contact::fresh_validation_receipt_missing",
+    "midas_exact_refresh::fresh_validation_receipt_missing",
+    "productization_heavy_profile::fresh_validation_receipt_missing",
+    "external_benchmark_refresh::fresh_validation_receipt_missing",
+    "design_optimization_refresh::fresh_validation_receipt_missing"
+  ],
+  "claim_boundary": "This status separates release publication materialization from fresh full-validation. A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion still requires fresh validation receipts for each named lane, with reused_evidence=false. Missing receipts must stay blocked and must not be replaced by CPU-required hydrated reports.",
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "fresh_full_validation_ready": false,
+  "generated_at": "2026-06-19T15:33:30.747515+00:00",
+  "input_checksums": {
+    "docs/commercialization-gap-current-state.md": "sha256:5a32109f7992e6d50d1434d7d61856a9977b37e42b58aa762e8b24889e062863",
+    "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
+    "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
+    "implementation/phase1/release_evidence/full_validation": "missing",
+    "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": "sha256:b1351c13b406990f0be83b713007844149f69c5e87d0b5d3feb8e2859305dabb",
+    "implementation/phase1/release_evidence/midas": "dir-sha256:9ee33eda2ea67bbb72b808fec074985bc1e2f27983433bf6c03a8bef48c795c9",
+    "implementation/phase1/release_evidence/performance": "dir-sha256:68a930bdf2daf37676dd28bd41458748268aaf3ed051b4affa9eb86c0e281230",
+    "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json": "sha256:1bf89382ea13a179c00b67ca756a95ad4009456f43627bebe97b4c6750c6266c",
+    "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json": "sha256:52bee2fd112f2c2635f25a90c7691645e5d6da242174bb4252c5c590bf32082b",
+    "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:dc2564dbfc3218d698feb7b0d63ba41ab276bdeeaacd88ad6dab549a5724e43b",
+    "implementation/phase1/release_evidence/surface": "dir-sha256:f2647a3d610cd1c1f7ae1d467d550332bb06416d56cfc1c9fe31d583d15df788"
+  },
+  "lane_contract_pass": true,
+  "reason_code": "ERR_FRESH_FULL_VALIDATION_LANES_INCOMPLETE",
+  "receipt_root": "implementation/phase1/release_evidence/full_validation",
+  "reuse_policy": "status_rebuilt_from_docs_materialized_evidence_and_optional_fresh_validation_receipts",
+  "reused_evidence": true,
+  "rows": [
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "torch-capable benchmark validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "commercial_benchmark_torch",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "torch_capable_benchmark_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "GPU-capable validation task"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "gpu_hip_solver",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "gpu_capable_rocm_hip_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "performance evidence"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "performance_profile",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/performance"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "performance_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "full surface/contact/material refresh",
+        "heavy validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "surface_material_contact",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/surface"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "heavy_surface_material_contact_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "MIDAS validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "midas_exact_refresh",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/midas"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "midas_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "NDTHA long-profile",
+        "heavy validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "productization_heavy_profile",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "heavy_productization_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "external kickoff refresh",
+        "benchmark/productization validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "external_benchmark_refresh",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/productization/hardest_external_10case_kickoff_gate_report.json"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "benchmark_productization_validation",
+      "validation_lane_boundary_present": true
+    },
+    {
+      "blockers": [
+        "fresh_validation_receipt_missing"
+      ],
+      "doc_terms": [
+        "solver-loop smoke refresh",
+        "design optimization validation lane"
+      ],
+      "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_contract_pass": false,
+      "fresh_validation_receipt_fresh": false,
+      "fresh_validation_receipt_metadata_present": false,
+      "fresh_validation_receipt_present": false,
+      "fresh_validation_receipt_reused_evidence": null,
+      "lane_id": "design_optimization_refresh",
+      "materialized_paths": [
+        "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_smoke_report.json"
+      ],
+      "materialized_publication_evidence_present": true,
+      "pass": false,
+      "runner": "design_optimization_validation",
+      "validation_lane_boundary_present": true
+    }
+  ],
+  "schema_version": "fresh-full-validation-lane-status.v1",
+  "source_commit_sha": "a495b253edacf8b9d4d8a917a61db675b70ca209",
+  "status": "blocked",
+  "summary": {
+    "blocker_count": 8,
+    "fresh_validation_receipt_pass_count": 0,
+    "fresh_validation_receipt_present_count": 0,
+    "lane_contract_pass_count": 8,
+    "lane_count": 8,
+    "lane_pass_count": 0
+  }
+}

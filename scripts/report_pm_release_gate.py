@@ -105,6 +105,9 @@ DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
+DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+)
 DEFAULT_VALIDATION_MANUAL = Path("docs/release-validation-manual.md")
 DEFAULT_LIMITATION_MANUAL = Path("docs/release-limitation-manual.md")
 VALIDATION_MANUAL_REQUIRED_TERMS = (
@@ -2393,6 +2396,7 @@ def build_report(
     template_evidence_safety: Path = DEFAULT_TEMPLATE_EVIDENCE_SAFETY,
     pm_release_reproduction_command_audit: Path = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     release_evidence_freshness: Path = DEFAULT_RELEASE_EVIDENCE_FRESHNESS,
+    fresh_full_validation_lane_status: Path = DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
     cpu_only_product_mode: bool = False,
@@ -2520,6 +2524,13 @@ def build_report(
     release_area_ready = all(bool(row["ok"]) for row in release_area_matrix)
     full_release_gate_ready = bool(limited_ready and release_area_ready)
     ga_readiness = _load_json(ga_enterprise_readiness)
+    fresh_full_validation = _load_json(fresh_full_validation_lane_status)
+    fresh_full_validation_summary = _summary(fresh_full_validation)
+    fresh_full_validation_blockers = (
+        [str(row) for row in _as_list(fresh_full_validation.get("blockers"))]
+        if fresh_full_validation
+        else ["fresh_full_validation_lane_status_missing"]
+    )
     ga_readiness_blockers = [str(row) for row in _as_list(ga_readiness.get("blockers"))]
     if not ga_readiness:
         ga_readiness_blockers = [
@@ -2528,8 +2539,17 @@ def build_report(
             "customer_audit_failure_bundle_sla_missing",
             *(["ga_validation_case_count_lt_300"] if measured_cases < ga_validation_cases else []),
         ]
-    ga_blockers = [*ga_readiness_blockers, *release_area_blockers]
-    ga_enterprise_ready = bool(full_release_gate_ready and _reason_pass(ga_readiness) and not ga_readiness_blockers)
+    ga_blockers = [
+        *ga_readiness_blockers,
+        *(f"fresh_full_validation::{item}" for item in fresh_full_validation_blockers),
+        *release_area_blockers,
+    ]
+    ga_enterprise_ready = bool(
+        full_release_gate_ready
+        and _reason_pass(ga_readiness)
+        and not ga_readiness_blockers
+        and _reason_pass(fresh_full_validation)
+    )
     ai_orchestration = _load_json(ai_orchestration_preflight)
     ai_orchestration_summary = _summary(ai_orchestration)
     commercial_gap_status = _load_json(commercial_gap_ledger_status)
@@ -2655,6 +2675,19 @@ def build_report(
             "ga_enterprise_readiness_summary_line": str(ga_readiness.get("summary_line", "")),
             "ga_enterprise_signoff_intake_packet": str(ga_enterprise_signoff_intake),
             "ga_enterprise_signoff_intake_summary_line": str(ga_signoff_intake.get("summary_line", "")),
+            "fresh_full_validation_lane_status": str(fresh_full_validation_lane_status),
+            "fresh_full_validation_ready": _reason_pass(fresh_full_validation),
+            "fresh_full_validation_summary": {
+                "lane_count": fresh_full_validation_summary.get("lane_count"),
+                "lane_contract_pass_count": fresh_full_validation_summary.get("lane_contract_pass_count"),
+                "fresh_validation_receipt_pass_count": fresh_full_validation_summary.get(
+                    "fresh_validation_receipt_pass_count"
+                ),
+                "fresh_validation_receipt_present_count": fresh_full_validation_summary.get(
+                    "fresh_validation_receipt_present_count"
+                ),
+                "blocker_count": fresh_full_validation_summary.get("blocker_count"),
+            },
             "ga_validation_case_threshold": ga_validation_cases,
             "ga_validation_case_threshold_met": measured_cases >= ga_validation_cases,
             "ga_enterprise_blockers": ga_blockers,
@@ -2769,6 +2802,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     )
     parser.add_argument("--release-evidence-freshness", type=Path, default=DEFAULT_RELEASE_EVIDENCE_FRESHNESS)
+    parser.add_argument(
+        "--fresh-full-validation-lane-status",
+        type=Path,
+        default=DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
+    )
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument("--cpu-only-product-mode", action="store_true")
@@ -2842,6 +2880,7 @@ def main(argv: list[str] | None = None) -> int:
         template_evidence_safety=args.template_evidence_safety,
         pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
         release_evidence_freshness=args.release_evidence_freshness,
+        fresh_full_validation_lane_status=args.fresh_full_validation_lane_status,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
         cpu_only_product_mode=args.cpu_only_product_mode,

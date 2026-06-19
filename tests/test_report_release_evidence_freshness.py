@@ -108,7 +108,8 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "p0_closure_status" in labels
     assert "p1_readiness_status" in labels
     assert "p1_benchmark_breadth_status" in labels
-    assert len(artifacts) == 5
+    assert "fresh_full_validation_lane_status" in labels
+    assert len(artifacts) == 6
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)

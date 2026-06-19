@@ -46,7 +46,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T15:24:02.358419+00:00",
+  "generated_at": "2026-06-19T15:36:09.082341+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -423,11 +423,11 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "artifact_count": 5,
+        "artifact_count": 6,
         "blocker_count": 0,
-        "current_source_commit_sha": "679eb1c393f32d21688f941406bec8696ec632fc",
+        "current_source_commit_sha": "a495b253edacf8b9d4d8a917a61db675b70ca209",
         "max_age_days": 30.0,
-        "pass_count": 5
+        "pass_count": 6
       },
       "title": "Evidence Freshness"
     },
@@ -823,11 +823,28 @@
     }
   ],
   "release_tiers": {
+    "fresh_full_validation_lane_status": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json",
+    "fresh_full_validation_ready": false,
+    "fresh_full_validation_summary": {
+      "blocker_count": 8,
+      "fresh_validation_receipt_pass_count": 0,
+      "fresh_validation_receipt_present_count": 0,
+      "lane_contract_pass_count": 8,
+      "lane_count": 8
+    },
     "ga_enterprise": false,
     "ga_enterprise_blockers": [
       "independent_vv_missing",
       "family_validation_manual_signoff_missing",
       "customer_audit_failure_bundle_sla_missing",
+      "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+      "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+      "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+      "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+      "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed",
