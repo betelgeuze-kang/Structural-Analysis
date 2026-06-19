@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
@@ -18,10 +20,38 @@ DEFAULT_TERMINAL_EQUILIBRIUM = (
 )
 DEFAULT_GATE_SUMMARY = PRODUCTIZATION / "mgt_g1_followup362_365_attached_equilibrium_newton_gate_summary.json"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _input_checksums(paths: list[Path]) -> dict[str, str]:
+    checksums: dict[str, str] = {}
+    for path in paths:
+        checksums[str(path)] = _sha256(path) if path.exists() else "missing"
+    return checksums
 
 
 def _load_json_dict(path: Path) -> dict[str, Any]:
@@ -135,7 +165,15 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": _input_checksums(
+            [direct_replay_path, terminal_equilibrium_path, gate_summary_path]
+        ),
+        "reused_evidence": True,
+        "reuse_policy": "status_rebuilt_from_existing_g1_terminal_gate_receipts",
         "status": "ready" if ready else "partial",
+        "contract_pass": ready,
         "direct_residual_terminal_gate_ready": ready,
         "direct_residual_newton_gate_ready": ready,
         "reason_code": "PASS" if ready else "ERR_G1_DIRECT_RESIDUAL_TERMINAL_GATE_BLOCKED",

@@ -20,7 +20,7 @@
   "claim_boundary": "This Level 3 residual status audits the attached NDTHA residual gate rows only. PASS means the tracked core NDTHA residual slice satisfies hard, recommended, fallback, solver_raw, normalized residual, silent-failure, and corrected-state recompute targets. It does not by itself close independent V&V, benchmark breadth, family validation, GA signoff, or external customer shadow evidence.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-19T17:01:41.888504+00:00",
+  "generated_at": "2026-06-19T17:13:24.002365+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:dc2564dbfc3218d698feb7b0d63ba41ab276bdeeaacd88ad6dab549a5724e43b"
   },
@@ -29,7 +29,7 @@
   "reuse_policy": "status_rebuilt_from_existing_ndtha_residual_gate_report",
   "reused_evidence": true,
   "schema_version": "residual-level3-status.v1",
-  "source_commit_sha": "62bd1bbc45294aacb58269c36372c485570a92c3",
+  "source_commit_sha": "1c75673e0c95cf68cec1edbe68a6484062b98922",
   "status": "ready",
   "summary": {
     "case_count": 3,

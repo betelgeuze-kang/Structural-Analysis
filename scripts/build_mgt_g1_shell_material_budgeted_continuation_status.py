@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
@@ -41,10 +43,38 @@ DEFAULT_NON_PROMOTING_LAUNCH_RECEIPTS = (
     "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/"
     "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
 )
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _input_checksums(paths: list[Path]) -> dict[str, str]:
+    checksums: dict[str, str] = {}
+    for path in paths:
+        checksums[str(path)] = _sha256(path) if path.exists() else "missing"
+    return checksums
 
 
 def _load_json_dict(path: Path) -> dict[str, Any]:
@@ -327,6 +357,19 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": _input_checksums(
+            [
+                *[productization_dir / receipt for receipt in chain_receipts],
+                *[productization_dir / receipt for receipt in counter_receipts],
+                *[productization_dir / receipt for receipt in launch_receipts],
+            ]
+        ),
+        "reused_evidence": True,
+        "reuse_policy": (
+            "status_rebuilt_from_existing_g1_shell_material_direct_residual_receipts"
+        ),
         "status": "partial",
         "contract_pass": direct_residual_gate_passed,
         "target_model": "midas_generator_33.optimized.roundtrip.json",

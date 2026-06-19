@@ -5,12 +5,15 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "pm-release-gate-report.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
@@ -139,6 +142,57 @@ def _load_json(path: Path) -> dict[str, Any]:
     except Exception:
         return {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as fh:
+        for chunk in iter(lambda: fh.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _input_checksums(paths: list[Path]) -> dict[str, str]:
+    checksums: dict[str, str] = {}
+    for path in paths:
+        checksums[str(path)] = _sha256(path) if path.exists() else "missing"
+    return checksums
+
+
+def _artifact_paths_from_rows(rows: list[dict[str, Any]]) -> list[Path]:
+    paths: list[Path] = []
+    for row in rows:
+        artifacts = row.get("artifacts")
+        if not isinstance(artifacts, dict):
+            continue
+        for value in artifacts.values():
+            if value:
+                paths.append(Path(str(value)))
+    return paths
+
+
+def _unique_paths(paths: list[Path]) -> list[Path]:
+    seen: set[str] = set()
+    unique: list[Path] = []
+    for path in paths:
+        key = str(path)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(path)
+    return unique
 
 
 def _summary(payload: dict[str, Any]) -> dict[str, Any]:
@@ -2637,9 +2691,28 @@ def build_report(
     else:
         recommended_scope = "Release blocked until core PM gates have green evidence."
 
+    report_input_paths = _unique_paths(
+        [
+            *_artifact_paths_from_rows(milestones),
+            *_artifact_paths_from_rows(release_area_matrix),
+            ga_enterprise_readiness,
+            fresh_full_validation_lane_status,
+            ai_orchestration_preflight,
+            commercial_gap_ledger_status,
+            gap_closure_status,
+            ga_enterprise_signoff_intake,
+            paid_pilot_scope_guard,
+        ]
+    )
+
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": _input_checksums(report_input_paths),
+        "reused_evidence": True,
+        "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
         "contract_pass": limited_ready,
         "milestone_gate_pass": limited_ready,
         "release_area_gate_ready": release_area_ready,

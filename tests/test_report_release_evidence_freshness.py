@@ -51,6 +51,12 @@ def test_release_evidence_freshness_passes_complete_metadata(tmp_path: Path) -> 
     row = payload["rows"][0]
 
     assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"] == "abcdef1234567890"
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"] == "status_rebuilt_from_release_evidence_artifact_metadata"
+    assert payload["input_checksums"]["evidence.json"].startswith("sha256:")
+    assert payload["input_checksums"]["producer.py"].startswith("sha256:")
     assert row["ok"] is True
     assert row["source_commit_match"] is True
     assert row["engine_version_present"] is True
@@ -120,7 +126,9 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "p1_benchmark_breadth_status" in labels
     assert "fresh_full_validation_lane_status" in labels
     assert "residual_level3_status" in labels
-    assert len(artifacts) == 7
+    assert "g1_direct_residual_terminal_gate_report" in labels
+    assert "g1_shell_material_budgeted_continuation_status" in labels
+    assert len(artifacts) == 9
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)
@@ -196,6 +204,71 @@ def test_release_evidence_freshness_audits_residual_level3_status(tmp_path: Path
     assert row["dependency_mtime_pass"] is True
     assert str(target_artifact).endswith("residual_level3_status.json")
     assert str(target_producer).endswith("check_residual_level3_status.py")
+
+
+def test_release_evidence_freshness_audits_g1_residual_receipts(tmp_path: Path) -> None:
+    freshness._git_head = lambda _repo_root: "abcdef1234567890"
+    now_iso = datetime.now(timezone.utc).isoformat()
+    artifacts: list[tuple[str, Path, Path]] = []
+    for label, artifact_relpath, producer_relpath, source_relpath in (
+        (
+            "g1_direct_residual_terminal_gate_report",
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_direct_residual_terminal_gate_report.json",
+            "scripts/build_mgt_g1_direct_residual_terminal_gate_report.py",
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_direct_residual_attached_policy_followup365_gate_replay_probe.json",
+        ),
+        (
+            "g1_shell_material_budgeted_continuation_status",
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+            "scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py",
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+        ),
+    ):
+        artifact_path = tmp_path / artifact_relpath
+        producer_path = tmp_path / producer_relpath
+        source_path = tmp_path / source_relpath
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        producer_path.parent.mkdir(parents=True, exist_ok=True)
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+        producer_path.write_text("print('producer')\n", encoding="utf-8")
+        source_path.write_text('{"receipt": true}\n', encoding="utf-8")
+        _write_json(
+            artifact_path,
+            {
+                "generated_at": now_iso,
+                "source_commit_sha": "abcdef123456",
+                "engine_version": "structural-optimization-workbench@1.0.0",
+                "input_checksums": {source_relpath: "sha256:abc"},
+                "reused_evidence": True,
+                "reuse_policy": "status_rebuilt_from_existing_g1_receipts",
+                "contract_pass": label == "g1_direct_residual_terminal_gate_report",
+            },
+        )
+        artifact_mtime = artifact_path.stat().st_mtime
+        os.utime(producer_path, (artifact_mtime - 5, artifact_mtime - 5))
+        os.utime(source_path, (artifact_mtime - 5, artifact_mtime - 5))
+        artifacts.append((label, artifact_path, producer_path))
+
+    payload = freshness.build_report(
+        repo_root=tmp_path,
+        artifacts=tuple(artifacts),
+        max_age_days=30,
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["summary"]["artifact_count"] == 2
+    rows_by_label = {row["label"]: row for row in payload["rows"]}
+    assert rows_by_label["g1_direct_residual_terminal_gate_report"]["ok"] is True
+    assert rows_by_label["g1_shell_material_budgeted_continuation_status"]["ok"] is True
+    assert rows_by_label["g1_shell_material_budgeted_continuation_status"][
+        "input_dependency_paths"
+    ][0].endswith(
+        "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json"
+    )
 
 
 def test_release_evidence_freshness_audits_real_project_and_customer_shadow_artifacts(

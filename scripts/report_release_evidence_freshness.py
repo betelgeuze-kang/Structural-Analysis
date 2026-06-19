@@ -63,6 +63,22 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("implementation/phase1/check_residual_level3_status.py"),
     ),
+    (
+        "g1_direct_residual_terminal_gate_report",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_direct_residual_terminal_gate_report.json"
+        ),
+        Path("scripts/build_mgt_g1_direct_residual_terminal_gate_report.py"),
+    ),
+    (
+        "g1_shell_material_budgeted_continuation_status",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
+        ),
+        Path("scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py"),
+    ),
 )
 
 
@@ -90,6 +106,24 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: fh.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _path_key(repo_root: Path, path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(repo_root))
+    except ValueError:
+        return str(path)
+
+
+def _report_input_checksums(repo_root: Path, rows: list[dict[str, Any]]) -> dict[str, str]:
+    checksums: dict[str, str] = {}
+    for row in rows:
+        for key in ("artifact_path", "producer_path"):
+            path = Path(str(row.get(key, "")))
+            checksums[_path_key(repo_root, path)] = (
+                f"sha256:{_sha256(path)}" if path.exists() else "missing"
+            )
+    return checksums
 
 
 def _parse_iso(value: Any) -> datetime | None:
@@ -426,6 +460,11 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": current_commit,
+        "engine_version": "structural-optimization-workbench@1.0.0",
+        "input_checksums": _report_input_checksums(repo_root, rows),
+        "reused_evidence": True,
+        "reuse_policy": "status_rebuilt_from_release_evidence_artifact_metadata",
         "contract_pass": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_RELEASE_EVIDENCE_FRESHNESS",
         "current_source_commit_sha": current_commit,

@@ -85,6 +85,14 @@ def test_terminal_gate_report_cross_checks_direct_residual_and_increment_receipt
     )
 
     assert payload["status"] == "ready"
+    assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"] == "status_rebuilt_from_existing_g1_terminal_gate_receipts"
+    assert payload["input_checksums"][str(fixtures["direct"])].startswith("sha256:")
+    assert payload["input_checksums"][str(fixtures["terminal"])].startswith("sha256:")
+    assert payload["input_checksums"][str(fixtures["summary"])].startswith("sha256:")
     assert payload["direct_residual_terminal_gate_ready"] is True
     assert payload["direct_residual_newton_gate_ready"] is True
     assert payload["checks"]["strict_residual_gate_passed"] is True
@@ -102,6 +110,7 @@ def test_terminal_gate_report_blocks_when_terminal_increment_is_not_verified(tmp
     )
 
     assert payload["status"] == "partial"
+    assert payload["contract_pass"] is False
     assert payload["direct_residual_terminal_gate_ready"] is False
     assert "terminal_increment_gate_passed" in payload["blockers"]
 

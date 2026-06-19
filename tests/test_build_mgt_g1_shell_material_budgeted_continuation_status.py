@@ -151,6 +151,17 @@ def test_shell_material_status_counts_latest_completed_frontier_and_launch_only_
 
     assert payload["status"] == "partial"
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert (
+        payload["reuse_policy"]
+        == "status_rebuilt_from_existing_g1_shell_material_direct_residual_receipts"
+    )
+    assert payload["input_checksums"][str(productization / "base.json")].startswith("sha256:")
+    assert payload["input_checksums"][str(productization / "seed.json")].startswith("sha256:")
+    assert payload["input_checksums"][str(productization / "followup389.json")].startswith("sha256:")
+    assert payload["input_checksums"][str(productization / "followup390_child.json")].startswith("sha256:")
     assert payload["direct_residual_gate_passed"] is False
     assert payload["latest_frontier_receipt"] == "followup389.json"
     assert payload["latest_frontier_compact_checkpoint"].endswith("followup389.npz")
