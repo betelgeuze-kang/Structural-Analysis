@@ -121,6 +121,7 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     labels = {label for label, _artifact, _producer in artifacts}
     assert "real_project_corpus_measured_status" in labels
     assert "customer_shadow_evidence_status" in labels
+    assert "customer_shadow_evidence_intake_packet" in labels
     assert "p0_closure_status" in labels
     assert "p1_readiness_status" in labels
     assert "p1_benchmark_breadth_status" in labels
@@ -128,7 +129,7 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "residual_level3_status" in labels
     assert "g1_direct_residual_terminal_gate_report" in labels
     assert "g1_shell_material_budgeted_continuation_status" in labels
-    assert len(artifacts) == 9
+    assert len(artifacts) == 10
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)

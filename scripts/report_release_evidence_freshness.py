@@ -50,6 +50,14 @@ DEFAULT_ARTIFACTS = (
         Path("implementation/phase1/check_customer_shadow_evidence_status.py"),
     ),
     (
+        "customer_shadow_evidence_intake_packet",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "customer_shadow_evidence_intake_packet.json"
+        ),
+        Path("scripts/build_customer_shadow_evidence_intake_packet.py"),
+    ),
+    (
         "fresh_full_validation_lane_status",
         Path(
             "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
