@@ -13,9 +13,9 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-06-19T17:32:52.696077+00:00",
+  "generated_at": "2026-06-19T17:38:49.555450+00:00",
   "input_checksums": {
-    "docs/commercialization-gap-current-state.md": "sha256:8d8926ac2f9c424a8a4fdd4efd06d662f1842a6039d1e8c7f01e753836860bab",
+    "docs/commercialization-gap-current-state.md": "sha256:7e08e2ab19821761120b28cda4df9bebfa6be6353dea9c4774cb71d715c74b64",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/release_evidence/full_validation": "missing",
@@ -215,7 +215,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "ca2b76e4aa34abec4246477b412ae1b5202cd580",
+  "source_commit_sha": "046f32fc5b5d0a71d28986289a9fc3ef311f2f56",
   "status": "blocked",
   "summary": {
     "blocker_count": 8,
