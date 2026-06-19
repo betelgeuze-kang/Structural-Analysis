@@ -1314,6 +1314,14 @@ def _build_release_area_matrix(
                 "nightly_github_actions_pass_streak_count": _manifest_lane_int(
                     ci_streak_manifest, "nightly", "github_actions_consecutive_pass_count"
                 ),
+                "pr_streak_source": _manifest_lane_text(ci_streak_manifest, "pr", "streak_source"),
+                "nightly_streak_source": _manifest_lane_text(ci_streak_manifest, "nightly", "streak_source"),
+                "pr_github_actions_job_start_blocker_count": _manifest_lane_int(
+                    ci_streak_manifest, "pr", "github_actions_job_start_blocker_count"
+                ),
+                "nightly_github_actions_job_start_blocker_count": _manifest_lane_int(
+                    ci_streak_manifest, "nightly", "github_actions_job_start_blocker_count"
+                ),
                 "ci_streak_source_evidence_generated_at": str(
                     ci_streak_source_evidence.get("generated_at", "")
                 ),

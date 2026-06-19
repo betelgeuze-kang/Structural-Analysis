@@ -187,3 +187,55 @@ def test_build_manifest_distinguishes_insufficient_pr_streak_from_missing_pr_sou
     assert pr["streak_source"] == "github_actions"
     assert "pr_pull_request_run_source_absent" not in pr["blockers"]
     assert pr["owner_action"].startswith("Collect 25 additional consecutive successful PR CI run")
+
+
+def test_build_manifest_propagates_github_actions_job_start_blocker(tmp_path: Path) -> None:
+    pr_reports = [_write(tmp_path / "pr1.json", {"reason_code": "PASS"})]
+    nightly_reports = [_write(tmp_path / "nightly1.json", {"reason_code": "PASS"})]
+    github_evidence = _write(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "lanes": {
+                "pr": {
+                    "consecutive_pass_count": 0,
+                    "workflow_registered": True,
+                    "queried_run_count": 5,
+                    "run_count": 0,
+                    "pull_request_run_source_present": False,
+                    "job_start_blockers": [
+                        {
+                            "run_id": 100,
+                            "job_id": 200,
+                            "reason_code": "github_actions_billing_or_spending_limit",
+                            "message": "The job was not started because recent account payments have failed.",
+                        }
+                    ],
+                    "blockers": [
+                        "github_actions_job_start_blocked",
+                        "pr_pull_request_run_source_absent",
+                        "pr_github_actions_30_consecutive_pass_evidence_missing",
+                    ],
+                },
+                "nightly": {"consecutive_pass_count": 30, "workflow_registered": True},
+            },
+        },
+    )
+
+    payload = build_ci_consecutive_pass_manifest.build_manifest(
+        threshold=30,
+        pr_reports=pr_reports,
+        nightly_reports=nightly_reports,
+        github_actions_evidence_path=github_evidence,
+    )
+
+    pr = payload["lanes"]["pr"]
+
+    assert payload["contract_pass"] is False
+    assert pr["streak_source"] == "github_actions_job_start_blocked"
+    assert pr["github_actions_job_start_blocker_count"] == 1
+    assert pr["github_actions_job_start_blockers"][0]["reason_code"] == "github_actions_billing_or_spending_limit"
+    assert "pr_github_actions_job_start_blocked" in pr["blockers"]
+    assert "pr:pr_github_actions_job_start_blocked" in payload["blockers"]
+    assert payload["summary"]["github_actions_pr_job_start_blocker_count"] == 1
+    assert pr["owner_action"].startswith("Resolve the pr GitHub Actions job-start blocker")

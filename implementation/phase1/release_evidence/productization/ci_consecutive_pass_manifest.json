@@ -1,9 +1,8 @@
 {
   "blockers": [
+    "pr:pr_github_actions_job_start_blocked",
     "pr:pr_pull_request_run_source_absent",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
-    "nightly:nightly_github_actions_query_failed",
-    "nightly:nightly_github_actions_workflow_not_registered",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing"
   ],
   "contract_pass": false,
@@ -15,12 +14,10 @@
     "local_pr_report_count": 2,
     "release_streak_source_policy": "github_actions_required"
   },
-  "generated_at": "2026-06-17T15:25:07.536974+00:00",
+  "generated_at": "2026-06-19T15:59:31.450675+00:00",
   "lanes": {
     "nightly": {
       "blockers": [
-        "nightly_github_actions_query_failed",
-        "nightly_github_actions_workflow_not_registered",
         "nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -28,9 +25,11 @@
       "github_actions_consecutive_pass_count": 0,
       "github_actions_filtered_run_count": 0,
       "github_actions_ignored_event_names": [],
+      "github_actions_job_start_blocker_count": 0,
+      "github_actions_job_start_blockers": [],
       "github_actions_queried_run_count": 0,
-      "github_actions_query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
-      "github_actions_workflow_registered": false,
+      "github_actions_query_error": "",
+      "github_actions_workflow_registered": true,
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
       "local_pull_request_trigger_present": false,
@@ -43,7 +42,7 @@
         "workflow_dispatch"
       ],
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pass_count": 230,
       "pull_request_run_source_present": null,
       "release_consecutive_pass_count": 0,
@@ -1661,12 +1660,13 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "github_actions_workflow_not_registered",
+      "streak_source": "missing_tracked_ci_evidence",
       "threshold": 30,
       "threshold_pass": false
     },
     "pr": {
       "blockers": [
+        "pr_github_actions_job_start_blocked",
         "pr_pull_request_run_source_absent",
         "pr_ci_30_consecutive_pass_evidence_missing"
       ],
@@ -1676,6 +1676,59 @@
       "github_actions_filtered_run_count": 0,
       "github_actions_ignored_event_names": [
         "push"
+      ],
+      "github_actions_job_start_blocker_count": 5,
+      "github_actions_job_start_blockers": [
+        {
+          "event": "push",
+          "head_sha": "7b96ae9b9cdadc083c784f38582092b37ed09256",
+          "job_id": 82383384852,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835794621,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835794621"
+        },
+        {
+          "event": "push",
+          "head_sha": "7b96ae9b9cdadc083c784f38582092b37ed09256",
+          "job_id": 82383384851,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835794603,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835794603"
+        },
+        {
+          "event": "push",
+          "head_sha": "0d13ffec6f86e61ef7fab865e48d9224612863d0",
+          "job_id": 82382466194,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835512282,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835512282"
+        },
+        {
+          "event": "push",
+          "head_sha": "0d13ffec6f86e61ef7fab865e48d9224612863d0",
+          "job_id": 82382466109,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835512259,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835512259"
+        },
+        {
+          "event": "push",
+          "head_sha": "679eb1c393f32d21688f941406bec8696ec632fc",
+          "job_id": 82377045002,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27833871840,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27833871840"
+        }
       ],
       "github_actions_queried_run_count": 100,
       "github_actions_query_error": "",
@@ -1692,7 +1745,7 @@
         "push"
       ],
       "missing_consecutive_pass_count": 30,
-      "owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+      "owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pass_count": 2,
       "pull_request_run_source_present": false,
       "release_consecutive_pass_count": 0,
@@ -1714,7 +1767,7 @@
           "reason_code": "PASS"
         }
       ],
-      "streak_source": "no_pull_request_run_source",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -1723,17 +1776,19 @@
   "schema_version": "ci-consecutive-pass-manifest.v1",
   "summary": {
     "github_actions_nightly_consecutive_pass_count": 0,
+    "github_actions_nightly_job_start_blocker_count": 0,
     "github_actions_nightly_local_workflow_present": true,
-    "github_actions_nightly_workflow_registered": false,
+    "github_actions_nightly_workflow_registered": true,
     "github_actions_pr_consecutive_pass_count": 0,
+    "github_actions_pr_job_start_blocker_count": 5,
     "github_actions_pr_workflow_registered": true,
     "nightly_consecutive_pass_count": 0,
     "nightly_missing_consecutive_pass_count": 30,
-    "nightly_owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+    "nightly_owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "nightly_threshold_pass": false,
     "pr_consecutive_pass_count": 0,
     "pr_missing_consecutive_pass_count": 30,
-    "pr_owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+    "pr_owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "pr_pull_request_run_source_present": false,
     "pr_threshold_pass": false
   },

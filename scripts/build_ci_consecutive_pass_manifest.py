@@ -77,6 +77,7 @@ def _lane_owner_action(
     *,
     github_workflow_registered: bool | None = None,
     github_query_error: str = "",
+    github_job_start_blocked: bool = False,
     local_workflow_present: bool = False,
     github_queried_run_count: int = 0,
     github_filtered_run_count: int = 0,
@@ -84,6 +85,12 @@ def _lane_owner_action(
     if consecutive >= threshold:
         return "No release action required; consecutive pass threshold is satisfied."
     missing = max(0, threshold - consecutive)
+    if github_job_start_blocked:
+        return (
+            f"Resolve the {label} GitHub Actions job-start blocker shown in "
+            "github_actions_ci_streak_evidence.json, rerun the workflow, and then collect "
+            f"{missing} additional consecutive successful CI run(s) before release signoff."
+        )
     if github_workflow_registered is False:
         local_hint = " Local workflow file is present, so merge/register it in GitHub Actions first." if local_workflow_present else ""
         return (
@@ -182,9 +189,15 @@ def _lane(
         else None
     )
     github_blockers = [str(item) for item in github_lane.get("blockers", []) if isinstance(item, str)]
+    github_job_start_blockers = [
+        row for row in github_lane.get("job_start_blockers", []) if isinstance(row, dict)
+    ]
+    github_job_start_blocked = bool(github_job_start_blockers)
     release_consecutive = github_consecutive if require_github_actions else max(local_consecutive, github_consecutive)
     threshold_pass = release_consecutive >= threshold
     blockers = []
+    if "github_actions_job_start_blocked" in github_blockers or github_job_start_blocked:
+        blockers.append(f"{label}_github_actions_job_start_blocked")
     if "github_actions_query_failed" in github_blockers:
         blockers.append(f"{label}_github_actions_query_failed")
     if "github_actions_workflow_not_registered" in github_blockers:
@@ -198,6 +211,8 @@ def _lane(
         streak_source = "github_actions_workflow_not_registered"
     elif github_query_error:
         streak_source = "github_actions_query_failed"
+    elif github_job_start_blocked:
+        streak_source = "github_actions_job_start_blocked"
     elif label == "pr" and pull_request_run_source_present is False:
         streak_source = "no_pull_request_run_source"
     if not require_github_actions and github_consecutive < local_consecutive:
@@ -218,6 +233,8 @@ def _lane(
         "github_actions_ignored_event_names": [
             str(item) for item in github_lane.get("ignored_event_names", []) if isinstance(item, str)
         ],
+        "github_actions_job_start_blocker_count": len(github_job_start_blockers),
+        "github_actions_job_start_blockers": github_job_start_blockers,
         "local_workflow_present": local_workflow_present,
         "local_workflow_trigger_events": local_workflow_trigger_events,
         "local_required_trigger_present": local_required_trigger_present,
@@ -236,6 +253,7 @@ def _lane(
             release_consecutive,
             github_workflow_registered=github_workflow_registered,
             github_query_error=github_query_error,
+            github_job_start_blocked=github_job_start_blocked,
             local_workflow_present=local_workflow_present,
             github_queried_run_count=_as_int(github_lane.get("queried_run_count"), 0),
             github_filtered_run_count=_as_int(github_lane.get("run_count"), 0),
@@ -302,6 +320,12 @@ def build_manifest(
             ],
             "github_actions_pr_workflow_registered": lanes["pr"]["github_actions_workflow_registered"],
             "github_actions_nightly_workflow_registered": lanes["nightly"]["github_actions_workflow_registered"],
+            "github_actions_pr_job_start_blocker_count": lanes["pr"][
+                "github_actions_job_start_blocker_count"
+            ],
+            "github_actions_nightly_job_start_blocker_count": lanes["nightly"][
+                "github_actions_job_start_blocker_count"
+            ],
             "github_actions_nightly_local_workflow_present": lanes["nightly"]["local_workflow_present"],
             "pr_pull_request_run_source_present": lanes["pr"]["pull_request_run_source_present"],
             "pr_threshold_pass": lanes["pr"]["threshold_pass"],

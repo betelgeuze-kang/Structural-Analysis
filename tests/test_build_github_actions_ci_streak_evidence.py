@@ -142,6 +142,64 @@ def test_build_evidence_flags_missing_pull_request_run_source_when_only_push_eve
     assert "pr_github_actions_3_consecutive_pass_evidence_missing" in pr["blockers"]
 
 
+def test_build_evidence_surfaces_github_actions_job_start_blockers() -> None:
+    base = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    payload = build_github_actions_ci_streak_evidence.build_evidence(
+        repo="owner/repo",
+        threshold=3,
+        limit=10,
+        pr_workflow="CI",
+        nightly_workflow="Nightly Full Quality",
+        pr_rows=[_run(1, "push", "failure", base)],
+        nightly_rows=[],
+        pr_job_start_blockers=[
+            {
+                "run_id": 1,
+                "job_id": 10,
+                "event": "push",
+                "head_sha": "sha-1",
+                "reason_code": "github_actions_billing_or_spending_limit",
+                "message": (
+                    "The job was not started because recent account payments have failed or "
+                    "your spending limit needs to be increased."
+                ),
+            }
+        ],
+        registered_workflows=[
+            {"id": 1, "name": "CI", "path": ".github/workflows/ci.yml", "state": "active"},
+            {
+                "id": 2,
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "state": "active",
+            },
+        ],
+        local_workflows=[
+            {
+                "name": "CI",
+                "path": ".github/workflows/ci.yml",
+                "exists": True,
+                "trigger_events": ["pull_request", "push"],
+            },
+            {
+                "name": "Nightly Full Quality",
+                "path": ".github/workflows/nightly-full-quality.yml",
+                "exists": True,
+                "trigger_events": ["schedule", "workflow_dispatch"],
+            },
+        ],
+    )
+
+    pr = payload["lanes"]["pr"]
+
+    assert payload["contract_pass"] is False
+    assert pr["job_start_blocker_count"] == 1
+    assert pr["job_start_blockers"][0]["reason_code"] == "github_actions_billing_or_spending_limit"
+    assert "github_actions_job_start_blocked" in pr["blockers"]
+    assert payload["summary"]["pr_job_start_blocker_count"] == 1
+    assert "do not create CI streak credit" in payload["claim_boundary"]
+
+
 def test_build_evidence_records_missing_registered_workflow_and_sanitized_query_error() -> None:
     payload = build_github_actions_ci_streak_evidence.build_evidence(
         repo="owner/repo",

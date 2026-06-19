@@ -148,6 +148,28 @@ def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) ->
     assert payload["next_actions"] == []
 
 
+def test_build_register_prioritizes_ci_job_start_blocker_state(tmp_path: Path) -> None:
+    report = _pm_report(tmp_path / "pm_release_gate_report.json")
+    payload = json.loads(report.read_text(encoding="utf-8"))
+    basic_ci = payload["release_area_matrix"][0]
+    basic_ci["summary"]["pr_streak_source"] = "github_actions_job_start_blocked"
+    basic_ci["summary"]["pr_github_actions_job_start_blocker_count"] = 2
+    basic_ci["summary"]["pr_owner_action"] = (
+        "Resolve the pr GitHub Actions job-start blocker shown in "
+        "github_actions_ci_streak_evidence.json."
+    )
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    register = build_register_module.build_register(pm_report=report)
+    row = register["rows"][0]
+
+    assert row["blocker_id"] == "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    assert row["evidence_status"]["state"] == "github_actions_job_start_blocked"
+    assert row["evidence_status"]["streak_source"] == "github_actions_job_start_blocked"
+    assert row["evidence_status"]["github_actions_job_start_blocker_count"] == 2
+    assert row["owner_action"].startswith("Resolve the pr GitHub Actions job-start blocker")
+
+
 def test_build_register_guides_frontend_dependency_audit_blocker(tmp_path: Path) -> None:
     report = _write_json(
         tmp_path / "pm_release_gate_report.json",

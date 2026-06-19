@@ -3,25 +3,23 @@
   "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
   "contract_pass": false,
   "current_blockers": [
+    "pr:pr_github_actions_job_start_blocked",
     "pr:pr_pull_request_run_source_absent",
     "pr:pr_ci_30_consecutive_pass_evidence_missing",
     "pr:github_actions_lane_threshold_not_pass",
     "pr:github_actions_lane_streak_below_threshold",
     "pr:github_actions_filtered_run_count_below_threshold",
-    "nightly:nightly_github_actions_query_failed",
-    "nightly:nightly_github_actions_workflow_not_registered",
     "nightly:nightly_ci_30_consecutive_pass_evidence_missing",
     "nightly:github_actions_lane_threshold_not_pass",
     "nightly:github_actions_lane_streak_below_threshold",
-    "nightly:github_actions_workflow_not_registered",
-    "nightly:github_actions_query_error",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-17T15:25:13.694595+00:00",
+  "generated_at": "2026-06-19T15:59:31.484173+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
       "blockers": [
+        "pr_github_actions_job_start_blocked",
         "pr_pull_request_run_source_absent",
         "pr_ci_30_consecutive_pass_evidence_missing",
         "github_actions_lane_threshold_not_pass",
@@ -55,7 +53,7 @@
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff.",
+      "owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
       "pull_request_run_source_present": false,
       "source_evidence_blockers": [
         "github_actions_lane_threshold_not_pass",
@@ -64,19 +62,15 @@
         "github_actions_filtered_run_count_below_threshold"
       ],
       "source_evidence_release_credit_pass": false,
-      "streak_source": "no_pull_request_run_source",
+      "streak_source": "github_actions_job_start_blocked",
       "threshold": 30,
       "threshold_pass": false
     },
     {
       "blockers": [
-        "nightly_github_actions_query_failed",
-        "nightly_github_actions_workflow_not_registered",
         "nightly_ci_30_consecutive_pass_evidence_missing",
         "github_actions_lane_threshold_not_pass",
         "github_actions_lane_streak_below_threshold",
-        "github_actions_workflow_not_registered",
-        "github_actions_query_error",
         "github_actions_filtered_run_count_below_threshold"
       ],
       "claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
@@ -85,11 +79,11 @@
       "github_actions_filtered_run_count": 0,
       "github_actions_ignored_event_names": [],
       "github_actions_queried_run_count": 0,
-      "github_actions_query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+      "github_actions_query_error": "",
       "github_actions_threshold_pass": false,
-      "github_actions_workflow_active": false,
-      "github_actions_workflow_registered": false,
-      "github_actions_workflow_state": "",
+      "github_actions_workflow_active": true,
+      "github_actions_workflow_registered": true,
+      "github_actions_workflow_state": "active",
       "lane": "nightly",
       "local_consecutive_pass_count": 230,
       "local_pull_request_trigger_present": false,
@@ -104,17 +98,15 @@
       "manifest_consecutive_pass_count": 0,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first.",
+      "owner_action": "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pull_request_run_source_present": null,
       "source_evidence_blockers": [
         "github_actions_lane_threshold_not_pass",
         "github_actions_lane_streak_below_threshold",
-        "github_actions_workflow_not_registered",
-        "github_actions_query_error",
         "github_actions_filtered_run_count_below_threshold"
       ],
       "source_evidence_release_credit_pass": false,
-      "streak_source": "github_actions_workflow_not_registered",
+      "streak_source": "missing_tracked_ci_evidence",
       "threshold": 30,
       "threshold_pass": false
     }
@@ -122,7 +114,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 19.49,
+    "age_hours": 0.0,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -130,20 +122,16 @@
       "pr:github_actions_filtered_run_count_below_threshold",
       "nightly:github_actions_lane_threshold_not_pass",
       "nightly:github_actions_lane_streak_below_threshold",
-      "nightly:github_actions_workflow_not_registered",
-      "nightly:github_actions_query_error",
       "nightly:github_actions_filtered_run_count_below_threshold"
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-06-16T19:55:48.528111+00:00",
+    "generated_at": "2026-06-19T15:59:30.279153+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
           "github_actions_lane_threshold_not_pass",
           "github_actions_lane_streak_below_threshold",
-          "github_actions_workflow_not_registered",
-          "github_actions_query_error",
           "github_actions_filtered_run_count_below_threshold"
         ],
         "lane": "nightly",
@@ -157,7 +145,7 @@
           "workflow_dispatch"
         ],
         "pull_request_run_source_present": null,
-        "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
+        "query_error": "",
         "source_consecutive_pass_count": 0,
         "source_lane_present": true,
         "source_release_credit_pass": false,
@@ -165,9 +153,9 @@
         "source_threshold": 30,
         "source_threshold_pass": false,
         "threshold": 30,
-        "workflow_active": false,
-        "workflow_registered": false,
-        "workflow_state": ""
+        "workflow_active": true,
+        "workflow_registered": true,
+        "workflow_state": "active"
       },
       "pr": {
         "blockers": [
@@ -214,22 +202,22 @@
   "summary": {
     "lane_count": 2,
     "lane_pass_count": 0,
-    "nightly_github_actions_workflow_registered": false,
-    "nightly_github_actions_workflow_state": "",
+    "nightly_github_actions_workflow_registered": true,
+    "nightly_github_actions_workflow_state": "active",
     "nightly_local_required_trigger_present": true,
     "nightly_local_workflow_present": true,
     "nightly_missing_consecutive_pass_count": 30,
     "nightly_source_threshold_pass": false,
-    "open_blocker_count": 13,
+    "open_blocker_count": 10,
     "pr_github_actions_workflow_registered": true,
     "pr_github_actions_workflow_state": "active",
     "pr_local_required_trigger_present": true,
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": false,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 19.49,
+    "source_evidence_age_hours": 0.0,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-06-16T19:55:48.528111+00:00",
+    "source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

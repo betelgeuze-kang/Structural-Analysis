@@ -347,15 +347,21 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
         github_count = int(summary.get(f"{lane}_github_actions_pass_streak_count", 0) or 0)
         missing = int(summary.get(f"{lane}_missing_consecutive_pass_count", max(0, required - release_count)) or 0)
         pull_request_source_present = summary.get("pr_pull_request_run_source_present")
+        job_start_blocker_count = int(summary.get(f"{lane}_github_actions_job_start_blocker_count", 0) or 0)
+        streak_source = str(summary.get(f"{lane}_streak_source", "") or "")
         state = "ready_for_pm_regeneration" if release_count >= required else "missing_tracked_ci_streak_evidence"
         if lane == "pr" and pull_request_source_present is False and release_count < required:
             state = "no_pull_request_run_source"
+        if job_start_blocker_count > 0 or streak_source == "github_actions_job_start_blocked":
+            state = "github_actions_job_start_blocked"
         return {
             "state": state,
             "lane": lane,
+            "streak_source": streak_source,
             "required_consecutive_pass_count": required,
             "release_consecutive_pass_count": release_count,
             "github_actions_consecutive_pass_count": github_count,
+            "github_actions_job_start_blocker_count": job_start_blocker_count,
             "local_consecutive_pass_count": local_count,
             "missing_consecutive_pass_count": missing,
             "pull_request_run_source_present": pull_request_source_present,

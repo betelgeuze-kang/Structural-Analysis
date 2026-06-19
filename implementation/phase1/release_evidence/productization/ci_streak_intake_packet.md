@@ -7,8 +7,8 @@
 
 | Lane | Streak | Missing | Source | Workflow Registered | Pass | Owner Action |
 |---|---:|---:|---|---|---|---|
-| `pr` | `0/30` | `30` | `no_pull_request_run_source` | `True` | `False` | No pull_request-triggered CI runs have been observed for the CI workflow (100 run(s) queried, all from non-PR events). Open a pull request for this branch or add `pull_request` to the CI workflow triggers, then collect 30 additional consecutive successful PR CI run(s) before release signoff. |
-| `nightly` | `0/30` | `30` | `github_actions_workflow_not_registered` | `False` | `False` | Register or enable the nightly GitHub Actions workflow, then collect 30 additional consecutive successful nightly CI run(s) before release signoff. Local workflow file is present, so merge/register it in GitHub Actions first. |
+| `pr` | `0/30` | `30` | `github_actions_job_start_blocked` | `True` | `False` | Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
+| `nightly` | `0/30` | `30` | `missing_tracked_ci_evidence` | `True` | `False` | Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff. |
 
 ## Validation Commands
 
@@ -22,4 +22,4 @@
 
 | Path | Schema | Fresh | Age Hours | Pass |
 |---|---|---:|---:|---:|
-| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `19.49` | `False` |
+| `implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json` | `github-actions-ci-streak-evidence.v1` | `True` | `0.0` | `False` |

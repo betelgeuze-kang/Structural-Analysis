@@ -1,7 +1,7 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T19:55:48.528111+00:00",
+  "generated_at": "2026-06-19T15:59:30.279153+00:00",
   "lanes": {
     "nightly": {
       "allowed_events": [
@@ -9,13 +9,13 @@
         "workflow_dispatch"
       ],
       "blockers": [
-        "github_actions_query_failed",
-        "github_actions_workflow_not_registered",
         "nightly_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
       "ignored_event_count": 0,
       "ignored_event_names": [],
+      "job_start_blocker_count": 0,
+      "job_start_blockers": [],
       "lane": "nightly",
       "local_pull_request_trigger_present": false,
       "local_required_trigger_present": true,
@@ -41,14 +41,19 @@
       "pass_count": 0,
       "pull_request_run_source_present": true,
       "queried_run_count": 0,
-      "query_error": "failed to get runs: could not find any workflows named Nightly Full Quality",
-      "registered_workflow": {},
+      "query_error": "",
+      "registered_workflow": {
+        "id": 298913064,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml",
+        "state": "active"
+      },
       "rows": [],
       "run_count": 0,
       "threshold": 30,
       "threshold_pass": false,
       "workflow": "Nightly Full Quality",
-      "workflow_registered": false
+      "workflow_registered": true
     },
     "pr": {
       "allowed_events": [
@@ -56,12 +61,66 @@
       ],
       "blockers": [
         "pr_pull_request_run_source_absent",
-        "pr_github_actions_30_consecutive_pass_evidence_missing"
+        "pr_github_actions_30_consecutive_pass_evidence_missing",
+        "github_actions_job_start_blocked"
       ],
       "consecutive_pass_count": 0,
       "ignored_event_count": 100,
       "ignored_event_names": [
         "push"
+      ],
+      "job_start_blocker_count": 5,
+      "job_start_blockers": [
+        {
+          "event": "push",
+          "head_sha": "7b96ae9b9cdadc083c784f38582092b37ed09256",
+          "job_id": 82383384852,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835794621,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835794621"
+        },
+        {
+          "event": "push",
+          "head_sha": "7b96ae9b9cdadc083c784f38582092b37ed09256",
+          "job_id": 82383384851,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835794603,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835794603"
+        },
+        {
+          "event": "push",
+          "head_sha": "0d13ffec6f86e61ef7fab865e48d9224612863d0",
+          "job_id": 82382466194,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835512282,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835512282"
+        },
+        {
+          "event": "push",
+          "head_sha": "0d13ffec6f86e61ef7fab865e48d9224612863d0",
+          "job_id": 82382466109,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27835512259,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27835512259"
+        },
+        {
+          "event": "push",
+          "head_sha": "679eb1c393f32d21688f941406bec8696ec632fc",
+          "job_id": 82377045002,
+          "message": "The job was not started because recent account payments have failed or your spending limit needs to be increased. Please check the 'Billing & plans' section in your settings",
+          "path": ".github",
+          "reason_code": "github_actions_billing_or_spending_limit",
+          "run_id": 27833871840,
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27833871840"
+        }
       ],
       "lane": "pr",
       "local_pull_request_trigger_present": true,
@@ -109,11 +168,13 @@
   "schema_version": "github-actions-ci-streak-evidence.v1",
   "summary": {
     "nightly_consecutive_pass_count": 0,
+    "nightly_job_start_blocker_count": 0,
     "nightly_local_required_trigger_present": true,
     "nightly_local_workflow_present": true,
     "nightly_threshold_pass": false,
-    "nightly_workflow_registered": false,
+    "nightly_workflow_registered": true,
     "pr_consecutive_pass_count": 0,
+    "pr_job_start_blocker_count": 5,
     "pr_local_required_trigger_present": true,
     "pr_pull_request_run_source_present": false,
     "pr_threshold_pass": false,
@@ -122,7 +183,6 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 3,
-    "local_workflow_metadata_generated_at": "2026-06-17T15:24:59.717198+00:00",
     "local_workflows": [
       {
         "exists": true,
@@ -161,12 +221,18 @@
       }
     ],
     "query_error": "",
-    "registered_workflow_count": 3,
+    "registered_workflow_count": 4,
     "registered_workflows": [
       {
         "id": 266642626,
         "name": "CI",
         "path": ".github/workflows/ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 298913064,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml",
         "state": "active"
       },
       {

@@ -19,6 +19,7 @@ DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
 DEFAULT_LOCAL_WORKFLOW_DIR = Path(".github/workflows")
 GH_FIELDS = "databaseId,event,conclusion,status,headSha,headBranch,createdAt,updatedAt,url,name"
 GH_DEBUG_LINE = re.compile(r"^\* Request(?:\s|$)")
+MAX_JOB_START_BLOCKER_RUNS = 5
 KNOWN_GITHUB_TRIGGER_EVENTS = frozenset(
     (
         "branch_protection_rule",
@@ -144,6 +145,112 @@ def _run_gh_workflows(*, repo: str) -> tuple[list[dict[str, Any]], str]:
         for row in rows
         if isinstance(row, dict)
     ], ""
+
+
+def _run_gh_api_json(*, repo: str, path: str) -> tuple[dict[str, Any], str]:
+    completed = subprocess.run(
+        ["gh", "api", f"repos/{repo}/{path}"],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=_gh_env(),
+    )
+    if completed.returncode != 0:
+        return {}, _clean_gh_message(completed.stderr or completed.stdout or "gh api failed")
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        return {}, f"gh api returned invalid JSON: {exc}"
+    return payload if isinstance(payload, dict) else {}, ""
+
+
+def _run_gh_api_list(*, repo: str, path: str) -> tuple[list[dict[str, Any]], str]:
+    completed = subprocess.run(
+        ["gh", "api", f"repos/{repo}/{path}"],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=_gh_env(),
+    )
+    if completed.returncode != 0:
+        return [], _clean_gh_message(completed.stderr or completed.stdout or "gh api failed")
+    try:
+        payload = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        return [], f"gh api returned invalid JSON: {exc}"
+    return [row for row in payload if isinstance(row, dict)] if isinstance(payload, list) else [], ""
+
+
+def _job_start_blocker_code(message: str) -> str:
+    text = message.lower()
+    if "payments have failed" in text or "spending limit" in text or "billing" in text:
+        return "github_actions_billing_or_spending_limit"
+    return "github_actions_job_start_blocked"
+
+
+def _job_start_blockers_for_rows(*, repo: str, rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    blockers: list[dict[str, Any]] = []
+    recent_rows = sorted(rows, key=lambda item: str(item.get("createdAt", "")), reverse=True)
+    for row in recent_rows[:MAX_JOB_START_BLOCKER_RUNS]:
+        run_id = row.get("databaseId")
+        if not run_id:
+            continue
+        jobs_payload, jobs_error = _run_gh_api_json(repo=repo, path=f"actions/runs/{run_id}/jobs")
+        if jobs_error:
+            blockers.append(
+                {
+                    "run_id": run_id,
+                    "event": row.get("event"),
+                    "head_sha": row.get("headSha"),
+                    "url": row.get("url"),
+                    "reason_code": "github_actions_job_lookup_failed",
+                    "message": jobs_error,
+                }
+            )
+            continue
+        jobs = jobs_payload.get("jobs") if isinstance(jobs_payload, dict) else []
+        for job in jobs if isinstance(jobs, list) else []:
+            if not isinstance(job, dict):
+                continue
+            steps = job.get("steps")
+            if isinstance(steps, list) and steps:
+                continue
+            if str(job.get("conclusion", "")).lower() != "failure":
+                continue
+            annotations, annotation_error = _run_gh_api_list(
+                repo=repo,
+                path=f"check-runs/{job.get('id')}/annotations",
+            )
+            if annotation_error:
+                blockers.append(
+                    {
+                        "run_id": run_id,
+                        "job_id": job.get("id"),
+                        "event": row.get("event"),
+                        "head_sha": row.get("headSha"),
+                        "url": row.get("url"),
+                        "reason_code": "github_actions_job_annotation_lookup_failed",
+                        "message": annotation_error,
+                    }
+                )
+                continue
+            for annotation in annotations:
+                message = str(annotation.get("message", "") or "")
+                if not message:
+                    continue
+                blockers.append(
+                    {
+                        "run_id": run_id,
+                        "job_id": job.get("id"),
+                        "event": row.get("event"),
+                        "head_sha": row.get("headSha"),
+                        "url": row.get("url"),
+                        "reason_code": _job_start_blocker_code(message),
+                        "message": message,
+                        "path": annotation.get("path"),
+                    }
+                )
+    return blockers
 
 
 def _strip_yaml_key(value: str) -> str:
@@ -291,6 +398,7 @@ def _lane_from_rows(
     threshold: int,
     registered_workflows: list[dict[str, Any]],
     local_workflows: list[dict[str, Any]],
+    job_start_blockers: list[dict[str, Any]] | None = None,
     error: str = "",
 ) -> dict[str, Any]:
     error = _clean_gh_message(error) if error else ""
@@ -330,6 +438,7 @@ def _lane_from_rows(
             break
         consecutive += 1
     blockers = []
+    job_start_blockers = job_start_blockers or []
     if error:
         blockers.append("github_actions_query_failed")
     if registered_workflows and not registered_workflow:
@@ -338,6 +447,8 @@ def _lane_from_rows(
         blockers.append("pr_pull_request_run_source_absent")
     if consecutive < threshold:
         blockers.append(f"{lane}_github_actions_{threshold}_consecutive_pass_evidence_missing")
+    if job_start_blockers:
+        blockers.append("github_actions_job_start_blocked")
     return {
         "lane": lane,
         "workflow": workflow,
@@ -357,6 +468,8 @@ def _lane_from_rows(
         "pass_count": sum(1 for row in relevant if row["pass"]),
         "consecutive_pass_count": consecutive,
         "threshold_pass": consecutive >= threshold,
+        "job_start_blocker_count": len(job_start_blockers),
+        "job_start_blockers": job_start_blockers,
         "blockers": blockers,
         "rows": relevant,
     }
@@ -377,7 +490,11 @@ def build_evidence(
     workflow_discovery_error: str = "",
     local_workflows: list[dict[str, Any]] | None = None,
     local_workflow_dir: Path = DEFAULT_LOCAL_WORKFLOW_DIR,
+    pr_job_start_blockers: list[dict[str, Any]] | None = None,
+    nightly_job_start_blockers: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    pr_rows_from_api = pr_rows is None
+    nightly_rows_from_api = nightly_rows is None
     if registered_workflows is None:
         registered_workflows, workflow_discovery_error = _run_gh_workflows(repo=repo)
     if local_workflows is None:
@@ -386,6 +503,12 @@ def build_evidence(
         pr_rows, pr_error = _run_gh_list(repo=repo, workflow=pr_workflow, limit=limit)
     if nightly_rows is None:
         nightly_rows, nightly_error = _run_gh_list(repo=repo, workflow=nightly_workflow, limit=limit)
+    if pr_job_start_blockers is None:
+        pr_job_start_blockers = _job_start_blockers_for_rows(repo=repo, rows=pr_rows) if pr_rows_from_api else []
+    if nightly_job_start_blockers is None:
+        nightly_job_start_blockers = (
+            _job_start_blockers_for_rows(repo=repo, rows=nightly_rows) if nightly_rows_from_api else []
+        )
     lanes = {
         "pr": _lane_from_rows(
             lane="pr",
@@ -395,6 +518,7 @@ def build_evidence(
             threshold=threshold,
             registered_workflows=registered_workflows,
             local_workflows=local_workflows,
+            job_start_blockers=pr_job_start_blockers,
             error=pr_error,
         ),
         "nightly": _lane_from_rows(
@@ -405,6 +529,7 @@ def build_evidence(
             threshold=threshold,
             registered_workflows=registered_workflows,
             local_workflows=local_workflows,
+            job_start_blockers=nightly_job_start_blockers,
             error=nightly_error,
         ),
     }
@@ -435,10 +560,14 @@ def build_evidence(
             "nightly_local_workflow_present": lanes["nightly"]["local_workflow_present"],
             "pr_local_required_trigger_present": lanes["pr"]["local_required_trigger_present"],
             "nightly_local_required_trigger_present": lanes["nightly"]["local_required_trigger_present"],
+            "pr_job_start_blocker_count": lanes["pr"]["job_start_blocker_count"],
+            "nightly_job_start_blocker_count": lanes["nightly"]["job_start_blocker_count"],
         },
         "claim_boundary": (
             "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts "
-            "pull_request events and nightly lane only counts schedule/workflow_dispatch events."
+            "pull_request events and nightly lane only counts schedule/workflow_dispatch events. "
+            "Job-start annotations are read-only GitHub check-run metadata and may identify external "
+            "account/billing blockers, but they do not create CI streak credit."
         ),
     }
 
