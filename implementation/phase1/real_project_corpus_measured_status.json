@@ -15,7 +15,7 @@
   "claim_boundary": "This status checks measured corpus evidence and release-readiness metadata. PASS means the initial measured-corpus row/value metadata is present; it does not turn local or public source artifacts into redistributable customer data, close external V&V, or treat measured-run KPI bridge rows as third-party reference truth.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-19T17:51:10.472995+00:00",
+  "generated_at": "2026-06-19T19:39:19.310875+00:00",
   "input_checksums": {
     "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:1684f9871aea7651232875e3d5abbe8ef97308814846af36ef41a362c15905b6",
     "implementation/phase1/real_project_row_provenance_report.json": "sha256:2b5db540ce49ac602a890af1fb0adc3b0ee432544f85f21240d60864d68f35f2"
@@ -26,7 +26,7 @@
   "reused_evidence": true,
   "row_provenance_report": "implementation/phase1/real_project_row_provenance_report.json",
   "schema_version": "real-project-corpus-measured-status.v1",
-  "source_commit_sha": "88dd0d553569af03ea2539a177fd2d045393e181",
+  "source_commit_sha": "aba5b0751c8d7503e3724d7282a0b8ef96875f59",
   "summary": {
     "duplicate_measured_stable_pointers": [],
     "measured_artifact_row_count": 10,
