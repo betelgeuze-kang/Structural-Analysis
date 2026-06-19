@@ -34,6 +34,15 @@ def _row(case_id: str, *, recommended: bool = True, normalized: bool = True) -> 
     row = {
         "case_id": case_id,
         "collapsed": False,
+        "residual_metric_source": "solver_raw",
+        "residual_metric_fallback_used": False,
+        "corrected_state_recompute": {
+            "present": True,
+            "pass": True,
+            "source": "solver_corrected_state_recompute",
+            "residual_top_displacement_m": 1e-6,
+            "residual_drift_ratio_pct": 1e-5,
+        },
         "checks": {
             "finite_pass": True,
             "hard_pass": True,
@@ -82,6 +91,8 @@ def test_residual_level3_status_passes_complete_gate(tmp_path: Path) -> None:
     assert payload["summary"]["recommended_pass_rate"] == 1.0
     assert payload["checks"]["fallback_rate_limited_pass"] is True
     assert payload["checks"]["solver_raw_ratio_pass"] is True
+    assert payload["summary"]["row_derived_fallback_rate"] == 0.0
+    assert payload["summary"]["row_derived_solver_raw_ratio"] == 1.0
     assert payload["checks"]["corrected_state_recompute_all_rows_pass"] is True
     assert payload["blockers"] == []
 
@@ -89,6 +100,7 @@ def test_residual_level3_status_passes_complete_gate(tmp_path: Path) -> None:
 def test_residual_level3_status_blocks_weak_release_evidence(tmp_path: Path) -> None:
     rows = [_row("C1"), _row("C2", recommended=False, normalized=False), _row("C3")]
     rows[2]["checks"]["corrected_state_recompute_pass"] = False
+    rows[2]["corrected_state_recompute"]["pass"] = False
     rows[2]["collapsed"] = True
     gate = _write_json(
         tmp_path / "ndtha.json",
@@ -104,6 +116,49 @@ def test_residual_level3_status_blocks_weak_release_evidence(tmp_path: Path) -> 
     assert "solver_raw_ratio_below_95pct" in payload["blockers"]
     assert "silent_failure_or_collapse_false_pass_present" in payload["blockers"]
     assert "normalized_residual_missing" in payload["blockers"]
+    assert "corrected_state_recompute_missing_or_failed" in payload["blockers"]
+
+
+def test_residual_level3_status_recomputes_row_source_and_fallback_rates(
+    tmp_path: Path,
+) -> None:
+    rows = [_row("C1"), _row("C2"), _row("C3")]
+    rows[1]["residual_metric_source"] = "fallback_corrected"
+    rows[1]["residual_metric_fallback_used"] = True
+    gate = _write_json(
+        tmp_path / "ndtha.json",
+        _gate(rows, fallback_rate=0.0, solver_raw_ratio=1.0),
+    )
+
+    payload = residual_status.build_status(ndtha_residual_gate_path=gate)
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["row_derived_fallback_rate"] == 1 / 3
+    assert payload["summary"]["row_derived_solver_raw_ratio"] == 2 / 3
+    assert payload["summary"]["fallback_case_ids"] == ["C2"]
+    assert payload["summary"]["solver_raw_case_ids"] == ["C1", "C3"]
+    assert "fallback_rate_gt_5pct" in payload["blockers"]
+    assert "solver_raw_ratio_below_95pct" in payload["blockers"]
+
+
+def test_residual_level3_status_requires_corrected_recompute_payload(
+    tmp_path: Path,
+) -> None:
+    rows = [_row("C1"), _row("C2"), _row("C3")]
+    rows[0]["corrected_state_recompute"] = {
+        "present": True,
+        "pass": True,
+        "source": "",
+    }
+    gate = _write_json(
+        tmp_path / "ndtha.json",
+        _gate(rows),
+    )
+
+    payload = residual_status.build_status(ndtha_residual_gate_path=gate)
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["corrected_state_recompute_missing_case_ids"] == ["C1"]
     assert "corrected_state_recompute_missing_or_failed" in payload["blockers"]
 
 

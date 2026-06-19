@@ -76,6 +76,19 @@ def _normalized_row_pass(row: dict[str, Any]) -> bool:
     return bool(NORMALIZED_RESIDUAL_KEYS <= set(normalized))
 
 
+def _corrected_state_recompute_row_pass(row: dict[str, Any]) -> bool:
+    corrected = _as_dict(row.get("corrected_state_recompute"))
+    return bool(
+        _row_check(row, "corrected_state_recompute_present")
+        and _row_check(row, "corrected_state_recompute_pass")
+        and corrected.get("present") is True
+        and corrected.get("pass") is True
+        and str(corrected.get("source", "") or "").strip()
+        and math.isfinite(_as_float(corrected.get("residual_top_displacement_m")))
+        and math.isfinite(_as_float(corrected.get("residual_drift_ratio_pct")))
+    )
+
+
 def build_status(
     *,
     ndtha_residual_gate_path: Path = DEFAULT_NDTHA_RESIDUAL_GATE,
@@ -103,15 +116,21 @@ def build_status(
         for row in rows
         if not _normalized_row_pass(row)
     ]
+    fallback_case_ids = [
+        str(row.get("case_id", "") or "")
+        for row in rows
+        if bool(row.get("residual_metric_fallback_used", False))
+    ]
+    solver_raw_case_ids = [
+        str(row.get("case_id", "") or "")
+        for row in rows
+        if str(row.get("residual_metric_source", "") or "") == "solver_raw"
+        and not bool(row.get("residual_metric_fallback_used", False))
+    ]
     corrected_missing_case_ids = [
         str(row.get("case_id", "") or "")
         for row in rows
-        if not _row_check(row, "corrected_state_recompute_present")
-    ]
-    corrected_failed_case_ids = [
-        str(row.get("case_id", "") or "")
-        for row in rows
-        if not _row_check(row, "corrected_state_recompute_pass")
+        if not _corrected_state_recompute_row_pass(row)
     ]
     collapse_false_pass_case_ids = [
         str(row.get("case_id", "") or "")
@@ -123,6 +142,8 @@ def build_status(
     solver_raw_ratio = _as_float(summary.get("solver_raw_ratio"), 0.0)
     hard_pass_rate = float(hard_pass_count / denominator)
     recommended_pass_rate = float(recommended_pass_count / denominator)
+    row_fallback_rate = float(len(fallback_case_ids) / denominator)
+    row_solver_raw_ratio = float(len(solver_raw_case_ids) / denominator)
     solver_control_nonconverged_step_total = _as_int(summary.get("solver_control_nonconverged_step_total"), 0)
     corrected_required = bool(summary.get("corrected_state_recompute_required", False))
 
@@ -137,9 +158,12 @@ def build_status(
             or summary.get("strict_recommended_residual_hard_fail")
         ),
         "strict_recommended_residual_pass": bool(checks.get("strict_recommended_residual_pass", False)),
-        "fallback_rate_limited_pass": fallback_rate <= max_fallback_rate,
-        "fallback_rate_ga_pass": fallback_rate <= ga_max_fallback_rate,
-        "solver_raw_ratio_pass": solver_raw_ratio >= min_solver_raw_ratio,
+        "fallback_rate_limited_pass": fallback_rate <= max_fallback_rate
+        and row_fallback_rate <= max_fallback_rate,
+        "fallback_rate_ga_pass": fallback_rate <= ga_max_fallback_rate
+        and row_fallback_rate <= ga_max_fallback_rate,
+        "solver_raw_ratio_pass": solver_raw_ratio >= min_solver_raw_ratio
+        and row_solver_raw_ratio >= min_solver_raw_ratio,
         "non_finite_residual_zero_pass": not non_finite_case_ids,
         "silent_failure_zero_pass": bool(
             checks.get("ndtha_no_collapse_pass", False)
@@ -150,7 +174,7 @@ def build_status(
         "normalized_residual_all_rows_pass": not normalized_missing_case_ids and case_count > 0,
         "corrected_state_recompute_required": corrected_required,
         "corrected_state_recompute_all_rows_pass": bool(
-            corrected_required and not corrected_missing_case_ids and not corrected_failed_case_ids and case_count > 0
+            corrected_required and not corrected_missing_case_ids and case_count > 0
         ),
     }
     blockers = [
@@ -198,7 +222,13 @@ def build_status(
             "recommended_pass_count": recommended_pass_count,
             "recommended_pass_rate": recommended_pass_rate,
             "fallback_rate": fallback_rate,
+            "row_derived_fallback_rate": row_fallback_rate,
+            "fallback_case_count": len(fallback_case_ids),
+            "fallback_case_ids": fallback_case_ids,
             "solver_raw_ratio": solver_raw_ratio,
+            "row_derived_solver_raw_ratio": row_solver_raw_ratio,
+            "solver_raw_case_count": len(solver_raw_case_ids),
+            "solver_raw_case_ids": solver_raw_case_ids,
             "non_finite_residual_case_count": len(non_finite_case_ids),
             "non_finite_residual_case_ids": non_finite_case_ids,
             "collapse_false_pass_case_count": len(collapse_false_pass_case_ids),
@@ -208,8 +238,6 @@ def build_status(
             "normalized_residual_missing_case_ids": normalized_missing_case_ids,
             "corrected_state_recompute_missing_case_count": len(corrected_missing_case_ids),
             "corrected_state_recompute_missing_case_ids": corrected_missing_case_ids,
-            "corrected_state_recompute_failed_case_count": len(corrected_failed_case_ids),
-            "corrected_state_recompute_failed_case_ids": corrected_failed_case_ids,
         },
         "checks": gate_checks,
         "blockers": blockers,
