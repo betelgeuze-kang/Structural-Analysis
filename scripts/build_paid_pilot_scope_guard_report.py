@@ -21,6 +21,10 @@ SCHEMA_VERSION = "paid-pilot-scope-guard-report.v1"
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_SCOPE_SOURCE = Path("docs/pm-release-gate-milestones.md")
+DEFAULT_CLAIM_BOUNDARY_DOCS = (
+    Path("README.md"),
+    Path("docs/commercialization-gap-current-state.md"),
+)
 DEFAULT_PM_RELEASE_GATE_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_SUPPORT_BUNDLE = Path("implementation/phase1/support_bundle_manifest.json")
 DEFAULT_PM_BLOCKER_REGISTER = Path(
@@ -265,6 +269,7 @@ def _support_bundle_section_rows(support_bundle: Path) -> list[dict[str, Any]]:
 def build_report(
     *,
     scope_source: Path = DEFAULT_SCOPE_SOURCE,
+    claim_boundary_docs: tuple[Path, ...] = DEFAULT_CLAIM_BOUNDARY_DOCS,
     pm_release_gate_report: Path = DEFAULT_PM_RELEASE_GATE_REPORT,
     support_bundle: Path = DEFAULT_SUPPORT_BUNDLE,
     pm_blocker_register: Path = DEFAULT_PM_BLOCKER_REGISTER,
@@ -276,6 +281,7 @@ def build_report(
     ga_enterprise_readiness_report: Path = DEFAULT_GA_ENTERPRISE_READINESS_REPORT,
 ) -> dict[str, Any]:
     scope_text = _read_text(scope_source)
+    claim_boundary_text = "\n".join([scope_text, *(_read_text(path) for path in claim_boundary_docs)])
     term_rows = [
         {
             "check": check,
@@ -303,7 +309,7 @@ def build_report(
     forbidden_claim_rows = [
         {
             "check": check,
-            "pass": not _contains_any(scope_text, phrases),
+            "pass": not _contains_any(claim_boundary_text, phrases),
             "prohibited_phrases": phrases,
         }
         for check, phrases in PROHIBITED_SCOPE_CLAIMS.items()
@@ -356,6 +362,7 @@ def build_report(
     contract_pass = not blockers
     metadata_input_paths = [
         scope_source,
+        *claim_boundary_docs,
         pm_release_gate_report,
         support_bundle,
         pm_blocker_register,
@@ -399,6 +406,7 @@ def build_report(
         },
         "summary": {
             "scope_source": str(scope_source),
+            "claim_boundary_docs": [str(path) for path in claim_boundary_docs],
             "required_scope_term_count": len(term_rows),
             "required_scope_term_pass_count": len(term_rows) - len(missing_terms),
             "commercial_v1_supported_scope_count": len(supported_scope_rows),
@@ -491,6 +499,13 @@ def _markdown(payload: dict[str, Any]) -> str:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scope-source", type=Path, default=DEFAULT_SCOPE_SOURCE)
+    parser.add_argument(
+        "--claim-boundary-doc",
+        action="append",
+        type=Path,
+        dest="claim_boundary_docs",
+        default=None,
+    )
     parser.add_argument("--pm-release-gate-report", type=Path, default=DEFAULT_PM_RELEASE_GATE_REPORT)
     parser.add_argument("--support-bundle", type=Path, default=DEFAULT_SUPPORT_BUNDLE)
     parser.add_argument("--pm-blocker-register", type=Path, default=DEFAULT_PM_BLOCKER_REGISTER)
@@ -515,6 +530,9 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_report(
         scope_source=args.scope_source,
+        claim_boundary_docs=tuple(args.claim_boundary_docs)
+        if args.claim_boundary_docs is not None
+        else DEFAULT_CLAIM_BOUNDARY_DOCS,
         pm_release_gate_report=args.pm_release_gate_report,
         support_bundle=args.support_bundle,
         pm_blocker_register=args.pm_blocker_register,

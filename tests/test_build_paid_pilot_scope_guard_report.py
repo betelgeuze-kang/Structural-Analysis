@@ -165,6 +165,28 @@ def test_paid_pilot_scope_guard_blocks_forbidden_scope_claims(tmp_path: Path) ->
     assert "forbidden_scope_claim_present:autonomous_approval" in payload["blockers"]
 
 
+def test_paid_pilot_scope_guard_scans_claim_boundary_docs_for_forbidden_claims(
+    tmp_path: Path,
+) -> None:
+    scope_source = _write_text(tmp_path / "scope.md", _scope_text())
+    readme = _write_text(tmp_path / "README.md", "full_commercial_replacement_ready=true\n")
+    current_state = _write_text(tmp_path / "current-state.md", "limited_commercial_ready=true\n")
+
+    payload = build_paid_pilot_scope_guard_report.build_report(
+        scope_source=scope_source,
+        claim_boundary_docs=(readme, current_state),
+        **_artifact_inputs(tmp_path),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["no_prohibited_scope_claims_present"] is False
+    assert payload["summary"]["claim_boundary_docs"] == [str(readme), str(current_state)]
+    assert payload["input_checksums"][str(readme)].startswith("sha256:")
+    assert payload["input_checksums"][str(current_state)].startswith("sha256:")
+    assert "forbidden_scope_claim_present:full_commercial_replacement_ready_true" in payload["blockers"]
+    assert "forbidden_scope_claim_present:limited_commercial_ready_true" in payload["blockers"]
+
+
 def test_paid_pilot_scope_guard_blocks_missing_reviewer_package_sections(tmp_path: Path) -> None:
     inputs = _artifact_inputs(tmp_path)
     _write_json(
