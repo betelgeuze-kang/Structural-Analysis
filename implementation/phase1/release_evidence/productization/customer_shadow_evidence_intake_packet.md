@@ -19,4 +19,5 @@
 
 - `validate_one_evidence_file`: `python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence <filled-customer-shadow-evidence.json> --json --fail-blocked`
 - `refresh_status`: `python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json`
+- `verify_status_no_write`: `python3 scripts/check_customer_shadow_evidence_status.py --no-write --json`
 - `refresh_evidence_console_scope`: `python3 scripts/build_evidence_console_scope_status.py --out implementation/phase1/release_evidence/productization/evidence_console_scope_status.json --out-md implementation/phase1/release_evidence/productization/evidence_console_scope_status.md --json`

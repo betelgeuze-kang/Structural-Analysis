@@ -137,13 +137,13 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-19T19:45:46.563455+00:00",
+  "generated_at": "2026-06-19T19:52:53.350757+00:00",
   "input_checksums": {
-    "README.md": "sha256:f2845e55435cef64ca2c78b0fb718de4cf5875ab9f910cada581655518c38bad",
-    "docs/commercialization-gap-current-state.md": "sha256:3a01e27368ffce598b9b42e48cdd531f967064963d0108df6db4c5298da7dca5",
+    "README.md": "sha256:d42b06366cb0156a3ffcfef54d87066f3a41be739a3a4045d2f5d1cc9954edd1",
+    "docs/commercialization-gap-current-state.md": "sha256:eb7e2e5845daa91855a18fd3ed649994b0e12b914af322a480545d716c9152e0",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:b56bffe0ed444585c230f3c3b89dd03977e43e4adca26ffd474897c607593792",
-    "implementation/phase1/real_project_corpus_measured_status.json": "sha256:08221ad3bd3401d4dd1f2e0ba3144533fd6fba45f24edd6e0e93a91626c1ec5e",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:ec64c466c66ba4e3503c2ee71fbdea9c81470143da6b21940a2beb9da9e676e7",
+    "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:79c71125879451e4277423a24c795122e2386aede58e0cb3e8abbde98bcbea07",
     "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:49ef2018f2326f259082f6e931728b797ce4818384ae19e3d2f879d88931c8db",
     "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:b707c9d1144e1d00f1497a2596c13b29ac2071871046ab871962a64937b254e3"
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "788bd99267a651ec8af7b915c744a87de8fac493",
+  "source_commit_sha": "380df40d2db01209d8e9315690969c8f1c54486a",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
