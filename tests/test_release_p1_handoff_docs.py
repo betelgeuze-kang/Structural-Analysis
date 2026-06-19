@@ -33,8 +33,8 @@ def test_readme_pins_the_current_commercial_scope_and_sidecar_closure() -> None:
     assert "Commercial" in text
     assert "engineer_in_loop_accelerated_coverage_ready=true" in text
     assert "full_commercial_replacement_ready=false" in text
-    assert "EB receipt stays `0/4`" in text
-    assert "RH closure evidence stays pending" in text
+    assert "EB receipts stay `0/4`" in text
+    assert "RH closure evidence is now signed/attached" in text
     assert "external_benchmark_submission_updates.json" in text
     assert "residual_holdout_closure_updates.json" in text
     assert "report_commercialization_level.py" in text
