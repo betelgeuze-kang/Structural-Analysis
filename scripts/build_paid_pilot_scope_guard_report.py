@@ -4,10 +4,17 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 SCHEMA_VERSION = "paid-pilot-scope-guard-report.v1"
@@ -201,10 +208,6 @@ REQUIRED_SUPPORT_BUNDLE_SECTIONS = (
 )
 
 
-def _now_utc_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
-
-
 def _read_text(path: Path) -> str:
     if not path.exists():
         return ""
@@ -351,9 +354,25 @@ def build_report(
         *(f"required_evidence_artifact_not_green:{label}" for label in failed_required_artifacts),
     ]
     contract_pass = not blockers
+    metadata_input_paths = [
+        scope_source,
+        pm_release_gate_report,
+        support_bundle,
+        pm_blocker_register,
+        pm_owner_evidence_request_packet,
+        pm_release_gate_reviewer_handoff,
+        pm_release_reproduction_command_audit,
+        ci_streak_intake_packet,
+        license_status_intake_packet,
+        ga_enterprise_readiness_report,
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": _now_utc_iso(),
+        **release_evidence_metadata(
+            input_paths=metadata_input_paths,
+            reused_evidence=True,
+            reuse_policy="scope_guard_rebuilt_from_scope_source_and_release_evidence_artifacts",
+        ),
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_PAID_PILOT_SCOPE_GUARD_BLOCKED",
         "summary_line": (

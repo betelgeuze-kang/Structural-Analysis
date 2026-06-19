@@ -77,8 +77,9 @@ def _artifact_inputs(tmp_path: Path) -> dict[str, Path]:
 
 
 def test_paid_pilot_scope_guard_passes_constrained_scope_and_artifacts(tmp_path: Path) -> None:
+    scope_source = _write_text(tmp_path / "scope.md", _scope_text())
     payload = build_paid_pilot_scope_guard_report.build_report(
-        scope_source=_write_text(tmp_path / "scope.md", _scope_text()),
+        scope_source=scope_source,
         **_artifact_inputs(tmp_path),
     )
 
@@ -94,6 +95,11 @@ def test_paid_pilot_scope_guard_passes_constrained_scope_and_artifacts(tmp_path:
     assert payload["summary"]["commercial_v1_separate_validation_exclusion_pass_count"] == 5
     assert payload["summary"]["support_bundle_required_section_present_count"] == 3
     assert payload["summary"]["prohibited_scope_claim_present_count"] == 0
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"]
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"] == "scope_guard_rebuilt_from_scope_source_and_release_evidence_artifacts"
+    assert payload["input_checksums"][str(scope_source)].startswith("sha256:")
     assert any(row["label"] == "pm_release_gate_reviewer_handoff" for row in payload["artifact_rows"])
     assert any(
         row["label"] == "pm_owner_evidence_request_packet" and row["present"]
