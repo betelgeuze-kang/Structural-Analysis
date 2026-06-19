@@ -8,7 +8,8 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
-    "github_sync::github_sync_preflight::worktree_not_clean",
+    "github_sync::github_sync_preflight::remote_mutation_approval_required",
+    "github_sync::github_sync_remote_sync_pending",
     "github_sync::github_sync_preflight_not_synced"
   ],
   "full_release_gate_ready": false,
@@ -49,7 +50,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T21:55:38.160620+00:00",
+  "generated_at": "2026-06-19T21:56:14.773291+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -378,7 +379,8 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
-    "github_sync::github_sync_preflight::worktree_not_clean",
+    "github_sync::github_sync_preflight::remote_mutation_approval_required",
+    "github_sync::github_sync_remote_sync_pending",
     "github_sync::github_sync_preflight_not_synced"
   ],
   "release_area_gate_ready": false,
@@ -901,7 +903,8 @@
         "github_development_sync_preflight": "<live-git-state>"
       },
       "blockers": [
-        "github_sync_preflight::worktree_not_clean",
+        "github_sync_preflight::remote_mutation_approval_required",
+        "github_sync_remote_sync_pending",
         "github_sync_preflight_not_synced"
       ],
       "checks": {
@@ -909,25 +912,25 @@
         "github_sync_main_fast_forward_possible": true,
         "github_sync_preflight_artifact_present": true,
         "github_sync_preflight_clean": false,
-        "github_sync_preflight_status": "blocked",
-        "github_sync_remote_mutation_approval_pending": false,
+        "github_sync_preflight_status": "approval_required",
+        "github_sync_remote_mutation_approval_pending": true,
         "github_sync_remote_safety_ok": true,
-        "github_sync_remote_sync_needed": false,
-        "github_sync_worktree_clean": false
+        "github_sync_remote_sync_needed": true,
+        "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 0,
-        "main_ahead_count": 0,
-        "pending_remote_update_count": 0,
-        "r4_risk": "No remote mutation remains.",
+        "feature_ahead_count": 1,
+        "main_ahead_count": 1,
+        "pending_remote_update_count": 2,
+        "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
-        "remote_mutation_approval_pending": false,
+        "remote_mutation_approval_pending": true,
         "remote_mutation_approved": false,
-        "remote_sync_needed": false,
-        "status": "blocked"
+        "remote_sync_needed": true,
+        "status": "approval_required"
       },
       "title": "GitHub Development Sync"
     }
@@ -971,7 +974,8 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
-      "github_sync::github_sync_preflight::worktree_not_clean",
+      "github_sync::github_sync_preflight::remote_mutation_approval_required",
+      "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
     ],
     "ga_enterprise_evidence_gate_pass": false,
@@ -994,6 +998,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "f1174fb41dc8c3e1d23062d775cf75ba5362096d",
+  "source_commit_sha": "38a76ee6dfeb633c2ce70c15c18d111d3792e749",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
