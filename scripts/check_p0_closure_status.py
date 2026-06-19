@@ -14,6 +14,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from check_release_p0_closure import build_status as build_release_status  # noqa: E402
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 DEFAULT_REPORTS = {
@@ -158,6 +159,66 @@ def _group_status(label: str, children: list[dict[str, Any]]) -> dict[str, Any]:
         "ok": ok,
         "children": children,
     }
+
+
+def _path_if_present(path: Path | None) -> list[Path]:
+    return [path] if path is not None else []
+
+
+def _gate_input_paths(gate: dict[str, Any]) -> list[Path]:
+    paths: list[Path] = []
+    for key in ("path", "primary_path", "manifest", "release_assets_json", "artifact_root", "post_publish_roundtrip_json"):
+        value = str(gate.get(key, "") or "").strip()
+        if value:
+            paths.append(Path(value))
+    details = gate.get("details") if isinstance(gate.get("details"), dict) else {}
+    for key in (
+        "manifest_path",
+        "promoted_manifest_json",
+        "assets_json",
+        "artifact_root",
+        "upload_plan_json",
+        "metadata_preflight_json",
+        "post_publish_roundtrip_json",
+    ):
+        value = str(details.get(key, "") or "").strip()
+        if value:
+            paths.append(Path(value))
+    children = gate.get("children") if isinstance(gate.get("children"), list) else []
+    for child in children:
+        if isinstance(child, dict):
+            paths.extend(_gate_input_paths(child))
+    return paths
+
+
+def _metadata_input_paths(
+    *,
+    manifest: Path,
+    publication_evidence_index: Path | None,
+    promoted_manifest_json: Path | None,
+    release_assets_json: Path | None,
+    artifact_root: Path | None,
+    upload_plan_json: Path | None,
+    metadata_preflight_json: Path | None,
+    post_publish_roundtrip_json: Path | None,
+    gates: list[dict[str, Any]],
+) -> list[Path]:
+    paths = [
+        manifest,
+        *_path_if_present(publication_evidence_index),
+        *_path_if_present(promoted_manifest_json),
+        *_path_if_present(release_assets_json),
+        *_path_if_present(artifact_root),
+        *_path_if_present(upload_plan_json),
+        *_path_if_present(metadata_preflight_json),
+        *_path_if_present(post_publish_roundtrip_json),
+    ]
+    for gate in gates:
+        paths.extend(_gate_input_paths(gate))
+    unique: dict[str, Path] = {}
+    for path in paths:
+        unique.setdefault(str(path), path)
+    return list(unique.values())
 
 
 def _release_publication_status(
@@ -333,6 +394,21 @@ def build_status(
     core_gates = [midas_exact, load_combination, geometry, constitutive, solver]
     return {
         "schema_version": "p0-closure-status.v1",
+        **release_evidence_metadata(
+            input_paths=_metadata_input_paths(
+                manifest=manifest,
+                publication_evidence_index=publication_evidence_index,
+                promoted_manifest_json=promoted_manifest_json,
+                release_assets_json=release_assets_json,
+                artifact_root=artifact_root,
+                upload_plan_json=upload_plan_json,
+                metadata_preflight_json=metadata_preflight_json,
+                post_publish_roundtrip_json=post_publish_roundtrip_json,
+                gates=gates,
+            ),
+            reused_evidence=True,
+            reuse_policy="status_rebuilt_from_existing_release_and_p0_gate_receipts",
+        ),
         "status": "closed" if all(bool(gate.get("ok", False)) for gate in gates) else "open",
         "p0_closed": all(bool(gate.get("ok", False)) for gate in gates),
         "core_evidence_closed": all(bool(gate.get("ok", False)) for gate in core_gates),

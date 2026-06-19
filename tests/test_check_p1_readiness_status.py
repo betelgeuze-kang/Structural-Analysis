@@ -147,6 +147,12 @@ def _paths(tmp_path: Path) -> dict[str, Path]:
 def test_p1_readiness_separates_inputs_ready_from_p0_release_blocker(tmp_path: Path) -> None:
     status = check_p1_readiness.build_status(**_paths(tmp_path))
 
+    assert status["generated_at"]
+    assert status["source_commit_sha"] is not None
+    assert status["engine_version"]
+    assert "input_checksums" in status
+    assert status["reused_evidence"] is True
+    assert status["reuse_policy"] == "status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts"
     assert status["p0_core_evidence_closed"] is True
     assert status["p1_inputs_ready"] is True
     assert status["p1_execution_unblocked"] is False

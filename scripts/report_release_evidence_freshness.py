@@ -85,6 +85,37 @@ def _git_head(repo_root: Path) -> str:
         return ""
 
 
+def _git_rev_parse(repo_root: Path, value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--verify", text],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str, paths: list[Path]) -> list[str]:
+    if not source_commit or not current_commit or not paths:
+        return []
+    path_args = [str(path if not path.is_absolute() else path.relative_to(repo_root)) for path in paths]
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--name-only", f"{source_commit}..{current_commit}", "--", *path_args],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
 def _nested_dict(payload: dict[str, Any], key: str) -> dict[str, Any]:
     value = payload.get(key)
     return value if isinstance(value, dict) else {}
@@ -104,6 +135,31 @@ def _commit_matches(value: Any, current_commit: str) -> bool:
     if not text or not current_commit:
         return False
     return current_commit.startswith(text) or text.startswith(current_commit)
+
+
+def _input_checksum_paths(input_checksum: Any) -> list[Path]:
+    if isinstance(input_checksum, dict):
+        return [Path(str(key)) for key in input_checksum if str(key).strip()]
+    return []
+
+
+def _source_state_matches(
+    *,
+    repo_root: Path,
+    source_commit: Any,
+    current_commit: str,
+    producer_path: Path,
+    input_checksum: Any,
+) -> tuple[bool, bool, list[str]]:
+    if _commit_matches(source_commit, current_commit):
+        return True, True, []
+    source = _git_rev_parse(repo_root, str(source_commit or ""))
+    current = _git_rev_parse(repo_root, current_commit)
+    if not source or not current:
+        return False, False, []
+    paths = [producer_path, *_input_checksum_paths(input_checksum)]
+    changed_paths = _git_diff_name_only(repo_root, source, current, paths)
+    return not changed_paths, False, changed_paths
 
 
 def _truthy_presence(value: Any) -> bool:
@@ -142,6 +198,13 @@ def _row(
         payload,
         ("reused_evidence", "reused_existing", "reuse_existing_if_present", "reuse_policy"),
     )
+    source_state_match, source_commit_exact_match, changed_since_source_commit = _source_state_matches(
+        repo_root=repo_root,
+        source_commit=source_commit,
+        current_commit=current_commit,
+        producer_path=producer_path,
+        input_checksum=input_checksum,
+    )
     blockers: list[str] = []
     artifact_exists = artifact_path.exists()
     producer_exists = producer_path.exists()
@@ -158,7 +221,7 @@ def _row(
             blockers.append("generated_at_outside_allowed_window")
     if not _truthy_presence(source_commit):
         blockers.append("source_commit_missing")
-    elif not _commit_matches(source_commit, current_commit):
+    elif not source_state_match:
         blockers.append("source_commit_mismatch")
     if not _truthy_presence(engine_version):
         blockers.append("engine_version_missing")
@@ -183,7 +246,9 @@ def _row(
         "generated_age_days": generated_age_days,
         "max_age_days": max_age_days,
         "source_commit": str(source_commit or ""),
-        "source_commit_match": _commit_matches(source_commit, current_commit),
+        "source_commit_match": source_state_match,
+        "source_commit_exact_match": source_commit_exact_match,
+        "changed_paths_since_source_commit": changed_since_source_commit,
         "engine_version": str(engine_version or ""),
         "engine_version_present": _truthy_presence(engine_version),
         "input_checksum_present": _truthy_presence(input_checksum),

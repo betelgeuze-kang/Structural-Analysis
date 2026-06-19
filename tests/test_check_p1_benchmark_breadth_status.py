@@ -183,6 +183,12 @@ def test_benchmark_breadth_is_ready_but_blocked_by_p0_release(tmp_path: Path) ->
     status = check_p1_benchmark.build_status(**_paths(tmp_path))
     commercial_gate = status["gates"][1]
 
+    assert status["generated_at"]
+    assert status["source_commit_sha"] is not None
+    assert status["engine_version"]
+    assert "input_checksums" in status
+    assert status["reused_evidence"] is True
+    assert status["reuse_policy"] == "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts"
     assert status["benchmark_breadth_inputs_ready"] is True
     assert status["p1_benchmark_execution_unblocked"] is False
     assert status["p0_release_blocker"] is True

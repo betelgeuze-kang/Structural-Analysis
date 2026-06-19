@@ -21,6 +21,7 @@ from implementation.phase1.generate_external_benchmark_submission_readiness impo
     _load_submission_updates,
     _merge_submission_update,
 )
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 DEFAULT_COMMERCIAL_READINESS = Path("implementation/phase1/commercial_readiness_report.json")
@@ -523,6 +524,19 @@ def build_status(
     pass_count = sum(1 for gate in evidence_gates if bool(gate["ok"]))
     return {
         "schema_version": "p1-benchmark-breadth-status.v1",
+        **release_evidence_metadata(
+            input_paths=[
+                *( [p1_readiness_status] if p1_readiness_status is not None else [] ),
+                *( [publication_evidence_index] if publication_evidence_index is not None else [] ),
+                commercial_readiness,
+                external_benchmark_submission_readiness,
+                *( [external_benchmark_submission_updates] if external_benchmark_submission_updates is not None else [] ),
+                *( [residual_holdout_closure_updates] if residual_holdout_closure_updates is not None else [] ),
+                *reports,
+            ],
+            reused_evidence=True,
+            reuse_policy="status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
+        ),
         "status": "ready" if p1_benchmark_execution_unblocked else "blocked",
         "benchmark_breadth_inputs_ready": benchmark_breadth_inputs_ready,
         "p1_benchmark_execution_unblocked": p1_benchmark_execution_unblocked,

@@ -202,6 +202,12 @@ def test_p0_status_reports_core_closed_and_release_open_without_listing(tmp_path
         reports=_reports(tmp_path),
     )
 
+    assert status["generated_at"]
+    assert status["source_commit_sha"] is not None
+    assert status["engine_version"]
+    assert "input_checksums" in status
+    assert status["reused_evidence"] is True
+    assert status["reuse_policy"] == "status_rebuilt_from_existing_release_and_p0_gate_receipts"
     assert status["p0_closed"] is False
     assert status["release_publication_closed"] is False
     assert status["core_evidence_closed"] is True

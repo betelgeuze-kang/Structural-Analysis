@@ -98,3 +98,47 @@ def test_release_evidence_freshness_blocks_newer_producer(tmp_path: Path) -> Non
 
     assert payload["contract_pass"] is False
     assert "evidence::producer_newer_than_artifact" in payload["blockers"]
+
+
+def test_release_evidence_freshness_accepts_receipt_only_commit_when_inputs_unchanged(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.chdir(tmp_path)
+    subprocess = freshness.subprocess
+    subprocess.check_call(["git", "init"], cwd=tmp_path, stdout=subprocess.DEVNULL)
+    subprocess.check_call(["git", "config", "user.email", "test@example.com"], cwd=tmp_path)
+    subprocess.check_call(["git", "config", "user.name", "Test"], cwd=tmp_path)
+    producer = tmp_path / "producer.py"
+    source = tmp_path / "input.json"
+    producer.write_text("print('producer')\n", encoding="utf-8")
+    source.write_text('{"ok": true}\n', encoding="utf-8")
+    subprocess.check_call(["git", "add", "producer.py", "input.json"], cwd=tmp_path)
+    subprocess.check_call(["git", "commit", "-m", "source"], cwd=tmp_path, stdout=subprocess.DEVNULL)
+    source_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True).strip()
+    artifact = _write_json(
+        tmp_path / "evidence.json",
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source_commit_sha": source_commit,
+            "engine_version": "engine-v1",
+            "input_checksums": {"input.json": "sha256:123"},
+            "reused_evidence": True,
+        },
+    )
+    subprocess.check_call(["git", "add", "evidence.json"], cwd=tmp_path)
+    subprocess.check_call(["git", "commit", "-m", "receipt"], cwd=tmp_path, stdout=subprocess.DEVNULL)
+    freshness._git_head = lambda _repo_root: subprocess.check_output(
+        ["git", "rev-parse", "HEAD"],
+        cwd=tmp_path,
+        text=True,
+    ).strip()
+
+    payload = freshness.build_report(
+        repo_root=tmp_path,
+        artifacts=(("evidence", artifact, producer),),
+        max_age_days=30,
+    )
+    row = payload["rows"][0]
+
+    assert payload["contract_pass"] is True
+    assert row["source_commit_match"] is True
+    assert row["source_commit_exact_match"] is False
+    assert row["changed_paths_since_source_commit"] == []

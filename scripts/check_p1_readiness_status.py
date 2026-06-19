@@ -16,6 +16,8 @@ if str(SCRIPT_DIR) not in sys.path:
 from check_p0_closure_status import build_status as build_p0_status  # noqa: E402
 from check_p0_closure_status import DEFAULT_PUBLICATION_EVIDENCE_INDEX  # noqa: E402
 from plan_open_data_artifact_restore import build_restore_plan  # noqa: E402
+from plan_open_data_artifact_restore import DEFAULT_MANIFEST as DEFAULT_OPEN_DATA_MANIFEST  # noqa: E402
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 DEFAULT_COVERAGE_MATRIX = Path("implementation/phase1/real_project_parser_coverage_matrix.json")
@@ -207,6 +209,18 @@ def build_status(
         next_action = "start P1 quality/fallback/benchmark breadth"
     return {
         "schema_version": "p1-readiness-status.v1",
+        **release_evidence_metadata(
+            input_paths=[
+                *( [p0_status] if p0_status is not None else [] ),
+                publication_evidence_index or Path(str(p0_payload.get("publication_evidence_index", "") or DEFAULT_PUBLICATION_EVIDENCE_INDEX)),
+                open_data_restore_plan or DEFAULT_OPEN_DATA_MANIFEST,
+                coverage_matrix,
+                peer_metric_records,
+                row_provenance,
+            ],
+            reused_evidence=True,
+            reuse_policy="status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts",
+        ),
         "status": "ready" if p1_execution_unblocked else "blocked",
         "p0_core_evidence_closed": bool(p0_gate["core_evidence_closed"]),
         "p1_inputs_ready": p1_inputs_ready,
