@@ -20,7 +20,7 @@
   "claim_boundary": "This Level 3 residual status audits the attached NDTHA residual gate rows only. PASS means the tracked core NDTHA residual slice satisfies hard, recommended, fallback, solver_raw, normalized residual, silent-failure, and corrected-state recompute targets. It does not by itself close independent V&V, benchmark breadth, family validation, GA signoff, or external customer shadow evidence.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-19T17:13:24.002365+00:00",
+  "generated_at": "2026-06-19T17:54:45.739666+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:dc2564dbfc3218d698feb7b0d63ba41ab276bdeeaacd88ad6dab549a5724e43b"
   },
@@ -29,16 +29,16 @@
   "reuse_policy": "status_rebuilt_from_existing_ndtha_residual_gate_report",
   "reused_evidence": true,
   "schema_version": "residual-level3-status.v1",
-  "source_commit_sha": "1c75673e0c95cf68cec1edbe68a6484062b98922",
+  "source_commit_sha": "2d1e389e72c5dba6dcb76f684c66172a85ec6e56",
   "status": "ready",
   "summary": {
     "case_count": 3,
     "collapse_false_pass_case_count": 0,
     "collapse_false_pass_case_ids": [],
-    "corrected_state_recompute_failed_case_count": 0,
-    "corrected_state_recompute_failed_case_ids": [],
     "corrected_state_recompute_missing_case_count": 0,
     "corrected_state_recompute_missing_case_ids": [],
+    "fallback_case_count": 0,
+    "fallback_case_ids": [],
     "fallback_rate": 0.0,
     "hard_pass_count": 3,
     "hard_pass_rate": 1.0,
@@ -48,7 +48,15 @@
     "normalized_residual_missing_case_ids": [],
     "recommended_pass_count": 3,
     "recommended_pass_rate": 1.0,
+    "row_derived_fallback_rate": 0.0,
+    "row_derived_solver_raw_ratio": 1.0,
     "solver_control_nonconverged_step_total": 0,
+    "solver_raw_case_count": 3,
+    "solver_raw_case_ids": [
+      "C-TST-001",
+      "C-TST-002",
+      "C-TST-003"
+    ],
     "solver_raw_ratio": 1.0
   },
   "targets": {
