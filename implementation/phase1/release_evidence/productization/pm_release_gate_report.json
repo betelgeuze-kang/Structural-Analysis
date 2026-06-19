@@ -47,7 +47,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T17:33:27.679343+00:00",
+  "generated_at": "2026-06-19T17:36:07.294690+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -95,7 +95,7 @@
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json": "sha256:3d3940ee10649ef05f76c3b041c0924d6500ccccf2c767e862b48160058588ed",
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:dc2564dbfc3218d698feb7b0d63ba41ab276bdeeaacd88ad6dab549a5724e43b",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
-    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:659f52cc297a116d60b010bddd891a6ba9c8cf5fa5ab26c4e844772b570f5f42",
+    "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:293d09c3bb8b79f763ce184457ff6e087288b386d831a275ec0a7af86c42671a",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:571cd61fb781d54a933bac912b74a833f7f422803776084af6fb287609d168bd",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:4802757c3d939589f98e1a4b4e5577562f966ba9330332e13c925e95c6d30690",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:e42dd3b58dff303fabf8c3be4cf88f5ecbdacfeeec598ba34a5ecded72f92eab",
@@ -940,6 +940,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "f55e3c6c91f9e7927762c92ac55cfc92c4165a98",
+  "source_commit_sha": "bc5ae29b2e2eda4f13034df59824266c80eb711d",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/15 | measured_cases=304"
 }
