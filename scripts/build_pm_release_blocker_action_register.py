@@ -42,6 +42,10 @@ DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET = Path(
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
+DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS = Path("implementation/phase1/customer_shadow_evidence_status.json")
+DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json"
+)
 DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
 )
@@ -75,6 +79,13 @@ def _as_list(value: Any) -> list[Any]:
 
 def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
+
+
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except Exception:
+        return int(default)
 
 
 def _split_blocker(blocker_id: str) -> tuple[str, str]:
@@ -144,6 +155,12 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
             f"Obtain explicit R4 approval phrase `{GITHUB_SYNC_APPROVAL_PHRASE}`, then run the pending "
             "remote-update commands from `check_github_development_sync_preflight.py --fetch --json`."
         )
+    if namespace == "customer_shadow":
+        return (
+            "Attach validated completed-project customer shadow metadata files under "
+            "`implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, "
+            "then regenerate customer shadow status and PM release evidence."
+        )
     direct = str(summary.get("owner_action", "") or row.get("owner_action", "") or "")
     if direct:
         return direct
@@ -154,6 +171,8 @@ def _owner_action(*, namespace: str, code: str, row: dict[str, Any]) -> str:
 def _owner(*, namespace: str, code: str) -> str:
     if namespace == "fresh_full_validation":
         return "validation_lane_owner"
+    if namespace == "customer_shadow":
+        return "customer_success_ops_owner"
     if not namespace and code == "independent_vv_missing":
         return "independent_vv_owner"
     if not namespace and code == "family_validation_manual_signoff_missing":
@@ -192,6 +211,8 @@ def _resolution_type(*, namespace: str, code: str) -> str:
         return "release_evidence_metadata_required"
     if namespace == "github_sync":
         return "r4_remote_mutation_approval_required"
+    if namespace == "customer_shadow":
+        return "external_customer_shadow_evidence_required"
     return "release_evidence_remediation_required"
 
 
@@ -201,6 +222,11 @@ def _claim_boundary(*, namespace: str, code: str, row: dict[str, Any]) -> str:
         return (
             "Fresh validation lane blockers require new lane execution receipts. Existing hydrated, "
             "publication, local-only, or reused evidence must not be counted as GA/Enterprise fresh validation."
+        )
+    if namespace == "customer_shadow":
+        return (
+            "Customer shadow blockers require real completed-project derived metadata. Templates, placeholder "
+            "rows, synthetic cases, or customer raw data committed to Git must not close this blocker."
         )
     if not namespace and code in {
         "independent_vv_missing",
@@ -308,6 +334,13 @@ def _acceptance_criteria(*, namespace: str, code: str, row: dict[str, Any]) -> l
             "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
             "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD",
         ]
+    if namespace == "customer_shadow":
+        return [
+            "`customer_shadow_evidence_status.json.contract_pass == true`",
+            "`customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`",
+            "Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`",
+            "`customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers`",
+        ]
     return [
         f"`{namespace}::{code}` absent from `full_release_blockers`",
         "`full_release_gate_ready == true` after PM report regeneration",
@@ -377,6 +410,13 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
+    if namespace == "customer_shadow":
+        return [
+            f"python3 implementation/phase1/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json",
+            f"python3 scripts/build_customer_shadow_evidence_intake_packet.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET} --out-md {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET.with_suffix('.md')}",
+            pm_report_command,
+            f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
+        ]
     return [
         pm_report_command,
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
@@ -432,6 +472,12 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
             f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
+    if namespace == "customer_shadow":
+        return [
+            f"python3 implementation/phase1/check_customer_shadow_evidence_status.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS} --json --fail-blocked",
+            f"python3 scripts/build_customer_shadow_evidence_intake_packet.py --out {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET} --out-md {DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET.with_suffix('.md')}",
+            f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_REPORT} --out-md {DEFAULT_PM_REPORT_MD}",
+        ]
     return [
         f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
     ]
@@ -443,6 +489,7 @@ def _owner_input_required(*, namespace: str, code: str) -> bool:
         or (namespace == "security" and "license" in code)
         or _is_ux_human_new_user_blocker(namespace=namespace, code=code)
         or namespace == "github_sync"
+        or namespace == "customer_shadow"
         or (
             not namespace
             and code
@@ -487,6 +534,9 @@ def _augment_evidence_artifacts(*, namespace: str, code: str, artifacts: dict[st
         augmented["ux_new_user_observation_intake_packet"] = str(DEFAULT_UX_NEW_USER_OBSERVATION_INTAKE_PACKET)
     if namespace == "evidence_freshness":
         augmented["release_evidence_freshness_report"] = str(DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT)
+    if namespace == "customer_shadow":
+        augmented["customer_shadow_evidence_status"] = str(DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS)
+        augmented["customer_shadow_evidence_intake_packet"] = str(DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET)
     return augmented
 
 
@@ -497,6 +547,8 @@ def _expected_intake_artifact(*, namespace: str, code: str) -> str:
         return "license_status_intake_packet"
     if _is_ux_human_new_user_blocker(namespace=namespace, code=code):
         return "ux_new_user_observation_intake_packet"
+    if namespace == "customer_shadow":
+        return "customer_shadow_evidence_intake_packet"
     return ""
 
 
@@ -535,6 +587,20 @@ def _evidence_status(*, namespace: str, code: str, row: dict[str, Any]) -> dict[
             "fresh_validation_receipt_blockers": validator_blockers,
             "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
             "source_policy": "fresh_lane_execution_required",
+        }
+    if namespace == "customer_shadow":
+        completed = _as_int(summary.get("completed_shadow_case_count"), 0)
+        minimum = _as_int(summary.get("min_completed_shadow_cases"), 3)
+        return {
+            "state": "completed_shadow_case_count_below_minimum"
+            if completed < minimum
+            else "ready_for_pm_regeneration",
+            "completed_shadow_case_count": completed,
+            "min_completed_shadow_cases": minimum,
+            "target_completed_shadow_cases": _as_int(summary.get("target_completed_shadow_cases"), 5),
+            "evidence_file_count": _as_int(summary.get("evidence_file_count"), 0),
+            "valid_evidence_file_count": _as_int(summary.get("valid_evidence_file_count"), 0),
+            "source_policy": "real_customer_retained_metadata_required",
         }
     if not namespace and code in {
         "independent_vv_missing",
@@ -700,6 +766,21 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     release_area_rows = _indexed_rows(_as_list(report.get("release_area_matrix")), "area")
     milestone_rows = _indexed_rows(_as_list(report.get("milestones")), "milestone")
     release_tiers = _as_dict(report.get("release_tiers"))
+    customer_shadow_summary = _as_dict(release_tiers.get("customer_shadow_summary"))
+    customer_shadow_source_row = {
+        "title": "Customer Shadow Evidence",
+        "summary": customer_shadow_summary,
+        "claim_boundary": (
+            "Customer shadow release-tier blockers require real completed-project derived metadata. "
+            "Templates, synthetic cases, and raw customer data committed to Git do not close the blocker."
+        ),
+        "artifacts": {
+            "customer_shadow_evidence_status": str(
+                release_tiers.get("customer_shadow_evidence_status") or DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS
+            ),
+            "customer_shadow_evidence_intake_packet": str(DEFAULT_CUSTOMER_SHADOW_EVIDENCE_INTAKE_PACKET),
+        },
+    }
     fresh_status_path = Path(
         str(release_tiers.get("fresh_full_validation_lane_status", "") or DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS)
     )
@@ -727,6 +808,8 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             if namespace == "fresh_full_validation":
                 lane_id = code.split("::", 1)[0]
                 source_row = fresh_lane_rows.get(lane_id, {})
+            elif namespace == "customer_shadow":
+                source_row = customer_shadow_source_row
             else:
                 source_row = {}
         else:

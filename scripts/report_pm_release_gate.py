@@ -117,6 +117,7 @@ DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT = Path(
 DEFAULT_RELEASE_EVIDENCE_FRESHNESS = Path(
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
 )
+DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS = Path("implementation/phase1/customer_shadow_evidence_status.json")
 DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS = Path(
     "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
 )
@@ -2611,6 +2612,7 @@ def build_report(
     template_evidence_safety: Path = DEFAULT_TEMPLATE_EVIDENCE_SAFETY,
     pm_release_reproduction_command_audit: Path = DEFAULT_PM_RELEASE_REPRODUCTION_COMMAND_AUDIT,
     release_evidence_freshness: Path = DEFAULT_RELEASE_EVIDENCE_FRESHNESS,
+    customer_shadow_evidence_status: Path = DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS,
     fresh_full_validation_lane_status: Path = DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
@@ -2742,6 +2744,13 @@ def build_report(
     release_area_ready = all(bool(row["ok"]) for row in release_area_matrix)
     full_release_gate_ready = bool(limited_ready and release_area_ready)
     ga_readiness = _load_json(ga_enterprise_readiness)
+    customer_shadow = _load_json(customer_shadow_evidence_status)
+    customer_shadow_summary = _summary(customer_shadow)
+    customer_shadow_blockers = (
+        [str(row) for row in _as_list(customer_shadow.get("blockers"))]
+        if customer_shadow
+        else ["customer_shadow_evidence_status_missing"]
+    )
     fresh_full_validation = _load_json(fresh_full_validation_lane_status)
     fresh_full_validation_summary = _summary(fresh_full_validation)
     fresh_full_validation_blockers = (
@@ -2759,6 +2768,7 @@ def build_report(
         ]
     ga_blockers = [
         *ga_readiness_blockers,
+        *(f"customer_shadow::{item}" for item in customer_shadow_blockers),
         *(f"fresh_full_validation::{item}" for item in fresh_full_validation_blockers),
         *release_area_blockers,
     ]
@@ -2766,6 +2776,7 @@ def build_report(
         full_release_gate_ready
         and _reason_pass(ga_readiness)
         and not ga_readiness_blockers
+        and _reason_pass(customer_shadow)
         and _reason_pass(fresh_full_validation)
     )
     ai_orchestration = _load_json(ai_orchestration_preflight)
@@ -2813,6 +2824,7 @@ def build_report(
             gap_closure_status,
             ga_enterprise_signoff_intake,
             paid_pilot_scope_guard,
+            customer_shadow_evidence_status,
         ]
     )
 
@@ -2912,6 +2924,16 @@ def build_report(
             "ga_enterprise_readiness_summary_line": str(ga_readiness.get("summary_line", "")),
             "ga_enterprise_signoff_intake_packet": str(ga_enterprise_signoff_intake),
             "ga_enterprise_signoff_intake_summary_line": str(ga_signoff_intake.get("summary_line", "")),
+            "customer_shadow_evidence_status": str(customer_shadow_evidence_status),
+            "customer_shadow_completed_project_ready": _reason_pass(customer_shadow),
+            "customer_shadow_summary": {
+                "completed_shadow_case_count": customer_shadow_summary.get("completed_shadow_case_count"),
+                "min_completed_shadow_cases": customer_shadow_summary.get("min_completed_shadow_cases"),
+                "target_completed_shadow_cases": customer_shadow_summary.get("target_completed_shadow_cases"),
+                "evidence_file_count": customer_shadow_summary.get("evidence_file_count"),
+                "valid_evidence_file_count": customer_shadow_summary.get("valid_evidence_file_count"),
+                "blocker_count": len(customer_shadow_blockers),
+            },
             "fresh_full_validation_lane_status": str(fresh_full_validation_lane_status),
             "fresh_full_validation_ready": _reason_pass(fresh_full_validation),
             "fresh_full_validation_summary": {
@@ -3047,6 +3069,11 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     )
+    parser.add_argument(
+        "--customer-shadow-evidence-status",
+        type=Path,
+        default=DEFAULT_CUSTOMER_SHADOW_EVIDENCE_STATUS,
+    )
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
     parser.add_argument(
@@ -3130,6 +3157,7 @@ def main(argv: list[str] | None = None) -> int:
         template_evidence_safety=args.template_evidence_safety,
         pm_release_reproduction_command_audit=args.pm_release_reproduction_command_audit,
         release_evidence_freshness=args.release_evidence_freshness,
+        customer_shadow_evidence_status=args.customer_shadow_evidence_status,
         fresh_full_validation_lane_status=args.fresh_full_validation_lane_status,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,

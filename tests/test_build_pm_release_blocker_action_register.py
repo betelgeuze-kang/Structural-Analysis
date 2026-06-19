@@ -179,9 +179,18 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
             "release_tiers": {
                 "ga_enterprise_blockers": [
                     "independent_vv_missing",
+                    "customer_shadow::completed_shadow_case_count_below_minimum",
                     "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
                 ],
                 "fresh_full_validation_lane_status": str(fresh_status),
+                "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
+                "customer_shadow_summary": {
+                    "completed_shadow_case_count": 0,
+                    "min_completed_shadow_cases": 3,
+                    "target_completed_shadow_cases": 5,
+                    "evidence_file_count": 0,
+                    "valid_evidence_file_count": 0,
+                },
             },
         },
     )
@@ -190,8 +199,8 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
     rows = {row["blocker_id"]: row for row in payload["rows"]}
 
     assert payload["contract_pass"] is False
-    assert payload["summary"]["open_blocker_count"] == 2
-    assert payload["summary"]["ga_enterprise_blocker_count"] == 2
+    assert payload["summary"]["open_blocker_count"] == 3
+    assert payload["summary"]["ga_enterprise_blocker_count"] == 3
 
     vv_row = rows["independent_vv_missing"]
     assert vv_row["scope"] == "ga_enterprise"
@@ -201,6 +210,20 @@ def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
     assert vv_row["resolution_type"] == "external_ga_enterprise_signoff_required"
     assert "ga_enterprise_signoff_intake_packet" in vv_row["evidence_artifacts"]
     assert vv_row["evidence_status"]["state"] == "missing_external_ga_enterprise_signoff_evidence"
+
+    customer_shadow_row = rows["customer_shadow::completed_shadow_case_count_below_minimum"]
+    assert customer_shadow_row["scope"] == "ga_enterprise"
+    assert customer_shadow_row["owner"] == "customer_success_ops_owner"
+    assert customer_shadow_row["owner_input_required"] is True
+    assert customer_shadow_row["handoff_state"] == "external_owner_input_ready"
+    assert customer_shadow_row["resolution_type"] == "external_customer_shadow_evidence_required"
+    assert customer_shadow_row["evidence_status"]["state"] == "completed_shadow_case_count_below_minimum"
+    assert customer_shadow_row["evidence_status"]["completed_shadow_case_count"] == 0
+    assert customer_shadow_row["evidence_status"]["min_completed_shadow_cases"] == 3
+    assert "customer_shadow_evidence_intake_packet" in customer_shadow_row["evidence_artifacts"]
+    assert customer_shadow_row["handoff"]["expected_intake_artifact"] == "customer_shadow_evidence_intake_packet"
+    assert any("check_customer_shadow_evidence_status.py" in command for command in customer_shadow_row["reproduction_commands"])
+    assert any("completed_shadow_case_count >= 3" in item for item in customer_shadow_row["acceptance_criteria"])
 
     fresh_row = rows["fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"]
     assert fresh_row["scope"] == "ga_enterprise"

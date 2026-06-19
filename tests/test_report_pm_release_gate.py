@@ -540,6 +540,21 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 "blockers": ["gpu_hip_solver::fresh_validation_receipt_missing"],
             },
         ),
+        "customer_shadow_evidence_status": _write(
+            tmp_path / "customer_shadow_evidence_status.json",
+            {
+                "contract_pass": False,
+                "reason_code": "ERR_CUSTOMER_SHADOW_EVIDENCE_INCOMPLETE",
+                "summary": {
+                    "completed_shadow_case_count": 0,
+                    "min_completed_shadow_cases": 3,
+                    "target_completed_shadow_cases": 5,
+                    "evidence_file_count": 0,
+                    "valid_evidence_file_count": 0,
+                },
+                "blockers": ["completed_shadow_case_count_below_minimum"],
+            },
+        ),
         "commercial_gap_ledger_status": _write(
             tmp_path / "commercial_gap_ledger_status.json",
             {
@@ -1009,7 +1024,17 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     )
     assert payload["release_tiers"]["fresh_full_validation_summary"]["lane_contract_pass_count"] == 8
     assert payload["release_tiers"]["fresh_full_validation_summary"]["fresh_validation_receipt_pass_count"] == 0
+    assert payload["release_tiers"]["customer_shadow_completed_project_ready"] is False
+    assert payload["release_tiers"]["customer_shadow_evidence_status"].endswith(
+        "customer_shadow_evidence_status.json"
+    )
+    assert payload["release_tiers"]["customer_shadow_summary"]["completed_shadow_case_count"] == 0
+    assert payload["release_tiers"]["customer_shadow_summary"]["min_completed_shadow_cases"] == 3
     assert "independent_vv_missing" in payload["release_tiers"]["ga_enterprise_blockers"]
+    assert (
+        "customer_shadow::completed_shadow_case_count_below_minimum"
+        in payload["release_tiers"]["ga_enterprise_blockers"]
+    )
     assert (
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"
         in payload["release_tiers"]["ga_enterprise_blockers"]
