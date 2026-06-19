@@ -54,14 +54,14 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-19T18:33:40.764389+00:00",
+  "generated_at": "2026-06-19T19:30:06.958972+00:00",
   "input_checksums": {
     "implementation/phase1/open_data_external_artifacts_manifest.json": "sha256:b8144a8e22fb7d91cb846113ce56e834b2505853697795db24e3c9d9dc344d14",
     "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:1684f9871aea7651232875e3d5abbe8ef97308814846af36ef41a362c15905b6",
     "implementation/phase1/real_project_parser_coverage_matrix.json": "sha256:0c2945fbbaa09d53929f80477a4136f85a9570982118a74eecb0cc473b014b93",
     "implementation/phase1/real_project_row_provenance_report.json": "sha256:2b5db540ce49ac602a890af1fb0adc3b0ee432544f85f21240d60864d68f35f2",
     "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json": "sha256:733fe07afff3d607e059aea4d77889a2b6da3572f583cd13694e6d7714859657",
-    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:1ce4e1014004ccecdf7debfae35d8b437acf8aa42f18d9abdf27356184fa1450"
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:79c71125879451e4277423a24c795122e2386aede58e0cb3e8abbde98bcbea07"
   },
   "next_action": "start P1 quality/fallback/benchmark breadth",
   "p0_core_evidence_closed": true,
@@ -72,6 +72,6 @@
   "reuse_policy": "status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts",
   "reused_evidence": true,
   "schema_version": "p1-readiness-status.v1",
-  "source_commit_sha": "3d413eca9b6f6decd4529f74cd82d86b3915c4e1",
+  "source_commit_sha": "705b958d8476c3a56d61bcdc7078edead41c3ea5",
   "status": "ready"
 }
