@@ -29,7 +29,7 @@
     "raw_data_retained_by_customer": true,
     "redistribution_allowed": false
   },
-  "generated_at": "2026-06-19T17:13:24.016148+00:00",
+  "generated_at": "2026-06-19T17:33:18.745217+00:00",
   "input_checksums": {
     "docs/templates/customer_shadow_evidence.template.json": "sha256:3fbf9f07b8a5c2461a2187470b6d8b40bd447b63aa9695959f9b2446beeead30",
     "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:245e2f8a1e1fceaca2f55790079ab3e08834a2b3d40f5e3ac265d1374c5899f5",
@@ -138,7 +138,7 @@
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-intake-packet.v1",
-  "source_commit_sha": "1c75673e0c95cf68cec1edbe68a6484062b98922",
+  "source_commit_sha": "707f20da88bd8338e1c99c5f34e36130ce51bb66",
   "status": "implementation/phase1/customer_shadow_evidence_status.json",
   "summary": {
     "allowed_reviewer_decisions": [
