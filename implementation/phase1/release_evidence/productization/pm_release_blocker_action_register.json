@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-19T18:45:44.672356+00:00",
+  "generated_at": "2026-06-19T19:01:00.433872+00:00",
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -499,8 +499,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 15,
-        "main_ahead_count": 63,
+        "feature_ahead_count": 19,
+        "main_ahead_count": 67,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -511,9 +511,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 15,
+        "feature_ahead_count": 19,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 63,
+        "main_ahead_count": 67,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -576,8 +576,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 15,
-        "main_ahead_count": 63,
+        "feature_ahead_count": 19,
+        "main_ahead_count": 67,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -588,9 +588,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 15,
+        "feature_ahead_count": 19,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 63,
+        "main_ahead_count": 67,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -653,8 +653,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 15,
-        "main_ahead_count": 63,
+        "feature_ahead_count": 19,
+        "main_ahead_count": 67,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -665,9 +665,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 15,
+        "feature_ahead_count": 19,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 63,
+        "main_ahead_count": 67,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -890,7 +890,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "commercial_benchmark_torch::fresh_validation_receipt_missing",
@@ -903,10 +906,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "commercial_benchmark_torch",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "torch_capable_benchmark_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -952,7 +961,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "gpu_hip_solver::fresh_validation_receipt_missing",
@@ -965,10 +977,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "gpu_hip_solver",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "gpu_capable_rocm_hip_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1014,7 +1032,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::performance_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "performance_profile::fresh_validation_receipt_missing",
@@ -1027,10 +1048,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "performance_profile",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "performance_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1076,7 +1103,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "surface_material_contact::fresh_validation_receipt_missing",
@@ -1089,10 +1119,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "surface_material_contact",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "heavy_surface_material_contact_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1138,7 +1174,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "midas_exact_refresh::fresh_validation_receipt_missing",
@@ -1151,10 +1190,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "midas_exact_refresh",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "midas_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1200,7 +1245,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "productization_heavy_profile::fresh_validation_receipt_missing",
@@ -1213,10 +1261,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "productization_heavy_profile",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "heavy_productization_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1262,7 +1316,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "external_benchmark_refresh::fresh_validation_receipt_missing",
@@ -1275,10 +1332,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "external_benchmark_refresh",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "benchmark_productization_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"
@@ -1324,7 +1387,10 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
       "blocker_code": "design_optimization_refresh::fresh_validation_receipt_missing",
@@ -1337,10 +1403,16 @@
       "evidence_snapshot": {},
       "evidence_status": {
         "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
+        "fresh_validation_receipt_blockers": [
+          "fresh_validation_receipt_missing"
+        ],
         "fresh_validation_receipt_contract_pass": false,
         "fresh_validation_receipt_fresh": false,
+        "fresh_validation_receipt_lane_matches": false,
         "fresh_validation_receipt_present": false,
+        "fresh_validation_receipt_runner_matches": false,
         "lane_id": "design_optimization_refresh",
+        "receipt_validator": "implementation/phase1/validate_fresh_validation_receipt.py",
         "runner": "design_optimization_validation",
         "source_policy": "fresh_lane_execution_required",
         "state": "fresh_validation_receipt_missing"

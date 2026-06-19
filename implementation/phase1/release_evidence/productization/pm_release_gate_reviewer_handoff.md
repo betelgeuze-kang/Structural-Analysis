@@ -467,7 +467,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -502,7 +505,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -537,7 +543,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::performance_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -572,7 +581,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -607,7 +619,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -642,7 +657,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -677,7 +695,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:
@@ -712,7 +733,10 @@ Verdict change conditions:
 Acceptance criteria:
 - `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`
 - `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`
+- `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`
 - `fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`
+- `implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0
 - `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`
 
 Evidence artifact paths:

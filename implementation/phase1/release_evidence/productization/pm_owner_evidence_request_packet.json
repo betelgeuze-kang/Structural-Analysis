@@ -2,7 +2,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-19T18:46:43.614345+00:00",
+  "generated_at": "2026-06-19T19:01:19.179979+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -2213,34 +2213,51 @@
       "acceptance_criteria": [
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_contract_pass == true`",
+        "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
         "`fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::performance_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`",
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
+        "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
         "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
         "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
       ],
@@ -2292,7 +2309,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[commercial_benchmark_torch].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2330,7 +2350,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[gpu_hip_solver].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2368,7 +2391,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[performance_profile].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::performance_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2406,7 +2432,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[surface_material_contact].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2444,7 +2473,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[midas_exact_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2482,7 +2514,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[productization_heavy_profile].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2520,7 +2555,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[external_benchmark_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
@@ -2558,7 +2596,10 @@
           "acceptance_criteria": [
             "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_present == true`",
             "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_fresh == true`",
+            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_lane_matches == true`",
+            "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_runner_matches == true`",
             "`fresh_full_validation_lane_status.json.rows[design_optimization_refresh].fresh_validation_receipt_contract_pass == true`",
+            "`implementation/phase1/validate_fresh_validation_receipt.py --receipt <lane receipt> --fail-blocked` exits 0",
             "`fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` absent from `ga_enterprise_blockers`"
           ],
           "blocked_release_tiers": [
