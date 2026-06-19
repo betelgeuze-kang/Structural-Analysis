@@ -1,0 +1,244 @@
+{
+  "blockers": [
+    "launch_prerequisite_blocked:customer_shadow_completed_project_cases_ready"
+  ],
+  "checks": {
+    "customer_shadow_prerequisite_pass": false,
+    "deferred_gui_surfaces_present": true,
+    "evidence_console_features_present": true,
+    "launch_prerequisites_pass": false,
+    "no_prohibited_first_scope_claims": true,
+    "scope_source_present": true
+  },
+  "claim_boundary": "This status defines the first GUI surface as an Evidence Console only. It must not be treated as approval for a full project dashboard, model editor, account/permission system, collaboration, or licensing workflow. Launch readiness remains blocked until validated customer completed-project shadow evidence is attached; synthetic customer cases must not close this gate.",
+  "contract_pass": false,
+  "deferred_gui_surface_rows": [
+    {
+      "accepted_phrases": [
+        "full project dashboard",
+        "project dashboard"
+      ],
+      "check": "full_project_dashboard",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "model editor",
+        "model-editing",
+        "model editing"
+      ],
+      "check": "model_editor",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "accounts/permissions",
+        "account/permission",
+        "permission management"
+      ],
+      "check": "accounts_permissions",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "collaboration",
+        "multi-user collaboration"
+      ],
+      "check": "collaboration",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "licensing",
+        "license management"
+      ],
+      "check": "licensing",
+      "pass": true,
+      "present": true
+    }
+  ],
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "feature_rows": [
+    {
+      "accepted_phrases": [
+        "case list",
+        "case-list",
+        "case rows",
+        "케이스 목록"
+      ],
+      "check": "case_list",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "source/provenance inspector",
+        "source provenance inspector",
+        "provenance inspector",
+        "source provenance"
+      ],
+      "check": "source_provenance_inspector",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "reference vs engine comparison",
+        "reference-vs-engine comparison",
+        "reference comparison"
+      ],
+      "check": "reference_vs_engine_comparison",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "residual audit",
+        "잔차 감사",
+        "residual auditing"
+      ],
+      "check": "residual_audit",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "worst member/story",
+        "worst member",
+        "worst story",
+        "governing member/story"
+      ],
+      "check": "worst_member_story",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "PASS/REVIEW/FAIL",
+        "PASS REVIEW FAIL",
+        "reviewer decision"
+      ],
+      "check": "reviewer_decision",
+      "pass": true,
+      "present": true
+    },
+    {
+      "accepted_phrases": [
+        "reproduce bundle export",
+        "reproduction bundle export",
+        "reproduce bundle"
+      ],
+      "check": "reproduce_bundle_export",
+      "pass": true,
+      "present": true
+    }
+  ],
+  "generated_at": "2026-06-19T15:12:08.713287+00:00",
+  "input_checksums": {
+    "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:76160bf86bad307fabc6ad6c017761041469eeef8937a54bcb2f1380938590bf",
+    "implementation/phase1/real_project_corpus_measured_status.json": "sha256:eaf55aca5e9c154724bddff63dbb32168e11d20168b1b34a6a3bfddc97c6bdc4",
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:073b350298a6973e8d2e3939eab2e61054b7d9aae3e46c4446be2cdd59e041ec",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:ace5fec134f3094b1b0f65745f1c22e928938e20711a8e3b2b75cded1c3fe044",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:cac785b46d135aa453665ab045a7df46b85d8b718644646ff3e350ef0c462074"
+  },
+  "launch_ready": false,
+  "prerequisite_rows": [
+    {
+      "check": "p0_closed",
+      "pass": true,
+      "path": "implementation/phase1/release_evidence/productization/p0_closure_status.json",
+      "summary": {}
+    },
+    {
+      "check": "p1_readiness_unblocked",
+      "pass": true,
+      "path": "implementation/phase1/release_evidence/productization/p1_readiness_status.json",
+      "summary": {}
+    },
+    {
+      "check": "p1_benchmark_breadth_ready",
+      "pass": true,
+      "path": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
+      "summary": {}
+    },
+    {
+      "check": "real_project_measured_status_pass",
+      "pass": true,
+      "path": "implementation/phase1/real_project_corpus_measured_status.json",
+      "summary": {}
+    },
+    {
+      "check": "customer_shadow_completed_project_cases_ready",
+      "pass": false,
+      "path": "implementation/phase1/customer_shadow_evidence_status.json",
+      "summary": {
+        "completed_shadow_case_count": 0,
+        "min_completed_shadow_cases": 3
+      }
+    }
+  ],
+  "prohibited_first_scope_claim_rows": [
+    {
+      "accepted_phrases": [
+        "full_gui_ready=true",
+        "\"full_gui_ready\": true",
+        "`full_gui_ready`: `true`"
+      ],
+      "check": "full_gui_ready_true",
+      "pass": true,
+      "present": false
+    },
+    {
+      "accepted_phrases": [
+        "model_editor_ready=true",
+        "\"model_editor_ready\": true"
+      ],
+      "check": "model_editor_ready_true",
+      "pass": true,
+      "present": false
+    },
+    {
+      "accepted_phrases": [
+        "collaboration_ready=true",
+        "\"collaboration_ready\": true"
+      ],
+      "check": "collaboration_ready_true",
+      "pass": true,
+      "present": false
+    },
+    {
+      "accepted_phrases": [
+        "licensing_ready=true",
+        "\"licensing_ready\": true"
+      ],
+      "check": "licensing_ready_true",
+      "pass": true,
+      "present": false
+    }
+  ],
+  "reason_code": "ERR_EVIDENCE_CONSOLE_SCOPE_OR_PREREQUISITES_BLOCKED",
+  "reuse_policy": "status_rebuilt_from_existing_scope_docs_and_readiness_receipts",
+  "reused_evidence": true,
+  "schema_version": "evidence-console-scope-status.v1",
+  "scope_contract_pass": true,
+  "source_commit_sha": "ccb07153e156ac752053bbaeea8ed6bab5327656",
+  "status": "blocked",
+  "summary": {
+    "customer_shadow_completed_case_count": 0,
+    "customer_shadow_min_completed_cases": 3,
+    "deferred_gui_surface_count": 5,
+    "deferred_gui_surface_pass_count": 5,
+    "evidence_console_feature_count": 7,
+    "evidence_console_feature_pass_count": 7,
+    "launch_prerequisite_count": 5,
+    "launch_prerequisite_pass_count": 4,
+    "next_action": "attach validated customer completed-project shadow evidence",
+    "scope_source": "docs/structure-viewer-product-workspace.md"
+  },
+  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=4/5"
+}

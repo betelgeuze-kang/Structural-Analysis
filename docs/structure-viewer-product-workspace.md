@@ -18,6 +18,35 @@ src/structure-viewer/index.html?preset=midas33_optimized
 src/structure-viewer/index.html?preset=real_drawing_private_3d
 ```
 
+## Evidence Console First Scope
+
+The first GUI productization surface is an Evidence Console, not a full project
+dashboard or model authoring environment. The scope gate is generated with
+`python3 scripts/build_evidence_console_scope_status.py`.
+
+Evidence Console first scope:
+
+- case list
+- source/provenance inspector
+- reference vs engine comparison
+- residual audit
+- worst member/story
+- PASS/REVIEW/FAIL reviewer decision
+- reproduce bundle export
+
+Deferred full GUI surfaces:
+
+- full project dashboard
+- model editor
+- accounts/permissions
+- collaboration
+- licensing
+
+Launch readiness for this Evidence Console remains blocked until P0/P1,
+measured real-project corpus, and validated customer completed-project shadow
+evidence are all green. Missing customer shadow evidence must stay blocked; do
+not close this gate with synthetic customer cases.
+
 ## Product Features
 
 - Project browser: registered MIDAS33, real drawing, and release visualization entries are normalized into project/drawing rows with status badges. The bundled release project currently covers the OPSTOOL 606m outrigger plus seven megatall optimized/compare triples (`baseline`, `after_only`, `ai_compare`) so the viewer can browse the release optimization set from one manifest.
