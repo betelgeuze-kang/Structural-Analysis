@@ -952,7 +952,7 @@ def _packaging_milestone(
         "pm_blocker_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
-            pm_blocker_closure_open_count == pm_blocker_register_release_area_count
+            pm_blocker_closure_open_count == pm_blocker_register_open_count
         ),
         "support_bundle_ci_streak_intake_packet_present": _support_section_present(
             support_optional_sections,
@@ -2147,7 +2147,7 @@ def _build_release_area_matrix(
         "pm_blocker_action_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
-            pm_blocker_closure_open_count == pm_blocker_register_release_area_count
+            pm_blocker_closure_open_count == pm_blocker_register_open_count
         ),
         "ci_streak_intake_packet_in_failure_bundle": _support_section_present(
             support_optional_sections,
