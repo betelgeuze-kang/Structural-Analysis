@@ -83,6 +83,7 @@ python3 scripts/build_opensees_roundtrip_trace_report.py --json
 python3 scripts/build_ux_release_readiness_report.py --run-browser-smoke --json
 python3 scripts/materialize_ndtha_corrected_state_recompute.py
 python3 implementation/phase1/run_ndtha_residual_gate.py --ndtha-stress implementation/phase1/release_evidence/productization/nonlinear_ndtha_stress.corrected_state_recompute.json --max-fallback-rate 0.05 --strict-recommended-residual-hard-fail --require-corrected-state-recompute --out implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json
+python3 implementation/phase1/check_residual_level3_status.py --out implementation/phase1/release_evidence/productization/residual_level3_status.json --json
 python3 scripts/report_release_evidence_freshness.py
 python3 scripts/report_pm_release_gate.py --json
 npm run ai:preflight
