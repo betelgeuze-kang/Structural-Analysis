@@ -575,6 +575,48 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                 "next_locally_closable_gaps": ["G1"],
             },
         ),
+        "github_sync_preflight": _write(
+            tmp_path / "github_development_sync_preflight_report.json",
+            {
+                "schema_version": "github-development-sync-preflight.v1",
+                "status": "synced",
+                "contract_pass": True,
+                "preflight_pass": True,
+                "remote_mutation_approved": False,
+                "remote_sync_needed": False,
+                "reason_code": "PASS",
+                "blockers": [],
+                "state": {
+                    "feature_ahead_count": 0,
+                    "main_ahead_count": 0,
+                    "feature_fast_forward_possible": True,
+                    "main_fast_forward_possible": True,
+                },
+                "checks": {
+                    "worktree_clean": True,
+                    "remote_safety_ok": True,
+                    "remote_fetch_ok": None,
+                    "feature_fast_forward_possible": True,
+                    "main_fast_forward_possible": True,
+                    "feature_synced_to_head": True,
+                    "main_synced_to_head": True,
+                    "explicit_remote_mutation_approval": False,
+                },
+                "pending_remote_updates": [],
+                "r4_disclosure": {
+                    "target": [],
+                    "action": "no remote mutation required",
+                    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
+                    "risk": "No remote mutation remains.",
+                    "rollback": "no rollback needed",
+                    "verification": "fetch origin and compare remote feature/main refs with local HEAD after push",
+                },
+                "claim_boundary": (
+                    "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. "
+                    "A remote update still requires explicit human R4 approval."
+                ),
+            },
+        ),
     }
 
 
@@ -1337,3 +1379,274 @@ def test_pm_release_gate_residual_area_consumes_residual_level3_status(tmp_path:
     assert missing_residual_area["checks"]["residual_level3_status_present"] is False
     assert "residual::residual_level3_status_missing" in missing_payload["release_area_blockers"]
     assert missing_payload["release_area_gate_ready"] is False
+
+
+def test_pm_release_gate_github_sync_area_passes_when_preflight_is_synced(
+    tmp_path: Path,
+) -> None:
+    ndtha = _write(
+        tmp_path / "release_evidence" / "productization" / "ndtha_residual_gate_report.json",
+        {
+            "contract_pass": True,
+            "checks": {
+                "ndtha_no_collapse_pass": True,
+                "residual_top_hard_pass": True,
+                "residual_drift_hard_pass": True,
+                "recommended_residual_pass": True,
+                "strict_recommended_residual_hard_fail_enabled": True,
+                "strict_recommended_residual_pass": True,
+                "corrected_state_recompute_pass": True,
+                "solver_control_rollup_pass": True,
+            },
+            "summary": {
+                "case_count": 12,
+                "fallback_rate": 0.0,
+                "solver_raw_ratio": 1.0,
+                "corrected_state_recompute_required": True,
+                "corrected_state_recompute_present_count": 12,
+                "corrected_state_recompute_pass_count": 12,
+                "solver_control_nonconverged_step_total": 0,
+            },
+            "rows": [{"normalized_residual": {"recommended_max_ratio": 0.1}}],
+        },
+    )
+    element = _write(
+        tmp_path / "element.json",
+        {
+            "contract_pass": True,
+            "checks": {
+                "structural_contact_direct_contract_pass": True,
+                "foundation_soil_link_direct_contract_pass": True,
+                "panel_contact_failure_mode_reason_code_pass": True,
+            },
+            "summary": {
+                "contact_material_coupled_case_count": 12,
+                "nonlinear_residual_integrated_case_count": 2,
+                "material_model_types": ["rc_composite", "steel_elastic_plastic", "composite_steel_rc"],
+            },
+        },
+    )
+    breadth = _write(
+        tmp_path / "breadth.json",
+        {
+            "contract_pass": True,
+            "summary": {
+                "measured_case_count": 150,
+                "measured_family_count": 6,
+                "holdout_family_count": 6,
+                "baseline_measured_case_count": 50,
+                "opensees_incremental_case_count": 20,
+            },
+        },
+    )
+    worst = _write(tmp_path / "worst.json", {"contract_pass": True})
+    base_kwargs = _base_kwargs(tmp_path)
+
+    synced_kwargs = dict(base_kwargs)
+    synced_kwargs["github_sync_preflight"] = _write(
+        tmp_path / "synced_preflight.json",
+        {
+            "schema_version": "github-development-sync-preflight.v1",
+            "status": "synced",
+            "contract_pass": True,
+            "preflight_pass": True,
+            "remote_mutation_approved": False,
+            "remote_sync_needed": False,
+            "reason_code": "PASS",
+            "blockers": [],
+            "state": {
+                "feature_ahead_count": 0,
+                "main_ahead_count": 0,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": True,
+            },
+            "checks": {
+                "worktree_clean": True,
+                "remote_safety_ok": True,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": True,
+                "feature_synced_to_head": True,
+                "main_synced_to_head": True,
+                "explicit_remote_mutation_approval": False,
+            },
+            "pending_remote_updates": [],
+            "r4_disclosure": {
+                "target": [],
+                "action": "no remote mutation required",
+                "risk": "No remote mutation remains.",
+            },
+            "claim_boundary": "read-only",
+        },
+    )
+    synced_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **synced_kwargs,
+    )
+    synced_area = next(
+        row for row in synced_payload["release_area_matrix"] if row["area"] == "github_sync"
+    )
+    assert synced_area["ok"] is True
+    assert synced_area["status"] == "pass"
+    assert synced_area["checks"]["github_sync_preflight_artifact_present"] is True
+    assert synced_area["checks"]["github_sync_preflight_clean"] is True
+    assert synced_area["checks"]["github_sync_preflight_status"] == "synced"
+    assert synced_area["summary"]["pending_remote_update_count"] == 0
+    assert synced_area["summary"]["status"] == "synced"
+    assert "read-only" in synced_area["claim_boundary"]
+    assert synced_area["artifacts"]["github_development_sync_preflight"].endswith(
+        "synced_preflight.json"
+    )
+
+    approval_kwargs = dict(base_kwargs)
+    approval_kwargs["github_sync_preflight"] = _write(
+        tmp_path / "approval_required_preflight.json",
+        {
+            "schema_version": "github-development-sync-preflight.v1",
+            "status": "approval_required",
+            "contract_pass": False,
+            "preflight_pass": True,
+            "remote_mutation_approved": False,
+            "remote_sync_needed": True,
+            "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+            "blockers": ["remote_mutation_approval_required"],
+            "state": {
+                "feature_ahead_count": 2,
+                "main_ahead_count": 4,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": True,
+            },
+            "checks": {
+                "worktree_clean": True,
+                "remote_safety_ok": True,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": True,
+                "feature_synced_to_head": False,
+                "main_synced_to_head": False,
+                "explicit_remote_mutation_approval": False,
+            },
+            "pending_remote_updates": [
+                {"target": "origin/main", "action": "fast-forward push current HEAD to main"}
+            ],
+            "r4_disclosure": {
+                "target": ["origin/main"],
+                "action": "fast-forward push current HEAD to main",
+                "risk": "Main CI and external reviewers immediately see the current commits.",
+            },
+            "claim_boundary": "read-only",
+        },
+    )
+    approval_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **approval_kwargs,
+    )
+    approval_area = next(
+        row for row in approval_payload["release_area_matrix"] if row["area"] == "github_sync"
+    )
+    assert approval_area["ok"] is False
+    assert approval_area["status"] == "blocked"
+    assert approval_area["checks"]["github_sync_preflight_clean"] is False
+    assert approval_area["checks"]["github_sync_remote_mutation_approval_pending"] is True
+    assert approval_area["summary"]["remote_mutation_approval_pending"] is True
+    assert approval_area["summary"]["pending_remote_update_count"] == 1
+    assert approval_area["summary"]["main_ahead_count"] == 4
+    assert approval_area["artifacts"]["github_development_sync_preflight"].endswith(
+        "approval_required_preflight.json"
+    )
+    assert (
+        "github_sync::github_sync_preflight::remote_mutation_approval_required"
+        in approval_payload["release_area_blockers"]
+    )
+    assert "github_sync::github_sync_remote_sync_pending" in approval_payload["release_area_blockers"]
+    assert "github_sync::github_sync_preflight_not_synced" in approval_payload["release_area_blockers"]
+    assert approval_payload["release_area_gate_ready"] is False
+
+    missing_kwargs = dict(base_kwargs)
+    missing_kwargs["github_sync_preflight"] = tmp_path / "missing_github_sync_preflight.json"
+    missing_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **missing_kwargs,
+    )
+    missing_area = next(
+        row for row in missing_payload["release_area_matrix"] if row["area"] == "github_sync"
+    )
+    assert missing_area["ok"] is False
+    assert missing_area["status"] == "blocked"
+    assert missing_area["checks"]["github_sync_preflight_artifact_present"] is False
+    assert missing_area["checks"]["github_sync_preflight_clean"] is False
+    assert missing_area["summary"]["status"] == "missing"
+    assert "github_sync::github_sync_preflight_report_missing" in missing_payload["release_area_blockers"]
+    assert missing_payload["release_area_gate_ready"] is False
+
+    blocked_kwargs = dict(base_kwargs)
+    blocked_kwargs["github_sync_preflight"] = _write(
+        tmp_path / "blocked_preflight.json",
+        {
+            "schema_version": "github-development-sync-preflight.v1",
+            "status": "blocked",
+            "contract_pass": False,
+            "preflight_pass": False,
+            "remote_mutation_approved": False,
+            "remote_sync_needed": False,
+            "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+            "blockers": [
+                "worktree_not_clean",
+                "main_remote_not_ancestor_of_head",
+                "remote_safety_failed",
+            ],
+            "state": {
+                "feature_ahead_count": 0,
+                "main_ahead_count": 0,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": False,
+            },
+            "checks": {
+                "worktree_clean": False,
+                "remote_safety_ok": False,
+                "feature_fast_forward_possible": True,
+                "main_fast_forward_possible": False,
+            },
+            "pending_remote_updates": [],
+            "r4_disclosure": {"target": [], "action": "no remote mutation required", "risk": ""},
+            "claim_boundary": "read-only",
+        },
+    )
+    blocked_payload = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **blocked_kwargs,
+    )
+    blocked_area = next(
+        row for row in blocked_payload["release_area_matrix"] if row["area"] == "github_sync"
+    )
+    assert blocked_area["ok"] is False
+    assert blocked_area["status"] == "blocked"
+    assert blocked_area["checks"]["github_sync_preflight_artifact_present"] is True
+    assert blocked_area["checks"]["github_sync_preflight_clean"] is False
+    assert blocked_area["checks"]["github_sync_worktree_clean"] is False
+    assert blocked_area["checks"]["github_sync_remote_safety_ok"] is False
+    assert blocked_area["checks"]["github_sync_main_fast_forward_possible"] is False
+    assert (
+        "github_sync::github_sync_preflight::worktree_not_clean"
+        in blocked_payload["release_area_blockers"]
+    )
+    assert (
+        "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head"
+        in blocked_payload["release_area_blockers"]
+    )
+    assert (
+        "github_sync::github_sync_preflight::remote_safety_failed"
+        in blocked_payload["release_area_blockers"]
+    )
+    assert blocked_payload["release_area_gate_ready"] is False
+    assert blocked_payload["full_release_gate_ready"] is False

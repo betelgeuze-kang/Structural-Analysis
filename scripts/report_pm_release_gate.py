@@ -9,7 +9,14 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+import check_github_development_sync_preflight  # noqa: E402
 
 
 SCHEMA_VERSION = "pm-release-gate-report.v1"
@@ -87,6 +94,7 @@ DEFAULT_LICENSE_STATUS_CLOSURE = Path(
 DEFAULT_AI_ORCHESTRATION_PREFLIGHT = Path(
     "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
 )
+DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT: Path | None = None
 DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
     "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
 )
@@ -178,8 +186,9 @@ def _artifact_paths_from_rows(rows: list[dict[str, Any]]) -> list[Path]:
         if not isinstance(artifacts, dict):
             continue
         for value in artifacts.values():
-            if value:
-                paths.append(Path(str(value)))
+            text = str(value or "")
+            if text and not (text.startswith("<") and text.endswith(">")):
+                paths.append(Path(text))
     return paths
 
 
@@ -477,6 +486,103 @@ def _core_family_p95_evidence(
         return float(summary_value), rows, "core_family_p95_accuracy_report"
     fallback_max, fallback_rows = _max_family_p95_error_pct(commercial_readiness)
     return fallback_max, fallback_rows, "legacy_commercial_readiness_p95_scan"
+
+
+def _github_sync_payload(github_sync_preflight_path: Path | None) -> tuple[dict[str, Any], str]:
+    if github_sync_preflight_path is not None:
+        return _load_json(github_sync_preflight_path), str(github_sync_preflight_path)
+    try:
+        payload = check_github_development_sync_preflight.build_report(
+            check_github_development_sync_preflight.collect_git_state(),
+            remote_fetch_attempted=False,
+            remote_fetch_ok=None,
+        )
+    except Exception as exc:  # pragma: no cover - defensive release gate boundary
+        payload = {
+            "schema_version": "github-development-sync-preflight.v1",
+            "status": "blocked",
+            "contract_pass": False,
+            "preflight_pass": False,
+            "remote_sync_needed": False,
+            "reason_code": "ERR_GITHUB_SYNC_LIVE_PREFLIGHT_FAILED",
+            "blockers": ["github_sync_live_preflight_failed"],
+            "checks": {},
+            "state": {},
+            "pending_remote_updates": [],
+            "r4_disclosure": {},
+            "error": str(exc),
+        }
+    return payload, "<live-git-state>"
+
+
+def _github_sync_area(github_sync_preflight_path: Path | None) -> dict[str, Any]:
+    payload, artifact_label = _github_sync_payload(github_sync_preflight_path)
+    checks = _as_dict(payload.get("checks"))
+    state = _as_dict(payload.get("state"))
+    preflight_blockers = [
+        str(item) for item in _as_list(payload.get("blockers")) if str(item).strip()
+    ]
+    remote_mutation_approval_required = "remote_mutation_approval_required" in preflight_blockers
+    artifact_present = bool(payload)
+    status = str(payload.get("status", "")).strip().lower() if artifact_present else ""
+    worktree_clean = bool(checks.get("worktree_clean", False))
+    remote_safety_ok = bool(checks.get("remote_safety_ok", False))
+    feature_ff = bool(checks.get("feature_fast_forward_possible", False))
+    main_ff = bool(checks.get("main_fast_forward_possible", False))
+    remote_sync_needed = bool(payload.get("remote_sync_needed", False)) if artifact_present else False
+    preflight_clean = bool(
+        artifact_present
+        and not preflight_blockers
+        and worktree_clean
+        and remote_safety_ok
+        and feature_ff
+        and main_ff
+        and not remote_sync_needed
+        and status == "synced"
+    )
+    area_checks = {
+        "github_sync_preflight_artifact_present": artifact_present,
+        "github_sync_preflight_status": status or "missing",
+        "github_sync_preflight_clean": preflight_clean,
+        "github_sync_worktree_clean": worktree_clean,
+        "github_sync_remote_safety_ok": remote_safety_ok,
+        "github_sync_feature_fast_forward_possible": feature_ff,
+        "github_sync_main_fast_forward_possible": main_ff,
+        "github_sync_remote_mutation_approval_pending": remote_mutation_approval_required,
+        "github_sync_remote_sync_needed": remote_sync_needed,
+    }
+    area_blockers = [
+        *(["github_sync_preflight_report_missing"] if not artifact_present else []),
+        *(f"github_sync_preflight::{blocker}" for blocker in preflight_blockers),
+        *(["github_sync_remote_sync_pending"] if artifact_present and remote_sync_needed else []),
+        *(["github_sync_preflight_not_synced"] if artifact_present and status and status != "synced" else []),
+    ]
+    pending_remote_updates = _as_list(payload.get("pending_remote_updates"))
+    return _area(
+        "github_sync",
+        "GitHub Development Sync",
+        ok=not area_blockers,
+        blockers=area_blockers,
+        checks=area_checks,
+        summary={
+            "status": status or "missing",
+            "remote_sync_needed": remote_sync_needed,
+            "remote_mutation_approval_pending": remote_mutation_approval_required,
+            "remote_mutation_approved": bool(payload.get("remote_mutation_approved", False)) if artifact_present else False,
+            "feature_ahead_count": _as_int(state.get("feature_ahead_count"), 0),
+            "main_ahead_count": _as_int(state.get("main_ahead_count"), 0),
+            "pending_remote_update_count": len(pending_remote_updates),
+            "reason_code": str(payload.get("reason_code", "")),
+            "r4_risk": str(
+                _as_dict(payload.get("r4_disclosure")).get("risk", "")
+            ) if artifact_present else "",
+        },
+        artifacts={"github_development_sync_preflight": artifact_label},
+        claim_boundary=(
+            "The GitHub development sync preflight is read-only. It does not push, merge, publish, "
+            "or mutate GitHub. A remote update still requires explicit human R4 approval."
+        ),
+    )
 
 
 def _release_area_blockers(rows: list[dict[str, Any]]) -> list[str]:
@@ -1249,6 +1355,7 @@ def _build_release_area_matrix(
     release_evidence_freshness_path: Path,
     validation_manual_path: Path,
     limitation_manual_path: Path,
+    github_sync_preflight_path: Path | None,
     cpu_only_product_mode: bool,
     ci_pass_streak_threshold: int,
     core_p95_error_pct_limit: float,
@@ -2447,6 +2554,8 @@ def _build_release_area_matrix(
         )
     )
 
+    rows.append(_github_sync_area(github_sync_preflight_path))
+
     return rows
 
 
@@ -2505,6 +2614,7 @@ def build_report(
     fresh_full_validation_lane_status: Path = DEFAULT_FRESH_FULL_VALIDATION_LANE_STATUS,
     validation_manual: Path = DEFAULT_VALIDATION_MANUAL,
     limitation_manual: Path = DEFAULT_LIMITATION_MANUAL,
+    github_sync_preflight: Path | None = DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT,
     cpu_only_product_mode: bool = False,
     ci_pass_streak_threshold: int = 30,
     core_p95_error_pct_limit: float = 5.0,
@@ -2618,6 +2728,7 @@ def build_report(
         release_evidence_freshness_path=release_evidence_freshness,
         validation_manual_path=validation_manual,
         limitation_manual_path=limitation_manual,
+        github_sync_preflight_path=github_sync_preflight,
         cpu_only_product_mode=cpu_only_product_mode,
         ci_pass_streak_threshold=ci_pass_streak_threshold,
         core_p95_error_pct_limit=core_p95_error_pct_limit,
@@ -2938,6 +3049,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--validation-manual", type=Path, default=DEFAULT_VALIDATION_MANUAL)
     parser.add_argument("--limitation-manual", type=Path, default=DEFAULT_LIMITATION_MANUAL)
+    parser.add_argument(
+        "--github-sync-preflight",
+        type=Path,
+        default=DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT,
+        help=(
+            "Optional pre-generated GitHub development sync preflight JSON. "
+            "Defaults to live local git-state evaluation without fetch or remote mutation."
+        ),
+    )
     parser.add_argument("--cpu-only-product-mode", action="store_true")
     parser.add_argument("--ci-pass-streak-threshold", type=int, default=30)
     parser.add_argument("--core-p95-error-pct-limit", type=float, default=5.0)
@@ -3013,6 +3133,7 @@ def main(argv: list[str] | None = None) -> int:
         fresh_full_validation_lane_status=args.fresh_full_validation_lane_status,
         validation_manual=args.validation_manual,
         limitation_manual=args.limitation_manual,
+        github_sync_preflight=args.github_sync_preflight,
         cpu_only_product_mode=args.cpu_only_product_mode,
         ci_pass_streak_threshold=args.ci_pass_streak_threshold,
         core_p95_error_pct_limit=args.core_p95_error_pct_limit,
