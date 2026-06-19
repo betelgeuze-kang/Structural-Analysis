@@ -45,6 +45,16 @@ def _value_present(value: Any) -> bool:
     return True
 
 
+def _has_empty_leaf(value: Any) -> bool:
+    if isinstance(value, str):
+        return not bool(value.strip())
+    if isinstance(value, dict):
+        return any(_has_empty_leaf(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_has_empty_leaf(item) for item in value)
+    return False
+
+
 def _has_numeric_leaf(value: Any) -> bool:
     if isinstance(value, bool):
         return False
@@ -60,7 +70,12 @@ def _has_numeric_leaf(value: Any) -> bool:
 def validate_payload(payload: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any]:
     required = [str(field) for field in schema.get("required_fields", [])]
     missing = [field for field in required if field not in payload]
-    empty_required = [field for field in required if field in payload and not _value_present(payload.get(field))]
+    empty_required = [
+        field
+        for field in required
+        if field in payload
+        and (not _value_present(payload.get(field)) or _has_empty_leaf(payload.get(field)))
+    ]
     fixed_values = schema.get("fixed_values") if isinstance(schema.get("fixed_values"), dict) else {}
     fixed_mismatches = [
         field

@@ -108,3 +108,16 @@ def test_customer_shadow_evidence_validator_rejects_empty_required_fields() -> N
     assert payload["contract_pass"] is False
     assert "empty_required_field:reference_output_checksum" in payload["blockers"]
     assert "empty_required_field:known_limitations" in payload["blockers"]
+
+
+def test_customer_shadow_evidence_validator_rejects_nested_blank_required_values() -> None:
+    bad = _valid_payload()
+    bad["known_limitations"] = [""]
+    bad["delta_metrics"] = {"max_relative_error_pct": ""}
+
+    payload = validator.validate_payload(bad, _schema())
+
+    assert payload["contract_pass"] is False
+    assert "empty_required_field:known_limitations" in payload["blockers"]
+    assert "empty_required_field:delta_metrics" in payload["blockers"]
+    assert "delta_metrics_missing_numeric_value" in payload["blockers"]
