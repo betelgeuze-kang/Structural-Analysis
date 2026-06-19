@@ -8,7 +8,15 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
+
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+import check_git_remote_safety  # noqa: E402
 
 
 DEFAULT_FEATURE_REF = "origin/codex/create-architecture-definition-document-for-hybrid-ai"
@@ -56,6 +64,9 @@ def collect_git_state(
         "remote_feature_sha": _git_output(["rev-parse", feature_ref], cwd=cwd),
         "remote_main_ref": main_ref,
         "remote_main_sha": _git_output(["rev-parse", main_ref], cwd=cwd),
+        "remote_safety": check_git_remote_safety.build_report(
+            _git_output(["remote", "-v"], cwd=cwd)
+        ),
         "worktree_status_short": _git_output(["status", "--short"], cwd=cwd),
         "feature_ahead_count": _ahead_count(feature_ref, cwd=cwd),
         "main_ahead_count": _ahead_count(main_ref, cwd=cwd),
@@ -78,6 +89,8 @@ def build_report(
     main_ahead_count = int(state.get("main_ahead_count", 0) or 0)
     feature_ff = bool(state.get("feature_fast_forward_possible", False))
     main_ff = bool(state.get("main_fast_forward_possible", False))
+    remote_safety = state.get("remote_safety") if isinstance(state.get("remote_safety"), dict) else {}
+    remote_safety_ok = bool(remote_safety.get("ok", False))
     local_head = str(state.get("local_head_sha", "") or "")
     remote_feature = str(state.get("remote_feature_sha", "") or "")
     remote_main = str(state.get("remote_main_sha", "") or "")
@@ -89,6 +102,7 @@ def build_report(
         and remote_feature
         and remote_main
         and worktree_clean
+        and remote_safety_ok
         and feature_ff
         and main_ff
     )
@@ -96,6 +110,8 @@ def build_report(
     blockers: list[str] = []
     if not worktree_clean:
         blockers.append("worktree_not_clean")
+    if not remote_safety_ok:
+        blockers.append("remote_safety_failed")
     if not feature_ff:
         blockers.append("feature_remote_not_ancestor_of_head")
     if not main_ff:
@@ -121,6 +137,7 @@ def build_report(
         "state": state,
         "checks": {
             "worktree_clean": worktree_clean,
+            "remote_safety_ok": remote_safety_ok,
             "feature_fast_forward_possible": feature_ff,
             "main_fast_forward_possible": main_ff,
             "feature_synced_to_head": feature_synced,

@@ -24,6 +24,14 @@ def _state(**overrides: object) -> dict[str, object]:
         "remote_feature_sha": "def5678",
         "remote_main_ref": "origin/main",
         "remote_main_sha": "012abcd",
+        "remote_safety": {
+            "errors": [],
+            "expected_slug": "betelgeuze-kang/Structural-Analysis",
+            "ok": True,
+            "remotes": {
+                "origin": ["https://github.com/betelgeuze-kang/Structural-Analysis.git"]
+            },
+        },
         "worktree_status_short": "",
         "feature_ahead_count": 2,
         "main_ahead_count": 4,
@@ -44,6 +52,7 @@ def test_sync_preflight_requires_r4_approval_for_ready_remote_mutation() -> None
     assert payload["blockers"] == ["remote_mutation_approval_required"]
     assert payload["checks"]["feature_fast_forward_possible"] is True
     assert payload["checks"]["main_fast_forward_possible"] is True
+    assert payload["checks"]["remote_safety_ok"] is True
     assert "git push origin HEAD:main" == payload["commands"]["main_fast_forward_push"]
     assert "read-only" in payload["claim_boundary"]
 
@@ -86,3 +95,26 @@ def test_sync_preflight_blocks_dirty_or_non_fast_forward_state() -> None:
     assert payload["contract_pass"] is False
     assert "worktree_not_clean" in payload["blockers"]
     assert "main_remote_not_ancestor_of_head" in payload["blockers"]
+
+
+def test_sync_preflight_blocks_wrong_remote_even_with_approval() -> None:
+    payload = sync_preflight.build_report(
+        _state(
+            remote_safety={
+                "errors": [
+                    "protected remote `origin` must point to betelgeuze-kang/Structural-Analysis"
+                ],
+                "expected_slug": "betelgeuze-kang/Structural-Analysis",
+                "ok": False,
+                "remotes": {
+                    "origin": ["https://github.com/betelgeuze-kang/Monet-wedding.git"]
+                },
+            }
+        ),
+        remote_mutation_approved=True,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["remote_safety_ok"] is False
+    assert "remote_safety_failed" in payload["blockers"]
