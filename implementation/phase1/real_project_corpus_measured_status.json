@@ -1,0 +1,37 @@
+{
+  "blockers": [
+    "peer_metric_bearing_groups_pass"
+  ],
+  "checks": {
+    "checksum_or_withheld_coverage_pass": true,
+    "koneps_measured_format_count_pass": true,
+    "manual_review_status_coverage_pass": true,
+    "measured_provenance_rows_pass": true,
+    "peer_metric_bearing_groups_pass": false,
+    "raw_redistribution_blocked_pass": true,
+    "release_eligibility_coverage_pass": true,
+    "stable_row_pointer_coverage_pass": true
+  },
+  "claim_boundary": "This status checks measured corpus evidence and release-readiness metadata. It does not turn local or public source artifacts into redistributable customer data, and it does not treat our measured-run KPI values as third-party reference truth.",
+  "contract_pass": false,
+  "peer_metric_records": "implementation/phase1/peer_tbi_benchmark_metric_records.json",
+  "reason_code": "ERR_REAL_PROJECT_CORPUS_MEASURED_INCOMPLETE",
+  "row_provenance_report": "implementation/phase1/real_project_row_provenance_report.json",
+  "schema_version": "real-project-corpus-measured-status.v1",
+  "summary": {
+    "measured_artifact_row_count": 10,
+    "measured_file_format_count": 2,
+    "measured_file_formats": [
+      "ifc",
+      "mgt"
+    ],
+    "min_measured_artifact_rows": 10,
+    "min_measured_file_formats": 2,
+    "peer_metric_group_count": 5,
+    "peer_metric_groups_with_value": [
+      "citation"
+    ],
+    "peer_metric_groups_with_value_count": 1,
+    "raw_redistribution_allowed_count": 0
+  }
+}

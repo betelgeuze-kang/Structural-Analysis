@@ -1,0 +1,30 @@
+{
+  "schema_version": "customer-shadow-evidence.schema.v1",
+  "required_fields": [
+    "case_id",
+    "project_status",
+    "structure_family",
+    "reference_solver",
+    "reference_solver_version",
+    "reference_output_checksum",
+    "our_engine_commit",
+    "delta_metrics",
+    "residual_metrics",
+    "reviewer_decision",
+    "known_limitations",
+    "reproduce_bundle_id",
+    "raw_data_retained_by_customer",
+    "redistribution_allowed"
+  ],
+  "fixed_values": {
+    "project_status": "completed",
+    "raw_data_retained_by_customer": true,
+    "redistribution_allowed": false
+  },
+  "allowed_reviewer_decisions": [
+    "PASS",
+    "REVIEW",
+    "FAIL"
+  ],
+  "claim_boundary": "Customer shadow evidence records derived checksums, metrics, reviewer decision, and reproduce bundle identity only. Raw customer data remains retained by the customer and is not redistributed through this repository."
+}

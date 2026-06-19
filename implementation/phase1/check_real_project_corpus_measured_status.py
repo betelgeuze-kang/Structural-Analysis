@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Check measured real-project corpus exit criteria without overstating raw evidence."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+
+SCHEMA_VERSION = "real-project-corpus-measured-status.v1"
+DEFAULT_ROW_PROVENANCE = Path("implementation/phase1/real_project_row_provenance_report.json")
+DEFAULT_PEER_METRIC_RECORDS = Path("implementation/phase1/peer_tbi_benchmark_metric_records.json")
+DEFAULT_OUT = Path("implementation/phase1/real_project_corpus_measured_status.json")
+REQUIRED_PEER_GROUPS = {"period", "base_shear", "story_drift", "nonlinear_response", "citation"}
+
+
+def _load_json(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
+def _value_present(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    return True
+
+
+def build_status(
+    *,
+    row_provenance_path: Path = DEFAULT_ROW_PROVENANCE,
+    peer_metric_records_path: Path = DEFAULT_PEER_METRIC_RECORDS,
+    min_measured_rows: int = 10,
+    min_measured_formats: int = 2,
+) -> dict[str, Any]:
+    row_provenance = _load_json(row_provenance_path)
+    peer_metric_records = _load_json(peer_metric_records_path)
+    provenance_rows = [
+        row for row in _as_list(row_provenance.get("source_provenance_rows")) if isinstance(row, dict)
+    ]
+    measured_rows = [
+        row
+        for row in provenance_rows
+        if str(row.get("artifact_status", "")) == "measured_local_artifact_attached"
+    ]
+    measured_formats = sorted(
+        {
+            str(_as_dict(row.get("parser_contract")).get("format", "") or "")
+            for row in measured_rows
+            if str(_as_dict(row.get("parser_contract")).get("format", "") or "")
+        }
+    )
+    peer_rows = [
+        row for row in _as_list(peer_metric_records.get("metric_records")) if isinstance(row, dict)
+    ]
+    peer_groups_with_value = sorted(
+        {
+            str(row.get("metric_group", ""))
+            for row in peer_rows
+            if str(row.get("metric_group", "")) in REQUIRED_PEER_GROUPS and _value_present(row.get("value"))
+        }
+    )
+    checks = {
+        "measured_provenance_rows_pass": len(measured_rows) >= min_measured_rows,
+        "koneps_measured_format_count_pass": len(measured_formats) >= min_measured_formats,
+        "peer_metric_bearing_groups_pass": REQUIRED_PEER_GROUPS <= set(peer_groups_with_value),
+        "checksum_or_withheld_coverage_pass": all(
+            bool(str(row.get("checksum_status_or_withheld_reason", "") or "")) for row in measured_rows
+        ),
+        "stable_row_pointer_coverage_pass": all(
+            bool(str(row.get("stable_row_pointer", "") or "")) for row in measured_rows
+        ),
+        "manual_review_status_coverage_pass": all(
+            bool(str(row.get("manual_review_status", "") or "")) for row in measured_rows
+        ),
+        "release_eligibility_coverage_pass": all(
+            bool(str(row.get("release_eligibility", "") or "")) for row in measured_rows
+        ),
+        "raw_redistribution_blocked_pass": all(row.get("release_surface_allowed") is False for row in measured_rows),
+    }
+    blockers = [key for key, passed in checks.items() if not passed]
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "contract_pass": not blockers,
+        "reason_code": "PASS" if not blockers else "ERR_REAL_PROJECT_CORPUS_MEASURED_INCOMPLETE",
+        "row_provenance_report": str(row_provenance_path),
+        "peer_metric_records": str(peer_metric_records_path),
+        "summary": {
+            "measured_artifact_row_count": len(measured_rows),
+            "min_measured_artifact_rows": min_measured_rows,
+            "measured_file_format_count": len(measured_formats),
+            "min_measured_file_formats": min_measured_formats,
+            "measured_file_formats": measured_formats,
+            "peer_metric_group_count": len(REQUIRED_PEER_GROUPS),
+            "peer_metric_groups_with_value_count": len(peer_groups_with_value),
+            "peer_metric_groups_with_value": peer_groups_with_value,
+            "raw_redistribution_allowed_count": sum(1 for row in measured_rows if row.get("release_surface_allowed")),
+        },
+        "checks": checks,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This status checks measured corpus evidence and release-readiness metadata. It does not turn "
+            "local or public source artifacts into redistributable customer data, and it does not treat "
+            "our measured-run KPI values as third-party reference truth."
+        ),
+    }
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--row-provenance", type=Path, default=DEFAULT_ROW_PROVENANCE)
+    parser.add_argument("--peer-metric-records", type=Path, default=DEFAULT_PEER_METRIC_RECORDS)
+    parser.add_argument("--min-measured-rows", type=int, default=10)
+    parser.add_argument("--min-measured-formats", type=int, default=2)
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--fail-blocked", action="store_true")
+    args = parser.parse_args(argv)
+
+    payload = build_status(
+        row_provenance_path=args.row_provenance,
+        peer_metric_records_path=args.peer_metric_records,
+        min_measured_rows=args.min_measured_rows,
+        min_measured_formats=args.min_measured_formats,
+    )
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if args.json:
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        summary = payload["summary"]
+        print(
+            "real-project-corpus-measured: "
+            f"{'PASS' if payload['contract_pass'] else 'BLOCKED'} | "
+            f"rows={summary['measured_artifact_row_count']}/{summary['min_measured_artifact_rows']} | "
+            f"formats={summary['measured_file_format_count']}/{summary['min_measured_file_formats']} | "
+            f"peer_values={summary['peer_metric_groups_with_value_count']}/{summary['peer_metric_group_count']}"
+        )
+    return 1 if args.fail_blocked and not payload["contract_pass"] else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

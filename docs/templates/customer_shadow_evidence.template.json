@@ -1,0 +1,22 @@
+{
+  "case_id": "OWNER_INPUT_REQUIRED_CASE_ID",
+  "project_status": "completed",
+  "structure_family": "OWNER_INPUT_REQUIRED_STRUCTURE_FAMILY",
+  "reference_solver": "OWNER_INPUT_REQUIRED_REFERENCE_SOLVER",
+  "reference_solver_version": "OWNER_INPUT_REQUIRED_REFERENCE_SOLVER_VERSION",
+  "reference_output_checksum": "sha256:OWNER_INPUT_REQUIRED_REFERENCE_OUTPUT_DIGEST",
+  "our_engine_commit": "OWNER_INPUT_REQUIRED_ENGINE_COMMIT",
+  "delta_metrics": {
+    "max_relative_error_pct": "OWNER_INPUT_REQUIRED"
+  },
+  "residual_metrics": {
+    "normalized_equilibrium_residual": "OWNER_INPUT_REQUIRED"
+  },
+  "reviewer_decision": "REVIEW",
+  "known_limitations": [
+    "OWNER_INPUT_REQUIRED_LIMITATION"
+  ],
+  "reproduce_bundle_id": "OWNER_INPUT_REQUIRED_REPRODUCE_BUNDLE_ID",
+  "raw_data_retained_by_customer": true,
+  "redistribution_allowed": false
+}

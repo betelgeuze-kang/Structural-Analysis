@@ -1,0 +1,540 @@
+{
+  "contract_pass": true,
+  "coverage_matrix_schema_version": "real_project_parser_coverage_matrix.v1",
+  "generated_at": "2026-04-27T00:00:00+09:00",
+  "p0_upstream_hard_gate": true,
+  "peer_metric_records_schema_version": "peer_tbi_benchmark_metric_records.v1",
+  "promoted_row_provenance_rows": [],
+  "raw_redistribution_default_blocked": true,
+  "reason_code": "PASS",
+  "row_provenance_coverage": 1.0,
+  "run_id": "phase1-real-project-row-provenance-report",
+  "schema_version": "real_project_row_provenance_report.v1",
+  "source_manifest_schema_version": "real_project_corpus_manifest.v1",
+  "source_provenance_rows": [
+    {
+      "access_policy": {
+        "classification": "unknown",
+        "license_basis": "Public procurement metadata is open; each attached design document must be reviewed for access, security, copyright, and redistribution constraints before download promotion.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "metadata_only_candidate_pending_artifact_review",
+      "blocked_reason": "KONEPS attachments require artifact-level access, security, copyright, checksum, and redistribution review before release.",
+      "checksum_status_or_withheld_reason": "withheld_until_artifact_level_review",
+      "file_inventory_status": "not_collected_metadata_seed_only",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_source_family_review",
+      "official_url": "https://www.data.go.kr/data/15058815/openapi.do",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "coverage_status": "planned",
+        "gate_id": "P1_KONEPS_PARSER_COVERAGE",
+        "required_target_count": 7,
+        "required_targets": [
+          ".mgt",
+          ".ifc",
+          ".dwg",
+          ".dxf",
+          ".pdf",
+          ".xlsx",
+          ".zip"
+        ],
+        "source_file": "real_project_parser_coverage_matrix.json"
+      },
+      "release_eligibility": "blocked_pending_manual_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:koneps_turnkey_design_docs",
+      "row_pointer": {
+        "json_path": "$.source_families[0]",
+        "source_file": "real_project_corpus_seed_manifest.json"
+      },
+      "source_id": "koneps_turnkey_design_docs",
+      "source_kind": "public_procurement_design_documents",
+      "source_label": "KONEPS turnkey and technical-proposal design-document candidates",
+      "stable_row_pointer": "real_project_corpus_seed_manifest.json:source_families[0]"
+    },
+    {
+      "access_policy": {
+        "classification": "public",
+        "license_basis": "PEER public reports and benchmark materials can be referenced; redistribution and derived packaging require per-document review.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "citation_metric_records_seeded_no_raw_models",
+      "blocked_reason": "PEER TBI seed exposes citation/metric provenance only; raw model redistribution remains blocked pending explicit review.",
+      "checksum_status_or_withheld_reason": "raw_model_files_not_redistributed",
+      "file_inventory_status": "peer_tbi_benchmark_metric_records.json",
+      "jurisdiction": "US",
+      "manual_review_status": "pending_document_level_review",
+      "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "coverage_status": "seeded",
+        "gate_id": "P1_PEER_TBI_BENCHMARK_METRICS",
+        "metric_group_count": 5,
+        "metric_groups": [
+          "base_shear",
+          "citation",
+          "nonlinear_response",
+          "period",
+          "story_drift"
+        ],
+        "source_file": "peer_tbi_benchmark_metric_records.json"
+      },
+      "release_eligibility": "blocked_pending_manual_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:peer_tbi_tall_buildings",
+      "row_pointer": {
+        "json_path": "$.metric_records[*]",
+        "source_file": "peer_tbi_benchmark_metric_records.json"
+      },
+      "source_id": "peer_tbi_tall_buildings",
+      "source_kind": "public_research_tall_building_benchmarks",
+      "source_label": "PEER Tall Buildings Initiative benchmark candidates",
+      "stable_row_pointer": "real_project_corpus_seed_manifest.json:source_families[1]"
+    },
+    {
+      "access_policy": {
+        "classification": "internal_validation_evidence",
+        "license_basis": "MIDAS/KDS validation evidence is trace-only; raw redistribution remains blocked.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "exact_geometry_bridge_row_provenance_validation_evidence",
+      "blocked_reason": "MIDAS/KDS exact geometry bridge validation evidence is trace-only; raw redistribution remains blocked pending explicit review.",
+      "checksum_status_or_withheld_reason": "validation_report_only_no_raw_redistribution",
+      "file_inventory_status": "midas_kds_geometry_bridge_validation_report.json",
+      "jurisdiction": "KR",
+      "manual_review_status": "trace_only_internal_validation_review_required",
+      "official_url": "midas_kds_geometry_bridge_validation_report.json",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "artifact_count": 3,
+        "contract_pass": true,
+        "exact_geometry_bridge_pass_count": 3,
+        "exact_mapped_row_provenance_count_total": 3168,
+        "full_load_crosswalk_count_total": 51,
+        "full_member_crosswalk_count_total": 242,
+        "full_section_crosswalk_count_total": 200,
+        "review_row_count_total": 3168,
+        "run_id": "phase1-validate-midas-kds-geometry-bridge-artifacts",
+        "source_file": "midas_kds_geometry_bridge_validation_report.json"
+      },
+      "release_eligibility": "blocked_trace_only_validation_evidence",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:midas_kds_geometry_bridge_validation",
+      "row_pointer": {
+        "json_path": "$.summary",
+        "source_file": "midas_kds_geometry_bridge_validation_report.json"
+      },
+      "source_id": "midas_kds_geometry_bridge_validation",
+      "source_kind": "validation_evidence",
+      "source_label": "MIDAS/KDS geometry bridge validation evidence",
+      "stable_row_pointer": "midas_kds_geometry_bridge_validation_report.json:$.summary"
+    },
+    {
+      "access_policy": {
+        "classification": "bim_award_archive_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "8c3fb09c069497b0c72f8a97afc3230de6d27e26e6978dd5a45554b1c566ef08",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2020.ifc",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://event.buildingsmart.or.kr/Awards/2020",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 1821,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "ifc_structural_subset",
+        "download_mode": "local_copy",
+        "format": "ifc",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "ifc_public_award_reference_2020.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:ifc_public_award_reference_2020",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "ifc_public_award_reference_2020.json"
+      },
+      "source_id": "ifc_public_award_reference_2020",
+      "source_kind": "ifc_structural_subset",
+      "source_label": "ifc public award reference 2020",
+      "stable_row_pointer": "ifc_public_award_reference_2020.json:ifc_public_award_reference_2020:ifc:8c3fb09c0694"
+    },
+    {
+      "access_policy": {
+        "classification": "bim_award_archive_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "16453643c1b07c3c7d2d55373edfb2ccc82bcf7c74505aa3e1a1be7ec82b15fa",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2021.ifc",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://event.buildingsmart.or.kr/Awards/2021",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2255,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "ifc_structural_subset",
+        "download_mode": "local_copy",
+        "format": "ifc",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "ifc_public_award_reference_2021.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:ifc_public_award_reference_2021",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "ifc_public_award_reference_2021.json"
+      },
+      "source_id": "ifc_public_award_reference_2021",
+      "source_kind": "ifc_structural_subset",
+      "source_label": "ifc public award reference 2021",
+      "stable_row_pointer": "ifc_public_award_reference_2021.json:ifc_public_award_reference_2021:ifc:16453643c1b0"
+    },
+    {
+      "access_policy": {
+        "classification": "bim_award_archive_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "8f78fdacb7c685a0c040f6c14799f9acbb974099c0752885fa5d49bf2ccc8486",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2022.ifc",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://event.buildingsmart.or.kr/Awards/2022",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 1993,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "ifc_structural_subset",
+        "download_mode": "local_copy",
+        "format": "ifc",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "ifc_public_award_reference_2022.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:ifc_public_award_reference_2022",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "ifc_public_award_reference_2022.json"
+      },
+      "source_id": "ifc_public_award_reference_2022",
+      "source_kind": "ifc_structural_subset",
+      "source_label": "ifc public award reference 2022",
+      "stable_row_pointer": "ifc_public_award_reference_2022.json:ifc_public_award_reference_2022:ifc:8f78fdacb7c6"
+    },
+    {
+      "access_policy": {
+        "classification": "bim_award_archive_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "7adebdcc95d55f9ac24be83ec31c89ea4d6799b685e128990d0890814753448b",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/ifc_public_award_reference_2024.ifc",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://event.buildingsmart.or.kr/Awards/2024",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2397,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "ifc_structural_subset",
+        "download_mode": "local_copy",
+        "format": "ifc",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "ifc_public_award_reference_2024.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:ifc_public_award_reference_2024",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "ifc_public_award_reference_2024.json"
+      },
+      "source_id": "ifc_public_award_reference_2024",
+      "source_kind": "ifc_structural_subset",
+      "source_label": "ifc public award reference 2024",
+      "stable_row_pointer": "ifc_public_award_reference_2024.json:ifc_public_award_reference_2024:ifc:7adebdcc95d5"
+    },
+    {
+      "access_policy": {
+        "classification": "bim_award_archive_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "eb1fcd5a49b04361a1482ad36156029d3b64ff131abb399af8446d6c5c50f4aa",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/ifc_public_award_structure.ifc",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://event.buildingsmart.or.kr/Awards/2023",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2293,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "ifc_structural_subset",
+        "download_mode": "local_copy",
+        "format": "ifc",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "ifc_public_award_structure.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:ifc_public_award_structure",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "ifc_public_award_structure.json"
+      },
+      "source_id": "ifc_public_award_structure",
+      "source_kind": "ifc_structural_subset",
+      "source_label": "ifc public award structure",
+      "stable_row_pointer": "ifc_public_award_structure.json:ifc_public_award_structure:ifc:eb1fcd5a49b0"
+    },
+    {
+      "access_policy": {
+        "classification": "society_example_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "fbe2257be2c10679cb7bc63a29f4c9d43ad8588168ce65330562b5aec0db6db8",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/kci_concrete_building_design_examples_2e_native_baseline.mgt",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 283,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "native_text_model",
+        "download_mode": "local_copy",
+        "format": "mgt",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "kci_concrete_building_design_examples_2e_native_baseline.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:kci_concrete_building_design_examples_2e_native_baseline",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "kci_concrete_building_design_examples_2e_native_baseline.json"
+      },
+      "source_id": "kci_concrete_building_design_examples_2e_native_baseline",
+      "source_kind": "native_text_model",
+      "source_label": "kci concrete building design examples 2e native baseline",
+      "stable_row_pointer": "kci_concrete_building_design_examples_2e_native_baseline.json:kci_concrete_building_design_examples_2e_native_baseline:mgt:fbe2257be2c1"
+    },
+    {
+      "access_policy": {
+        "classification": "public_attachment_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/koneps_goyang_changneung_powerplant_design_service.mgt",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK01150037&bidPbancOrd=000&fileSeq=1&fileType=",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2205887,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "native_text_model",
+        "download_mode": "local_copy",
+        "format": "mgt",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "koneps_goyang_changneung_powerplant_design_service.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:koneps_goyang_changneung_powerplant_design_service",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "koneps_goyang_changneung_powerplant_design_service.json"
+      },
+      "source_id": "koneps_goyang_changneung_powerplant_design_service",
+      "source_kind": "native_text_model",
+      "source_label": "koneps goyang changneung powerplant design service",
+      "stable_row_pointer": "koneps_goyang_changneung_powerplant_design_service.json:koneps_goyang_changneung_powerplant_design_service:mgt:1538a3cc663e"
+    },
+    {
+      "access_policy": {
+        "classification": "public_attachment_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "3ad30305644241319450b42e56316ff3b36ee9db8eb2b393737a61a6272aa870",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/koneps_hangang_park_gwangnaru2_native_baseline.mgt",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK00667779&bidPbancOrd=000&fileSeq=2&fileType=",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 285,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "native_text_model",
+        "download_mode": "local_copy",
+        "format": "mgt",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "koneps_hangang_park_gwangnaru2_native_baseline.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:koneps_hangang_park_gwangnaru2_native_baseline",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "koneps_hangang_park_gwangnaru2_native_baseline.json"
+      },
+      "source_id": "koneps_hangang_park_gwangnaru2_native_baseline",
+      "source_kind": "native_text_model",
+      "source_label": "koneps hangang park gwangnaru2 native baseline",
+      "stable_row_pointer": "koneps_hangang_park_gwangnaru2_native_baseline.json:koneps_hangang_park_gwangnaru2_native_baseline:mgt:3ad303056442"
+    },
+    {
+      "access_policy": {
+        "classification": "competition_material_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/lh_bucheon_yeokgok_a1_housing_native_baseline.mgt",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=647939&seq=3",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2205887,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "native_text_model",
+        "download_mode": "local_copy",
+        "format": "mgt",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "lh_bucheon_yeokgok_a1_housing_native_baseline.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:lh_bucheon_yeokgok_a1_housing_native_baseline",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "lh_bucheon_yeokgok_a1_housing_native_baseline.json"
+      },
+      "source_id": "lh_bucheon_yeokgok_a1_housing_native_baseline",
+      "source_kind": "native_text_model",
+      "source_label": "lh bucheon yeokgok a1 housing native baseline",
+      "stable_row_pointer": "lh_bucheon_yeokgok_a1_housing_native_baseline.json:lh_bucheon_yeokgok_a1_housing_native_baseline:mgt:1538a3cc663e"
+    },
+    {
+      "access_policy": {
+        "classification": "competition_material_check_terms",
+        "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        "redistribution_allowed": false,
+        "requires_manual_review": true
+      },
+      "artifact_status": "measured_local_artifact_attached",
+      "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+      "checksum_status_or_withheld_reason": "1538a3cc663e530d52955a4211ca2b37554dca6c76f59a0056a313213beb4eb4",
+      "file_inventory_status": "implementation/phase1/open_data/korea/curated/lh_happy_city_5_1_native_baseline.mgt",
+      "jurisdiction": "KR",
+      "manual_review_status": "pending_artifact_level_review",
+      "official_url": "https://www.lh.or.kr/boardDownload.es?bid=0034&list_no=648330&seq=1",
+      "p0_upstream_hard_gate": true,
+      "parser_contract": {
+        "byte_count": 2205887,
+        "collection_policy": "local_first_manual_attach",
+        "content_kind": "native_text_model",
+        "download_mode": "local_copy",
+        "format": "mgt",
+        "measured_local_artifact": true,
+        "retrieved_at_utc": "2026-06-12T19:57:56.016840+00:00",
+        "source_file": "lh_happy_city_5_1_native_baseline.json"
+      },
+      "release_eligibility": "blocked_pending_artifact_review",
+      "release_surface_allowed": false,
+      "row_id": "real-project-row-provenance:korea-collected:lh_happy_city_5_1_native_baseline",
+      "row_pointer": {
+        "json_path": "$",
+        "source_file": "lh_happy_city_5_1_native_baseline.json"
+      },
+      "source_id": "lh_happy_city_5_1_native_baseline",
+      "source_kind": "native_text_model",
+      "source_label": "lh happy city 5 1 native baseline",
+      "stable_row_pointer": "lh_happy_city_5_1_native_baseline.json:lh_happy_city_5_1_native_baseline:mgt:1538a3cc663e"
+    }
+  ],
+  "summary": {
+    "all_rows_have_required_fields": true,
+    "checksum_or_withheld_count": 13,
+    "manual_review_status_count": 13,
+    "measured_artifact_row_count": 10,
+    "measured_file_format_count": 2,
+    "measured_file_formats": [
+      "ifc",
+      "mgt"
+    ],
+    "midas_kds_exact_geometry_bridge_pass_count": 3,
+    "midas_kds_exact_row_provenance_count": 3168,
+    "midas_kds_full_load_crosswalk_count_total": 51,
+    "midas_kds_full_member_crosswalk_count_total": 242,
+    "midas_kds_full_section_crosswalk_count_total": 200,
+    "midas_kds_review_row_count": 3168,
+    "midas_kds_validation_artifact_count": 3,
+    "midas_kds_validation_present": true,
+    "midas_kds_validation_run_id": "phase1-validate-midas-kds-geometry-bridge-artifacts",
+    "p0_hard_gate_represented": true,
+    "peer_tbi_metric_group_count": 5,
+    "raw_redistribution_default_blocked": true,
+    "release_eligibility_count": 13,
+    "release_surface_allowed_count": 0,
+    "required_source_families": [
+      "koneps_turnkey_design_docs",
+      "peer_tbi_tall_buildings"
+    ],
+    "required_source_families_present": true,
+    "row_count": 13,
+    "row_provenance_coverage": 1.0,
+    "stable_row_pointer_count": 13
+  }
+}

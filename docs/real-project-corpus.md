@@ -43,7 +43,7 @@ Benchmark metric groups are kept as machine-readable records:
 | --- | --- | --- | --- |
 | P0 | provenance, license, security, checksum, manual-review | official entrypoint, jurisdiction, access policy, file inventory, checksums, reviewer signoff | accept/reject decision and redistributability flag |
 | P1 | parser coverage matrix and benchmark metric record | file-type coverage, typed/raw-preserved/excluded/blocked status, metric rows, citation linkage | corpus coverage report and benchmark table |
-| P1-3 | row provenance gate | source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, row pointer, release-surface eligibility | row-level eligibility for P2 |
+| P1-3 | row provenance gate | source family, access policy, checksum-or-withheld reason, file inventory status, parser contract, stable row pointer, manual review status, release-surface eligibility | row-level eligibility for P2 |
 | P2 | crawler automation, redaction, release viewer, report surfacing | refresh schedule, robots and rate-limit handling, redaction policy, release manifest | repeatable refresh and surfaced reports/releases |
 
 ## P0: Provenance / License / Security / Checksum / Manual-Review
@@ -80,12 +80,20 @@ P1-3 closes the handoff from parsed rows to P2 release/report surfaces.
 | checksum or withheld reason | The row carries a checksum when allowed, or an explicit reason when it is withheld. |
 | file inventory status | The row records whether the source file is retrieved, referenced, excluded, blocked, or missing. |
 | parser contract | The parser identity, parser version, and row classification remain auditable. |
-| row pointer | The row keeps a stable page/table/entity/cell/member locator back to source. |
+| stable row pointer | The row keeps a stable page/table/entity/cell/member locator back to source. |
+| manual review status | The row says whether artifact-level or document-level review is complete, pending, or blocked. |
 | release-surface eligibility | The row states clearly whether it may move to P2. |
 
 - KONEPS public metadata/announcement/attachment access is tracked separately from redistributable artifacts.
 - PEER TBI allows citation-first benchmark records, but raw model/input deck release stays blocked until document-level review is complete.
-- Generate the current seed report with `implementation/phase1/build_real_project_row_provenance_report.py`; `implementation/phase1/real_project_row_provenance_report.json` is a generated local/CI report and remains outside Git by default.
+- Generate the current report with `implementation/phase1/build_real_project_row_provenance_report.py`; the tracked `implementation/phase1/real_project_row_provenance_report.json` now includes measured local KR artifact rows in addition to seed/source-family rows.
+- Check the measured exit status with `implementation/phase1/check_real_project_corpus_measured_status.py`. Current status is intentionally blocked until all five PEER metric groups carry values; the KR measured provenance row and measured format counts already meet the initial target.
+
+## Customer Shadow Evidence
+
+Customer completed-project shadow evidence must not put customer raw data into Git. Use `implementation/phase1/customer_shadow_evidence.schema.json` and validate a filled evidence file with `implementation/phase1/validate_customer_shadow_evidence.py`.
+
+Required evidence fields include `case_id`, `project_status=completed`, structure family, reference solver/version, reference output checksum, our engine commit, delta metrics, residual metrics, reviewer decision, limitations, and reproduce bundle id. The validator requires `raw_data_retained_by_customer=true` and `redistribution_allowed=false`, rejects placeholders, and only accepts reviewer decisions `PASS`, `REVIEW`, or `FAIL`.
 
 ## P2: Crawler Automation / Redaction / Release Viewer / Report Surfacing
 

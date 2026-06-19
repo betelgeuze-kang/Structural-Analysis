@@ -17,6 +17,7 @@ MIDAS_KDS_VALIDATION_SOURCE_ID = "midas_kds_geometry_bridge_validation"
 DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH = Path(__file__).resolve().with_name(
     "midas_kds_geometry_bridge_validation_report.json"
 )
+DEFAULT_KOREA_COLLECTED_REPORTS_DIR = Path(__file__).resolve().parent / "open_data/korea/collected/reports"
 REQUIRED_SOURCE_IDS = {KONEPS_SOURCE_ID, PEER_TBI_SOURCE_ID}
 REQUIRED_ROW_FIELDS = {
     "row_id",
@@ -32,6 +33,9 @@ REQUIRED_ROW_FIELDS = {
     "file_inventory_status",
     "parser_contract",
     "row_pointer",
+    "stable_row_pointer",
+    "manual_review_status",
+    "release_eligibility",
     "release_surface_allowed",
     "blocked_reason",
 }
@@ -179,6 +183,9 @@ def _validation_report_row(
             "source_file": validation_report_path.name,
             "json_path": "$.summary",
         },
+        "stable_row_pointer": f"{validation_report_path.name}:$.summary",
+        "manual_review_status": "trace_only_internal_validation_review_required",
+        "release_eligibility": "blocked_trace_only_validation_evidence",
         "release_surface_allowed": False,
         "blocked_reason": "MIDAS/KDS exact geometry bridge validation evidence is trace-only; raw redistribution remains blocked pending explicit review.",
     }
@@ -255,6 +262,18 @@ def _artifact_fields(source_id: str) -> dict[str, str]:
     }
 
 
+def _manual_review_status(*, source_id: str, measured: bool = False) -> str:
+    if measured:
+        return "pending_artifact_level_review"
+    if source_id == PEER_TBI_SOURCE_ID:
+        return "pending_document_level_review"
+    return "pending_source_family_review"
+
+
+def _release_eligibility(*, measured: bool = False) -> str:
+    return "blocked_pending_artifact_review" if measured else "blocked_pending_manual_review"
+
+
 def _source_row(
     source: dict[str, Any],
     manifest_index: int,
@@ -278,9 +297,74 @@ def _source_row(
         "file_inventory_status": artifact_fields["file_inventory_status"],
         "parser_contract": _parser_contract(source_id, coverage_matrix, peer_metric_records),
         "row_pointer": _row_pointer(source_id, manifest_index),
+        "stable_row_pointer": f"real_project_corpus_seed_manifest.json:source_families[{manifest_index}]",
+        "manual_review_status": _manual_review_status(source_id=source_id),
+        "release_eligibility": _release_eligibility(),
         "release_surface_allowed": False,
         "blocked_reason": artifact_fields["blocked_reason"],
     }
+
+
+def _collected_report_paths(reports_dir: Path | None) -> list[Path]:
+    if reports_dir is None or not reports_dir.exists():
+        return []
+    return sorted(path for path in reports_dir.glob("*.json") if path.is_file())
+
+
+def _measured_artifact_row(report_path: Path, report: dict[str, Any]) -> dict[str, Any]:
+    source_id = str(report.get("source_id", report_path.stem) or report_path.stem)
+    fmt = str(report.get("format", "") or "")
+    sha256 = str(report.get("sha256", "") or "")
+    resolved_reference = str(report.get("resolved_reference", "") or "")
+    stable_suffix = sha256[:12] if sha256 else "checksum-withheld"
+    return {
+        "row_id": f"real-project-row-provenance:korea-collected:{source_id}",
+        "source_id": source_id,
+        "source_label": source_id.replace("_", " "),
+        "source_kind": str(report.get("content_kind", "local_collected_artifact") or "local_collected_artifact"),
+        "jurisdiction": "KR",
+        "official_url": str(report.get("provenance_url", "") or ""),
+        "p0_upstream_hard_gate": True,
+        "access_policy": {
+            "classification": str(report.get("license_hint", "manual_review_required") or "manual_review_required"),
+            "redistribution_allowed": False,
+            "requires_manual_review": True,
+            "license_basis": "Measured local artifact row is retained as provenance evidence only; redistribution stays blocked until artifact-level review completes.",
+        },
+        "artifact_status": "measured_local_artifact_attached",
+        "checksum_status_or_withheld_reason": sha256 or "checksum_withheld_or_missing",
+        "file_inventory_status": resolved_reference or "local_reference_missing",
+        "parser_contract": {
+            "source_file": report_path.name,
+            "format": fmt,
+            "content_kind": str(report.get("content_kind", "") or ""),
+            "collection_policy": str(report.get("collection_policy", "") or ""),
+            "download_mode": str(report.get("download_mode", "") or ""),
+            "byte_count": int(report.get("byte_count", 0) or 0),
+            "retrieved_at_utc": str(report.get("retrieved_at_utc", "") or ""),
+            "measured_local_artifact": True,
+        },
+        "row_pointer": {
+            "source_file": report_path.name,
+            "json_path": "$",
+        },
+        "stable_row_pointer": f"{report_path.name}:{source_id}:{fmt}:{stable_suffix}",
+        "manual_review_status": _manual_review_status(source_id=source_id, measured=True),
+        "release_eligibility": _release_eligibility(measured=True),
+        "release_surface_allowed": False,
+        "blocked_reason": "Measured local artifact is provenance evidence only; release packaging remains blocked until checksum, security, terms, and redistribution review complete.",
+    }
+
+
+def _measured_artifact_rows(reports_dir: Path | None) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for report_path in _collected_report_paths(reports_dir):
+        try:
+            report = _load_json(report_path)
+        except Exception:
+            continue
+        rows.append(_measured_artifact_row(report_path, report))
+    return rows
 
 
 def _all_rows_have_required_fields(rows: list[dict[str, Any]]) -> bool:
@@ -307,6 +391,7 @@ def build_report(
     peer_metric_records: dict[str, Any],
     midas_kds_validation_report: dict[str, Any] | None = None,
     midas_kds_validation_report_path: Path | None = None,
+    korea_collected_reports_dir: Path | None = DEFAULT_KOREA_COLLECTED_REPORTS_DIR,
 ) -> dict[str, Any]:
     if midas_kds_validation_report_path is None:
         midas_kds_validation_report_path = DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH
@@ -321,6 +406,8 @@ def build_report(
     if isinstance(midas_kds_validation_report, dict) and bool(midas_kds_validation_report.get("contract_pass", False)):
         validation_row = _validation_report_row(midas_kds_validation_report, midas_kds_validation_report_path)
         rows.append(validation_row)
+    measured_rows = _measured_artifact_rows(korea_collected_reports_dir)
+    rows.extend(measured_rows)
     source_ids = {row["source_id"] for row in rows}
     required_source_families_present = REQUIRED_SOURCE_IDS <= source_ids
     p0_hard_gate_represented = all(row["p0_upstream_hard_gate"] is True for row in rows)
@@ -335,6 +422,19 @@ def build_report(
         and row["parser_contract"].get("metric_group_count") == 5
         for row in rows
     )
+    measured_file_formats = sorted(
+        {
+            str(row.get("parser_contract", {}).get("format", "") or "")
+            for row in measured_rows
+            if str(row.get("parser_contract", {}).get("format", "") or "")
+        }
+    )
+    checksum_or_withheld_count = sum(
+        1 for row in rows if bool(str(row.get("checksum_status_or_withheld_reason", "") or ""))
+    )
+    stable_row_pointer_count = sum(1 for row in rows if bool(str(row.get("stable_row_pointer", "") or "")))
+    manual_review_status_count = sum(1 for row in rows if bool(str(row.get("manual_review_status", "") or "")))
+    release_eligibility_count = sum(1 for row in rows if bool(str(row.get("release_eligibility", "") or "")))
     contract_pass = (
         required_source_families_present
         and p0_hard_gate_represented
@@ -364,8 +464,15 @@ def build_report(
             "required_source_families_present": required_source_families_present,
             "p0_hard_gate_represented": p0_hard_gate_represented,
             "row_count": len(rows),
+            "measured_artifact_row_count": len(measured_rows),
+            "measured_file_format_count": len(measured_file_formats),
+            "measured_file_formats": measured_file_formats,
             "release_surface_allowed_count": sum(1 for row in rows if row["release_surface_allowed"]),
             "all_rows_have_required_fields": all_rows_have_required_fields,
+            "checksum_or_withheld_count": checksum_or_withheld_count,
+            "stable_row_pointer_count": stable_row_pointer_count,
+            "manual_review_status_count": manual_review_status_count,
+            "release_eligibility_count": release_eligibility_count,
             "row_provenance_coverage": row_provenance_coverage,
             "peer_tbi_metric_group_count": peer_metric_group_count,
             "raw_redistribution_default_blocked": raw_redistribution_default_blocked,
@@ -400,6 +507,7 @@ def write_report(
     peer_metric_records_path: Path,
     out_path: Path,
     midas_kds_validation_report_path: Path | None = None,
+    korea_collected_reports_dir: Path | None = DEFAULT_KOREA_COLLECTED_REPORTS_DIR,
 ) -> dict[str, Any]:
     if midas_kds_validation_report_path is None:
         midas_kds_validation_report_path = DEFAULT_MIDAS_KDS_VALIDATION_REPORT_PATH
@@ -410,6 +518,7 @@ def write_report(
         _load_json(peer_metric_records_path),
         midas_kds_validation_report,
         midas_kds_validation_report_path,
+        korea_collected_reports_dir,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -422,6 +531,7 @@ def main() -> int:
     parser.add_argument("--coverage-matrix", type=Path, required=True)
     parser.add_argument("--peer-metric-records", type=Path, required=True)
     parser.add_argument("--midas-kds-validation-report", type=Path, default=None)
+    parser.add_argument("--korea-collected-reports-dir", type=Path, default=DEFAULT_KOREA_COLLECTED_REPORTS_DIR)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
 
@@ -431,6 +541,7 @@ def main() -> int:
         args.peer_metric_records,
         args.out,
         args.midas_kds_validation_report,
+        args.korea_collected_reports_dir,
     )
     return 0 if payload["contract_pass"] else 1
 
