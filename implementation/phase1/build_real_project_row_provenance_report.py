@@ -95,6 +95,39 @@ def _peer_metric_groups(peer_metric_records: dict[str, Any]) -> list[str]:
     return sorted(groups)
 
 
+def _value_present(value: Any) -> bool:
+    if value is None:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (dict, list, tuple, set)):
+        return bool(value)
+    return True
+
+
+def _peer_metric_groups_with_value(peer_metric_records: dict[str, Any]) -> list[str]:
+    groups = {
+        str(record.get("metric_group"))
+        for record in peer_metric_records.get("metric_records", [])
+        if isinstance(record, dict)
+        and isinstance(record.get("metric_group"), str)
+        and _value_present(record.get("value"))
+    }
+    return sorted(groups)
+
+
+def _peer_reference_truth_groups(peer_metric_records: dict[str, Any], reference_truth_status: str) -> list[str]:
+    groups = {
+        str(record.get("metric_group"))
+        for record in peer_metric_records.get("metric_records", [])
+        if isinstance(record, dict)
+        and isinstance(record.get("metric_group"), str)
+        and _value_present(record.get("value"))
+        and str(record.get("reference_truth_status", "") or "") == reference_truth_status
+    }
+    return sorted(groups)
+
+
 def _validation_report_summary(validation_report: dict[str, Any]) -> dict[str, Any]:
     summary = validation_report.get("summary")
     return summary if isinstance(summary, dict) else {}
@@ -209,12 +242,31 @@ def _parser_contract(
 
     if source_id == PEER_TBI_SOURCE_ID:
         metric_groups = _peer_metric_groups(peer_metric_records)
+        value_groups = _peer_metric_groups_with_value(peer_metric_records)
+        official_reference_truth_groups = _peer_reference_truth_groups(
+            peer_metric_records,
+            "official_public_report_metric",
+        )
+        measured_bridge_groups = _peer_reference_truth_groups(
+            peer_metric_records,
+            "measured_run_kpi_bridge_not_external_reference_truth",
+        )
         return {
             "source_file": "peer_tbi_benchmark_metric_records.json",
             "gate_id": "P1_PEER_TBI_BENCHMARK_METRICS",
             "coverage_status": "seeded",
             "metric_groups": metric_groups,
             "metric_group_count": len(metric_groups),
+            "metric_groups_with_value": value_groups,
+            "metric_groups_with_value_count": len(value_groups),
+            "official_reference_truth_metric_groups": official_reference_truth_groups,
+            "official_reference_truth_metric_group_count": len(official_reference_truth_groups),
+            "measured_run_kpi_bridge_metric_groups": measured_bridge_groups,
+            "measured_run_kpi_bridge_metric_group_count": len(measured_bridge_groups),
+            "claim_boundary": (
+                "PEER metric values are represented for measured-corpus traceability; measured-run "
+                "KPI bridge rows are not third-party reference truth."
+            ),
         }
 
     coverage_row = _coverage_source_row(coverage_matrix, source_id) or {}

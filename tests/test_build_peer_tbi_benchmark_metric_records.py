@@ -23,6 +23,7 @@ REQUIRED_RECORD_FIELDS = {
     "unit",
     "locator",
     "benchmark_status",
+    "reference_truth_status",
     "redistribution_allowed",
 }
 
@@ -81,7 +82,20 @@ def test_build_peer_tbi_benchmark_metric_records_cli_contract(tmp_path: Path) ->
     assert payload["summary"]["metric_record_count"] == len(REQUIRED_GROUPS)
     assert payload["summary"]["required_metric_group_count"] == len(REQUIRED_GROUPS)
     assert payload["summary"]["recorded_metric_group_count"] == len(REQUIRED_GROUPS)
+    assert payload["summary"]["metric_groups_with_value"] == sorted(REQUIRED_GROUPS)
+    assert payload["summary"]["metric_groups_with_value_count"] == len(REQUIRED_GROUPS)
+    assert payload["summary"]["metric_groups_missing_value"] == []
+    assert payload["summary"]["official_reference_truth_metric_groups"] == ["period"]
+    assert payload["summary"]["measured_run_kpi_bridge_metric_groups"] == [
+        "base_shear",
+        "nonlinear_response",
+        "story_drift",
+    ]
     assert payload["summary"]["redistribution_allowed_record_count"] == 0
+    assert payload["source_documents"]["peer_task12_report"]["sha256"]
+    assert payload["source_documents"]["kpi_receipt"]["exists"] is True
+    assert payload["source_documents"]["ndtha_stress_report"]["exists"] is True
+    assert "third-party reference truth" in payload["claim_boundary"]
 
     records_by_group = {record["metric_group"]: record for record in payload["metric_records"]}
     assert set(records_by_group) == REQUIRED_GROUPS
@@ -92,17 +106,25 @@ def test_build_peer_tbi_benchmark_metric_records_cli_contract(tmp_path: Path) ->
         assert record["citation"]
         assert record["report_id"] == "peer_tbi_tall_buildings_citation_seed"
         assert record["metric_name"]
-        assert record["benchmark_status"] == "citation_metric_recorded"
         assert record["redistribution_allowed"] is False
         assert record["raw_model_redistribution_review_required"] is True
+        assert record["value"] is not None
         assert {"page", "table", "figure", "note"} <= set(record["locator"])
-        assert record["locator"]["note"] == f"citation_seed:{group}"
         if group == "citation":
             assert record["status"] == "recorded"
             assert record["value"] == record["citation"]
+            assert record["benchmark_status"] == "citation_metric_recorded"
+            assert record["reference_truth_status"] == "citation_only_not_metric_truth"
+            assert record["locator"]["note"] == "citation_seed:citation"
+        elif group == "period":
+            assert record["status"] == "official_report_value_recorded"
+            assert record["value"] == 4.456
+            assert record["benchmark_status"] == "official_public_report_metric_recorded"
+            assert record["reference_truth_status"] == "official_public_report_metric"
+            assert record["locator"]["table"] == "Table 4.1 Period and mass participation summary"
         else:
-            assert record["status"] == "not_available"
-            assert record["value"] is None
+            assert record["benchmark_status"] == "measured_run_kpi_bridge_attached"
+            assert record["reference_truth_status"] == "measured_run_kpi_bridge_not_external_reference_truth"
             assert isinstance(record["unit"], str)
 
     gates_by_id = {row["gate_id"]: row for row in payload["p1_gate_rows"]}

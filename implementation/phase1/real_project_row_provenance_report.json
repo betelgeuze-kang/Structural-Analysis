@@ -70,8 +70,15 @@
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "p0_upstream_hard_gate": true,
       "parser_contract": {
+        "claim_boundary": "PEER metric values are represented for measured-corpus traceability; measured-run KPI bridge rows are not third-party reference truth.",
         "coverage_status": "seeded",
         "gate_id": "P1_PEER_TBI_BENCHMARK_METRICS",
+        "measured_run_kpi_bridge_metric_group_count": 3,
+        "measured_run_kpi_bridge_metric_groups": [
+          "base_shear",
+          "nonlinear_response",
+          "story_drift"
+        ],
         "metric_group_count": 5,
         "metric_groups": [
           "base_shear",
@@ -79,6 +86,18 @@
           "nonlinear_response",
           "period",
           "story_drift"
+        ],
+        "metric_groups_with_value": [
+          "base_shear",
+          "citation",
+          "nonlinear_response",
+          "period",
+          "story_drift"
+        ],
+        "metric_groups_with_value_count": 5,
+        "official_reference_truth_metric_group_count": 1,
+        "official_reference_truth_metric_groups": [
+          "period"
         ],
         "source_file": "peer_tbi_benchmark_metric_records.json"
       },

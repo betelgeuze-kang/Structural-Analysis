@@ -85,9 +85,9 @@ P1-3 closes the handoff from parsed rows to P2 release/report surfaces.
 | release-surface eligibility | The row states clearly whether it may move to P2. |
 
 - KONEPS public metadata/announcement/attachment access is tracked separately from redistributable artifacts.
-- PEER TBI allows citation-first benchmark records, but raw model/input deck release stays blocked until document-level review is complete.
+- PEER TBI records now include the official Task 12 period locator and local measured-run KPI bridge rows, but raw model/input deck release stays blocked until document-level review is complete.
 - Generate the current report with `implementation/phase1/build_real_project_row_provenance_report.py`; the tracked `implementation/phase1/real_project_row_provenance_report.json` now includes measured local KR artifact rows in addition to seed/source-family rows.
-- Check the measured exit status with `implementation/phase1/check_real_project_corpus_measured_status.py`. Current status is intentionally blocked until all five PEER metric groups carry values; the KR measured provenance row and measured format counts already meet the initial target.
+- Check the measured exit status with `implementation/phase1/check_real_project_corpus_measured_status.py`. Current status passes the initial metadata/value gate with all five PEER metric groups carrying values, while separately reporting official reference-truth groups and measured-run KPI bridge groups so the result is not treated as external V&V closure.
 
 ## Customer Shadow Evidence
 

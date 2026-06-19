@@ -30,7 +30,7 @@
 | Workstation delivery service | local gate: hardware profile, service budget, delivery package manifest, client input validation, package restore/checksum smoke |
 | PM release-area gate | blocked: `12/15` green; CI streak, human UX observation, license status remain open |
 | Release evidence freshness | pass: `3/3` artifacts include generated_at/source commit/engine version/input checksum/reuse marker and producer mtime recency |
-| Real-project corpus measured status | blocked: KR measured rows `10/10`, formats `2/2`, PEER metric-bearing values `1/5` |
+| Real-project corpus measured status | pass for initial metadata/value gate: KR measured rows `10/10`, formats `2/2`, PEER metric-bearing values `5/5`; official PEER reference-truth groups `1`, measured-run bridge groups `3` |
 | Customer shadow evidence schema | ready: schema and validator require completed project metadata, checksums/metrics/reviewer decision, customer-retained raw data, and `redistribution_allowed=false` |
 | Strict EB/RH evidence | blocked: EB `0/4`, RH signed closure `3/3` |
 | Independent product readiness | blocked, `80/100` |

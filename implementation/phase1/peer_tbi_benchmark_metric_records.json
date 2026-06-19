@@ -1,33 +1,40 @@
 {
+  "claim_boundary": "Non-citation values make the PEER metric rows traceable for the measured-corpus exit gate. Only rows marked official_public_report_metric are external PEER report values; measured-run KPI bridge rows are local solver evidence and must not be represented as third-party reference truth.",
   "contract_pass": true,
   "metric_records": [
     {
-      "benchmark_status": "citation_metric_recorded",
+      "benchmark_status": "official_public_report_metric_recorded",
       "citation": "Pacific Earthquake Engineering Research Center (PEER), Tall Buildings Initiative, public research and benchmark materials.",
       "locator": {
         "figure": "",
-        "note": "citation_seed:period",
-        "page": "p. n/a",
-        "table": ""
+        "note": "fundamental period T1 for the Building 2A model",
+        "page": "PDF page 50",
+        "source_document_id": "PEER-2011/05 Task 12",
+        "source_sha256": "00afa40a749e960e465b7c1c01cd6508f514effb47214278a56246708d78a909",
+        "source_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+        "table": "Table 4.1 Period and mass participation summary"
       },
       "metric_group": "period",
       "metric_name": "fundamental_period",
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "raw_model_redistribution_review_required": true,
       "redistribution_allowed": false,
+      "reference_truth_status": "official_public_report_metric",
       "report_id": "peer_tbi_tall_buildings_citation_seed",
       "source_id": "peer_tbi_tall_buildings",
-      "status": "not_available",
+      "status": "official_report_value_recorded",
       "unit": "s",
-      "value": null
+      "value": 4.456
     },
     {
-      "benchmark_status": "citation_metric_recorded",
+      "benchmark_status": "measured_run_kpi_bridge_attached",
       "citation": "Pacific Earthquake Engineering Research Center (PEER), Tall Buildings Initiative, public research and benchmark materials.",
       "locator": {
         "figure": "",
-        "note": "citation_seed:base_shear",
+        "json_path": "$.rows[*].response.base_shear_kN",
+        "note": "local_ndtha_base_shear_series_trace",
         "page": "p. n/a",
+        "source_file": "implementation/phase1/nonlinear_ndtha_stress_report.json",
         "table": ""
       },
       "metric_group": "base_shear",
@@ -35,19 +42,36 @@
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "raw_model_redistribution_review_required": true,
       "redistribution_allowed": false,
+      "reference_truth_status": "measured_run_kpi_bridge_not_external_reference_truth",
       "report_id": "peer_tbi_tall_buildings_citation_seed",
       "source_id": "peer_tbi_tall_buildings",
-      "status": "not_available",
-      "unit": "kN",
-      "value": null
+      "status": "measured_run_trace_attached",
+      "unit": "kN_trace",
+      "value": {
+        "measured_run_trace": {
+          "case_count": 3,
+          "observed_max_abs_base_shear_kN": -336034318.8416342,
+          "observed_max_abs_locator": {
+            "case_id": "C-TST-003",
+            "json_path": "$.rows[?case_id=='C-TST-003'].response.base_shear_kN[255]",
+            "series_index": 255
+          },
+          "quality_boundary": "Trace summary only; not an official PEER acceptance value.",
+          "sample_count": 768,
+          "series_available": true
+        },
+        "official_pdf_policy": "Task 12 records base-shear design-policy decisions for the TBI cases; the attached numeric series is the local NDTHA stress-run trace."
+      }
     },
     {
-      "benchmark_status": "citation_metric_recorded",
+      "benchmark_status": "measured_run_kpi_bridge_attached",
       "citation": "Pacific Earthquake Engineering Research Center (PEER), Tall Buildings Initiative, public research and benchmark materials.",
       "locator": {
         "figure": "",
-        "note": "citation_seed:story_drift",
+        "json_path": "$.kpi_rows[?label=='max_drift_ratio_pct_max']",
+        "note": "primary.summary.max_drift_ratio_pct_max",
         "page": "p. n/a",
+        "source_file": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
         "table": ""
       },
       "metric_group": "story_drift",
@@ -55,19 +79,39 @@
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "raw_model_redistribution_review_required": true,
       "redistribution_allowed": false,
+      "reference_truth_status": "measured_run_kpi_bridge_not_external_reference_truth",
       "report_id": "peer_tbi_tall_buildings_citation_seed",
       "source_id": "peer_tbi_tall_buildings",
-      "status": "not_available",
-      "unit": "ratio",
-      "value": null
+      "status": "official_context_plus_measured_run_kpi_recorded",
+      "unit": "ratio_or_pct",
+      "value": {
+        "measured_run_max_drift_ratio_pct_max": 9.200000000000003,
+        "official_pdf_context": {
+          "building_2a_ove_average_interstory_drift_ratio": {
+            "east_west": ">0.02",
+            "north_south": "~0.015"
+          },
+          "locator": {
+            "figure": "Figure 4.13",
+            "note": "Building 2A OVE interstory drift context",
+            "page": "PDF page 64",
+            "source_document_id": "PEER-2011/05 Task 12",
+            "source_sha256": "00afa40a749e960e465b7c1c01cd6508f514effb47214278a56246708d78a909",
+            "source_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+            "table": ""
+          }
+        }
+      }
     },
     {
-      "benchmark_status": "citation_metric_recorded",
+      "benchmark_status": "measured_run_kpi_bridge_attached",
       "citation": "Pacific Earthquake Engineering Research Center (PEER), Tall Buildings Initiative, public research and benchmark materials.",
       "locator": {
         "figure": "",
-        "note": "citation_seed:nonlinear_response",
+        "json_path": "$.kpi_rows[*]",
+        "note": "local_ndtha_kpi_receipt_rows",
         "page": "p. n/a",
+        "source_file": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
         "table": ""
       },
       "metric_group": "nonlinear_response",
@@ -75,11 +119,19 @@
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "raw_model_redistribution_review_required": true,
       "redistribution_allowed": false,
+      "reference_truth_status": "measured_run_kpi_bridge_not_external_reference_truth",
       "report_id": "peer_tbi_tall_buildings_citation_seed",
       "source_id": "peer_tbi_tall_buildings",
-      "status": "not_available",
-      "unit": "",
-      "value": null
+      "status": "measured_run_kpi_recorded",
+      "unit": "mixed",
+      "value": {
+        "avg_step_iterations_mean": 16.0,
+        "case_count": 3,
+        "max_drift_ratio_pct_max": 9.200000000000003,
+        "peak_plastic_story_count_mean": 22.666666666666668,
+        "residual_drift_ratio_pct_max_abs": 1.9136000000000006,
+        "solver_hip_variants": 20
+      }
     },
     {
       "benchmark_status": "citation_metric_recorded",
@@ -95,6 +147,7 @@
       "official_url": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
       "raw_model_redistribution_review_required": true,
       "redistribution_allowed": false,
+      "reference_truth_status": "citation_only_not_metric_truth",
       "report_id": "peer_tbi_tall_buildings_citation_seed",
       "source_id": "peer_tbi_tall_buildings",
       "status": "recorded",
@@ -149,11 +202,48 @@
   ],
   "run_id": "phase1-peer-tbi-benchmark-metric-records",
   "schema_version": "peer_tbi_benchmark_metric_records.v1",
+  "source_documents": {
+    "kpi_receipt": {
+      "exists": true,
+      "path": "implementation/phase1/release/external_benchmark_kickoff/runs/hardest_peer_tbi_tall_building_ndtha/benchmark_task_kpi_receipt.json",
+      "sha256": "sha256:185dff8f3f03f44435cbd9612fd7b25e69776472c302fcce22ea3c029dcf9f7c"
+    },
+    "ndtha_stress_report": {
+      "exists": true,
+      "path": "implementation/phase1/nonlinear_ndtha_stress_report.json",
+      "sha256": "sha256:029da902ff88351ef7eef51ad32e1f502931e11cb111a2829ed25c29a65273f0"
+    },
+    "peer_task12_report": {
+      "document_id": "PEER-2011/05 Task 12",
+      "official_url": "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf",
+      "sha256": "00afa40a749e960e465b7c1c01cd6508f514effb47214278a56246708d78a909",
+      "title": "Guidelines for Performance-Based Seismic Design of Tall Buildings - Task 12"
+    }
+  },
   "source_id": "peer_tbi_tall_buildings",
   "source_manifest_schema_version": "real_project_corpus_manifest.v1",
   "summary": {
     "coverage_matrix_has_peer_tbi_benchmark_targets": true,
+    "measured_run_kpi_bridge_metric_group_count": 3,
+    "measured_run_kpi_bridge_metric_groups": [
+      "base_shear",
+      "nonlinear_response",
+      "story_drift"
+    ],
+    "metric_groups_missing_value": [],
+    "metric_groups_with_value": [
+      "base_shear",
+      "citation",
+      "nonlinear_response",
+      "period",
+      "story_drift"
+    ],
+    "metric_groups_with_value_count": 5,
     "metric_record_count": 5,
+    "official_reference_truth_metric_group_count": 1,
+    "official_reference_truth_metric_groups": [
+      "period"
+    ],
     "peer_tbi_source_family_exists": true,
     "raw_redistribution_auto_allowed": false,
     "recorded_metric_group_count": 5,

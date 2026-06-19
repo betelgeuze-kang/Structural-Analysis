@@ -76,6 +76,25 @@ def build_status(
             if str(row.get("metric_group", "")) in REQUIRED_PEER_GROUPS and _value_present(row.get("value"))
         }
     )
+    peer_official_reference_truth_groups = sorted(
+        {
+            str(row.get("metric_group", ""))
+            for row in peer_rows
+            if str(row.get("metric_group", "")) in REQUIRED_PEER_GROUPS
+            and _value_present(row.get("value"))
+            and str(row.get("reference_truth_status", "")) == "official_public_report_metric"
+        }
+    )
+    peer_measured_bridge_groups = sorted(
+        {
+            str(row.get("metric_group", ""))
+            for row in peer_rows
+            if str(row.get("metric_group", "")) in REQUIRED_PEER_GROUPS
+            and _value_present(row.get("value"))
+            and str(row.get("reference_truth_status", ""))
+            == "measured_run_kpi_bridge_not_external_reference_truth"
+        }
+    )
     checks = {
         "measured_provenance_rows_pass": len(measured_rows) >= min_measured_rows,
         "koneps_measured_format_count_pass": len(measured_formats) >= min_measured_formats,
@@ -110,14 +129,19 @@ def build_status(
             "peer_metric_group_count": len(REQUIRED_PEER_GROUPS),
             "peer_metric_groups_with_value_count": len(peer_groups_with_value),
             "peer_metric_groups_with_value": peer_groups_with_value,
+            "peer_official_reference_truth_group_count": len(peer_official_reference_truth_groups),
+            "peer_official_reference_truth_groups": peer_official_reference_truth_groups,
+            "peer_measured_run_kpi_bridge_group_count": len(peer_measured_bridge_groups),
+            "peer_measured_run_kpi_bridge_groups": peer_measured_bridge_groups,
             "raw_redistribution_allowed_count": sum(1 for row in measured_rows if row.get("release_surface_allowed")),
         },
         "checks": checks,
         "blockers": blockers,
         "claim_boundary": (
-            "This status checks measured corpus evidence and release-readiness metadata. It does not turn "
-            "local or public source artifacts into redistributable customer data, and it does not treat "
-            "our measured-run KPI values as third-party reference truth."
+            "This status checks measured corpus evidence and release-readiness metadata. PASS means the "
+            "initial measured-corpus row/value metadata is present; it does not turn local or public "
+            "source artifacts into redistributable customer data, close external V&V, or treat measured-run "
+            "KPI bridge rows as third-party reference truth."
         ),
     }
 
