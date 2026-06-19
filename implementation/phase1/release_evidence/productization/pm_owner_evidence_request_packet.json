@@ -2,7 +2,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-19T19:09:38.450398+00:00",
+  "generated_at": "2026-06-19T19:17:02.469432+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -2131,21 +2131,57 @@
       "acceptance_criteria": [
         "`ga_enterprise_readiness_report.json.contract_pass == true` or no `customer_audit_failure_bundle_sla_missing` blocker",
         "`ga_enterprise_signoff_intake_packet.json` shows customer audit/failure-bundle/SLA evidence accepted",
-        "`customer_audit_failure_bundle_sla_missing` absent from `ga_enterprise_blockers`"
+        "`customer_audit_failure_bundle_sla_missing` absent from `ga_enterprise_blockers`",
+        "`customer_shadow_evidence_status.json.contract_pass == true`",
+        "`customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`",
+        "Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`",
+        "`customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers`"
       ],
       "blocked_release_tiers": [
         "release_tier.ga_enterprise_evidence_gate_pass"
       ],
-      "blocker_count": 1,
+      "blocker_count": 2,
       "blocker_ids": [
-        "customer_audit_failure_bundle_sla_missing"
+        "customer_audit_failure_bundle_sla_missing",
+        "customer_shadow::completed_shadow_case_count_below_minimum"
       ],
       "evidence_states": [
-        "missing_external_ga_enterprise_signoff_evidence"
+        "missing_external_ga_enterprise_signoff_evidence",
+        "completed_shadow_case_count_below_minimum"
       ],
-      "expected_intake_artifacts": [],
-      "expected_intake_details": [],
-      "expected_intake_paths": [],
+      "expected_intake_artifacts": [
+        "customer_shadow_evidence_intake_packet"
+      ],
+      "expected_intake_details": [
+        {
+          "claim_boundary": "This packet creates owner-input slots and validation commands only. It does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target. Each slot must be filled with real customer-retained derived metadata and pass the validator.",
+          "contract_pass": true,
+          "current_blocker_count": 0,
+          "current_blockers": [],
+          "field_request_count": 0,
+          "field_request_rows": [],
+          "lane_request_count": 0,
+          "lane_request_rows": [],
+          "path": "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+          "present": true,
+          "reason_code": "PASS",
+          "schema_version": "customer-shadow-evidence-intake-packet.v1",
+          "signoff_request_count": 0,
+          "signoff_request_rows": [],
+          "summary": {
+            "current_completed_shadow_case_count": 0,
+            "current_status_contract_pass": false,
+            "intake_slot_count": 5,
+            "min_completed_shadow_cases": 3,
+            "required_field_count": 14,
+            "target_completed_shadow_cases": 5
+          },
+          "summary_line": ""
+        }
+      ],
+      "expected_intake_paths": [
+        "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json"
+      ],
       "external_input_required": true,
       "incomplete_blockers": [],
       "intake_current_blockers": [],
@@ -2153,7 +2189,8 @@
       "intake_lane_request_rows": [],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release."
+        "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
+        "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence."
       ],
       "owner": "customer_success_ops_owner",
       "owner_input_required": true,
@@ -2161,7 +2198,9 @@
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md",
         "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
-        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md",
+        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
+        "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md"
       ],
       "request_rows": [
         {
@@ -2201,12 +2240,79 @@
             "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
             "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
           ]
+        },
+        {
+          "acceptance_criteria": [
+            "`customer_shadow_evidence_status.json.contract_pass == true`",
+            "`customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`",
+            "Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`",
+            "`customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers`"
+          ],
+          "blocked_release_tiers": [
+            "release_tier.ga_enterprise_evidence_gate_pass"
+          ],
+          "blocker_id": "customer_shadow::completed_shadow_case_count_below_minimum",
+          "claim_boundary": "Customer shadow blockers require real completed-project derived metadata. Templates, placeholder rows, synthetic cases, or customer raw data committed to Git must not close this blocker.",
+          "evidence_artifacts": {
+            "customer_shadow_evidence_intake_packet": "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+            "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+          },
+          "evidence_state": "completed_shadow_case_count_below_minimum",
+          "expected_intake_artifact": "customer_shadow_evidence_intake_packet",
+          "expected_intake_detail": {
+            "claim_boundary": "This packet creates owner-input slots and validation commands only. It does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target. Each slot must be filled with real customer-retained derived metadata and pass the validator.",
+            "contract_pass": true,
+            "current_blocker_count": 0,
+            "current_blockers": [],
+            "field_request_count": 0,
+            "field_request_rows": [],
+            "lane_request_count": 0,
+            "lane_request_rows": [],
+            "path": "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+            "present": true,
+            "reason_code": "PASS",
+            "schema_version": "customer-shadow-evidence-intake-packet.v1",
+            "signoff_request_count": 0,
+            "signoff_request_rows": [],
+            "summary": {
+              "current_completed_shadow_case_count": 0,
+              "current_status_contract_pass": false,
+              "intake_slot_count": 5,
+              "min_completed_shadow_cases": 3,
+              "required_field_count": 14,
+              "target_completed_shadow_cases": 5
+            },
+            "summary_line": ""
+          },
+          "expected_intake_path": "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
+            "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "ga_enterprise",
+          "title": "Customer Shadow Evidence",
+          "verification_commands": [
+            "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
+            "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
+          ]
         }
       ],
       "request_state": "ready_for_owner_input",
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
-        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
+        "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked",
+        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
+        "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
       ]
     },
     {
@@ -2732,6 +2838,7 @@
         "independent_vv_missing",
         "family_validation_manual_signoff_missing",
         "customer_audit_failure_bundle_sla_missing",
+        "customer_shadow::completed_shadow_case_count_below_minimum",
         "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
         "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
@@ -3009,6 +3116,7 @@
             "independent_vv_missing",
             "family_validation_manual_signoff_missing",
             "customer_audit_failure_bundle_sla_missing",
+            "customer_shadow::completed_shadow_case_count_below_minimum",
             "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
             "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
             "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
@@ -3187,15 +3295,15 @@
   ],
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
-    "blocked_release_tier_impact_count": 27,
+    "blocked_release_tier_impact_count": 28,
     "evidence_closure_pass": false,
-    "expected_intake_contract_pass_count": 0,
-    "expected_intake_count": 4,
+    "expected_intake_contract_pass_count": 1,
+    "expected_intake_count": 5,
     "expected_intake_field_request_count": 24,
     "expected_intake_lane_request_count": 2,
     "expected_intake_open_blocker_count": 31,
     "expected_intake_signoff_request_count": 3,
-    "external_input_required_count": 11,
+    "external_input_required_count": 12,
     "full_release_gate_ready": false,
     "handoff_contract_pass": true,
     "incomplete_request_count": 0,
@@ -3203,9 +3311,9 @@
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "missing_release_tier_impact_count": 0,
-    "open_blocker_count": 19,
-    "open_blocker_with_release_tier_impact_count": 19,
-    "owner_input_required_count": 11,
+    "open_blocker_count": 20,
+    "open_blocker_with_release_tier_impact_count": 20,
+    "owner_input_required_count": 12,
     "owner_packet_count": 8,
     "paid_pilot_candidate": true,
     "release_area_gate_ready": false,
@@ -3216,5 +3324,5 @@
     "release_tier_owner_packet_count": 2,
     "release_tier_request_count": 2
   },
-  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=19 | tier_requests=2 | incomplete=0"
+  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=20 | tier_requests=2 | incomplete=0"
 }

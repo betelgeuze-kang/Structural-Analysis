@@ -1,6 +1,6 @@
 {
   "contract_pass": false,
-  "generated_at": "2026-06-19T19:09:38.354140+00:00",
+  "generated_at": "2026-06-19T19:16:18.311513+00:00",
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -13,6 +13,7 @@
     "Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence.",
     "Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence.",
     "Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release.",
+    "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.",
     "Run the `torch_capable_benchmark_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
     "Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
     "Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence.",
@@ -499,8 +500,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 23,
-        "main_ahead_count": 71,
+        "feature_ahead_count": 27,
+        "main_ahead_count": 75,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -511,9 +512,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 23,
+        "feature_ahead_count": 27,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 71,
+        "main_ahead_count": 75,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -576,8 +577,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 23,
-        "main_ahead_count": 71,
+        "feature_ahead_count": 27,
+        "main_ahead_count": 75,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -588,9 +589,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 23,
+        "feature_ahead_count": 27,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 71,
+        "main_ahead_count": 75,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -653,8 +654,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 23,
-        "main_ahead_count": 71,
+        "feature_ahead_count": 27,
+        "main_ahead_count": 75,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -665,9 +666,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 23,
+        "feature_ahead_count": 27,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 71,
+        "main_ahead_count": 75,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -884,6 +885,76 @@
       "verification_commands": [
         "python3 scripts/build_ga_enterprise_readiness_report.py --out implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json --fail-blocked",
         "python3 scripts/build_ga_enterprise_signoff_intake_packet.py --out implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json --out-md implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "`customer_shadow_evidence_status.json.contract_pass == true`",
+        "`customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`",
+        "Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`",
+        "`customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers`"
+      ],
+      "blocker_code": "completed_shadow_case_count_below_minimum",
+      "blocker_id": "customer_shadow::completed_shadow_case_count_below_minimum",
+      "claim_boundary": "Customer shadow blockers require real completed-project derived metadata. Templates, placeholder rows, synthetic cases, or customer raw data committed to Git must not close this blocker.",
+      "evidence_artifacts": {
+        "customer_shadow_evidence_intake_packet": "implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json",
+        "customer_shadow_evidence_status": "implementation/phase1/customer_shadow_evidence_status.json",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {
+        "blocker_count": 1,
+        "completed_shadow_case_count": 0,
+        "evidence_file_count": 0,
+        "min_completed_shadow_cases": 3,
+        "target_completed_shadow_cases": 5,
+        "valid_evidence_file_count": 0
+      },
+      "evidence_status": {
+        "completed_shadow_case_count": 0,
+        "evidence_file_count": 0,
+        "min_completed_shadow_cases": 3,
+        "source_policy": "real_customer_retained_metadata_required",
+        "state": "completed_shadow_case_count_below_minimum",
+        "target_completed_shadow_cases": 5,
+        "valid_evidence_file_count": 0
+      },
+      "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "customer_shadow_evidence_intake_packet",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "namespace": "customer_shadow",
+      "next_action": "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.",
+      "owner": "customer_success_ops_owner",
+      "owner_action": "Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
+        "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "external_customer_shadow_evidence_required",
+      "scope": "ga_enterprise",
+      "status": "open",
+      "title": "Customer Shadow Evidence",
+      "verification_commands": [
+        "python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked",
+        "python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md"
       ]
     },
     {
@@ -1458,19 +1529,19 @@
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
     "all_open_blockers_have_handoff": true,
-    "external_input_required_count": 11,
-    "external_owner_input_ready_count": 11,
+    "external_input_required_count": 12,
+    "external_owner_input_ready_count": 12,
     "full_release_gate_ready": false,
-    "ga_enterprise_blocker_count": 19,
+    "ga_enterprise_blocker_count": 20,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 19,
+    "handoff_ready_count": 20,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 8,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 19,
-    "owner_input_required_count": 11,
+    "open_blocker_count": 20,
+    "owner_input_required_count": 12,
     "paid_pilot_candidate": true,
     "release_area_blocker_count": 8,
     "release_area_gate_ready": false

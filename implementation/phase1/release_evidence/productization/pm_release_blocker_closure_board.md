@@ -1,9 +1,9 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=19 | external_owner_ready=11 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=20 | external_owner_ready=12 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `19`
+- `open_blocker_count`: `20`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -20,6 +20,7 @@
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release. |
+| `customer_shadow::completed_shadow_case_count_below_minimum` | `customer_success_ops_owner` | `external_owner_input_ready` | `completed_shadow_case_count_below_minimum` | Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence. |
 | `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `torch_capable_benchmark_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
 | `fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `gpu_capable_rocm_hip_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
 | `fresh_full_validation::performance_profile::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `performance_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |

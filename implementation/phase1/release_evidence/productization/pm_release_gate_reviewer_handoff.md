@@ -1,6 +1,6 @@
 # PM Release Gate Reviewer Handoff
 
-- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=19 | incomplete=0 | release_tiers=2/4`
+- `summary_line`: `PM release gate reviewer handoff: PASS | open_blockers=20 | incomplete=0 | release_tiers=2/4`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `True`
 
@@ -17,6 +17,7 @@
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`independent_vv_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`family_validation_manual_signoff_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`<br>`customer_audit_failure_bundle_sla_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
+| `customer_shadow::completed_shadow_case_count_below_minimum` | `customer_success_ops_owner` | `external_owner_input_ready` | `release_area.customer_shadow` status is `pass` in `pm_release_gate_completion_audit.json`<br>`customer_shadow::completed_shadow_case_count_below_minimum` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `release_area.fresh_full_validation` status is `pass` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `release_area.fresh_full_validation` status is `pass` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
 | `fresh_full_validation::performance_profile::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `release_area.fresh_full_validation` status is `pass` in `pm_release_gate_completion_audit.json`<br>`fresh_full_validation::performance_profile::fresh_validation_receipt_missing` is absent from `pm_release_gate_report.json.release_area_blockers`<br>The owning release-area row has no blocker-specific false check in the PM report. |
@@ -33,7 +34,7 @@
 | `release_tier.technical_paid_pilot_candidate` Technical Paid Pilot Candidate | `pass` | none | none | Technical paid pilot candidate status depends on local milestone evidence and still requires the paid-pilot scope guard before customer use. |
 | `release_tier.paid_pilot_scope_guard_pass` Paid Pilot Scope Guard | `pass` | none | none | Paid pilot status is a constrained customer PoC scope only; it does not imply Limited, GA, or engineer-of-record replacement readiness. |
 | `release_tier.limited_commercial_full_gate_ready` Limited Commercial Full Gate | `blocked` | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Close all release-area blockers, regenerate the PM release gate, and verify `release_tiers.limited_commercial_full_gate_ready == true` before Limited Commercial promotion. | Limited Commercial cannot be promoted while release-area blockers remain open, even when milestone evidence is green. |
-| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing`, `fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing`, `fresh_full_validation::performance_profile::fresh_validation_receipt_missing`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing`, `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing`, `fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
+| `release_tier.ga_enterprise_evidence_gate_pass` GA / Enterprise Evidence Gate | `blocked` | `independent_vv_missing`, `family_validation_manual_signoff_missing`, `customer_audit_failure_bundle_sla_missing`, `customer_shadow::completed_shadow_case_count_below_minimum`, `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing`, `fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing`, `fresh_full_validation::performance_profile::fresh_validation_receipt_missing`, `fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing`, `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing`, `fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing`, `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing`, `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing`, `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`, `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing`, `ux::human_new_user_observation_missing_or_failed`, `ux::human_new_user_30min_sample_evidence_missing`, `security::license_status_not_configured`, `github_sync::github_sync_preflight::remote_mutation_approval_required`, `github_sync::github_sync_remote_sync_pending`, `github_sync::github_sync_preflight_not_synced` | Attach independent V&V attestation, family validation-manual signoff, and customer audit/failure-bundle/SLA approval evidence before GA/Enterprise release. | GA still requires independent V&V, family validation manuals, signed release registry, customer audit/failure bundles, and support SLA; this report only verifies local evidence inputs. |
 
 ## Blocker Details
 
@@ -452,6 +453,43 @@ Verification commands:
 Verdict change conditions:
 - `release_area.` status is `pass` in `pm_release_gate_completion_audit.json`
 - `customer_audit_failure_bundle_sla_missing` is absent from `pm_release_gate_report.json.release_area_blockers`
+- The owning release-area row has no blocker-specific false check in the PM report.
+
+### `customer_shadow::completed_shadow_case_count_below_minimum`
+
+- Owner: `customer_success_ops_owner`
+- Release area status: ``
+- Closure state: `external_owner_input_ready`
+- Evidence state: `completed_shadow_case_count_below_minimum`
+- External input required: `True`
+- Owner input required: `True`
+- Next action: Attach validated completed-project customer shadow metadata files under `implementation/phase1/customer_shadow_evidence/`, keep raw customer data retained by the customer, then regenerate customer shadow status and PM release evidence.
+
+Acceptance criteria:
+- `customer_shadow_evidence_status.json.contract_pass == true`
+- `customer_shadow_evidence_status.json.summary.completed_shadow_case_count >= 3`
+- Every attached customer shadow JSON passes `validate_customer_shadow_evidence.py --fail-blocked`
+- `customer_shadow::completed_shadow_case_count_below_minimum` absent from `ga_enterprise_blockers`
+
+Evidence artifact paths:
+- `customer_shadow_evidence_intake_packet`: `implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json`
+- `customer_shadow_evidence_status`: `implementation/phase1/customer_shadow_evidence_status.json`
+- `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
+
+Reproduction commands:
+- `python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json`
+- `python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+- `python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md`
+
+Verification commands:
+- `python3 implementation/phase1/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json --fail-blocked`
+- `python3 scripts/build_customer_shadow_evidence_intake_packet.py --out implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.json --out-md implementation/phase1/release_evidence/productization/customer_shadow_evidence_intake_packet.md`
+- `python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md`
+
+Verdict change conditions:
+- `release_area.customer_shadow` status is `pass` in `pm_release_gate_completion_audit.json`
+- `customer_shadow::completed_shadow_case_count_below_minimum` is absent from `pm_release_gate_report.json.release_area_blockers`
 - The owning release-area row has no blocker-specific false check in the PM report.
 
 ### `fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing`
