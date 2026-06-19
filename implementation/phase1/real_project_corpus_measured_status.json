@@ -4,16 +4,18 @@
     "checksum_or_withheld_coverage_pass": true,
     "koneps_measured_format_count_pass": true,
     "manual_review_status_coverage_pass": true,
+    "measured_parser_contract_pass": true,
     "measured_provenance_rows_pass": true,
     "peer_metric_bearing_groups_pass": true,
     "raw_redistribution_blocked_pass": true,
     "release_eligibility_coverage_pass": true,
-    "stable_row_pointer_coverage_pass": true
+    "stable_row_pointer_coverage_pass": true,
+    "stable_row_pointer_unique_pass": true
   },
   "claim_boundary": "This status checks measured corpus evidence and release-readiness metadata. PASS means the initial measured-corpus row/value metadata is present; it does not turn local or public source artifacts into redistributable customer data, close external V&V, or treat measured-run KPI bridge rows as third-party reference truth.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-19T15:33:30.637860+00:00",
+  "generated_at": "2026-06-19T17:51:10.472995+00:00",
   "input_checksums": {
     "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:1684f9871aea7651232875e3d5abbe8ef97308814846af36ef41a362c15905b6",
     "implementation/phase1/real_project_row_provenance_report.json": "sha256:2b5db540ce49ac602a890af1fb0adc3b0ee432544f85f21240d60864d68f35f2"
@@ -24,14 +26,16 @@
   "reused_evidence": true,
   "row_provenance_report": "implementation/phase1/real_project_row_provenance_report.json",
   "schema_version": "real-project-corpus-measured-status.v1",
-  "source_commit_sha": "a495b253edacf8b9d4d8a917a61db675b70ca209",
+  "source_commit_sha": "88dd0d553569af03ea2539a177fd2d045393e181",
   "summary": {
+    "duplicate_measured_stable_pointers": [],
     "measured_artifact_row_count": 10,
     "measured_file_format_count": 2,
     "measured_file_formats": [
       "ifc",
       "mgt"
     ],
+    "measured_parser_contract_valid_count": 10,
     "min_measured_artifact_rows": 10,
     "min_measured_file_formats": 2,
     "peer_measured_run_kpi_bridge_group_count": 3,
