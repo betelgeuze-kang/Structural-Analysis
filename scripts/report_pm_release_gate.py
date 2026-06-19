@@ -727,6 +727,10 @@ def _packaging_milestone(
     pm_blocker_summary = _summary(pm_blocker_register)
     pm_blocker_closure_summary = _summary(pm_blocker_closure_board)
     pm_blocker_register_open_count = _as_int(pm_blocker_summary.get("open_blocker_count"), 0)
+    pm_blocker_register_release_area_count = _as_int(
+        pm_blocker_summary.get("release_area_blocker_count"),
+        pm_blocker_register_open_count,
+    )
     pm_blocker_closure_open_count = _as_int(pm_blocker_closure_summary.get("open_blocker_count"), -1)
     support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
@@ -787,7 +791,7 @@ def _packaging_milestone(
         "pm_blocker_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
-            pm_blocker_closure_open_count == pm_blocker_register_open_count
+            pm_blocker_closure_open_count == pm_blocker_register_release_area_count
         ),
         "support_bundle_ci_streak_intake_packet_present": _support_section_present(
             support_optional_sections,
@@ -1046,6 +1050,7 @@ def _packaging_milestone(
                 support_pm_failure_bundle_coverage.get("sha256", "")
             ),
             "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
+            "pm_blocker_register_release_area_blocker_count": pm_blocker_register_release_area_count,
             "pm_blocker_register_handoff_ready_count": _as_int(
                 pm_blocker_summary.get("handoff_ready_count"), 0
             ),
@@ -1907,6 +1912,10 @@ def _build_release_area_matrix(
     pm_blocker_summary = _summary(pm_blocker_register)
     pm_blocker_closure_summary = _summary(pm_blocker_closure_board)
     pm_blocker_register_open_count = _as_int(pm_blocker_summary.get("open_blocker_count"), 0)
+    pm_blocker_register_release_area_count = _as_int(
+        pm_blocker_summary.get("release_area_blocker_count"),
+        pm_blocker_register_open_count,
+    )
     pm_blocker_closure_open_count = _as_int(pm_blocker_closure_summary.get("open_blocker_count"), -1)
     support_export_archive = _as_dict(support.get("export_archive"))
     support_optional_sections = _as_dict(support.get("optional_sections"))
@@ -1944,7 +1953,7 @@ def _build_release_area_matrix(
         "pm_blocker_action_register_handoff_ready_pass": _handoff_ready_pass(pm_blocker_register),
         "pm_blocker_closure_board_handoff_ready_pass": _handoff_ready_pass(pm_blocker_closure_board),
         "pm_blocker_closure_board_register_count_match": (
-            pm_blocker_closure_open_count == pm_blocker_register_open_count
+            pm_blocker_closure_open_count == pm_blocker_register_release_area_count
         ),
         "ci_streak_intake_packet_in_failure_bundle": _support_section_present(
             support_optional_sections,
@@ -2192,6 +2201,7 @@ def _build_release_area_matrix(
                     support_pm_failure_bundle_coverage.get("sha256", "")
                 ),
                 "pm_blocker_register_open_blocker_count": pm_blocker_register_open_count,
+                "pm_blocker_register_release_area_blocker_count": pm_blocker_register_release_area_count,
                 "pm_blocker_register_handoff_ready_count": _as_int(
                     pm_blocker_summary.get("handoff_ready_count"), 0
                 ),

@@ -700,6 +700,36 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     )
     worst = _write(tmp_path / "worst.json", {"contract_pass": True})
     base_kwargs = _base_kwargs(tmp_path)
+    _write(
+        base_kwargs["pm_release_blocker_action_register"],
+        {
+            "contract_pass": True,
+            "summary": {
+                "open_blocker_count": 16,
+                "release_area_blocker_count": 5,
+                "ga_enterprise_blocker_count": 16,
+                "handoff_ready_count": 16,
+                "handoff_not_ready_count": 0,
+                "external_owner_input_ready_count": 8,
+                "all_open_blockers_have_handoff": True,
+            },
+            "rows": [],
+        },
+    )
+    _write(
+        base_kwargs["pm_release_blocker_closure_board"],
+        {
+            "contract_pass": True,
+            "summary": {
+                "open_blocker_count": 5,
+                "handoff_ready_count": 5,
+                "handoff_not_ready_count": 0,
+                "external_owner_input_ready_count": 5,
+                "all_open_blockers_have_handoff": True,
+            },
+            "rows": [],
+        },
+    )
 
     payload = report_pm_release_gate.build_report(
         ndtha_residual=ndtha,
@@ -851,6 +881,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     )
     assert support_area["summary"]["one_click_failure_bundle_archive"].endswith("support_bundle_export.zip")
     assert support_area["summary"]["one_click_failure_bundle_archive_sha256"] == "support-bundle-sha256"
+    assert support_area["summary"]["pm_blocker_register_open_blocker_count"] == 16
+    assert support_area["summary"]["pm_blocker_register_release_area_blocker_count"] == 5
+    assert support_area["summary"]["pm_blocker_closure_board_open_blocker_count"] == 5
     m5 = next(row for row in payload["milestones"] if row["milestone"] == "M5")
     assert m5["checks"]["validation_manual_content_pass"] is True
     assert m5["checks"]["limitation_manual_content_pass"] is True
@@ -892,6 +925,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert m5["summary"]["release_evidence_freshness"].endswith("release_evidence_freshness_report.json")
     assert m5["summary"]["release_evidence_freshness_contract_pass"] is True
     assert m5["summary"]["release_evidence_freshness_blocker_count"] == 0
+    assert m5["summary"]["pm_blocker_register_open_blocker_count"] == 16
+    assert m5["summary"]["pm_blocker_register_release_area_blocker_count"] == 5
+    assert m5["summary"]["pm_blocker_closure_board_open_blocker_count"] == 5
     assert m5["artifacts"]["release_evidence_freshness"].endswith("release_evidence_freshness_report.json")
     assert m5["checks"]["support_bundle_one_click_archive_present"] is True
     assert payload["ga_enterprise_ready"] is False

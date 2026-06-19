@@ -13,22 +13,30 @@ from typing import Any
 
 
 SCHEMA_VERSION = "release-evidence-freshness-report.v1"
-DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json")
+DEFAULT_OUT = Path(
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+)
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_ARTIFACTS = (
     (
         "p0_closure_status",
-        Path("implementation/phase1/release_evidence/productization/p0_closure_status.json"),
+        Path(
+            "implementation/phase1/release_evidence/productization/p0_closure_status.json"
+        ),
         Path("scripts/check_p0_closure_status.py"),
     ),
     (
         "p1_readiness_status",
-        Path("implementation/phase1/release_evidence/productization/p1_readiness_status.json"),
+        Path(
+            "implementation/phase1/release_evidence/productization/p1_readiness_status.json"
+        ),
         Path("scripts/check_p1_readiness_status.py"),
     ),
     (
         "p1_benchmark_breadth_status",
-        Path("implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"),
+        Path(
+            "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"
+        ),
         Path("scripts/check_p1_benchmark_breadth_status.py"),
     ),
     (
@@ -43,7 +51,9 @@ DEFAULT_ARTIFACTS = (
     ),
     (
         "fresh_full_validation_lane_status",
-        Path("implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"),
+        Path(
+            "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
+        ),
         Path("scripts/build_fresh_full_validation_lane_status.py"),
     ),
 )
@@ -115,13 +125,29 @@ def _git_rev_parse(repo_root: Path, value: str) -> str:
         return ""
 
 
-def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str, paths: list[Path]) -> list[str]:
+def _git_diff_name_only(
+    repo_root: Path, source_commit: str, current_commit: str, paths: list[Path]
+) -> list[str]:
     if not source_commit or not current_commit or not paths:
         return []
-    path_args = [str(path if not path.is_absolute() else path.relative_to(repo_root)) for path in paths]
+    path_args: list[str] = []
+    for path in paths:
+        try:
+            path_args.append(str(path if not path.is_absolute() else path.relative_to(repo_root)))
+        except ValueError:
+            continue
+    if not path_args:
+        return []
     try:
         output = subprocess.check_output(
-            ["git", "diff", "--name-only", f"{source_commit}..{current_commit}", "--", *path_args],
+            [
+                "git",
+                "diff",
+                "--name-only",
+                f"{source_commit}..{current_commit}",
+                "--",
+                *path_args,
+            ],
             cwd=repo_root,
             text=True,
             stderr=subprocess.DEVNULL,
@@ -137,7 +163,11 @@ def _nested_dict(payload: dict[str, Any], key: str) -> dict[str, Any]:
 
 
 def _first_present(payload: dict[str, Any], keys: tuple[str, ...]) -> Any:
-    sources = (payload, _nested_dict(payload, "summary"), _nested_dict(payload, "inputs"))
+    sources = (
+        payload,
+        _nested_dict(payload, "summary"),
+        _nested_dict(payload, "inputs"),
+    )
     for source in sources:
         for key in keys:
             if key in source:
@@ -152,10 +182,20 @@ def _commit_matches(value: Any, current_commit: str) -> bool:
     return current_commit.startswith(text) or text.startswith(current_commit)
 
 
-def _input_checksum_paths(input_checksum: Any) -> list[Path]:
-    if isinstance(input_checksum, dict):
-        return [Path(str(key)) for key in input_checksum if str(key).strip()]
-    return []
+def _input_checksum_paths(repo_root: Path, input_checksum: Any) -> list[Path]:
+    if not isinstance(input_checksum, dict):
+        return []
+    paths: list[Path] = []
+    for key in input_checksum:
+        text = str(key).strip()
+        if not text:
+            continue
+        candidate = Path(text)
+        if not candidate.is_absolute():
+            candidate = repo_root / candidate
+        if candidate.exists():
+            paths.append(candidate)
+    return paths
 
 
 def _source_state_matches(
@@ -172,9 +212,42 @@ def _source_state_matches(
     current = _git_rev_parse(repo_root, current_commit)
     if not source or not current:
         return False, False, []
-    paths = [producer_path, *_input_checksum_paths(input_checksum)]
+    paths = [producer_path, *_input_checksum_paths(repo_root, input_checksum)]
     changed_paths = _git_diff_name_only(repo_root, source, current, paths)
     return not changed_paths, False, changed_paths
+
+
+def _dependency_mtime_check(
+    *,
+    artifact_exists: bool,
+    artifact_mtime: float,
+    producer_exists: bool,
+    producer_mtime: float,
+    input_dependency_paths: list[Path],
+) -> tuple[bool, list[dict[str, Any]]]:
+    details: list[dict[str, Any]] = []
+    if producer_exists:
+        details.append(
+            {
+                "dependency_kind": "producer",
+                "dependency_path": "<producer>",
+                "dependency_mtime": producer_mtime,
+                "newer_than_artifact": artifact_mtime < producer_mtime,
+            }
+        )
+    for dep_path in input_dependency_paths:
+        dep_mtime = dep_path.stat().st_mtime
+        details.append(
+            {
+                "dependency_kind": "input_checksum",
+                "dependency_path": str(dep_path),
+                "dependency_mtime": dep_mtime,
+                "newer_than_artifact": artifact_mtime < dep_mtime,
+            }
+        )
+    if not artifact_exists or not producer_exists:
+        return False, details
+    return (not any(detail["newer_than_artifact"] for detail in details), details)
 
 
 def _truthy_presence(value: Any) -> bool:
@@ -202,24 +275,46 @@ def _row(
     generated_at = _parse_iso(generated_at_raw)
     source_commit = _first_present(
         payload,
-        ("source_commit_sha", "source_commit", "git_commit", "commit_sha", "our_engine_commit"),
+        (
+            "source_commit_sha",
+            "source_commit",
+            "git_commit",
+            "commit_sha",
+            "our_engine_commit",
+        ),
     )
-    engine_version = _first_present(payload, ("engine_version", "solver_version", "version"))
+    engine_version = _first_present(
+        payload, ("engine_version", "solver_version", "version")
+    )
     input_checksum = _first_present(
         payload,
-        ("input_checksum", "input_checksums", "input_sha256", "input_artifact_checksum", "source_checksum"),
+        (
+            "input_checksum",
+            "input_checksums",
+            "input_sha256",
+            "input_artifact_checksum",
+            "source_checksum",
+        ),
     )
     reuse_marker = _first_present(
         payload,
-        ("reused_evidence", "reused_existing", "reuse_existing_if_present", "reuse_policy"),
+        (
+            "reused_evidence",
+            "reused_existing",
+            "reuse_existing_if_present",
+            "reuse_policy",
+        ),
     )
-    source_state_match, source_commit_exact_match, changed_since_source_commit = _source_state_matches(
-        repo_root=repo_root,
-        source_commit=source_commit,
-        current_commit=current_commit,
-        producer_path=producer_path,
-        input_checksum=input_checksum,
+    source_state_match, source_commit_exact_match, changed_since_source_commit = (
+        _source_state_matches(
+            repo_root=repo_root,
+            source_commit=source_commit,
+            current_commit=current_commit,
+            producer_path=producer_path,
+            input_checksum=input_checksum,
+        )
     )
+    input_dependency_paths = _input_checksum_paths(repo_root, input_checksum)
     blockers: list[str] = []
     artifact_exists = artifact_path.exists()
     producer_exists = producer_path.exists()
@@ -247,8 +342,25 @@ def _row(
 
     artifact_mtime = artifact_path.stat().st_mtime if artifact_exists else 0.0
     producer_mtime = producer_path.stat().st_mtime if producer_exists else 0.0
-    if artifact_exists and producer_exists and artifact_mtime < producer_mtime:
+    dependency_mtime_pass, dependency_mtime_details = _dependency_mtime_check(
+        artifact_exists=artifact_exists,
+        artifact_mtime=artifact_mtime,
+        producer_exists=producer_exists,
+        producer_mtime=producer_mtime,
+        input_dependency_paths=input_dependency_paths,
+    )
+    producer_newer = any(
+        detail["dependency_kind"] == "producer" and detail["newer_than_artifact"]
+        for detail in dependency_mtime_details
+    )
+    input_dependency_newer = any(
+        detail["dependency_kind"] == "input_checksum" and detail["newer_than_artifact"]
+        for detail in dependency_mtime_details
+    )
+    if producer_newer:
         blockers.append("producer_newer_than_artifact")
+    if input_dependency_newer:
+        blockers.append("input_dependency_newer_than_artifact")
 
     return {
         "label": label,
@@ -267,8 +379,10 @@ def _row(
         "engine_version": str(engine_version or ""),
         "engine_version_present": _truthy_presence(engine_version),
         "input_checksum_present": _truthy_presence(input_checksum),
+        "input_dependency_paths": [str(path) for path in input_dependency_paths],
         "reuse_marker_present": reuse_marker is not None,
-        "dependency_mtime_pass": bool(not artifact_exists or not producer_exists or artifact_mtime >= producer_mtime),
+        "dependency_mtime_details": dependency_mtime_details,
+        "dependency_mtime_pass": dependency_mtime_pass,
         "blockers": blockers,
         "ok": not blockers,
     }
@@ -286,8 +400,12 @@ def build_report(
     rows = [
         _row(
             label=label,
-            artifact_path=(repo_root / artifact_path).resolve() if not artifact_path.is_absolute() else artifact_path,
-            producer_path=(repo_root / producer_path).resolve() if not producer_path.is_absolute() else producer_path,
+            artifact_path=(repo_root / artifact_path).resolve()
+            if not artifact_path.is_absolute()
+            else artifact_path,
+            producer_path=(repo_root / producer_path).resolve()
+            if not producer_path.is_absolute()
+            else producer_path,
             repo_root=repo_root,
             current_commit=current_commit,
             max_age_days=max_age_days,
@@ -295,7 +413,9 @@ def build_report(
         )
         for label, artifact_path, producer_path in artifacts
     ]
-    blockers = [f"{row['label']}::{blocker}" for row in rows for blocker in row["blockers"]]
+    blockers = [
+        f"{row['label']}::{blocker}" for row in rows for blocker in row["blockers"]
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -307,18 +427,28 @@ def build_report(
             "artifact_count": len(rows),
             "pass_count": sum(1 for row in rows if row["ok"]),
             "blocker_count": len(blockers),
-            "source_commit_match_count": sum(1 for row in rows if row["source_commit_match"]),
-            "engine_version_present_count": sum(1 for row in rows if row["engine_version_present"]),
-            "input_checksum_present_count": sum(1 for row in rows if row["input_checksum_present"]),
-            "reuse_marker_present_count": sum(1 for row in rows if row["reuse_marker_present"]),
-            "dependency_mtime_pass_count": sum(1 for row in rows if row["dependency_mtime_pass"]),
+            "source_commit_match_count": sum(
+                1 for row in rows if row["source_commit_match"]
+            ),
+            "engine_version_present_count": sum(
+                1 for row in rows if row["engine_version_present"]
+            ),
+            "input_checksum_present_count": sum(
+                1 for row in rows if row["input_checksum_present"]
+            ),
+            "reuse_marker_present_count": sum(
+                1 for row in rows if row["reuse_marker_present"]
+            ),
+            "dependency_mtime_pass_count": sum(
+                1 for row in rows if row["dependency_mtime_pass"]
+            ),
         },
         "blockers": blockers,
         "rows": rows,
         "claim_boundary": (
             "Freshness audit records whether release evidence exposes source commit, engine version, "
-            "input checksum, reuse marker, generated_at, and producer dependency recency. It does not rerun "
-            "heavy validation by itself."
+            "input checksum, reuse marker, generated_at, producer dependency mtime, and declared "
+            "input-checksum file dependency mtime. It does not rerun heavy validation by itself."
         ),
     }
 
@@ -332,12 +462,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `current_source_commit_sha`: `{payload['current_source_commit_sha']}`",
         f"- `blockers`: `{', '.join(payload['blockers']) if payload['blockers'] else 'none'}`",
         "",
-        "| Artifact | Status | Blockers |",
-        "|---|---|---|",
+        "| Artifact | Status | Blockers | Newer Dependencies |",
+        "|---|---|---|---|",
     ]
     for row in payload["rows"]:
         blockers = ", ".join(row["blockers"]) if row["blockers"] else "none"
-        lines.append(f"| `{row['label']}` | `{'pass' if row['ok'] else 'blocked'}` | `{blockers}` |")
+        newer = [
+            detail["dependency_path"]
+            for detail in row.get("dependency_mtime_details", [])
+            if detail.get("newer_than_artifact")
+        ]
+        newer_label = ", ".join(f"`{path}`" for path in newer) if newer else "none"
+        lines.append(
+            f"| `{row['label']}` | `{'pass' if row['ok'] else 'blocked'}` | `{blockers}` | {newer_label} |"
+        )
     lines.append("")
     return "\n".join(lines)
 
@@ -356,7 +494,10 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     payload = build_report(max_age_days=args.max_age_days)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    args.out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     args.out_md.parent.mkdir(parents=True, exist_ok=True)
     args.out_md.write_text(_markdown(payload), encoding="utf-8")
     summary = (
@@ -364,7 +505,11 @@ def main(argv: list[str] | None = None) -> int:
         f"pass={payload['summary']['pass_count']}/{payload['summary']['artifact_count']} "
         f"blockers={payload['summary']['blocker_count']}"
     )
-    print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else summary)
+    print(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)
+        if args.json
+        else summary
+    )
     return 1 if args.fail_blocked and not payload["contract_pass"] else 0
 
 
