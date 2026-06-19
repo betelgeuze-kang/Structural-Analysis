@@ -104,6 +104,40 @@ def build_report(
     feature_synced = local_head == remote_feature
     main_synced = local_head == remote_main
     remote_sync_needed = bool(feature_ahead_count or main_ahead_count or not feature_synced or not main_synced)
+    feature_push_command = (
+        "git push origin "
+        f"{str(state.get('branch', '') or 'HEAD')}:"
+        "codex/create-architecture-definition-document-for-hybrid-ai"
+    )
+    main_push_command = "git push origin HEAD:main"
+    pending_remote_updates: list[dict[str, str]] = []
+    if not feature_synced:
+        pending_remote_updates.append(
+            {
+                "target": str(state.get("remote_feature_ref", "") or DEFAULT_FEATURE_REF),
+                "action": "push current HEAD to feature",
+                "command": feature_push_command,
+                "rollback": f"restore feature to previous remote SHA {remote_feature} with an approved restore action",
+            }
+        )
+    if not main_synced:
+        pending_remote_updates.append(
+            {
+                "target": str(state.get("remote_main_ref", "") or DEFAULT_MAIN_REF),
+                "action": "fast-forward push current HEAD to main",
+                "command": main_push_command,
+                "rollback": f"restore main to previous remote SHA {remote_main} with an approved revert/restore action",
+            }
+        )
+    pending_targets = [item["target"] for item in pending_remote_updates]
+    pending_actions = [item["action"] for item in pending_remote_updates]
+    pending_rollbacks = [item["rollback"] for item in pending_remote_updates]
+    if not pending_targets:
+        r4_risk = "No remote mutation remains."
+    elif any(target == str(state.get("remote_main_ref", "") or DEFAULT_MAIN_REF) for target in pending_targets):
+        r4_risk = "Main CI and external reviewers immediately see the current commits."
+    else:
+        r4_risk = "External reviewers of the feature branch immediately see the current commits."
     preflight_pass = bool(
         local_head
         and remote_feature
@@ -147,6 +181,7 @@ def build_report(
         "reason_code": "PASS" if remote_sync_authorized and not blockers else "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "blockers": blockers,
         "state": state,
+        "pending_remote_updates": pending_remote_updates,
         "checks": {
             "worktree_clean": worktree_clean,
             "remote_safety_ok": remote_safety_ok,
@@ -158,26 +193,23 @@ def build_report(
             "explicit_remote_mutation_approval": remote_mutation_approved,
         },
         "commands": {
-            "feature_push": (
-                "git push origin "
-                f"{str(state.get('branch', '') or 'HEAD')}:"
-                "codex/create-architecture-definition-document-for-hybrid-ai"
-            ),
-            "main_fast_forward_push": "git push origin HEAD:main",
+            "feature_push": feature_push_command,
+            "main_fast_forward_push": main_push_command,
             "post_push_verify": (
                 "git fetch origin && git rev-parse HEAD "
                 f"{state.get('remote_feature_ref')} {state.get('remote_main_ref')}"
             ),
         },
         "r4_disclosure": {
-            "target": [
-                str(state.get("remote_feature_ref", "") or DEFAULT_FEATURE_REF),
-                str(state.get("remote_main_ref", "") or DEFAULT_MAIN_REF),
-            ],
-            "action": "push current HEAD to feature, then fast-forward push HEAD to main",
-            "impact": "GitHub feature/main refs become externally visible at the local development state.",
-            "risk": "Main CI and external reviewers immediately see the current commits.",
-            "rollback": f"restore main to previous remote SHA {remote_main} with an approved revert/restore action",
+            "target": pending_targets,
+            "action": "; ".join(pending_actions) if pending_actions else "no remote mutation required",
+            "impact": (
+                "GitHub pending refs become externally visible at the local development state."
+                if pending_targets
+                else "No GitHub ref update is needed; feature and main already match local HEAD."
+            ),
+            "risk": r4_risk,
+            "rollback": "; ".join(pending_rollbacks) if pending_rollbacks else "no rollback needed",
             "verification": "fetch origin and compare remote feature/main refs with local HEAD after push",
         },
         "claim_boundary": (

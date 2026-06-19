@@ -53,6 +53,28 @@ def test_sync_preflight_requires_r4_approval_for_ready_remote_mutation() -> None
     assert payload["checks"]["feature_fast_forward_possible"] is True
     assert payload["checks"]["main_fast_forward_possible"] is True
     assert payload["checks"]["remote_safety_ok"] is True
+    assert payload["pending_remote_updates"] == [
+        {
+            "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+            "action": "push current HEAD to feature",
+            "command": (
+                "git push origin "
+                "codex/create-architecture-definition-document-for-hybrid-ai:"
+                "codex/create-architecture-definition-document-for-hybrid-ai"
+            ),
+            "rollback": "restore feature to previous remote SHA def5678 with an approved restore action",
+        },
+        {
+            "target": "origin/main",
+            "action": "fast-forward push current HEAD to main",
+            "command": "git push origin HEAD:main",
+            "rollback": "restore main to previous remote SHA 012abcd with an approved revert/restore action",
+        },
+    ]
+    assert payload["r4_disclosure"]["target"] == [
+        "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+        "origin/main",
+    ]
     assert "git push origin HEAD:main" == payload["commands"]["main_fast_forward_push"]
     assert "read-only" in payload["claim_boundary"]
 
@@ -71,6 +93,34 @@ def test_sync_preflight_passes_when_already_synced_without_remote_mutation() -> 
     assert payload["contract_pass"] is True
     assert payload["remote_sync_needed"] is False
     assert payload["blockers"] == []
+    assert payload["pending_remote_updates"] == []
+    assert payload["r4_disclosure"]["action"] == "no remote mutation required"
+    assert payload["r4_disclosure"]["risk"] == "No remote mutation remains."
+
+
+def test_sync_preflight_reports_only_main_update_after_feature_is_synced() -> None:
+    payload = sync_preflight.build_report(
+        _state(
+            remote_feature_sha="abc1234",
+            feature_ahead_count=0,
+            main_ahead_count=4,
+        )
+    )
+
+    assert payload["status"] == "approval_required"
+    assert payload["checks"]["feature_synced_to_head"] is True
+    assert payload["checks"]["main_synced_to_head"] is False
+    assert payload["pending_remote_updates"] == [
+        {
+            "target": "origin/main",
+            "action": "fast-forward push current HEAD to main",
+            "command": "git push origin HEAD:main",
+            "rollback": "restore main to previous remote SHA 012abcd with an approved revert/restore action",
+        }
+    ]
+    assert payload["r4_disclosure"]["target"] == ["origin/main"]
+    assert payload["r4_disclosure"]["action"] == "fast-forward push current HEAD to main"
+    assert "Main CI" in payload["r4_disclosure"]["risk"]
 
 
 def test_sync_preflight_allows_ready_push_only_with_explicit_approval() -> None:
