@@ -137,16 +137,16 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-19T18:25:21.202343+00:00",
+  "generated_at": "2026-06-19T18:31:30.176940+00:00",
   "input_checksums": {
-    "README.md": "sha256:4bdea33ede64361cf9ecf2cefafe81c5e31b42ad2c622f6101b98775602b1628",
-    "docs/commercialization-gap-current-state.md": "sha256:d66dd88a1c0c59c18e72f1cb64fd0d34d3edb48c546f4c0499a54e5b72459c89",
+    "README.md": "sha256:7b6ff727f6a5e0dea043a06db94bf59296155044bf23e7ccf6dfa70422fa27c9",
+    "docs/commercialization-gap-current-state.md": "sha256:8348e80d56ef7a211223aeb70d73a69b0269fa2271376a6bcadb339795a4d8ae",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:458fb180bc5a348315834fc21c6083d52d5ccb1a7529f11e374fcda46cdc1a6f",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:44bc98f66138e9df4cb2d2f3a7edb546fedeafea10777b9ddd9371a7feb913da",
-    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:a723b6e6c92a7865113968c0f51bf904e467981535d4eee190a902faa7d38df9",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:96f757519af3d1cbdf3b3807b00f9c6a10858fe99508484bea1bdbfd792cee0d",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:f98f4f2cae4af0ea1c42bc1393e7155e86fc910692fb53c93915d3e96edd1318"
+    "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:1ce4e1014004ccecdf7debfae35d8b437acf8aa42f18d9abdf27356184fa1450",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:665b3bd84bfaefe4f7d2ff7f1563d973ab35a9acd5bae42fcd575943b4afaa63",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:0582a6ed148f758e4ee580d8521f48cd23bb5324da6b8ce4f5db4be0096c2226"
   },
   "launch_ready": false,
   "prerequisite_rows": [
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "81d094bffca4362a5e610c5c0374ec2b827612f2",
+  "source_commit_sha": "3151eb3eeb1c08f467408cc57d438f93ec51f079",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
