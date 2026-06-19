@@ -23,10 +23,6 @@
       "G6:external_receipt_or_closure_pending:peer_spd_hinge",
       "G6:external_receipt_or_closure_pending:tpu_hffb",
       "G6:external_submission_receipts_pending",
-      "G6:residual_closure_pending:RH-001",
-      "G6:residual_closure_pending:RH-002",
-      "G6:residual_closure_pending:RH-003",
-      "G6:residual_holdout_closure_pending",
       "G7:repo_benchmark_bridge_mgt_present",
       "G7:metadata_only_sources_present",
       "G7:operator_attached_real_mgt_header_ok_below_target"
@@ -50,7 +46,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-18T15:46:23.381845+00:00",
+  "generated_at": "2026-06-19T13:20:39.083951+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"

@@ -1,14 +1,15 @@
 # 상용화 개선 우선순위 및 단계 평가
 
-- 기준일: 2026-05-19
+- 기준일: 2026-06-19
 - 대상: 전체 repo, `implementation/phase1`, `src/structure-viewer`, 릴리즈/검증 문서와 게이트 스크립트
 - 평가 방식: 현재 로컬 게이트 결과, 기존 상용화 gap 문서, 프론트엔드/viewer 계약 문서, 빌드/품질 체크 결과를 함께 반영한다.
 
 ## 결론
 
-현재 단계는 **조건부 상용 운영 L4, 9.0/10**으로 본다.
+현재 단계는 **strict evidence-aware 상용 운영 L4, 8.0/10**으로 본다.
 
-- 게이트 기반 공식 점수: **9.0/10** (`scripts/report_commercialization_level.py --closure-mode conditional`)
+- 게이트 기반 공식 점수: **8.0/10** (`scripts/report_commercialization_level.py --closure-mode strict`)
+- PM release milestone gate: **M1-M5 5/5 pass**, release areas는 CI streak, human UX observation, license status 때문에 blocked
 - 실무자 검토 전제 상용 보조툴 readiness: **상용 운영 가능**
 - 독립 상용 구조해석제품 readiness: **blocked, 80/100** (`scripts/check_independent_product_readiness.py`)
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
@@ -25,10 +26,10 @@
 | P1 execution | ready | publication evidence 기반 P1 readiness와 benchmark breadth가 unblocked |
 | P1 evidence sidecar structure | pass | `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open` 통과. EB/RH row 구조는 준비됨 |
 | source boundary inventory | pass | CI에서 `plan_source_boundary_cleanup.py --large-file-threshold-mib 25 --fail-on-candidates` 실행, 현재 후보 0건 |
-| 상용화 레벨 | L4 conditional | `commercial_operations_ready_with_evidence_closure`, strict evidence는 pending |
-| 상용화 점수 | 9.0/10 | 조건부 제품화 기준. 독립 제품 승격은 별도 readiness gate로 blocked |
+| 상용화 레벨 | L4 strict evidence-aware | `commercial_operations_ready_with_evidence_closure`, strict evidence는 EB receipt 때문에 pending |
+| 상용화 점수 | 8.0/10 | strict evidence 기준. 독립 제품 승격은 별도 readiness gate로 blocked |
 | 외부 benchmark receipt | 0/4 attached | strict evidence gate는 아직 pending. 외부 검증은 아직 claim 승격 근거로 쓰면 안 됨 |
-| residual holdout closure | 0/3 closed | strict evidence gate 기준 구조기술사/레거시툴/인허가성 검토 대기 영역 |
+| residual holdout closure | 3/3 signed_attached | RH-001/RH-002/RH-003 signed closure evidence는 attached로 계산됨 |
 | runtime production packaging | pass | strict Rust/HIP probe, SBOM, native artifact manifest, compatibility matrix가 `production_runtime_packaging_manifest.json`으로 연결됨 |
 | production ops/security gate | pass | auth/tenant/audit 계약, no-default-secret production path, tenant/actor rate limit, request metadata limit, audit digest, `/ops/policy` manifest가 readiness gate를 통과함 |
 | support bundle | pass | redaction, audit digest, roundtrip 가능한 support bundle manifest가 생성됨 |
@@ -55,8 +56,8 @@
 - 이어서 `E402/E741/E731/E701/F811` 잔여 30건을 정리해 전체 `python -m ruff check .` 통과 상태로 만들고 CI static check를 full ruff로 승격했다.
 - 풀 테스트 후 `panel_zone_solver_verified_export_bundle.json`이 fixture 샘플로 덮이는 테스트 격리 누락을 수정했고, 재실행 후 `check_generated_worktree_clean.py --show-ok` 통과를 확인했다.
 - `python -m pytest -q`는 **1387 passed**로 통과했다.
-- P1 EB/RH evidence sidecar preflight에 `--structure-only` 모드를 추가해, 외부 증거가 없는 현재 상황에서도 "준비 구조 통과"와 "strict 증거 pending"을 분리했다.
-- `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 receipt/closure evidence 7건 pending을 계속 blocker로 보고한다.
+- P1 EB/RH evidence sidecar preflight에 `--structure-only` 모드를 추가해, 내부 준비 구조와 strict evidence 상태를 분리했다.
+- `python3 scripts/preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open --json`은 통과하며, 같은 preflight의 기본 strict evidence 모드는 EB receipt 4건 pending을 blocker로 보고한다. RH closure evidence 3건은 `signed_attached`로 attached 처리된다.
 - clean-checkout evidence chain도 `p1_evidence_sidecar_structure_preflight`와 strict `p1_evidence_sidecar_preflight`를 함께 기록하므로, release reviewer가 내부 준비도와 실제 승격 evidence를 한 payload에서 구분할 수 있다.
 - 구조 웹뷰어의 real drawing browser state를 `viewer-real-drawing-browser-state.js` 모듈로 분리했고, single-file viewer generator가 이 모듈을 data URL로 inline하도록 연결했다.
 - source-boundary cleanup plan에 JSON/Markdown 산출물, NUL-safe tracked file fixture, `--fail-on-candidates` 게이트를 추가했고 현재 repo 기준 후보 0건 통과를 확인했다.
@@ -74,9 +75,9 @@
 - 구조 웹뷰어의 side panel load-case inventory/layer toggle 계산을 `viewer-side-panel-model.js`로 분리했고, load-case fallback/active insertion 계약을 테스트로 고정했다.
 - 구조 웹뷰어의 member search result 중복 제거/selected/isolate 표시 계산을 `viewer-search-results-model.js`로 분리했고, applied section 검색 계약을 테스트로 고정했다.
 - 구조 웹뷰어의 selection key/summary/clear button state 계산을 `viewer-selection-summary-model.js`로 분리했고, multi-selection summary 계약을 테스트로 고정했다.
-- 상용화 레포트는 조건부 closure 기준 **`9.0/10`**을 보고한다.
+- 상용화 레포트는 strict evidence 기준 **`8.0/10`**과 L4를 보고한다.
 
-남은 strict blocker는 외부 benchmark receipt 4건, residual holdout closure 3건, 그리고 full commercial replacement false 상태다.
+남은 strict blocker는 외부 benchmark receipt 4건과 full commercial replacement false 상태다. RH closure 3건은 signed evidence로 닫혔지만, full autonomous replacement claim을 열지는 않는다.
 
 ## 2026-05-18~2026-05-19 실행 결과
 
@@ -91,7 +92,7 @@
 - `scripts/measure-structure-viewer-visual-regression.mjs`와 `npm run verify:viewer-visual-regression`을 추가해 render mode 및 plan/review/compare/evidence-ingest workflow-state local canvas signature baseline을 full quality gate에 연결했다. 이 증거는 `live_visual_claim=false`이며 pixel-perfect 고객 장비 렌더링 claim으로 쓰지 않는다.
 - Viewer evidence hub에 review task, solver receipt, commercial-tool crosswalk, evidence ingest, renderable ingest, lineage drilldown, local ops bundle 흐름을 확장했다.
 - 선택 부재의 SVG sheet/revision/callout/viewer deep-link를 `structure-viewer-drawing-sheet-package.v1`로 정규화하고 HTML report/report panel에 노출했다.
-- 현재 `python3 scripts/check_independent_product_readiness.py --json`은 production ops/runtime/support/viewer packaging이 ready인 상태에서도 strict EB/RH 때문에 **80/100 blocked**를 유지한다.
+- 현재 `python3 scripts/check_independent_product_readiness.py --json`은 production ops/runtime/support/viewer packaging과 RH signed closure가 ready인 상태에서도 strict EB receipt 때문에 **80/100 blocked**를 유지한다.
 
 ## 우선순위 0. P0 릴리즈 증거 게이트 닫기
 
@@ -164,26 +165,26 @@
 - P1 operational queues materialized
 - EB/RH evidence intake template generated
 - EB/RH sidecar row 구조 preflight 통과 모드 추가
-- `--structure-only --fail-open`은 준비 구조를 통과시키고, strict evidence 미수집은 `pending_evidence_blockers`로 분리 보고
+- `--structure-only --fail-open`은 준비 구조를 통과시키고, strict EB receipt pending은 `pending_evidence_blockers`로 분리 보고
 - clean-checkout materializer가 structure preflight와 strict preflight를 모두 payload에 기록
 
 남은 부분:
 
 - external benchmark submission receipt `0/4`
-- residual holdout closure evidence `0/3 closed`
+- residual holdout closure evidence `3/3 signed_attached`
 
 완료 기준:
 
 - P1 operational queues materialized
 - EB 4개 lane에 receipt/status/update sidecar 구조 존재
-- RH 3건에 owner/status/SLA/closure packet template 존재
+- RH 3건에 owner/status/SLA/closure packet template와 signed closure evidence 존재
 - 외부 증거가 없는 상태와 내부 준비 완료 상태가 명확히 분리됨
 
 다음 작업:
 
 1. 제품 개발 중에는 `preflight_p1_evidence_sidecar_intake.py --structure-only --fail-open`을 내부 준비도 gate로 사용
 2. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
-3. RH 3개에 closure evidence path 연결
+3. RH 3개의 signed closure evidence path 유지 및 회귀 검증
 4. `build_p1_evidence_sidecar_updates.py --require-complete` 실행
 5. `preflight_p1_evidence_sidecar_intake.py --fail-open` strict evidence gate 통과
 
@@ -347,7 +348,7 @@
 
 상용 보조툴 점수와 독립 상용제품 readiness는 분리한다.
 
-- 조건부 상용 운영 점수: **9.0/10**
+- strict evidence-aware 상용 운영 점수: **8.0/10**
 - 독립 상용 구조해석제품 readiness: `scripts/check_independent_product_readiness.py` 기준 blocked
 - 완전자율 상용 구조툴 대체 readiness: **55-60%**
 
@@ -357,7 +358,7 @@
 | --- | ---: | ---: | ---: |
 | P0 release/core evidence | 15 | closed | 15 |
 | P1 validation/benchmark breadth | 15 | ready | 15 |
-| strict EB/RH evidence | 20 | EB 0/4, RH 0/3 | 0 |
+| strict EB/RH evidence | 20 | EB 0/4, RH 3/3 signed_attached | 0 |
 | runtime production path | 15 | strict runtime + packaging manifest pass | 15 |
 | ops/security productization | 15 | no production default secret, auth/tenant/audit/rate/request-limit/audit-digest/policy/deployment-drill contract pass | 15 |
 | packaging/support | 10 | support bundle redaction/digest/roundtrip pass, on-prem/air-gapped skeleton pass | 10 |
@@ -367,7 +368,7 @@
 
 따라서 현재 판정은 다음처럼 구분한다.
 
-- **9.0/10**: 조건부 상용 운영 readiness
+- **8.0/10**: strict evidence-aware 상용 운영 readiness
 - **blocked / 80%**: 독립 상용 구조해석제품 readiness
 - **55-60%**: 완전자율 상용 구조툴 대체 readiness
 
@@ -375,15 +376,15 @@
 
 | 단계 | 목표 퍼센트 | 승격 조건 |
 | --- | ---: | --- |
-| 현재 | blocked / 80% | L4 conditional, P0/P1/runtime/ops/support ready, strict EB/RH pending |
-| 다음 목표 | 100% | EB/RH strict evidence sidecar closed, claim docs synchronized |
+| 현재 | blocked / 80% | L4, P0/P1/runtime/ops/support ready, RH signed closure ready, EB receipt pending |
+| 다음 목표 | 100% | EB strict evidence receipt sidecar closed 4/4, claim docs synchronized |
 | 독립 제품 후보 | 80%+ | runtime production path, ops/security, packaging/support gate closed |
 | 독립 제품 release | 100% | `check_independent_product_readiness.py --fail-blocked` 통과 |
 
 ## 바로 실행할 작업 순서
 
 1. EB receipt 4개에 실제 receipt URL/path 또는 formal hold evidence 연결
-2. RH 3개에 signed closure packet 또는 formal hold packet 연결
+2. RH 3개 signed closure packet 경로와 status 회귀 검증
 3. `validate_p1_evidence_intake_manifest.py --json --fail-open`으로 no-write promotion lint 통과
 4. `build_p1_evidence_sidecar_updates.py --require-complete`로 sidecar 생성
 5. `preflight_p1_evidence_sidecar_intake.py --json --fail-open` strict evidence gate 통과

@@ -78,6 +78,28 @@ def _residual_updates(path: Path, *, repo_root: Path, closed: bool, missing_path
     )
 
 
+def _signed_residual_updates(path: Path, *, repo_root: Path) -> Path:
+    updates = {}
+    for work_item_id in ["RH-001", "RH-002", "RH-003"]:
+        evidence_path = repo_root / "evidence" / f"{work_item_id}.signed_closure.json"
+        _write_json(evidence_path, {"work_item_id": work_item_id, "signature_status": "verified"})
+        updates[work_item_id] = {
+            "status": "closed",
+            "queue_status": "closure_evidence_attached",
+            "closure_evidence_status": "signed_attached",
+            "closure_evidence_path": str(evidence_path.relative_to(repo_root)),
+            "last_checked_at_utc": "2026-06-05T13:35:55Z",
+            "closed_at_utc": "2026-06-05T13:35:56Z",
+        }
+    return _write_json(
+        path,
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": updates,
+        },
+    )
+
+
 def test_preflight_reports_pending_current_sidecars(tmp_path: Path) -> None:
     payload = preflight.build_preflight(
         external_benchmark_submission_updates=_external_updates(tmp_path / "eb.json", attached=False),
@@ -131,6 +153,21 @@ def test_preflight_passes_only_with_real_receipts_and_closure_files(tmp_path: Pa
     assert payload["summary"]["residual_closed_count"] == 3
     assert payload["summary"]["residual_closure_evidence_attached_count"] == 3
     assert payload["blockers"] == []
+
+
+def test_preflight_accepts_signed_attached_residual_closure_files(tmp_path: Path) -> None:
+    payload = preflight.build_preflight(
+        external_benchmark_submission_updates=_external_updates(tmp_path / "eb.json", attached=False),
+        residual_holdout_closure_updates=_signed_residual_updates(tmp_path / "rh.json", repo_root=tmp_path),
+        repo_root=tmp_path,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["external_receipt_attached_count"] == 0
+    assert payload["summary"]["residual_closed_count"] == 3
+    assert payload["summary"]["residual_closure_evidence_attached_count"] == 3
+    assert "residual_closure_pending:RH-001" not in payload["blockers"]
+    assert "external_receipt_or_closure_pending:hardest_external_10case" in payload["blockers"]
 
 
 def test_preflight_rejects_closed_residual_rows_without_evidence_files(tmp_path: Path) -> None:

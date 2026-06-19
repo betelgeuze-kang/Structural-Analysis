@@ -56,6 +56,7 @@ REQUIRED_COMMERCIAL_CHECKS = (
     "ood_safety_pass",
     "gpu_strict_pass",
 )
+ATTACHED_EVIDENCE_STATUSES = {"attached", "verified", "closed", "signed_attached"}
 
 RESIDUAL_HOLDOUT_QUEUE_DEFAULTS = {
     "licensed_engineer_review_required": {
@@ -201,7 +202,7 @@ def _commercial_gate(
         "residual_holdout_closure_evidence_attached_count": sum(
             1
             for row in residual_work_items
-            if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+            if str(row.get("closure_evidence_status", "") or "").lower() in ATTACHED_EVIDENCE_STATUSES
         ),
         "residual_holdout_last_checked_count": sum(
             1 for row in residual_work_items if str(row.get("last_checked_at_utc", "") or "").strip()
@@ -333,7 +334,7 @@ def _external_submission_queue_gate(
             sum(
                 1
                 for row in rows
-                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+                if str(row.get("closure_evidence_status", "") or "").lower() in ATTACHED_EVIDENCE_STATUSES
             )
         ),
         "onepage_attestation_status": str(summary.get("onepage_attestation_status", "") or ""),
@@ -346,7 +347,7 @@ def _external_submission_queue_gate(
 def _is_residual_closed(row: dict[str, Any]) -> bool:
     status = str(row.get("status", "") or "").lower()
     evidence_status = str(row.get("closure_evidence_status", "") or "").lower()
-    return status in {"closed", "complete", "completed"} or evidence_status in {"attached", "verified", "closed"}
+    return status in {"closed", "complete", "completed"} or evidence_status in ATTACHED_EVIDENCE_STATUSES
 
 
 def _merge_residual_update(row: dict[str, Any], updates: dict[str, dict[str, Any]]) -> dict[str, Any]:

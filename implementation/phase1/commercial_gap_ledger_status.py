@@ -2479,7 +2479,9 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
     korea_operator_attachment_queue_validation = _load(
         KOREA_OPEN_DATA / "operator_attachment_manifest.queue.validation_report.json"
     )
-    independent = _load(RELEASE / "independent_product_readiness.json")
+    independent = _load(productization / "independent_product_readiness.json") or _load(
+        RELEASE / "independent_product_readiness.json"
+    )
     workstation = _load(REPO_ROOT / "implementation/phase1/workstation_delivery_readiness.json")
     governance = _load(productization / "solver_governance_support_contract.json")
     ml = _load(productization / "ml_multi_objective_status.json")

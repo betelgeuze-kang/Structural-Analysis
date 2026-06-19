@@ -1,0 +1,64 @@
+{
+  "default_publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "gates": [
+    {
+      "blocks_p1_execution": false,
+      "core_evidence_closed": true,
+      "label": "P0 release publication",
+      "ok": true,
+      "release_publication_closed": true,
+      "status": "ready"
+    },
+    {
+      "already_restored": 8,
+      "artifact_count": 8,
+      "blocked": 0,
+      "cache_ready": 0,
+      "label": "Open-data artifact restore",
+      "ok": true,
+      "status": "ready",
+      "total_bytes": 293146888
+    },
+    {
+      "koneps_parser_target_count": 7,
+      "label": "Real-project parser coverage",
+      "ok": true,
+      "peer_tbi_benchmark_metric_target_count": 5,
+      "raw_redistribution_auto_allowed_after_p0": false,
+      "status": "ready"
+    },
+    {
+      "label": "PEER TBI benchmark metric records",
+      "metric_record_count": 5,
+      "ok": true,
+      "raw_redistribution_auto_allowed": false,
+      "recorded_metric_group_count": 5,
+      "required_metric_group_count": 5,
+      "status": "ready"
+    },
+    {
+      "label": "Real-project row provenance",
+      "midas_kds_exact_geometry_bridge_pass_count": 3,
+      "midas_kds_exact_row_provenance_count": 3168,
+      "midas_kds_review_row_count": 3168,
+      "midas_kds_row_provenance_complete": true,
+      "midas_kds_validation_artifact_count": 3,
+      "midas_kds_validation_present": true,
+      "midas_kds_validation_row_present": true,
+      "ok": true,
+      "raw_redistribution_default_blocked": true,
+      "release_surface_allowed_count": 0,
+      "row_count": 3,
+      "row_provenance_coverage": 1.0,
+      "status": "ready"
+    }
+  ],
+  "next_action": "start P1 quality/fallback/benchmark breadth",
+  "p0_core_evidence_closed": true,
+  "p0_release_blocker": false,
+  "p1_execution_unblocked": true,
+  "p1_inputs_ready": true,
+  "publication_evidence_index": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
+  "schema_version": "p1-readiness-status.v1",
+  "status": "ready"
+}

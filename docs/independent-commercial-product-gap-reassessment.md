@@ -1,6 +1,6 @@
 # Independent Commercial Product Gap Reassessment
 
-- 기준일: 2026-05-20
+- 기준일: 2026-06-19
 - 목적: 조건부 상용 보조툴 상태에서 독립 상용 구조해석제품 claim으로 넘어가기 위해 남은 gap을 재산정한다.
 - 판정 기준: `scripts/check_independent_product_readiness.py --json`
 
@@ -8,7 +8,7 @@
 
 현재 독립 상용제품 readiness는 **80/100, blocked**다.
 
-상용 보조툴 관점에서는 L4 conditional, `9.0/10`으로 운영 가능한 상태에 가깝다. 그러나 독립 상용 구조해석제품 claim은 아직 사용할 수 없다. 이유는 runtime, ops, packaging이 아니라 **strict external benchmark / residual holdout evidence**가 비어 있기 때문이다.
+상용 보조툴 관점에서는 strict evidence-aware L4, `8.0/10`으로 운영 가능한 상태에 가깝다. 그러나 독립 상용 구조해석제품 claim은 아직 사용할 수 없다. 이유는 runtime, ops, packaging이 아니라 **strict external benchmark receipt evidence**가 비어 있기 때문이다. RH closure는 signed evidence `3/3`으로 닫혔지만, EB receipt `0/4`가 strict package 전체를 blocked로 유지한다.
 
 별도 로컬 트랙으로 **Workstation Delivery Service Readiness**를 추가했다. 이 트랙은 내 워크스테이션에서 구조해석/최적화 산출물, 리포트, 뷰어, 도면, 데이터, evidence, manifest/checksum zip을 생성해 납품하는 서비스 gate이며, EB/RH를 닫지 않아도 로컬에서 green이 될 수 있다. 다만 이 green은 독립 상용 구조해석제품 claim을 의미하지 않는다.
 
@@ -32,7 +32,7 @@
 | --- | ---: | --- | --- |
 | P0 release/core evidence | 15 | ready | `p0_closed=true`, release publication closed, core evidence closed |
 | P1 validation/benchmark breadth | 15 | ready | P1 inputs/execution ready, benchmark breadth unblocked |
-| Strict EB/RH evidence | 20 | blocked | EB receipt `0/4`, RH closure `0/3` |
+| Strict EB/RH evidence | 20 | blocked | EB receipt `0/4`, RH signed closure `3/3` |
 | Runtime production path | 15 | ready | strict Rust/HIP probe pass, runtime packaging manifest pass |
 | Production API/security/ops | 15 | ready | bearer/tenant/audit contract present, production default secret removed, rate/request limits, audit digest, ops policy manifest, dry-run deployment drill |
 | Deployment packaging/support | 10 | ready | support bundle redaction/digest/roundtrip pass, on-prem/air-gapped skeleton packaging pass, static viewer performance budget pass |
@@ -93,22 +93,22 @@ python3 scripts/preflight_p1_evidence_sidecar_intake.py --json --fail-open
 
 ### Gap 2. Residual Holdout Closure
 
-Impact: **independent product claim blocker**
+Impact: **closed locally, still audited with strict package**
 
 Current evidence:
 
-- `RH-001`: signed engineer review packet pending
-- `RH-002`: legacy tool cross-validation packet pending
-- `RH-003`: authority signoff receipt or formal hold packet pending
+- `RH-001`: signed engineer review packet attached
+- `RH-002`: legacy tool cross-validation packet attached
+- `RH-003`: authority signoff receipt or formal hold packet attached
 
-Missing requirements:
+Maintained requirements:
 
 - `status=closed`
-- `closure_evidence_status=attached`
+- `closure_evidence_status=signed_attached`
 - local evidence path exists or explicit evidence URL
 - closed/last-checked timestamps
 
-Closure path is the same P1 intake path above. The new no-write validator must pass before sidecar mutation.
+RH closure no longer contributes a current blocker by itself. Keep it in the strict preflight so EB/RH package regressions are visible before any independent product claim.
 
 ### Gap 3. External-State Release Promotion
 
@@ -143,7 +143,7 @@ The following items were previous independent-product blockers, but are now read
 
 Do not promote to independent commercial structural analysis product yet.
 
-Next valid milestone is **strict EB/RH evidence closed**. Once that happens, rerun:
+Next valid milestone is **strict EB receipt evidence closed 4/4**. Once that happens, rerun:
 
 ```bash
 python3 scripts/check_independent_product_readiness.py --fail-blocked

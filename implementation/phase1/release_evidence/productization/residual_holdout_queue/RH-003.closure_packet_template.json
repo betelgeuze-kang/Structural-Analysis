@@ -1,0 +1,18 @@
+{
+  "category_id": "legal_authority_signoff_required",
+  "closed_at_utc": "2026-06-05T13:35:55.252261+00:00",
+  "closure_evidence_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/rh_signed_closure_packets/RH-003.signed_closure.json",
+  "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
+  "closure_evidence_status": "signed_attached",
+  "due_date": "authority_submission_window",
+  "generated_at": "2026-06-19T13:19:15.542573+00:00",
+  "last_checked_at_utc": "2026-05-05T05:05:53Z",
+  "owner": "authority_workflow_owner",
+  "owner_action": "verify_closure_evidence_and_archive",
+  "queue_status": "pending_signoff",
+  "schema_version": "residual_holdout_closure_packet_template.v1",
+  "sla_hours": 168,
+  "sla_label": "168h",
+  "status": "closed",
+  "work_item_id": "RH-003"
+}

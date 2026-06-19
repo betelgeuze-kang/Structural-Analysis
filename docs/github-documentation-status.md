@@ -1,6 +1,6 @@
 # GitHub Documentation Status
 
-- 기준일: 2026-05-20
+- 기준일: 2026-06-19
 - 목적: GitHub에서 바로 보이는 README/docs 문서가 현재 productization gate 상태와 같은 claim boundary를 말하는지 고정한다.
 
 ## Current Published Claim
@@ -14,7 +14,7 @@
 - full autonomous commercial replacement
 - 구조기술사 검토 대체
 - 인허가 자동 승인
-- strict external benchmark / residual holdout evidence closed
+- full strict external benchmark / residual holdout evidence package closed
 
 ## Current Gate Snapshot
 
@@ -28,7 +28,7 @@
 | Support bundle | ready |
 | Viewer workflow packaging | ready: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package, static performance budget manifest, local browser performance probe, 11-case render-mode/core/advanced workflow-state visual regression baseline |
 | Workstation delivery service | local gate: hardware profile, service budget, delivery package manifest, client input validation, package restore/checksum smoke |
-| Strict EB/RH evidence | blocked: EB `0/4`, RH `0/3` |
+| Strict EB/RH evidence | blocked: EB `0/4`, RH signed closure `3/3` |
 | Independent product readiness | blocked, `80/100` |
 
 ## Documentation Source Of Truth

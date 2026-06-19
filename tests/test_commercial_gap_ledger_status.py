@@ -8412,6 +8412,13 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G5"]["evidence"]["trace_ready"] is True
     assert rows["G6"]["status"] == "external_blocked"
     assert rows["G6"]["locally_closable"] is False
+    assert rows["G6"]["evidence"]["external_receipt_attached_count"] == 0
+    assert rows["G6"]["evidence"]["residual_closed_count"] == 3
+    assert "external_submission_receipts_pending" in rows["G6"]["blockers"]
+    assert not any(
+        str(blocker).startswith("residual_closure_pending:")
+        for blocker in rows["G6"]["blockers"]
+    )
     assert "G6 is externally blocked" in rows["G6"]["claim_boundary"]
     assert "do not close external benchmark receipts" in rows["G6"]["claim_boundary"]
     assert rows["G7"]["status"] == "partial"

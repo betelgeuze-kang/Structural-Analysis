@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from check_p1_benchmark_breadth_status import (  # noqa: E402
+    ATTACHED_EVIDENCE_STATUSES,
     DEFAULT_COMMERCIAL_READINESS,
     DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
     DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
@@ -39,7 +40,7 @@ def _write_json(path: Path, payload: object) -> None:
 def _is_closed(row: dict[str, Any]) -> bool:
     status = str(row.get("status", "") or "").lower()
     evidence_status = str(row.get("closure_evidence_status", "") or "").lower()
-    return status in {"closed", "complete", "completed"} or evidence_status in {"attached", "verified", "closed"}
+    return status in {"closed", "complete", "completed"} or evidence_status in ATTACHED_EVIDENCE_STATUSES
 
 
 def _residual_owner_action(row: dict[str, Any]) -> str:
@@ -211,7 +212,7 @@ def build_operational_queues(
             "external_submission_closure_evidence_attached_count": sum(
                 1
                 for row in external_items
-                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+                if str(row.get("closure_evidence_status", "") or "").lower() in ATTACHED_EVIDENCE_STATUSES
             ),
             "external_submission_updates_applied_count": int(
                 external_gate.get("external_benchmark_submission_updates_applied_count", 0) or 0
@@ -227,7 +228,7 @@ def build_operational_queues(
             "residual_holdout_closure_evidence_attached_count": sum(
                 1
                 for row in residual_items
-                if str(row.get("closure_evidence_status", "") or "").lower() in {"attached", "verified", "closed"}
+                if str(row.get("closure_evidence_status", "") or "").lower() in ATTACHED_EVIDENCE_STATUSES
             ),
             "residual_holdout_last_checked_count": sum(
                 1 for row in residual_items if str(row.get("last_checked_at_utc", "") or "").strip()

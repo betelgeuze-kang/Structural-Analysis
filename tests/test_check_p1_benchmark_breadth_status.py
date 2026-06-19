@@ -272,7 +272,7 @@ def test_benchmark_breadth_merges_residual_holdout_closure_sidecar(tmp_path: Pat
                     "status": "closed",
                     "queue_status": "closure_evidence_attached",
                     "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
-                    "closure_evidence_status": "attached",
+                    "closure_evidence_status": "signed_attached",
                     "last_checked_at_utc": "2026-05-05T04:05:06Z",
                     "closed_at_utc": "2026-05-05T04:06:07Z",
                 }
@@ -286,7 +286,7 @@ def test_benchmark_breadth_merges_residual_holdout_closure_sidecar(tmp_path: Pat
     work_items = {row["work_item_id"]: row for row in commercial_gate["residual_holdout_work_items"]}
 
     assert work_items["RH-001"]["status"] == "closed"
-    assert work_items["RH-001"]["closure_evidence_status"] == "attached"
+    assert work_items["RH-001"]["closure_evidence_status"] == "signed_attached"
     assert work_items["RH-001"]["closure_evidence_path"].endswith("RH-001.closure.json")
     assert work_items["RH-001"]["last_checked_at_utc"] == "2026-05-05T04:05:06Z"
     scope = status["summary"]["commercialization_scope"]

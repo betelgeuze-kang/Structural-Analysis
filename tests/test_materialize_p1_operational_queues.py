@@ -270,7 +270,7 @@ def test_materialize_p1_operational_queues_merges_external_submission_update_sid
                     "receipt_status": "attached",
                     "submitted_at_utc": "2026-05-05T01:02:03Z",
                     "last_checked_at_utc": "2026-05-05T02:03:04Z",
-                    "closure_evidence_status": "attached",
+                    "closure_evidence_status": "signed_attached",
                 }
             },
         },
@@ -322,7 +322,7 @@ def test_materialize_p1_operational_queues_merges_residual_holdout_closure_sidec
                     "status": "closed",
                     "queue_status": "closure_evidence_attached",
                     "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
-                    "closure_evidence_status": "attached",
+                    "closure_evidence_status": "signed_attached",
                     "last_checked_at_utc": "2026-05-05T04:05:06Z",
                     "closed_at_utc": "2026-05-05T04:06:07Z",
                 },
@@ -362,7 +362,7 @@ def test_materialize_p1_operational_queues_merges_residual_holdout_closure_sidec
     payload = json.loads(out.read_text(encoding="utf-8"))
     rows = {row["work_item_id"]: row for row in payload["queues"]["residual_holdout_work_items"]}
     assert rows["RH-001"]["status"] == "closed"
-    assert rows["RH-001"]["closure_evidence_status"] == "attached"
+    assert rows["RH-001"]["closure_evidence_status"] == "signed_attached"
     assert rows["RH-001"]["last_checked_at_utc"] == "2026-05-05T04:05:06Z"
     assert rows["RH-002"]["closure_evidence_status"] == "attached"
     assert rows["RH-002"]["closure_evidence_path"].endswith("RH-002.cross_validation.json")

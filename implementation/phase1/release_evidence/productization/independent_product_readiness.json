@@ -1,0 +1,159 @@
+{
+  "artifacts": {
+    "commercialization_status": "implementation/phase1/release_evidence/productization/commercialization_level.json",
+    "onprem_deployment_packaging_manifest": "implementation/phase1/onprem_deployment_packaging_manifest.json",
+    "p0_status": "implementation/phase1/release_evidence/productization/p0_closure_status.json",
+    "p1_benchmark_breadth_status": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
+    "p1_readiness_status": "implementation/phase1/release_evidence/productization/p1_readiness_status.json",
+    "project_ops_deployment_drill": "implementation/phase1/project_ops_deployment_drill_manifest.json",
+    "runtime_packaging_manifest": "implementation/phase1/production_runtime_packaging_manifest.json",
+    "runtime_strict_probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+    "strict_evidence_preflight": "implementation/phase1/release_evidence/productization/p1_evidence_sidecar_preflight.json",
+    "support_bundle_manifest": "implementation/phase1/support_bundle_manifest.json",
+    "viewer_browser_performance_probe": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+    "viewer_performance_budget_manifest": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+    "viewer_visual_regression_baseline": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+    "workstation_delivery_readiness": "implementation/phase1/workstation_delivery_readiness.json"
+  },
+  "blockers": [
+    "Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
+    "Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
+    "Strict external and residual holdout evidence::external_receipt_or_closure_pending:peer_spd_hinge",
+    "Strict external and residual holdout evidence::external_receipt_or_closure_pending:tpu_hffb",
+    "Strict external and residual holdout evidence::external_submission_receipts_pending"
+  ],
+  "contract_pass": false,
+  "full_autonomous_replacement_ready": false,
+  "gates": [
+    {
+      "blockers": [],
+      "core_evidence_closed": true,
+      "label": "P0 release and core evidence",
+      "ok": true,
+      "p0_closed": true,
+      "release_publication_closed": true,
+      "status": "ready"
+    },
+    {
+      "benchmark_breadth_inputs_ready": true,
+      "blockers": [],
+      "label": "P1 validation and benchmark breadth",
+      "ok": true,
+      "p1_benchmark_execution_unblocked": true,
+      "p1_execution_unblocked": true,
+      "p1_inputs_ready": true,
+      "status": "ready"
+    },
+    {
+      "blockers": [
+        "external_receipt_or_closure_pending:hardest_external_10case",
+        "external_receipt_or_closure_pending:korean_public_structures",
+        "external_receipt_or_closure_pending:peer_spd_hinge",
+        "external_receipt_or_closure_pending:tpu_hffb",
+        "external_submission_receipts_pending"
+      ],
+      "external_expected_queue_count": 4,
+      "external_receipt_attached_count": 0,
+      "label": "Strict external and residual holdout evidence",
+      "ok": false,
+      "preflight_reason_code": "ERR_P1_EVIDENCE_SIDECAR_INTAKE_PENDING",
+      "residual_closed_count": 3,
+      "residual_expected_work_item_count": 3,
+      "status": "blocked"
+    },
+    {
+      "blockers": [],
+      "label": "Runtime production path",
+      "ok": true,
+      "runtime_packaging_manifest": "implementation/phase1/production_runtime_packaging_manifest.json",
+      "runtime_packaging_manifest_pass": true,
+      "runtime_strict_probe": "implementation/phase1/zero_copy_real_probe_report_strict.json",
+      "status": "ready",
+      "strict_rust_hip_pass": true
+    },
+    {
+      "audit_contract_present": true,
+      "audit_digest_present": true,
+      "auth_contract_present": true,
+      "blockers": [],
+      "deployment_drill_manifest_pass": true,
+      "deployment_drill_mode": "dry_run_contract",
+      "dev_secret_default_present": false,
+      "label": "Production API security and operations",
+      "lifecycle_policy_present": true,
+      "ok": true,
+      "policy_manifest_present": true,
+      "production_security_doc": "docs/production-ops-security.md",
+      "project_ops_api": "implementation/phase1/project_ops_api_service.py",
+      "project_ops_deployment_drill": "implementation/phase1/project_ops_deployment_drill_manifest.json",
+      "rate_limit_present": true,
+      "request_limit_present": true,
+      "status": "ready"
+    },
+    {
+      "blockers": [],
+      "independent_productization_plan": "docs/independent-commercial-productization-plan.md",
+      "label": "Deployment packaging and support bundle",
+      "ok": true,
+      "onprem_deployment_packaging_manifest": "implementation/phase1/onprem_deployment_packaging_manifest.json",
+      "onprem_deployment_packaging_manifest_pass": true,
+      "runtime_packaging_doc": "docs/runtime-production-packaging.md",
+      "status": "ready",
+      "support_bundle_manifest": "implementation/phase1/support_bundle_manifest.json",
+      "support_bundle_manifest_pass": true,
+      "viewer_browser_performance_probe": "implementation/phase1/structure_viewer_browser_performance_probe.json",
+      "viewer_browser_performance_probe_pass": true,
+      "viewer_performance_budget_manifest": "implementation/phase1/structure_viewer_performance_budget_manifest.json",
+      "viewer_performance_budget_manifest_pass": true,
+      "viewer_visual_regression_baseline": "implementation/phase1/structure_viewer_visual_regression_baseline.json",
+      "viewer_visual_regression_baseline_pass": true
+    },
+    {
+      "blockers": [],
+      "label": "Commercial claim governance",
+      "ok": true,
+      "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
+      "stale_claim_docs": [],
+      "status": "ready"
+    },
+    {
+      "allowlisted_files": 21,
+      "allowlisted_mib": 608.017,
+      "blockers": [],
+      "candidate_files": 0,
+      "label": "Source boundary and artifact footprint",
+      "ok": true,
+      "status": "ready"
+    }
+  ],
+  "generated_at": "2026-06-19T13:20:23.476624+00:00",
+  "independent_commercial_product_ready": false,
+  "next_actions": [
+    "Fill and validate the P1 evidence intake manifest before building EB sidecars.",
+    "Attach real EB receipt URL/path for all four external benchmark lanes."
+  ],
+  "readiness_score": 80.0,
+  "recommended_claim": "Commercial engineer-in-loop acceleration for 95-99% repeated workflows; not a full autonomous commercial replacement.",
+  "schema_version": "independent-commercial-product-readiness.v1",
+  "status": "blocked",
+  "summary_line": "Independent commercial product readiness: BLOCKED | score=80.0/100 | full_autonomous_replacement_ready=False",
+  "workstation_delivery_service": {
+    "blockers": [],
+    "claim_boundary": {
+      "allowed": "workstation-based structural analysis/optimization deliverable preparation with engineer review",
+      "forbidden": [
+        "independent commercial structural analysis product",
+        "structural engineer replacement",
+        "full autonomous replacement",
+        "customer-device FPS claim",
+        "multi-tenant SaaS throughput claim"
+      ]
+    },
+    "label": "Workstation delivery service readiness",
+    "note": "This is a separate local workstation delivery-service gate and does not change independent commercial product EB/RH readiness.",
+    "ok": true,
+    "path": "implementation/phase1/workstation_delivery_readiness.json",
+    "status": "ready",
+    "summary_line": "Workstation delivery readiness: PASS | gates=8/8"
+  }
+}

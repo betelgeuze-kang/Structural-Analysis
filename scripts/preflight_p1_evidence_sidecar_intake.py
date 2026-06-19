@@ -34,7 +34,7 @@ EXTERNAL_WORK_ITEM_IDS = {
     "korean_public_structures": "EB-004",
 }
 RESIDUAL_EXPECTED_WORK_ITEM_IDS = ("RH-001", "RH-002", "RH-003")
-ATTACHED_STATUSES = {"attached", "verified", "closed"}
+ATTACHED_STATUSES = {"attached", "verified", "closed", "signed_attached"}
 CLOSED_STATUSES = {"closed", "complete", "completed"}
 PLACEHOLDER_VALUES = {"", "pending", "none", "null", "n/a", "na", "tbd", "todo"}
 

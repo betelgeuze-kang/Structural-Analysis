@@ -1,6 +1,6 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-18T15:46:30.760914+00:00",
+  "generated_at": "2026-06-19T13:25:27.948335+00:00",
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
@@ -26,10 +26,6 @@
     "G6:external_receipt_or_closure_pending:peer_spd_hinge",
     "G6:external_receipt_or_closure_pending:tpu_hffb",
     "G6:external_submission_receipts_pending",
-    "G6:residual_closure_pending:RH-001",
-    "G6:residual_closure_pending:RH-002",
-    "G6:residual_closure_pending:RH-003",
-    "G6:residual_holdout_closure_pending",
     "G7:repo_benchmark_bridge_mgt_present",
     "G7:metadata_only_sources_present",
     "G7:operator_attached_real_mgt_header_ok_below_target"
@@ -176,11 +172,7 @@
         "external_receipt_or_closure_pending:korean_public_structures",
         "external_receipt_or_closure_pending:peer_spd_hinge",
         "external_receipt_or_closure_pending:tpu_hffb",
-        "external_submission_receipts_pending",
-        "residual_closure_pending:RH-001",
-        "residual_closure_pending:RH-002",
-        "residual_closure_pending:RH-003",
-        "residual_holdout_closure_pending"
+        "external_submission_receipts_pending"
       ],
       "next_gate": "attach EB receipts 4/4 and strict RH closures 3/3",
       "claim_boundary": "G6 is externally blocked: local dry-run packages, signed templates, and readiness queues do not close external benchmark receipts or strict residual holdout approvals. Full V&V closure requires attached external receipt/closure evidence for the expected benchmark and RH items."
