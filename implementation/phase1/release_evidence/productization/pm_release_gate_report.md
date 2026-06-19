@@ -1,9 +1,9 @@
 # PM Release Gate
 
-- `summary_line`: `PM release gate: BLOCKED | release_areas=BLOCKED | paid_pilot_candidate=False | milestones=4/5 | release_areas_green=10/16 | measured_cases=304`
-- `recommended_scope`: Release blocked until core PM gates have green evidence.
-- `paid_pilot_candidate`: `False`
-- `limited_commercial_milestone_ready`: `False`
+- `summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
+- `recommended_scope`: Limited milestone evidence is green, but the broader PM release-area gate is still blocked; keep any use constrained to the paid-pilot scope guard until release-area blockers are closed.
+- `paid_pilot_candidate`: `True`
+- `limited_commercial_milestone_ready`: `True`
 - `limited_commercial_ready`: `False`
 - `limited_commercial_release_ready`: `False`
 - `release_area_gate_ready`: `False`
@@ -22,7 +22,7 @@
 | M2 Core Engine Depth Closure | pass | none |
 | M3 Strict Runtime Closure | pass | none |
 | M4 Benchmark Breadth Expansion | pass | none |
-| M5 Commercial Packaging | blocked | support_bundle_export_missing_or_failed, support_bundle_pm_failure_bundle_coverage_incomplete |
+| M5 Commercial Packaging | pass | none |
 
 | Release Area | Status | Blockers |
 |---|---|---|
@@ -37,8 +37,8 @@
 | memory Memory | pass | none |
 | gpu_device GPU / Device | pass | none |
 | interop Interop | pass | none |
-| report Report | blocked | commercial_packaging_milestone_not_green |
+| report Report | pass | none |
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
-| support Support | blocked | pm_failure_bundle_coverage_index_incomplete, failure_bundle_export_not_green |
+| support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_preflight::worktree_not_clean, github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |
+| github_sync GitHub Development Sync | blocked | github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |
