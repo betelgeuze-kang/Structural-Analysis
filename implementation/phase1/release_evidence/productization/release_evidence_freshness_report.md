@@ -2,7 +2,7 @@
 
 - `contract_pass`: `True`
 - `reason_code`: `PASS`
-- `current_source_commit_sha`: `bc5ae29b2e2eda4f13034df59824266c80eb711d`
+- `current_source_commit_sha`: `9e7726749c484f7ef46e3d3ace4ca98d6e0dce1a`
 - `blockers`: `none`
 
 | Artifact | Status | Blockers | Newer Dependencies |
@@ -17,3 +17,4 @@
 | `residual_level3_status` | `pass` | `none` | none |
 | `g1_direct_residual_terminal_gate_report` | `pass` | `none` | none |
 | `g1_shell_material_budgeted_continuation_status` | `pass` | `none` | none |
+| `evidence_console_scope_status` | `pass` | `none` | none |
