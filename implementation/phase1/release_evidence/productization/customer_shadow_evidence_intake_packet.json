@@ -21,8 +21,8 @@
   },
   "claim_boundary": "This packet creates owner-input slots and validation commands only. It does not create customer shadow evidence, ingest customer raw data, or close the 3/5 completed-project target. Each slot must be filled with real customer-retained derived metadata and pass the validator.",
   "commands": {
-    "refresh_evidence_console_scope": "python3 scripts/build_evidence_console_scope_status.py --json",
-    "refresh_status": "python3 implementation/phase1/check_customer_shadow_evidence_status.py --json",
+    "refresh_evidence_console_scope": "python3 scripts/build_evidence_console_scope_status.py --out implementation/phase1/release_evidence/productization/evidence_console_scope_status.json --out-md implementation/phase1/release_evidence/productization/evidence_console_scope_status.md --json",
+    "refresh_status": "python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json --json",
     "validate_one_evidence_file": "python3 implementation/phase1/validate_customer_shadow_evidence.py --evidence <filled-customer-shadow-evidence.json> --json --fail-blocked"
   },
   "contract_pass": true,
@@ -32,7 +32,7 @@
     "raw_data_retained_by_customer": true,
     "redistribution_allowed": false
   },
-  "generated_at": "2026-06-19T19:41:31.206716+00:00",
+  "generated_at": "2026-06-19T19:45:46.525377+00:00",
   "input_checksums": {
     "docs/templates/customer_shadow_evidence.template.json": "sha256:3fbf9f07b8a5c2461a2187470b6d8b40bd447b63aa9695959f9b2446beeead30",
     "implementation/phase1/customer_shadow_evidence.schema.json": "sha256:db530761321ba8a1bd3e16ba81c5ea4579aeecea296ea0bda34ee070f530e802",
@@ -147,7 +147,7 @@
   "reused_evidence": true,
   "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
   "schema_version": "customer-shadow-evidence-intake-packet.v1",
-  "source_commit_sha": "082659c1e6fb6f84cb1bdc9c6fdf3ed2eaa5286a",
+  "source_commit_sha": "788bd99267a651ec8af7b915c744a87de8fac493",
   "status": "implementation/phase1/customer_shadow_evidence_status.json",
   "summary": {
     "allowed_reviewer_decisions": [
