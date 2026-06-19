@@ -1,0 +1,33 @@
+{
+  "blockers": [
+    "evidence_directory_missing",
+    "completed_shadow_case_count_below_minimum"
+  ],
+  "checks": {
+    "all_evidence_files_valid_pass": true,
+    "completed_case_ids_unique_pass": true,
+    "evidence_directory_present": false,
+    "min_completed_shadow_cases_pass": false,
+    "raw_data_policy_pass": true,
+    "schema_present": true,
+    "target_completed_shadow_cases_pass": false
+  },
+  "claim_boundary": "Customer shadow evidence status counts validated completed-project evidence metadata only. It must not create synthetic customer cases, ingest customer raw data, or treat missing customer-retained evidence as closed. PASS requires at least the configured minimum of completed-project shadow cases with raw_data_retained_by_customer=true and redistribution_allowed=false.",
+  "contract_pass": false,
+  "evidence_dir": "implementation/phase1/customer_shadow_evidence",
+  "evidence_rows": [],
+  "reason_code": "ERR_CUSTOMER_SHADOW_EVIDENCE_INCOMPLETE",
+  "schema": "implementation/phase1/customer_shadow_evidence.schema.json",
+  "schema_version": "customer-shadow-evidence-status.v1",
+  "summary": {
+    "completed_shadow_case_count": 0,
+    "completed_shadow_case_ids": [],
+    "duplicate_completed_shadow_case_ids": [],
+    "evidence_file_count": 0,
+    "invalid_evidence_file_count": 0,
+    "min_completed_shadow_cases": 3,
+    "raw_policy_violation_count": 0,
+    "target_completed_shadow_cases": 5,
+    "valid_evidence_file_count": 0
+  }
+}
