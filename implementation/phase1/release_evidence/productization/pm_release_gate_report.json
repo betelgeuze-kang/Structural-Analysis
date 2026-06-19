@@ -50,7 +50,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T19:54:31.950217+00:00",
+  "generated_at": "2026-06-19T19:56:40.333983+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -105,7 +105,7 @@
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:b4a6cd0c424894d10ba2f41f9370e7a7010c51ca5b7a4c91afd1e2feac17d460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:94a4f13d3a49ee43056e27d50669519f9960e9ae194235228780816db29edef2",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:5efccd1464edc1300986f6a5b123d7f15874e65e38891b9cdc15eb4fd750fdd3",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:61c38da6d08e12b681b5931e6a5edca9f4e233aa4b61553f8d16684ecae6fc60",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -494,7 +494,7 @@
       "summary": {
         "artifact_count": 11,
         "blocker_count": 0,
-        "current_source_commit_sha": "380df40d2db01209d8e9315690969c8f1c54486a",
+        "current_source_commit_sha": "3a587bad015addec5a484a87c3325baf4990f964",
         "max_age_days": 30.0,
         "pass_count": 11
       },
@@ -922,8 +922,8 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 60,
-        "main_ahead_count": 108,
+        "feature_ahead_count": 62,
+        "main_ahead_count": 110,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -998,6 +998,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "8b6562c2e5c7d075dde21d52afa356a13f71b634",
+  "source_commit_sha": "56654da7a502f70343ecd1b7099e1e1d152d76c9",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
