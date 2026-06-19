@@ -385,7 +385,7 @@
       "summary_line": "Korean source collect: PASS | sources=22 | collected=10 | metadata_only=12 | rejected=0 | bytes=6628988 | seed_complete=22 | exact_topology=7 | native_writeback=7 | curated_local_ifc=5/7 | p0_focus=18"
     }
   ],
-  "generated_at": "2026-06-19T14:39:03.578915+00:00",
+  "generated_at": "2026-06-19T17:24:08.177124+00:00",
   "input_checksums": {
     "implementation/phase1/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/hf_benchmark_report.atwood_open.json": "sha256:5cf552c1aa8c5ca61b5677bf2dad3fc13c5876a962034a882e5834c2e5229320",
@@ -400,7 +400,7 @@
     "implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json": "sha256:2e6bdaab47358db2788928716d5a880403a02270cb6f3a6ccd674938e0a18661",
     "implementation/phase1/release/external_benchmark_submission_readiness.json": "sha256:766c82ad63a7a08eabdd6de56da842463b23d4ebc8a1994ee836fd53823f57e9",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:423185574830819ba26ebfb0d929b612f451f5ce6f7734739467ea67a70cf552",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:cac785b46d135aa453665ab045a7df46b85d8b718644646ff3e350ef0c462074",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:18f6182a1ca280ea9134c2f494d96e4041dc2c4e8153d1c463956a6cad0fcaf5",
     "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:b44f81a417626a0c3723c171322329d43aa05e004cffd24c3d3103e355d11f57"
   },
   "next_action": "run P1 quality/fallback/benchmark breadth execution",
@@ -411,7 +411,7 @@
   "reuse_policy": "status_rebuilt_from_existing_p1_readiness_commercial_benchmark_and_sidecar_receipts",
   "reused_evidence": true,
   "schema_version": "p1-benchmark-breadth-status.v1",
-  "source_commit_sha": "b03e9e773d694d8206e2805b8c9370f938c3b04a",
+  "source_commit_sha": "3930048790838686a4c2f97ffaca9a2bab23363c",
   "status": "ready",
   "summary": {
     "benchmark_report_count": 10,
