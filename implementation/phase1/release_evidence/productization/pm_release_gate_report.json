@@ -46,7 +46,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-19T15:03:20.428207+00:00",
+  "generated_at": "2026-06-19T15:24:02.358419+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -423,11 +423,11 @@
       "ok": true,
       "status": "pass",
       "summary": {
-        "artifact_count": 3,
+        "artifact_count": 5,
         "blocker_count": 0,
-        "current_source_commit_sha": "3eff138848f22fd79794e0fa9af0fa978d9039dc",
+        "current_source_commit_sha": "679eb1c393f32d21688f941406bec8696ec632fc",
         "max_age_days": 30.0,
-        "pass_count": 3
+        "pass_count": 5
       },
       "title": "Evidence Freshness"
     },

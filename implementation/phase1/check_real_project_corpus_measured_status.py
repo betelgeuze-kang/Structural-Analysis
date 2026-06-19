@@ -6,7 +6,16 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
 from typing import Any
+
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 SCHEMA_VERSION = "real-project-corpus-measured-status.v1"
@@ -116,6 +125,12 @@ def build_status(
     blockers = [key for key, passed in checks.items() if not passed]
     return {
         "schema_version": SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=[row_provenance_path, peer_metric_records_path],
+            reused_evidence=True,
+            reuse_policy="status_rebuilt_from_existing_row_provenance_and_peer_metric_receipts",
+            repo_root=REPO_ROOT,
+        ),
         "contract_pass": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_REAL_PROJECT_CORPUS_MEASURED_INCOMPLETE",
         "row_provenance_report": str(row_provenance_path),

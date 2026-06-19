@@ -31,6 +31,16 @@ DEFAULT_ARTIFACTS = (
         Path("implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"),
         Path("scripts/check_p1_benchmark_breadth_status.py"),
     ),
+    (
+        "real_project_corpus_measured_status",
+        Path("implementation/phase1/real_project_corpus_measured_status.json"),
+        Path("implementation/phase1/check_real_project_corpus_measured_status.py"),
+    ),
+    (
+        "customer_shadow_evidence_status",
+        Path("implementation/phase1/customer_shadow_evidence_status.json"),
+        Path("implementation/phase1/check_customer_shadow_evidence_status.py"),
+    ),
 )
 
 

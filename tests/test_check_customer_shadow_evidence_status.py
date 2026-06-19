@@ -16,6 +16,16 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(status_gate)
 
 
+REQUIRED_METADATA_FIELDS = (
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "input_checksums",
+    "reused_evidence",
+    "reuse_policy",
+)
+
+
 def _write_json(path: Path, payload: object) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
@@ -98,3 +108,39 @@ def test_customer_shadow_status_blocks_invalid_and_duplicate_cases(tmp_path: Pat
     assert "invalid_customer_shadow_evidence_files_present" in payload["blockers"]
     assert "duplicate_completed_shadow_case_ids" in payload["blockers"]
     assert "raw_data_policy_violation" in payload["blockers"]
+
+
+def test_customer_shadow_status_exposes_release_evidence_metadata(tmp_path: Path) -> None:
+    evidence_dir = tmp_path / "shadow"
+    for idx in range(3):
+        _write_json(evidence_dir / f"case-{idx}.json", _case(idx))
+
+    payload = status_gate.build_status(
+        evidence_dir=evidence_dir,
+        schema_path=SCHEMA_PATH,
+        min_completed_cases=3,
+        target_completed_cases=5,
+    )
+
+    assert payload["contract_pass"] is True
+    for field in REQUIRED_METADATA_FIELDS:
+        assert field in payload, f"missing release evidence metadata field: {field}"
+    assert isinstance(payload["input_checksums"], dict)
+    assert str(SCHEMA_PATH) in payload["input_checksums"]
+    assert str(evidence_dir) in payload["input_checksums"]
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"]
+
+
+def test_customer_shadow_status_metadata_present_even_when_blocked(tmp_path: Path) -> None:
+    payload = status_gate.build_status(
+        evidence_dir=tmp_path / "missing",
+        schema_path=SCHEMA_PATH,
+    )
+
+    assert payload["contract_pass"] is False
+    for field in REQUIRED_METADATA_FIELDS:
+        assert field in payload, f"missing release evidence metadata field: {field}"
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"]
+    assert payload["generated_at"]

@@ -11,13 +11,18 @@ from typing import Any
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS_DIR = REPO_ROOT / "scripts"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 from validate_customer_shadow_evidence import (  # noqa: E402
     DEFAULT_SCHEMA,
     validate_payload,
 )
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 SCHEMA_VERSION = "customer-shadow-evidence-status.v1"
@@ -118,6 +123,12 @@ def build_status(
 
     return {
         "schema_version": SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=[schema_path, evidence_dir],
+            reused_evidence=True,
+            reuse_policy="status_rebuilt_from_existing_shadow_evidence_schema_and_directory_metadata",
+            repo_root=REPO_ROOT,
+        ),
         "contract_pass": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_CUSTOMER_SHADOW_EVIDENCE_INCOMPLETE",
         "evidence_dir": str(evidence_dir),

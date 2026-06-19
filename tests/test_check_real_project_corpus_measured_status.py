@@ -13,6 +13,16 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(measured_status)
 
 
+REQUIRED_METADATA_FIELDS = (
+    "generated_at",
+    "source_commit_sha",
+    "engine_version",
+    "input_checksums",
+    "reused_evidence",
+    "reuse_policy",
+)
+
+
 def _write_json(path: Path, payload: object) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
@@ -97,3 +107,58 @@ def test_real_project_measured_status_passes_complete_exit_criteria(tmp_path: Pa
 
     assert payload["contract_pass"] is True
     assert payload["blockers"] == []
+
+
+def test_real_project_measured_status_exposes_release_evidence_metadata(tmp_path: Path) -> None:
+    row_provenance = _write_json(
+        tmp_path / "rows.json",
+        {
+            "source_provenance_rows": [
+                *[_measured_row(idx, "mgt") for idx in range(5)],
+                *[_measured_row(idx, "ifc") for idx in range(5, 10)],
+            ]
+        },
+    )
+    peer_metric_records = _write_json(
+        tmp_path / "peer.json",
+        {
+            "metric_records": [
+                {"metric_group": "period", "value": 1.2},
+                {"metric_group": "base_shear", "value": 123.0},
+                {"metric_group": "story_drift", "value": 0.01},
+                {"metric_group": "nonlinear_response", "value": "converged"},
+                {"metric_group": "citation", "value": "citation"},
+            ]
+        },
+    )
+
+    payload = measured_status.build_status(
+        row_provenance_path=row_provenance,
+        peer_metric_records_path=peer_metric_records,
+    )
+
+    for field in REQUIRED_METADATA_FIELDS:
+        assert field in payload, f"missing release evidence metadata field: {field}"
+    assert isinstance(payload["input_checksums"], dict)
+    assert str(row_provenance) in payload["input_checksums"]
+    assert str(peer_metric_records) in payload["input_checksums"]
+    assert payload["reused_evidence"] is True
+    assert payload["reuse_policy"]
+    assert payload["generated_at"]
+
+
+def test_real_project_measured_status_metadata_present_even_when_blocked(tmp_path: Path) -> None:
+    row_provenance = _write_json(tmp_path / "rows.json", {"source_provenance_rows": []})
+    peer_metric_records = _write_json(
+        tmp_path / "peer.json",
+        {"metric_records": [{"metric_group": "citation", "value": "citation"}]},
+    )
+
+    payload = measured_status.build_status(
+        row_provenance_path=row_provenance,
+        peer_metric_records_path=peer_metric_records,
+    )
+
+    assert payload["contract_pass"] is False
+    for field in REQUIRED_METADATA_FIELDS:
+        assert field in payload, f"missing release evidence metadata field: {field}"
