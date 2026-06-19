@@ -164,6 +164,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--min-completed-cases", type=int, default=DEFAULT_MIN_COMPLETED_CASES)
     parser.add_argument("--target-completed-cases", type=int, default=DEFAULT_TARGET_COMPLETED_CASES)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--no-write", action="store_true", help="Print the status without writing --out.")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     args = parser.parse_args(argv)
@@ -174,8 +175,12 @@ def main(argv: list[str] | None = None) -> int:
         min_completed_cases=args.min_completed_cases,
         target_completed_cases=args.target_completed_cases,
     )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if not args.no_write:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
     else:

@@ -145,3 +145,29 @@ def test_customer_shadow_status_metadata_present_even_when_blocked(tmp_path: Pat
     assert payload["reused_evidence"] is True
     assert payload["reuse_policy"]
     assert payload["generated_at"]
+
+
+def test_customer_shadow_status_no_write_does_not_touch_out_path(tmp_path: Path, capsys) -> None:
+    evidence_dir = tmp_path / "shadow"
+    for idx in range(3):
+        _write_json(evidence_dir / f"case-{idx}.json", _case(idx))
+    out = tmp_path / "would_write.json"
+
+    exit_code = status_gate.main(
+        [
+            "--evidence-dir",
+            str(evidence_dir),
+            "--schema",
+            str(SCHEMA_PATH),
+            "--out",
+            str(out),
+            "--no-write",
+            "--json",
+            "--fail-blocked",
+        ]
+    )
+
+    assert exit_code == 0
+    assert not out.exists()
+    payload = json.loads(capsys.readouterr().out)
+    assert payload["contract_pass"] is True

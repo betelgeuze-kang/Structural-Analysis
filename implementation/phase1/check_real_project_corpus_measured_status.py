@@ -213,6 +213,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--min-measured-rows", type=int, default=10)
     parser.add_argument("--min-measured-formats", type=int, default=2)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--no-write", action="store_true", help="Print the status without writing --out.")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     args = parser.parse_args(argv)
@@ -223,8 +224,12 @@ def main(argv: list[str] | None = None) -> int:
         min_measured_rows=args.min_measured_rows,
         min_measured_formats=args.min_measured_formats,
     )
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if not args.no_write:
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     if args.json:
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
     else:

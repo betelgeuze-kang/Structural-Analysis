@@ -87,7 +87,7 @@ P1-3 closes the handoff from parsed rows to P2 release/report surfaces.
 - KONEPS public metadata/announcement/attachment access is tracked separately from redistributable artifacts.
 - PEER TBI records now include the official Task 12 period locator and local measured-run KPI bridge rows, but raw model/input deck release stays blocked until document-level review is complete.
 - Generate the current report with `implementation/phase1/build_real_project_row_provenance_report.py`; the tracked `implementation/phase1/real_project_row_provenance_report.json` now includes measured local KR artifact rows in addition to seed/source-family rows.
-- Check the measured exit status without touching tracked evidence with `python3 implementation/phase1/check_real_project_corpus_measured_status.py --out /tmp/real_project_corpus_measured_status.verify.json --json`. Release evidence refreshes should write explicitly to `implementation/phase1/real_project_corpus_measured_status.json`. Current status passes the initial metadata/value gate with all five PEER metric groups carrying values, while separately reporting official reference-truth groups and measured-run KPI bridge groups so the result is not treated as external V&V closure.
+- Check the measured exit status without touching tracked evidence with `python3 implementation/phase1/check_real_project_corpus_measured_status.py --no-write --json`. Release evidence refreshes should write explicitly to `implementation/phase1/real_project_corpus_measured_status.json`. Current status passes the initial metadata/value gate with all five PEER metric groups carrying values, while separately reporting official reference-truth groups and measured-run KPI bridge groups so the result is not treated as external V&V closure.
 
 ## Customer Shadow Evidence
 
@@ -97,7 +97,7 @@ Generate the owner handoff packet with `python3 scripts/build_customer_shadow_ev
 
 Required evidence fields include `case_id`, `project_status=completed`, structure family, reference solver/version, reference output checksum, our engine commit, delta metrics, residual metrics, reviewer decision, limitations, and reproduce bundle id. The validator requires `raw_data_retained_by_customer=true` and `redistribution_allowed=false`, rejects placeholders, and only accepts reviewer decisions `PASS`, `REVIEW`, or `FAIL`.
 
-Track the 3-5 completed-project shadow-case target with `python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json`. Verification-only checks should write to `/tmp` instead of the tracked status path. The current tracked status is intentionally blocked at `0/3` because no real customer-retained evidence files are attached under `implementation/phase1/customer_shadow_evidence/`; synthetic or placeholder cases must not be used to close this gate.
+Track the 3-5 completed-project shadow-case target with `python3 scripts/check_customer_shadow_evidence_status.py --out implementation/phase1/customer_shadow_evidence_status.json`. Verification-only checks should pass `--no-write` instead of writing the tracked status path. The current tracked status is intentionally blocked at `0/3` because no real customer-retained evidence files are attached under `implementation/phase1/customer_shadow_evidence/`; synthetic or placeholder cases must not be used to close this gate.
 
 ## P2: Crawler Automation / Redaction / Release Viewer / Report Surfacing
 

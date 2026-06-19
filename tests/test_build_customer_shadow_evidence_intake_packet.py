@@ -177,6 +177,9 @@ def test_intake_packet_passes_as_structure_artifact_while_status_is_blocked(tmp_
         "python3 scripts/check_customer_shadow_evidence_status.py "
         "--out implementation/phase1/customer_shadow_evidence_status.json --json"
     )
+    assert payload["commands"]["verify_status_no_write"] == (
+        "python3 scripts/check_customer_shadow_evidence_status.py --no-write --json"
+    )
     assert "implementation/phase1/check_customer_shadow_evidence_status.py --json" not in payload["commands"][
         "refresh_status"
     ]
