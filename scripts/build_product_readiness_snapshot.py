@@ -13,6 +13,11 @@ import re
 import subprocess
 from typing import Any
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 fallback.
+    tomllib = None  # type: ignore[assignment]
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -400,14 +405,34 @@ def _external_benchmark_receipt_counts(
     }
 
 
-def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list[str]) -> dict[str, Any]:
-    package = _load_json(repo_root, paths.package_json, blockers)
-    pyproject = _read_text(repo_root, paths.pyproject_toml, blockers)
-    package_name = str(package.get("name", ""))
-    package_version = str(package.get("version", ""))
-    pyproject_name = ""
-    pyproject_version = ""
+def _pyproject_project_metadata(
+    repo_root: Path,
+    path: Path,
+    blockers: list[str],
+) -> dict[str, str]:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        blockers.append(f"missing_doc:{path}")
+        return {}
+
+    if tomllib is not None:
+        try:
+            payload = tomllib.loads(resolved.read_text(encoding="utf-8"))
+        except Exception as exc:
+            blockers.append(f"invalid_toml:{path}:{exc.__class__.__name__}")
+            return {}
+        project = payload.get("project", {})
+        if not isinstance(project, dict):
+            return {}
+        return {
+            "name": str(project.get("name", "")),
+            "version": str(project.get("version", "")),
+        }
+
+    pyproject = resolved.read_text(encoding="utf-8", errors="replace")
+    project: dict[str, str] = {}
     in_project = False
+    value_pattern = re.compile(r"^([A-Za-z0-9_-]+)\s*=\s*(['\"])(.*?)\2")
     for raw_line in pyproject.splitlines():
         line = raw_line.strip()
         if line == "[project]":
@@ -417,10 +442,19 @@ def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list
             in_project = False
         if not in_project:
             continue
-        if line.startswith("name"):
-            pyproject_name = line.split("=", 1)[1].strip().strip('"')
-        if line.startswith("version"):
-            pyproject_version = line.split("=", 1)[1].strip().strip('"')
+        match = value_pattern.match(line)
+        if match:
+            project[match.group(1)] = match.group(3)
+    return project
+
+
+def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list[str]) -> dict[str, Any]:
+    package = _load_json(repo_root, paths.package_json, blockers)
+    pyproject = _pyproject_project_metadata(repo_root, paths.pyproject_toml, blockers)
+    package_name = str(package.get("name", ""))
+    package_version = str(package.get("version", ""))
+    pyproject_name = str(pyproject.get("name", ""))
+    pyproject_version = str(pyproject.get("version", ""))
     name_matches = bool(package_name and pyproject_name and package_name == pyproject_name)
     version_matches = bool(
         package_version and pyproject_version and package_version == pyproject_version
