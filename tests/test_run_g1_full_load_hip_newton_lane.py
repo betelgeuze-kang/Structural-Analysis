@@ -300,6 +300,7 @@ def _write_acceptance_child(
     reused_evidence: bool,
     hip_engine_passed: bool,
     observed_load_scale: float,
+    fallback_zero_passed: bool = True,
     material_newton_breadth_passed: bool = True,
     consistent_residual_jacobian_newton_passed: bool = True,
     cpu_acceptance_refresh_closure_blocked: bool = False,
@@ -319,7 +320,7 @@ def _write_acceptance_child(
                 },
                 "gate_assessment": {
                     "full_load_closure_passed": True,
-                    "fallback_zero_passed": True,
+                    "fallback_zero_passed": fallback_zero_passed,
                     "material_newton_breadth_passed": material_newton_breadth_passed,
                     "consistent_residual_jacobian_newton_passed": (
                         consistent_residual_jacobian_newton_passed
@@ -613,6 +614,42 @@ def test_child_cpu_acceptance_refresh_blocked_blocks_lane_promotion(
     assert "child_cpu_acceptance_refresh_closure_blocked" in payload["blockers"]
 
 
+def test_child_fallback_zero_not_proven_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+            fallback_zero_passed=False,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "child_fallback_zero_not_proven" in payload["blockers"]
+
+
 def test_child_material_newton_breadth_not_proven_blocks_lane_promotion(
     tmp_path: Path,
     monkeypatch: Any,
@@ -730,6 +767,326 @@ def test_child_diagnostic_jacobian_inclusion_does_not_prove_consistency(
     assert payload["status"] == "blocked"
     assert (
         "child_consistent_residual_jacobian_newton_not_proven"
+        in payload["blockers"]
+    )
+
+
+def test_child_fallback_zero_boundaries_with_passed_flag_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        lane_source_commit = run_g1_full_load_hip_newton_lane._git_head()
+        child.write_text(
+            json.dumps(
+                {
+                    "schema_version": "mgt-direct-residual-newton-probe.v1",
+                    "source_commit_sha": lane_source_commit,
+                    "reused_evidence": False,
+                    "direct_residual_newton_ready": True,
+                    "residual_contract": {
+                        "hip_residual_engine_contract_passed": True,
+                        "consistent_residual_jacobian_newton_gate_passed": True,
+                    },
+                    "gate_assessment": {
+                        "full_load_closure_passed": True,
+                        "fallback_zero_passed": True,
+                        "fallback_zero_audit": {
+                            "fallback_zero_passed": False,
+                            "fallback_zero_boundary_count": 1,
+                            "fallback_zero_boundaries": [
+                                {
+                                    "boundary": (
+                                        "global_krylov_host_gmres_used_with_hip_required"
+                                    ),
+                                    "path": "matrix_free_global_krylov",
+                                }
+                            ],
+                        },
+                        "material_newton_breadth_passed": True,
+                        "consistent_residual_jacobian_newton_passed": True,
+                        "full_load_closure_gate": {
+                            "observed_load_scale": 1.0,
+                            "required_load_scale": 1.0,
+                        },
+                        "cpu_acceptance_refresh_closure_blocked": False,
+                    },
+                    "blockers": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "child_fallback_zero_boundaries_present_with_passed_flag"
+        in payload["blockers"]
+    )
+    assert "child_fallback_zero_gate_audit_mismatch" in payload["blockers"]
+
+
+def test_child_fallback_zero_boundary_count_mismatch_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        lane_source_commit = run_g1_full_load_hip_newton_lane._git_head()
+        child.write_text(
+            json.dumps(
+                {
+                    "schema_version": "mgt-direct-residual-newton-probe.v1",
+                    "source_commit_sha": lane_source_commit,
+                    "reused_evidence": False,
+                    "direct_residual_newton_ready": True,
+                    "residual_contract": {
+                        "hip_residual_engine_contract_passed": True,
+                        "consistent_residual_jacobian_newton_gate_passed": True,
+                    },
+                    "gate_assessment": {
+                        "full_load_closure_passed": True,
+                        "fallback_zero_passed": True,
+                        "fallback_zero_audit": {
+                            "fallback_zero_passed": True,
+                            "fallback_zero_boundary_count": 0,
+                            "fallback_zero_boundaries": [
+                                {
+                                    "boundary": (
+                                        "global_krylov_host_gmres_used_with_hip_required"
+                                    ),
+                                    "path": "matrix_free_global_krylov",
+                                }
+                            ],
+                        },
+                        "material_newton_breadth_passed": True,
+                        "consistent_residual_jacobian_newton_passed": True,
+                        "full_load_closure_gate": {
+                            "observed_load_scale": 1.0,
+                            "required_load_scale": 1.0,
+                        },
+                        "cpu_acceptance_refresh_closure_blocked": False,
+                    },
+                    "blockers": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "child_fallback_zero_boundary_count_mismatch" in payload["blockers"]
+    )
+    assert (
+        "child_fallback_zero_boundaries_present_with_passed_flag"
+        in payload["blockers"]
+    )
+
+
+def test_child_material_newton_breadth_blockers_with_passed_flag_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        lane_source_commit = run_g1_full_load_hip_newton_lane._git_head()
+        child.write_text(
+            json.dumps(
+                {
+                    "schema_version": "mgt-direct-residual-newton-probe.v1",
+                    "source_commit_sha": lane_source_commit,
+                    "reused_evidence": False,
+                    "direct_residual_newton_ready": True,
+                    "residual_contract": {
+                        "hip_residual_engine_contract_passed": True,
+                        "consistent_residual_jacobian_newton_gate_passed": True,
+                    },
+                    "gate_assessment": {
+                        "full_load_closure_passed": True,
+                        "fallback_zero_passed": True,
+                        "fallback_zero_audit": {
+                            "fallback_zero_passed": True,
+                            "fallback_zero_boundary_count": 0,
+                            "fallback_zero_boundaries": [],
+                        },
+                        "material_newton_breadth_passed": True,
+                        "material_newton_breadth_blockers": [
+                            "material_newton_breadth_not_proven",
+                        ],
+                        "consistent_residual_jacobian_newton_passed": True,
+                        "full_load_closure_gate": {
+                            "observed_load_scale": 1.0,
+                            "required_load_scale": 1.0,
+                        },
+                        "cpu_acceptance_refresh_closure_blocked": False,
+                    },
+                    "blockers": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "child_material_newton_breadth_blockers_present_with_passed_flag"
+        in payload["blockers"]
+    )
+
+
+def test_child_consistent_residual_jacobian_blockers_with_passed_flag_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        lane_source_commit = run_g1_full_load_hip_newton_lane._git_head()
+        child.write_text(
+            json.dumps(
+                {
+                    "schema_version": "mgt-direct-residual-newton-probe.v1",
+                    "source_commit_sha": lane_source_commit,
+                    "reused_evidence": False,
+                    "direct_residual_newton_ready": True,
+                    "residual_contract": {
+                        "hip_residual_engine_contract_passed": True,
+                        "consistent_residual_jacobian_newton_gate_passed": True,
+                    },
+                    "gate_assessment": {
+                        "full_load_closure_passed": True,
+                        "fallback_zero_passed": True,
+                        "fallback_zero_audit": {
+                            "fallback_zero_passed": True,
+                            "fallback_zero_boundary_count": 0,
+                            "fallback_zero_boundaries": [],
+                        },
+                        "material_newton_breadth_passed": True,
+                        "consistent_residual_jacobian_newton_passed": True,
+                        "consistent_residual_jacobian_newton_blockers": [
+                            "residual_jacobian_consistency_not_executed",
+                        ],
+                        "full_load_closure_gate": {
+                            "observed_load_scale": 1.0,
+                            "required_load_scale": 1.0,
+                        },
+                        "cpu_acceptance_refresh_closure_blocked": False,
+                    },
+                    "blockers": [],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "child_consistent_residual_jacobian_newton_blockers_present_with_passed_flag"
         in payload["blockers"]
     )
 

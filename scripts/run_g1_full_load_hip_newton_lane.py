@@ -777,6 +777,61 @@ def _child_safety_blockers(
         blockers.append("child_material_newton_breadth_not_proven")
     if child_gate.get("cpu_acceptance_refresh_closure_blocked") is True:
         blockers.append("child_cpu_acceptance_refresh_closure_blocked")
+    if child_gate.get("fallback_zero_passed") is not True:
+        blockers.append("child_fallback_zero_not_proven")
+    blockers.extend(_child_gate_audit_consistency_blockers(child_gate))
+    return blockers
+
+
+def _child_gate_audit_consistency_blockers(child_gate: dict[str, Any]) -> list[str]:
+    """Return blockers when a child gate advertises a positive verdict but the
+    matching audit-level evidence contradicts it.
+
+    The G1 readiness check accepts ``fallback_zero_passed is True``,
+    ``material_newton_breadth_passed is True``, and
+    ``consistent_residual_jacobian_newton_passed is True`` as proof that those
+    closures are real. A hand-crafted or buggy child payload that flips those
+    flags while the underlying audit still records non-zero boundaries or a
+    non-empty blockers list would otherwise be promoted as full G1 closure.
+    This guard cross-validates the gate-level verdict against the matching
+    audit detail so such an inconsistency is recorded as an actionable
+    blocker instead of being silently accepted.
+    """
+    blockers: list[str] = []
+    fallback_zero_audit = child_gate.get("fallback_zero_audit")
+    fallback_zero_audit = fallback_zero_audit if isinstance(fallback_zero_audit, dict) else {}
+    audit_fallback_passed = fallback_zero_audit.get("fallback_zero_passed")
+    boundaries = fallback_zero_audit.get("fallback_zero_boundaries")
+    boundary_list = boundaries if isinstance(boundaries, list) else []
+    boundary_count = fallback_zero_audit.get("fallback_zero_boundary_count")
+    if (
+        child_gate.get("fallback_zero_passed") is True
+        and boundary_list
+    ):
+        blockers.append("child_fallback_zero_boundaries_present_with_passed_flag")
+    if (
+        child_gate.get("fallback_zero_passed") is True
+        and audit_fallback_passed is False
+    ):
+        blockers.append("child_fallback_zero_gate_audit_mismatch")
+    if isinstance(boundary_count, (int, float)) and int(boundary_count) != len(boundary_list):
+        blockers.append("child_fallback_zero_boundary_count_mismatch")
+    material_blockers = child_gate.get("material_newton_breadth_blockers")
+    if (
+        child_gate.get("material_newton_breadth_passed") is True
+        and isinstance(material_blockers, list)
+        and material_blockers
+    ):
+        blockers.append("child_material_newton_breadth_blockers_present_with_passed_flag")
+    consistent_blockers = child_gate.get("consistent_residual_jacobian_newton_blockers")
+    if (
+        child_gate.get("consistent_residual_jacobian_newton_passed") is True
+        and isinstance(consistent_blockers, list)
+        and consistent_blockers
+    ):
+        blockers.append(
+            "child_consistent_residual_jacobian_newton_blockers_present_with_passed_flag"
+        )
     return blockers
 
 
