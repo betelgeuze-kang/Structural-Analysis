@@ -105,6 +105,10 @@ def test_docs_describe_release_mode_as_non_mutating_checks() -> None:
         "build_product_readiness_snapshot.py",
         "without rewriting tracked evidence",
     ]
+    runner_query_failure_fragments = [
+        "query failure remains a blocker",
+        "query failure는 blocker로 남기며",
+    ]
     forbidden_fragments = [
         "Release mode refreshes that self-hosted runner status",
         "refreshes self-hosted runner status, rebuilds the canonical product readiness snapshot",
@@ -119,5 +123,6 @@ def test_docs_describe_release_mode_as_non_mutating_checks() -> None:
             required_fragments[3] in text
             or "재작성하지 않고 `--check`로 검증" in text
         ), path
+        assert any(fragment in text for fragment in runner_query_failure_fragments), path
         for fragment in forbidden_fragments:
             assert fragment not in text, (path, fragment)

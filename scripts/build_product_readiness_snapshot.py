@@ -24,7 +24,6 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "product_readiness_snapshot.json"
 SCHEMA_VERSION = "product-readiness-snapshot.v1"
-ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 
 def _load_runner_policy_checker():
@@ -525,6 +524,18 @@ def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list
     }
 
 
+def _engine_version_from_identity(identity: dict[str, Any]) -> str:
+    package = _as_dict(identity.get("package_json"))
+    pyproject = _as_dict(identity.get("pyproject"))
+    package_name = str(package.get("name", ""))
+    package_version = str(package.get("version", ""))
+    pyproject_name = str(pyproject.get("name", ""))
+    pyproject_version = str(pyproject.get("version", ""))
+    name = package_name or pyproject_name or "unknown-product"
+    version = package_version or pyproject_version or "unknown-version"
+    return f"{name}@{version}"
+
+
 def build_snapshot(
     *,
     repo_root: Path = ROOT,
@@ -888,7 +899,7 @@ def build_snapshot(
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": current_commit,
-        "engine_version": ENGINE_VERSION,
+        "engine_version": _engine_version_from_identity(identity),
         "reused_evidence": False,
         "schema_valid": schema_valid,
         "evidence_fresh": evidence_fresh,

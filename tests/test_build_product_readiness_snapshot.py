@@ -552,6 +552,29 @@ def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path
     assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
 
 
+def test_snapshot_engine_version_tracks_canonical_product_identity(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "package.json", {
+        "name": "structural-optimization-workbench",
+        "version": "1.2.3",
+    })
+    _write_text(
+        tmp_path / "pyproject.toml",
+        '[project]\nname = "structural-optimization-workbench"\nversion = "1.2.3"\n',
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["engine_version"] == "structural-optimization-workbench@1.2.3"
+    assert payload["components"]["product_identity"]["matches"] is True
+    assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+
+
 def test_snapshot_blocks_package_pyproject_name_mismatch(tmp_path: Path) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
