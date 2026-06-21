@@ -441,6 +441,84 @@ def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:
     assert payload["blockers"] == ["component_only_diagnostic_not_consistency_closure"]
 
 
+def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required probe must not use the CPU diagnostic assembler")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "_git_head",
+        lambda: "fixture-commit",
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        require_hip_residual_engine=True,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["source_commit_sha"] == "fixture-commit"
+    assert payload["reused_evidence"] is False
+    assert payload["rocm_hip_required"] is True
+    assert payload["residual_jacobian_consistency_ready"] is False
+    assert payload["consistent_residual_jacobian_newton_passed"] is False
+    assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert payload["blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
+
+
+def test_hip_required_cli_does_not_pass_component_only_without_hip(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required CLI must not use the CPU diagnostic assembler")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+        },
+    )
+
+    exit_code = probe_module.main(
+        [
+            "--component-only",
+            "--require-hip-residual-engine",
+            "--output-json",
+            str(tmp_path / "receipt.json"),
+        ]
+    )
+
+    assert exit_code == 2
+
+
 def test_component_breakdown_probe_honors_top_residual_count(monkeypatch) -> None:
     stiffness = coo_matrix(([1.0, 1.0, 1.0], ([0, 1, 2], [0, 1, 2])), shape=(3, 3)).tocsc()
     free = np.asarray([0, 1, 2], dtype=np.int64)

@@ -18,7 +18,13 @@ PHASE1 = REPO_ROOT / "implementation" / "phase1"
 if str(PHASE1) not in sys.path:
     sys.path.insert(0, str(PHASE1))
 
-from run_mgt_direct_residual_newton_probe import DEFAULT_CHECKPOINT, PRODUCTIZATION  # noqa: E402
+from run_mgt_direct_residual_newton_probe import (  # noqa: E402
+    DEFAULT_CHECKPOINT,
+    ENGINE_VERSION,
+    PRODUCTIZATION,
+    _git_head,
+    _rocm_hip_runtime_preflight,
+)
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
 from run_mgt_full_frame_6dof_sparse_equilibrium import (  # noqa: E402
     FrameElement,
@@ -1609,9 +1615,62 @@ def run_mgt_residual_jacobian_consistency_probe(
         0.001,
     ),
     shell_pressure_load_path_policy: str = "all_components",
+    require_hip_residual_engine: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     generated_at = datetime.now(timezone.utc).isoformat()
+    source_commit_sha = _git_head()
+    hip_preflight = (
+        _rocm_hip_runtime_preflight()
+        if require_hip_residual_engine
+        else {
+            "checked_at": generated_at,
+            "hip_available": False,
+            "hip_required": False,
+            "unavailable_reason": "not_required_for_legacy_cpu_diagnostic",
+        }
+    )
+    if require_hip_residual_engine and not bool(hip_preflight.get("hip_available")):
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "source_commit_sha": source_commit_sha,
+            "engine_version": ENGINE_VERSION,
+            "reused_evidence": False,
+            "status": "partial",
+            "residual_jacobian_consistency_ready": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "rocm_hip_required": True,
+            "rocm_hip_runtime_preflight": hip_preflight,
+            "component_only": bool(component_only),
+            "checkpoint": {"path": str(checkpoint_npz)},
+            "load_scale": None,
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "direction_rows": [],
+            "state_scale_sweep": [],
+            "runtime_metrics": {
+                "setup_and_reference_seconds": 0.0,
+                "base_assembly_seconds": 0.0,
+                "total_seconds": time.perf_counter() - started,
+            },
+            "claim_boundary": (
+                "Production ROCm/HIP residual-Jacobian consistency was requested, but no "
+                "usable HIP runtime was available. The probe did not fall back to the CPU "
+                "diagnostic path and does not close G1."
+            ),
+            "blockers": [
+                "rocm_hip_runtime_unavailable",
+                "hip_residual_jacobian_consistency_not_executed",
+            ],
+        }
+        if output_json is not None:
+            output_json.parent.mkdir(parents=True, exist_ok=True)
+            output_json.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+                encoding="utf-8",
+            )
+        return payload
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
@@ -1761,11 +1820,28 @@ def run_mgt_residual_jacobian_consistency_probe(
             for row in evaluated
         )
     )
+    hip_consistency_proof_ready = False
+    blockers: list[str]
+    if require_hip_residual_engine:
+        blockers = ["hip_residual_jacobian_consistency_not_implemented"]
+    elif consistency_ready:
+        blockers = []
+    elif component_only:
+        blockers = ["component_only_diagnostic_not_consistency_closure"]
+    else:
+        blockers = ["residual_jacobian_consistency_not_closed"]
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
-        "status": "ready" if consistency_ready else "partial",
+        "source_commit_sha": source_commit_sha,
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
+        "status": "ready" if consistency_ready and not require_hip_residual_engine else "partial",
         "residual_jacobian_consistency_ready": consistency_ready,
+        "consistent_residual_jacobian_newton_passed": hip_consistency_proof_ready,
+        "consistent_residual_jacobian_newton_gate_passed": hip_consistency_proof_ready,
+        "rocm_hip_required": bool(require_hip_residual_engine),
+        "rocm_hip_runtime_preflight": hip_preflight,
         "checkpoint": setup_meta.get("checkpoint"),
         "load_scale": setup_meta.get("load_scale"),
         "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
@@ -1807,13 +1883,11 @@ def run_mgt_residual_jacobian_consistency_probe(
         },
         "claim_boundary": (
             "Full-model diagnostic comparing assembled tangent K*d against finite-difference "
-            "physical residual action dR/du*d. This is not a nonlinear equilibrium closure."
+            "physical residual action dR/du*d. This is not a nonlinear equilibrium closure. "
+            "The production ROCm/HIP residual-Jacobian proof remains false unless explicitly "
+            "reported by the consistent_residual_jacobian_newton_* fields."
         ),
-        "blockers": []
-        if consistency_ready
-        else ["component_only_diagnostic_not_consistency_closure"]
-        if component_only
-        else ["residual_jacobian_consistency_not_closed"],
+        "blockers": blockers,
     }
     if output_json is not None:
         output_json.parent.mkdir(parents=True, exist_ok=True)
@@ -1886,6 +1960,14 @@ def main(argv: list[str] | None = None) -> int:
         default="all_components",
         help="Diagnostic shell pressure load policy for the frozen external load.",
     )
+    parser.add_argument(
+        "--require-hip-residual-engine",
+        action="store_true",
+        help=(
+            "Require a production ROCm/HIP residual-Jacobian proof path. If HIP is unavailable "
+            "or the proof path is not implemented, emit a non-promoting partial receipt."
+        ),
+    )
     args = parser.parse_args(argv)
     state_scale_values = tuple(
         float(value.strip())
@@ -1918,6 +2000,7 @@ def main(argv: list[str] | None = None) -> int:
             if value.strip()
         ),
         shell_pressure_load_path_policy=str(args.shell_pressure_load_path_policy),
+        require_hip_residual_engine=bool(args.require_hip_residual_engine),
     )
     print(
         "mgt-residual-jacobian-consistency:",
@@ -1926,8 +2009,10 @@ def main(argv: list[str] | None = None) -> int:
         "->",
         args.output_json,
     )
-    if payload.get("component_only"):
+    if payload.get("component_only") and not args.require_hip_residual_engine:
         return 0
+    if args.require_hip_residual_engine:
+        return 0 if payload.get("consistent_residual_jacobian_newton_gate_passed") else 2
     return 0 if payload.get("residual_jacobian_consistency_ready") else 2
 
 
