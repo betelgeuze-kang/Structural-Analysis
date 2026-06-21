@@ -283,7 +283,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T11:43:43.410270+00:00",
+  "generated_at": "2026-06-21T11:58:22.760081+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -303,7 +303,7 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
+    "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
     "status": "partial"
   },
   "load_path_provenance": {
@@ -316,6 +316,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
+  "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
   "status": "blocked"
 }

@@ -125,7 +125,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "5fbfdd6ee034861a3242e397bd806a4f7d44327d",
+  "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -143,7 +143,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 3,
-    "local_workflow_metadata_generated_at": "2026-06-21T11:56:17.470981+00:00",
+    "local_workflow_metadata_generated_at": "2026-06-21T11:58:22.393577+00:00",
     "local_workflows": [
       {
         "exists": true,
