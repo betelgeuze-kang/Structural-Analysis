@@ -133,7 +133,7 @@ npm run ai:preflight
 ## 현재 판정
 
 현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_milestone_ready=true`, `limited_commercial_ready=false`, `ga_enterprise_ready=false`다.
-다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `12/15` green이다.
+다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `12/16` green이다.
 
 합격한 마일스톤:
 
@@ -142,7 +142,7 @@ npm run ai:preflight
 - M3 Strict Runtime Closure: NDTHA long profile, HIP e2e, CPU fallback 금지, device residency, host copy share가 통과했다.
 - M4 Benchmark Breadth Expansion: measured breadth `304` cases, `22` families, family별 holdout, coverage-risk worst-case report가 통과했다. PEER/E-Defense blind prediction measured-response family `10` cases는 `peer_blind_delta=1/10`으로 별도 집계한다.
 - M5 Commercial Packaging: viewer/reviewer surface, signed release registry, support bundle one-click export archive, validation/limitation manuals가 통과했다. 전용 manual은 `docs/release-validation-manual.md`와 `docs/release-limitation-manual.md`이며, CI/license source evidence와 함께 support bundle의 redacted reviewer package에 포함된다.
-- Implementation orchestration: Cursor Agent와 OpenCode worker bridge 파일/CLI preflight가 구성되어 있고, OpenCode wrapper 기본 모델은 MiniMax M3 registry id `opencode-go/minimax-m3`다. Model availability evidence는 실행 환경의 writable `XDG_DATA_HOME` 계정 store에 의존하므로, sandbox가 `/tmp` fallback registry만 볼 때는 blocked로 남는다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
+- Implementation orchestration: Cursor Agent와 OpenCode worker bridge 파일/CLI preflight가 구성되어 있고, Cursor는 scoped implementation/focused edit/test-fix loop에 더 적극적으로 활용하며, OpenCode wrapper 기본 모델은 MiniMax M3 registry id `opencode-go/minimax-m3`다. Model availability evidence는 실행 환경의 writable `XDG_DATA_HOME` 계정 store에 의존하므로, sandbox가 `/tmp` fallback registry만 볼 때는 blocked로 남는다. 이 evidence는 release pass/fail을 대체하지 않으며, Codex가 goal tracking, diff review, verification, final acceptance를 계속 담당한다.
 
 남은 M1-M5 milestone blocker는 없다.
 
@@ -153,11 +153,12 @@ npm run ai:preflight
 - Fresh Full-Validation Lanes: `fresh_full_validation_lane_status.json`은 CPU-required publication runner가 hydrate/materialize하는 evidence와 Level 3 fresh validation receipt를 분리한다. 현재 lane contract는 `8/8` 보이지만 fresh receipt는 `0/8`이므로 status는 blocked다. 향후 receipt는 `implementation/phase1/fresh_validation_receipt.schema.json`과 `implementation/phase1/validate_fresh_validation_receipt.py`를 통과해야 하며, `docs/templates/fresh_validation_receipt.template.json`은 owner 입력용 placeholder 예시일 뿐 release evidence가 아니다. 이 blocked 상태는 freshness PASS를 뒤집지 않고, Level 3 promotion 전에 별도 torch/GPU/heavy validation lane receipt가 필요하다는 경계를 고정한다.
 - UX: automated browser rehearsal는 sample workflow가 30분 예산 안에 끝난다는 workflow evidence로만 인정한다. PM UX release-area pass는 실제 신규 사용자 human observation record, completion minutes, blocker count, observer, evidence reference, accepted decision이 들어간 `ux_new_user_observation_report.json.contract_pass=true`를 요구한다.
 - Security: SBOM/repro/secrets negative-start boundary는 통과하지만 license status closure report가 현재 `not_configured`를 막고 있다. `docs/templates/license_status.template.json`은 입력 형식 예시일 뿐 release evidence가 아니며, placeholder 그대로는 closure report가 hard fail한다.
+- GitHub sync: read-only preflight는 feature/main fast-forward 가능성을 보이지만, 현재 remote ref가 local HEAD와 같지 않고 remote mutation은 명시적 R4 approval 없이는 금지된다. `github_sync` release area는 explicit approval과 remote sync evidence가 들어오기 전까지 blocked다.
 
 `pm_release_blocker_action_register.json`은 위 blocker와 GA/Enterprise blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 현재 action register open blocker는 총 `20`개다. Release-area blocker는 CI/UX/Security/GitHub-sync `8`개이며 external owner/R4 input이 필요한 상태로 분류된다. GA/Enterprise handoff에는 독립 V&V, family validation manual signoff, customer audit/failure-bundle/SLA, completed-project customer shadow `4`개 external owner blocker와 fresh full-validation receipt `8`개 local-remediation blocker가 추가로 노출된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval, explicit GitHub remote-mutation approval, external signoff, customer-retained shadow metadata, fresh validation receipt evidence를 대체하지 않는다.
 `pm_release_blocker_closure_board.json`은 open blocker를 `external_owner_input_ready`, `local_remediation_ready`, `handoff_incomplete` closure state로 다시 묶는 PM daily board다. 이 board도 blocker를 해제하지 않으며, action register의 open blocker count와 handoff readiness가 support bundle에서 바로 확인되는지를 고정한다.
-`pm_release_gate_completion_audit.json`은 PM release-area 15개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `12/15` pass, Basic CI/UX/Security 3개 top-level row가 external owner input ready 상태로 blocked임을 기록한다.
+`pm_release_gate_completion_audit.json`은 PM release-area 16개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `12/16` pass, Basic CI/UX/Security/GitHub sync 4개 top-level row가 external owner 또는 R4 input ready 상태로 blocked임을 기록한다.
 `pm_release_gate_reviewer_handoff.json`은 open blocker별 owner, closure state, reproduction/verification command, verdict-change condition을 reviewer package로 묶는다. 이 handoff는 reviewer가 어떤 evidence가 들어오면 판정이 바뀌는지 확인하는 산출물이며, CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `pm_owner_evidence_request_packet.json`은 같은 open blocker를 owner별로 다시 묶어 owner가 제출해야 할 intake artifact, acceptance criteria, reproduction/verification command를 한 곳에 고정한다. 이 packet도 external evidence를 생성하거나 blocker를 해제하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.

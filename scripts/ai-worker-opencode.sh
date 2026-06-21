@@ -8,14 +8,19 @@ if [[ ! -f "$prompt_file" ]]; then
 fi
 
 OPENCODE_DEFAULT_MODEL="opencode-go/minimax-m3"
+OPENCODE_DEEPSEEK_V4_PRO_MODEL="opencode-go/deepseek-v4-pro"
+OPENCODE_MINIMAX_M3_MODEL="opencode-go/minimax-m3"
 OPENCODE_GLM52_MODEL="opencode-go/glm-5.2"
 OPENCODE_MODEL="${OPENCODE_MODEL:-${AI_WORKER_OPENCODE_MODEL:-$OPENCODE_DEFAULT_MODEL}}"
 case "$OPENCODE_MODEL" in
   minimax/m3|minimax-m3|minimaxm3|minimax3|minimax\ m3|minimax\ 3|m3)
-    OPENCODE_MODEL="$OPENCODE_DEFAULT_MODEL"
+    OPENCODE_MODEL="$OPENCODE_MINIMAX_M3_MODEL"
     ;;
   glm/5.2|glm-5.2|glm5.2|glm\ 5.2|kimi/k2.7|kimi-k2.7|k2.7|kimi-k2.7-code)
     OPENCODE_MODEL="$OPENCODE_GLM52_MODEL"
+    ;;
+  deepseek/v4/pro|deepseek-v4-pro|deepseekv4pro|deepseek\ v4\ pro|v4-pro)
+    OPENCODE_MODEL="$OPENCODE_DEEPSEEK_V4_PRO_MODEL"
     ;;
 esac
 OPENCODE_TIMEOUT_SECONDS="${AI_WORKER_OPENCODE_TIMEOUT_SECONDS:-600}"

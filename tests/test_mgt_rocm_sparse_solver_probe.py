@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION_ROCM_RECEIPT = (
@@ -182,6 +183,7 @@ PRODUCTIZATION_RESIDUAL_REGION_DIAGNOSTIC_SHELL_SMOKE = (
 RUN_HEAVY_ROCM_TEST_ENV = "RUN_MGT_ROCM_HEAVY_GPU_TEST"
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
+import run_mgt_rocm_sparse_solver_probe as rocm_probe  # noqa: E402
 from run_mgt_rocm_sparse_solver_probe import (  # noqa: E402
     _rocalution_preconditioned_krylov_candidates,
     _run_external_solver_bridge,
@@ -222,6 +224,101 @@ def test_rocalution_sweep_keeps_saamg_preconditioners_opt_in() -> None:
     assert not any(row["preconditioner"] == "saamg" for row in candidates)
     assert ("gmres", "saamg", 0, 1, 64, 256, False) in opt_in_keys
     assert ("saamg", "none", 0, 1, 64, 30000, False) in opt_in_keys
+
+
+def test_torch_sparse_solver_attempts_hip_only_skips_host_fallback(monkeypatch) -> None:
+    class FakeMatrix:
+        shape = (2, 2)
+        nnz = 2
+
+    def not_converged(name: str) -> dict[str, object]:
+        return {"backend": name, "converged": False}
+
+    monkeypatch.setattr(
+        rocm_probe,
+        "_torch_sparse_cg",
+        lambda **_kwargs: not_converged("rocm_torch_sparse_cg"),
+    )
+    monkeypatch.setattr(
+        rocm_probe,
+        "_torch_sparse_bicgstab",
+        lambda **_kwargs: not_converged("rocm_torch_sparse_bicgstab"),
+    )
+    monkeypatch.setattr(
+        rocm_probe,
+        "_torch_sparse_symmetric_scaled_bicgstab",
+        lambda **_kwargs: not_converged("rocm_torch_sparse_symmetric_scaled_bicgstab"),
+    )
+    monkeypatch.setattr(
+        rocm_probe,
+        "_rocalution_sparse_preconditioned_krylov_sweep",
+        lambda **_kwargs: not_converged("rocalution_sparse_preconditioned_krylov"),
+    )
+    monkeypatch.setattr(rocm_probe, "_matrix_diagnostics", lambda _k_ff: {})
+
+    def fail_host_fallback(**_kwargs):
+        raise AssertionError("HIP-only solve must not call host ILU/CPU GMRES fallback")
+
+    monkeypatch.setattr(
+        rocm_probe,
+        "_torch_sparse_host_ilu_device_gmres_sweep",
+        fail_host_fallback,
+    )
+
+    result = rocm_probe._torch_sparse_solver_attempts(
+        label="hip_only_unit",
+        k_ff=FakeMatrix(),
+        rhs=np.asarray([1.0, 0.0], dtype=np.float64),
+        max_iterations=1,
+        tolerance_abs=1.0e-6,
+        tolerance_rel=1.0e-9,
+        allow_host_fallback=False,
+    )
+
+    assert result["ready"] is False
+    assert result["hip_only"] is True
+    assert result["host_solver_fallback_allowed"] is False
+    assert result["host_solver_fallback_skipped"] is True
+    assert result["rocm_sparse_host_ilu_device_gmres"]["skipped"] is True
+    assert result["rocm_sparse_block_bicgstab_ready"] is False
+    assert result["rocm_sparse_post_schur_residual_row_block_lstsq_refinement_ready"] is False
+    assert result["rocm_sparse_spsolve_supported"] is False
+    assert result["blockers"] == ["hip_only_unit_hip_only_rocm_sparse_solver_not_converged"]
+
+
+def test_hip_only_crash_wrapper_writes_blocked_receipt(tmp_path: Path, monkeypatch) -> None:
+    out = tmp_path / "hip_only_crash.json"
+    captured: dict[str, object] = {}
+
+    class FakeCompletedProcess:
+        returncode = -6
+        stdout = ""
+        stderr = "Memory access fault by GPU node-1"
+
+    def fake_run(command, **kwargs):
+        captured["command"] = command
+        captured["kwargs"] = kwargs
+        return FakeCompletedProcess()
+
+    monkeypatch.setattr(rocm_probe.subprocess, "run", fake_run)
+
+    rc = rocm_probe._run_hip_only_probe_with_crash_receipt(
+        ["--hip-only", "--output-json", str(out)],
+        output_json=out,
+    )
+    payload = json.loads(out.read_text(encoding="utf-8"))
+
+    assert rc == 3
+    assert payload["status"] == "blocked"
+    assert payload["reason_code"] == "ERR_ROCM_HIP_WORKER_ABORTED"
+    assert payload["hip_only"] is True
+    assert payload["host_solver_fallback_allowed"] is False
+    assert payload["host_solver_fallback_skipped"] is True
+    assert payload["worker_returncode"] == -6
+    assert payload["worker_signal"] == "SIGABRT"
+    assert "Memory access fault" in payload["worker_stderr_tail"]
+    assert "rocm_hip_worker_aborted_before_receipt" in payload["blockers"]
+    assert "--internal-no-crash-wrapper" in captured["command"]
 
 
 def test_external_solver_bridge_timeout_kills_process_group() -> None:

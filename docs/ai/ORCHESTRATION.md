@@ -17,8 +17,8 @@
 
 ```text
 Codex goal: 목표 추적, 설계, 리뷰, 최종 판단
+Cursor auto: scoped 구현, focused edit, test-fix loop, 현재 에디터 상태, 선택 영역, IDE affordance가 중요한 구현 slice 수행
 OpenCode worker (MiniMax M3, `opencode-go/minimax-m3` default): 큰 컨텍스트, 긴 로그/문서, 넓은 저장소 탐색, 반복 구현 slice 수행
-Cursor auto: 현재 에디터 상태, 선택 영역, IDE affordance가 중요한 구현 slice 수행
 ai-verify.sh: 오케스트레이션 smoke 검증
 Human owner: push, merge, deploy, release, billing, production mutation 승인
 ```

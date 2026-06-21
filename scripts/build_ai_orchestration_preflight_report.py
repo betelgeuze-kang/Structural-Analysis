@@ -15,6 +15,8 @@ from typing import Any
 
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json")
 DEFAULT_OPENCODE_MODEL = "opencode-go/minimax-m3"
+OPENCODE_DEEPSEEK_V4_PRO_MODEL = "opencode-go/deepseek-v4-pro"
+OPENCODE_MINIMAX_M3_MODEL = "opencode-go/minimax-m3"
 OPENCODE_GLM52_MODEL = "opencode-go/glm-5.2"
 DEFAULT_OPENCODE_XDG_DATA_HOME = Path("/tmp/codex-opencode-xdg-data")
 DEFAULT_OPENCODE_GO_MIRROR_XDG_DATA_HOME = Path("/tmp/codex-opencode-go-xdg-data")
@@ -167,13 +169,13 @@ def _opencode_worker_env() -> tuple[dict[str, str], str]:
 
 def _normalize_opencode_model(model: str) -> str:
     aliases = {
-        "minimax/m3": DEFAULT_OPENCODE_MODEL,
-        "minimax-m3": DEFAULT_OPENCODE_MODEL,
-        "minimaxm3": DEFAULT_OPENCODE_MODEL,
-        "minimax3": DEFAULT_OPENCODE_MODEL,
-        "minimax m3": DEFAULT_OPENCODE_MODEL,
-        "minimax 3": DEFAULT_OPENCODE_MODEL,
-        "m3": DEFAULT_OPENCODE_MODEL,
+        "minimax/m3": OPENCODE_MINIMAX_M3_MODEL,
+        "minimax-m3": OPENCODE_MINIMAX_M3_MODEL,
+        "minimaxm3": OPENCODE_MINIMAX_M3_MODEL,
+        "minimax3": OPENCODE_MINIMAX_M3_MODEL,
+        "minimax m3": OPENCODE_MINIMAX_M3_MODEL,
+        "minimax 3": OPENCODE_MINIMAX_M3_MODEL,
+        "m3": OPENCODE_MINIMAX_M3_MODEL,
         "glm/5.2": OPENCODE_GLM52_MODEL,
         "glm-5.2": OPENCODE_GLM52_MODEL,
         "glm5.2": OPENCODE_GLM52_MODEL,
@@ -182,6 +184,11 @@ def _normalize_opencode_model(model: str) -> str:
         "kimi-k2.7": OPENCODE_GLM52_MODEL,
         "k2.7": OPENCODE_GLM52_MODEL,
         "kimi-k2.7-code": OPENCODE_GLM52_MODEL,
+        "deepseek/v4/pro": OPENCODE_DEEPSEEK_V4_PRO_MODEL,
+        "deepseek-v4-pro": OPENCODE_DEEPSEEK_V4_PRO_MODEL,
+        "deepseekv4pro": OPENCODE_DEEPSEEK_V4_PRO_MODEL,
+        "deepseek v4 pro": OPENCODE_DEEPSEEK_V4_PRO_MODEL,
+        "v4-pro": OPENCODE_DEEPSEEK_V4_PRO_MODEL,
     }
     return aliases.get(model, model)
 

@@ -168,6 +168,7 @@ def test_preflight_uses_opencode_go_mirror_when_account_store_is_read_only(
 
     mirror_home = tmp_dir / "codex-opencode-go-xdg-data"
     assert payload["contract_pass"] is True
+    assert payload["summary"]["opencode_configured_model"] == "opencode-go/minimax-m3"
     assert payload["summary"]["opencode_xdg_data_home"] == str(mirror_home)
     assert (mirror_home / "opencode" / "auth.json").is_symlink()
     assert (mirror_home / "opencode" / "account.json").is_symlink()

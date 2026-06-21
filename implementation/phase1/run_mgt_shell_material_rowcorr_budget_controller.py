@@ -44,6 +44,167 @@ def _csv(values: tuple[int, ...] | tuple[float, ...]) -> str:
     return ",".join(str(value) for value in values)
 
 
+def _child_strict_hip_promotion_blockers(
+    *,
+    require_hip: bool,
+    child_payload: dict[str, Any],
+) -> list[str]:
+    if not require_hip:
+        return []
+    blockers: list[str] = []
+    gate = child_payload.get("gate_assessment")
+    if not isinstance(gate, dict) or gate.get("fallback_zero_passed") is not True:
+        blockers.append("child_fallback_zero_audit_not_closed")
+    residual_contract = child_payload.get("residual_contract")
+    if (
+        not isinstance(residual_contract, dict)
+        or residual_contract.get("hip_residual_engine_contract_passed") is not True
+    ):
+        blockers.append("child_hip_residual_engine_contract_not_proven")
+    return blockers
+
+
+def _row_hip_residual_engine_contract_passed(row: dict[str, Any]) -> bool:
+    if row.get("child_hip_residual_engine_contract_passed") is True:
+        return True
+    residual_contract = row.get("child_residual_contract")
+    return (
+        isinstance(residual_contract, dict)
+        and residual_contract.get("hip_residual_engine_contract_passed") is True
+    )
+
+
+def _row_reports_hip_runtime_unavailable(row: dict[str, Any]) -> bool:
+    child_blockers = row.get("child_blockers")
+    if isinstance(child_blockers, list) and any(
+        str(blocker) == "rocm_hip_runtime_unavailable" for blocker in child_blockers
+    ):
+        return True
+    residual_contract = row.get("child_residual_contract")
+    if isinstance(residual_contract, dict):
+        engine_blockers = residual_contract.get("hip_residual_engine_blockers")
+        if isinstance(engine_blockers, list) and any(
+            str(blocker) == "rocm_hip_runtime_unavailable"
+            for blocker in engine_blockers
+        ):
+            return True
+    gate = row.get("child_gate_assessment")
+    return isinstance(gate, dict) and gate.get("rocm_hip_runtime_available") is False
+
+
+def _build_shell_rowcorr_claim_boundary(
+    *,
+    require_hip: bool,
+    backend_is_hip: bool,
+    preflight_blockers_exist: bool,
+    runtime_budget_exceeded: bool,
+    promoted_rows: list[dict[str, Any]],
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    child_hip_runtime_unavailable = any(
+        _row_reports_hip_runtime_unavailable(row) for row in [*rows, *promoted_rows]
+    )
+    hip_backend_available = bool(
+        require_hip
+        and backend_is_hip
+        and not preflight_blockers_exist
+        and not child_hip_runtime_unavailable
+    )
+    conservative = {
+        "cpu_diagnostic_only": True,
+        "official_rocm_hip_closure_required": True,
+        "shell_material_tangent_required": True,
+        "child_receipts_are_source_of_residual_progress": True,
+        "timeouts_do_not_claim_descent": True,
+        "hip_required_material_tangent_backend_available": hip_backend_available,
+        "rocm_hip_runtime_available": hip_backend_available,
+    }
+    if not require_hip:
+        return conservative
+    if not backend_is_hip:
+        return conservative
+    if preflight_blockers_exist:
+        return conservative
+    if runtime_budget_exceeded:
+        return conservative
+    if not promoted_rows:
+        return conservative
+    child_timeout_occurred = any(
+        bool(row.get("subprocess_timeout")) for row in rows
+    )
+    if child_timeout_occurred:
+        return conservative
+    host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency = False
+    for row in promoted_rows:
+        if not _row_hip_residual_engine_contract_passed(row):
+            return conservative
+        gate = row.get("child_gate_assessment")
+        if not isinstance(gate, dict):
+            return conservative
+        if gate.get("fallback_zero_passed") is not True:
+            return conservative
+        claim_boundary = row.get("child_claim_boundary")
+        if isinstance(claim_boundary, dict):
+            if claim_boundary.get("cpu_diagnostic_only") is True:
+                return conservative
+            if claim_boundary.get("official_rocm_hip_closure_required") is True:
+                return conservative
+        elif isinstance(claim_boundary, str) and claim_boundary:
+            lowered = claim_boundary.lower()
+            if any(
+                token in lowered
+                for token in ("cpu", "host", "fallback", "rocm", "hip-required", "hip")
+            ):
+                residual_contract = row.get("child_residual_contract")
+                if isinstance(residual_contract, dict):
+                    if (
+                        residual_contract.get(
+                            "allow_state_dependent_shell_material_tangent_hip_replay"
+                        )
+                        and residual_contract.get(
+                            "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency"
+                        )
+                    ):
+                        host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency = True
+                    elif residual_contract.get(
+                        "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure"
+                    ):
+                        return conservative
+                    else:
+                        return conservative
+                else:
+                    return conservative
+        child_blockers = row.get("child_blockers")
+        if isinstance(child_blockers, list):
+            for blocker in child_blockers:
+                text = str(blocker)
+                if any(
+                    token in text
+                    for token in (
+                        "fallback",
+                        "cpu_",
+                        "host_",
+                        "rocm_hip",
+                        "hip_required",
+                        "hip_batch_replay_required_unavailable",
+                        "hip_krylov_solver_required_unavailable",
+                    )
+                ):
+                    return conservative
+    return {
+        "cpu_diagnostic_only": False,
+        "official_rocm_hip_closure_required": False,
+        "shell_material_tangent_required": True,
+        "child_receipts_are_source_of_residual_progress": True,
+        "timeouts_do_not_claim_descent": True,
+        "hip_required_material_tangent_backend_available": True,
+        "rocm_hip_runtime_available": True,
+        "host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency": (
+            host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency
+        ),
+    }
+
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
@@ -133,13 +294,28 @@ def _build_child_command(
     child_checkpoint: Path | None,
     compact_child_checkpoint: bool,
     shell_pressure_load_path_policy: str,
+    row_target_mode: str,
+    row_frontier_probe_json: Path | None,
+    row_frontier_component_scale_mode: str,
     target_row_count: int,
     support_column_count: int,
     alpha_values: tuple[float, ...],
+    row_jacobian_mode: str,
+    row_fd_epsilon: float,
+    row_fd_max_support_columns: int,
+    row_batch_fd_replay: bool,
+    row_batch_fd_replay_chunk_size: int,
+    row_batch_replay_backend: str,
+    row_require_hip_batch_replay: bool,
+    allow_frozen_shell_material_tangent_hip_replay: bool,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool,
+    row_use_residual_only_assembly: bool,
+    row_batch_alpha_replay: bool,
     max_row_promotions: int,
     row_min_relative_improvement: float,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
+    row_support_selection: str = "row_strongest",
 ) -> list[str]:
     script = Path(__file__).resolve().with_name("run_mgt_direct_residual_newton_probe.py")
     command = [
@@ -165,16 +341,64 @@ def _build_child_command(
         "--enable-current-tangent-residual-row-correction",
         "--max-current-tangent-residual-row-corrections",
         str(int(max_row_promotions)),
+        "--current-tangent-residual-row-target-mode",
+        str(row_target_mode),
         "--current-tangent-residual-row-target-counts",
         str(int(target_row_count)),
         "--current-tangent-residual-row-support-column-counts",
         str(int(support_column_count)),
+        "--current-tangent-residual-row-frontier-component-scale-mode",
+        str(row_frontier_component_scale_mode),
+        "--current-tangent-residual-row-jacobian-mode",
+        str(row_jacobian_mode),
+        "--current-tangent-residual-row-fd-epsilon",
+        str(float(row_fd_epsilon)),
+        "--current-tangent-residual-row-fd-max-support-columns",
+        str(int(row_fd_max_support_columns)),
         "--current-tangent-residual-row-alpha-values",
         _csv(alpha_values),
         "--current-tangent-residual-row-min-relative-improvement",
         str(float(row_min_relative_improvement)),
-        "--allow-cpu-diagnostic",
+        "--current-tangent-residual-row-support-selection",
+        str(row_support_selection),
     ]
+    if not row_require_hip_batch_replay:
+        command.append("--allow-cpu-diagnostic")
+    if row_frontier_probe_json is not None:
+        command.extend(
+            [
+                "--current-tangent-residual-row-frontier-probe-json",
+                str(row_frontier_probe_json),
+            ]
+        )
+    if row_batch_fd_replay:
+        command.extend(
+            [
+                "--current-tangent-residual-row-batch-fd-replay",
+                "--current-tangent-residual-row-batch-fd-replay-chunk-size",
+                str(int(row_batch_fd_replay_chunk_size)),
+            ]
+        )
+    if row_batch_replay_backend != "cpu":
+        command.extend(
+            [
+                "--current-tangent-residual-row-batch-replay-backend",
+                str(row_batch_replay_backend),
+            ]
+        )
+    if row_require_hip_batch_replay:
+        command.append("--current-tangent-residual-row-require-hip-batch-replay")
+    if (
+        allow_frozen_shell_material_tangent_hip_replay
+        and not allow_state_dependent_shell_material_tangent_hip_replay
+    ):
+        command.append("--allow-frozen-shell-material-tangent-hip-replay")
+    if allow_state_dependent_shell_material_tangent_hip_replay:
+        command.append("--allow-state-dependent-shell-material-tangent-hip-replay")
+    if row_use_residual_only_assembly:
+        command.append("--current-tangent-residual-row-use-residual-only-assembly")
+    if row_batch_alpha_replay:
+        command.append("--current-tangent-residual-row-batch-alpha-replay")
     if child_checkpoint is not None:
         insertion = command.index("--shell-pressure-load-path-policy")
         command[insertion:insertion] = [
@@ -193,11 +417,14 @@ def _launch_receipt(
     child_json: Path,
     child_checkpoint: Path | None,
     checkpoint_npz: Path,
+    row_target_mode: str,
+    row_jacobian_mode: str,
     target_row_count: int,
     support_column_count: int,
     alpha_values: tuple[float, ...],
     child_timeout_seconds: float,
     command: list[str],
+    row_support_selection: str = "row_strongest",
 ) -> dict[str, Any]:
     return {
         "schema_version": "mgt-shell-material-rowcorr-child-launch.v1",
@@ -208,6 +435,9 @@ def _launch_receipt(
         "output_final_checkpoint_npz": (
             None if child_checkpoint is None else str(child_checkpoint)
         ),
+        "row_target_mode": str(row_target_mode),
+        "row_jacobian_mode": str(row_jacobian_mode),
+        "row_support_selection": str(row_support_selection),
         "target_row_count": int(target_row_count),
         "support_column_count": int(support_column_count),
         "alpha_values": [float(value) for value in alpha_values],
@@ -266,15 +496,30 @@ def _run_child(
     child_json: Path,
     child_checkpoint: Path | None,
     shell_pressure_load_path_policy: str,
+    row_target_mode: str,
+    row_frontier_probe_json: Path | None,
+    row_frontier_component_scale_mode: str,
     target_row_count: int,
     support_column_count: int,
     alpha_values: tuple[float, ...],
+    row_jacobian_mode: str,
+    row_fd_epsilon: float,
+    row_fd_max_support_columns: int,
+    row_batch_fd_replay: bool,
+    row_batch_fd_replay_chunk_size: int,
+    row_batch_replay_backend: str,
+    row_require_hip_batch_replay: bool,
+    allow_frozen_shell_material_tangent_hip_replay: bool,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool,
+    row_use_residual_only_assembly: bool,
+    row_batch_alpha_replay: bool,
     max_row_promotions: int,
     compact_child_checkpoint: bool,
     row_min_relative_improvement: float,
     residual_tolerance_n: float,
     relative_increment_tolerance: float,
     child_timeout_seconds: float,
+    row_support_selection: str = "row_strongest",
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     command = _build_child_command(
         python_exe=python_exe,
@@ -284,13 +529,32 @@ def _run_child(
         child_checkpoint=child_checkpoint,
         compact_child_checkpoint=compact_child_checkpoint,
         shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+        row_target_mode=row_target_mode,
+        row_frontier_probe_json=row_frontier_probe_json,
+        row_frontier_component_scale_mode=row_frontier_component_scale_mode,
         target_row_count=target_row_count,
         support_column_count=support_column_count,
         alpha_values=alpha_values,
+        row_jacobian_mode=row_jacobian_mode,
+        row_fd_epsilon=row_fd_epsilon,
+        row_fd_max_support_columns=row_fd_max_support_columns,
+        row_batch_fd_replay=row_batch_fd_replay,
+        row_batch_fd_replay_chunk_size=row_batch_fd_replay_chunk_size,
+        row_batch_replay_backend=row_batch_replay_backend,
+        row_require_hip_batch_replay=row_require_hip_batch_replay,
+        allow_frozen_shell_material_tangent_hip_replay=(
+            allow_frozen_shell_material_tangent_hip_replay
+        ),
+        allow_state_dependent_shell_material_tangent_hip_replay=(
+            allow_state_dependent_shell_material_tangent_hip_replay
+        ),
+        row_use_residual_only_assembly=row_use_residual_only_assembly,
+        row_batch_alpha_replay=row_batch_alpha_replay,
         max_row_promotions=max_row_promotions,
         row_min_relative_improvement=row_min_relative_improvement,
         residual_tolerance_n=residual_tolerance_n,
         relative_increment_tolerance=relative_increment_tolerance,
+        row_support_selection=row_support_selection,
     )
     _write_json(
         child_json,
@@ -298,11 +562,14 @@ def _run_child(
             child_json=child_json,
             child_checkpoint=child_checkpoint,
             checkpoint_npz=checkpoint_npz,
+            row_target_mode=row_target_mode,
+            row_jacobian_mode=row_jacobian_mode,
             target_row_count=target_row_count,
             support_column_count=support_column_count,
             alpha_values=alpha_values,
             child_timeout_seconds=child_timeout_seconds,
             command=command,
+            row_support_selection=row_support_selection,
         ),
     )
     try:
@@ -369,6 +636,20 @@ def run_shell_material_rowcorr_budget_controller(
     row_target_counts: tuple[int, ...] = (1,),
     row_support_column_counts: tuple[int, ...] = (4,),
     row_alpha_values: tuple[float, ...] = (0.015625,),
+    row_target_mode: str = "largest_rows",
+    row_frontier_probe_json: Path | None = None,
+    row_frontier_component_scale_mode: str = "none",
+    row_jacobian_mode: str = "current_tangent",
+    row_fd_epsilon: float = 1.0e-6,
+    row_fd_max_support_columns: int = 12,
+    row_batch_fd_replay: bool = False,
+    row_batch_fd_replay_chunk_size: int = 64,
+    row_batch_replay_backend: str = "cpu",
+    row_require_hip_batch_replay: bool = False,
+    allow_frozen_shell_material_tangent_hip_replay: bool = False,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
+    row_use_residual_only_assembly: bool = False,
+    row_batch_alpha_replay: bool = False,
     max_candidates: int = 1,
     max_row_promotions: int = 1,
     write_child_checkpoints: bool = False,
@@ -380,6 +661,7 @@ def run_shell_material_rowcorr_budget_controller(
     relative_increment_tolerance: float = 1.0e-4,
     max_controller_runtime_seconds: float | None = None,
     child_timeout_seconds: float = 120.0,
+    row_support_selection: str = "row_strongest",
 ) -> dict[str, Any]:
     generated_at = datetime.now(timezone.utc).isoformat()
     started = time.perf_counter()
@@ -391,6 +673,20 @@ def run_shell_material_rowcorr_budget_controller(
     child_output_dir = child_output_dir or output_json.parent / f"{output_json.stem}_children"
     child_output_dir.mkdir(parents=True, exist_ok=True)
     python_exe = python_exe or Path(sys.executable)
+
+    row_batch_replay_backend = str(row_batch_replay_backend).strip().lower()
+    row_support_selection = str(row_support_selection).strip().lower()
+    if row_support_selection not in {
+        "row_strongest",
+        "residual_weighted",
+        "target_rows",
+    }:
+        row_support_selection = "row_strongest"
+    if row_require_hip_batch_replay and row_batch_replay_backend == "cpu":
+        raise ValueError(
+            "row_require_hip_batch_replay=True requires a HIP row batch replay backend, "
+            f"got row_batch_replay_backend={row_batch_replay_backend!r}"
+        )
 
     seed_payload = _read_json(seed_probe_json)
     if Path(checkpoint_npz) == DEFAULT_CHECKPOINT:
@@ -405,6 +701,16 @@ def run_shell_material_rowcorr_budget_controller(
     runtime_budget_exceeded = False
     promotion_count = 0
     stop_reason = "max_candidates_reached"
+    preflight_blockers: list[str] = []
+    if (
+        row_require_hip_batch_replay
+        and not allow_frozen_shell_material_tangent_hip_replay
+        and not allow_state_dependent_shell_material_tangent_hip_replay
+    ):
+        preflight_blockers.append(
+            "hip_required_shell_material_tangent_batch_backend_unavailable"
+        )
+        stop_reason = "hip_required_shell_material_tangent_backend_unavailable"
 
     candidates: list[tuple[int, int]] = []
     for target_count in row_target_counts or (1,):
@@ -417,7 +723,10 @@ def run_shell_material_rowcorr_budget_controller(
         runtime_budget_exceeded = True
         stop_reason = "runtime_budget_exceeded"
 
-    for candidate_index, (target_count, support_count) in enumerate(candidates, start=1):
+    for candidate_index, (target_count, support_count) in enumerate(
+        [] if preflight_blockers else candidates,
+        start=1,
+    ):
         if runtime_budget_seconds is not None and time.perf_counter() - started >= runtime_budget_seconds:
             runtime_budget_exceeded = True
             stop_reason = "runtime_budget_exceeded"
@@ -454,15 +763,34 @@ def run_shell_material_rowcorr_budget_controller(
             child_json=child_json,
             child_checkpoint=child_checkpoint,
             shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+            row_target_mode=row_target_mode,
+            row_frontier_probe_json=row_frontier_probe_json,
+            row_frontier_component_scale_mode=row_frontier_component_scale_mode,
             target_row_count=target_count,
             support_column_count=support_count,
             alpha_values=row_alpha_values,
+            row_jacobian_mode=row_jacobian_mode,
+            row_fd_epsilon=row_fd_epsilon,
+            row_fd_max_support_columns=row_fd_max_support_columns,
+            row_batch_fd_replay=row_batch_fd_replay,
+            row_batch_fd_replay_chunk_size=row_batch_fd_replay_chunk_size,
+            row_batch_replay_backend=row_batch_replay_backend,
+            row_require_hip_batch_replay=row_require_hip_batch_replay,
+            allow_frozen_shell_material_tangent_hip_replay=(
+                allow_frozen_shell_material_tangent_hip_replay
+            ),
+            allow_state_dependent_shell_material_tangent_hip_replay=(
+                allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+            row_use_residual_only_assembly=row_use_residual_only_assembly,
+            row_batch_alpha_replay=row_batch_alpha_replay,
             max_row_promotions=max_row_promotions,
             compact_child_checkpoint=compact_child_checkpoints,
             row_min_relative_improvement=row_min_relative_improvement,
             residual_tolerance_n=residual_tolerance_n,
             relative_increment_tolerance=relative_increment_tolerance,
             child_timeout_seconds=effective_timeout,
+            row_support_selection=row_support_selection,
         )
         child_runtime_seconds = float(time.perf_counter() - child_started)
         child_summary = _probe_summary(child_json, child_payload)
@@ -478,10 +806,24 @@ def run_shell_material_rowcorr_budget_controller(
             if frontier_improvement is not None and current_frontier is not None
             else None
         )
+        child_gate = child_payload.get("gate_assessment")
+        child_claim_boundary = child_payload.get("claim_boundary")
+        child_blockers = child_payload.get("blockers")
+        child_residual_contract = child_payload.get("residual_contract")
+        child_hip_residual_engine_contract_passed = bool(
+            isinstance(child_residual_contract, dict)
+            and child_residual_contract.get("hip_residual_engine_contract_passed")
+            is True
+        )
+        child_strict_hip_promotion_blockers = _child_strict_hip_promotion_blockers(
+            require_hip=bool(row_require_hip_batch_replay),
+            child_payload=child_payload,
+        )
         rowcorr_accepted = bool(child_summary.get("row_correction_accepted"))
         accepted = bool(
             rowcorr_accepted
             and child_final_value is not None
+            and not child_strict_hip_promotion_blockers
             and (
                 current_frontier is None
                 or (
@@ -495,9 +837,53 @@ def run_shell_material_rowcorr_budget_controller(
         )
         row = {
             "candidate_index": int(candidate_index),
+            "child_gate_assessment": (
+                child_gate if isinstance(child_gate, dict) else None
+            ),
+            "child_claim_boundary": (
+                child_claim_boundary
+                if isinstance(child_claim_boundary, (dict, str))
+                else None
+            ),
+            "child_blockers": (
+                child_blockers if isinstance(child_blockers, list) else []
+            ),
+            "child_residual_contract": (
+                child_residual_contract
+                if isinstance(child_residual_contract, dict)
+                else None
+            ),
+            "child_hip_residual_engine_contract_passed": (
+                child_hip_residual_engine_contract_passed
+            ),
+            "child_strict_hip_promotion_blockers": child_strict_hip_promotion_blockers,
             "target_row_count": int(target_count),
             "support_column_count": int(support_count),
             "alpha_values": [float(value) for value in row_alpha_values],
+            "row_target_mode": str(row_target_mode),
+            "row_support_selection": str(row_support_selection),
+            "row_frontier_probe_json": (
+                None if row_frontier_probe_json is None else str(row_frontier_probe_json)
+            ),
+            "row_frontier_component_scale_mode": str(
+                row_frontier_component_scale_mode
+            ),
+            "row_jacobian_mode": str(row_jacobian_mode),
+            "row_support_selection": str(row_support_selection),
+            "row_fd_epsilon": float(row_fd_epsilon),
+            "row_fd_max_support_columns": int(row_fd_max_support_columns),
+            "row_batch_fd_replay": bool(row_batch_fd_replay),
+            "row_batch_fd_replay_chunk_size": int(row_batch_fd_replay_chunk_size),
+            "row_batch_replay_backend": str(row_batch_replay_backend),
+            "row_require_hip_batch_replay": bool(row_require_hip_batch_replay),
+            "allow_frozen_shell_material_tangent_hip_replay": bool(
+                allow_frozen_shell_material_tangent_hip_replay
+            ),
+            "allow_state_dependent_shell_material_tangent_hip_replay": bool(
+                allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+            "row_use_residual_only_assembly": bool(row_use_residual_only_assembly),
+            "row_batch_alpha_replay": bool(row_batch_alpha_replay),
             "child_receipt_path": str(child_json),
             "child_checkpoint_path": (
                 None if child_checkpoint is None else str(child_checkpoint)
@@ -540,7 +926,7 @@ def run_shell_material_rowcorr_budget_controller(
             stop_reason = "runtime_budget_exceeded"
             break
 
-    if not candidates and not runtime_budget_exceeded:
+    if not candidates and not runtime_budget_exceeded and not preflight_blockers:
         stop_reason = "no_candidates_requested"
     if rows and stop_reason == "max_candidates_reached":
         final_residual = current_frontier
@@ -577,11 +963,36 @@ def run_shell_material_rowcorr_budget_controller(
             "promotion_count": int(promotion_count),
             "max_candidates": int(max_candidates),
             "stop_reason": stop_reason,
+            "preflight_blockers": preflight_blockers,
             "row_target_counts": [int(value) for value in row_target_counts],
             "row_support_column_counts": [
                 int(value) for value in row_support_column_counts
             ],
             "row_alpha_values": [float(value) for value in row_alpha_values],
+            "row_target_mode": str(row_target_mode),
+            "row_support_selection": str(row_support_selection),
+            "row_frontier_probe_json": (
+                None if row_frontier_probe_json is None else str(row_frontier_probe_json)
+            ),
+            "row_frontier_component_scale_mode": str(
+                row_frontier_component_scale_mode
+            ),
+            "row_jacobian_mode": str(row_jacobian_mode),
+            "row_support_selection": str(row_support_selection),
+            "row_fd_epsilon": float(row_fd_epsilon),
+            "row_fd_max_support_columns": int(row_fd_max_support_columns),
+            "row_batch_fd_replay": bool(row_batch_fd_replay),
+            "row_batch_fd_replay_chunk_size": int(row_batch_fd_replay_chunk_size),
+            "row_batch_replay_backend": str(row_batch_replay_backend),
+            "row_require_hip_batch_replay": bool(row_require_hip_batch_replay),
+            "allow_frozen_shell_material_tangent_hip_replay": bool(
+                allow_frozen_shell_material_tangent_hip_replay
+            ),
+            "allow_state_dependent_shell_material_tangent_hip_replay": bool(
+                allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+            "row_use_residual_only_assembly": bool(row_use_residual_only_assembly),
+            "row_batch_alpha_replay": bool(row_batch_alpha_replay),
             "max_row_promotions_per_child": int(max_row_promotions),
             "write_child_checkpoints": bool(write_child_checkpoints),
             "compact_child_checkpoints": bool(compact_child_checkpoints),
@@ -605,13 +1016,14 @@ def run_shell_material_rowcorr_budget_controller(
         "promoted_rows": promoted_rows,
         "best_candidate_row": best_row,
         "runtime_seconds": float(time.perf_counter() - started),
-        "claim_boundary": {
-            "cpu_diagnostic_only": True,
-            "official_rocm_hip_closure_required": True,
-            "shell_material_tangent_required": True,
-            "child_receipts_are_source_of_residual_progress": True,
-            "timeouts_do_not_claim_descent": True,
-        },
+        "claim_boundary": _build_shell_rowcorr_claim_boundary(
+            require_hip=bool(row_require_hip_batch_replay),
+            backend_is_hip=bool(row_batch_replay_backend != "cpu"),
+            preflight_blockers_exist=bool(preflight_blockers),
+            runtime_budget_exceeded=bool(runtime_budget_exceeded),
+            promoted_rows=promoted_rows,
+            rows=rows,
+        ),
     }
     _write_json(output_json, payload)
     return payload
@@ -629,6 +1041,69 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--row-target-counts", default="1")
     parser.add_argument("--row-support-column-counts", default="4")
     parser.add_argument("--row-alpha-values", default="0.015625")
+    parser.add_argument(
+        "--row-target-mode",
+        choices=(
+            "largest_rows",
+            "residual_node_blocks",
+            "residual_element_blocks",
+            "residual_frame_element_blocks",
+            "residual_shell_element_blocks",
+            "residual_shell_bending_drilling_rows",
+            "residual_shell_normal_rows",
+            "residual_shell_geometry_normal_rows",
+            "residual_shell_geometry_normal_bending_rows",
+            "frontier_component_rows",
+            "current_component_rows",
+        ),
+        default="largest_rows",
+    )
+    parser.add_argument("--row-frontier-probe-json", type=Path, default=None)
+    parser.add_argument(
+        "--row-frontier-component-scale-mode",
+        choices=("none", "dominant_component_magnitude", "total_component_magnitude"),
+        default="none",
+    )
+    parser.add_argument(
+        "--row-jacobian-mode",
+        choices=("current_tangent", "finite_difference"),
+        default="current_tangent",
+    )
+    parser.add_argument(
+        "--row-support-selection",
+        choices=("row_strongest", "residual_weighted", "target_rows"),
+        default="row_strongest",
+    )
+    parser.add_argument("--row-fd-epsilon", type=float, default=1.0e-6)
+    parser.add_argument("--row-fd-max-support-columns", type=int, default=12)
+    parser.add_argument("--row-batch-fd-replay", action="store_true")
+    parser.add_argument("--row-batch-fd-replay-chunk-size", type=int, default=64)
+    parser.add_argument(
+        "--row-batch-replay-backend",
+        choices=("cpu", "hip_full_residual", "hip_full_residual_resident", "rust_hip_full_residual_ffi"),
+        default="cpu",
+    )
+    parser.add_argument("--row-require-hip-batch-replay", action="store_true")
+    parser.add_argument(
+        "--allow-frozen-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "Forward the direct-probe frozen shell-material tangent HIP replay flag. "
+            "This uses a frozen current-state shell material CSR and is not full "
+            "state-dependent material Newton closure."
+        ),
+    )
+    parser.add_argument(
+        "--allow-state-dependent-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "Forward candidate-state shell-material tangent HIP replay to child "
+            "direct probes. Residual replay stays on HIP, but host shell operator "
+            "refresh is not production residency closure."
+        ),
+    )
+    parser.add_argument("--row-use-residual-only-assembly", action="store_true")
+    parser.add_argument("--row-batch-alpha-replay", action="store_true")
     parser.add_argument("--max-candidates", type=int, default=1)
     parser.add_argument("--max-row-promotions", type=int, default=1)
     parser.add_argument(
@@ -659,6 +1134,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--max-controller-runtime-seconds", type=float, default=None)
     parser.add_argument("--child-timeout-seconds", type=float, default=120.0)
     parser.add_argument(
+        "--current-tangent-residual-row-support-selection",
+        choices=("row_strongest", "residual_weighted", "target_rows"),
+        default=None,
+        help=(
+            "Deprecated alias for --row-support-selection. Accepted for older "
+            "dispatch prompts and forwarded to child direct probes."
+        ),
+    )
+    parser.add_argument(
         "--allow-cpu-diagnostic",
         action="store_true",
         help="Acknowledge this controller orchestrates CPU-diagnostic child probes.",
@@ -668,36 +1152,69 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if not args.allow_cpu_diagnostic:
+    needs_cpu_ack = not (
+        args.row_require_hip_batch_replay
+        and args.row_batch_replay_backend != "cpu"
+    )
+    if needs_cpu_ack and not args.allow_cpu_diagnostic:
         print(
             "mgt-shell-material-rowcorr-budget-controller: blocked cpu diagnostic "
             "requires --allow-cpu-diagnostic",
             file=sys.stderr,
         )
         return 2
-    payload = run_shell_material_rowcorr_budget_controller(
-        mgt_path=args.mgt_path,
-        checkpoint_npz=args.checkpoint_npz,
-        seed_probe_json=args.seed_probe_json,
-        output_json=args.output_json,
-        output_final_checkpoint_npz=args.output_final_checkpoint_npz,
-        child_output_dir=args.child_output_dir,
-        python_exe=args.python_exe,
-        row_target_counts=_parse_int_csv(args.row_target_counts) or (1,),
-        row_support_column_counts=_parse_int_csv(args.row_support_column_counts) or (4,),
-        row_alpha_values=_parse_float_csv(args.row_alpha_values) or (0.015625,),
-        max_candidates=args.max_candidates,
-        max_row_promotions=args.max_row_promotions,
-        write_child_checkpoints=args.write_child_checkpoints,
-        compact_child_checkpoints=not args.write_full_child_checkpoints,
-        row_min_relative_improvement=args.row_min_relative_improvement,
-        controller_min_relative_improvement=args.controller_min_relative_improvement,
-        shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
-        residual_tolerance_n=args.residual_tolerance_n,
-        relative_increment_tolerance=args.relative_increment_tolerance,
-        max_controller_runtime_seconds=args.max_controller_runtime_seconds,
-        child_timeout_seconds=args.child_timeout_seconds,
-    )
+    try:
+        row_support_selection = args.row_support_selection
+        if args.current_tangent_residual_row_support_selection is not None:
+            row_support_selection = args.current_tangent_residual_row_support_selection
+        payload = run_shell_material_rowcorr_budget_controller(
+            mgt_path=args.mgt_path,
+            checkpoint_npz=args.checkpoint_npz,
+            seed_probe_json=args.seed_probe_json,
+            output_json=args.output_json,
+            output_final_checkpoint_npz=args.output_final_checkpoint_npz,
+            child_output_dir=args.child_output_dir,
+            python_exe=args.python_exe,
+            row_target_counts=_parse_int_csv(args.row_target_counts) or (1,),
+            row_support_column_counts=_parse_int_csv(args.row_support_column_counts) or (4,),
+            row_alpha_values=_parse_float_csv(args.row_alpha_values) or (0.015625,),
+            row_target_mode=args.row_target_mode,
+            row_frontier_probe_json=args.row_frontier_probe_json,
+            row_frontier_component_scale_mode=args.row_frontier_component_scale_mode,
+            row_jacobian_mode=args.row_jacobian_mode,
+            row_support_selection=row_support_selection,
+            row_fd_epsilon=args.row_fd_epsilon,
+            row_fd_max_support_columns=args.row_fd_max_support_columns,
+            row_batch_fd_replay=args.row_batch_fd_replay,
+            row_batch_fd_replay_chunk_size=args.row_batch_fd_replay_chunk_size,
+            row_batch_replay_backend=args.row_batch_replay_backend,
+            row_require_hip_batch_replay=args.row_require_hip_batch_replay,
+            allow_frozen_shell_material_tangent_hip_replay=(
+                args.allow_frozen_shell_material_tangent_hip_replay
+            ),
+            allow_state_dependent_shell_material_tangent_hip_replay=(
+                args.allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+            row_use_residual_only_assembly=args.row_use_residual_only_assembly,
+            row_batch_alpha_replay=args.row_batch_alpha_replay,
+            max_candidates=args.max_candidates,
+            max_row_promotions=args.max_row_promotions,
+            write_child_checkpoints=args.write_child_checkpoints,
+            compact_child_checkpoints=not args.write_full_child_checkpoints,
+            row_min_relative_improvement=args.row_min_relative_improvement,
+            controller_min_relative_improvement=args.controller_min_relative_improvement,
+            shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
+            residual_tolerance_n=args.residual_tolerance_n,
+            relative_increment_tolerance=args.relative_increment_tolerance,
+            max_controller_runtime_seconds=args.max_controller_runtime_seconds,
+            child_timeout_seconds=args.child_timeout_seconds,
+        )
+    except ValueError as exc:
+        print(
+            f"mgt-shell-material-rowcorr-budget-controller: {exc}",
+            file=sys.stderr,
+        )
+        return 2
     controller = payload["controller"]
     print(
         "mgt-shell-material-rowcorr-budget-controller: "

@@ -1,0 +1,104 @@
+{
+  "schema_version": "mgt-direct-residual-newton-probe.v1",
+  "generated_at": "2026-06-21T03:20:04.357734+00:00",
+  "status": "partial",
+  "direct_residual_newton_ready": false,
+  "source": {
+    "mgt_path": "implementation/phase1/mega_demo/mgt_fullcase_optimized.mgt",
+    "checkpoint_npz": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+    "provenance": "repo_benchmark_bridge"
+  },
+  "rocm_hip_runtime_preflight": {
+    "checked_at": "2026-06-21T03:20:04.357750+00:00",
+    "hip_available": false,
+    "torch_importable": true,
+    "torch_rocm_build": true,
+    "torch_hip_device_available": false,
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_rocm_version": "6.1.40091-a8dbc0c19",
+    "unavailable_reason": "torch_hip_device_unavailable"
+  },
+  "residual_contract": {
+    "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+    "hip_residual_engine_contract_passed": false,
+    "hip_residual_engine_required": true,
+    "hip_residual_engine_required_lane_count": 1,
+    "hip_residual_engine_passed_lane_count": 0,
+    "hip_residual_engine_backends": [
+      "hip_full_residual"
+    ],
+    "hip_residual_engine_blockers": [
+      "rocm_hip_runtime_unavailable"
+    ]
+  },
+  "matrix_free_global_krylov": {
+    "enabled": false,
+    "attempted": false,
+    "accepted": false,
+    "promoted_to_final_state": false,
+    "batch_replay_backend": "cpu",
+    "require_hip_batch_replay": false,
+    "linear_solver_backend": "scipy_host_gmres",
+    "require_hip_krylov_solver": false,
+    "hip_runtime_preflight": {
+      "checked_at": "2026-06-21T03:20:04.357750+00:00",
+      "hip_available": false,
+      "torch_importable": true,
+      "torch_rocm_build": true,
+      "torch_hip_device_available": false,
+      "torch_version": "2.6.0+rocm6.1",
+      "torch_rocm_version": "6.1.40091-a8dbc0c19",
+      "unavailable_reason": "torch_hip_device_unavailable"
+    },
+    "stop_reason": "rocm_hip_runtime_unavailable"
+  },
+  "current_tangent_residual_row_correction": {
+    "enabled": true,
+    "attempted": false,
+    "accepted": false,
+    "promoted_to_final_state": false,
+    "batch_replay_backend": "hip_full_residual",
+    "require_hip_batch_replay": true,
+    "hip_runtime_preflight": {
+      "checked_at": "2026-06-21T03:20:04.357750+00:00",
+      "hip_available": false,
+      "torch_importable": true,
+      "torch_rocm_build": true,
+      "torch_hip_device_available": false,
+      "torch_version": "2.6.0+rocm6.1",
+      "torch_rocm_version": "6.1.40091-a8dbc0c19",
+      "unavailable_reason": "torch_hip_device_unavailable"
+    },
+    "stop_reason": "rocm_hip_runtime_unavailable"
+  },
+  "gate_assessment": {
+    "direct_residual_gate_passed": false,
+    "relative_increment_gate_verified": false,
+    "relative_increment_gate_passed": false,
+    "rocm_hip_runtime_available": false,
+    "fallback_zero_audit": {
+      "fallback_zero_passed": false,
+      "fallback_zero_boundary_count": 1,
+      "fallback_zero_boundaries": [
+        {
+          "boundary": "direct_probe_rocm_hip_runtime_unavailable",
+          "path": "direct_residual_newton_probe",
+          "detail": "hip_runtime_required_preflight_failed_before_cpu_assembly",
+          "reason": "torch_hip_device_unavailable"
+        }
+      ]
+    },
+    "fallback_zero_passed": false
+  },
+  "runtime_metrics": {
+    "initial_assembly_seconds": 0.0,
+    "total_seconds": 0.8776181830035057
+  },
+  "claim_boundary": "HIP-required direct residual Newton probe stopped before MGT parsing, checkpoint loading, child execution, and CPU residual/tangent assembly because the ROCm/HIP runtime preflight failed. This receipt is not G1 closure evidence.",
+  "blockers": [
+    "rocm_hip_runtime_unavailable",
+    "g1_fallback_zero_audit_not_closed",
+    "direct_residual_gate_not_closed",
+    "relative_increment_gate_not_closed_or_not_verified"
+  ]
+}

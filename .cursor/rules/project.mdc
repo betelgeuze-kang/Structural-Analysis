@@ -7,8 +7,8 @@ alwaysApply: true
 - Use `AGENTS.md` as the source of truth.
 - Codex VS Code extension owns the active goal.
 - Cursor auto and OpenCode worker are implementation worker bridges for scoped edits only. The OpenCode wrapper default model is MiniMax M3 via registry id `opencode-go/minimax-m3`.
+- Prefer Cursor auto more actively for scoped implementation, focused edits, test-fix loops, and IDE-attached work where open files, selections, current UI state, or Cursor-specific tooling matter.
 - Prefer OpenCode worker on MiniMax M3 (`opencode-go/minimax-m3`) for large-context work, broad repository sweeps, long logs/docs, large diffs, and repeated implementation passes.
-- Prefer Cursor auto for IDE-attached work where open files, selections, current UI state, or Cursor-specific tooling matter most.
 - Codex task prompts must stay short: goal, scope, candidate files, verification criteria.
 - Treat 50+ LOC, 3+ files, 10+ minutes of exploration, broad grep/sweep, repeated test-fix cycles, or long logs/evidence/readiness-gate diagnosis as worker candidates.
 - Do not delegate simple docs, small tests, or clear fixes unless one of the worker-candidate triggers applies.

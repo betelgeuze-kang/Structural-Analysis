@@ -61,6 +61,11 @@ DEFAULT_OUT = PRODUCTIZATION / "mgt_direct_residual_newton_probe.json"
 DEFAULT_CHECKPOINT = (
     PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
 )
+HIP_RESIDUAL_BATCH_REPLAY_BACKENDS = {
+    "hip_full_residual",
+    "hip_full_residual_resident",
+    "rust_hip_full_residual_ffi",
+}
 
 
 def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray | None, np.ndarray | None]:
@@ -288,6 +293,14 @@ def _load_frontier_component_top_rows(path: Path | None) -> list[dict[str, Any]]
         return []
     breakdown = payload.get("residual_component_breakdown")
     if not isinstance(breakdown, dict):
+        final_residual = payload.get("final_direct_residual")
+        if isinstance(final_residual, dict):
+            breakdown = final_residual.get("residual_component_breakdown")
+    if not isinstance(breakdown, dict):
+        base_residual = payload.get("base_direct_residual")
+        if isinstance(base_residual, dict):
+            breakdown = base_residual.get("residual_component_breakdown")
+    if not isinstance(breakdown, dict):
         return []
     rows = breakdown.get("top_rows")
     if not isinstance(rows, list):
@@ -310,6 +323,83 @@ def _load_frontier_component_top_rows(path: Path | None) -> list[dict[str, Any]]
             }
         )
     return clean_rows
+
+
+def _component_breakdown(
+    *,
+    component_forces: dict[str, np.ndarray],
+    free: np.ndarray,
+    residual: np.ndarray,
+    rhs: np.ndarray,
+    top_count: int = 24,
+) -> dict[str, Any]:
+    free_idx = np.asarray(free, dtype=np.int64)
+    residual_np = np.asarray(residual, dtype=np.float64)
+    rhs_np = np.asarray(rhs, dtype=np.float64)
+    components = {
+        str(name): np.asarray(values, dtype=np.float64)
+        for name, values in component_forces.items()
+        if isinstance(values, np.ndarray)
+    }
+    component_inf = {
+        name: (
+            float(np.max(np.abs(values[free_idx])))
+            if free_idx.size and values.size
+            else 0.0
+        )
+        for name, values in components.items()
+    }
+    if not residual_np.size:
+        return {
+            "component_inf_n": component_inf,
+            "top_rows": [],
+            "top_row_dominant_component_counts": {},
+        }
+    row_count = min(max(int(top_count), 1), int(residual_np.size))
+    top_rows = np.argpartition(np.abs(residual_np), -row_count)[-row_count:]
+    top_rows = top_rows[np.argsort(-np.abs(residual_np[top_rows]))]
+    dof_names = ("ux", "uy", "uz", "rx", "ry", "rz")
+    rows: list[dict[str, Any]] = []
+    dominant_counts: dict[str, int] = {}
+    for local_row in top_rows.tolist():
+        global_dof = int(free_idx[int(local_row)])
+        component_values = {
+            name: float(values[global_dof])
+            for name, values in components.items()
+            if 0 <= global_dof < int(values.size)
+        }
+        max_component_abs = max(
+            (abs(float(value)) for value in component_values.values()),
+            default=0.0,
+        )
+        external_load = float(rhs_np[int(local_row)]) if int(local_row) < rhs_np.size else 0.0
+        if max_component_abs <= 1.0e-12 and abs(external_load) > 1.0e-12:
+            dominant = "external_only_unassembled"
+        else:
+            dominant = max(
+                component_values,
+                key=lambda name: abs(float(component_values[name])),
+                default="none",
+            )
+        dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
+        rows.append(
+            {
+                "free_row": int(local_row),
+                "global_dof": global_dof,
+                "node_index": int(global_dof // DOF_PER_NODE),
+                "dof": dof_names[global_dof % DOF_PER_NODE],
+                "residual_n": float(residual_np[int(local_row)]),
+                "external_load_n": external_load,
+                "component_values_n": component_values,
+                "internal_sum_n": float(sum(component_values.values())),
+                "dominant_component": dominant,
+            }
+        )
+    return {
+        "component_inf_n": component_inf,
+        "top_rows": rows,
+        "top_row_dominant_component_counts": dominant_counts,
+    }
 
 
 def _select_frontier_component_rows(
@@ -728,6 +818,524 @@ def _truncated_svd_lstsq(
     return coeffs, residual_sum, rank, singular_values, meta
 
 
+def _torch_hip_gmres_once(
+    matvec: Any,
+    rhs: np.ndarray,
+    *,
+    restart: int,
+) -> tuple[np.ndarray, int, dict[str, Any]]:
+    """Run one restarted GMRES cycle with vector algebra on a ROCm torch device."""
+    b_cpu = np.asarray(rhs, dtype=np.float64)
+    meta: dict[str, Any] = {
+        "linear_solver_backend": "torch_hip_gmres",
+        "torch_hip_vector_algebra": False,
+        "hip_krylov_solver_used": False,
+        "python_matvec_orchestration": True,
+        "host_vector_transfer_for_matvec": True,
+        "krylov_restart": int(max(restart, 0)),
+    }
+    if b_cpu.ndim != 1:
+        meta["unavailable_reason"] = "rhs_must_be_1d"
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+    n = int(b_cpu.size)
+    if n == 0:
+        meta["torch_hip_vector_algebra"] = True
+        meta["hip_krylov_solver_used"] = True
+        return np.zeros_like(b_cpu, dtype=np.float64), 0, meta
+    try:
+        import torch  # type: ignore[import-not-found]
+    except Exception as exc:  # pragma: no cover - depends on runtime image
+        meta["unavailable_reason"] = "torch_import_failed"
+        meta["torch_import_error"] = str(exc)
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+    meta["torch_version"] = str(getattr(torch, "__version__", ""))
+    meta["torch_rocm_version"] = str(getattr(torch.version, "hip", None))
+    if getattr(torch.version, "hip", None) is None:
+        meta["unavailable_reason"] = "torch_build_is_not_rocm"
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+    try:
+        hip_available = bool(torch.cuda.is_available())
+    except Exception as exc:  # pragma: no cover - depends on ROCm runtime
+        meta["unavailable_reason"] = "torch_hip_availability_check_failed"
+        meta["torch_hip_availability_error"] = str(exc)
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+    meta["torch_hip_device_available"] = hip_available
+    if not hip_available:
+        meta["unavailable_reason"] = "torch_hip_device_unavailable"
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+    try:
+        device = torch.device("cuda")
+        device_name = torch.cuda.get_device_name(0)
+        b = torch.as_tensor(b_cpu, dtype=torch.float64, device=device)
+        beta = torch.linalg.vector_norm(b)
+        beta_value = float(beta.detach().cpu().item())
+        meta["torch_hip_device_name"] = str(device_name)
+        meta["rhs_l2"] = beta_value
+        if beta_value <= 1.0e-30:
+            meta["torch_hip_vector_algebra"] = True
+            meta["hip_krylov_solver_used"] = True
+            meta["arnoldi_column_count"] = 0
+            return np.zeros_like(b_cpu, dtype=np.float64), 0, meta
+        m = max(1, min(int(restart), n))
+        v = torch.zeros((n, m + 1), dtype=torch.float64, device=device)
+        h = torch.zeros((m + 1, m), dtype=torch.float64, device=device)
+        v[:, 0] = b / beta
+        used_cols = 0
+        breakdown = False
+        for col in range(m):
+            direction_cpu = v[:, col].detach().cpu().numpy()
+            action_cpu = np.asarray(matvec(direction_cpu), dtype=np.float64)
+            if action_cpu.shape != b_cpu.shape:
+                meta["unavailable_reason"] = "matvec_shape_mismatch"
+                meta["matvec_shape"] = list(action_cpu.shape)
+                return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+            w = torch.as_tensor(action_cpu, dtype=torch.float64, device=device)
+            for row in range(col + 1):
+                h[row, col] = torch.dot(v[:, row], w)
+                w = w - h[row, col] * v[:, row]
+            h[col + 1, col] = torch.linalg.vector_norm(w)
+            used_cols = col + 1
+            h_next = float(h[col + 1, col].detach().cpu().item())
+            if h_next <= 1.0e-30:
+                breakdown = True
+                break
+            if col + 1 < m:
+                v[:, col + 1] = w / h[col + 1, col]
+        e1 = torch.zeros((used_cols + 1,), dtype=torch.float64, device=device)
+        e1[0] = beta
+        h_used = h[: used_cols + 1, :used_cols]
+        y = torch.linalg.lstsq(h_used, e1).solution
+        x = v[:, :used_cols] @ y
+        correction = x.detach().cpu().numpy().astype(np.float64, copy=False)
+        residual_vec = h_used @ y - e1
+        meta.update(
+            {
+                "torch_hip_vector_algebra": True,
+                "hip_krylov_solver_used": True,
+                "arnoldi_column_count": int(used_cols),
+                "arnoldi_breakdown": bool(breakdown),
+                "least_squares_residual_l2": float(
+                    torch.linalg.vector_norm(residual_vec).detach().cpu().item()
+                ),
+            }
+        )
+        return correction, 0, meta
+    except Exception as exc:  # pragma: no cover - depends on ROCm linalg support
+        meta["unavailable_reason"] = "torch_hip_gmres_failed"
+        meta["torch_hip_gmres_error"] = str(exc)
+        return np.zeros_like(b_cpu, dtype=np.float64), 1, meta
+
+
+def _normalize_residual_batch_replay_backend(value: str) -> str:
+    backend = str(value).strip()
+    if backend in {"cpu", *HIP_RESIDUAL_BATCH_REPLAY_BACKENDS}:
+        return backend
+    return "cpu"
+
+
+def _normalize_global_krylov_linear_solver_backend(value: str) -> str:
+    backend = str(value).strip().lower()
+    if backend in {"scipy_host_gmres", "torch_hip_gmres"}:
+        return backend
+    return "scipy_host_gmres"
+
+
+def _rocm_hip_runtime_preflight() -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "hip_available": False,
+        "torch_importable": False,
+        "torch_rocm_build": False,
+        "torch_hip_device_available": False,
+    }
+    try:
+        import torch  # type: ignore[import-not-found]
+    except Exception as exc:  # pragma: no cover - depends on runtime image
+        payload["unavailable_reason"] = "torch_import_failed"
+        payload["torch_import_error"] = str(exc)
+        return payload
+
+    payload["torch_importable"] = True
+    payload["torch_version"] = str(getattr(torch, "__version__", ""))
+    torch_rocm_version = getattr(torch.version, "hip", None)
+    payload["torch_rocm_version"] = str(torch_rocm_version)
+    if torch_rocm_version is None:
+        payload["unavailable_reason"] = "torch_build_is_not_rocm"
+        return payload
+    payload["torch_rocm_build"] = True
+
+    try:
+        hip_available = bool(torch.cuda.is_available())
+    except Exception as exc:  # pragma: no cover - depends on ROCm runtime
+        payload["unavailable_reason"] = "torch_hip_availability_check_failed"
+        payload["torch_hip_availability_error"] = str(exc)
+        return payload
+    payload["torch_hip_device_available"] = hip_available
+    if not hip_available:
+        payload["unavailable_reason"] = "torch_hip_device_unavailable"
+        return payload
+
+    payload["hip_available"] = True
+    try:
+        payload["torch_hip_device_count"] = int(torch.cuda.device_count())
+        payload["torch_hip_device_name"] = str(torch.cuda.get_device_name(0))
+    except Exception as exc:  # pragma: no cover - depends on ROCm runtime
+        payload["torch_hip_device_metadata_error"] = str(exc)
+    return payload
+
+
+def _hip_runtime_unavailable_direct_probe_payload(
+    *,
+    generated_at: str,
+    started: float,
+    mgt_path: Path,
+    checkpoint_npz: Path,
+    enable_matrix_free_global_krylov: bool,
+    global_batch_backend: str,
+    global_require_hip_batch_replay: bool,
+    global_linear_solver_backend: str,
+    global_linear_solver_auto_reason: str | None,
+    enable_current_tangent_residual_row_correction: bool,
+    row_batch_backend: str,
+    row_require_hip_batch_replay: bool,
+    hip_preflight: dict[str, Any],
+) -> dict[str, Any]:
+    fallback_zero_audit = {
+        "fallback_zero_passed": False,
+        "fallback_zero_boundary_count": 1,
+        "fallback_zero_boundaries": [
+            {
+                "boundary": "direct_probe_rocm_hip_runtime_unavailable",
+                "path": "direct_residual_newton_probe",
+                "detail": "hip_runtime_required_preflight_failed_before_cpu_assembly",
+                "reason": hip_preflight.get("unavailable_reason"),
+            }
+        ],
+    }
+    matrix_free_global_krylov: dict[str, Any] = {
+        "enabled": bool(enable_matrix_free_global_krylov),
+        "attempted": False,
+        "accepted": False,
+        "promoted_to_final_state": False,
+        "batch_replay_backend": str(global_batch_backend),
+        "require_hip_batch_replay": bool(global_require_hip_batch_replay),
+        "linear_solver_backend": str(global_linear_solver_backend),
+        "require_hip_krylov_solver": bool(
+            global_linear_solver_backend == "torch_hip_gmres"
+            or global_require_hip_batch_replay
+        ),
+        "hip_runtime_preflight": hip_preflight,
+        "stop_reason": "rocm_hip_runtime_unavailable",
+    }
+    if global_linear_solver_auto_reason is not None:
+        matrix_free_global_krylov[
+            "linear_solver_backend_auto_selected_reason"
+        ] = global_linear_solver_auto_reason
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "status": "partial",
+        "direct_residual_newton_ready": False,
+        "source": {
+            "mgt_path": str(mgt_path),
+            "checkpoint_npz": str(checkpoint_npz),
+            "provenance": "repo_benchmark_bridge",
+        },
+        "rocm_hip_runtime_preflight": hip_preflight,
+        "residual_contract": {
+            "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+            "hip_residual_engine_contract_passed": False,
+            "hip_residual_engine_required": bool(
+                global_require_hip_batch_replay or row_require_hip_batch_replay
+            ),
+            "hip_residual_engine_required_lane_count": int(
+                bool(enable_matrix_free_global_krylov and global_require_hip_batch_replay)
+            )
+            + int(
+                bool(
+                    enable_current_tangent_residual_row_correction
+                    and row_require_hip_batch_replay
+                )
+            ),
+            "hip_residual_engine_passed_lane_count": 0,
+            "hip_residual_engine_backends": sorted(
+                {
+                    backend
+                    for backend in (str(global_batch_backend), str(row_batch_backend))
+                    if backend in HIP_RESIDUAL_REPLAY_BACKENDS
+                }
+            ),
+            "hip_residual_engine_blockers": ["rocm_hip_runtime_unavailable"],
+        },
+        "matrix_free_global_krylov": matrix_free_global_krylov,
+        "current_tangent_residual_row_correction": {
+            "enabled": bool(enable_current_tangent_residual_row_correction),
+            "attempted": False,
+            "accepted": False,
+            "promoted_to_final_state": False,
+            "batch_replay_backend": str(row_batch_backend),
+            "require_hip_batch_replay": bool(row_require_hip_batch_replay),
+            "hip_runtime_preflight": hip_preflight,
+            "stop_reason": "rocm_hip_runtime_unavailable",
+        },
+        "gate_assessment": {
+            "direct_residual_gate_passed": False,
+            "relative_increment_gate_verified": False,
+            "relative_increment_gate_passed": False,
+            "rocm_hip_runtime_available": False,
+            "fallback_zero_audit": fallback_zero_audit,
+            "fallback_zero_passed": False,
+        },
+        "runtime_metrics": {
+            "initial_assembly_seconds": 0.0,
+            "total_seconds": time.perf_counter() - started,
+        },
+        "claim_boundary": (
+            "HIP-required direct residual Newton probe stopped before MGT parsing, "
+            "checkpoint loading, child execution, and CPU residual/tangent assembly "
+            "because the ROCm/HIP runtime preflight failed. This receipt is not G1 "
+            "closure evidence."
+        ),
+        "blockers": [
+            "rocm_hip_runtime_unavailable",
+            "g1_fallback_zero_audit_not_closed",
+            "direct_residual_gate_not_closed",
+            "relative_increment_gate_not_closed_or_not_verified",
+        ],
+    }
+
+
+def _cpu_acceptance_refresh_closure_blocked(component: dict[str, Any]) -> bool:
+    return bool(
+        component.get("promoted_to_final_state")
+        and component.get("require_hip_batch_replay")
+        and (
+            component.get("accepted_state_refresh_cpu_used")
+            or component.get("accepted_state_tangent_refresh_cpu_used")
+        )
+    )
+
+
+def _can_use_hip_acceptance_residual_refresh(
+    candidate_meta: dict[str, Any],
+    *,
+    require_hip_batch_replay: bool,
+) -> bool:
+    return bool(
+        require_hip_batch_replay
+        and candidate_meta.get("hip_full_residual_batch_replay")
+        and candidate_meta.get("residual_only_free_override")
+    )
+
+
+def _g1_fallback_zero_audit(
+    global_krylov: dict[str, Any],
+    row_correction: dict[str, Any],
+) -> dict[str, Any]:
+    boundaries: list[dict[str, Any]] = []
+    global_promoted = bool(global_krylov.get("promoted_to_final_state"))
+    global_attempted = bool(global_krylov.get("attempted"))
+    global_hip_required = bool(
+        global_krylov.get("require_hip_batch_replay")
+        or global_krylov.get("require_hip_krylov_solver")
+    )
+    row_promoted = bool(row_correction.get("promoted_to_final_state"))
+    row_attempted = bool(row_correction.get("attempted"))
+    row_hip_required = bool(row_correction.get("require_hip_batch_replay"))
+
+    if (global_promoted or global_attempted) and global_hip_required:
+        if global_krylov.get("host_krylov_solver_used"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_host_gmres_used_with_hip_required",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "promoted_or_attempted_hip_required_path_used_host_gmres",
+                }
+            )
+        if global_krylov.get("hip_batch_replay_required_unavailable"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_hip_replay_required_unavailable",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "hip_batch_replay_required_unavailable",
+                    "reason": global_krylov.get("hip_batch_replay_required_unavailable_reason"),
+                }
+            )
+        if global_krylov.get("hip_krylov_solver_required_unavailable"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_hip_krylov_solver_required_unavailable",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "hip_krylov_solver_required_unavailable",
+                    "reason": global_krylov.get("hip_krylov_solver_required_unavailable_reason"),
+                }
+            )
+        if global_krylov.get("host_krylov_solver_closure_blocked"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_host_solver_closure_blocked",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "host_krylov_solver_closure_blocked",
+                }
+            )
+        if global_krylov.get("cpu_batch_replay_fallback_suppressed"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_cpu_batch_replay_fallback_suppressed",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "cpu_linear_fallback_suppressed",
+                }
+            )
+        if global_krylov.get("accepted_state_refresh_cpu_used"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_cpu_residual_acceptance_refresh_used",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "cpu_residual_acceptance_refresh_used",
+                }
+            )
+        if global_krylov.get("accepted_state_tangent_refresh_cpu_used"):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_cpu_tangent_refresh_used",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "cpu_tangent_refresh_used",
+                }
+            )
+
+    if (row_promoted or row_attempted) and row_hip_required:
+        if row_correction.get("hip_batch_replay_required_unavailable"):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_hip_replay_required_unavailable",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_hip_replay_required_unavailable",
+                    "reason": row_correction.get("hip_batch_replay_required_unavailable_reason"),
+                }
+            )
+        if row_correction.get("cpu_batch_replay_fallback_suppressed"):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_cpu_batch_replay_fallback_suppressed",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_cpu_linear_fallback_suppressed",
+                }
+            )
+        if row_correction.get("accepted_state_refresh_cpu_used"):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_cpu_residual_acceptance_refresh_used",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_cpu_residual_acceptance_refresh_used",
+                }
+            )
+        if row_correction.get("accepted_state_tangent_refresh_cpu_used"):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_cpu_tangent_refresh_used",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_cpu_tangent_refresh_used",
+                }
+            )
+
+    fallback_zero_passed = not bool(boundaries)
+    return {
+        "fallback_zero_passed": fallback_zero_passed,
+        "fallback_zero_boundary_count": len(boundaries),
+        "fallback_zero_boundaries": boundaries,
+    }
+
+
+HIP_RESIDUAL_REPLAY_BACKENDS = {
+    "hip_full_residual",
+    "hip_full_residual_resident",
+    "rust_hip_full_residual_ffi",
+}
+
+
+def _g1_hip_residual_engine_contract(
+    global_krylov: dict[str, Any],
+    row_correction: dict[str, Any],
+) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+
+    def _component_row(name: str, component: dict[str, Any]) -> None:
+        active = bool(
+            component.get("enabled")
+            or component.get("attempted")
+            or component.get("promoted_to_final_state")
+        )
+        require_hip = bool(
+            component.get("require_hip_batch_replay")
+            or component.get("require_hip_krylov_solver")
+        )
+        backend = str(component.get("batch_replay_backend", "") or "")
+        backend_is_hip = backend in HIP_RESIDUAL_REPLAY_BACKENDS
+        blockers: list[str] = []
+        if not active:
+            blockers.append("component_not_active")
+        if not require_hip:
+            blockers.append("hip_not_required")
+        if require_hip and not backend_is_hip:
+            blockers.append("residual_replay_backend_not_hip")
+        if component.get("host_krylov_solver_used"):
+            blockers.append("host_krylov_solver_used")
+        if component.get("hip_batch_replay_required_unavailable"):
+            blockers.append("hip_batch_replay_required_unavailable")
+        if component.get("hip_krylov_solver_required_unavailable"):
+            blockers.append("hip_krylov_solver_required_unavailable")
+        if component.get("host_krylov_solver_closure_blocked"):
+            blockers.append("host_krylov_solver_closure_blocked")
+        if component.get("cpu_batch_replay_fallback_suppressed"):
+            blockers.append("cpu_batch_replay_fallback_suppressed")
+        if component.get("accepted_state_refresh_cpu_used"):
+            blockers.append("accepted_state_refresh_cpu_used")
+        if component.get("accepted_state_tangent_refresh_cpu_used"):
+            blockers.append("accepted_state_tangent_refresh_cpu_used")
+        require_hip_krylov = bool(component.get("require_hip_krylov_solver"))
+        if require_hip_krylov and not component.get("hip_krylov_solver_used"):
+            blockers.append("hip_krylov_solver_not_used")
+
+        row_passed = bool(active and require_hip and backend_is_hip and not blockers)
+        rows.append(
+            {
+                "component": name,
+                "active": active,
+                "require_hip": require_hip,
+                "batch_replay_backend": backend,
+                "backend_is_hip": backend_is_hip,
+                "require_hip_krylov_solver": require_hip_krylov,
+                "hip_krylov_solver_used": bool(component.get("hip_krylov_solver_used")),
+                "passed": row_passed,
+                "blockers": blockers,
+            }
+        )
+
+    _component_row("matrix_free_global_krylov", global_krylov)
+    _component_row("current_tangent_residual_row_correction", row_correction)
+
+    required_rows = [row for row in rows if row["active"] and row["require_hip"]]
+    passed_rows = [row for row in required_rows if row["passed"]]
+    blockers = [
+        f"{row['component']}::{blocker}"
+        for row in required_rows
+        for blocker in row["blockers"]
+    ]
+    return {
+        "hip_residual_engine_contract_passed": bool(
+            required_rows and len(passed_rows) == len(required_rows) and not blockers
+        ),
+        "hip_residual_engine_required": bool(required_rows),
+        "hip_residual_engine_required_lane_count": len(required_rows),
+        "hip_residual_engine_passed_lane_count": len(passed_rows),
+        "hip_residual_engine_backends": sorted(
+            {str(row["batch_replay_backend"]) for row in required_rows if row["batch_replay_backend"]}
+        ),
+        "hip_residual_engine_rows": rows,
+        "hip_residual_engine_blockers": blockers,
+    }
+
+
 def run_mgt_direct_residual_newton_probe(
     *,
     mgt_path: Path = DEFAULT_MGT,
@@ -739,6 +1347,10 @@ def run_mgt_direct_residual_newton_probe(
     stiffness_scale_to_si: float = 1000.0,
     shell_pressure_load_path_policy: str = "all_components",
     apply_shell_material_tangent: bool = False,
+    allow_frozen_shell_material_tangent_hip_replay: bool = False,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
+    include_residual_component_breakdown: bool = False,
+    residual_component_breakdown_top_count: int = 24,
     residual_tolerance_n: float = 5.0e-4,
     relative_increment_tolerance: float = 1.0e-4,
     max_trust_iterations: int = 6,
@@ -770,6 +1382,7 @@ def run_mgt_direct_residual_newton_probe(
     matrix_free_jacobian_min_relative_improvement: float = 1.0e-5,
     enable_matrix_free_global_krylov: bool = False,
     matrix_free_global_krylov_max_iterations: int = 4,
+    matrix_free_global_krylov_difference_scheme: str = "forward",
     matrix_free_global_krylov_probe_epsilon: float = 1.0e-6,
     matrix_free_global_krylov_probe_max_step: float = 1.0e-5,
     matrix_free_global_krylov_scaling_mode: str = "none",
@@ -787,6 +1400,10 @@ def run_mgt_direct_residual_newton_probe(
         0.00390625,
     ),
     matrix_free_global_krylov_min_relative_improvement: float = 1.0e-6,
+    matrix_free_global_krylov_full_assembly_trial_replay: bool = False,
+    matrix_free_global_krylov_batch_replay_backend: str = "cpu",
+    matrix_free_global_krylov_require_hip_batch_replay: bool = False,
+    matrix_free_global_krylov_linear_solver_backend: str = "scipy_host_gmres",
     enable_current_tangent_residual_row_correction: bool = False,
     max_current_tangent_residual_row_corrections: int = 2,
     current_tangent_residual_row_min_relative_improvement: float = 1.0e-5,
@@ -812,6 +1429,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_batch_fd_replay: bool = False,
     current_tangent_residual_row_batch_fd_replay_chunk_size: int = 64,
     current_tangent_residual_row_batch_replay_backend: str = "cpu",
+    current_tangent_residual_row_require_hip_batch_replay: bool = False,
     current_tangent_residual_row_hipcc: Path = Path("/opt/rocm/bin/hipcc"),
     current_tangent_residual_row_force_rebuild_hip: bool = False,
     current_tangent_residual_row_allow_negative_alphas: bool = False,
@@ -838,6 +1456,94 @@ def run_mgt_direct_residual_newton_probe(
 ) -> dict[str, Any]:
     generated_at = datetime.now(timezone.utc).isoformat()
     started = time.perf_counter()
+    global_batch_backend = _normalize_residual_batch_replay_backend(
+        matrix_free_global_krylov_batch_replay_backend
+    )
+    global_linear_solver_backend = _normalize_global_krylov_linear_solver_backend(
+        matrix_free_global_krylov_linear_solver_backend
+    )
+    global_require_hip_batch_replay = bool(
+        matrix_free_global_krylov_require_hip_batch_replay
+        and global_batch_backend in HIP_RESIDUAL_BATCH_REPLAY_BACKENDS
+    )
+    global_linear_solver_auto_reason: str | None = None
+    if (
+        global_require_hip_batch_replay
+        and global_linear_solver_backend == "scipy_host_gmres"
+    ):
+        global_linear_solver_backend = "torch_hip_gmres"
+        global_linear_solver_auto_reason = "hip_batch_replay_required_suppresses_host_gmres"
+    row_batch_backend = _normalize_residual_batch_replay_backend(
+        current_tangent_residual_row_batch_replay_backend
+    )
+    row_require_hip_batch_replay = bool(
+        current_tangent_residual_row_require_hip_batch_replay
+        and row_batch_backend in HIP_RESIDUAL_BATCH_REPLAY_BACKENDS
+    )
+    if (
+        matrix_free_global_krylov_require_hip_batch_replay
+        and global_batch_backend == "cpu"
+    ):
+        raise ValueError(
+            "matrix_free_global_krylov_require_hip_batch_replay is True "
+            "but the matrix_free_global_krylov_batch_replay_backend "
+            "normalized to 'cpu'. HIP-required residual paths must use "
+            "a HIP batch replay backend ("
+            + ", ".join(sorted(HIP_RESIDUAL_BATCH_REPLAY_BACKENDS))
+            + ")."
+        )
+    if (
+        current_tangent_residual_row_require_hip_batch_replay
+        and row_batch_backend == "cpu"
+    ):
+        raise ValueError(
+            "current_tangent_residual_row_require_hip_batch_replay is True "
+            "but the current_tangent_residual_row_batch_replay_backend "
+            "normalized to 'cpu'. HIP-required residual paths must use "
+            "a HIP batch replay backend ("
+            + ", ".join(sorted(HIP_RESIDUAL_BATCH_REPLAY_BACKENDS))
+            + ")."
+        )
+    hip_runtime_required = bool(
+        (
+            enable_matrix_free_global_krylov
+            and (
+                global_require_hip_batch_replay
+                or global_linear_solver_backend == "torch_hip_gmres"
+            )
+        )
+        or (
+            enable_current_tangent_residual_row_correction
+            and row_require_hip_batch_replay
+        )
+    )
+    if hip_runtime_required:
+        hip_preflight = _rocm_hip_runtime_preflight()
+        if not bool(hip_preflight.get("hip_available")):
+            payload = _hip_runtime_unavailable_direct_probe_payload(
+                generated_at=generated_at,
+                started=started,
+                mgt_path=mgt_path,
+                checkpoint_npz=checkpoint_npz,
+                enable_matrix_free_global_krylov=enable_matrix_free_global_krylov,
+                global_batch_backend=global_batch_backend,
+                global_require_hip_batch_replay=global_require_hip_batch_replay,
+                global_linear_solver_backend=global_linear_solver_backend,
+                global_linear_solver_auto_reason=global_linear_solver_auto_reason,
+                enable_current_tangent_residual_row_correction=(
+                    enable_current_tangent_residual_row_correction
+                ),
+                row_batch_backend=row_batch_backend,
+                row_require_hip_batch_replay=row_require_hip_batch_replay,
+                hip_preflight=hip_preflight,
+            )
+            if output_json is not None:
+                output_json.parent.mkdir(parents=True, exist_ok=True)
+                output_json.write_text(
+                    json.dumps(payload, indent=2, ensure_ascii=False) + "\n",
+                    encoding="utf-8",
+                )
+            return payload
     if not mgt_path.is_file():
         return {"schema_version": SCHEMA_VERSION, "generated_at": generated_at, "status": "blocked", "blockers": ["mgt_missing"]}
     if not checkpoint_npz.is_file():
@@ -1112,7 +1818,20 @@ def run_mgt_direct_residual_newton_probe(
         stiffness, f_ext, free, residual, rhs, assembly_meta = assemble_residual(
             u0,
             external_load_override=reference_f_ext,
+            include_component_forces=bool(include_residual_component_breakdown),
         )
+        base_component_breakdown: dict[str, Any] | None = None
+        if include_residual_component_breakdown:
+            component_forces = assembly_meta.pop("component_forces", {})
+            base_component_breakdown = _component_breakdown(
+                component_forces=(
+                    component_forces if isinstance(component_forces, dict) else {}
+                ),
+                free=np.asarray(free, dtype=np.int64),
+                residual=np.asarray(residual, dtype=np.float64),
+                rhs=np.asarray(rhs, dtype=np.float64),
+                top_count=int(residual_component_breakdown_top_count),
+            )
         base_residual_inf = float(np.max(np.abs(residual))) if residual.size else 0.0
         base_residual_l2 = float(np.linalg.norm(residual)) if residual.size else 0.0
         rhs_inf = float(np.max(np.abs(rhs))) if rhs.size else 0.0
@@ -2566,6 +3285,7 @@ def run_mgt_direct_residual_newton_probe(
             "promoted_to_final_state": False,
             "method": "gmres",
             "max_iterations": int(max(matrix_free_global_krylov_max_iterations, 0)),
+            "difference_scheme": str(matrix_free_global_krylov_difference_scheme),
             "probe_epsilon": float(matrix_free_global_krylov_probe_epsilon),
             "probe_max_step_m": float(max(matrix_free_global_krylov_probe_max_step, 0.0)),
             "scaling_mode": str(matrix_free_global_krylov_scaling_mode),
@@ -2583,6 +3303,21 @@ def run_mgt_direct_residual_newton_probe(
             "minimum_relative_improvement": float(
                 max(matrix_free_global_krylov_min_relative_improvement, 0.0)
             ),
+            "full_assembly_trial_replay": bool(
+                matrix_free_global_krylov_full_assembly_trial_replay
+            ),
+            "batch_replay_backend": str(
+                matrix_free_global_krylov_batch_replay_backend
+            ),
+            "require_hip_batch_replay": bool(
+                matrix_free_global_krylov_require_hip_batch_replay
+            ),
+            "linear_solver_backend": str(
+                matrix_free_global_krylov_linear_solver_backend
+            ),
+            "hip_batch_replay_required_unavailable": False,
+            "hip_krylov_solver_required_unavailable": False,
+            "cpu_batch_replay_fallback_suppressed": False,
             "alpha_values": [
                 float(value)
                 for value in matrix_free_global_krylov_alpha_values
@@ -2595,6 +3330,21 @@ def run_mgt_direct_residual_newton_probe(
             "best_gate_eligible_candidate": None,
             "stop_reason": "not_attempted",
         }
+        if (
+            apply_shell_material_tangent
+            and allow_state_dependent_shell_material_tangent_hip_replay
+            and global_batch_backend in {
+                "hip_full_residual",
+                "hip_full_residual_resident",
+                "rust_hip_full_residual_ffi",
+            }
+        ):
+            matrix_free_global_krylov[
+                "state_dependent_shell_material_tangent_hip_replay"
+            ] = True
+            matrix_free_global_krylov[
+                "state_dependent_shell_material_tangent_operator_refresh_backend"
+            ] = "host_shell_operator_refresh"
         if (
             enable_matrix_free_global_krylov
             and current_residual.size
@@ -2613,6 +3363,11 @@ def run_mgt_direct_residual_newton_probe(
             jvp_rows: list[dict[str, Any]] = []
             probe_epsilon = max(float(matrix_free_global_krylov_probe_epsilon), 1.0e-12)
             probe_max_step = max(float(matrix_free_global_krylov_probe_max_step), 0.0)
+            global_difference_scheme = (
+                str(matrix_free_global_krylov_difference_scheme).strip().lower()
+            )
+            if global_difference_scheme not in {"forward", "central"}:
+                global_difference_scheme = "forward"
             scaling_mode = str(matrix_free_global_krylov_scaling_mode).strip().lower()
             if scaling_mode not in {"none", "residual_diagonal_displacement"}:
                 scaling_mode = "none"
@@ -2646,6 +3401,7 @@ def run_mgt_direct_residual_newton_probe(
             else:
                 column_scale = np.ones(n_free, dtype=np.float64)
             matrix_free_global_krylov["scaling_mode"] = scaling_mode
+            matrix_free_global_krylov["difference_scheme"] = global_difference_scheme
             matrix_free_global_krylov["preconditioner_mode"] = preconditioner_mode
             matrix_free_global_krylov["preconditioner_input_scale_n"] = (
                 preconditioner_input_scale
@@ -2672,6 +3428,85 @@ def run_mgt_direct_residual_newton_probe(
             full_assembly_matvec_count = 0
             residual_only_trial_count = 0
             full_assembly_trial_count = 0
+            full_assembly_trial_replay_count = 0
+            global_batch_backend = str(
+                matrix_free_global_krylov_batch_replay_backend
+            ).strip()
+            if global_batch_backend not in {
+                "cpu",
+                "hip_full_residual",
+                "hip_full_residual_resident",
+                "rust_hip_full_residual_ffi",
+            }:
+                global_batch_backend = "cpu"
+            global_linear_solver_backend = str(
+                matrix_free_global_krylov_linear_solver_backend
+            ).strip().lower()
+            if global_linear_solver_backend not in {
+                "scipy_host_gmres",
+                "torch_hip_gmres",
+            }:
+                global_linear_solver_backend = "scipy_host_gmres"
+            global_require_hip_batch_replay = bool(
+                matrix_free_global_krylov_require_hip_batch_replay
+                and global_batch_backend
+                in {
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                    "rust_hip_full_residual_ffi",
+                }
+            )
+            if (
+                global_require_hip_batch_replay
+                and global_linear_solver_backend == "scipy_host_gmres"
+            ):
+                global_linear_solver_backend = "torch_hip_gmres"
+                matrix_free_global_krylov[
+                    "linear_solver_backend_auto_selected_reason"
+                ] = "hip_batch_replay_required_suppresses_host_gmres"
+            effective_full_assembly_trial_replay = bool(
+                matrix_free_global_krylov_full_assembly_trial_replay
+                and not global_require_hip_batch_replay
+            )
+            global_hip_batch_eval_count = 0
+            global_hip_batch_state_count = 0
+            global_hip_batch_seconds = 0.0
+            global_hip_backend: Any | None = None
+            global_hip_backend_error = ""
+            matrix_free_global_krylov["batch_replay_backend"] = global_batch_backend
+            matrix_free_global_krylov[
+                "linear_solver_backend"
+            ] = global_linear_solver_backend
+            matrix_free_global_krylov["require_hip_batch_replay"] = (
+                global_require_hip_batch_replay
+            )
+            matrix_free_global_krylov["require_hip_krylov_solver"] = bool(
+                global_linear_solver_backend == "torch_hip_gmres"
+                or global_require_hip_batch_replay
+            )
+            if (
+                global_require_hip_batch_replay
+                and preconditioner_mode == "current_tangent"
+            ):
+                matrix_free_global_krylov[
+                    "preconditioner_mode_requested"
+                ] = "current_tangent"
+                matrix_free_global_krylov[
+                    "preconditioner_mode_disabled_reason"
+                ] = (
+                    "hip_batch_replay_required_suppresses_cpu_current_tangent_"
+                    "preconditioner"
+                )
+                preconditioner_mode = "none"
+                matrix_free_global_krylov["preconditioner_mode"] = preconditioner_mode
+            if (
+                global_require_hip_batch_replay
+                and matrix_free_global_krylov_full_assembly_trial_replay
+            ):
+                matrix_free_global_krylov["full_assembly_trial_replay"] = False
+                matrix_free_global_krylov[
+                    "full_assembly_trial_replay_disabled_reason"
+                ] = "hip_batch_replay_required_suppresses_cpu_full_assembly_replay"
             if preconditioner_mode == "current_tangent":
                 preconditioner_k_ff = current_stiffness[current_free, :][:, current_free].tocsc()
                 preconditioner_diag = np.asarray(preconditioner_k_ff.diagonal(), dtype=np.float64)
@@ -2692,6 +3527,480 @@ def run_mgt_direct_residual_newton_probe(
                 preconditioner_regularization
             )
 
+            def _global_hip_residual_backend() -> Any | None:
+                nonlocal global_hip_backend, global_hip_backend_error
+                if apply_shell_material_tangent:
+                    if allow_state_dependent_shell_material_tangent_hip_replay:
+                        matrix_free_global_krylov[
+                            "state_dependent_shell_material_tangent_hip_replay"
+                        ] = True
+                        matrix_free_global_krylov[
+                            "state_dependent_shell_material_tangent_operator_refresh_backend"
+                        ] = "host_shell_operator_refresh"
+                    elif not allow_frozen_shell_material_tangent_hip_replay:
+                        matrix_free_global_krylov[
+                            "batch_replay_backend_disabled_reason"
+                        ] = "state_dependent_shell_material_tangent_requires_cpu_batch"
+                        return None
+                    else:
+                        matrix_free_global_krylov[
+                            "frozen_shell_material_tangent_hip_replay"
+                        ] = True
+                        matrix_free_global_krylov[
+                            "shell_material_tangent_frozen_from_current_state"
+                        ] = True
+                if global_batch_backend not in {
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                    "rust_hip_full_residual_ffi",
+                }:
+                    return None
+                if global_hip_backend is not None:
+                    return global_hip_backend
+                try:
+                    global_frozen_shell_tangent = None
+                    if apply_shell_material_tangent and (
+                        allow_frozen_shell_material_tangent_hip_replay
+                        or allow_state_dependent_shell_material_tangent_hip_replay
+                    ):
+                        global_frozen_shell_tangent, _frozen_shell_meta = shell_material_tangent_by_surface_index(
+                            node_xyz=node_xyz,
+                            u=current_u,
+                            elem_type_code=elem_type_code,
+                            elem_material_id=elem_material_id,
+                            conn_ptr=conn_ptr,
+                            conn_idx=conn_idx,
+                            material_props=material_props,
+                            controlled_probe=False,
+                        )
+                    shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
+                        u=current_u,
+                        node_xyz=node_xyz,
+                        elem_type_code=elem_type_code,
+                        elem_section_id=elem_section_id,
+                        elem_material_id=elem_material_id,
+                        conn_ptr=conn_ptr,
+                        conn_idx=conn_idx,
+                        material_props=material_props,
+                        plate_thickness_props=plate_thickness_props,
+                        include_membrane=True,
+                        shell_operator_cache=shell_operator_cache,
+                        material_tangent_by_surface_index_mpa=global_frozen_shell_tangent,
+                    )
+                    backend_cls = (
+                        HipFullResidualResidentWorkerBackend
+                        if global_batch_backend == "hip_full_residual_resident"
+                        else HipFullResidualRustFfiBackend
+                        if global_batch_backend == "rust_hip_full_residual_ffi"
+                        else HipFullResidualBatchBackend
+                    )
+                    global_hip_backend = backend_cls.prepare(
+                        frame_dofs=frame_force_cache.dofs,
+                        frame_stiffness=frame_force_cache.element_stiffness,
+                        shell_csr=shell_stiffness.tocsr(),
+                        spring_csr=spring_stiffness.tocsr(),
+                        f_ext=reference_f_ext,
+                        free=base_free_for_krylov,
+                        hipcc=current_tangent_residual_row_hipcc,
+                        force_rebuild=bool(
+                            current_tangent_residual_row_force_rebuild_hip
+                        ),
+                    )
+                except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                    global_hip_backend_error = str(exc)
+                    matrix_free_global_krylov["batch_replay_backend_error"] = (
+                        global_hip_backend_error
+                    )
+                    return None
+                return global_hip_backend
+
+            def _global_hip_replay_required_unavailable(reason: str) -> bool:
+                if not global_require_hip_batch_replay:
+                    return False
+                matrix_free_global_krylov[
+                    "hip_batch_replay_required_unavailable"
+                ] = True
+                matrix_free_global_krylov[
+                    "hip_batch_replay_required_unavailable_reason"
+                ] = str(reason)
+                matrix_free_global_krylov[
+                    "cpu_batch_replay_fallback_suppressed"
+                ] = True
+                return True
+
+            def _evaluate_global_residual_candidate(
+                candidate_u: np.ndarray,
+                *,
+                replay_role: str,
+            ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None:
+                nonlocal global_hip_batch_eval_count
+                nonlocal global_hip_batch_state_count
+                nonlocal global_hip_batch_seconds
+                if global_batch_backend in {
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                    "rust_hip_full_residual_ffi",
+                }:
+                    batch_started = time.perf_counter()
+                    state_dependent_role = bool(
+                        apply_shell_material_tangent
+                        and allow_state_dependent_shell_material_tangent_hip_replay
+                    )
+                    if state_dependent_role:
+                        try:
+                            (
+                                sd_shell_tangent,
+                                _sd_shell_meta,
+                            ) = shell_material_tangent_by_surface_index(
+                                node_xyz=node_xyz,
+                                u=candidate_u,
+                                elem_type_code=elem_type_code,
+                                elem_material_id=elem_material_id,
+                                conn_ptr=conn_ptr,
+                                conn_idx=conn_idx,
+                                material_props=material_props,
+                                controlled_probe=False,
+                            )
+                            shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
+                                u=candidate_u,
+                                node_xyz=node_xyz,
+                                elem_type_code=elem_type_code,
+                                elem_section_id=elem_section_id,
+                                elem_material_id=elem_material_id,
+                                conn_ptr=conn_ptr,
+                                conn_idx=conn_idx,
+                                material_props=material_props,
+                                plate_thickness_props=plate_thickness_props,
+                                include_membrane=True,
+                                shell_operator_cache=shell_operator_cache,
+                                material_tangent_by_surface_index_mpa=sd_shell_tangent,
+                            )
+                            backend_cls = (
+                                HipFullResidualResidentWorkerBackend
+                                if global_batch_backend == "hip_full_residual_resident"
+                                else HipFullResidualRustFfiBackend
+                                if global_batch_backend == "rust_hip_full_residual_ffi"
+                                else HipFullResidualBatchBackend
+                            )
+                            sd_backend = backend_cls.prepare(
+                                frame_dofs=frame_force_cache.dofs,
+                                frame_stiffness=frame_force_cache.element_stiffness,
+                                shell_csr=shell_stiffness.tocsr(),
+                                spring_csr=spring_stiffness.tocsr(),
+                                f_ext=reference_f_ext,
+                                free=base_free_for_krylov,
+                                hipcc=current_tangent_residual_row_hipcc,
+                                force_rebuild=bool(
+                                    current_tangent_residual_row_force_rebuild_hip
+                                ),
+                            )
+                            residual_batch, batch_meta = sd_backend.evaluate(
+                                np.asarray([candidate_u], dtype=np.float64),
+                                reps=1,
+                            )
+                            elapsed = float(time.perf_counter() - batch_started)
+                            global_hip_batch_eval_count += 1
+                            global_hip_batch_state_count += 1
+                            global_hip_batch_seconds += elapsed
+                            matrix_free_global_krylov[
+                                "state_dependent_shell_material_tangent_hip_replay"
+                            ] = True
+                            matrix_free_global_krylov[
+                                "state_dependent_shell_material_tangent_operator_refresh_backend"
+                            ] = "host_shell_operator_refresh"
+                            meta = {
+                                **batch_meta,
+                                "residual_batch_backend": global_batch_backend,
+                                "hip_full_residual_batch_replay": True,
+                                "hip_full_residual_resident_worker": bool(
+                                    global_batch_backend
+                                    == "hip_full_residual_resident"
+                                ),
+                                "rust_hip_full_residual_ffi_worker": bool(
+                                    global_batch_backend
+                                    == "rust_hip_full_residual_ffi"
+                                ),
+                                "residual_only_assembly": True,
+                                "residual_only_free_override": True,
+                                "global_krylov_replay_role": str(replay_role),
+                                "state_dependent_shell_material_tangent_hip_replay": True,
+                                "state_dependent_shell_material_tangent_operator_refresh_backend": (
+                                    "host_shell_operator_refresh"
+                                ),
+                            }
+                            rhs = np.asarray(
+                                reference_f_ext[base_free_for_krylov],
+                                dtype=np.float64,
+                            )
+                            return (
+                                base_free_for_krylov,
+                                np.asarray(residual_batch[0], dtype=np.float64),
+                                rhs,
+                                meta,
+                            )
+                        except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                            matrix_free_global_krylov[
+                                "batch_replay_backend_error"
+                            ] = str(exc)
+                            if _global_hip_replay_required_unavailable(
+                                "hip_backend_prepare_or_evaluate_failed_state_dependent"
+                            ):
+                                return None
+                    else:
+                        hip_backend = _global_hip_residual_backend()
+                        if hip_backend is not None:
+                            try:
+                                residual_batch, batch_meta = hip_backend.evaluate(
+                                    np.asarray([candidate_u], dtype=np.float64),
+                                    reps=1,
+                                )
+                                elapsed = float(time.perf_counter() - batch_started)
+                                global_hip_batch_eval_count += 1
+                                global_hip_batch_state_count += 1
+                                global_hip_batch_seconds += elapsed
+                                meta = {
+                                    **batch_meta,
+                                    "residual_batch_backend": global_batch_backend,
+                                    "hip_full_residual_batch_replay": True,
+                                    "hip_full_residual_resident_worker": bool(
+                                        global_batch_backend
+                                        == "hip_full_residual_resident"
+                                    ),
+                                    "rust_hip_full_residual_ffi_worker": bool(
+                                        global_batch_backend
+                                        == "rust_hip_full_residual_ffi"
+                                    ),
+                                    "residual_only_assembly": True,
+                                    "residual_only_free_override": True,
+                                    "global_krylov_replay_role": str(replay_role),
+                                }
+                                rhs = np.asarray(
+                                    reference_f_ext[base_free_for_krylov],
+                                    dtype=np.float64,
+                                )
+                                return (
+                                    base_free_for_krylov,
+                                    np.asarray(residual_batch[0], dtype=np.float64),
+                                    rhs,
+                                    meta,
+                                )
+                            except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                                matrix_free_global_krylov[
+                                    "batch_replay_backend_error"
+                                ] = str(exc)
+                                if _global_hip_replay_required_unavailable(
+                                    "hip_backend_evaluate_failed"
+                                ):
+                                    return None
+                        elif _global_hip_replay_required_unavailable(
+                            "hip_backend_prepare_failed_or_disabled"
+                        ):
+                            return None
+                (
+                    _candidate_k,
+                    _candidate_f,
+                    candidate_free,
+                    candidate_residual,
+                    candidate_rhs,
+                    candidate_meta,
+                ) = assemble_residual(
+                    candidate_u,
+                    external_load_override=reference_f_ext,
+                    residual_only=True,
+                    free_override=base_free_for_krylov,
+                )
+                meta = candidate_meta if isinstance(candidate_meta, dict) else {}
+                return (
+                    np.asarray(candidate_free, dtype=np.int64),
+                    np.asarray(candidate_residual, dtype=np.float64),
+                    np.asarray(candidate_rhs, dtype=np.float64),
+                    meta,
+                )
+
+            def _evaluate_global_residual_candidates(
+                candidate_us: list[np.ndarray],
+                *,
+                replay_role: str,
+            ) -> list[
+                tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]] | None
+            ]:
+                nonlocal global_hip_batch_eval_count
+                nonlocal global_hip_batch_state_count
+                nonlocal global_hip_batch_seconds
+                if not candidate_us:
+                    return []
+                state_dependent_role = bool(
+                    apply_shell_material_tangent
+                    and allow_state_dependent_shell_material_tangent_hip_replay
+                )
+                if (
+                    not state_dependent_role
+                    and global_batch_backend
+                    in {
+                        "hip_full_residual",
+                        "hip_full_residual_resident",
+                        "rust_hip_full_residual_ffi",
+                    }
+                ):
+                    batch_started = time.perf_counter()
+                    hip_backend = _global_hip_residual_backend()
+                    if hip_backend is not None:
+                        try:
+                            state_batch = np.asarray(candidate_us, dtype=np.float64)
+                            residual_batch, batch_meta = hip_backend.evaluate(
+                                state_batch,
+                                reps=1,
+                            )
+                            elapsed = float(time.perf_counter() - batch_started)
+                            global_hip_batch_eval_count += 1
+                            global_hip_batch_state_count += int(state_batch.shape[0])
+                            global_hip_batch_seconds += elapsed
+                            rhs = np.asarray(
+                                reference_f_ext[base_free_for_krylov],
+                                dtype=np.float64,
+                            )
+                            results: list[
+                                tuple[
+                                    np.ndarray,
+                                    np.ndarray,
+                                    np.ndarray,
+                                    dict[str, Any],
+                                ]
+                                | None
+                            ] = []
+                            for batch_index, residual in enumerate(residual_batch):
+                                meta = {
+                                    **batch_meta,
+                                    "residual_batch_backend": global_batch_backend,
+                                    "hip_full_residual_batch_replay": True,
+                                    "hip_full_residual_resident_worker": bool(
+                                        global_batch_backend
+                                        == "hip_full_residual_resident"
+                                    ),
+                                    "rust_hip_full_residual_ffi_worker": bool(
+                                        global_batch_backend
+                                        == "rust_hip_full_residual_ffi"
+                                    ),
+                                    "residual_only_assembly": True,
+                                    "residual_only_free_override": True,
+                                    "global_krylov_replay_role": str(replay_role),
+                                    "hip_batch_group_size": int(state_batch.shape[0]),
+                                    "hip_batch_group_index": int(batch_index),
+                                }
+                                results.append(
+                                    (
+                                        base_free_for_krylov,
+                                        np.asarray(residual, dtype=np.float64),
+                                        rhs,
+                                        meta,
+                                    )
+                                )
+                            return results
+                        except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                            matrix_free_global_krylov[
+                                "batch_replay_backend_error"
+                            ] = str(exc)
+                            if _global_hip_replay_required_unavailable(
+                                "hip_backend_batch_evaluate_failed"
+                            ):
+                                return [None for _ in candidate_us]
+                    elif _global_hip_replay_required_unavailable(
+                        "hip_backend_prepare_failed_or_disabled"
+                    ):
+                        return [None for _ in candidate_us]
+                return [
+                    _evaluate_global_residual_candidate(
+                        candidate_u,
+                        replay_role=replay_role,
+                    )
+                    for candidate_u in candidate_us
+                ]
+
+            if global_require_hip_batch_replay:
+                base_replay = _evaluate_global_residual_candidate(
+                    base_u_for_krylov,
+                    replay_role="base",
+                )
+                if base_replay is None:
+                    matrix_free_global_krylov[
+                        "base_residual_hip_replay_required_unavailable"
+                    ] = True
+                    matrix_free_global_krylov[
+                        "base_residual_source"
+                    ] = "unavailable_required_hip_batch_replay"
+                    matrix_free_global_krylov[
+                        "cpu_base_residual_for_krylov_suppressed"
+                    ] = True
+                    base_residual_for_krylov = np.zeros_like(
+                        base_residual_for_krylov
+                    )
+                    previous_residual_inf = 0.0
+                else:
+                    (
+                        base_replay_free,
+                        base_replay_residual,
+                        _base_replay_rhs,
+                        base_replay_meta,
+                    ) = base_replay
+                    base_free_is_stable = bool(
+                        base_replay_free.shape == base_free_for_krylov.shape
+                        and np.array_equal(base_replay_free, base_free_for_krylov)
+                    )
+                    matrix_free_global_krylov[
+                        "base_residual_hip_replay_free_dof_set_stable"
+                    ] = base_free_is_stable
+                    matrix_free_global_krylov["base_residual_source"] = (
+                        "hip_full_residual_batch_replay"
+                        if base_free_is_stable
+                        else "unstable_required_hip_batch_replay"
+                    )
+                    matrix_free_global_krylov[
+                        "base_residual_hip_full_residual_batch_replay"
+                    ] = bool(
+                        isinstance(base_replay_meta, dict)
+                        and base_replay_meta.get("hip_full_residual_batch_replay")
+                    )
+                    if base_free_is_stable:
+                        base_residual_for_krylov = np.asarray(
+                            base_replay_residual,
+                            dtype=np.float64,
+                        )
+                        previous_residual_inf = (
+                            float(np.max(np.abs(base_residual_for_krylov)))
+                            if base_residual_for_krylov.size
+                            else 0.0
+                        )
+                    else:
+                        _global_hip_replay_required_unavailable(
+                            "hip_base_replay_free_dof_set_changed"
+                        )
+                        base_residual_for_krylov = np.zeros_like(
+                            base_residual_for_krylov
+                        )
+                        previous_residual_inf = 0.0
+            else:
+                matrix_free_global_krylov[
+                    "base_residual_source"
+                ] = "cpu_direct_residual_assembly"
+            if scaling_mode == "residual_diagonal_displacement":
+                row_scale = 1.0 / np.maximum(
+                    np.abs(base_residual_for_krylov),
+                    residual_scale_floor,
+                )
+            else:
+                row_scale = np.ones(n_free, dtype=np.float64)
+            matrix_free_global_krylov["base_residual_inf_n_for_krylov"] = (
+                float(np.max(np.abs(base_residual_for_krylov)))
+                if base_residual_for_krylov.size
+                else 0.0
+            )
+            matrix_free_global_krylov["row_scale_inf"] = (
+                float(np.max(np.abs(row_scale))) if row_scale.size else 0.0
+            )
+            matrix_free_global_krylov["row_scale_min"] = (
+                float(np.min(np.abs(row_scale))) if row_scale.size else 0.0
+            )
+
             def _global_residual_jvp_physical(vector: np.ndarray) -> np.ndarray:
                 nonlocal matvec_count, unstable_probe_count
                 nonlocal residual_only_matvec_count, full_assembly_matvec_count
@@ -2703,25 +4012,64 @@ def run_mgt_direct_residual_newton_probe(
                 scale = probe_epsilon / direction_inf
                 if probe_max_step > 0.0:
                     scale = min(scale, probe_max_step / direction_inf)
-                probe_u = base_u_for_krylov.copy()
-                probe_u[base_free_for_krylov] += scale * direction
+
+                def _probe_state(sign: float) -> np.ndarray:
+                    probe_u = base_u_for_krylov.copy()
+                    probe_u[base_free_for_krylov] += float(sign) * scale * direction
+                    return probe_u
+
+                def _probe_residual_from_result(
+                    probe_result: tuple[
+                        np.ndarray,
+                        np.ndarray,
+                        np.ndarray,
+                        dict[str, Any],
+                    ]
+                    | None,
+                ) -> tuple[np.ndarray, np.ndarray, bool, float, dict[str, Any]]:
+                    if probe_result is None:
+                        matrix_free_global_krylov[
+                            "matvec_replay_required_unavailable"
+                        ] = True
+                        return (
+                            base_free_for_krylov,
+                            base_residual_for_krylov.copy(),
+                            False,
+                            float(previous_residual_inf),
+                            {},
+                        )
+                    probe_free, probe_residual, _probe_rhs, _probe_meta = probe_result
+                    probe_meta = _probe_meta if isinstance(_probe_meta, dict) else {}
+                    used_residual_only = bool(
+                        probe_meta.get("residual_only_assembly")
+                    )
+                    probe_residual_inf = (
+                        float(np.max(np.abs(probe_residual)))
+                        if probe_residual.size
+                        else 0.0
+                    )
+                    return (
+                        np.asarray(probe_free, dtype=np.int64),
+                        np.asarray(probe_residual, dtype=np.float64),
+                        used_residual_only,
+                        probe_residual_inf,
+                        probe_meta,
+                    )
+
+                probe_signs = [1.0]
+                if global_difference_scheme == "central":
+                    probe_signs.append(-1.0)
+                probe_results = _evaluate_global_residual_candidates(
+                    [_probe_state(sign) for sign in probe_signs],
+                    replay_role="matvec",
+                )
                 (
-                    _probe_k,
-                    _probe_f,
                     probe_free,
                     probe_residual,
-                    _probe_rhs,
-                    _probe_meta,
-                ) = assemble_residual(
-                    probe_u,
-                    external_load_override=reference_f_ext,
-                    residual_only=True,
-                    free_override=base_free_for_krylov,
-                )
-                used_residual_only = bool(
-                    isinstance(_probe_meta, dict)
-                    and _probe_meta.get("residual_only_assembly")
-                )
+                    used_residual_only,
+                    probe_residual_inf,
+                    probe_meta,
+                ) = _probe_residual_from_result(probe_results[0] if probe_results else None)
                 if used_residual_only:
                     residual_only_matvec_count += 1
                 else:
@@ -2730,24 +4078,81 @@ def run_mgt_direct_residual_newton_probe(
                     probe_free.shape == base_free_for_krylov.shape
                     and np.array_equal(probe_free, base_free_for_krylov)
                 )
-                probe_residual_inf = (
-                    float(np.max(np.abs(probe_residual))) if probe_residual.size else 0.0
-                )
                 row = {
                     "matvec_index": int(matvec_count),
+                    "difference_scheme": global_difference_scheme,
                     "direction_inf_m": float(direction_inf),
                     "effective_probe_scale": float(scale),
                     "probe_step_inf_m": float(scale * direction_inf),
                     "free_dof_set_stable": free_is_stable,
                     "residual_only_assembly": bool(used_residual_only),
                     "probe_direct_residual_inf_n": probe_residual_inf,
+                    "hip_full_residual_batch_replay": bool(
+                        probe_meta.get("hip_full_residual_batch_replay")
+                    ),
+                    "hip_batch_group_size": (
+                        int(probe_meta.get("hip_batch_group_size"))
+                        if probe_meta.get("hip_batch_group_size") is not None
+                        else None
+                    ),
+                    "hip_batch_group_index": (
+                        int(probe_meta.get("hip_batch_group_index"))
+                        if probe_meta.get("hip_batch_group_index") is not None
+                        else None
+                    ),
                 }
+                if global_difference_scheme == "central" and free_is_stable:
+                    (
+                        minus_free,
+                        minus_residual,
+                        minus_used_residual_only,
+                        minus_residual_inf,
+                        minus_probe_meta,
+                    ) = _probe_residual_from_result(
+                        probe_results[1] if len(probe_results) > 1 else None
+                    )
+                    if minus_used_residual_only:
+                        residual_only_matvec_count += 1
+                    else:
+                        full_assembly_matvec_count += 1
+                    minus_free_is_stable = bool(
+                        minus_free.shape == base_free_for_krylov.shape
+                        and np.array_equal(minus_free, base_free_for_krylov)
+                    )
+                    free_is_stable = bool(free_is_stable and minus_free_is_stable)
+                    row.update(
+                        {
+                            "minus_free_dof_set_stable": minus_free_is_stable,
+                            "minus_residual_only_assembly": bool(
+                                minus_used_residual_only
+                            ),
+                            "minus_probe_direct_residual_inf_n": minus_residual_inf,
+                            "minus_hip_full_residual_batch_replay": bool(
+                                minus_probe_meta.get("hip_full_residual_batch_replay")
+                            ),
+                            "minus_hip_batch_group_size": (
+                                int(minus_probe_meta.get("hip_batch_group_size"))
+                                if minus_probe_meta.get("hip_batch_group_size")
+                                is not None
+                                else None
+                            ),
+                            "minus_hip_batch_group_index": (
+                                int(minus_probe_meta.get("hip_batch_group_index"))
+                                if minus_probe_meta.get("hip_batch_group_index")
+                                is not None
+                                else None
+                            ),
+                        }
+                    )
                 if not free_is_stable:
                     unstable_probe_count += 1
                     row["reason"] = "free_dof_set_changed"
                     jvp_rows.append(row)
                     return np.zeros_like(base_residual_for_krylov)
-                jvp = (np.asarray(probe_residual, dtype=np.float64) - base_residual_for_krylov) / scale
+                if global_difference_scheme == "central":
+                    jvp = (probe_residual - minus_residual) / (2.0 * scale)
+                else:
+                    jvp = (probe_residual - base_residual_for_krylov) / scale
                 row["jacobian_action_inf_n"] = (
                     float(np.max(np.abs(jvp))) if jvp.size else 0.0
                 )
@@ -2775,6 +4180,22 @@ def run_mgt_direct_residual_newton_probe(
                 physical_direction = _right_preconditioned_direction(vector)
                 return row_scale * _global_residual_jvp_physical(physical_direction)
 
+            host_krylov_solver_closure_blocked = bool(
+                global_require_hip_batch_replay
+                and global_linear_solver_backend == "scipy_host_gmres"
+            )
+            hip_krylov_solver_required_unavailable = False
+            matrix_free_global_krylov["host_krylov_solver_used"] = bool(
+                global_linear_solver_backend == "scipy_host_gmres"
+            )
+            matrix_free_global_krylov["hip_krylov_solver_used"] = False
+            matrix_free_global_krylov["host_krylov_solver_closure_blocked"] = (
+                host_krylov_solver_closure_blocked
+            )
+            if host_krylov_solver_closure_blocked:
+                matrix_free_global_krylov[
+                    "host_krylov_solver_closure_blocker"
+                ] = "rocm_hip_krylov_solver_required_for_closure"
             operator = LinearOperator(
                 (n_free, n_free),
                 matvec=_global_scaled_matvec,
@@ -2782,23 +4203,55 @@ def run_mgt_direct_residual_newton_probe(
             )
             scaled_rhs = -row_scale * base_residual_for_krylov
             solve_started = time.perf_counter()
-            try:
-                correction_free_scaled, krylov_info = gmres(
-                    operator,
+            if global_linear_solver_backend == "torch_hip_gmres":
+                (
+                    correction_free_scaled,
+                    krylov_info,
+                    hip_solver_meta,
+                ) = _torch_hip_gmres_once(
+                    _global_scaled_matvec,
                     scaled_rhs,
                     restart=max(1, int(matrix_free_global_krylov_max_iterations)),
-                    maxiter=1,
-                    rtol=0.0,
-                    atol=0.0,
                 )
-            except TypeError:
-                correction_free_scaled, krylov_info = gmres(
-                    operator,
-                    scaled_rhs,
-                    restart=max(1, int(matrix_free_global_krylov_max_iterations)),
-                    maxiter=1,
-                    tol=0.0,
+                matrix_free_global_krylov.update(hip_solver_meta)
+                if not bool(hip_solver_meta.get("hip_krylov_solver_used")):
+                    hip_krylov_solver_required_unavailable = True
+                    matrix_free_global_krylov[
+                        "hip_krylov_solver_required_unavailable"
+                    ] = True
+                    matrix_free_global_krylov[
+                        "hip_krylov_solver_required_unavailable_reason"
+                    ] = str(
+                        hip_solver_meta.get(
+                            "unavailable_reason",
+                            "torch_hip_gmres_unavailable",
+                        )
+                    )
+                    matrix_free_global_krylov[
+                        "cpu_linear_solver_fallback_suppressed"
+                    ] = True
+                matrix_free_global_krylov["host_krylov_solver_used"] = False
+                matrix_free_global_krylov["hip_krylov_solver_used"] = bool(
+                    hip_solver_meta.get("hip_krylov_solver_used")
                 )
+            else:
+                try:
+                    correction_free_scaled, krylov_info = gmres(
+                        operator,
+                        scaled_rhs,
+                        restart=max(1, int(matrix_free_global_krylov_max_iterations)),
+                        maxiter=1,
+                        rtol=0.0,
+                        atol=0.0,
+                    )
+                except TypeError:
+                    correction_free_scaled, krylov_info = gmres(
+                        operator,
+                        scaled_rhs,
+                        restart=max(1, int(matrix_free_global_krylov_max_iterations)),
+                        maxiter=1,
+                        tol=0.0,
+                    )
             solve_seconds = time.perf_counter() - solve_started
             correction_free_scaled = np.asarray(correction_free_scaled, dtype=np.float64)
             correction_free = _right_preconditioned_direction(correction_free_scaled)
@@ -2836,6 +4289,8 @@ def run_mgt_direct_residual_newton_probe(
                 min_alpha=1.0e-10,
                 max_alpha=max_global_krylov_alpha,
             )
+            if hip_krylov_solver_required_unavailable:
+                alpha_rows = []
             if matrix_free_global_krylov_allow_negative_alphas:
                 alpha_rows.extend(
                     (f"{source}_negative", -float(alpha))
@@ -2843,20 +4298,22 @@ def run_mgt_direct_residual_newton_probe(
                 )
             trial_rows: list[dict[str, Any]] = []
             trial_vectors: list[np.ndarray] = []
-            for alpha_source, alpha in alpha_rows:
-                candidate_u = current_u + float(alpha) * correction
-                (
-                    _k,
-                    _f,
-                    _free,
-                    candidate_residual,
-                    candidate_rhs,
-                    candidate_meta,
-                ) = assemble_residual(
-                    candidate_u,
-                    external_load_override=reference_f_ext,
-                    residual_only=True,
-                    free_override=base_free_for_krylov,
+            trial_specs = [
+                (str(alpha_source), float(alpha), current_u + float(alpha) * correction)
+                for alpha_source, alpha in alpha_rows
+            ]
+            trial_results = _evaluate_global_residual_candidates(
+                [candidate_u for _alpha_source, _alpha, candidate_u in trial_specs],
+                replay_role="trial",
+            )
+            for (alpha_source, alpha, candidate_u), candidate_result in zip(
+                trial_specs,
+                trial_results,
+            ):
+                if candidate_result is None:
+                    continue
+                _free, candidate_residual, candidate_rhs, candidate_meta = (
+                    candidate_result
                 )
                 used_residual_only = bool(
                     isinstance(candidate_meta, dict)
@@ -2866,11 +4323,51 @@ def run_mgt_direct_residual_newton_probe(
                     residual_only_trial_count += 1
                 else:
                     full_assembly_trial_count += 1
-                residual_inf = (
+                residual_inf_residual_only = (
                     float(np.max(np.abs(candidate_residual)))
                     if candidate_residual.size
                     else 0.0
                 )
+                residual_inf = residual_inf_residual_only
+                rhs_for_trial = candidate_rhs
+                full_replay_meta: dict[str, Any] = {}
+                if (
+                    effective_full_assembly_trial_replay
+                ):
+                    (
+                        _full_k,
+                        _full_f,
+                        full_free,
+                        full_residual,
+                        full_rhs,
+                        full_meta,
+                    ) = assemble_residual(
+                        candidate_u,
+                        external_load_override=reference_f_ext,
+                    )
+                    full_assembly_trial_replay_count += 1
+                    full_free_is_stable = bool(
+                        full_free.shape == base_free_for_krylov.shape
+                        and np.array_equal(full_free, base_free_for_krylov)
+                    )
+                    full_residual_inf = (
+                        float(np.max(np.abs(full_residual))) if full_residual.size else 0.0
+                    )
+                    full_replay_meta = {
+                        "full_assembly_trial_replay": True,
+                        "full_assembly_free_dof_set_stable": full_free_is_stable,
+                        "full_assembly_direct_residual_inf_n": full_residual_inf,
+                        "full_assembly_free_dof_count": int(full_free.size),
+                        "full_assembly_residual_only_assembly": bool(
+                            isinstance(full_meta, dict)
+                            and full_meta.get("residual_only_assembly")
+                        ),
+                    }
+                    if full_free_is_stable:
+                        residual_inf = full_residual_inf
+                        rhs_for_trial = full_rhs
+                    else:
+                        residual_inf = max(residual_inf_residual_only, full_residual_inf)
                 improvement_inf = previous_residual_inf - residual_inf
                 relative_improvement = improvement_inf / max(previous_residual_inf, 1.0e-30)
                 increment = (
@@ -2887,12 +4384,40 @@ def run_mgt_direct_residual_newton_probe(
                     "alpha_source": str(alpha_source),
                     "alpha": float(alpha),
                     "residual_only_assembly": bool(used_residual_only),
+                    "trial_residual_source": (
+                        "full_assembly_replay"
+                        if effective_full_assembly_trial_replay
+                        else "residual_only"
+                    ),
+                    "residual_only_direct_residual_inf_n": residual_inf_residual_only,
+                    "residual_batch_backend": str(
+                        candidate_meta.get("residual_batch_backend")
+                        if isinstance(candidate_meta, dict)
+                        else ""
+                    ),
+                    "hip_full_residual_batch_replay": bool(
+                        isinstance(candidate_meta, dict)
+                        and candidate_meta.get("hip_full_residual_batch_replay")
+                    ),
+                    "hip_batch_group_size": (
+                        int(candidate_meta.get("hip_batch_group_size"))
+                        if isinstance(candidate_meta, dict)
+                        and candidate_meta.get("hip_batch_group_size") is not None
+                        else None
+                    ),
+                    "hip_batch_group_index": (
+                        int(candidate_meta.get("hip_batch_group_index"))
+                        if isinstance(candidate_meta, dict)
+                        and candidate_meta.get("hip_batch_group_index") is not None
+                        else None
+                    ),
+                    **full_replay_meta,
                     "direct_residual_inf_n": residual_inf,
                     "improvement_inf_n": float(improvement_inf),
                     "relative_improvement": float(relative_improvement),
                     "direct_relative_residual_inf": residual_inf
                     / max(
-                        float(np.max(np.abs(candidate_rhs))) if candidate_rhs.size else 0.0,
+                        float(np.max(np.abs(rhs_for_trial))) if rhs_for_trial.size else 0.0,
                         1.0,
                     ),
                     "relative_increment": increment / max_abs,
@@ -2917,6 +4442,8 @@ def run_mgt_direct_residual_newton_probe(
                 (index, row)
                 for index, row in enumerate(trial_rows)
                 if bool(row.get("relative_increment_gate_passed"))
+                and bool(row.get("full_assembly_free_dof_set_stable", True))
+                and not host_krylov_solver_closure_blocked
                 and float(row["direct_residual_inf_n"]) < previous_residual_inf
                 and float(row.get("relative_improvement", 0.0))
                 >= max(float(matrix_free_global_krylov_min_relative_improvement), 0.0)
@@ -2925,6 +4452,8 @@ def run_mgt_direct_residual_newton_probe(
                 (index, row)
                 for index, row in enumerate(trial_rows)
                 if bool(row.get("relative_increment_gate_passed"))
+                and bool(row.get("full_assembly_free_dof_set_stable", True))
+                and not host_krylov_solver_closure_blocked
                 and float(row["direct_residual_inf_n"]) < previous_residual_inf
             ]
             best_gate_trial_index: int | None = None
@@ -2937,14 +4466,111 @@ def run_mgt_direct_residual_newton_probe(
             promoted = best_gate_trial_index is not None
             if promoted:
                 current_u = trial_vectors[int(best_gate_trial_index)]
-                (
-                    current_stiffness,
-                    _current_f_ext,
-                    current_free,
-                    current_residual,
-                    current_rhs,
-                    _current_meta,
-                ) = assemble_residual(current_u, external_load_override=reference_f_ext)
+                hip_acceptance_refresh_used = False
+                if global_require_hip_batch_replay:
+                    accepted_replay = _evaluate_global_residual_candidate(
+                        current_u,
+                        replay_role="accepted_refresh",
+                    )
+                    if accepted_replay is not None:
+                        (
+                            accepted_free,
+                            accepted_residual,
+                            accepted_rhs,
+                            accepted_meta,
+                        ) = accepted_replay
+                        if _can_use_hip_acceptance_residual_refresh(
+                            accepted_meta if isinstance(accepted_meta, dict) else {},
+                            require_hip_batch_replay=global_require_hip_batch_replay,
+                        ):
+                            hip_acceptance_refresh_used = True
+                            current_free = np.asarray(accepted_free, dtype=np.int64)
+                            current_residual = np.asarray(accepted_residual, dtype=np.float64)
+                            current_rhs = np.asarray(accepted_rhs, dtype=np.float64)
+                            matrix_free_global_krylov[
+                                "accepted_state_refresh_backend"
+                            ] = str(
+                                accepted_meta.get(
+                                    "residual_batch_backend",
+                                    "hip_batch_replay",
+                                )
+                            ) if isinstance(accepted_meta, dict) else "hip_batch_replay"
+                            matrix_free_global_krylov[
+                                "accepted_state_refresh_hip_used"
+                            ] = True
+                            matrix_free_global_krylov[
+                                "accepted_state_refresh_cpu_used"
+                            ] = False
+                            matrix_free_global_krylov[
+                                "accepted_state_refresh_tangent_note"
+                            ] = (
+                                "tangent_stiffness_not_refreshed_from_hip_acceptance_path"
+                            )
+                            if enable_current_tangent_residual_row_correction:
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_backend"
+                                ] = "cpu_full_assembly"
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_cpu_used"
+                                ] = True
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_closure_blocked"
+                                ] = True
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_closure_blocker"
+                                ] = (
+                                    "rocm_hip_acceptance_tangent_refresh_required_for_closure"
+                                )
+                                (
+                                    current_stiffness,
+                                    _current_f_ext,
+                                    _cpu_free,
+                                    _cpu_residual,
+                                    _cpu_rhs,
+                                    _current_meta,
+                                ) = assemble_residual(
+                                    current_u, external_load_override=reference_f_ext
+                                )
+                            else:
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_backend"
+                                ] = "not_refreshed_not_needed_after_global_krylov"
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_cpu_used"
+                                ] = False
+                                matrix_free_global_krylov[
+                                    "accepted_state_tangent_refresh_skipped_reason"
+                                ] = (
+                                    "no_downstream_current_tangent_row_correction"
+                                )
+                    else:
+                        matrix_free_global_krylov[
+                            "accepted_state_refresh_hip_unavailable"
+                        ] = True
+                if not hip_acceptance_refresh_used:
+                    matrix_free_global_krylov[
+                        "accepted_state_refresh_backend"
+                    ] = "cpu_full_assembly"
+                    matrix_free_global_krylov["accepted_state_refresh_cpu_used"] = True
+                    if global_require_hip_batch_replay:
+                        matrix_free_global_krylov[
+                            "accepted_state_refresh_closure_blocked"
+                        ] = True
+                        matrix_free_global_krylov[
+                            "accepted_state_refresh_closure_blocker"
+                        ] = (
+                            "rocm_hip_acceptance_refresh_required_for_closure"
+                        )
+                    (
+                        current_stiffness,
+                        _current_f_ext,
+                        current_free,
+                        current_residual,
+                        current_rhs,
+                        _current_meta,
+                    ) = assemble_residual(
+                        current_u, external_load_override=reference_f_ext
+                    )
                 accepted_state_history.append(np.asarray(current_u, dtype=np.float64).copy())
                 accepted_residual_history.append(np.asarray(current_residual, dtype=np.float64).copy())
             if best_gate_trial is not None:
@@ -2955,6 +4581,8 @@ def run_mgt_direct_residual_newton_probe(
                 stop_reason = "no_gate_eligible_residual_descent"
             elif best_trial is not None:
                 stop_reason = "no_residual_descent"
+            elif hip_krylov_solver_required_unavailable:
+                stop_reason = "rocm_hip_krylov_solver_unavailable"
             else:
                 stop_reason = "trial_candidate_unavailable"
             matrix_free_global_krylov.update(
@@ -2969,6 +4597,12 @@ def run_mgt_direct_residual_newton_probe(
                     "full_assembly_matvec_count": int(full_assembly_matvec_count),
                     "residual_only_trial_count": int(residual_only_trial_count),
                     "full_assembly_trial_count": int(full_assembly_trial_count),
+                    "full_assembly_trial_replay_count": int(
+                        full_assembly_trial_replay_count
+                    ),
+                    "hip_batch_eval_count": int(global_hip_batch_eval_count),
+                    "hip_batch_state_count": int(global_hip_batch_state_count),
+                    "hip_batch_seconds": float(global_hip_batch_seconds),
                     "correction_inf_m": correction_inf,
                     "correction_scaled_inf": correction_scaled_inf,
                     "gate_limited_alpha": float(gate_limited_alpha),
@@ -3055,6 +4689,21 @@ def run_mgt_direct_residual_newton_probe(
             "passes": [],
             "trial_rows": [],
         }
+        if (
+            apply_shell_material_tangent
+            and allow_state_dependent_shell_material_tangent_hip_replay
+            and row_batch_backend in {
+                "hip_full_residual",
+                "hip_full_residual_resident",
+                "rust_hip_full_residual_ffi",
+            }
+        ):
+            current_tangent_residual_row_correction[
+                "state_dependent_shell_material_tangent_hip_replay"
+            ] = True
+            current_tangent_residual_row_correction[
+                "state_dependent_shell_material_tangent_operator_refresh_backend"
+            ] = "host_shell_operator_refresh"
         if enable_current_tangent_residual_row_correction and current_residual.size:
             pass_rows: list[dict[str, Any]] = []
             all_trial_rows: list[dict[str, Any]] = []
@@ -3076,6 +4725,7 @@ def run_mgt_direct_residual_newton_probe(
                 "residual_shell_geometry_normal_rows",
                 "residual_shell_geometry_normal_bending_rows",
                 "frontier_component_rows",
+                "current_component_rows",
             }:
                 target_mode = "largest_rows"
             current_tangent_residual_row_correction["target_mode"] = target_mode
@@ -3112,12 +4762,21 @@ def run_mgt_direct_residual_newton_probe(
                 element_neighbor_depth
             )
             support_selection_mode = str(current_tangent_residual_row_support_selection).strip()
-            if support_selection_mode not in {"row_strongest", "residual_weighted"}:
+            if support_selection_mode not in {
+                "row_strongest",
+                "residual_weighted",
+                "target_rows",
+            }:
                 support_selection_mode = "row_strongest"
-            current_tangent_residual_row_correction["support_selection"] = support_selection_mode
             jacobian_mode = str(current_tangent_residual_row_jacobian_mode).strip()
             if jacobian_mode not in {"current_tangent", "finite_difference"}:
                 jacobian_mode = "current_tangent"
+            if support_selection_mode == "target_rows" and jacobian_mode != "finite_difference":
+                current_tangent_residual_row_correction[
+                    "support_selection_disabled_reason"
+                ] = "target_rows_requires_finite_difference_jacobian"
+                support_selection_mode = "row_strongest"
+            current_tangent_residual_row_correction["support_selection"] = support_selection_mode
             current_tangent_residual_row_correction["jacobian_mode"] = jacobian_mode
             fd_epsilon_base = max(float(current_tangent_residual_row_fd_epsilon), 1.0e-12)
             fd_max_support_columns = max(
@@ -3177,6 +4836,18 @@ def run_mgt_direct_residual_newton_probe(
             current_tangent_residual_row_correction["batch_replay_backend"] = (
                 row_batch_backend
             )
+            row_require_hip_batch_replay = bool(
+                current_tangent_residual_row_require_hip_batch_replay
+                and row_batch_backend
+                in {
+                    "hip_full_residual",
+                    "hip_full_residual_resident",
+                    "rust_hip_full_residual_ffi",
+                }
+            )
+            current_tangent_residual_row_correction[
+                "require_hip_batch_replay"
+            ] = row_require_hip_batch_replay
             if row_batch_alpha_replay_requested and not use_row_residual_only:
                 current_tangent_residual_row_correction[
                     "batch_alpha_replay_disabled_reason"
@@ -3199,10 +4870,25 @@ def run_mgt_direct_residual_newton_probe(
             def row_hip_residual_backend() -> Any | None:
                 nonlocal row_hip_backend, row_hip_backend_error
                 if apply_shell_material_tangent:
-                    current_tangent_residual_row_correction[
-                        "batch_replay_backend_disabled_reason"
-                    ] = "state_dependent_shell_material_tangent_requires_cpu_batch"
-                    return None
+                    if allow_state_dependent_shell_material_tangent_hip_replay:
+                        current_tangent_residual_row_correction[
+                            "state_dependent_shell_material_tangent_hip_replay"
+                        ] = True
+                        current_tangent_residual_row_correction[
+                            "state_dependent_shell_material_tangent_operator_refresh_backend"
+                        ] = "host_shell_operator_refresh"
+                    elif not allow_frozen_shell_material_tangent_hip_replay:
+                        current_tangent_residual_row_correction[
+                            "batch_replay_backend_disabled_reason"
+                        ] = "state_dependent_shell_material_tangent_requires_cpu_batch"
+                        return None
+                    else:
+                        current_tangent_residual_row_correction[
+                            "frozen_shell_material_tangent_hip_replay"
+                        ] = True
+                        current_tangent_residual_row_correction[
+                            "shell_material_tangent_frozen_from_current_state"
+                        ] = True
                 if row_batch_backend not in {
                     "hip_full_residual",
                     "hip_full_residual_resident",
@@ -3212,6 +4898,21 @@ def run_mgt_direct_residual_newton_probe(
                 if row_hip_backend is not None:
                     return row_hip_backend
                 try:
+                    row_frozen_shell_tangent = None
+                    if apply_shell_material_tangent and (
+                        allow_frozen_shell_material_tangent_hip_replay
+                        or allow_state_dependent_shell_material_tangent_hip_replay
+                    ):
+                        row_frozen_shell_tangent, _row_frozen_shell_meta = shell_material_tangent_by_surface_index(
+                            node_xyz=node_xyz,
+                            u=current_u,
+                            elem_type_code=elem_type_code,
+                            elem_material_id=elem_material_id,
+                            conn_ptr=conn_ptr,
+                            conn_idx=conn_idx,
+                            material_props=material_props,
+                            controlled_probe=False,
+                        )
                     shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
                         u=current_u,
                         node_xyz=node_xyz,
@@ -3224,6 +4925,7 @@ def run_mgt_direct_residual_newton_probe(
                         plate_thickness_props=plate_thickness_props,
                         include_membrane=True,
                         shell_operator_cache=shell_operator_cache,
+                        material_tangent_by_surface_index_mpa=row_frozen_shell_tangent,
                     )
                     backend_cls = (
                         HipFullResidualResidentWorkerBackend
@@ -3252,6 +4954,20 @@ def run_mgt_direct_residual_newton_probe(
                     return None
                 return row_hip_backend
 
+            def hip_batch_replay_required_unavailable(reason: str) -> bool:
+                if not row_require_hip_batch_replay:
+                    return False
+                current_tangent_residual_row_correction[
+                    "hip_batch_replay_required_unavailable"
+                ] = True
+                current_tangent_residual_row_correction[
+                    "hip_batch_replay_required_unavailable_reason"
+                ] = str(reason)
+                current_tangent_residual_row_correction[
+                    "cpu_batch_replay_fallback_suppressed"
+                ] = True
+                return True
+
             def evaluate_row_candidate(
                 candidate_u: np.ndarray,
             ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
@@ -3275,6 +4991,146 @@ def run_mgt_direct_residual_newton_probe(
                     row_full_assembly_eval_count += 1
                 return result
 
+            def _evaluate_row_candidates_state_dependent(
+                candidate_us: list[np.ndarray],
+                *,
+                replay_role: str,
+            ) -> list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]]:
+                nonlocal row_residual_only_eval_count
+                nonlocal row_batch_alpha_replay_batch_count
+                nonlocal row_batch_alpha_replay_state_count
+                nonlocal row_batch_alpha_replay_seconds
+                nonlocal row_batch_fd_replay_batch_count
+                nonlocal row_batch_fd_replay_state_count
+                nonlocal row_batch_fd_replay_seconds
+                f_ext = np.asarray(reference_f_ext, dtype=np.float64)
+                free = np.asarray(current_free, dtype=np.int64)
+                backend_cls = (
+                    HipFullResidualResidentWorkerBackend
+                    if row_batch_backend == "hip_full_residual_resident"
+                    else HipFullResidualRustFfiBackend
+                    if row_batch_backend == "rust_hip_full_residual_ffi"
+                    else HipFullResidualBatchBackend
+                )
+                results: list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]] = []
+                for candidate_u in candidate_us:
+                    batch_started = time.perf_counter()
+                    try:
+                        (
+                            sd_shell_tangent,
+                            _sd_shell_meta,
+                        ) = shell_material_tangent_by_surface_index(
+                            node_xyz=node_xyz,
+                            u=candidate_u,
+                            elem_type_code=elem_type_code,
+                            elem_material_id=elem_material_id,
+                            conn_ptr=conn_ptr,
+                            conn_idx=conn_idx,
+                            material_props=material_props,
+                            controlled_probe=False,
+                        )
+                        shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
+                            u=candidate_u,
+                            node_xyz=node_xyz,
+                            elem_type_code=elem_type_code,
+                            elem_section_id=elem_section_id,
+                            elem_material_id=elem_material_id,
+                            conn_ptr=conn_ptr,
+                            conn_idx=conn_idx,
+                            material_props=material_props,
+                            plate_thickness_props=plate_thickness_props,
+                            include_membrane=True,
+                            shell_operator_cache=shell_operator_cache,
+                            material_tangent_by_surface_index_mpa=sd_shell_tangent,
+                        )
+                        sd_backend = backend_cls.prepare(
+                            frame_dofs=frame_force_cache.dofs,
+                            frame_stiffness=frame_force_cache.element_stiffness,
+                            shell_csr=shell_stiffness.tocsr(),
+                            spring_csr=spring_stiffness.tocsr(),
+                            f_ext=reference_f_ext,
+                            free=free,
+                            hipcc=current_tangent_residual_row_hipcc,
+                            force_rebuild=bool(
+                                current_tangent_residual_row_force_rebuild_hip
+                            ),
+                        )
+                        residual_batch, batch_meta = sd_backend.evaluate(
+                            np.asarray([candidate_u], dtype=np.float64),
+                            reps=1,
+                        )
+                        elapsed = float(time.perf_counter() - batch_started)
+                        current_tangent_residual_row_correction[
+                            "state_dependent_shell_material_tangent_hip_replay"
+                        ] = True
+                        current_tangent_residual_row_correction[
+                            "state_dependent_shell_material_tangent_operator_refresh_backend"
+                        ] = "host_shell_operator_refresh"
+                        row_residual_only_eval_count += 1
+                        if replay_role == "finite_difference":
+                            row_batch_fd_replay_batch_count += 1
+                            row_batch_fd_replay_state_count += 1
+                            row_batch_fd_replay_seconds += elapsed
+                        else:
+                            row_batch_alpha_replay_batch_count += 1
+                            row_batch_alpha_replay_state_count += 1
+                            row_batch_alpha_replay_seconds += elapsed
+                        rhs = np.asarray(f_ext[free], dtype=np.float64)
+                        meta = {
+                            **batch_meta,
+                            "residual_batch_backend": row_batch_backend,
+                            "hip_full_residual_batch_replay": True,
+                            "hip_batch_group_size": 1,
+                            "hip_batch_group_index": 0,
+                            "hip_full_residual_resident_worker": bool(
+                                row_batch_backend == "hip_full_residual_resident"
+                            ),
+                            "rust_hip_full_residual_ffi_worker": bool(
+                                row_batch_backend == "rust_hip_full_residual_ffi"
+                            ),
+                            "residual_only_assembly": True,
+                            "residual_only_free_override": True,
+                            "batch_alpha_replay": bool(replay_role == "alpha"),
+                            "batch_fd_replay": bool(replay_role == "finite_difference"),
+                            "residual_row_batch_alpha_replay": bool(replay_role == "alpha"),
+                            "residual_row_batch_fd_replay": bool(replay_role == "finite_difference"),
+                            "residual_row_batch_replay_role": replay_role,
+                            "residual_row_batch_group_size": 1,
+                            "residual_row_batch_group_index": 0,
+                            "batch_alpha_replay_seconds": elapsed if replay_role == "alpha" else 0.0,
+                            "batch_fd_replay_seconds": elapsed if replay_role == "finite_difference" else 0.0,
+                            "batch_size": 1,
+                            "free_dof_count": int(free.size),
+                            "shell_operator_cache_size": int(len(shell_operator_cache)),
+                            "physical_internal_force_inf_n": None,
+                            "external_load_source": "reference_configuration",
+                            "assembled_external_load_inf_n": None,
+                            "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+                            "state_dependent_shell_material_tangent_hip_replay": True,
+                            "state_dependent_shell_material_tangent_operator_refresh_backend": (
+                                "host_shell_operator_refresh"
+                            ),
+                        }
+                        results.append(
+                            (
+                                None,
+                                f_ext,
+                                free,
+                                np.asarray(residual_batch[0], dtype=np.float64),
+                                rhs,
+                                meta,
+                            )
+                        )
+                    except Exception as exc:  # pragma: no cover - recorded in probe JSON
+                        current_tangent_residual_row_correction[
+                            "batch_replay_backend_error"
+                        ] = str(exc)
+                        if hip_batch_replay_required_unavailable(
+                            "hip_backend_prepare_or_evaluate_failed_state_dependent"
+                        ):
+                            return []
+                return results
+
             def evaluate_row_candidates_batch(
                 candidate_us: list[np.ndarray],
                 *,
@@ -3291,6 +5147,27 @@ def run_mgt_direct_residual_newton_probe(
                 if not candidate_us:
                     return []
                 replay_role = str(replay_role)
+                state_dependent_hip = bool(
+                    apply_shell_material_tangent
+                    and allow_state_dependent_shell_material_tangent_hip_replay
+                    and row_batch_backend
+                    in {
+                        "hip_full_residual",
+                        "hip_full_residual_resident",
+                        "rust_hip_full_residual_ffi",
+                    }
+                )
+                if state_dependent_hip:
+                    current_tangent_residual_row_correction[
+                        "state_dependent_shell_material_tangent_hip_replay"
+                    ] = True
+                    current_tangent_residual_row_correction[
+                        "state_dependent_shell_material_tangent_operator_refresh_backend"
+                    ] = "host_shell_operator_refresh"
+                    return _evaluate_row_candidates_state_dependent(
+                        candidate_us,
+                        replay_role=replay_role,
+                    )
                 batch_enabled = (
                     row_batch_fd_replay
                     if replay_role == "finite_difference"
@@ -3326,8 +5203,12 @@ def run_mgt_direct_residual_newton_probe(
                         current_tangent_residual_row_correction[
                             "batch_replay_backend_error"
                         ] = str(exc)
+                        if hip_batch_replay_required_unavailable("hip_backend_evaluate_failed"):
+                            return []
                         return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
                 else:
+                    if hip_batch_replay_required_unavailable("hip_backend_prepare_failed_or_disabled"):
+                        return []
                     f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
                         u_batch=states,
                         node_xyz=node_xyz,
@@ -3380,6 +5261,7 @@ def run_mgt_direct_residual_newton_probe(
                         replay_role == "finite_difference"
                     ),
                     "residual_row_batch_replay_role": replay_role,
+                    "residual_row_batch_group_size": int(states.shape[0]),
                     "batch_alpha_replay_seconds": elapsed
                     if replay_role == "alpha"
                     else 0.0,
@@ -3404,6 +5286,7 @@ def run_mgt_direct_residual_newton_probe(
                     if f_ext.size
                     else 0.0,
                 }
+                hip_batch_replay = bool(meta_base.get("hip_full_residual_batch_replay"))
                 return [
                     (
                         None,
@@ -3419,6 +5302,13 @@ def run_mgt_direct_residual_newton_probe(
                             "batch_fd_replay_index": int(index)
                             if replay_role == "finite_difference"
                             else None,
+                            "residual_row_batch_group_index": int(index),
+                            "hip_batch_group_size": int(states.shape[0])
+                            if hip_batch_replay
+                            else None,
+                            "hip_batch_group_index": int(index)
+                            if hip_batch_replay
+                            else None,
                         },
                     )
                     for index in range(int(states.shape[0]))
@@ -3428,7 +5318,15 @@ def run_mgt_direct_residual_newton_probe(
                 previous_residual_inf = (
                     float(np.max(np.abs(current_residual))) if current_residual.size else 0.0
                 )
-                k_ff = current_stiffness[current_free, :][:, current_free].tocsr()
+                stiffness_free_target_support = bool(
+                    jacobian_mode == "finite_difference"
+                    and support_selection_mode == "target_rows"
+                )
+                k_ff = (
+                    None
+                    if stiffness_free_target_support
+                    else current_stiffness[current_free, :][:, current_free].tocsr()
+                )
                 current_tangent_residual_row_correction["attempted"] = True
                 current_max_abs = max(
                     float(np.max(np.abs(current_u))) if current_u.size else 0.0,
@@ -3438,15 +5336,81 @@ def run_mgt_direct_residual_newton_probe(
                     "row_correction_pass": int(row_pass),
                     "previous_direct_residual_inf_n": previous_residual_inf,
                     "free_dof_count": int(current_free.size),
+                    "stiffness_free_target_support": bool(
+                        stiffness_free_target_support
+                    ),
                 }
-                support_graph = (abs(k_ff) + abs(k_ff.T)).tocsr()
+                support_graph = (
+                    None
+                    if k_ff is None
+                    else (abs(k_ff) + abs(k_ff.T)).tocsr()
+                )
                 trial_rows: list[dict[str, Any]] = []
                 trial_vectors: list[np.ndarray] = []
+                trial_frees: list[np.ndarray] = []
+                trial_residuals: list[np.ndarray] = []
+                trial_rhs_vectors: list[np.ndarray] = []
                 candidate_rows_meta: list[dict[str, Any]] = []
                 fd_jvp_cache: dict[int, tuple[np.ndarray, float]] = {}
                 fd_cache_hits = 0
                 fd_cache_misses = 0
                 residual_abs = np.abs(current_residual)
+                current_component_rows: list[dict[str, Any]] = []
+                current_component_breakdown_meta: dict[str, Any] | None = None
+                if target_mode == "current_component_rows":
+                    (
+                        _component_k,
+                        _component_f,
+                        component_free,
+                        component_residual,
+                        component_rhs,
+                        component_meta,
+                    ) = assemble_residual(
+                        current_u,
+                        external_load_override=reference_f_ext,
+                        include_component_forces=True,
+                    )
+                    component_forces = component_meta.pop("component_forces", {})
+                    component_breakdown = _component_breakdown(
+                        component_forces=(
+                            component_forces
+                            if isinstance(component_forces, dict)
+                            else {}
+                        ),
+                        free=np.asarray(component_free, dtype=np.int64),
+                        residual=np.asarray(component_residual, dtype=np.float64),
+                        rhs=np.asarray(component_rhs, dtype=np.float64),
+                        top_count=max(
+                            24,
+                            2
+                            * max(
+                                (
+                                    int(value)
+                                    for value in current_tangent_residual_row_target_counts
+                                ),
+                                default=12,
+                            ),
+                        ),
+                    )
+                    current_component_rows = [
+                        row
+                        for row in component_breakdown.get("top_rows", [])
+                        if isinstance(row, dict)
+                    ]
+                    current_component_breakdown_meta = {
+                        "component_inf_n": component_breakdown.get(
+                            "component_inf_n", {}
+                        ),
+                        "top_row_dominant_component_counts": (
+                            component_breakdown.get(
+                                "top_row_dominant_component_counts", {}
+                            )
+                        ),
+                        "top_row_count": int(len(current_component_rows)),
+                    }
+                    pass_payload[
+                        "current_component_residual_breakdown"
+                    ] = current_component_breakdown_meta
                 for target_row_count in current_tangent_residual_row_target_counts:
                     target_meta: dict[str, Any] = {}
                     if target_mode == "residual_node_blocks":
@@ -3463,6 +5427,20 @@ def run_mgt_direct_residual_newton_probe(
                             frontier_component_rows,
                             target_row_count=int(target_row_count),
                         )
+                        actual_target_count = int(target_rows.size)
+                    elif target_mode == "current_component_rows":
+                        target_rows, target_meta = _select_frontier_component_rows(
+                            current_free,
+                            current_component_rows,
+                            target_row_count=int(target_row_count),
+                        )
+                        target_meta = {
+                            **target_meta,
+                            "source": "current_component_residual_breakdown",
+                            "current_component_breakdown": (
+                                current_component_breakdown_meta or {}
+                            ),
+                        }
                         actual_target_count = int(target_rows.size)
                     elif target_mode in {
                         "residual_element_blocks",
@@ -3581,7 +5559,13 @@ def run_mgt_direct_residual_newton_probe(
                         continue
                     for support_column_count in current_tangent_residual_row_support_column_counts:
                         support: set[int] = set(int(row) for row in target_rows.tolist())
-                        if support_selection_mode == "residual_weighted":
+                        stiffness_free_support_selection = bool(
+                            stiffness_free_target_support
+                        )
+                        if support_selection_mode == "target_rows":
+                            pass
+                        elif support_selection_mode == "residual_weighted":
+                            assert k_ff is not None
                             scores: dict[int, float] = {}
                             for target_row in target_rows.tolist():
                                 start = int(k_ff.indptr[int(target_row)])
@@ -3602,6 +5586,7 @@ def run_mgt_direct_residual_newton_probe(
                                 )[:max_take]
                                 support.update(int(col) for col in ranked_cols)
                         else:
+                            assert k_ff is not None
                             for target_row in target_rows.tolist():
                                 start = int(k_ff.indptr[int(target_row)])
                                 end = int(k_ff.indptr[int(target_row) + 1])
@@ -3614,6 +5599,8 @@ def run_mgt_direct_residual_newton_probe(
                         for _depth in range(
                             max(0, int(current_tangent_residual_row_support_expansion_depth))
                         ):
+                            if support_graph is None:
+                                break
                             frontier = sorted(support)
                             expanded: set[int] = set(support)
                             for support_col in frontier:
@@ -3636,7 +5623,14 @@ def run_mgt_direct_residual_newton_probe(
                             )
                         if support_cols.size == 0:
                             continue
-                        tangent_submatrix = k_ff[target_rows, :][:, support_cols].toarray()
+                        tangent_submatrix = (
+                            np.zeros(
+                                (int(target_rows.size), int(support_cols.size)),
+                                dtype=np.float64,
+                            )
+                            if stiffness_free_support_selection
+                            else k_ff[target_rows, :][:, support_cols].toarray()
+                        )
                         pre_fd_support_size = int(support_cols.size)
                         support_trimmed_by_fd_limit = False
                         if (
@@ -3644,7 +5638,17 @@ def run_mgt_direct_residual_newton_probe(
                             and fd_max_support_columns > 0
                             and support_cols.size > fd_max_support_columns
                         ):
-                            column_scores = np.linalg.norm(tangent_submatrix, axis=0)
+                            column_scores = (
+                                np.asarray(
+                                    [
+                                        abs(float(current_residual[int(col)]))
+                                        for col in support_cols.tolist()
+                                    ],
+                                    dtype=np.float64,
+                                )
+                                if stiffness_free_support_selection
+                                else np.linalg.norm(tangent_submatrix, axis=0)
+                            )
                             take = min(int(fd_max_support_columns), int(support_cols.size))
                             strongest = np.argpartition(column_scores, -take)[-take:]
                             strongest = strongest[
@@ -3662,6 +5666,12 @@ def run_mgt_direct_residual_newton_probe(
                             "pre_finite_difference_support_size": pre_fd_support_size,
                             "support_trimmed_by_fd_limit": bool(support_trimmed_by_fd_limit),
                             "post_finite_difference_support_size": int(support_cols.size),
+                            "stiffness_free_support_selection": bool(
+                                stiffness_free_support_selection
+                            ),
+                            "support_selection_uses_tangent_stiffness": bool(
+                                not stiffness_free_support_selection
+                            ),
                             "free_dof_set_stable": True,
                         }
                         if jacobian_mode == "finite_difference":
@@ -3678,6 +5688,7 @@ def run_mgt_direct_residual_newton_probe(
                             fd_batch_count_before = row_batch_fd_replay_batch_count
                             fd_batch_state_count_before = row_batch_fd_replay_state_count
                             fd_batch_seconds_before = row_batch_fd_replay_seconds
+                            fd_batch_meta_rows: list[dict[str, Any]] = []
                             missing_fd_entries: list[
                                 tuple[int, int, float, np.ndarray]
                             ] = []
@@ -3719,6 +5730,12 @@ def run_mgt_direct_residual_newton_probe(
                                     ],
                                     replay_role="finite_difference",
                                 )
+                                if len(fd_chunk_results) != len(fd_chunk):
+                                    fd_stable = False
+                                    current_tangent_residual_row_correction[
+                                        "stop_reason"
+                                    ] = "hip_required_fd_replay_unavailable"
+                                    break
                                 for (
                                     _fd_col,
                                     support_col,
@@ -3733,6 +5750,7 @@ def run_mgt_direct_residual_newton_probe(
                                         _fd_rhs,
                                         _fd_meta,
                                     ) = fd_result
+                                    fd_batch_meta_rows.append(dict(_fd_meta))
                                     if not (
                                         fd_free.shape == current_free.shape
                                         and np.array_equal(fd_free, current_free)
@@ -3806,6 +5824,25 @@ def run_mgt_direct_residual_newton_probe(
                                         row_batch_fd_replay_seconds
                                         - fd_batch_seconds_before
                                     ),
+                                    "finite_difference_hip_batch_replay": any(
+                                        bool(meta.get("hip_full_residual_batch_replay"))
+                                        for meta in fd_batch_meta_rows
+                                    ),
+                                    "finite_difference_hip_batch_group_sizes": sorted(
+                                        {
+                                            int(meta["hip_batch_group_size"])
+                                            for meta in fd_batch_meta_rows
+                                            if meta.get("hip_batch_group_size")
+                                            is not None
+                                        }
+                                    ),
+                                    "finite_difference_residual_batch_backends": sorted(
+                                        {
+                                            str(meta.get("residual_batch_backend"))
+                                            for meta in fd_batch_meta_rows
+                                            if meta.get("residual_batch_backend")
+                                        }
+                                    ),
                                 }
                             )
                             if not fd_stable or len(fd_epsilons) != int(support_cols.size):
@@ -3817,7 +5854,10 @@ def run_mgt_direct_residual_newton_probe(
                             "mode": "none",
                             "enabled": False,
                         }
-                        if target_mode == "frontier_component_rows":
+                        if target_mode in {
+                            "frontier_component_rows",
+                            "current_component_rows",
+                        }:
                             (
                                 row_equation_weights,
                                 row_equation_scale_meta,
@@ -4187,6 +6227,24 @@ def run_mgt_direct_residual_newton_probe(
                                         "residual_row_batch_alpha_replay"
                                     )
                                 ),
+                                "batch_alpha_replay_index": (
+                                    int(candidate_meta["batch_alpha_replay_index"])
+                                    if candidate_meta.get("batch_alpha_replay_index")
+                                    is not None
+                                    else None
+                                ),
+                                "residual_row_batch_group_size": (
+                                    int(candidate_meta["residual_row_batch_group_size"])
+                                    if candidate_meta.get("residual_row_batch_group_size")
+                                    is not None
+                                    else None
+                                ),
+                                "residual_row_batch_group_index": (
+                                    int(candidate_meta["residual_row_batch_group_index"])
+                                    if candidate_meta.get("residual_row_batch_group_index")
+                                    is not None
+                                    else None
+                                ),
                                 "residual_batch_backend": str(
                                     candidate_meta.get("residual_batch_backend") or ""
                                 ),
@@ -4194,6 +6252,18 @@ def run_mgt_direct_residual_newton_probe(
                                     candidate_meta.get(
                                         "hip_full_residual_batch_replay"
                                     )
+                                ),
+                                "hip_batch_group_size": (
+                                    int(candidate_meta["hip_batch_group_size"])
+                                    if candidate_meta.get("hip_batch_group_size")
+                                    is not None
+                                    else None
+                                ),
+                                "hip_batch_group_index": (
+                                    int(candidate_meta["hip_batch_group_index"])
+                                    if candidate_meta.get("hip_batch_group_index")
+                                    is not None
+                                    else None
                                 ),
                                 "hip_kernel_mean_seconds": (
                                     float(candidate_meta["hip_kernel_mean_seconds"])
@@ -4213,6 +6283,15 @@ def run_mgt_direct_residual_newton_probe(
                             }
                             trial_rows.append(trial_row)
                             trial_vectors.append(candidate_u)
+                            trial_frees.append(
+                                np.asarray(candidate_free, dtype=np.int64).copy()
+                            )
+                            trial_residuals.append(
+                                np.asarray(candidate_residual, dtype=np.float64).copy()
+                            )
+                            trial_rhs_vectors.append(
+                                np.asarray(candidate_rhs, dtype=np.float64).copy()
+                            )
                         candidate_trials = trial_rows[candidate_start:]
                         if candidate_trials:
                             best_candidate_trial = min(
@@ -4354,16 +6433,176 @@ def run_mgt_direct_residual_newton_probe(
                 assert best_gate_trial_index is not None
                 promotion_count += 1
                 current_u = trial_vectors[best_gate_trial_index]
-                (
-                    current_stiffness,
-                    _current_f_ext,
-                    current_free,
-                    current_residual,
-                    current_rhs,
-                    _current_meta,
-                ) = assemble_residual(current_u, external_load_override=reference_f_ext)
+                accepted_trial = trial_rows[best_gate_trial_index]
+                terminal_row_promotion = bool(promotion_count >= max_row_promotions)
+                stop_after_row_promotion = False
+                hip_residual_refresh_available = bool(
+                    row_require_hip_batch_replay
+                    and accepted_trial.get("hip_full_residual_batch_replay")
+                    and best_gate_trial_index < len(trial_frees)
+                    and best_gate_trial_index < len(trial_residuals)
+                    and best_gate_trial_index < len(trial_rhs_vectors)
+                    and trial_frees[best_gate_trial_index].shape == current_free.shape
+                    and np.array_equal(
+                        trial_frees[best_gate_trial_index],
+                        current_free,
+                    )
+                )
+                if hip_residual_refresh_available:
+                    current_free = trial_frees[best_gate_trial_index]
+                    current_residual = trial_residuals[best_gate_trial_index]
+                    current_rhs = trial_rhs_vectors[best_gate_trial_index]
+                    row_acceptance_refresh_meta = {
+                        "accepted_state_refresh_backend": str(
+                            accepted_trial.get("residual_batch_backend")
+                            or row_batch_backend
+                        ),
+                        "accepted_state_refresh_hip_used": True,
+                        "accepted_state_refresh_cpu_used": False,
+                        "accepted_state_refresh_source": (
+                            "accepted_row_candidate_hip_batch_replay"
+                        ),
+                    }
+                    if terminal_row_promotion:
+                        row_acceptance_refresh_meta.update(
+                            {
+                                "accepted_state_tangent_refresh_backend": (
+                                    "not_refreshed_terminal_row_correction"
+                                ),
+                                "accepted_state_tangent_refresh_cpu_used": False,
+                                "accepted_state_tangent_refresh_skipped_reason": (
+                                    "terminal_row_correction_uses_accepted_hip_residual"
+                                ),
+                            }
+                        )
+                    else:
+                        if jacobian_mode == "finite_difference":
+                            row_acceptance_refresh_meta.update(
+                                {
+                                    "accepted_state_tangent_refresh_backend": (
+                                        "frozen_previous_support_graph_fd_residual_jvp"
+                                    ),
+                                    "accepted_state_tangent_refresh_cpu_used": False,
+                                    "accepted_state_tangent_refresh_skipped_reason": (
+                                        "finite_difference_residual_jvp_reuses_previous_support_graph"
+                                    ),
+                                    "frozen_support_graph_after_hip_residual_promotion": True,
+                                    "frozen_support_graph_scope": (
+                                        "support_selection_scaffold_only"
+                                    ),
+                                }
+                            )
+                        else:
+                            stop_after_row_promotion = True
+                            row_acceptance_refresh_meta.update(
+                                {
+                                    "accepted_state_tangent_refresh_backend": (
+                                        "not_refreshed_hip_required_row_correction"
+                                    ),
+                                    "accepted_state_tangent_refresh_cpu_used": False,
+                                    "accepted_state_tangent_refresh_skipped_reason": (
+                                        "hip_required_row_tangent_refresh_unavailable"
+                                    ),
+                                    "hip_required_tangent_refresh_unavailable_after_promotion": True,
+                                    "stop_after_hip_residual_promotion": True,
+                                }
+                            )
+                else:
+                    row_acceptance_refresh_meta = {
+                        "accepted_state_refresh_backend": "cpu_full_assembly",
+                        "accepted_state_refresh_cpu_used": True,
+                        "accepted_state_tangent_refresh_backend": "cpu_full_assembly",
+                        "accepted_state_tangent_refresh_cpu_used": True,
+                    }
+                    if row_require_hip_batch_replay:
+                        row_acceptance_refresh_meta.update(
+                            {
+                                "accepted_state_refresh_closure_blocked": True,
+                                "accepted_state_refresh_closure_blocker": (
+                                    "rocm_hip_row_acceptance_refresh_required_for_closure"
+                                ),
+                                "accepted_state_tangent_refresh_closure_blocked": True,
+                                "accepted_state_tangent_refresh_closure_blocker": (
+                                    "rocm_hip_row_tangent_refresh_required_for_closure"
+                                ),
+                            }
+                        )
+                    (
+                        current_stiffness,
+                        _current_f_ext,
+                        current_free,
+                        current_residual,
+                        current_rhs,
+                        _current_meta,
+                    ) = assemble_residual(
+                        current_u,
+                        external_load_override=reference_f_ext,
+                    )
+                    if (
+                        row_require_hip_batch_replay
+                        and not (
+                            current_free.shape == trial_frees[best_gate_trial_index].shape
+                            and np.array_equal(
+                                current_free,
+                                trial_frees[best_gate_trial_index],
+                            )
+                        )
+                    ):
+                        row_acceptance_refresh_meta.update(
+                            {
+                                "accepted_state_refresh_closure_blocker": (
+                                    "rocm_hip_row_acceptance_refresh_free_dof_mismatch"
+                                )
+                            }
+                        )
+                prior_cpu_residual_refresh = bool(
+                    current_tangent_residual_row_correction.get(
+                        "accepted_state_refresh_cpu_used"
+                    )
+                )
+                prior_cpu_tangent_refresh = bool(
+                    current_tangent_residual_row_correction.get(
+                        "accepted_state_tangent_refresh_cpu_used"
+                    )
+                )
+                if (
+                    prior_cpu_residual_refresh
+                    and not row_acceptance_refresh_meta.get(
+                        "accepted_state_refresh_cpu_used"
+                    )
+                ):
+                    row_acceptance_refresh_meta[
+                        "accepted_state_refresh_prior_cpu_used"
+                    ] = True
+                    row_acceptance_refresh_meta[
+                        "accepted_state_refresh_cpu_used"
+                    ] = True
+                if (
+                    prior_cpu_tangent_refresh
+                    and not row_acceptance_refresh_meta.get(
+                        "accepted_state_tangent_refresh_cpu_used"
+                    )
+                ):
+                    row_acceptance_refresh_meta[
+                        "accepted_state_tangent_refresh_prior_cpu_used"
+                    ] = True
+                    row_acceptance_refresh_meta[
+                        "accepted_state_tangent_refresh_cpu_used"
+                    ] = True
+                pass_payload.update(row_acceptance_refresh_meta)
+                current_tangent_residual_row_correction.update(
+                    row_acceptance_refresh_meta
+                )
                 accepted_state_history.append(np.asarray(current_u, dtype=np.float64).copy())
                 accepted_residual_history.append(np.asarray(current_residual, dtype=np.float64).copy())
+                if stop_after_row_promotion:
+                    pass_payload["reason"] = (
+                        "hip_required_row_tangent_refresh_unavailable_after_promotion"
+                    )
+                    current_tangent_residual_row_correction["stop_reason"] = str(
+                        pass_payload["reason"]
+                    )
+                    break
             if max_row_promotions == 0:
                 current_tangent_residual_row_correction["stop_reason"] = "max_promotions_zero"
             elif promotion_count >= max_row_promotions:
@@ -4437,15 +6676,53 @@ def run_mgt_direct_residual_newton_probe(
     final_direct_residual_inf = (
         float(np.max(np.abs(current_residual))) if current_residual.size else base_residual_inf
     )
+    final_component_breakdown: dict[str, Any] | None = None
+    if include_residual_component_breakdown:
+        (
+            _component_stiffness,
+            _component_f_ext,
+            component_free,
+            component_residual,
+            component_rhs,
+            component_meta,
+        ) = assemble_residual(
+            current_u,
+            external_load_override=reference_f_ext,
+            include_component_forces=True,
+        )
+        component_forces = component_meta.pop("component_forces", {})
+        final_component_breakdown = _component_breakdown(
+            component_forces=(
+                component_forces if isinstance(component_forces, dict) else {}
+            ),
+            free=np.asarray(component_free, dtype=np.int64),
+            residual=np.asarray(component_residual, dtype=np.float64),
+            rhs=np.asarray(component_rhs, dtype=np.float64),
+            top_count=int(residual_component_breakdown_top_count),
+        )
     direct_residual_gate_passed = bool(final_direct_residual_inf <= residual_tolerance_n)
     relative_increment_gate_verified = bool(final_gate_candidate)
     relative_increment_gate_passed = bool(
         final_gate_candidate.get("relative_increment_gate_passed")
     )
+    cpu_acceptance_refresh_closure_blocked = _cpu_acceptance_refresh_closure_blocked(
+        matrix_free_global_krylov
+    )
+    fallback_zero_audit = _g1_fallback_zero_audit(
+        matrix_free_global_krylov,
+        current_tangent_residual_row_correction,
+    )
+    fallback_zero_passed = bool(fallback_zero_audit["fallback_zero_passed"])
+    hip_residual_engine_contract = _g1_hip_residual_engine_contract(
+        matrix_free_global_krylov,
+        current_tangent_residual_row_correction,
+    )
     converged = bool(
         best_improved
         and direct_residual_gate_passed
         and relative_increment_gate_passed
+        and not cpu_acceptance_refresh_closure_blocked
+        and fallback_zero_passed
     )
     output_final_checkpoint_meta: dict[str, Any] | None = None
     final_state_improved = final_direct_residual_inf < base_residual_inf
@@ -4513,6 +6790,18 @@ def run_mgt_direct_residual_newton_probe(
             final_direct_residual_inf=final_direct_residual_inf,
             reason="no_residual_descent",
         )
+    hip_batch_replay_required_unavailable = bool(
+        matrix_free_global_krylov.get("hip_batch_replay_required_unavailable")
+        or current_tangent_residual_row_correction.get(
+            "hip_batch_replay_required_unavailable"
+        )
+    )
+    hip_krylov_solver_required_unavailable = bool(
+        matrix_free_global_krylov.get("hip_krylov_solver_required_unavailable")
+    )
+    host_krylov_solver_closure_blocked = bool(
+        matrix_free_global_krylov.get("host_krylov_solver_closure_blocked")
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
@@ -4533,6 +6822,20 @@ def run_mgt_direct_residual_newton_probe(
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "shell_pressure_load_path_meta": pressure_load_path_meta,
             "shell_material_tangent_residual_applied": bool(apply_shell_material_tangent),
+            "allow_frozen_shell_material_tangent_hip_replay": bool(
+                allow_frozen_shell_material_tangent_hip_replay
+            ),
+            "allow_state_dependent_shell_material_tangent_hip_replay": bool(
+                allow_state_dependent_shell_material_tangent_hip_replay
+            ),
+            "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure": bool(
+                apply_shell_material_tangent
+                and allow_frozen_shell_material_tangent_hip_replay
+            ),
+            "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency": bool(
+                apply_shell_material_tangent
+                and allow_state_dependent_shell_material_tangent_hip_replay
+            ),
             "frame_geometric_equilibrium_included": True,
             "authored_support_restraints_included": True,
             "finite_elastic_link_springs_included": True,
@@ -4550,11 +6853,15 @@ def run_mgt_direct_residual_newton_probe(
             "current_tangent_residual_row_correction_included": bool(
                 enable_current_tangent_residual_row_correction
             ),
+            "residual_component_breakdown_included": bool(
+                include_residual_component_breakdown
+            ),
             "finite_difference_residual_row_jacobian_included": bool(
                 enable_current_tangent_residual_row_correction
                 and str(current_tangent_residual_row_jacobian_mode).strip()
                 == "finite_difference"
             ),
+            **hip_residual_engine_contract,
         },
         "mesh_fingerprint": {
             **frame_select_meta,
@@ -4581,6 +6888,7 @@ def run_mgt_direct_residual_newton_probe(
             "fixed_point_receipt_relative_increment": checkpoint_meta.get(
                 "fixed_point_relative_increment"
             ),
+            "residual_component_breakdown": base_component_breakdown,
         },
         "final_direct_residual": {
             "direct_residual_inf_n": final_direct_residual_inf,
@@ -4601,6 +6909,7 @@ def run_mgt_direct_residual_newton_probe(
                 matrix_free_global_krylov.get("accepted")
             ),
             "improvement_factor": base_residual_inf / max(final_direct_residual_inf, 1.0e-30),
+            "residual_component_breakdown": final_component_breakdown,
         },
         "gate_assessment": {
             "residual_tolerance_n": float(residual_tolerance_n),
@@ -4609,6 +6918,20 @@ def run_mgt_direct_residual_newton_probe(
             "relative_increment_gate_verified": relative_increment_gate_verified,
             "relative_increment_gate_passed": relative_increment_gate_passed,
             "direct_residual_newton_ready_requires_increment_gate": True,
+            "hip_batch_replay_required_unavailable": (
+                hip_batch_replay_required_unavailable
+            ),
+            "host_krylov_solver_closure_blocked": (
+                host_krylov_solver_closure_blocked
+            ),
+            "hip_krylov_solver_required_unavailable": (
+                hip_krylov_solver_required_unavailable
+            ),
+            "cpu_acceptance_refresh_closure_blocked": (
+                cpu_acceptance_refresh_closure_blocked
+            ),
+            "fallback_zero_audit": fallback_zero_audit,
+            "fallback_zero_passed": fallback_zero_passed,
         },
         "newton_direction": {
             "linearized_tangent": (
@@ -4653,10 +6976,49 @@ def run_mgt_direct_residual_newton_probe(
             "consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov "
             "direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and "
             "increment gates pass."
+            + (
+                " Frozen shell-material tangent HIP replay freezes the current accepted "
+                "state shell material CSR for ROCm/HIP residual replay; it is not "
+                "state-dependent material Newton closure."
+                if apply_shell_material_tangent
+                and allow_frozen_shell_material_tangent_hip_replay
+                else ""
+            )
+            + (
+                " State-dependent shell-material tangent HIP replay computes the "
+                "shell material tangent from each candidate state and evaluates "
+                "through a candidate-specific HIP backend. Shell CSR/operator refresh "
+                "happens on host; this is state-dependent material tangent HIP "
+                "residual replay but not full production ROCm/HIP residency closure."
+                if apply_shell_material_tangent
+                and allow_state_dependent_shell_material_tangent_hip_replay
+                else ""
+            )
         ),
         "blockers": []
         if converged
         else [
+            *(
+                ["rocm_hip_batch_replay_required_unavailable"]
+                if hip_batch_replay_required_unavailable
+                else []
+            ),
+            *(
+                ["rocm_hip_krylov_solver_required_for_closure"]
+                if host_krylov_solver_closure_blocked
+                else []
+            ),
+            *(
+                ["rocm_hip_krylov_solver_unavailable"]
+                if hip_krylov_solver_required_unavailable
+                else []
+            ),
+            *(
+                ["rocm_hip_acceptance_refresh_required_for_closure"]
+                if cpu_acceptance_refresh_closure_blocked
+                else []
+            ),
+            *(["g1_fallback_zero_audit_not_closed"] if not fallback_zero_passed else []),
             *([] if direct_residual_gate_passed else ["direct_residual_gate_not_closed"]),
             *(
                 []
@@ -4713,6 +7075,45 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual and Newton tangent assembly. This is CPU diagnostic evidence "
             "until the ROCm/HIP full residual backend consumes the same tangent field."
         ),
+    )
+    parser.add_argument(
+        "--allow-frozen-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "When --apply-shell-material-tangent is enabled and a HIP residual batch "
+            "replay backend is requested, freeze the current accepted state's shell "
+            "material tangent CSR as a non-closure HIP operator and use HIP batch "
+            "replay instead of falling back to CPU. This is frozen_shell_material_tangent_"
+            "hip_replay, not state-dependent material Newton. Do not claim full material "
+            "Newton closure from this path."
+        ),
+    )
+    parser.add_argument(
+        "--allow-state-dependent-shell-material-tangent-hip-replay",
+        action="store_true",
+        help=(
+            "When --apply-shell-material-tangent is enabled and a HIP residual batch "
+            "replay backend is requested, compute the shell material tangent from each "
+            "candidate state, build the candidate shell CSR, and evaluate that candidate "
+            "residual through the selected HIP backend. This wins over --allow-frozen-"
+            "shell-material-tangent-hip-replay. HIP-required prepare/evaluate failure "
+            "suppresses CPU fallback. Shell CSR/operator refresh happens on host; this "
+            "is not full production ROCm/HIP residency closure."
+        ),
+    )
+    parser.add_argument(
+        "--include-residual-component-breakdown",
+        action="store_true",
+        help=(
+            "Record base/final residual component top-row breakdowns from the same "
+            "direct residual assembly used by this probe."
+        ),
+    )
+    parser.add_argument(
+        "--residual-component-breakdown-top-count",
+        type=int,
+        default=24,
+        help="Number of top residual rows to include when component breakdown is enabled.",
     )
     parser.add_argument("--residual-tolerance-n", type=float, default=5.0e-4)
     parser.add_argument("--relative-increment-tolerance", type=float, default=1.0e-4)
@@ -4829,6 +7230,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument("--matrix-free-global-krylov-max-iterations", type=int, default=4)
+    parser.add_argument(
+        "--matrix-free-global-krylov-difference-scheme",
+        choices=("forward", "central"),
+        default="forward",
+        help=(
+            "Finite-difference stencil for global Krylov residual-JVP matvecs. "
+            "central evaluates plus/minus residual probes and requires both free-DOF "
+            "sets to remain stable."
+        ),
+    )
     parser.add_argument("--matrix-free-global-krylov-probe-epsilon", type=float, default=1.0e-6)
     parser.add_argument(
         "--matrix-free-global-krylov-probe-max-step",
@@ -4910,6 +7321,43 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=1.0e-6,
     )
     parser.add_argument(
+        "--matrix-free-global-krylov-full-assembly-trial-replay",
+        action="store_true",
+        help=(
+            "Replay global matrix-free Krylov line-search candidates through the full "
+            "Newton tangent/physical residual assembly and use that residual for "
+            "promotion gating."
+        ),
+    )
+    parser.add_argument(
+        "--matrix-free-global-krylov-batch-replay-backend",
+        choices=("cpu", "hip_full_residual", "hip_full_residual_resident", "rust_hip_full_residual_ffi"),
+        default="cpu",
+        help=(
+            "Residual replay backend for global Krylov residual probes and line-search "
+            "trials. HIP backends use the native full-residual batch engine."
+        ),
+    )
+    parser.add_argument(
+        "--matrix-free-global-krylov-require-hip-batch-replay",
+        action="store_true",
+        help=(
+            "Require a HIP global Krylov residual replay backend and suppress CPU "
+            "batch fallback."
+        ),
+    )
+    parser.add_argument(
+        "--matrix-free-global-krylov-linear-solver-backend",
+        choices=("scipy_host_gmres", "torch_hip_gmres"),
+        default="scipy_host_gmres",
+        help=(
+            "Linear Krylov solver backend for the global matrix-free direction. "
+            "torch_hip_gmres runs the Arnoldi/least-squares vector algebra on a "
+            "ROCm torch HIP device and does not fall back to SciPy GMRES if HIP is "
+            "unavailable."
+        ),
+    )
+    parser.add_argument(
         "--enable-current-tangent-residual-row-correction",
         action="store_true",
         help="Enable experimental current-tangent residual-row least-squares correction.",
@@ -4938,6 +7386,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "residual_shell_geometry_normal_rows",
             "residual_shell_geometry_normal_bending_rows",
             "frontier_component_rows",
+            "current_component_rows",
         ),
         default="largest_rows",
         help=(
@@ -4956,7 +7405,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "the local shell normal; residual_shell_geometry_normal_bending_rows unions "
             "geometry-normal translation rows with shell rx/ry/rz bending/drilling rows; "
             "frontier_component_rows loads component-balanced hotspot rows from a "
-            "residual/Jacobian frontier probe JSON."
+            "residual/Jacobian frontier probe JSON; current_component_rows recomputes "
+            "component-balanced hotspot rows from the current pass residual."
         ),
     )
     parser.add_argument(
@@ -5009,12 +7459,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument(
         "--current-tangent-residual-row-support-selection",
-        choices=("row_strongest", "residual_weighted"),
+        choices=("row_strongest", "residual_weighted", "target_rows"),
         default="row_strongest",
         help=(
             "Support selection strategy for current-tangent residual-row correction. "
             "row_strongest preserves legacy per-target-row |K| selection; residual_weighted "
-            "uses target residual magnitudes to score support columns globally."
+            "uses target residual magnitudes to score support columns globally; target_rows "
+            "is finite-difference-only and uses selected target rows as stiffness-free "
+            "support columns."
         ),
     )
     parser.add_argument(
@@ -5078,6 +7530,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "keeps the native HIP worker and operator buffers resident; "
             "rust_hip_full_residual_ffi calls the native HIP C ABI through an "
             "in-process Rust FFI library."
+        ),
+    )
+    parser.add_argument(
+        "--current-tangent-residual-row-require-hip-batch-replay",
+        action="store_true",
+        help=(
+            "Require a HIP residual-row batch backend and suppress CPU batch fallback. "
+            "If HIP setup/evaluation fails, the row-correction attempt records a "
+            "blocked HIP replay boundary instead of replaying candidates on CPU."
         ),
     )
     parser.add_argument(
@@ -5174,12 +7635,62 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "diagnostic only. ROCm/HIP closure evidence must come from mgt_rocm_sparse_solver_probe."
         ),
     )
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if (
+        args.current_tangent_residual_row_require_hip_batch_replay
+        and args.current_tangent_residual_row_batch_replay_backend == "cpu"
+    ):
+        parser.error(
+            "--current-tangent-residual-row-require-hip-batch-replay requires "
+            "--current-tangent-residual-row-batch-replay-backend to be one of "
+            "hip_full_residual, hip_full_residual_resident, or rust_hip_full_residual_ffi"
+        )
+    if (
+        args.matrix_free_global_krylov_require_hip_batch_replay
+        and args.matrix_free_global_krylov_batch_replay_backend == "cpu"
+    ):
+        parser.error(
+            "--matrix-free-global-krylov-require-hip-batch-replay requires "
+            "--matrix-free-global-krylov-batch-replay-backend to be one of "
+            "hip_full_residual, hip_full_residual_resident, or rust_hip_full_residual_ffi"
+        )
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    if not args.allow_cpu_diagnostic:
+    global_cpu_diagnostic_enabled = bool(
+        args.enable_matrix_free_global_krylov
+        and not (
+            args.matrix_free_global_krylov_require_hip_batch_replay
+            and args.matrix_free_global_krylov_batch_replay_backend != "cpu"
+        )
+    )
+    row_cpu_diagnostic_enabled = bool(
+        args.enable_current_tangent_residual_row_correction
+        and not (
+            args.current_tangent_residual_row_require_hip_batch_replay
+            and args.current_tangent_residual_row_batch_replay_backend != "cpu"
+        )
+    )
+    explicit_hip_required = bool(
+        (
+            args.enable_matrix_free_global_krylov
+            and args.matrix_free_global_krylov_require_hip_batch_replay
+            and args.matrix_free_global_krylov_batch_replay_backend != "cpu"
+        )
+        or (
+            args.enable_current_tangent_residual_row_correction
+            and args.current_tangent_residual_row_require_hip_batch_replay
+            and args.current_tangent_residual_row_batch_replay_backend != "cpu"
+        )
+    )
+    needs_cpu_ack = bool(
+        global_cpu_diagnostic_enabled
+        or row_cpu_diagnostic_enabled
+        or not explicit_hip_required
+    )
+    if needs_cpu_ack and not args.allow_cpu_diagnostic:
         print(
             "mgt-direct-residual-newton: blocked cpu diagnostic requires "
             "--allow-cpu-diagnostic; use scripts/run_mgt_rocm_sparse_solver_probe.py "
@@ -5251,6 +7762,16 @@ def main(argv: list[str] | None = None) -> int:
         stiffness_scale_to_si=args.stiffness_scale_to_si,
         shell_pressure_load_path_policy=args.shell_pressure_load_path_policy,
         apply_shell_material_tangent=args.apply_shell_material_tangent,
+        allow_frozen_shell_material_tangent_hip_replay=args.allow_frozen_shell_material_tangent_hip_replay,
+        allow_state_dependent_shell_material_tangent_hip_replay=(
+            args.allow_state_dependent_shell_material_tangent_hip_replay
+        ),
+        include_residual_component_breakdown=(
+            args.include_residual_component_breakdown
+        ),
+        residual_component_breakdown_top_count=(
+            args.residual_component_breakdown_top_count
+        ),
         residual_tolerance_n=args.residual_tolerance_n,
         relative_increment_tolerance=args.relative_increment_tolerance,
         max_trust_iterations=args.max_trust_iterations,
@@ -5290,6 +7811,9 @@ def main(argv: list[str] | None = None) -> int:
         matrix_free_global_krylov_max_iterations=(
             args.matrix_free_global_krylov_max_iterations
         ),
+        matrix_free_global_krylov_difference_scheme=(
+            args.matrix_free_global_krylov_difference_scheme
+        ),
         matrix_free_global_krylov_probe_epsilon=(
             args.matrix_free_global_krylov_probe_epsilon
         ),
@@ -5324,6 +7848,18 @@ def main(argv: list[str] | None = None) -> int:
         ),
         matrix_free_global_krylov_min_relative_improvement=(
             args.matrix_free_global_krylov_min_relative_improvement
+        ),
+        matrix_free_global_krylov_full_assembly_trial_replay=(
+            args.matrix_free_global_krylov_full_assembly_trial_replay
+        ),
+        matrix_free_global_krylov_batch_replay_backend=(
+            args.matrix_free_global_krylov_batch_replay_backend
+        ),
+        matrix_free_global_krylov_require_hip_batch_replay=(
+            args.matrix_free_global_krylov_require_hip_batch_replay
+        ),
+        matrix_free_global_krylov_linear_solver_backend=(
+            args.matrix_free_global_krylov_linear_solver_backend
         ),
         enable_current_tangent_residual_row_correction=(
             args.enable_current_tangent_residual_row_correction
@@ -5399,6 +7935,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_batch_replay_backend=(
             args.current_tangent_residual_row_batch_replay_backend
+        ),
+        current_tangent_residual_row_require_hip_batch_replay=(
+            args.current_tangent_residual_row_require_hip_batch_replay
         ),
         current_tangent_residual_row_hipcc=args.current_tangent_residual_row_hipcc,
         current_tangent_residual_row_force_rebuild_hip=(

@@ -1,0 +1,82 @@
+{
+  "blockers": [
+    "remote_mutation_approval_required"
+  ],
+  "checks": {
+    "explicit_remote_mutation_approval": false,
+    "feature_fast_forward_possible": true,
+    "feature_synced_to_head": false,
+    "main_fast_forward_possible": true,
+    "main_synced_to_head": false,
+    "remote_fetch_ok": true,
+    "remote_safety_ok": true,
+    "worktree_clean": true
+  },
+  "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+  "commands": {
+    "feature_push": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
+    "main_fast_forward_push": "git push origin HEAD:main",
+    "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
+  },
+  "contract_pass": false,
+  "generated_at": "2026-06-20T13:27:30.441494+00:00",
+  "pending_remote_updates": [
+    {
+      "action": "push current HEAD to feature",
+      "command": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
+      "rollback": "restore feature to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved restore action",
+      "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+    },
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved revert/restore action",
+      "target": "origin/main"
+    }
+  ],
+  "preflight_pass": true,
+  "r4_disclosure": {
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "impact": "GitHub pending refs become externally visible at the local development state.",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved restore action; restore main to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved revert/restore action",
+    "target": [
+      "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+      "origin/main"
+    ],
+    "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
+  },
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+  "remote_fetch_attempted": true,
+  "remote_fetch_ok": true,
+  "remote_mutation_approved": false,
+  "remote_sync_needed": true,
+  "schema_version": "github-development-sync-preflight.v1",
+  "state": {
+    "branch": "HEAD",
+    "feature_ahead_count": 2,
+    "feature_fast_forward_possible": true,
+    "local_head_sha": "954f2f79793e4ba35f9a7393cb456430e114a956",
+    "main_ahead_count": 2,
+    "main_fast_forward_possible": true,
+    "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+    "remote_feature_sha": "2ff3f9f8a2d977276832a8f988318d4a739259f6",
+    "remote_main_ref": "origin/main",
+    "remote_main_sha": "2ff3f9f8a2d977276832a8f988318d4a739259f6",
+    "remote_safety": {
+      "errors": [],
+      "expected_slug": "betelgeuze-kang/Structural-Analysis",
+      "ok": true,
+      "remotes": {
+        "origin": [
+          "git@github.com:betelgeuze-kang/Structural-Analysis.git"
+        ],
+        "structural": [
+          "git@github.com:betelgeuze-kang/Structural-Analysis.git"
+        ]
+      }
+    },
+    "worktree_status_short": ""
+  },
+  "status": "approval_required"
+}

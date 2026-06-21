@@ -1,0 +1,7 @@
+Goal: Add ROCm/HIP runtime preflight to the adaptive preconditioned global Newton controller so HIP-required global Krylov runs do not launch CPU-heavy child probes when no HIP device is available.
+
+Scope: Work only in implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py and tests/test_mgt_direct_residual_adaptive_preconditioned_global_newton.py. Do not edit release evidence, ledgers, PM reports, support bundles, or unrelated files. Preserve partial/non-closure claim boundaries. When --matrix-free-global-krylov-require-hip-batch-replay is active, the controller should check torch ROCm/HIP availability before launching child probes; if unavailable, write a partial controller receipt with promotion_count=0, stop_reason clearly indicating HIP runtime unavailable, rows=[], and a receipt-visible preflight payload. Existing CPU-diagnostic non-HIP behavior must remain unchanged.
+
+Candidate files: implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py, tests/test_mgt_direct_residual_adaptive_preconditioned_global_newton.py.
+
+Verification criteria: Run python3 -m py_compile implementation/phase1/run_mgt_direct_residual_adaptive_preconditioned_global_newton.py and python3 -m pytest -q tests/test_mgt_direct_residual_adaptive_preconditioned_global_newton.py. Worker output must be concise: changed files, test results, failed tests if any, core diff summary, and blockers. Do not include unified diffs, patch hunks, raw file dumps, secrets, or long logs.

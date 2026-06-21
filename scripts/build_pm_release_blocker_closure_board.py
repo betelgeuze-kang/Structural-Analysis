@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 
@@ -50,6 +51,16 @@ def _as_int(value: Any, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _release_area_green_total(report: dict[str, Any]) -> tuple[int, int]:
+    rows = [row for row in _as_list(report.get("release_area_matrix")) if isinstance(row, dict)]
+    if rows:
+        return sum(1 for row in rows if row.get("ok") is True), len(rows)
+    match = re.search(r"release_areas_green=(\d+)/(\d+)", str(report.get("summary_line", "")))
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return 0, 0
 
 
 def _row_handoff_ready(row: dict[str, Any]) -> bool:
@@ -179,6 +190,26 @@ def build_board(
     action_register_loaded = bool(register_payload)
     pm_report_loaded = bool(pm_payload)
     pm_blocker_ids = _pm_blocker_ids(pm_payload)
+    release_area_blocker_ids = [
+        str(item) for item in _as_list(pm_payload.get("release_area_blockers")) if str(item)
+    ]
+    release_area_green_count, release_area_total_count = _release_area_green_total(pm_payload)
+    canonical_release_area_evidence = {
+        "release_area_green_count": release_area_green_count,
+        "release_area_total_count": release_area_total_count,
+        "release_area_summary": (
+            f"{release_area_green_count}/{release_area_total_count}"
+            if release_area_total_count
+            else ""
+        ),
+        "release_area_blocker_count": len(release_area_blocker_ids),
+        "release_area_blocker_ids": release_area_blocker_ids,
+        "claim_boundary": (
+            "Release-area blockers are sourced from "
+            "pm_release_gate_report.json.release_area_blockers and are distinct "
+            "from release-tier/open blocker lists used for owner handoff."
+        ),
+    }
     register_blocker_ids = [str(row.get("blocker_id", "")) for row in rows if str(row.get("blocker_id", ""))]
     pm_blocker_set = set(pm_blocker_ids)
     register_blocker_set = set(register_blocker_ids)
@@ -212,6 +243,7 @@ def build_board(
         "pm_summary_line": str(
             pm_payload.get("summary_line", register_payload.get("pm_summary_line", ""))
         ),
+        "canonical_release_area_evidence": canonical_release_area_evidence,
         "summary_line": (
             "PM release blocker closure board: "
             f"{'PASS' if contract_pass else 'BLOCKED'} | "
@@ -237,6 +269,9 @@ def build_board(
             "paid_pilot_candidate": paid_pilot_candidate,
             "register_open_blocker_count": _as_int(register_summary.get("open_blocker_count"), len(rows)),
             "pm_report_blocker_count": len(pm_blocker_ids),
+            "release_area_blocker_count": len(release_area_blocker_ids),
+            "release_area_green_count": release_area_green_count,
+            "release_area_total_count": release_area_total_count,
             "register_blocker_count": len(register_blocker_ids),
             "action_register_matches_pm_report": action_register_matches_pm_report,
             "missing_from_action_register_count": len(missing_from_action_register),
@@ -262,6 +297,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `pm_summary_line`: `{payload['pm_summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `open_blocker_count`: `{payload['summary']['open_blocker_count']}`",
+        f"- `release_area_summary`: `{payload['canonical_release_area_evidence']['release_area_summary']}`",
+        f"- `release_area_blocker_count`: `{payload['canonical_release_area_evidence']['release_area_blocker_count']}`",
         f"- `all_open_blockers_have_handoff`: `{payload['summary']['all_open_blockers_have_handoff']}`",
         f"- `action_register_matches_pm_report`: `{payload['summary']['action_register_matches_pm_report']}`",
         "",

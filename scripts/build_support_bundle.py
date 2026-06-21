@@ -531,6 +531,39 @@ def _build_pm_failure_bundle_coverage(
     handoff_blocker_ids = _blocker_ids_from_rows(reviewer_handoff)
     owner_packet_blocker_ids = _blocker_ids_from_owner_packet(owner_packet)
     release_tier_blocker_ids = _release_tier_blocker_ids(reviewer_handoff)
+    canonical_release_area_evidence = (
+        action_register.get("canonical_release_area_evidence")
+        if isinstance(action_register.get("canonical_release_area_evidence"), dict)
+        else {}
+    )
+    release_area_blocker_ids = _unique_sorted(
+        [
+            str(item)
+            for item in (
+                canonical_release_area_evidence.get("release_area_blocker_ids", [])
+                if isinstance(canonical_release_area_evidence, dict)
+                else []
+            )
+            if str(item)
+        ]
+        or [
+            str(row.get("blocker_id", ""))
+            for row in _rows(action_register)
+            if str(row.get("scope", "")) == "release_area"
+        ]
+    )
+    if not canonical_release_area_evidence:
+        canonical_release_area_evidence = {
+            "release_area_green_count": 0,
+            "release_area_total_count": 0,
+            "release_area_summary": "",
+            "release_area_blocker_count": len(release_area_blocker_ids),
+            "release_area_blocker_ids": release_area_blocker_ids,
+            "claim_boundary": (
+                "Release-area blockers are distinct from release-tier/open blocker lists "
+                "used for owner handoff."
+            ),
+        }
     ga_covered_blocker_ids = _unique_sorted(
         [
             *release_tier_blocker_ids,
@@ -591,6 +624,13 @@ def _build_pm_failure_bundle_coverage(
         ),
         "summary": {
             "open_blocker_count": len(action_blocker_ids),
+            "release_area_blocker_count": len(release_area_blocker_ids),
+            "release_area_green_count": int(
+                canonical_release_area_evidence.get("release_area_green_count", 0) or 0
+            ),
+            "release_area_total_count": int(
+                canonical_release_area_evidence.get("release_area_total_count", 0) or 0
+            ),
             "release_tier_blocker_count": len(release_tier_blocker_ids),
             "required_section_count": len(section_rows),
             "missing_required_section_count": len(missing_section_labels),
@@ -607,6 +647,8 @@ def _build_pm_failure_bundle_coverage(
             "owner_packet_tier_impact_complete": owner_packet_tier_impact_complete,
         },
         "open_blocker_ids": action_blocker_ids,
+        "release_area_blocker_ids": release_area_blocker_ids,
+        "canonical_release_area_evidence": canonical_release_area_evidence,
         "release_tier_blocker_ids": release_tier_blocker_ids,
         "ga_covered_blocker_ids": ga_covered_blocker_ids,
         "action_extra_blocker_ids": action_extra_blocker_ids,
