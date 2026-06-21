@@ -22,14 +22,29 @@ sys.modules[SPEC.name] = run_g1_full_load_hip_newton_lane
 SPEC.loader.exec_module(run_g1_full_load_hip_newton_lane)
 
 
-def _checkpoint(path: Path, *, load_scale: float) -> Path:
+def _checkpoint(
+    path: Path,
+    *,
+    load_scale: float,
+    frontier_load_scale: float | None = None,
+    failed_bracket_load_scales: list[float] | None = None,
+) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    np.savez_compressed(
-        path,
-        checkpoint_schema=np.asarray("mgt-direct-residual-newton-state.v1"),
-        load_scale=np.asarray(load_scale, dtype=np.float64),
-        displacement_u=np.zeros(12, dtype=np.float64),
-    )
+    payload: dict[str, Any] = {
+        "checkpoint_schema": np.asarray("mgt-direct-residual-newton-state.v1"),
+        "load_scale": np.asarray(load_scale, dtype=np.float64),
+        "displacement_u": np.zeros(12, dtype=np.float64),
+    }
+    if frontier_load_scale is not None:
+        payload["frontier_load_scale"] = np.asarray(
+            float(frontier_load_scale), dtype=np.float64
+        )
+    if failed_bracket_load_scales is not None:
+        payload["failed_bracket_load_scales"] = np.asarray(
+            [float(value) for value in failed_bracket_load_scales],
+            dtype=np.float64,
+        )
+    np.savez_compressed(path, **payload)
     return path
 
 
@@ -739,6 +754,135 @@ def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> 
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
 
 
+def test_load_path_provenance_frontier_below_full_load_blocks_claimed_full_load(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(
+        tmp_path / "state.npz",
+        load_scale=1.0,
+        frontier_load_scale=0.85,
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is False
+    assert payload["checkpoint"]["frontier_load_scale"] == 0.85
+    assert payload["checkpoint"]["load_path_provenance_present"] is True
+    assert (
+        "load_path_provenance_accepted_frontier_below_full_load"
+        in payload["blockers"]
+    )
+    assert payload["child_exit_code"] is None
+
+
+def test_load_path_provenance_failed_bracket_below_full_load_blocks_claimed_full_load(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(
+        tmp_path / "state.npz",
+        load_scale=1.0,
+        failed_bracket_load_scales=[0.7, 0.92],
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is False
+    assert payload["checkpoint"]["failed_bracket_load_scales"] == [0.7, 0.92]
+    assert (
+        "load_path_provenance_failed_bracket_below_full_load"
+        in payload["blockers"]
+    )
+    assert payload["child_exit_code"] is None
+
+
+def test_load_path_provenance_clean_history_passes_claimed_full_load(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(
+        tmp_path / "state.npz",
+        load_scale=1.0,
+        frontier_load_scale=1.0,
+        failed_bracket_load_scales=[],
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ready_to_run"
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is True
+    assert payload["blockers"] == []
+
+
+def test_load_path_provenance_absent_does_not_block_claimed_full_load(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ready_to_run"
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is True
+    assert payload["checkpoint"]["load_path_provenance_present"] is False
+    assert payload["blockers"] == []
+
+
+def test_load_path_provenance_blocked_payload_omits_hip_consistency_when_unprovided(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(
+        tmp_path / "state.npz",
+        load_scale=1.0,
+        frontier_load_scale=0.95,
+    )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert (
+        "load_path_provenance_accepted_frontier_below_full_load"
+        in payload["blockers"]
+    )
+    assert "hip_consistency_proof_receipt_missing_or_unreadable" not in payload["blockers"]
+
+
 def _write_evidence_source(
     source: Path,
     *,
@@ -788,6 +932,43 @@ def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
     assert resolution["selection"]["selected_checkpoint"]["path"] == str(full)
     assert resolution["selection"]["selection_reason"] == "full_load_candidate_selected"
     assert Path(payload["checkpoint"]["path"]) == full
+
+
+def test_auto_select_blocks_full_load_checkpoint_with_sub_full_load_provenance(
+    tmp_path: Path,
+) -> None:
+    full = _checkpoint(tmp_path / "full.npz", load_scale=1.0)
+    source = tmp_path / "source.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema_version": "test-evidence-source.v1",
+                "current_g1_frontier": {
+                    "load_scale": 0.656,
+                    "retained_checkpoint_npz": {"path": str(full)},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is False
+    assert (
+        "checkpoint_load_path_provenance_below_required_full_load"
+        in payload["blockers"]
+    )
+    assert payload["load_path_provenance"]["context"]["load_scale"] == 0.656
+    selected = payload["checkpoint_resolution"]["selection"]["selected_checkpoint"]
+    assert selected["provenance_context"]["load_scale"] == 0.656
 
 
 def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> None:

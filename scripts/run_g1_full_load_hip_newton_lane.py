@@ -42,6 +42,17 @@ NPZ_PATH_KEYS: tuple[str, ...] = (
     "checkpoint_path",
     "checkpoint_npz",
 )
+LOAD_PATH_PROVENANCE_KEYS: tuple[str, ...] = (
+    "load_scale",
+    "max_converged_load_scale",
+    "frontier_load_scale",
+    "latest_frontier_load_scale",
+    "accepted_frontier_load_scale",
+    "first_failed_load_scale",
+    "first_direct_failed_load_scale",
+    "next_failed_load_scale_after_frontier",
+    "required_load_scale",
+)
 
 
 def _now_utc_iso() -> str:
@@ -58,6 +69,44 @@ def _git_head() -> str:
         ).strip()
     except Exception:
         return ""
+
+
+def _read_optional_float(archive: Any, key: str) -> float | None:
+    if key not in archive.files:
+        return None
+    raw = archive[key]
+    try:
+        value = float(np.asarray(raw).item())
+    except (TypeError, ValueError):
+        return None
+    if value != value:
+        return None
+    return value
+
+
+def _read_failed_bracket_load_scales(archive: Any) -> list[float]:
+    candidates = (
+        "failed_bracket_load_scales",
+        "failed_brackets_load_scales",
+    )
+    for key in candidates:
+        if key not in archive.files:
+            continue
+        raw = np.asarray(archive[key])
+        if raw.ndim == 0:
+            try:
+                value = float(raw.item())
+            except (TypeError, ValueError):
+                continue
+            return [value]
+        values: list[float] = []
+        for entry in raw.reshape(-1):
+            try:
+                values.append(float(entry))
+            except (TypeError, ValueError):
+                continue
+        return values
+    return []
 
 
 def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
@@ -81,6 +130,8 @@ def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
                 if "checkpoint_schema" in archive.files
                 else ""
             )
+            frontier_load_scale = _read_optional_float(archive, "frontier_load_scale")
+            failed_bracket_load_scales = _read_failed_bracket_load_scales(archive)
     except Exception as exc:
         return {
             "path": str(path),
@@ -94,7 +145,59 @@ def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
         "schema": schema,
         "load_scale": load_scale,
         "dof_count": dof_count,
+        "frontier_load_scale": frontier_load_scale,
+        "failed_bracket_load_scales": failed_bracket_load_scales,
+        "load_path_provenance_present": bool(
+            frontier_load_scale is not None or failed_bracket_load_scales
+        ),
     }, blockers
+
+
+def _load_path_provenance_blockers(
+    *,
+    checkpoint_meta: dict[str, Any],
+    required_load_scale: float,
+    full_load_tolerance: float,
+) -> list[str]:
+    """Return explicit load-path provenance blockers.
+
+    The numeric ``load_scale`` gate is not enough. When a checkpoint claims
+    ``load_scale >= required_load_scale`` but the metadata shows an accepted
+    frontier below the required full load or a failed bracket below full load,
+    the lane must be blocked even though the numeric claim is satisfied.
+    """
+    if not checkpoint_meta.get("load_path_provenance_present"):
+        return []
+    observed_load_scale = checkpoint_meta.get("load_scale")
+    if observed_load_scale is None:
+        return []
+    try:
+        observed_load_value = float(observed_load_scale)
+    except (TypeError, ValueError):
+        return []
+    threshold = float(required_load_scale) - float(full_load_tolerance)
+    if observed_load_value < threshold:
+        return []
+    blockers: list[str] = []
+    frontier_load_scale = checkpoint_meta.get("frontier_load_scale")
+    if isinstance(frontier_load_scale, (int, float)):
+        if float(frontier_load_scale) < threshold:
+            blockers.append(
+                "load_path_provenance_accepted_frontier_below_full_load"
+            )
+    failed_bracket_load_scales_raw = checkpoint_meta.get("failed_bracket_load_scales")
+    failed_bracket_below_full_load: list[float] = []
+    if isinstance(failed_bracket_load_scales_raw, list):
+        for entry in failed_bracket_load_scales_raw:
+            try:
+                value = float(entry)
+            except (TypeError, ValueError):
+                continue
+            if value < threshold:
+                failed_bracket_below_full_load.append(value)
+    if failed_bracket_below_full_load:
+        blockers.append("load_path_provenance_failed_bracket_below_full_load")
+    return blockers
 
 
 def _normalize_workspace_path(value: object) -> Path | None:
@@ -131,10 +234,53 @@ def _collect_npz_paths_from_json(payload: object) -> list[Path]:
     return found
 
 
+def _float_or_none(value: object) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _checkpoint_provenance_context(payload: object) -> dict[str, float]:
+    if not isinstance(payload, dict):
+        return {}
+    context: dict[str, float] = {}
+    for key in LOAD_PATH_PROVENANCE_KEYS:
+        value = _float_or_none(payload.get(key))
+        if value is not None:
+            context[key] = value
+    return context
+
+
+def _collect_npz_records_from_json(payload: object) -> list[dict[str, Any]]:
+    found: list[dict[str, Any]] = []
+    if isinstance(payload, dict):
+        context = _checkpoint_provenance_context(payload)
+        for key, value in payload.items():
+            if key in NPZ_PATH_KEYS and isinstance(value, str):
+                resolved = _normalize_workspace_path(value)
+                if resolved is not None:
+                    found.append({"path": resolved, "provenance_context": context})
+                continue
+            if isinstance(value, dict):
+                inner_path = value.get("path")
+                if isinstance(inner_path, str) and key in NPZ_PATH_KEYS:
+                    resolved = _normalize_workspace_path(inner_path)
+                    if resolved is not None:
+                        found.append({"path": resolved, "provenance_context": context})
+            found.extend(_collect_npz_records_from_json(value))
+    elif isinstance(payload, list):
+        for entry in payload:
+            found.extend(_collect_npz_records_from_json(entry))
+    return found
+
+
 def _scan_evidence_checkpoint_paths(
     sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
-) -> tuple[list[Path], list[dict[str, Any]]]:
-    candidates: list[Path] = []
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    candidates: list[dict[str, Any]] = []
     per_source: list[dict[str, Any]] = []
     for source in sources:
         entry: dict[str, Any] = {
@@ -153,15 +299,22 @@ def _scan_evidence_checkpoint_paths(
             per_source.append(entry)
             continue
         entry["available"] = True
-        paths: list[Path] = []
-        for path in _collect_npz_paths_from_json(payload):
-            if path not in paths:
-                paths.append(path)
-        for path in paths:
-            if path not in candidates:
-                candidates.append(path)
-        entry["candidate_count"] = len(paths)
-        entry["candidate_paths_sample"] = [str(p) for p in paths[:12]]
+        records: list[dict[str, Any]] = []
+        seen_paths: set[str] = set()
+        for record in _collect_npz_records_from_json(payload):
+            path = record["path"]
+            path_key = str(path)
+            if path_key in seen_paths:
+                continue
+            seen_paths.add(path_key)
+            records.append(record)
+        existing_paths = {str(record["path"]) for record in candidates}
+        for record in records:
+            if str(record["path"]) not in existing_paths:
+                candidates.append(record)
+                existing_paths.add(str(record["path"]))
+        entry["candidate_count"] = len(records)
+        entry["candidate_paths_sample"] = [str(record["path"]) for record in records[:12]]
         per_source.append(entry)
     return candidates, per_source
 
@@ -174,7 +327,8 @@ def _auto_select_checkpoint(
 ) -> dict[str, Any]:
     candidates, per_source = _scan_evidence_checkpoint_paths(sources)
     observed: list[dict[str, Any]] = []
-    for index, path in enumerate(candidates):
+    for index, record in enumerate(candidates):
+        path = record["path"]
         meta, _blockers = _load_checkpoint_meta(path)
         entry = {
             "path": str(path),
@@ -183,6 +337,7 @@ def _auto_select_checkpoint(
             "load_scale": meta.get("load_scale"),
             "schema": meta.get("schema", ""),
             "dof_count": meta.get("dof_count"),
+            "provenance_context": record.get("provenance_context", {}),
         }
         observed.append(entry)
     loadable = [
@@ -229,9 +384,51 @@ def _auto_select_checkpoint(
             "meets_full_load": meets_full_load,
             "schema": best.get("schema", ""),
             "dof_count": best.get("dof_count"),
+            "provenance_context": best.get("provenance_context", {}),
         },
         "selection_reason": reason,
     }
+
+
+def _load_path_provenance_assessment(
+    *,
+    checkpoint_resolution: dict[str, Any],
+    required_load_scale: float,
+    full_load_tolerance: float,
+) -> tuple[dict[str, Any], list[str]]:
+    selection = checkpoint_resolution.get("selection")
+    selected = selection.get("selected_checkpoint") if isinstance(selection, dict) else None
+    selected = selected if isinstance(selected, dict) else {}
+    context = selected.get("provenance_context")
+    context = context if isinstance(context, dict) else {}
+    blockers: list[str] = []
+    below_required: dict[str, float] = {}
+    for key in (
+        "load_scale",
+        "max_converged_load_scale",
+        "frontier_load_scale",
+        "latest_frontier_load_scale",
+        "accepted_frontier_load_scale",
+    ):
+        value = _float_or_none(context.get(key))
+        if value is not None and value < float(required_load_scale) - float(full_load_tolerance):
+            below_required[key] = value
+    for key in (
+        "first_failed_load_scale",
+        "first_direct_failed_load_scale",
+        "next_failed_load_scale_after_frontier",
+    ):
+        value = _float_or_none(context.get(key))
+        if value is not None and value <= float(required_load_scale) + float(full_load_tolerance):
+            below_required[key] = value
+    if below_required:
+        blockers.append("checkpoint_load_path_provenance_below_required_full_load")
+    return {
+        "context": context,
+        "required_load_scale": float(required_load_scale),
+        "provenance_below_required_full_load": below_required,
+        "passed": not below_required,
+    }, blockers
 
 
 def _resolve_checkpoint(
@@ -395,6 +592,23 @@ def build_lane_report(
     )
     if not full_load_input_pass and "checkpoint_load_scale_missing" not in blockers:
         blockers.append("checkpoint_load_scale_below_required_full_load")
+    checkpoint_load_path_blockers = _load_path_provenance_blockers(
+        checkpoint_meta=checkpoint_meta,
+        required_load_scale=float(required_load_scale),
+        full_load_tolerance=float(full_load_tolerance),
+    )
+    load_path_provenance, evidence_load_path_blockers = (
+        _load_path_provenance_assessment(
+            checkpoint_resolution=checkpoint_resolution,
+            required_load_scale=float(required_load_scale),
+            full_load_tolerance=float(full_load_tolerance),
+        )
+    )
+    load_path_provenance_blockers = [
+        *checkpoint_load_path_blockers,
+        *evidence_load_path_blockers,
+    ]
+    load_path_provenance_pass = not load_path_provenance_blockers
     command = _direct_probe_command(
         checkpoint_npz=resolved_checkpoint or DEFAULT_CHECKPOINT,
         output_json=output_json,
@@ -416,6 +630,8 @@ def build_lane_report(
         "required_load_scale": float(required_load_scale),
         "full_load_tolerance": float(full_load_tolerance),
         "full_load_input_pass": full_load_input_pass,
+        "load_path_provenance": load_path_provenance,
+        "load_path_provenance_pass": load_path_provenance_pass,
         "dry_run": bool(dry_run),
         "command": command,
         "hip_consistency_proof": hip_consistency_proof,
@@ -439,7 +655,9 @@ def build_lane_report(
             "consistent residual/Jacobian Newton closure, fallback-zero behavior, "
             "and material Newton breadth. The separate HIP-required residual/Jacobian "
             "consistency receipt must also pass without blockers. A checkpoint below "
-            "load_scale 1.0 is blocked before execution."
+            "load_scale 1.0 is blocked before execution, and a checkpoint that claims "
+            "load_scale >= 1.0 is also blocked when its metadata exposes an accepted "
+            "frontier below the required full load or a failed bracket below full load."
         ),
     }
     if blockers:
@@ -448,6 +666,14 @@ def build_lane_report(
             "status": "blocked",
             "contract_pass": False,
             "blockers": [*blockers, *hip_consistency_blockers],
+            "child_exit_code": None,
+        }, 1
+    if load_path_provenance_blockers:
+        return {
+            **base_payload,
+            "status": "blocked",
+            "contract_pass": False,
+            "blockers": [*load_path_provenance_blockers, *hip_consistency_blockers],
             "child_exit_code": None,
         }, 1
     if dry_run:
