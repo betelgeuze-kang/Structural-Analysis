@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -147,6 +148,62 @@ def _validate_receipt(receipt_path: Path, schema: dict[str, Any]) -> dict[str, A
     return validate_receipt_payload(payload, schema)
 
 
+def _resolve_artifact_path(path_value: str, receipt_path: Path) -> Path:
+    path = Path(path_value)
+    if path.is_absolute() or path.exists():
+        return path
+    receipt_relative = receipt_path.parent / path
+    if receipt_relative.exists():
+        return receipt_relative
+    return path
+
+
+def _sha256_ref(path: Path) -> str | None:
+    if not path.exists() or not path.is_file():
+        return None
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _receipt_artifact_integrity_blockers(
+    receipt_payload: dict[str, Any],
+    *,
+    receipt_path: Path,
+) -> list[str]:
+    blockers: list[str] = []
+    receipt_artifacts = receipt_payload.get("receipt_artifacts")
+    if isinstance(receipt_artifacts, list):
+        for index, artifact in enumerate(receipt_artifacts):
+            if not isinstance(artifact, dict):
+                continue
+            path_value = artifact.get("path")
+            expected_sha = artifact.get("sha256")
+            if not isinstance(path_value, str) or not isinstance(expected_sha, str):
+                continue
+            resolved = _resolve_artifact_path(path_value, receipt_path)
+            actual_sha = _sha256_ref(resolved)
+            if actual_sha is None:
+                blockers.append(f"receipt_artifacts[{index}].path_missing:{path_value}")
+            elif actual_sha.lower() != expected_sha.lower():
+                blockers.append(f"receipt_artifacts[{index}].sha256_mismatch:{path_value}")
+
+    input_checksums = receipt_payload.get("input_checksums")
+    if isinstance(input_checksums, dict):
+        for path_value, expected_sha in input_checksums.items():
+            if not isinstance(path_value, str) or not isinstance(expected_sha, str):
+                continue
+            resolved = _resolve_artifact_path(path_value, receipt_path)
+            actual_sha = _sha256_ref(resolved)
+            if actual_sha is None:
+                blockers.append(f"input_checksums.path_missing:{path_value}")
+            elif actual_sha.lower() != expected_sha.lower():
+                blockers.append(f"input_checksums.sha256_mismatch:{path_value}")
+    return blockers
+
+
 def _lane_row(
     lane: dict[str, Any],
     *,
@@ -175,6 +232,12 @@ def _lane_row(
     }
     receipt_validator_pass = bool(validation.get("contract_pass"))
     receipt_validator_blockers = list(validation.get("blockers", []))
+    artifact_integrity_blockers = (
+        _receipt_artifact_integrity_blockers(receipt_payload, receipt_path=receipt_path)
+        if receipt_present and receipt_validator_pass
+        else []
+    )
+    receipt_artifact_integrity_pass = receipt_present and not artifact_integrity_blockers
     lane_pass = bool(
         materialized_present
         and doc_boundary_present
@@ -183,6 +246,7 @@ def _lane_row(
         and receipt_fresh
         and receipt_self_asserted
         and receipt_validator_pass
+        and receipt_artifact_integrity_pass
         and receipt_lane_matches
         and receipt_runner_matches
     )
@@ -205,6 +269,15 @@ def _lane_row(
             if receipt_present and not receipt_validator_pass
             else []
         ),
+        *(
+            ["fresh_validation_receipt_artifact_integrity_failed"]
+            if artifact_integrity_blockers
+            else []
+        ),
+        *[
+            f"fresh_validation_receipt_artifact_integrity_failed:{blocker}"
+            for blocker in artifact_integrity_blockers
+        ],
     ]
     return {
         "lane_id": lane_id,
@@ -222,6 +295,8 @@ def _lane_row(
         "fresh_validation_receipt_lane_matches": receipt_lane_matches,
         "fresh_validation_receipt_runner_matches": receipt_runner_matches,
         "fresh_validation_receipt_contract_pass": receipt_validator_pass,
+        "fresh_validation_receipt_artifact_integrity_pass": receipt_artifact_integrity_pass,
+        "fresh_validation_receipt_artifact_integrity_blockers": artifact_integrity_blockers,
         "fresh_validation_receipt_reason_code": validation.get("reason_code"),
         "fresh_validation_receipt_blockers": receipt_validator_blockers,
         "pass": lane_pass,
