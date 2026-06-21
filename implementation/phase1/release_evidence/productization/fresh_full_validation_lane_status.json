@@ -13,7 +13,7 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": false,
-  "generated_at": "2026-06-21T08:20:25.386673+00:00",
+  "generated_at": "2026-06-21T08:24:51.357613+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
     "docs/commercialization-gap-current-state.md": "sha256:4e96e98c33ef97ed34cb2abc0281d5204707a9c0ceecd731faf486484419fa25",
@@ -43,6 +43,8 @@
         "torch-capable benchmark validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/commercial_benchmark_torch.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -72,6 +74,8 @@
         "GPU-capable validation task"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -101,6 +105,8 @@
         "performance evidence"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/performance_profile.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -131,6 +137,8 @@
         "heavy validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/surface_material_contact.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -160,6 +168,8 @@
         "MIDAS validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -190,6 +200,8 @@
         "heavy validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -220,6 +232,8 @@
         "benchmark/productization validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -250,6 +264,8 @@
         "design optimization validation lane"
       ],
       "fresh_validation_receipt": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
+      "fresh_validation_receipt_artifact_integrity_blockers": [],
+      "fresh_validation_receipt_artifact_integrity_pass": false,
       "fresh_validation_receipt_blockers": [
         "fresh_validation_receipt_missing"
       ],
@@ -273,7 +289,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "6fa2ed4355139829fe26b12494282449c463caa0",
+  "source_commit_sha": "518ab2e8a87c7d0c7696fcabf5ad4cd4da7ce9aa",
   "status": "blocked",
   "summary": {
     "blocker_count": 8,
