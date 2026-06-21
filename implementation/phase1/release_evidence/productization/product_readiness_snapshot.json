@@ -23,10 +23,10 @@
   },
   "blocker_count": 59,
   "blockers": [
+    "ci_streak::nightly::github_actions_query_failed",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
-    "ci_streak::pr::github_actions_job_start_blocked",
+    "ci_streak::pr::github_actions_query_failed",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
-    "ci_streak::pr::pr_pull_request_run_source_absent",
     "customer_shadow::completed_shadow_case_count_below_minimum",
     "external_benchmark::submission_receipts_pending=4",
     "external_benchmark::submission_updates_reused_evidence_not_fresh",
@@ -188,7 +188,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": true,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-21T06:10:04.047107+00:00",
+  "generated_at": "2026-06-21T06:30:12.439155+00:00",
   "independent_product_ready": false,
   "paid_pilot_ready": false,
   "reason_code": "BLOCKED",
@@ -196,7 +196,7 @@
   "reused_evidence": false,
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a",
+  "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -236,107 +236,146 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "generated_at": "2026-06-21T06:06:10.364209+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:40.698299+00:00",
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
-        "generated_at": "2026-06-21T06:05:58.426982+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:10.117428+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "fresh_full_validation_lane_status",
-        "generated_at": "2026-06-21T06:05:47.386239+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:28:54.549073+00:00",
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "mgt_g1_direct_residual_terminal_gate_report",
-        "generated_at": "2026-06-21T06:05:46.494750+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:03.443036+00:00",
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
-        "generated_at": "2026-06-21T06:09:35.196498+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:03.462704+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "customer_shadow_evidence_status",
-        "generated_at": "2026-06-21T06:05:46.477620+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:28:53.638185+00:00",
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "workstation_delivery_readiness",
-        "generated_at": "2026-06-21T06:05:58.135809+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:03.465881+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "independent_product_readiness",
-        "generated_at": "2026-06-21T06:05:59.515074+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:35.420068+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "github_actions_ci_streak_evidence",
-        "generated_at": "2026-06-19T15:59:30.279153+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:03.510104+00:00",
         "metadata_complete": true,
-        "reused_evidence": true,
+        "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "ux_new_user_observation_report",
-        "generated_at": "2026-06-21T06:05:46.594879+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:28:53.657010+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "license_status_closure_report",
-        "generated_at": "2026-06-21T06:05:46.535307+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:28:53.692973+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "external_benchmark_submission_readiness",
-        "generated_at": "2026-06-21T06:05:58.250538+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:29:34.879763+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "external_benchmark_submission_updates",
-        "generated_at": "2026-06-21T06:05:58.430986+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T06:28:53.744371+00:00",
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a"
+        "source_commit_sha": "e2be05eaef6bc2dd03cd609ec8dc16fd29d10f7f",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       }
     ],
     "open_blocker_counts": {
