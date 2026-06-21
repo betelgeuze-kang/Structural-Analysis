@@ -546,6 +546,10 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         proof_blockers.append("hip_consistency_proof_reused_evidence_not_false")
     if proof.get("rocm_hip_required") is not True:
         proof_blockers.append("hip_consistency_proof_rocm_hip_not_required")
+    if proof.get("cpu_diagnostic_assembler_used") is not False:
+        proof_blockers.append("hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false")
+    if proof.get("production_hip_residual_jacobian_path") is not True:
+        proof_blockers.append("hip_consistency_proof_production_hip_path_not_proven")
     if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
         proof_blockers.append("hip_consistency_proof_gate_not_passed")
     if receipt_blockers:
@@ -558,6 +562,8 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         proof
         and proof.get("reused_evidence") is False
         and proof.get("rocm_hip_required") is True
+        and proof.get("cpu_diagnostic_assembler_used") is False
+        and proof.get("production_hip_residual_jacobian_path") is True
         and proof.get("consistent_residual_jacobian_newton_gate_passed") is True
         and not receipt_blockers
         and not runtime_blockers
@@ -572,6 +578,9 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         "source_commit_sha": proof_source_commit,
         "reused_evidence": proof.get("reused_evidence"),
         "rocm_hip_required": proof.get("rocm_hip_required"),
+        "execution_mode": proof.get("execution_mode"),
+        "cpu_diagnostic_assembler_used": proof.get("cpu_diagnostic_assembler_used"),
+        "production_hip_residual_jacobian_path": proof.get("production_hip_residual_jacobian_path"),
         "consistent_residual_jacobian_newton_gate_passed": proof.get(
             "consistent_residual_jacobian_newton_gate_passed"
         ),

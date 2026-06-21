@@ -476,6 +476,9 @@ def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
     assert payload["source_commit_sha"] == "fixture-commit"
     assert payload["reused_evidence"] is False
     assert payload["rocm_hip_required"] is True
+    assert payload["execution_mode"] == "hip_required_runtime_unavailable_no_cpu_fallback"
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
     assert payload["residual_jacobian_consistency_ready"] is False
     assert payload["consistent_residual_jacobian_newton_passed"] is False
     assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
@@ -519,6 +522,8 @@ def test_hip_required_probe_without_runtime_blocker_list_keeps_generic_blockers(
         "rocm_hip_runtime_unavailable",
         "hip_residual_jacobian_consistency_not_executed",
     ]
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
 
 
 def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
@@ -558,6 +563,9 @@ def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
     assert payload["source_commit_sha"] == "fixture-commit"
     assert payload["reused_evidence"] is False
     assert payload["rocm_hip_required"] is True
+    assert payload["execution_mode"] == "hip_required_path_not_implemented_no_cpu_fallback"
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
     assert payload["rocm_hip_runtime_preflight"]["hip_available"] is True
     assert payload["residual_jacobian_consistency_ready"] is False
     assert payload["consistent_residual_jacobian_newton_gate_passed"] is False

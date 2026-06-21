@@ -566,6 +566,11 @@ def _hip_consistency_proof_assessment(
         "source_commit_sha": proof_source_commit,
         "reused_evidence": payload.get("reused_evidence"),
         "rocm_hip_required": payload.get("rocm_hip_required"),
+        "execution_mode": payload.get("execution_mode"),
+        "cpu_diagnostic_assembler_used": payload.get("cpu_diagnostic_assembler_used"),
+        "production_hip_residual_jacobian_path": payload.get(
+            "production_hip_residual_jacobian_path"
+        ),
         "consistent_residual_jacobian_newton_gate_passed": payload.get(
             "consistent_residual_jacobian_newton_gate_passed"
         ),

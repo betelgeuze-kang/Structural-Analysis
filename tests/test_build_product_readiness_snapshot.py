@@ -92,6 +92,13 @@ def _g1_hip_consistency_proof(
         "source_commit_sha": source_commit_sha,
         "reused_evidence": False,
         "rocm_hip_required": True,
+        "execution_mode": (
+            "hip_required_production_residual_jacobian"
+            if ready
+            else "hip_required_runtime_unavailable_no_cpu_fallback"
+        ),
+        "cpu_diagnostic_assembler_used": False,
+        "production_hip_residual_jacobian_path": ready,
         "consistent_residual_jacobian_newton_gate_passed": ready,
         "receipt_blockers": [] if ready else [
             "rocm_hip_runtime_unavailable",
@@ -1887,6 +1894,8 @@ def test_snapshot_records_ready_g1_hip_consistency_proof_component(
     ] is True
     assert proof["ready"] is True
     assert proof["rocm_hip_required"] is True
+    assert proof["cpu_diagnostic_assembler_used"] is False
+    assert proof["production_hip_residual_jacobian_path"] is True
     assert proof["consistent_residual_jacobian_newton_gate_passed"] is True
     assert proof["receipt_blockers"] == []
     assert proof["runtime_blockers"] == []
@@ -1931,6 +1940,92 @@ def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_ready_g1_lane_when_hip_proof_no_cpu_contract_missing(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    proof = _g1_hip_consistency_proof(ready=True)
+    proof.pop("cpu_diagnostic_assembler_used")
+    proof.pop("production_hip_residual_jacobian_path")
+    g1_lane["hip_consistency_proof"] = proof
+    g1_lane["blockers"] = []
+    g1_lane["contract_pass"] = True
+    g1_lane["status"] = "ready"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof_summary = payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof"
+    ]
+    assert proof_summary["ready"] is False
+    assert proof_summary["cpu_diagnostic_assembler_used"] is None
+    assert proof_summary["production_hip_residual_jacobian_path"] is None
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_ready_g1_lane_when_hip_proof_used_cpu_diagnostic(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["hip_consistency_proof"] = {
+        **_g1_hip_consistency_proof(ready=True),
+        "execution_mode": "cpu_diagnostic",
+        "cpu_diagnostic_assembler_used": True,
+        "production_hip_residual_jacobian_path": False,
+    }
+    g1_lane["blockers"] = []
+    g1_lane["contract_pass"] = True
+    g1_lane["status"] = "ready"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof_summary = payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof"
+    ]
+    assert proof_summary["ready"] is False
+    assert proof_summary["cpu_diagnostic_assembler_used"] is True
+    assert proof_summary["production_hip_residual_jacobian_path"] is False
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven"
         in payload["blockers"]
     )
     assert payload["paid_pilot_ready"] is False

@@ -215,6 +215,8 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
         child_components["current_tangent_residual_row_correction"]["ready"]
         is True
     )
+    assert payload["hip_consistency_proof"]["cpu_diagnostic_assembler_used"] is False
+    assert payload["hip_consistency_proof"]["production_hip_residual_jacobian_path"] is True
     assert payload["blockers"] == []
 
 
@@ -543,6 +545,8 @@ def _write_hip_consistency_proof(
     reused_evidence: bool = False,
     rocm_hip_required: bool = True,
     gate_passed: bool = True,
+    cpu_diagnostic_assembler_used: bool = False,
+    production_hip_residual_jacobian_path: bool = True,
     blockers: list[str] | None = None,
     runtime_blockers: list[str] | None = None,
 ) -> None:
@@ -551,6 +555,13 @@ def _write_hip_consistency_proof(
         "source_commit_sha": source_commit_sha,
         "reused_evidence": reused_evidence,
         "rocm_hip_required": rocm_hip_required,
+        "execution_mode": (
+            "hip_required_production_residual_jacobian"
+            if production_hip_residual_jacobian_path
+            else "hip_required_runtime_unavailable_no_cpu_fallback"
+        ),
+        "cpu_diagnostic_assembler_used": cpu_diagnostic_assembler_used,
+        "production_hip_residual_jacobian_path": production_hip_residual_jacobian_path,
         "consistent_residual_jacobian_newton_gate_passed": gate_passed,
         "blockers": blockers or [],
     }
