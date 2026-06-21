@@ -455,6 +455,17 @@ def _external_benchmark_receipt_counts(
     }
 
 
+def _completed_customer_shadow_row_count(rows: list[dict[str, Any]]) -> int:
+    return sum(
+        1
+        for row in rows
+        if row.get("contract_pass") is True
+        and str(row.get("project_status", "") or "") == "completed"
+        and row.get("raw_data_retained_by_customer") is True
+        and row.get("redistribution_allowed") is False
+    )
+
+
 def _g1_child_hip_residual_refresh_summary(
     lane_payload: dict[str, Any],
 ) -> dict[str, Any]:
@@ -812,13 +823,10 @@ def build_snapshot(
         1 for row in fresh_rows if row.get("fresh_validation_receipt_contract_pass") is True
     )
     fresh_rows_ready = bool(
-        not fresh_rows
-        or (
-            len(fresh_rows) >= lane_count
-            and fresh_row_pass_count >= lane_count
-            and fresh_row_fresh_count >= lane_count
-            and fresh_row_contract_count >= lane_count
-        )
+        len(fresh_rows) >= lane_count
+        and fresh_row_pass_count >= lane_count
+        and fresh_row_fresh_count >= lane_count
+        and fresh_row_contract_count >= lane_count
     )
     fresh_ready = bool(
         _contract_pass(fresh)
@@ -829,6 +837,8 @@ def build_snapshot(
     )
     if not fresh_ready:
         blockers.extend(f"fresh_full_validation::{item}" for item in _as_list(fresh.get("blockers")))
+        if len(fresh_rows) < lane_count:
+            blockers.append("fresh_full_validation::row_count_below_lane_count")
         if fresh_rows and fresh_row_pass_count < lane_count:
             blockers.append("fresh_full_validation::row_pass_count_below_lane_count")
         if fresh_rows and fresh_row_fresh_count < lane_count:
@@ -841,9 +851,25 @@ def build_snapshot(
     customer_summary = _as_dict(customer.get("summary"))
     completed_shadow_cases = _as_int(customer_summary.get("completed_shadow_case_count"), 0)
     min_shadow_cases = _as_int(customer_summary.get("min_completed_shadow_cases"), 3)
-    customer_ready = bool(_contract_pass(customer) and completed_shadow_cases >= min_shadow_cases)
+    customer_rows = [
+        row for row in _as_list(customer.get("evidence_rows")) if isinstance(row, dict)
+    ]
+    completed_customer_rows = _completed_customer_shadow_row_count(customer_rows)
+    customer_rows_ready = bool(
+        len(customer_rows) >= min_shadow_cases
+        and completed_customer_rows >= min_shadow_cases
+    )
+    customer_ready = bool(
+        _contract_pass(customer)
+        and completed_shadow_cases >= min_shadow_cases
+        and customer_rows_ready
+    )
     if not customer_ready:
         blockers.extend(f"customer_shadow::{item}" for item in _as_list(customer.get("blockers")))
+        if len(customer_rows) < min_shadow_cases:
+            blockers.append("customer_shadow::evidence_row_count_below_minimum")
+        if completed_customer_rows < min_shadow_cases:
+            blockers.append("customer_shadow::completed_evidence_row_count_below_minimum")
         if not _as_list(customer.get("blockers")):
             blockers.append("customer_shadow:not_ready")
 
@@ -896,11 +922,17 @@ def build_snapshot(
         and external_benchmark_updates_fresh
         and external_benchmark_receipts["queue_count"] >= 4
         and external_benchmark_receipts["attached_count"] >= external_benchmark_receipts["queue_count"]
+        and external_benchmark_receipts["update_count"] >= external_benchmark_receipts["queue_count"]
+        and external_benchmark_receipts["update_attached_count"] >= external_benchmark_receipts["queue_count"]
         and external_benchmark_receipts["pending_count"] == 0
     )
     if not external_benchmark_ready:
         if not external_benchmark_updates_fresh:
             blockers.append("external_benchmark::submission_updates_reused_evidence_not_fresh")
+        if external_benchmark_receipts["update_count"] < external_benchmark_receipts["queue_count"]:
+            blockers.append("external_benchmark::submission_update_rows_below_queue_count")
+        if external_benchmark_receipts["update_attached_count"] < external_benchmark_receipts["queue_count"]:
+            blockers.append("external_benchmark::submission_update_receipts_below_queue_count")
         blockers.append(
             "external_benchmark::submission_receipts_pending="
             f"{max(external_benchmark_receipts['pending_count'], 0)}"
@@ -1096,6 +1128,8 @@ def build_snapshot(
                 "contract_pass": bool(customer.get("contract_pass")),
                 "completed_shadow_case_count": completed_shadow_cases,
                 "min_completed_shadow_cases": min_shadow_cases,
+                "evidence_row_count": len(customer_rows),
+                "completed_evidence_row_count": completed_customer_rows,
                 "ready": customer_ready,
             },
             "github_actions_ci_streak": {

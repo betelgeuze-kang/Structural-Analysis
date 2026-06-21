@@ -104,6 +104,40 @@ def _g1_hip_consistency_proof(
     }
 
 
+def _fresh_validation_rows(count: int = 8) -> list[dict]:
+    return [
+        {
+            "lane_id": f"lane_{index + 1}",
+            "pass": True,
+            "fresh_validation_receipt_fresh": True,
+            "fresh_validation_receipt_contract_pass": True,
+            "fresh_validation_receipt_present": True,
+            "fresh_validation_receipt_reused_evidence": False,
+        }
+        for index in range(count)
+    ]
+
+
+def _customer_shadow_rows(count: int = 3) -> list[dict]:
+    return [
+        {
+            "path": f"implementation/phase1/customer_shadow_evidence/case_{index + 1}.json",
+            "case_id": f"customer-shadow-case-{index + 1:03d}",
+            "project_status": "completed",
+            "structure_family": "commercial_building",
+            "reference_solver": "customer_retained_reference",
+            "reference_solver_version": "owner-retained",
+            "reviewer_decision": "PASS",
+            "raw_data_retained_by_customer": True,
+            "redistribution_allowed": False,
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "blockers": [],
+        }
+        for index in range(count)
+    ]
+
+
 def _paths(tmp_path: Path) -> SnapshotInputPaths:
     return SnapshotInputPaths(
         readme=Path("README.md"),
@@ -323,6 +357,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
             "fresh_validation_receipt_present_count": 8,
             "fresh_validation_receipt_pass_count": 8,
         },
+        "rows": _fresh_validation_rows(),
         "blockers": [],
     })
     _write_json(tmp_path / "customer_shadow_evidence_status.json", {
@@ -332,6 +367,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "evidence_rows": _customer_shadow_rows(),
         "blockers": [],
     })
     _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
@@ -469,6 +505,7 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
+        "rows": _fresh_validation_rows(),
         "blockers": [],
     })
     _write_json(tmp_path / "customer_shadow_evidence_status.json", {
@@ -478,6 +515,7 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "evidence_rows": _customer_shadow_rows(),
         "blockers": [],
     })
     _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
@@ -1426,6 +1464,51 @@ def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Pa
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_rejects_external_benchmark_summary_without_update_receipts(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
+        "schema_version": "external-benchmark-submission-readiness.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "summary": {
+            "submission_queue_count": 4,
+            "submission_receipt_attached_count": 4,
+            "submission_receipt_pending_count": 0,
+        },
+    })
+    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
+        "schema_version": "external-benchmark-submission-updates.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "updates": {},
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["external_benchmark_receipts"]["attached_count"] == 4
+    assert payload["components"]["external_benchmark_receipts"]["update_count"] == 0
+    assert payload["components"]["external_benchmark_receipts"]["ready"] is False
+    assert (
+        "external_benchmark::submission_update_rows_below_queue_count"
+        in payload["blockers"]
+    )
+    assert (
+        "external_benchmark::submission_update_receipts_below_queue_count"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
 def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
     tmp_path: Path,
 ) -> None:
@@ -1466,6 +1549,71 @@ def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
     assert payload["components"]["fresh_full_validation"]["ready"] is False
     assert (
         "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+
+
+def test_snapshot_rejects_fresh_validation_summary_without_rows(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 8,
+            "fresh_validation_receipt_pass_count": 8,
+        },
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["fresh_full_validation"]["row_count"] == 0
+    assert payload["components"]["fresh_full_validation"]["ready"] is False
+    assert "fresh_full_validation::row_count_below_lane_count" in payload["blockers"]
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+
+
+def test_snapshot_rejects_customer_shadow_summary_without_evidence_rows(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
+        "schema_version": "customer-shadow-evidence-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["customer_shadow"]["completed_shadow_case_count"] == 3
+    assert payload["components"]["customer_shadow"]["evidence_row_count"] == 0
+    assert payload["components"]["customer_shadow"]["ready"] is False
+    assert "customer_shadow::evidence_row_count_below_minimum" in payload["blockers"]
+    assert (
+        "customer_shadow::completed_evidence_row_count_below_minimum"
         in payload["blockers"]
     )
     assert payload["paid_pilot_ready"] is False
