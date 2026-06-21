@@ -73,7 +73,12 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert "hip_full_residual_resident" in command
     assert "hip_full_residual" in command
     assert "child_material_newton_breadth_passed" in payload["child_safety_requirements"]
+    assert (
+        "external_hip_consistency_proof_gate_passed"
+        in payload["child_safety_requirements"]
+    )
     assert "material Newton breadth" in payload["claim_boundary"]
+    assert "separate HIP-required residual/Jacobian" in payload["claim_boundary"]
 
 
 def test_child_probe_result_must_report_full_load_and_fallback_zero(
@@ -82,6 +87,7 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
 
     class Result:
         returncode = 0
@@ -123,11 +129,16 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
         return Result()
 
     monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 0
@@ -135,6 +146,87 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
     assert payload["contract_pass"] is True
     assert payload["child_exit_code"] == 0
     assert payload["blockers"] == []
+
+
+def test_missing_hip_consistency_proof_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=tmp_path / "missing-proof.json",
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "hip_consistency_proof_receipt_missing_or_unreadable" in payload["blockers"]
+    assert payload["hip_consistency_proof"]["present"] is False
+
+
+def test_partial_hip_consistency_proof_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["rocm_hip_runtime_unavailable"],
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
+    assert "hip_consistency_proof_has_blockers" in payload["blockers"]
 
 
 def _write_acceptance_child(
@@ -177,6 +269,30 @@ def _write_acceptance_child(
                     ),
                 },
                 "blockers": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
+def _write_hip_consistency_proof(
+    proof: Path,
+    *,
+    source_commit_sha: str,
+    reused_evidence: bool = False,
+    rocm_hip_required: bool = True,
+    gate_passed: bool = True,
+    blockers: list[str] | None = None,
+) -> None:
+    proof.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+                "source_commit_sha": source_commit_sha,
+                "reused_evidence": reused_evidence,
+                "rocm_hip_required": rocm_hip_required,
+                "consistent_residual_jacobian_newton_gate_passed": gate_passed,
+                "blockers": blockers or [],
             }
         ),
         encoding="utf-8",

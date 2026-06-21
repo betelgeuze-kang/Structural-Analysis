@@ -24,6 +24,9 @@ DEFAULT_CHECKPOINT = (
 )
 DEFAULT_OUT = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
 DEFAULT_CHILD_OUT = PRODUCTIZATION / "g1_full_load_hip_newton_direct_probe.json"
+DEFAULT_HIP_CONSISTENCY_PROOF = (
+    PRODUCTIZATION / "mgt_residual_jacobian_consistency_hip_required_probe.json"
+)
 DIRECT_PROBE = Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py")
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
@@ -304,6 +307,53 @@ def _direct_probe_command(
     return command
 
 
+def _load_json_payload(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        return {}
+    try:
+        loaded = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def _hip_consistency_proof_assessment(
+    *,
+    proof_json: Path,
+    lane_source_commit_sha: str,
+) -> tuple[dict[str, Any], list[str]]:
+    payload = _load_json_payload(proof_json)
+    blockers: list[str] = []
+    if not payload:
+        blockers.append("hip_consistency_proof_receipt_missing_or_unreadable")
+    if payload.get("reused_evidence") is not False:
+        blockers.append("hip_consistency_proof_reused_evidence_not_false")
+    proof_source_commit = str(payload.get("source_commit_sha", "") or "")
+    if not proof_source_commit:
+        blockers.append("hip_consistency_proof_source_commit_sha_missing")
+    elif lane_source_commit_sha and proof_source_commit != lane_source_commit_sha:
+        blockers.append("hip_consistency_proof_source_commit_sha_mismatch")
+    if payload.get("rocm_hip_required") is not True:
+        blockers.append("hip_consistency_proof_rocm_hip_not_required")
+    if payload.get("consistent_residual_jacobian_newton_gate_passed") is not True:
+        blockers.append("hip_consistency_proof_gate_not_passed")
+    proof_blockers = payload.get("blockers")
+    if isinstance(proof_blockers, list) and proof_blockers:
+        blockers.append("hip_consistency_proof_has_blockers")
+    return {
+        "path": str(proof_json),
+        "present": proof_json.exists(),
+        "status": payload.get("status"),
+        "source_commit_sha": proof_source_commit,
+        "reused_evidence": payload.get("reused_evidence"),
+        "rocm_hip_required": payload.get("rocm_hip_required"),
+        "consistent_residual_jacobian_newton_gate_passed": payload.get(
+            "consistent_residual_jacobian_newton_gate_passed"
+        ),
+        "receipt_blockers": proof_blockers if isinstance(proof_blockers, list) else [],
+    }, blockers
+
+
 def build_lane_report(
     *,
     checkpoint_npz: Path | None = None,
@@ -313,6 +363,7 @@ def build_lane_report(
     full_load_tolerance: float = 1.0e-12,
     dry_run: bool = False,
     evidence_sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
+    hip_consistency_proof_json: Path = DEFAULT_HIP_CONSISTENCY_PROOF,
 ) -> tuple[dict[str, Any], int]:
     generated_at = _now_utc_iso()
     resolved_checkpoint, checkpoint_resolution = _resolve_checkpoint(
@@ -338,10 +389,15 @@ def build_lane_report(
         output_json=output_json,
         mgt_path=mgt_path,
     )
+    source_commit_sha = _git_head()
+    hip_consistency_proof, hip_consistency_blockers = _hip_consistency_proof_assessment(
+        proof_json=hip_consistency_proof_json,
+        lane_source_commit_sha=source_commit_sha,
+    )
     base_payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
-        "source_commit_sha": _git_head(),
+        "source_commit_sha": source_commit_sha,
         "engine_version": ENGINE_VERSION,
         "reused_evidence": False,
         "checkpoint": checkpoint_meta,
@@ -351,12 +407,14 @@ def build_lane_report(
         "full_load_input_pass": full_load_input_pass,
         "dry_run": bool(dry_run),
         "command": command,
+        "hip_consistency_proof": hip_consistency_proof,
         "child_safety_requirements": [
             "child_reused_evidence_false",
             "child_source_commit_matches_lane",
             "child_observed_load_scale_at_required_full_load",
             "child_hip_residual_engine_contract_passed",
             "child_consistent_residual_jacobian_newton_passed",
+            "external_hip_consistency_proof_gate_passed",
             "child_material_newton_breadth_passed",
             "child_cpu_acceptance_refresh_not_blocked",
             "child_fallback_zero_passed",
@@ -368,8 +426,9 @@ def build_lane_report(
             "customer, validation, or ROCm/HIP closure evidence. "
             "The child probe must explicitly prove full-load closure, HIP residual residency, "
             "consistent residual/Jacobian Newton closure, fallback-zero behavior, "
-            "and material Newton breadth. A checkpoint below load_scale 1.0 is "
-            "blocked before execution."
+            "and material Newton breadth. The separate HIP-required residual/Jacobian "
+            "consistency receipt must also pass without blockers. A checkpoint below "
+            "load_scale 1.0 is blocked before execution."
         ),
     }
     if blockers:
@@ -377,7 +436,7 @@ def build_lane_report(
             **base_payload,
             "status": "blocked",
             "contract_pass": False,
-            "blockers": blockers,
+            "blockers": [*blockers, *hip_consistency_blockers],
             "child_exit_code": None,
         }, 1
     if dry_run:
@@ -407,6 +466,7 @@ def build_lane_report(
         required_load_scale=float(required_load_scale),
         full_load_tolerance=float(full_load_tolerance),
     )
+    safety_blockers.extend(hip_consistency_blockers)
     child_ready = bool(
         result.returncode == 0
         and not safety_blockers
@@ -507,6 +567,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--required-load-scale", type=float, default=1.0)
     parser.add_argument("--full-load-tolerance", type=float, default=1.0e-12)
+    parser.add_argument(
+        "--hip-consistency-proof-json",
+        type=Path,
+        default=DEFAULT_HIP_CONSISTENCY_PROOF,
+        help=(
+            "HIP-required residual/Jacobian consistency receipt that must pass before "
+            "the G1 lane can be promoted."
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -522,6 +591,7 @@ def main(argv: list[str] | None = None) -> int:
         required_load_scale=args.required_load_scale,
         full_load_tolerance=args.full_load_tolerance,
         dry_run=args.dry_run,
+        hip_consistency_proof_json=args.hip_consistency_proof_json,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(
