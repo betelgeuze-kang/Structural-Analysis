@@ -229,6 +229,55 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
 
 
+def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["rocm_hip_runtime_unavailable"],
+        runtime_blockers=["dev_kfd_missing", "dev_dri_missing"],
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    proof_summary = payload["hip_consistency_proof"]
+    assert proof_summary["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
+    assert "hip_consistency_proof_runtime::dev_kfd_missing" in payload["blockers"]
+    assert "hip_consistency_proof_runtime::dev_dri_missing" in payload["blockers"]
+    assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
+    assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+
+
 def _write_acceptance_child(
     child: Path,
     *,
@@ -283,20 +332,21 @@ def _write_hip_consistency_proof(
     rocm_hip_required: bool = True,
     gate_passed: bool = True,
     blockers: list[str] | None = None,
+    runtime_blockers: list[str] | None = None,
 ) -> None:
-    proof.write_text(
-        json.dumps(
-            {
-                "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-                "source_commit_sha": source_commit_sha,
-                "reused_evidence": reused_evidence,
-                "rocm_hip_required": rocm_hip_required,
-                "consistent_residual_jacobian_newton_gate_passed": gate_passed,
-                "blockers": blockers or [],
-            }
-        ),
-        encoding="utf-8",
-    )
+    payload: dict[str, Any] = {
+        "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+        "source_commit_sha": source_commit_sha,
+        "reused_evidence": reused_evidence,
+        "rocm_hip_required": rocm_hip_required,
+        "consistent_residual_jacobian_newton_gate_passed": gate_passed,
+        "blockers": blockers or [],
+    }
+    if runtime_blockers is not None:
+        payload["rocm_hip_runtime_preflight"] = {
+            "runtime_blockers": runtime_blockers,
+        }
+    proof.write_text(json.dumps(payload), encoding="utf-8")
 
 
 def test_child_reused_evidence_blocks_lane_promotion(

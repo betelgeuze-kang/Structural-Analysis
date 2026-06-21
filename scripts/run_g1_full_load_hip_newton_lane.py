@@ -340,6 +340,16 @@ def _hip_consistency_proof_assessment(
     proof_blockers = payload.get("blockers")
     if isinstance(proof_blockers, list) and proof_blockers:
         blockers.append("hip_consistency_proof_has_blockers")
+    preflight = payload.get("rocm_hip_runtime_preflight")
+    preflight = preflight if isinstance(preflight, dict) else {}
+    runtime_blockers_raw = preflight.get("runtime_blockers")
+    runtime_blockers_list: list[str] = (
+        [item for item in runtime_blockers_raw if isinstance(item, str) and item]
+        if isinstance(runtime_blockers_raw, list)
+        else []
+    )
+    for runtime_blocker in runtime_blockers_list:
+        blockers.append(f"hip_consistency_proof_runtime::{runtime_blocker}")
     return {
         "path": str(proof_json),
         "present": proof_json.exists(),
@@ -351,6 +361,7 @@ def _hip_consistency_proof_assessment(
             "consistent_residual_jacobian_newton_gate_passed"
         ),
         "receipt_blockers": proof_blockers if isinstance(proof_blockers, list) else [],
+        "runtime_blockers": runtime_blockers_list,
     }, blockers
 
 
