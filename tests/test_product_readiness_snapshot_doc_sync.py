@@ -16,6 +16,14 @@ SNAPSHOT = (
 INDEPENDENT_PRODUCT = (
     REPO_ROOT / "implementation" / "phase1" / "release" / "independent_product_readiness.json"
 )
+PM_BLOCKER_REGISTER = (
+    REPO_ROOT
+    / "implementation"
+    / "phase1"
+    / "release_evidence"
+    / "productization"
+    / "pm_release_blocker_action_register.json"
+)
 DOCS = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "docs" / "commercialization-gap-current-state.md",
@@ -65,3 +73,26 @@ def test_readme_independent_product_score_matches_receipt() -> None:
 
     assert expected in readme
     assert expected_score in readme
+
+
+def test_docs_pm_release_area_and_handoff_counts_match_register() -> None:
+    payload = json.loads(PM_BLOCKER_REGISTER.read_text(encoding="utf-8"))
+    summary = payload["summary"]
+    green = int(summary["release_area_green_count"])
+    total = int(summary["release_area_total_count"])
+    open_count = int(summary["open_blocker_count"])
+    release_area_count = int(summary["release_area_blocker_count"])
+    fresh_count = int(summary["local_remediation_ready_count"])
+    external_customer_count = open_count - release_area_count - fresh_count
+    expected_fragments = [
+        f"{green}/{total}",
+        f"`{open_count}`",
+        f"`{release_area_count}`",
+        f"`{external_customer_count}`",
+        f"`{fresh_count}`",
+    ]
+
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in expected_fragments:
+            assert fragment in text, (path, fragment)
