@@ -239,6 +239,8 @@ def check_status_consistency(
         runner_rows=runner_rows,
         query_error=query_error,
     )
+    if query_error:
+        return False, "runner_status_live_query_failed", generated
     existing_normalized = _strip_volatile_for_compare(existing)
     generated_normalized = _strip_volatile_for_compare(generated)
     if existing_normalized == generated_normalized:

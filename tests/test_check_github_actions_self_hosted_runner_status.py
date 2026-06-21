@@ -219,6 +219,34 @@ def test_self_hosted_runner_status_check_fails_on_semantic_mismatch(
     assert generated["contract_pass"] is True
 
 
+def test_self_hosted_runner_status_check_reports_live_query_failure_separately(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "runner-status.json"
+    payload = runner_status.build_status(
+        repo="owner/repo",
+        runner_rows=[_matching_runner()],
+    )
+    out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    before = out.read_text(encoding="utf-8")
+
+    ok, message, generated = runner_status.check_status_consistency(
+        out_path=out,
+        repo="owner/repo",
+        runner_rows=[],
+        query_error="lookup api.github.com: Temporary failure in name resolution",
+    )
+
+    assert ok is False
+    assert message == "runner_status_live_query_failed"
+    assert generated is not None
+    assert "github_actions_self_hosted_runner_query_failed" in generated["blockers"]
+    assert out.read_text(encoding="utf-8") == before
+
+
 def test_self_hosted_runner_status_main_check_does_not_write(
     tmp_path: Path,
     monkeypatch,
