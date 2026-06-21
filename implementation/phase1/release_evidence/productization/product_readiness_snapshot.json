@@ -21,7 +21,7 @@
     "ux_new_user_observation": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
     "workstation_delivery": "implementation/phase1/workstation_delivery_readiness.json"
   },
-  "blocker_count": 89,
+  "blocker_count": 90,
   "blockers": [
     "ci_streak::nightly::github_actions_query_failed",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -104,6 +104,7 @@
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
     "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
+    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
     "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
@@ -293,7 +294,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-21T11:03:06.278075+00:00",
+  "generated_at": "2026-06-21T11:08:08.172860+00:00",
   "independent_product_ready": false,
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
@@ -301,7 +302,7 @@
   "reused_evidence": false,
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "source_commit_sha": "0d3ce24f1b90de2d855d1ebb665c33899dca41ef",
+  "source_commit_sha": "fe1b32654a0685ee2a35895dade40e7bc4228894",
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -446,20 +447,16 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [
-          "README.md",
-          "docs/ai/dispatch/opencode_hip_consistency_blocked_receipt_refresh_20260621T201000Z.md",
-          "docs/commercialization-gap-current-state.md",
-          "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
-          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+          "scripts/build_product_readiness_snapshot.py",
+          "tests/test_build_product_readiness_snapshot.py"
         ],
         "generated_at": "2026-06-21T11:01:11.776670+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": false,
         "source_commit_sha": "e24887d7923025b4c721efab1f720f5b57ebcc38",
-        "source_state_fresh": true,
-        "source_state_kind": "receipt_only_commit"
+        "source_state_fresh": false,
+        "source_state_kind": "non_receipt_paths_changed"
       },
       {
         "artifact": "customer_shadow_evidence_status",
