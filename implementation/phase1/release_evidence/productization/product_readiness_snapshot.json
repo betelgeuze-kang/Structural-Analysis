@@ -249,7 +249,7 @@
           "dev_kfd_missing",
           "dev_dri_missing"
         ],
-        "source_commit_sha": "1f8f179b8680629058a826826cc01335546078a8",
+        "source_commit_sha": "19c2e75333135f116f7bac4a1b320327524604c8",
         "status": "partial"
       },
       "full_load_hip_newton_hip_consistency_proof_ready": false,
@@ -325,7 +325,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-21T11:33:33.446955+00:00",
+  "generated_at": "2026-06-21T11:38:20.717062+00:00",
   "independent_product_ready": false,
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
@@ -333,7 +333,7 @@
   "reused_evidence": false,
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "source_commit_sha": "1f8f179b8680629058a826826cc01335546078a8",
+  "source_commit_sha": "19c2e75333135f116f7bac4a1b320327524604c8",
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -377,6 +377,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -385,6 +386,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -403,6 +405,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -411,6 +414,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -429,6 +433,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -437,6 +442,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -455,6 +461,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -463,6 +470,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -478,11 +486,11 @@
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-06-21T11:33:17.753917+00:00",
+        "generated_at": "2026-06-21T11:38:05.840980+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
         "source_commit_matches_head": true,
-        "source_commit_sha": "1f8f179b8680629058a826826cc01335546078a8",
+        "source_commit_sha": "19c2e75333135f116f7bac4a1b320327524604c8",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -492,6 +500,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -500,6 +509,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -518,6 +528,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -526,6 +537,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -544,6 +556,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -552,6 +565,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -570,6 +584,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -578,6 +593,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -596,6 +612,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -604,6 +621,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -622,6 +640,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -630,6 +649,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -648,6 +668,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -656,6 +677,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
@@ -674,6 +696,7 @@
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
           "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
           "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+          "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
           "implementation/phase1/support_bundle_manifest.json",
           "scripts/build_product_readiness_snapshot.py",
           "scripts/check_github_actions_self_hosted_runner_status.py",
@@ -682,6 +705,7 @@
           "tests/test_build_product_readiness_snapshot.py",
           "tests/test_check_github_actions_self_hosted_runner_status.py",
           "tests/test_mgt_direct_residual_newton_probe.py",
+          "tests/test_mgt_residual_jacobian_consistency_probe.py",
           "tests/test_product_readiness_snapshot_doc_sync.py",
           "tests/test_run_g1_full_load_hip_newton_lane.py",
           "tests/test_verify_quality_gate.py"
