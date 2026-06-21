@@ -1678,6 +1678,48 @@ def run_mgt_residual_jacobian_consistency_probe(
                 encoding="utf-8",
             )
         return payload
+    if require_hip_residual_engine:
+        payload = {
+            "schema_version": SCHEMA_VERSION,
+            "generated_at": generated_at,
+            "source_commit_sha": source_commit_sha,
+            "engine_version": ENGINE_VERSION,
+            "reused_evidence": False,
+            "status": "partial",
+            "residual_jacobian_consistency_ready": False,
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "rocm_hip_required": True,
+            "rocm_hip_runtime_preflight": hip_preflight,
+            "component_only": bool(component_only),
+            "checkpoint": {"path": str(checkpoint_npz)},
+            "load_scale": None,
+            "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "direction_rows": [],
+            "state_scale_sweep": [],
+            "runtime_metrics": {
+                "setup_and_reference_seconds": 0.0,
+                "base_assembly_seconds": 0.0,
+                "total_seconds": time.perf_counter() - started,
+            },
+            "claim_boundary": (
+                "Production ROCm/HIP residual-Jacobian consistency was requested and "
+                "a usable HIP runtime was reported, but this proof path does not yet "
+                "implement the production HIP residual/Jacobian evaluation. The probe "
+                "did not fall back to the CPU diagnostic assembler and does not close G1."
+            ),
+            "blockers": [
+                "hip_residual_jacobian_consistency_hip_path_not_implemented",
+                "hip_residual_jacobian_consistency_not_executed",
+            ],
+        }
+        if output_json is not None:
+            output_json.parent.mkdir(parents=True, exist_ok=True)
+            output_json.write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+                encoding="utf-8",
+            )
+        return payload
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,
         checkpoint_npz=checkpoint_npz,
