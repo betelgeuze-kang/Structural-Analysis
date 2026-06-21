@@ -8,6 +8,9 @@
   ],
   "checkpoint": {
     "dof_count": 78282,
+    "failed_bracket_load_scales": [],
+    "frontier_load_scale": null,
+    "load_path_provenance_present": false,
     "load_scale": 0.656,
     "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
     "schema": "mgt-direct-residual-newton-state.v1"
@@ -25,6 +28,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -33,6 +37,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_final_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -41,6 +46,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_final_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -49,6 +55,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -57,6 +64,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -65,6 +73,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -73,6 +82,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -81,6 +91,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -89,6 +100,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -97,6 +109,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -105,6 +118,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
@@ -113,6 +127,7 @@
           "exists": true,
           "load_scale": 0.656,
           "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz",
+          "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         }
       ],
@@ -123,6 +138,7 @@
         "load_scale": 0.656,
         "meets_full_load": false,
         "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+        "provenance_context": {},
         "schema": "mgt-direct-residual-newton-state.v1"
       },
       "selection_reason": "highest_sub_full_load_candidate_selected",
@@ -178,7 +194,7 @@
     "child_cpu_acceptance_refresh_not_blocked",
     "child_fallback_zero_passed"
   ],
-  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. The separate HIP-required residual/Jacobian consistency receipt must also pass without blockers. A checkpoint below load_scale 1.0 is blocked before execution.",
+  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. The separate HIP-required residual/Jacobian consistency receipt must also pass without blockers. A checkpoint below load_scale 1.0 is blocked before execution, and a checkpoint that claims load_scale >= 1.0 is also blocked when its metadata exposes an accepted frontier below the required full load or a failed bracket below full load.",
   "command": [
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
@@ -213,7 +229,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T07:40:57.550605+00:00",
+  "generated_at": "2026-06-21T07:49:54.784686+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -228,12 +244,19 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "60e656c432da3291bddd15b564e5eeb5963c2709",
+    "source_commit_sha": "c22e23e6001da615d2e728275c061ffd727669dc",
     "status": "partial"
   },
+  "load_path_provenance": {
+    "context": {},
+    "passed": true,
+    "provenance_below_required_full_load": {},
+    "required_load_scale": 1.0
+  },
+  "load_path_provenance_pass": true,
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "60e656c432da3291bddd15b564e5eeb5963c2709",
+  "source_commit_sha": "c22e23e6001da615d2e728275c061ffd727669dc",
   "status": "blocked"
 }
