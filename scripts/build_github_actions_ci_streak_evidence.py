@@ -21,6 +21,10 @@ DEFAULT_LOCAL_WORKFLOW_DIR = Path(".github/workflows")
 GH_FIELDS = "databaseId,event,conclusion,status,headSha,headBranch,createdAt,updatedAt,url,name"
 GH_DEBUG_LINE = re.compile(r"^\* Request(?:\s|$)")
 MAX_JOB_START_BLOCKER_RUNS = 5
+LOCAL_METADATA_CLAIM_BOUNDARY = (
+    "Local workflow trigger metadata is parsed from the current checkout and does not refresh "
+    "or replace GitHub Actions run-history evidence."
+)
 KNOWN_GITHUB_TRIGGER_EVENTS = frozenset(
     (
         "branch_protection_rule",
@@ -685,11 +689,11 @@ def refresh_local_workflow_metadata(
     payload["source_commit_sha"] = _git_head()
     payload["engine_version"] = ENGINE_VERSION
     payload["reused_evidence"] = True
-    payload["claim_boundary"] = (
-        str(payload.get("claim_boundary", "")).rstrip()
-        + " Local workflow trigger metadata is parsed from the current checkout and does not refresh "
-        "or replace GitHub Actions run-history evidence."
-    ).strip()
+    claim_boundary = str(payload.get("claim_boundary", "")).strip()
+    claim_boundary = claim_boundary.replace(LOCAL_METADATA_CLAIM_BOUNDARY, "").strip()
+    claim_boundary = re.sub(r"\s+", " ", claim_boundary)
+    claim_boundary = f"{claim_boundary} {LOCAL_METADATA_CLAIM_BOUNDARY}".strip()
+    payload["claim_boundary"] = claim_boundary
     return payload
 
 
