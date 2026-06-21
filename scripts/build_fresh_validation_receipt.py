@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -55,6 +56,44 @@ DEFAULT_CLAIM_BOUNDARY = (
 )
 SCHEMA_VERSION = "fresh-validation-receipt.v1"
 BUILDER_SCHEMA_VERSION = "fresh-validation-receipt-builder.v1"
+PYTHON_EXECUTABLE_NAMES = {"python", "python3"}
+RUNNER_COMMAND_PREFIXES: dict[str, tuple[tuple[str, ...], ...]] = {
+    "torch_capable_benchmark_validation": (
+        ("python3", "implementation/phase1/report_commercial_solver_cross_validation.py"),
+    ),
+    "gpu_capable_rocm_hip_validation": (
+        ("python3", "implementation/phase1/run_solver_hip_e2e_contract.py"),
+        (
+            "python3",
+            "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
+            "--component-only",
+            "--require-hip-residual-engine",
+        ),
+    ),
+    "performance_validation": (
+        ("python3", "implementation/phase1/run_performance_profiling_gate.py"),
+    ),
+    "heavy_surface_material_contact_validation": (
+        ("python3", "implementation/phase1/run_general_fe_contact_benchmark_gate.py"),
+        ("python3", "implementation/phase1/run_mgt_surface_membrane_tangent.py"),
+        ("python3", "implementation/phase1/run_mgt_surface_shell_bending_tangent.py"),
+        ("python3", "implementation/phase1/run_mgt_coupled_frame_surface_sparse_equilibrium.py"),
+    ),
+    "midas_validation": (
+        ("python3", "implementation/phase1/run_midas_exact_roundtrip_closure_gate.py"),
+        ("python3", "implementation/phase1/run_midas_interoperability_gate.py"),
+    ),
+    "heavy_productization_validation": (
+        ("python3", "implementation/phase1/run_productization_gate.py"),
+        ("python3", "implementation/phase1/run_ndtha_residual_gate.py"),
+    ),
+    "benchmark_productization_validation": (
+        ("python3", "implementation/phase1/start_external_benchmark_task.py"),
+    ),
+    "design_optimization_validation": (
+        ("python3", "implementation/phase1/run_design_optimization_solver_loop_long.py"),
+    ),
+}
 
 
 class CommandRunError(RuntimeError):
@@ -70,6 +109,55 @@ def _split_command(raw: str) -> list[str]:
         return shlex.split(raw, posix=True)
     except ValueError as exc:
         raise CommandRunError(f"validation_command_unparseable:{exc}") from exc
+
+
+def _is_python_executable(token: str) -> bool:
+    text = str(token).strip()
+    if not text:
+        return False
+    if text == sys.executable:
+        return True
+    return os.path.basename(text) in PYTHON_EXECUTABLE_NAMES
+
+
+def _argv_matches_prefix(argv: list[str], prefix: tuple[str, ...]) -> bool:
+    if len(argv) < len(prefix):
+        return False
+    for index, expected in enumerate(prefix):
+        actual = argv[index]
+        if index == 0 and expected in PYTHON_EXECUTABLE_NAMES:
+            if not _is_python_executable(actual):
+                return False
+            continue
+        if actual != expected:
+            return False
+    return True
+
+
+def _runner_command_blockers(
+    *,
+    runner: str,
+    validation_command: str,
+    runner_command_prefixes: dict[str, tuple[tuple[str, ...], ...]] | None = None,
+) -> list[str]:
+    registry = (
+        RUNNER_COMMAND_PREFIXES
+        if runner_command_prefixes is None
+        else runner_command_prefixes
+    )
+    runner_id = str(runner).strip()
+    prefixes = registry.get(runner_id)
+    if not prefixes:
+        return [f"fresh_validation_runner_not_registered:{runner_id or '<empty>'}"]
+    try:
+        argv = _split_command(validation_command)
+    except CommandRunError as exc:
+        return [str(exc)]
+    if not argv:
+        return ["validation_command_empty"]
+    if any(_argv_matches_prefix(argv, prefix) for prefix in prefixes):
+        return []
+    return [f"fresh_validation_command_not_allowed_for_runner:{runner_id}"]
 
 
 def _run_validation_command(
@@ -369,6 +457,24 @@ def main(argv: list[str] | None = None) -> int:
         print(f"fresh-validation-receipt: BLOCKED | reason={blocker}")
         return 7
     else:
+        command_policy_blockers = _runner_command_blockers(
+            runner=args.runner,
+            validation_command=args.validation_command,
+        )
+        if command_policy_blockers:
+            _write_result(
+                args.out_result,
+                contract_pass=False,
+                reason_code="ERR_FRESH_VALIDATION_COMMAND_NOT_ALLOWED",
+                blockers=command_policy_blockers,
+                receipt_path=None,
+                command_result=None,
+            )
+            print(
+                "fresh-validation-receipt: BLOCKED | "
+                f"reason={command_policy_blockers[0]}"
+            )
+            return 9
         try:
             command_result = _run_validation_command(
                 args.validation_command,

@@ -9,7 +9,7 @@ source boundary, P0-2~P0-6 core evidence, release P0-1 publication이 닫혔다.
 
 ## 현재 상태
 
-- Canonical product readiness snapshot: status `blocked`, blocker_count `64`, paid_pilot_ready=`false`, release_ready=`false`. 권위 소스는 `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`이며, README/current-state 문서가 이 값과 어긋나면 release claim을 올리지 않는다.
+- Canonical product readiness snapshot: status `blocked`, blocker_count `65`, paid_pilot_ready=`false`, release_ready=`false`. 권위 소스는 `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`이며, README/current-state 문서가 이 값과 어긋나면 release claim을 올리지 않는다.
 - `scripts/check_repo_hygiene.py --strict-source-boundary`는 통과했고, tracked stress/workspace/output/rust target 정리는 끝났다.
 - `scripts/plan_source_boundary_cleanup.py --large-file-threshold-mib 25 --fail-on-candidates`는 0 candidates를 보고했고, 필요 시 같은 명령에 `--out`/`--out-md`를 붙여 JSON/Markdown inventory를 남긴다. CI도 같은 gate를 실행해 새 대형 산출물/경계 후보 유입을 차단한다.
 - `implementation/phase1/open_data_external_artifacts_manifest.json`는 SHA/bytes가 붙은 8개 externalized open-data assets를 기록한다.
