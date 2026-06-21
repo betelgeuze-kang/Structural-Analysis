@@ -6,7 +6,7 @@
   "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-21T07:41:13.391810+00:00",
+  "generated_at": "2026-06-21T07:42:02.719355+00:00",
   "matching_runner_count": 0,
   "online_matching_runner_count": 0,
   "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
@@ -21,6 +21,6 @@
   "rows": [],
   "runner_count": 0,
   "schema_version": "github-actions-self-hosted-runner-status.v1",
-  "source_commit_sha": "60e656c432da3291bddd15b564e5eeb5963c2709",
+  "source_commit_sha": "d9f6481f5171fca9b9840f8f2447ef008ac21334",
   "status": "blocked"
 }
