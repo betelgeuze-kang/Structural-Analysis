@@ -764,6 +764,45 @@ def test_direct_residual_cli_requires_explicit_cpu_diagnostic_ack(tmp_path: Path
     assert not out.exists()
 
 
+def test_rocm_hip_preflight_blocks_when_device_nodes_fail_despite_torch_available(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_torch = types.SimpleNamespace(
+        __version__="2.6.0+rocm6.1",
+        version=types.SimpleNamespace(hip="6.1.40091"),
+        cuda=types.SimpleNamespace(
+            is_available=lambda: True,
+            device_count=lambda: 1,
+            get_device_name=lambda _index: "fixture-amd-gpu",
+        ),
+    )
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    monkeypatch.setattr(
+        direct_probe,
+        "_rocm_device_runtime_diagnostics",
+        lambda: {
+            "device_nodes": {
+                "kfd": {"path": "/dev/kfd", "exists": False},
+                "dri": {"path": "/dev/dri", "exists": False},
+            },
+            "process_group_ids": [],
+            "rocm_commands": {"rocminfo": None, "rocm_smi": None, "hipcc": None},
+            "visibility_settings": {},
+            "runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+        },
+    )
+
+    payload = direct_probe._rocm_hip_runtime_preflight()
+
+    assert payload["torch_importable"] is True
+    assert payload["torch_rocm_build"] is True
+    assert payload["torch_hip_device_available"] is True
+    assert payload["hip_available"] is False
+    assert payload["unavailable_reason"] == "rocm_device_runtime_blocked"
+    assert payload["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
+    assert "torch_hip_device_count" not in payload
+
+
 def test_direct_residual_cli_allows_hip_required_without_cpu_diagnostic_ack(
     tmp_path: Path,
     monkeypatch,

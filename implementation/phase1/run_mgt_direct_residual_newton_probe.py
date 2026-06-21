@@ -1095,6 +1095,10 @@ def _rocm_hip_runtime_preflight() -> dict[str, Any]:
     if not hip_available:
         payload["unavailable_reason"] = "torch_hip_device_unavailable"
         return payload
+    runtime_blockers = payload.get("runtime_blockers")
+    if isinstance(runtime_blockers, list) and runtime_blockers:
+        payload["unavailable_reason"] = "rocm_device_runtime_blocked"
+        return payload
 
     payload["hip_available"] = True
     try:
