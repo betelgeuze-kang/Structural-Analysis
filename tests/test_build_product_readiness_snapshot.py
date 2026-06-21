@@ -509,6 +509,50 @@ def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     ]
 
 
+def test_snapshot_accepts_dispatch_prompt_commit_as_receipt_boundary(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(
+        tmp_path / "docs/ai/dispatch/g1_runtime_blocker_probe.md",
+        "Goal: inspect runtime blocker propagation.\n",
+    )
+    dispatch_commit = _commit_all(tmp_path, "dispatch prompt")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == dispatch_commit
+    assert payload["schema_valid"] is True
+    assert payload["evidence_fresh"] is True
+    assert payload["status"] == "ready"
+    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert (
+        "docs/ai/dispatch/g1_runtime_blocker_probe.md"
+        in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
 def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)

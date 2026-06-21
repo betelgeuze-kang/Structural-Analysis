@@ -178,6 +178,8 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return True
     if path in {"README.md", "docs/commercialization-gap-current-state.md"}:
         return True
+    if path.startswith("docs/ai/dispatch/") and path.endswith(".md"):
+        return True
     if path.startswith("implementation/phase1/release_evidence/productization/"):
         return path.endswith((".json", ".md"))
     if path in {
