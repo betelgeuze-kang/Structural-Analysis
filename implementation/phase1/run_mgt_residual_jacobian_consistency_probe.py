@@ -1631,6 +1631,12 @@ def run_mgt_residual_jacobian_consistency_probe(
         }
     )
     if require_hip_residual_engine and not bool(hip_preflight.get("hip_available")):
+        runtime_blockers = hip_preflight.get("runtime_blockers")
+        runtime_blocker_names = (
+            [item for item in runtime_blockers if isinstance(item, str) and item]
+            if isinstance(runtime_blockers, list)
+            else []
+        )
         payload = {
             "schema_version": SCHEMA_VERSION,
             "generated_at": generated_at,
@@ -1661,6 +1667,7 @@ def run_mgt_residual_jacobian_consistency_probe(
             ),
             "blockers": [
                 "rocm_hip_runtime_unavailable",
+                *[f"hip_runtime::{item}" for item in runtime_blocker_names],
                 "hip_residual_jacobian_consistency_not_executed",
             ],
         }
