@@ -1,6 +1,8 @@
 {
   "blockers": [
-    "checkpoint_load_scale_below_required_full_load"
+    "checkpoint_load_scale_below_required_full_load",
+    "hip_consistency_proof_gate_not_passed",
+    "hip_consistency_proof_has_blockers"
   ],
   "checkpoint": {
     "dof_count": 78282,
@@ -169,11 +171,12 @@
     "child_observed_load_scale_at_required_full_load",
     "child_hip_residual_engine_contract_passed",
     "child_consistent_residual_jacobian_newton_passed",
+    "external_hip_consistency_proof_gate_passed",
     "child_material_newton_breadth_passed",
     "child_cpu_acceptance_refresh_not_blocked",
     "child_fallback_zero_passed"
   ],
-  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. A checkpoint below load_scale 1.0 is blocked before execution.",
+  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. The separate HIP-required residual/Jacobian consistency receipt must also pass without blockers. A checkpoint below load_scale 1.0 is blocked before execution.",
   "command": [
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
@@ -208,10 +211,23 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T07:02:54.101193+00:00",
+  "generated_at": "2026-06-21T07:13:53.626313+00:00",
+  "hip_consistency_proof": {
+    "consistent_residual_jacobian_newton_gate_passed": false,
+    "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+    "present": true,
+    "receipt_blockers": [
+      "rocm_hip_runtime_unavailable",
+      "hip_residual_jacobian_consistency_not_executed"
+    ],
+    "reused_evidence": false,
+    "rocm_hip_required": true,
+    "source_commit_sha": "47977d5489d5738957c1b57e5f394208d724e2dd",
+    "status": "partial"
+  },
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "0b1397bff7f4f8b354a1dd62a4134069923f6746",
+  "source_commit_sha": "47977d5489d5738957c1b57e5f394208d724e2dd",
   "status": "blocked"
 }
