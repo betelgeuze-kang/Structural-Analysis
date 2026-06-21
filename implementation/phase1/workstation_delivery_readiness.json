@@ -147,12 +147,12 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-21T09:09:05.942864+00:00",
+  "generated_at": "2026-06-21T09:20:04.510119+00:00",
   "independent_commercial_product_ready": false,
   "reason_code": "PASS",
   "reused_evidence": false,
   "schema_version": "workstation-delivery-readiness.v1",
-  "source_commit_sha": "bcf160827477d54cdfb091d496b676a6d2e8db1c",
+  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
   "status": "ready",
   "summary_line": "Workstation delivery readiness: PASS | gates=8/8",
   "workstation_delivery_service_ready": true

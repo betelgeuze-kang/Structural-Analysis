@@ -1,9 +1,9 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=21 | external_owner_ready=13 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=20 | external_owner_ready=13 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `21`
+- `open_blocker_count`: `20`
 - `release_area_summary`: `12/16`
 - `release_area_blocker_count`: `9`
 - `all_open_blockers_have_handoff`: `True`
@@ -31,6 +31,5 @@
 | `fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `midas_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
 | `fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `heavy_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
 | `fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `benchmark_productization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
-| `fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing` | `validation_lane_owner` | `local_remediation_ready` | `fresh_validation_receipt_missing` | Run the `design_optimization_validation` fresh validation lane, attach `implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json` with `reused_evidence=false`, required provenance metadata, and a green contract result, then regenerate fresh full-validation and PM release evidence. |
 
 This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.

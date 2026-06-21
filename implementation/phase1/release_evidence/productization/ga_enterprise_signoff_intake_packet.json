@@ -7,7 +7,7 @@
     "customer_audit_failure_bundle_sla_missing"
   ],
   "ga_enterprise_readiness_report": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json",
-  "generated_at": "2026-06-16T20:59:08.203168+00:00",
+  "generated_at": "2026-06-21T09:21:01.068303+00:00",
   "owner_packets": [
     {
       "acceptance_criteria": [

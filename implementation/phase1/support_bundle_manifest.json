@@ -130,8 +130,8 @@
       "bytes": 6638,
       "label": "workstation_delivery_readiness",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/workstation_delivery_readiness.json",
-      "redacted_sha256": "c0e634a3710203a835b5108e4f3cc58d87cce85b4cb5bb43842f465d9e0a10df",
-      "sha256": "c0e634a3710203a835b5108e4f3cc58d87cce85b4cb5bb43842f465d9e0a10df",
+      "redacted_sha256": "e499aa1d29bb575a74ea6a882d7c90e8d3f3e4c2ecc61fbf4b514ffb97e8e55e",
+      "sha256": "e499aa1d29bb575a74ea6a882d7c90e8d3f3e4c2ecc61fbf4b514ffb97e8e55e",
       "source_path": "implementation/phase1/workstation_delivery_readiness.json"
     },
     {
@@ -175,8 +175,8 @@
       "bytes": 2933,
       "label": "external_benchmark_updates",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/external_benchmark_updates.json",
-      "redacted_sha256": "cbc36ab4b285e756beb1ae63108d1537d0eac7f8fbd31154485b88d7fd9a673e",
-      "sha256": "cbc36ab4b285e756beb1ae63108d1537d0eac7f8fbd31154485b88d7fd9a673e",
+      "redacted_sha256": "1e54dd2d5e3823fbac3d31c9331394a629adc3dfc7ddc6477ce0e726dced5dd9",
+      "sha256": "1e54dd2d5e3823fbac3d31c9331394a629adc3dfc7ddc6477ce0e726dced5dd9",
       "source_path": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json"
     },
     {
@@ -184,8 +184,8 @@
       "bytes": 4891,
       "label": "residual_holdout_updates",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/residual_holdout_updates.json",
-      "redacted_sha256": "e6da486eb2ddb33b386b78f46b99c530a63a662bf52b28167cff488ffd77f64b",
-      "sha256": "e6da486eb2ddb33b386b78f46b99c530a63a662bf52b28167cff488ffd77f64b",
+      "redacted_sha256": "52ecf3d5ae313d0aee0863a188ea5168359ab5222079f87403b5755fdc7c27f7",
+      "sha256": "52ecf3d5ae313d0aee0863a188ea5168359ab5222079f87403b5755fdc7c27f7",
       "source_path": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
     },
     {
@@ -208,47 +208,47 @@
     },
     {
       "available": true,
-      "bytes": 121127,
+      "bytes": 114949,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "b9ad836d35ca9bd938e3f89dbf9af59bbfc67bb34f4f5460bad74bd02663d7b2",
-      "sha256": "b9ad836d35ca9bd938e3f89dbf9af59bbfc67bb34f4f5460bad74bd02663d7b2",
+      "redacted_sha256": "c901b783f7ecab833ac04b55b13d8d322253684b56f3a832d0c05796cf7b25d5",
+      "sha256": "c901b783f7ecab833ac04b55b13d8d322253684b56f3a832d0c05796cf7b25d5",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
       "available": true,
-      "bytes": 76679,
+      "bytes": 72679,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "ed15820e21f496bb32e95500837862f98281b8be06b0e2c782620acc0c9b92fa",
-      "sha256": "ed15820e21f496bb32e95500837862f98281b8be06b0e2c782620acc0c9b92fa",
+      "redacted_sha256": "f7db3cde2cb49ffb4e9a9deff8b6fe113523c31064cdd576d7c9bb57f245e1d6",
+      "sha256": "f7db3cde2cb49ffb4e9a9deff8b6fe113523c31064cdd576d7c9bb57f245e1d6",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
-      "bytes": 153888,
+      "bytes": 152960,
       "label": "pm_release_gate_completion_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
-      "redacted_sha256": "1301bcafe91b2f75baa18bf60ecb56dcf1b17269aec7e0f97abb230c581f1db6",
-      "sha256": "088f1d220ab135b6507cbe5a786bcf6ec8714f7c358ec150169b19bd5e49117c",
+      "redacted_sha256": "df88990306784e3efb1d8740b0a9b632af6466ab1f4060ef8d9b836917277f3f",
+      "sha256": "e2c38d1315a195cd84d691446c5c0c28e51b7fe407c6154feddcfbf8ee2f2ec3",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
     },
     {
       "available": true,
-      "bytes": 90981,
+      "bytes": 86526,
       "label": "pm_release_gate_reviewer_handoff",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
-      "redacted_sha256": "d43148fe237d0c0448dd3fdc5dd1625bd92f31323d57fdcbded92dd6af560aac",
-      "sha256": "d43148fe237d0c0448dd3fdc5dd1625bd92f31323d57fdcbded92dd6af560aac",
+      "redacted_sha256": "9078faedd2f06ec9da9d9b7f6d0bee5bcdd74a86c1133db30c2e5182943621a4",
+      "sha256": "9078faedd2f06ec9da9d9b7f6d0bee5bcdd74a86c1133db30c2e5182943621a4",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
     },
     {
       "available": true,
-      "bytes": 220348,
+      "bytes": 214671,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "fd3e9a7f30ddbfd5ca2052d7b40a6c8c487a2b90ee70c40eb7b756a0362ad6e7",
-      "sha256": "fd3e9a7f30ddbfd5ca2052d7b40a6c8c487a2b90ee70c40eb7b756a0362ad6e7",
+      "redacted_sha256": "9693badae23591db640f9e2770a1349258de51fe5ae437188e00631435a6d21b",
+      "sha256": "9693badae23591db640f9e2770a1349258de51fe5ae437188e00631435a6d21b",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -271,11 +271,11 @@
     },
     {
       "available": true,
-      "bytes": 7755,
+      "bytes": 7971,
       "label": "github_actions_ci_streak_evidence",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/github_actions_ci_streak_evidence.json",
-      "redacted_sha256": "120e9260a44f21f70bf50b7efd598bbccff9fe105a5417b869887cc1e8c6794b",
-      "sha256": "120e9260a44f21f70bf50b7efd598bbccff9fe105a5417b869887cc1e8c6794b",
+      "redacted_sha256": "2fd363bf2f01dca9fc051c98b61f69e6d5a2700e8e21c341606fd960c9298525",
+      "sha256": "2fd363bf2f01dca9fc051c98b61f69e6d5a2700e8e21c341606fd960c9298525",
       "source_path": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json"
     },
     {
@@ -292,8 +292,8 @@
       "bytes": 3125,
       "label": "license_status_closure_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/license_status_closure_report.json",
-      "redacted_sha256": "bee571b96b0c6eb014d38c64d377617f984f9ff1866d9c39835d32d095274947",
-      "sha256": "bee571b96b0c6eb014d38c64d377617f984f9ff1866d9c39835d32d095274947",
+      "redacted_sha256": "244fec324e963c45e1436d74bec72fac50a964989a5db0e360f8fd6edc12bcc5",
+      "sha256": "244fec324e963c45e1436d74bec72fac50a964989a5db0e360f8fd6edc12bcc5",
       "source_path": "implementation/phase1/release_evidence/productization/license_status_closure_report.json"
     },
     {
@@ -319,8 +319,8 @@
       "bytes": 6735,
       "label": "ga_enterprise_readiness_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_readiness_report.json",
-      "redacted_sha256": "7cd712e826ec97dfc0392b749c584a6f8d6f2583e032daa0411503ac0cc8362c",
-      "sha256": "7cd712e826ec97dfc0392b749c584a6f8d6f2583e032daa0411503ac0cc8362c",
+      "redacted_sha256": "bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
+      "sha256": "bdb7c158aabaccf54301f87bada5ae67418c62bf8e4cc205884b56fa2f28a229",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_readiness_report.json"
     },
     {
@@ -328,17 +328,17 @@
       "bytes": 33866,
       "label": "ga_enterprise_signoff_intake_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ga_enterprise_signoff_intake_packet.json",
-      "redacted_sha256": "dceb743b8214fd965c28ca308160b0e4c29a96fc384be17dff21c573a154f84b",
-      "sha256": "dceb743b8214fd965c28ca308160b0e4c29a96fc384be17dff21c573a154f84b",
+      "redacted_sha256": "efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
+      "sha256": "efe9834d56292cffa7a61e4b9217a565d2710f49b276344a6b715f52b31e0956",
       "source_path": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json"
     },
     {
       "available": true,
-      "bytes": 15035,
+      "bytes": 14894,
       "label": "fresh_full_validation_lane_status",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/fresh_full_validation_lane_status.json",
-      "redacted_sha256": "060da806f8169c90a77c0b33238b915c6602bf4082cc8835c5fc9e54e007d95a",
-      "sha256": "060da806f8169c90a77c0b33238b915c6602bf4082cc8835c5fc9e54e007d95a",
+      "redacted_sha256": "8f5e63b3278b971fc1343ee3e6172bf01af50150990998b57aae21c784366c8f",
+      "sha256": "8f5e63b3278b971fc1343ee3e6172bf01af50150990998b57aae21c784366c8f",
       "source_path": "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json"
     },
     {
@@ -400,8 +400,8 @@
       "bytes": 3758,
       "label": "ux_new_user_observation_report",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/ux_new_user_observation_report.json",
-      "redacted_sha256": "78677f0887856c2a9cfbf4dd0438bd1910657bf780e827dd1f036b0e2018282a",
-      "sha256": "78677f0887856c2a9cfbf4dd0438bd1910657bf780e827dd1f036b0e2018282a",
+      "redacted_sha256": "99bd9b54fd25b3f2851bc0cc5e38e4653eda9ecb4dd502a7ff2f83a54b162369",
+      "sha256": "99bd9b54fd25b3f2851bc0cc5e38e4653eda9ecb4dd502a7ff2f83a54b162369",
       "source_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json"
     },
     {
@@ -463,8 +463,8 @@
       "bytes": 13219,
       "label": "gap_closure_status",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/gap_closure_status.json",
-      "redacted_sha256": "48312e73816e464380bbc28d4db24e8a0113cde9fb02d5e996bd4a0fb2b67c40",
-      "sha256": "5484b6362d85c2f443d176a19f068e0d76b5f18f8b1695760513843f097e4349",
+      "redacted_sha256": "7154be04e86579f1379e7789d92950fcb64ccb3993e42220dfa47025f9229df2",
+      "sha256": "31feb6f4c60b9385a1c36cc35b9d8a317e698c9bb29ae3dd4b1d9f60d5a63063",
       "source_path": "implementation/phase1/release_evidence/productization/gap_closure_status.json"
     }
   ],
@@ -473,7 +473,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-21T09:09:27.497536+00:00",
+    "generated_at": "2026-06-21T09:32:01.514856+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -482,7 +482,7 @@
     "artifact_count": 51,
     "available_artifact_count": 51,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "f152c3546d839ca080ea446951e398fc68a400aeb7811bf2c2dabe09cb155d4e"
+    "sha256": "814a0dad4a1f79063a9f3f6d1086df99d1aa7d4b431aea9d1a20499c23b166f2"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -504,7 +504,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 417507,
+    "bytes": 417036,
     "error": "",
     "member_count": 55,
     "members": [
@@ -565,9 +565,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "8f6a3e757ac82148dbd23b9b68ac2083a01d35f753514c468cef36e045d35aa0"
+    "sha256": "45fdac40fc1a48a613af7d14306bce0a12820227ce5187e6d6fd27fbf4567f24"
   },
-  "generated_at": "2026-06-21T09:09:27.556180+00:00",
+  "generated_at": "2026-06-21T09:32:01.572956+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -643,7 +643,6 @@
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
       "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
       "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -659,7 +658,7 @@
       "ux::human_new_user_30min_sample_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed"
     ],
-    "generated_at": "2026-06-21T09:09:27.501043+00:00",
+    "generated_at": "2026-06-21T09:32:01.518074+00:00",
     "missing_required_section_labels": [],
     "open_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -668,7 +667,6 @@
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
       "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
       "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -703,7 +701,6 @@
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
       "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-      "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
       "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -867,7 +864,7 @@
       }
     ],
     "schema_version": "pm-failure-bundle-coverage.v1",
-    "sha256": "6b61d300f2856303dd1aa2986887886b5f990679e90e370d1e11ba11d63925d7",
+    "sha256": "a8eba3548c2ea877735c77862919648a9ef4184345b150c2ecad3a7cb22d5bb9",
     "source_artifacts": {
       "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -883,7 +880,6 @@
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
         "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
         "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -906,7 +902,6 @@
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
         "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
         "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -929,7 +924,6 @@
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
         "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
         "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -952,7 +946,6 @@
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
         "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
-        "fresh_full_validation::design_optimization_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
         "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
@@ -975,8 +968,8 @@
       "blocker_id_sources_match": true,
       "core_blocker_id_sources_match": true,
       "missing_required_section_count": 0,
-      "open_blocker_count": 21,
-      "owner_packet_blocked_release_tier_impact_count": 30,
+      "open_blocker_count": 20,
+      "owner_packet_blocked_release_tier_impact_count": 29,
       "owner_packet_missing_release_tier_impact_count": 0,
       "owner_packet_tier_impact_complete": true,
       "owner_packet_tier_impact_contract_pass": true,
@@ -984,7 +977,7 @@
       "release_area_blocker_count": 9,
       "release_area_green_count": 12,
       "release_area_total_count": 16,
-      "release_tier_blocker_count": 21,
+      "release_tier_blocker_count": 20,
       "release_tier_owner_packets_present": true,
       "release_tier_rows_present": true,
       "required_section_count": 29
