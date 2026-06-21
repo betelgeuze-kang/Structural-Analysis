@@ -208,10 +208,10 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T06:50:25.780728+00:00",
+  "generated_at": "2026-06-21T07:02:54.101193+00:00",
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "120b2d88b11410246ea8fd92f2a2fd4cf9719efd",
+  "source_commit_sha": "0b1397bff7f4f8b354a1dd62a4134069923f6746",
   "status": "blocked"
 }
