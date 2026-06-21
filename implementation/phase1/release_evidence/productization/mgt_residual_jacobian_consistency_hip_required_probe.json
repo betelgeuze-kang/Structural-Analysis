@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-21T07:20:08.122760+00:00",
-  "source_commit_sha": "69a46a367da74ca98227dda01e079e0aebe4257d",
+  "generated_at": "2026-06-21T07:28:13.792926+00:00",
+  "source_commit_sha": "bb2944ccf393ac87c4a557ec0a8856770b0ddcca",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -10,11 +10,48 @@
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-21T07:20:08.124749+00:00",
+    "checked_at": "2026-06-21T07:28:13.794855+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
     "torch_hip_device_available": false,
+    "device_nodes": {
+      "kfd": {
+        "path": "/dev/kfd",
+        "exists": false
+      },
+      "dri": {
+        "path": "/dev/dri",
+        "exists": false
+      }
+    },
+    "process_group_ids": [
+      1000,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534
+    ],
+    "rocm_commands": {
+      "rocminfo": "/usr/bin/rocminfo",
+      "rocm_smi": "/usr/local/bin/rocm-smi",
+      "hipcc": null
+    },
+    "visibility_settings": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "HSA_OVERRIDE_GFX_VERSION": "10.3.0"
+    },
+    "runtime_blockers": [
+      "dev_kfd_missing",
+      "dev_dri_missing"
+    ],
     "torch_version": "2.6.0+rocm6.1",
     "torch_rocm_version": "6.1.40091-a8dbc0c19",
     "unavailable_reason": "torch_hip_device_unavailable"
@@ -30,7 +67,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.8493935110018356
+    "total_seconds": 0.8922474959981628
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [

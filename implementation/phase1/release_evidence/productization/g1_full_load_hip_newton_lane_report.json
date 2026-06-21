@@ -211,7 +211,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T07:20:09.433213+00:00",
+  "generated_at": "2026-06-21T07:28:30.612025+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -222,12 +222,12 @@
     ],
     "reused_evidence": false,
     "rocm_hip_required": true,
-    "source_commit_sha": "69a46a367da74ca98227dda01e079e0aebe4257d",
+    "source_commit_sha": "bb2944ccf393ac87c4a557ec0a8856770b0ddcca",
     "status": "partial"
   },
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "69a46a367da74ca98227dda01e079e0aebe4257d",
+  "source_commit_sha": "bb2944ccf393ac87c4a557ec0a8856770b0ddcca",
   "status": "blocked"
 }
