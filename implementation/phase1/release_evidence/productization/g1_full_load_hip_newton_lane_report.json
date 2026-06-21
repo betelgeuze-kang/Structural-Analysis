@@ -168,11 +168,12 @@
     "child_source_commit_matches_lane",
     "child_observed_load_scale_at_required_full_load",
     "child_hip_residual_engine_contract_passed",
+    "child_consistent_residual_jacobian_newton_passed",
     "child_material_newton_breadth_passed",
     "child_cpu_acceptance_refresh_not_blocked",
     "child_fallback_zero_passed"
   ],
-  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, fallback-zero behavior, and material Newton breadth. A checkpoint below load_scale 1.0 is blocked before execution.",
+  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. A checkpoint below load_scale 1.0 is blocked before execution.",
   "command": [
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
@@ -207,10 +208,10 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T06:42:07.862141+00:00",
+  "generated_at": "2026-06-21T06:50:25.780728+00:00",
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "14004e7b750056c79c56a17c76c66ba1cb4d0bb3",
+  "source_commit_sha": "120b2d88b11410246ea8fd92f2a2fd4cf9719efd",
   "status": "blocked"
 }
