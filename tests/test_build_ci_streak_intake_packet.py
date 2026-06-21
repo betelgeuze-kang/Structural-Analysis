@@ -39,6 +39,11 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "registered_workflow": {"state": "active"},
                     "local_workflow_present": True,
                     "local_workflow_trigger_events": ["pull_request", "push"],
+                    "local_workflow_runs_on": [
+                        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+                    ],
+                    "local_self_hosted_runner_default": True,
+                    "local_github_hosted_runner_default": False,
                     "local_required_trigger_present": True,
                     "local_pull_request_trigger_present": True,
                     "query_error": "",
@@ -54,6 +59,11 @@ def _valid_github_actions_evidence(path: Path, *, now: datetime, threshold: int 
                     "registered_workflow": {"state": "active"},
                     "local_workflow_present": True,
                     "local_workflow_trigger_events": ["schedule", "workflow_dispatch"],
+                    "local_workflow_runs_on": [
+                        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+                    ],
+                    "local_self_hosted_runner_default": True,
+                    "local_github_hosted_runner_default": False,
                     "local_required_trigger_present": True,
                     "local_schedule_trigger_present": True,
                     "local_workflow_dispatch_trigger_present": True,
@@ -244,6 +254,41 @@ def test_ci_streak_intake_packet_passes_closed_manifest_with_valid_source_eviden
     assert payload["summary"]["pr_local_required_trigger_present"] is True
     assert payload["summary"]["nightly_local_required_trigger_present"] is True
     assert payload["source_evidence"]["lanes"]["pr"]["workflow_active"] is True
+    assert payload["source_evidence"]["lanes"]["pr"]["local_self_hosted_runner_default"] is True
+
+
+def test_ci_streak_intake_packet_rejects_github_hosted_runner_default(tmp_path: Path) -> None:
+    now = datetime(2026, 6, 16, tzinfo=timezone.utc)
+    manifest = _write_json(
+        tmp_path / "ci_consecutive_pass_manifest.json",
+        {
+            "contract_pass": True,
+            "threshold": 30,
+            "lanes": {
+                "pr": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+                "nightly": {"threshold": 30, "threshold_pass": True, "consecutive_pass_count": 30},
+            },
+        },
+    )
+    github_actions = _valid_github_actions_evidence(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        now=now,
+    )
+    payload = json.loads(github_actions.read_text(encoding="utf-8"))
+    payload["lanes"]["pr"]["local_workflow_runs_on"] = ["ubuntu-latest"]
+    payload["lanes"]["pr"]["local_self_hosted_runner_default"] = False
+    payload["lanes"]["pr"]["local_github_hosted_runner_default"] = True
+    github_actions.write_text(json.dumps(payload), encoding="utf-8")
+
+    packet = build_ci_streak_intake_packet.build_packet(
+        manifest_path=manifest,
+        github_actions_evidence_path=github_actions,
+        now=now,
+    )
+
+    assert packet["contract_pass"] is False
+    assert "pr:local_workflow_uses_github_hosted_runner" in packet["current_blockers"]
+    assert "pr:local_self_hosted_runner_default_missing" in packet["current_blockers"]
 
 
 def test_ci_streak_intake_packet_rejects_stale_source_evidence(tmp_path: Path) -> None:

@@ -73,6 +73,9 @@ def test_build_evidence_filters_pr_and_nightly_events_for_streaks() -> None:
     )
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["lanes"]["pr"]["consecutive_pass_count"] == 3
     assert payload["lanes"]["pr"]["threshold_pass"] is True
     assert payload["lanes"]["nightly"]["consecutive_pass_count"] == 2
@@ -200,6 +203,14 @@ def test_build_evidence_surfaces_github_actions_job_start_blockers() -> None:
     assert "do not create CI streak credit" in payload["claim_boundary"]
 
 
+def test_job_start_blocker_classifies_self_hosted_runner_unavailable() -> None:
+    reason = build_github_actions_ci_streak_evidence._job_start_blocker_code(
+        "No runner matching the specified labels was found: self-hosted, linux, x64"
+    )
+
+    assert reason == "github_actions_self_hosted_runner_unavailable"
+
+
 def test_build_evidence_records_missing_registered_workflow_and_sanitized_query_error() -> None:
     payload = build_github_actions_ci_streak_evidence.build_evidence(
         repo="owner/repo",
@@ -254,6 +265,10 @@ on:
   push:
     branches: ["main"]
   pull_request:
+
+jobs:
+  verify:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
 """,
         encoding="utf-8",
     )
@@ -265,6 +280,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "17 18 * * *"
+
+jobs:
+  full-quality:
+    runs-on: ubuntu-latest
 """,
         encoding="utf-8",
     )
@@ -274,9 +293,13 @@ on:
 
     assert by_name["CI"]["trigger_events"] == ["pull_request", "push"]
     assert by_name["CI"]["pull_request_trigger_present"] is True
+    assert by_name["CI"]["self_hosted_runner_default"] is True
+    assert by_name["CI"]["github_hosted_runner_default"] is False
     assert by_name["Nightly Full Quality"]["trigger_events"] == ["schedule", "workflow_dispatch"]
     assert by_name["Nightly Full Quality"]["schedule_trigger_present"] is True
     assert by_name["Nightly Full Quality"]["workflow_dispatch_trigger_present"] is True
+    assert by_name["Nightly Full Quality"]["self_hosted_runner_default"] is False
+    assert by_name["Nightly Full Quality"]["github_hosted_runner_default"] is True
 
 
 def test_local_workflow_trigger_readiness_does_not_replace_remote_streaks() -> None:
@@ -359,6 +382,9 @@ def test_local_metadata_only_refresh_preserves_run_history_timestamp(tmp_path: P
     )
 
     assert payload["generated_at"] == generated_at
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
     assert payload["lanes"]["pr"]["local_required_trigger_present"] is True
     assert payload["lanes"]["pr"]["local_workflow_trigger_events"] == ["pull_request"]
     assert payload["lanes"]["nightly"]["local_required_trigger_present"] is True

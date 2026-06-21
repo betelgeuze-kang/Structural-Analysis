@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 
@@ -75,6 +76,16 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _release_area_green_total(report: dict[str, Any]) -> tuple[int, int]:
+    rows = [row for row in _as_list(report.get("release_area_matrix")) if isinstance(row, dict)]
+    if rows:
+        return sum(1 for row in rows if row.get("ok") is True), len(rows)
+    match = re.search(r"release_areas_green=(\d+)/(\d+)", str(report.get("summary_line", "")))
+    if match:
+        return int(match.group(1)), int(match.group(2))
+    return 0, 0
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -866,17 +877,37 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
 
     release_area_blockers = [str(row) for row in _as_list(report.get("release_area_blockers"))]
     milestone_blockers = [str(row) for row in _as_list(report.get("blockers"))]
+    release_area_green_count, release_area_total_count = _release_area_green_total(report)
+    canonical_release_area_evidence = {
+        "release_area_green_count": release_area_green_count,
+        "release_area_total_count": release_area_total_count,
+        "release_area_summary": (
+            f"{release_area_green_count}/{release_area_total_count}"
+            if release_area_total_count
+            else ""
+        ),
+        "release_area_blocker_count": len(release_area_blockers),
+        "release_area_blocker_ids": release_area_blockers,
+        "claim_boundary": (
+            "Release-area blockers are sourced from "
+            "pm_release_gate_report.json.release_area_blockers and are distinct "
+            "from release-tier/open blocker lists used for owner handoff."
+        ),
+    }
     contract_pass = not rows
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
         "pm_release_gate_report": str(pm_report),
         "pm_summary_line": str(report.get("summary_line", "")),
+        "canonical_release_area_evidence": canonical_release_area_evidence,
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_PM_RELEASE_BLOCKERS_OPEN",
         "summary": {
             "open_blocker_count": len(rows),
             "release_area_blocker_count": len(release_area_blockers),
+            "release_area_green_count": release_area_green_count,
+            "release_area_total_count": release_area_total_count,
             "milestone_blocker_count": len(milestone_blockers),
             "ga_enterprise_blocker_count": len(ga_enterprise_blockers),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
@@ -913,6 +944,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `pm_summary_line`: `{payload['pm_summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `open_blocker_count`: `{payload['summary']['open_blocker_count']}`",
+        f"- `release_area_summary`: `{payload['canonical_release_area_evidence']['release_area_summary']}`",
+        f"- `release_area_blocker_count`: `{payload['canonical_release_area_evidence']['release_area_blocker_count']}`",
         "",
         "| Blocker | Scope | Owner | Evidence Status | Next Action | Acceptance |",
         "|---|---|---|---|---|---|",

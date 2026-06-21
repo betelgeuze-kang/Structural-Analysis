@@ -100,10 +100,17 @@ def _source_lane(
         for item in github_lane.get("local_workflow_trigger_events", [])
         if isinstance(item, str)
     ]
+    local_workflow_runs_on = [
+        str(item)
+        for item in github_lane.get("local_workflow_runs_on", [])
+        if isinstance(item, str)
+    ]
     local_required_trigger_present = github_lane.get("local_required_trigger_present") is True
     local_pull_request_trigger_present = github_lane.get("local_pull_request_trigger_present") is True
     local_schedule_trigger_present = github_lane.get("local_schedule_trigger_present") is True
     local_workflow_dispatch_trigger_present = github_lane.get("local_workflow_dispatch_trigger_present") is True
+    local_self_hosted_runner_default = github_lane.get("local_self_hosted_runner_default") is True
+    local_github_hosted_runner_default = github_lane.get("local_github_hosted_runner_default") is True
     pull_request_run_source_present = (
         github_lane.get("pull_request_run_source_present") is True if lane == "pr" else None
     )
@@ -127,6 +134,12 @@ def _source_lane(
         *(["github_actions_query_error"] if query_error else []),
         *(["pr_pull_request_run_source_absent"] if lane == "pr" and source_lane_present and not pull_request_run_source_present else []),
         *(["github_actions_filtered_run_count_below_threshold"] if source_lane_present and run_count < threshold else []),
+        *(["local_workflow_uses_github_hosted_runner"] if source_lane_present and local_github_hosted_runner_default else []),
+        *(
+            ["local_self_hosted_runner_default_missing"]
+            if source_lane_present and local_workflow_present and not local_self_hosted_runner_default
+            else []
+        ),
     ]
     source_release_credit_pass = not blockers
     return {
@@ -143,6 +156,9 @@ def _source_lane(
         "workflow_active": workflow_active,
         "local_workflow_present": local_workflow_present,
         "local_workflow_trigger_events": local_workflow_trigger_events,
+        "local_workflow_runs_on": local_workflow_runs_on,
+        "local_self_hosted_runner_default": local_self_hosted_runner_default,
+        "local_github_hosted_runner_default": local_github_hosted_runner_default,
         "local_required_trigger_present": local_required_trigger_present,
         "local_pull_request_trigger_present": local_pull_request_trigger_present,
         "local_schedule_trigger_present": local_schedule_trigger_present,

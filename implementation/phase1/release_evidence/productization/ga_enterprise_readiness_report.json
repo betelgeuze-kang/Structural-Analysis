@@ -27,7 +27,7 @@
   },
   "claim_boundary": "This report is a readiness/evidence gate. It does not create independent V&V, legal approval, customer acceptance, or support SLA commitments.",
   "contract_pass": false,
-  "generated_at": "2026-06-16T18:09:41.477467+00:00",
+  "generated_at": "2026-06-21T09:20:55.652168+00:00",
   "owner_handoff_rows": [
     {
       "acceptance": "`independent_vv_attestation.contract_pass == true`",

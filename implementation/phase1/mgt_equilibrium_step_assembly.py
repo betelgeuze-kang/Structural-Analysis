@@ -21,6 +21,7 @@ from mgt_shell_load_path import (
 )
 from mgt_frame_force_based_assembly import prepack_frame_force_based_assembly
 from mgt_shell_force_based_assembly import _cached_shell_operator
+from mgt_shell_material_tangent import shell_material_tangent_by_surface_index
 from run_mgt_direct_residual_newton_probe import _active_free
 from run_mgt_full_frame_6dof_sparse_equilibrium import DOF_PER_NODE, FrameElement
 
@@ -62,6 +63,9 @@ def build_equilibrium_step_assembler(
     load_scale: float,
     restrained: set[int],
     shell_pressure_load_path_policy: str = "all_components",
+    apply_shell_material_tangent: bool = False,
+    allow_frozen_shell_material_tangent_hip_replay: bool = False,
+    allow_state_dependent_shell_material_tangent_hip_replay: bool = False,
 ) -> tuple[
     Callable[..., tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]],
     dict[str, Any],
@@ -91,6 +95,15 @@ def build_equilibrium_step_assembler(
         include_geometric=True,
     )
     hip_backend_holder: dict[str, Any] = {}
+    build_equilibrium_step_assembler_apply_shell_material_tangent = bool(
+        apply_shell_material_tangent
+    )
+    build_equilibrium_step_assembler_allow_frozen_shell_material_tangent_hip_replay = bool(
+        allow_frozen_shell_material_tangent_hip_replay
+    )
+    build_equilibrium_step_assembler_allow_state_dependent_shell_material_tangent_hip_replay = bool(
+        allow_state_dependent_shell_material_tangent_hip_replay
+    )
 
     def assemble_residual(
         u: np.ndarray,
@@ -244,6 +257,9 @@ def build_equilibrium_step_assembler(
         backend: str = "cpu",
         hipcc: Path = Path("/opt/rocm/bin/hipcc"),
         force_rebuild_hip: bool = False,
+        apply_shell_material_tangent: bool | None = None,
+        allow_frozen_shell_material_tangent_hip_replay: bool | None = None,
+        allow_state_dependent_shell_material_tangent_hip_replay: bool | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
         state_batch = np.asarray(states, dtype=np.float64)
         if state_batch.ndim != 2:
@@ -268,14 +284,69 @@ def build_equilibrium_step_assembler(
                 HipFullResidualRustFfiBackend,
             )
 
+            effective_apply_shell_material = (
+                bool(apply_shell_material_tangent)
+                if apply_shell_material_tangent is not None
+                else bool(build_equilibrium_step_assembler_apply_shell_material_tangent)
+            )
+            effective_frozen_shell_material_hip = (
+                bool(allow_frozen_shell_material_tangent_hip_replay)
+                if allow_frozen_shell_material_tangent_hip_replay is not None
+                else bool(build_equilibrium_step_assembler_allow_frozen_shell_material_tangent_hip_replay)
+            )
+            effective_state_dependent_shell_material_hip = (
+                bool(allow_state_dependent_shell_material_tangent_hip_replay)
+                if allow_state_dependent_shell_material_tangent_hip_replay is not None
+                else bool(build_equilibrium_step_assembler_allow_state_dependent_shell_material_tangent_hip_replay)
+            )
+            if (
+                effective_apply_shell_material
+                and effective_state_dependent_shell_material_hip
+                and int(state_batch.shape[0]) != 1
+            ):
+                raise ValueError(
+                    "state-dependent shell material tangent HIP replay requires a "
+                    "single-state batch in mgt_equilibrium_step_assembly; use the "
+                    "direct-probe state-dependent replay path for grouped candidates"
+                )
+            material_tangent_by_surface_index_mpa: dict[int, float] | None = None
+            shell_material_meta: dict[str, Any] = {}
+            shell_material_applied = bool(
+                effective_apply_shell_material
+                and (
+                    effective_frozen_shell_material_hip
+                    or effective_state_dependent_shell_material_hip
+                )
+            )
             holder_key = f"{backend_name}:{Path(hipcc)}:{bool(force_rebuild_hip)}"
-            hip_backend = hip_backend_holder.get(holder_key)
+            hip_backend = (
+                None
+                if shell_material_applied
+                else hip_backend_holder.get(holder_key)
+            )
             if hip_backend is None:
                 reference_u = (
                     state_batch[0]
                     if int(state_batch.shape[0])
                     else np.zeros(int(n_dof), dtype=np.float64)
                 )
+                if effective_apply_shell_material and (
+                    effective_frozen_shell_material_hip
+                    or effective_state_dependent_shell_material_hip
+                ):
+                    (
+                        material_tangent_by_surface_index_mpa,
+                        shell_material_meta,
+                    ) = shell_material_tangent_by_surface_index(
+                        node_xyz=node_xyz,
+                        u=reference_u,
+                        elem_type_code=elem_type_code,
+                        elem_material_id=elem_material_id,
+                        conn_ptr=conn_ptr,
+                        conn_idx=conn_idx,
+                        material_props=material_props,
+                        controlled_probe=False,
+                    )
                 shell_stiffness, _shell_meta, _cache_hit = _cached_shell_operator(
                     u=reference_u,
                     node_xyz=node_xyz,
@@ -288,6 +359,7 @@ def build_equilibrium_step_assembler(
                     plate_thickness_props=plate_thickness_props,
                     include_membrane=True,
                     shell_operator_cache=shell_operator_cache,
+                    material_tangent_by_surface_index_mpa=material_tangent_by_surface_index_mpa,
                 )
                 backend_cls = (
                     HipFullResidualResidentWorkerBackend
@@ -296,17 +368,23 @@ def build_equilibrium_step_assembler(
                     if backend_name == "rust_hip_full_residual_ffi"
                     else HipFullResidualBatchBackend
                 )
-                hip_backend = backend_cls.prepare(
-                    frame_dofs=frame_force_cache.dofs,
-                    frame_stiffness=frame_force_cache.element_stiffness,
-                    shell_csr=shell_stiffness.tocsr(),
-                    spring_csr=spring_stiffness.tocsr(),
-                    f_ext=f_ext,
-                    free=free,
-                    hipcc=Path(hipcc),
-                    force_rebuild=bool(force_rebuild_hip),
-                )
-                hip_backend_holder[holder_key] = hip_backend
+                try:
+                    hip_backend = backend_cls.prepare(
+                        frame_dofs=frame_force_cache.dofs,
+                        frame_stiffness=frame_force_cache.element_stiffness,
+                        shell_csr=shell_stiffness.tocsr(),
+                        spring_csr=spring_stiffness.tocsr(),
+                        f_ext=f_ext,
+                        free=free,
+                        hipcc=Path(hipcc),
+                        force_rebuild=bool(force_rebuild_hip),
+                    )
+                except Exception as exc:
+                    raise RuntimeError(
+                        f"{backend_name} prepare failed: {exc}"
+                    ) from exc
+                if not shell_material_applied:
+                    hip_backend_holder[holder_key] = hip_backend
             residual_batch, batch_meta = hip_backend.evaluate(state_batch, reps=1)
             rhs = np.asarray(f_ext[free], dtype=np.float64)
             return (
@@ -328,6 +406,29 @@ def build_equilibrium_step_assembler(
                     "shell_operator_cache_size": int(len(shell_operator_cache)),
                     "external_load_source": "reference_configuration",
                     "used_external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+                    "shell_material_tangent_residual_applied": shell_material_applied,
+                    "frozen_shell_material_tangent_hip_replay": bool(
+                        shell_material_applied and effective_frozen_shell_material_hip
+                    ),
+                    "frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure": bool(
+                        shell_material_applied
+                        and effective_frozen_shell_material_hip
+                        and not effective_state_dependent_shell_material_hip
+                    ),
+                    "state_dependent_shell_material_tangent_hip_replay": bool(
+                        shell_material_applied
+                        and effective_state_dependent_shell_material_hip
+                    ),
+                    "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency": bool(
+                        shell_material_applied
+                        and effective_state_dependent_shell_material_hip
+                    ),
+                    "shell_material_tangent_operator_refresh_backend": (
+                        "host_shell_operator_refresh"
+                        if shell_material_applied
+                        else "not_requested"
+                    ),
+                    "shell_material_tangent_meta": shell_material_meta,
                 },
             )
         f_int_batch, batch_meta = assemble_physical_internal_forces_batch(
@@ -373,6 +474,8 @@ def build_equilibrium_step_assembler(
     assemble_with_frozen_external_load.supports_hip_full_residual_batch = True  # type: ignore[attr-defined]
     assemble_with_frozen_external_load.supports_hip_full_residual_resident_worker = True  # type: ignore[attr-defined]
     assemble_with_frozen_external_load.supports_rust_hip_full_residual_ffi = True  # type: ignore[attr-defined]
+    assemble_with_frozen_external_load.supports_shell_material_tangent_hip_replay = True  # type: ignore[attr-defined]
+    assemble_with_frozen_external_load.supports_state_dependent_shell_material_tangent_hip_replay = True  # type: ignore[attr-defined]
 
     setup_meta = {
         "equilibrium_geometry_contract": EQUILIBRIUM_GEOMETRY_CONTRACT,

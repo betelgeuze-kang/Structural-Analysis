@@ -1,0 +1,82 @@
+{
+  "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
+  "generated_at": "2026-06-21T11:43:33.651721+00:00",
+  "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "reused_evidence": false,
+  "status": "partial",
+  "residual_jacobian_consistency_ready": false,
+  "consistent_residual_jacobian_newton_passed": false,
+  "consistent_residual_jacobian_newton_gate_passed": false,
+  "rocm_hip_required": true,
+  "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
+  "cpu_diagnostic_assembler_used": false,
+  "production_hip_residual_jacobian_path": false,
+  "rocm_hip_runtime_preflight": {
+    "checked_at": "2026-06-21T11:43:33.653522+00:00",
+    "hip_available": false,
+    "torch_importable": true,
+    "torch_rocm_build": true,
+    "torch_hip_device_available": false,
+    "device_nodes": {
+      "kfd": {
+        "path": "/dev/kfd",
+        "exists": false
+      },
+      "dri": {
+        "path": "/dev/dri",
+        "exists": false
+      }
+    },
+    "process_group_ids": [
+      1000,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534,
+      65534
+    ],
+    "rocm_commands": {
+      "rocminfo": "/usr/bin/rocminfo",
+      "rocm_smi": "/usr/local/bin/rocm-smi",
+      "hipcc": null
+    },
+    "visibility_settings": {
+      "HIP_VISIBLE_DEVICES": "0",
+      "HSA_OVERRIDE_GFX_VERSION": "10.3.0"
+    },
+    "runtime_blockers": [
+      "dev_kfd_missing",
+      "dev_dri_missing"
+    ],
+    "torch_version": "2.6.0+rocm6.1",
+    "torch_rocm_version": "6.1.40091-a8dbc0c19",
+    "unavailable_reason": "torch_hip_device_unavailable"
+  },
+  "component_only": false,
+  "checkpoint": {
+    "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
+  },
+  "load_scale": null,
+  "shell_pressure_load_path_policy": "all_components",
+  "direction_rows": [],
+  "state_scale_sweep": [],
+  "runtime_metrics": {
+    "setup_and_reference_seconds": 0.0,
+    "base_assembly_seconds": 0.0,
+    "total_seconds": 0.8730764409992844
+  },
+  "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
+  "blockers": [
+    "rocm_hip_runtime_unavailable",
+    "hip_runtime::dev_kfd_missing",
+    "hip_runtime::dev_dri_missing",
+    "hip_residual_jacobian_consistency_not_executed"
+  ]
+}

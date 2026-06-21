@@ -1,6 +1,9 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-19T17:08:34.892317+00:00",
+  "generated_at": "2026-06-21T09:20:04.756406+00:00",
+  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "reused_evidence": false,
   "overall_status": "ready",
   "delivery_status": "ready",
   "authority_holdout_status": "closed",
@@ -92,8 +95,8 @@
       "open_count": 0
     },
     "rh_signed_closure": {
-      "status": "closed",
-      "actual_closure_evidence_attached": true
+      "status": null,
+      "actual_closure_evidence_attached": null
     },
     "ml_multi_objective_a_p3": {
       "status": "production_shadow_solver_gated_ready",
@@ -340,5 +343,6 @@
     "delivery_evidence_bundle": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json",
     "residual_holdout_closure_updates": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
     "commercial_gap_ledger_status": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json"
-  }
+  },
+  "claim_boundary": "This is a read-only rollup of gap-ledger and productization evidence status. It does not create external receipts, customer evidence, G1 full-load closure, or release readiness by itself."
 }

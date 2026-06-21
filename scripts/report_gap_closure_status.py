@@ -7,11 +7,13 @@ import argparse
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+import subprocess
 from typing import Any
 import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
@@ -25,6 +27,18 @@ def _load(path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
@@ -162,6 +176,9 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
     return {
         "schema_version": "gap-closure-status.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "overall_status": delivery_status,
         "delivery_status": delivery_status,
         "authority_holdout_status": authority_holdout_status,
@@ -180,6 +197,11 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
             "residual_holdout_closure_updates": str(productization / "residual_holdout_closure_updates.json"),
             "commercial_gap_ledger_status": str(productization / "commercial_gap_ledger_status.json"),
         },
+        "claim_boundary": (
+            "This is a read-only rollup of gap-ledger and productization evidence status. "
+            "It does not create external receipts, customer evidence, G1 full-load closure, "
+            "or release readiness by itself."
+        ),
     }
 
 

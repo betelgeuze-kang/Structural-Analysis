@@ -4,11 +4,13 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.sparse import coo_matrix
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
+import mgt_equilibrium_step_assembly as step_assembly  # noqa: E402
 from mgt_equilibrium_step_assembly import (  # noqa: E402
     _surface_pressure_load_path_filter,
     build_equilibrium_step_assembler,
@@ -16,6 +18,46 @@ from mgt_equilibrium_step_assembly import (  # noqa: E402
 )
 from run_mgt_full_frame_6dof_sparse_equilibrium import FrameElement  # noqa: E402
 import mgt_hip_full_residual_backend  # noqa: E402
+
+
+def _minimal_step_assembler():
+    node_xyz = np.asarray([[0.0, 0.0, 0.0], [0.0, 0.0, 3.0]], dtype=np.float64)
+    elements = [
+        FrameElement(
+            elem_id=1,
+            node_i=0,
+            node_j=1,
+            section_id=1,
+            material_id=1,
+            length_m=3.0,
+        )
+    ]
+    section_props = {1: {"A_m2": 0.01, "Iy_m4": 1.0e-4, "Iz_m4": 5.0e-5}}
+    material_props = {1: {"E_kN_per_m2": 210000.0, "poisson": 0.3}}
+    spring = coo_matrix(
+        (
+            np.array([], dtype=np.float64),
+            (np.array([], dtype=np.int64), np.array([], dtype=np.int64)),
+        ),
+        shape=(12, 12),
+    ).tocsr()
+    return build_equilibrium_step_assembler(
+        node_xyz=node_xyz,
+        frame_elements=elements,
+        elem_type_code=np.asarray([], dtype=np.int32),
+        elem_section_id=np.asarray([], dtype=np.int32),
+        elem_material_id=np.asarray([], dtype=np.int32),
+        conn_ptr=np.asarray([0], dtype=np.int64),
+        conn_idx=np.asarray([], dtype=np.int64),
+        section_props=section_props,
+        material_props=material_props,
+        plate_thickness_props={},
+        spring_stiffness=spring,
+        base_axial_forces={},
+        frame_gravity_load_scale=1.0,
+        load_scale=0.5,
+        restrained={0, 1, 2, 3, 4, 5},
+    )
 
 
 def test_build_equilibrium_step_assembler_freezes_external_load() -> None:
@@ -300,3 +342,145 @@ def test_residual_batch_evaluator_accepts_rust_hip_ffi_backend(monkeypatch) -> N
     assert batch_meta["hip_full_residual_batch_replay"] is True
     assert batch_meta["rust_hip_full_residual_ffi_worker"] is True
     assert batch_meta["persistent_in_process_worker"] is True
+
+
+def test_residual_batch_evaluator_forwards_frozen_shell_material_tangent(
+    monkeypatch,
+) -> None:
+    assembler, _meta = _minimal_step_assembler()
+    u = np.zeros(12, dtype=np.float64)
+    _k, _f, free, _r, _rhs, _m = assembler(u)
+    captured_tangents: list[object] = []
+
+    class FakeBatchBackend:
+        def evaluate(self, states: np.ndarray, *, reps: int = 1):
+            state_batch = np.asarray(states, dtype=np.float64)
+            return np.zeros((state_batch.shape[0], free.size), dtype=np.float64), {
+                "backend": "native_hip_full_residual_batch",
+            }
+
+    def fake_prepare(**_kwargs):
+        return FakeBatchBackend()
+
+    def fake_shell_tangent(**_kwargs):
+        return {0: 123.0}, {"fixture_shell_material_tangent": True}
+
+    def fake_cached_shell_operator(**kwargs):
+        captured_tangents.append(kwargs.get("material_tangent_by_surface_index_mpa"))
+        return coo_matrix((12, 12), dtype=np.float64).tocsr(), {}, False
+
+    monkeypatch.setattr(
+        mgt_hip_full_residual_backend.HipFullResidualBatchBackend,
+        "prepare",
+        staticmethod(fake_prepare),
+    )
+    monkeypatch.setattr(
+        step_assembly,
+        "shell_material_tangent_by_surface_index",
+        fake_shell_tangent,
+    )
+    monkeypatch.setattr(step_assembly, "_cached_shell_operator", fake_cached_shell_operator)
+
+    _residual_batch, _trial_free, _trial_rhs, batch_meta = assembler.evaluate_residual_batch(
+        np.asarray([u], dtype=np.float64),
+        backend="hip_full_residual",
+        apply_shell_material_tangent=True,
+        allow_frozen_shell_material_tangent_hip_replay=True,
+    )
+
+    assert captured_tangents == [{0: 123.0}]
+    assert batch_meta["shell_material_tangent_residual_applied"] is True
+    assert batch_meta["frozen_shell_material_tangent_hip_replay"] is True
+    assert (
+        batch_meta["frozen_shell_material_tangent_hip_replay_is_not_material_newton_closure"]
+        is True
+    )
+    assert batch_meta["state_dependent_shell_material_tangent_hip_replay"] is False
+    assert (
+        batch_meta["shell_material_tangent_operator_refresh_backend"]
+        == "host_shell_operator_refresh"
+    )
+    assert batch_meta["shell_material_tangent_meta"] == {
+        "fixture_shell_material_tangent": True
+    }
+
+
+def test_residual_batch_evaluator_records_state_dependent_shell_material_meta(
+    monkeypatch,
+) -> None:
+    assembler, _meta = _minimal_step_assembler()
+    u = np.zeros(12, dtype=np.float64)
+    _k, _f, free, _r, _rhs, _m = assembler(u)
+
+    class FakeBatchBackend:
+        def evaluate(self, states: np.ndarray, *, reps: int = 1):
+            state_batch = np.asarray(states, dtype=np.float64)
+            return np.zeros((state_batch.shape[0], free.size), dtype=np.float64), {
+                "backend": "native_hip_full_residual_batch",
+            }
+
+    monkeypatch.setattr(
+        mgt_hip_full_residual_backend.HipFullResidualBatchBackend,
+        "prepare",
+        staticmethod(lambda **_kwargs: FakeBatchBackend()),
+    )
+    monkeypatch.setattr(
+        step_assembly,
+        "shell_material_tangent_by_surface_index",
+        lambda **_kwargs: ({0: 456.0}, {}),
+    )
+    monkeypatch.setattr(
+        step_assembly,
+        "_cached_shell_operator",
+        lambda **_kwargs: (coo_matrix((12, 12), dtype=np.float64).tocsr(), {}, False),
+    )
+
+    _residual_batch, _trial_free, _trial_rhs, batch_meta = assembler.evaluate_residual_batch(
+        np.asarray([u], dtype=np.float64),
+        backend="hip_full_residual",
+        apply_shell_material_tangent=True,
+        allow_state_dependent_shell_material_tangent_hip_replay=True,
+    )
+
+    assert batch_meta["shell_material_tangent_residual_applied"] is True
+    assert batch_meta["frozen_shell_material_tangent_hip_replay"] is False
+    assert batch_meta["state_dependent_shell_material_tangent_hip_replay"] is True
+    assert (
+        batch_meta["state_dependent_shell_material_tangent_hip_replay_is_not_production_residency"]
+        is True
+    )
+
+
+def test_residual_batch_evaluator_rejects_grouped_state_dependent_shell_material_replay() -> None:
+    assembler, _meta = _minimal_step_assembler()
+    u = np.zeros(12, dtype=np.float64)
+
+    with pytest.raises(ValueError, match="requires a single-state batch"):
+        assembler.evaluate_residual_batch(
+            np.vstack([u, u]),
+            backend="hip_full_residual",
+            apply_shell_material_tangent=True,
+            allow_state_dependent_shell_material_tangent_hip_replay=True,
+        )
+
+
+def test_residual_batch_evaluator_standardizes_hip_prepare_error(
+    monkeypatch,
+) -> None:
+    assembler, _meta = _minimal_step_assembler()
+    u = np.zeros(12, dtype=np.float64)
+
+    def fake_prepare(**_kwargs):
+        raise RuntimeError("hip boom")
+
+    monkeypatch.setattr(
+        mgt_hip_full_residual_backend.HipFullResidualBatchBackend,
+        "prepare",
+        staticmethod(fake_prepare),
+    )
+
+    with pytest.raises(RuntimeError, match="hip_full_residual prepare failed: hip boom"):
+        assembler.evaluate_residual_batch(
+            np.asarray([u], dtype=np.float64),
+            backend="hip_full_residual",
+        )

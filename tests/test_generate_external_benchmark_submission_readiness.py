@@ -141,6 +141,10 @@ def _run(
 
 def test_external_benchmark_submission_readiness_allows_limited_start_with_clean_pending_queue(tmp_path: Path) -> None:
     payload = _run(tmp_path, pending=2, overdue=0)
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
+    assert "does not create or attach external benchmark submission receipts" in payload["claim_boundary"]
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS_START_NOW_LIMITED"
     assert payload["summary"]["recommended_start_mode"] == "start_now_limited_external_benchmark"

@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "launch_prerequisite_blocked:p1_benchmark_breadth_ready",
     "launch_prerequisite_blocked:customer_shadow_completed_project_cases_ready"
   ],
   "checks": {
@@ -137,16 +138,16 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-20T07:20:02.253785+00:00",
+  "generated_at": "2026-06-21T09:30:55.962962+00:00",
   "input_checksums": {
-    "README.md": "sha256:d8c51211c4a31f92d05ac16a931312f4e1afe061d9fc34677905de1bdf0241e5",
-    "docs/commercialization-gap-current-state.md": "sha256:e42f4e94408e5cb49ee0c1d72c8fc551e080622316efab34aa218aff53e53033",
+    "README.md": "sha256:7313c72a643751a63f1f1f47bd8b343c3432f3051e5e40f6aa220dbde23d74c8",
+    "docs/commercialization-gap-current-state.md": "sha256:3aaeb9d2414fb475be40ac28a062389d860dd7cf212b832726708cebe22705ba",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
-    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:ec64c466c66ba4e3503c2ee71fbdea9c81470143da6b21940a2beb9da9e676e7",
+    "implementation/phase1/customer_shadow_evidence_status.json": "sha256:78bd3dd424578d0337a0e9648d2508468dc58da964ce8a29f9e38717f6d1dd3a",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:79c71125879451e4277423a24c795122e2386aede58e0cb3e8abbde98bcbea07",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:49ef2018f2326f259082f6e931728b797ce4818384ae19e3d2f879d88931c8db",
-    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:b707c9d1144e1d00f1497a2596c13b29ac2071871046ab871962a64937b254e3"
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:e8b888963aea04529a2b4e26172f2c0618aacbb8ebd5f32f67623c19b28f0d72",
+    "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:fd2c35ceefddd41ecc2b612189cc4595bf2bb32b76d1372c3d6be2be8f5b69dc"
   },
   "launch_ready": false,
   "prerequisite_rows": [
@@ -164,7 +165,7 @@
     },
     {
       "check": "p1_benchmark_breadth_ready",
-      "pass": true,
+      "pass": false,
       "path": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
       "summary": {}
     },
@@ -228,7 +229,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "8823aaf46e33f316afee2eb606f1672b19855cb5",
+  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [
@@ -242,9 +243,9 @@
     "evidence_console_feature_count": 7,
     "evidence_console_feature_pass_count": 7,
     "launch_prerequisite_count": 5,
-    "launch_prerequisite_pass_count": 4,
+    "launch_prerequisite_pass_count": 3,
     "next_action": "attach validated customer completed-project shadow evidence",
     "scope_source": "docs/structure-viewer-product-workspace.md"
   },
-  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=4/5"
+  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=3/5"
 }

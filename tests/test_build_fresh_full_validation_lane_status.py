@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -26,6 +27,10 @@ def _write_text(path: Path, text: str) -> Path:
     return path
 
 
+def _sha256_ref(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def _lane(materialized_path: Path) -> dict[str, object]:
     return {
         "lane_id": "gpu_hip_solver",
@@ -41,7 +46,14 @@ def _valid_receipt_payload(
     runner: str = "gpu_capable_rocm_hip_validation",
     reused_evidence: bool = False,
     contract_pass: bool = True,
+    artifact_path: Path | None = None,
+    artifact_sha256: str | None = None,
 ) -> dict[str, object]:
+    artifact_ref = str(
+        artifact_path
+        or "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+    )
+    digest_ref = artifact_sha256 or ("sha256:" + "a" * 64)
     return {
         "schema_version": "fresh-validation-receipt.v1",
         "lane_id": lane_id,
@@ -49,19 +61,15 @@ def _valid_receipt_payload(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": "abcdef1234567890",
         "engine_version": "engine@1.0.0",
-        "input_checksums": {
-            "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json": (
-                "sha256:" + "a" * 64
-            )
-        },
+        "input_checksums": {artifact_ref: digest_ref},
         "reused_evidence": reused_evidence,
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "FAIL",
         "validation_command": "python3 -m implementation.phase1.run_gpu_solver_hip_validation",
         "receipt_artifacts": [
             {
-                "path": "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
-                "sha256": "sha256:" + "a" * 64,
+                "path": artifact_ref,
+                "sha256": digest_ref,
                 "kind": "contract_report",
             }
         ],
@@ -107,7 +115,13 @@ def test_fresh_full_validation_lane_status_passes_with_valid_fresh_receipt(tmp_p
     docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
     materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
     receipt_root = tmp_path / "receipts"
-    _write_json(receipt_root / "gpu_hip_solver.fresh_validation_receipt.json", _valid_receipt_payload())
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=materialized,
+            artifact_sha256=_sha256_ref(materialized),
+        ),
+    )
 
     payload = lane_status.build_status(
         docs=docs,
@@ -119,6 +133,67 @@ def test_fresh_full_validation_lane_status_passes_with_valid_fresh_receipt(tmp_p
     assert payload["fresh_full_validation_ready"] is True
     assert payload["summary"]["fresh_validation_receipt_pass_count"] == 1
     assert payload["blockers"] == []
+
+
+def test_fresh_full_validation_lane_status_blocks_artifact_sha_mismatch(tmp_path: Path) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
+    receipt_root = tmp_path / "receipts"
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=materialized,
+            artifact_sha256="sha256:" + "b" * 64,
+        ),
+    )
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["fresh_validation_receipt_pass_count"] == 0
+    row = payload["rows"][0]
+    assert row["fresh_validation_receipt_contract_pass"] is True
+    assert row["fresh_validation_receipt_artifact_integrity_pass"] is False
+    assert any(
+        blocker.startswith(
+            "gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:"
+        )
+        and "sha256_mismatch" in blocker
+        for blocker in payload["blockers"]
+    )
+
+
+def test_fresh_full_validation_lane_status_blocks_missing_receipt_artifact(tmp_path: Path) -> None:
+    docs = (_write_text(tmp_path / "runbook.md", "GPU-capable validation task\n"),)
+    materialized = _write_json(tmp_path / "gpu" / "solver_hip_e2e_contract_report.json", {"contract_pass": True})
+    missing_artifact = tmp_path / "gpu" / "missing.json"
+    receipt_root = tmp_path / "receipts"
+    _write_json(
+        receipt_root / "gpu_hip_solver.fresh_validation_receipt.json",
+        _valid_receipt_payload(
+            artifact_path=missing_artifact,
+            artifact_sha256="sha256:" + "c" * 64,
+        ),
+    )
+
+    payload = lane_status.build_status(
+        docs=docs,
+        receipt_root=receipt_root,
+        lanes=(_lane(materialized),),
+    )
+
+    assert payload["contract_pass"] is False
+    assert any(
+        blocker.startswith(
+            "gpu_hip_solver::fresh_validation_receipt_artifact_integrity_failed:"
+        )
+        and "path_missing" in blocker
+        for blocker in payload["blockers"]
+    )
 
 
 def test_fresh_full_validation_lane_status_rejects_reused_receipt(tmp_path: Path) -> None:

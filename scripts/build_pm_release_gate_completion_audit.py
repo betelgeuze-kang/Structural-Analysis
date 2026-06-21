@@ -42,6 +42,7 @@ RELEASE_AREA_REQUIREMENTS = [
     ("ux", "UX", "new user completes sample project within 30 minutes"),
     ("support", "Support", "known issues, failure bundle, and rollback evidence"),
     ("security", "Security", "secrets/license/SBOM/repro build pass"),
+    ("github_sync", "GitHub Development Sync", "read-only GitHub sync preflight is clean or explicitly approved"),
 ]
 
 MILESTONE_REQUIREMENTS = [

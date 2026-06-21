@@ -1,0 +1,34 @@
+{
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-21T09:17:02.646050+00:00",
+  "input_checksums": {
+    "implementation/phase1/release/design_optimization/design_objective_calibration_report.json": "sha256:cb6f4b3d94614f7c57ced207b20928eb9252236ba36e041e495e4aa7165bee95",
+    "implementation/phase1/release/design_optimization/design_optimization_dataset.npz": "sha256:6c4a616d1c94899e29a0586b0681a60091b03adfa105ce34586fcd406c54d591"
+  },
+  "lane_id": "design_optimization_refresh",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "solver_loop_long_report",
+      "path": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json",
+      "sha256": "sha256:cdccb594ad13d25d867d2d6efa4f259063bf9308f1cd956dc45bde6541e4cbdb"
+    },
+    {
+      "kind": "solver_loop_long_state",
+      "path": "implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_state.npz",
+      "sha256": "sha256:2037cab7ed442dbdb612a6aaa1c613e6f58eefcde0221fb93f461d8e5908a477"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "design_optimization_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "summary": {
+    "case_count": 1,
+    "duration_seconds": 6.385441,
+    "passed_case_count": 1
+  },
+  "validation_command": "python3 implementation/phase1/run_design_optimization_solver_loop_long.py"
+}

@@ -7,10 +7,12 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "workstation-delivery-readiness.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_OUT = Path("implementation/phase1/workstation_delivery_readiness.json")
 DEFAULT_HARDWARE_PROFILE = Path("implementation/phase1/workstation_hardware_profile.json")
 DEFAULT_SERVICE_BUDGET = Path("implementation/phase1/workstation_service_budget.json")
@@ -25,6 +27,18 @@ DEFAULT_DELIVERY_VIEWER_SMOKE = Path("implementation/phase1/workstation_delivery
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -380,6 +394,9 @@ def check_workstation_delivery_readiness(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "contract_pass": contract_pass,
         "workstation_delivery_service_ready": contract_pass,
         "independent_commercial_product_ready": False,

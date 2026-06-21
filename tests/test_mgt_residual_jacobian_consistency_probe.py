@@ -441,6 +441,182 @@ def test_component_only_probe_skips_jvp_and_state_scale(monkeypatch) -> None:
     assert payload["blockers"] == ["component_only_diagnostic_not_consistency_closure"]
 
 
+def test_hip_required_probe_blocks_without_cpu_fallback(monkeypatch) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required probe must not use the CPU diagnostic assembler")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "_git_head",
+        lambda: "fixture-commit",
+    )
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+            "runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        require_hip_residual_engine=True,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["source_commit_sha"] == "fixture-commit"
+    assert payload["reused_evidence"] is False
+    assert payload["rocm_hip_required"] is True
+    assert payload["execution_mode"] == "hip_required_runtime_unavailable_no_cpu_fallback"
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
+    assert payload["residual_jacobian_consistency_ready"] is False
+    assert payload["consistent_residual_jacobian_newton_passed"] is False
+    assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert payload["blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "hip_runtime::dev_kfd_missing",
+        "hip_runtime::dev_dri_missing",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
+
+
+def test_hip_required_probe_without_runtime_blocker_list_keeps_generic_blockers(
+    monkeypatch,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required probe must not use the CPU diagnostic assembler")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=True,
+        require_hip_residual_engine=True,
+    )
+
+    assert payload["blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
+
+
+def test_hip_required_probe_with_runtime_still_does_not_use_cpu_assembler(
+    monkeypatch,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError(
+            "HIP-required proof must not use the CPU diagnostic assembler"
+        )
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": True,
+            "torch_importable": True,
+            "torch_rocm_build": True,
+            "torch_hip_device_available": True,
+            "runtime_blockers": [],
+        },
+    )
+
+    payload = probe_module.run_mgt_residual_jacobian_consistency_probe(
+        output_json=None,
+        component_only=False,
+        require_hip_residual_engine=True,
+    )
+
+    assert payload["status"] == "partial"
+    assert payload["source_commit_sha"] == "fixture-commit"
+    assert payload["reused_evidence"] is False
+    assert payload["rocm_hip_required"] is True
+    assert payload["execution_mode"] == "hip_required_path_not_implemented_no_cpu_fallback"
+    assert payload["cpu_diagnostic_assembler_used"] is False
+    assert payload["production_hip_residual_jacobian_path"] is False
+    assert payload["rocm_hip_runtime_preflight"]["hip_available"] is True
+    assert payload["residual_jacobian_consistency_ready"] is False
+    assert payload["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert payload["direction_rows"] == []
+    assert payload["state_scale_sweep"] == []
+    assert payload["runtime_metrics"]["base_assembly_seconds"] == 0.0
+    assert "did not fall back to the CPU diagnostic assembler" in payload["claim_boundary"]
+    assert payload["blockers"] == [
+        "hip_residual_jacobian_consistency_hip_path_not_implemented",
+        "hip_residual_jacobian_consistency_not_executed",
+    ]
+
+
+def test_hip_required_cli_does_not_pass_component_only_without_hip(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    def build_direct_residual_assembler(**_kwargs):
+        raise AssertionError("HIP-required CLI must not use the CPU diagnostic assembler")
+
+    monkeypatch.setattr(
+        probe_module,
+        "build_direct_residual_assembler",
+        build_direct_residual_assembler,
+    )
+    monkeypatch.setattr(probe_module, "_git_head", lambda: "fixture-commit")
+    monkeypatch.setattr(
+        probe_module,
+        "_rocm_hip_runtime_preflight",
+        lambda: {
+            "checked_at": "fixture-time",
+            "hip_available": False,
+            "unavailable_reason": "fixture_no_hip",
+            "runtime_blockers": ["dev_kfd_missing"],
+        },
+    )
+
+    receipt = tmp_path / "receipt.json"
+    exit_code = probe_module.main(
+        [
+            "--component-only",
+            "--require-hip-residual-engine",
+            "--output-json",
+            str(receipt),
+        ]
+    )
+
+    assert exit_code == 2
+    assert '"hip_runtime::dev_kfd_missing"' in receipt.read_text(encoding="utf-8")
+
+
 def test_component_breakdown_probe_honors_top_residual_count(monkeypatch) -> None:
     stiffness = coo_matrix(([1.0, 1.0, 1.0], ([0, 1, 2], [0, 1, 2])), shape=(3, 3)).tocsc()
     free = np.asarray([0, 1, 2], dtype=np.int64)

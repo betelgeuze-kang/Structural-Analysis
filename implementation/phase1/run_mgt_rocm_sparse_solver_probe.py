@@ -11,6 +11,7 @@ from pathlib import Path
 import shutil
 import signal
 import subprocess
+import sys
 import tempfile
 import time
 from typing import Any
@@ -11906,6 +11907,59 @@ def _torch_sparse_hotspot_compressed_row_neighborhood_lstsq_correction(
     return result
 
 
+ROCM_SPARSE_ATTEMPT_READY_KEYS = (
+    "rocm_sparse_cg_ready",
+    "rocm_sparse_bicgstab_ready",
+    "rocm_sparse_symmetric_scaled_bicgstab_ready",
+    "rocm_sparse_block_bicgstab_ready",
+    "rocm_sparse_restarted_block_bicgstab_ready",
+    "rocm_sparse_restarted_block_bicgstab_defect_correction_ready",
+    "rocm_sparse_block_gmres_ready",
+    "rocm_sparse_node_block_gmres_ready",
+    "rocm_sparse_solution_fusion_ready",
+    "rocm_sparse_hotspot_subspace_correction_ready",
+    "rocm_sparse_dof_hotspot_subspace_correction_ready",
+    "rocm_sparse_wide_dof_hotspot_subspace_correction_ready",
+    "rocm_sparse_column_lstsq_hotspot_correction_ready",
+    "rocm_sparse_direct_column_lstsq_hotspot_correction_ready",
+    "rocm_sparse_compressed_row_neighborhood_lstsq_hotspot_correction_ready",
+    "rocm_sparse_row_neighborhood_lstsq_hotspot_correction_ready",
+    "rocm_sparse_hotspot_solution_fusion_ready",
+    "rocm_sparse_post_hotspot_node_block_gmres_ready",
+    "rocm_sparse_post_hotspot_solution_fusion_ready",
+    "rocm_sparse_small_component_direct_correction_ready",
+    "rocm_sparse_post_hotspot_block_gmres_ready",
+    "rocm_sparse_post_small_component_solution_fusion_ready",
+    "rocm_sparse_post_fusion_row_neighborhood_lstsq_correction_ready",
+    "rocm_sparse_residual_row_kaczmarz_correction_ready",
+    "rocm_sparse_residual_polishing_ready",
+    "rocm_sparse_large_component_coarse_correction_ready",
+    "rocm_sparse_micro_residual_row_kaczmarz_correction_ready",
+    "rocm_sparse_residual_row_block_lstsq_correction_ready",
+    "rocm_sparse_post_block_lstsq_residual_row_kaczmarz_correction_ready",
+    "rocm_sparse_post_kaczmarz_residual_row_block_lstsq_refinement_ready",
+    "rocm_sparse_post_refinement_residual_row_kaczmarz_polish_ready",
+    "rocm_sparse_post_polish_residual_row_block_lstsq_refinement_ready",
+    "rocm_sparse_post_block_lstsq_solution_fusion_ready",
+    "rocm_sparse_post_fusion_residual_row_block_lstsq_refinement_ready",
+    "rocm_sparse_overlapping_schwarz_patch_correction_ready",
+    "rocm_sparse_additive_schwarz_krylov_correction_ready",
+    "rocm_sparse_deflated_jacobi_krylov_correction_ready",
+    "rocm_sparse_structural_node_coarse_correction_ready",
+    "rocm_sparse_enriched_structural_node_coarse_correction_ready",
+    "rocm_sparse_schur_interface_correction_ready",
+    "rocm_sparse_post_schur_residual_row_block_lstsq_refinement_ready",
+    "rocm_sparse_rocalution_preconditioned_krylov_ready",
+    "rocm_sparse_host_ilu_device_gmres_ready",
+    "rocm_sparse_spsolve_supported",
+    "rocm_sparse_spsolve_ready",
+)
+
+
+def _rocm_sparse_attempt_ready_defaults() -> dict[str, bool]:
+    return {key: False for key in ROCM_SPARSE_ATTEMPT_READY_KEYS}
+
+
 def _torch_sparse_solver_attempts(
     *,
     label: str,
@@ -11917,6 +11971,8 @@ def _torch_sparse_solver_attempts(
     run_restarted_block_refinement: bool = False,
     free_global_dof: np.ndarray | None = None,
     dof_per_node: int = FRAME_DOF_PER_NODE,
+    allow_host_fallback: bool = True,
+    candidate_timeout_seconds: int = 45,
 ) -> dict[str, Any]:
     cg = _torch_sparse_cg(
         k_ff=k_ff,
@@ -11947,6 +12003,7 @@ def _torch_sparse_solver_attempts(
         tolerance_abs=tolerance_abs,
         tolerance_rel=tolerance_rel,
         max_iterations=max(int(max_iterations), 4000),
+        timeout_seconds=int(candidate_timeout_seconds),
     )
     rocalution_preconditioned_krylov, _rocalution_preconditioned_krylov_np = (
         _strip_private_solution(rocalution_preconditioned_krylov_private)
@@ -11960,6 +12017,53 @@ def _torch_sparse_solver_attempts(
             scaled_bicgstab=scaled_bicgstab,
             rocalution_preconditioned_krylov=rocalution_preconditioned_krylov,
         )
+    if not allow_host_fallback:
+        ready_flags = _rocm_sparse_attempt_ready_defaults()
+        ready_flags.update(
+            {
+                "rocm_sparse_cg_ready": bool(cg.get("converged")),
+                "rocm_sparse_bicgstab_ready": bool(bicgstab.get("converged")),
+                "rocm_sparse_symmetric_scaled_bicgstab_ready": bool(
+                    scaled_bicgstab.get("converged")
+                ),
+                "rocm_sparse_rocalution_preconditioned_krylov_ready": bool(
+                    rocalution_preconditioned_krylov.get("converged")
+                ),
+            }
+        )
+        return {
+            "label": label,
+            "ready": False,
+            "matrix_shape": [int(k_ff.shape[0]), int(k_ff.shape[1])],
+            "matrix_nnz": int(k_ff.nnz),
+            "matrix_diagnostics": _matrix_diagnostics(k_ff),
+            "hip_only": True,
+            "host_solver_fallback_allowed": False,
+            "host_solver_fallback_skipped": True,
+            **ready_flags,
+            "rocm_sparse_cg": cg,
+            "rocm_sparse_bicgstab": bicgstab,
+            "rocm_sparse_symmetric_scaled_bicgstab": scaled_bicgstab,
+            "rocm_sparse_rocalution_preconditioned_krylov": (
+                rocalution_preconditioned_krylov
+            ),
+            "rocm_sparse_host_ilu_device_gmres": {
+                "backend": "rocm_torch_sparse_host_ilu_device_gmres",
+                "skipped": True,
+                "skip_reason": "hip_only_mode_disallows_host_solver_fallback",
+            },
+            "rocm_sparse_spsolve": {
+                "supported": False,
+                "skipped": True,
+                "skip_reason": "hip_only_mode_disallows_cpu_or_unsupported_sparse_direct_fallback",
+            },
+            "claim_boundary": (
+                "HIP-only sparse solve attempt. CPU host ILU/SciPy GMRES and other "
+                "host fallback solve paths are skipped, so a non-converged ROCm/HIP "
+                "row remains blocked instead of being promoted by CPU fallback."
+            ),
+            "blockers": [f"{label}_hip_only_rocm_sparse_solver_not_converged"],
+        }
     host_ilu_device_gmres_private = _torch_sparse_host_ilu_device_gmres_sweep(
         k_ff=k_ff,
         rhs=rhs,
@@ -13615,6 +13719,9 @@ def run_mgt_rocm_sparse_solver_probe(
     roundtrip_json: Path = DEFAULT_ROUNDTRIP,
     roundtrip_npz: Path | None = None,
     output_json: Path | None = None,
+    hip_only: bool = False,
+    candidate_timeout_seconds: int = 45,
+    max_iterations: int = 4000,
 ) -> dict[str, Any]:
     generated_at = datetime.now(timezone.utc).isoformat()
     roundtrip_npz = roundtrip_npz or roundtrip_json.with_suffix(".npz")
@@ -13632,6 +13739,9 @@ def run_mgt_rocm_sparse_solver_probe(
             "generated_at": generated_at,
             "status": "blocked",
             "torch_rocm": torch_info,
+            "hip_only": bool(hip_only),
+            "host_solver_fallback_allowed": not bool(hip_only),
+            "host_solver_fallback_skipped": bool(hip_only),
             "blockers": ["torch_rocm_runtime_not_ready"],
         }
         if output_json is not None:
@@ -13769,11 +13879,13 @@ def run_mgt_rocm_sparse_solver_probe(
         label="surface_shell_bending_rocm_sparse_solve_attempt",
         k_ff=shell_k_ff,
         rhs=shell_rhs,
-        max_iterations=3000,
+        max_iterations=int(max_iterations),
         tolerance_abs=1.0e-3,
         tolerance_rel=5.0e-8,
         free_global_dof=_shell_free,
         dof_per_node=FRAME_DOF_PER_NODE,
+        allow_host_fallback=not bool(hip_only),
+        candidate_timeout_seconds=int(candidate_timeout_seconds),
     )
     shell_solver_attempt["mesh_fingerprint"] = shell_replay["mesh_fingerprint"]
     shell_solver_attempt["cpu_reference"] = shell_system_meta["cpu_reference"]
@@ -13835,12 +13947,14 @@ def run_mgt_rocm_sparse_solver_probe(
         label="coupled_frame_shell_rocm_sparse_solve_attempt",
         k_ff=coupled_k_ff,
         rhs=coupled_rhs,
-        max_iterations=3000,
+        max_iterations=int(max_iterations),
         tolerance_abs=5.0e-2,
         tolerance_rel=2.0e-8,
         run_restarted_block_refinement=True,
         free_global_dof=_coupled_free,
         dof_per_node=FRAME_DOF_PER_NODE,
+        allow_host_fallback=not bool(hip_only),
+        candidate_timeout_seconds=int(candidate_timeout_seconds),
     )
     coupled_solver_attempt["mesh_fingerprint"] = coupled_replay["mesh_fingerprint"]
     coupled_solver_attempt["frame_section_material_coverage"] = coupled_frame_asm
@@ -14143,6 +14257,11 @@ def run_mgt_rocm_sparse_solver_probe(
         "coupled_frame_shell_rocm_sparse_residual_replay_ready": bool(coupled_replay["ready"]),
         "full_3d_rocm_nonlinear_equilibrium_ready": False,
         "torch_rocm": torch_info,
+        "hip_only": bool(hip_only),
+        "host_solver_fallback_allowed": not bool(hip_only),
+        "host_solver_fallback_skipped": bool(hip_only),
+        "candidate_timeout_seconds": int(candidate_timeout_seconds),
+        "max_iterations": int(max_iterations),
         "roundtrip_json": str(roundtrip_json),
         "roundtrip_npz": str(roundtrip_npz),
         "mgt_path": str(mgt_path),
@@ -14159,7 +14278,8 @@ def run_mgt_rocm_sparse_solver_probe(
             "replays full shell and coupled frame-shell sparse residuals on ROCm CSR tensors using CPU "
             "reference solutions and records actual ROCm sparse solve attempts for those full matrices. "
             "Shell/coupled sparse solve attempts remain unclosed when PyTorch ROCm sparse-direct support "
-            "is unavailable or iterative preconditioners plus defect-correction refinement fail to converge."
+            "is unavailable or iterative preconditioners plus defect-correction refinement fail to converge. "
+            "When hip_only=true, CPU host solve fallbacks are not allowed to close or improve the receipt."
         ),
         "blockers": blockers,
     }
@@ -14287,16 +14407,90 @@ def run_mgt_rocalution_shell_preconditioner_sweep(
     return payload
 
 
-def main() -> int:
+def _write_hip_only_crash_receipt(
+    *,
+    output_json: Path,
+    returncode: int,
+    command: list[str],
+    stdout: str,
+    stderr: str,
+) -> dict[str, Any]:
+    signal_name = ""
+    if returncode < 0:
+        try:
+            signal_name = signal.Signals(-returncode).name
+        except ValueError:
+            signal_name = f"SIG{returncode * -1}"
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "status": "blocked",
+        "reason_code": "ERR_ROCM_HIP_WORKER_ABORTED",
+        "hip_only": True,
+        "host_solver_fallback_allowed": False,
+        "host_solver_fallback_skipped": True,
+        "crash_isolated_by_parent": True,
+        "worker_returncode": int(returncode),
+        "worker_signal": signal_name,
+        "worker_command": command,
+        "worker_stdout_tail": str(stdout or "")[-4000:],
+        "worker_stderr_tail": str(stderr or "")[-4000:],
+        "blockers": ["rocm_hip_worker_aborted_before_receipt"],
+        "claim_boundary": (
+            "HIP-only ROCm sparse probe worker aborted before writing a full receipt. "
+            "The parent process wrote this blocked receipt and did not retry through "
+            "CPU host ILU, SciPy sparse direct, or other CPU solve fallback paths."
+        ),
+    }
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(json.dumps(payload, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return payload
+
+
+def _run_hip_only_probe_with_crash_receipt(argv: list[str], *, output_json: Path) -> int:
+    child_argv = [value for value in argv if value != "--internal-no-crash-wrapper"]
+    child_argv.append("--internal-no-crash-wrapper")
+    command = [sys.executable, str(Path(__file__).resolve()), *child_argv]
+    proc = subprocess.run(command, cwd=REPO_ROOT, capture_output=True, text=True, check=False)
+    if proc.returncode == 0:
+        return 0
+    if not output_json.exists():
+        payload = _write_hip_only_crash_receipt(
+            output_json=output_json,
+            returncode=int(proc.returncode),
+            command=command,
+            stdout=proc.stdout,
+            stderr=proc.stderr,
+        )
+        print(
+            "mgt-rocm-sparse-probe: "
+            f"{payload['status']} reason={payload['reason_code']} -> {output_json}"
+        )
+        return 3
+    return proc.returncode
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--roundtrip-json", type=Path, default=DEFAULT_ROUNDTRIP)
     parser.add_argument("--roundtrip-npz", type=Path, default=None)
     parser.add_argument("--output-json", type=Path, default=PRODUCTIZATION / "mgt_rocm_sparse_solver_probe.json")
     parser.add_argument("--rocalution-focused-shell-only", action="store_true")
+    parser.add_argument(
+        "--hip-only",
+        action="store_true",
+        help=(
+            "Disallow CPU host solve fallbacks in the official ROCm/HIP sparse "
+            "probe. If HIP runtime or ROCm sparse convergence is unavailable, "
+            "write a blocked/partial receipt instead of using SciPy/host solves."
+        ),
+    )
     parser.add_argument("--include-saamg", action="store_true")
     parser.add_argument("--candidate-timeout-seconds", type=int, default=45)
     parser.add_argument("--max-iterations", type=int, default=4000)
-    args = parser.parse_args()
+    parser.add_argument("--internal-no-crash-wrapper", action="store_true", help=argparse.SUPPRESS)
+    argv_list = list(sys.argv[1:] if argv is None else argv)
+    args = parser.parse_args(argv_list)
     if args.rocalution_focused_shell_only:
         payload = run_mgt_rocalution_shell_preconditioner_sweep(
             roundtrip_json=args.roundtrip_json,
@@ -14311,10 +14505,15 @@ def main() -> int:
             f"{payload['status']} ready={payload.get('ready')} -> {args.output_json}"
         )
         return 0 if payload.get("status") in {"ready", "partial"} else 3
+    if args.hip_only and not args.internal_no_crash_wrapper:
+        return _run_hip_only_probe_with_crash_receipt(argv_list, output_json=args.output_json)
     payload = run_mgt_rocm_sparse_solver_probe(
         roundtrip_json=args.roundtrip_json,
         roundtrip_npz=args.roundtrip_npz,
         output_json=args.output_json,
+        hip_only=args.hip_only,
+        candidate_timeout_seconds=args.candidate_timeout_seconds,
+        max_iterations=args.max_iterations,
     )
     print(
         "mgt-rocm-sparse-probe: "

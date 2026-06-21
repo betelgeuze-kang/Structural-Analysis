@@ -1,0 +1,7 @@
+Goal: Add a strict HIP residual-engine mode to the G1 alternating Newton controller so G1 residual work can be orchestrated through ROCm/HIP replay instead of silently accepting CPU residual backends.
+
+Scope: Work only in implementation/phase1/run_mgt_g1_alternating_newton_controller.py, scripts/run_mgt_g1_alternating_newton_controller.py, and tests/test_mgt_g1_alternating_newton_controller.py. Do not edit release evidence, ledgers, PM reports, support bundles, or unrelated files. Preserve the current partial/non-closure claim boundary. The new mode should refuse CPU residual replay backends when enabled, force/require row and global HIP replay paths, keep torch_hip_gmres auto-selection for global Krylov, and expose receipt fields showing strict HIP residual-engine mode and fallback-zero expectation. It must not claim G1 closure or hide CPU diagnostic boundaries that still remain for tangent/assembly.
+
+Candidate files: implementation/phase1/run_mgt_g1_alternating_newton_controller.py, scripts/run_mgt_g1_alternating_newton_controller.py, tests/test_mgt_g1_alternating_newton_controller.py.
+
+Verification criteria: Run python3 -m py_compile implementation/phase1/run_mgt_g1_alternating_newton_controller.py scripts/run_mgt_g1_alternating_newton_controller.py and python3 -m pytest -q tests/test_mgt_g1_alternating_newton_controller.py. Worker output must be concise: changed files, test results, failed tests if any, core diff summary, and blockers. Do not include unified diffs, patch hunks, raw file dumps, secrets, or long logs.

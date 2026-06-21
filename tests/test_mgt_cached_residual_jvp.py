@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 from scipy.sparse import diags
 
 
@@ -100,6 +101,59 @@ def test_cached_residual_jvp_reports_full_assembly_fallback() -> None:
     np.testing.assert_allclose(jvp, np.asarray([2.0]))
     assert row["residual_only_assembly"] is False
     assert cache.summary()["full_assembly_count"] == 1
+
+
+def test_cached_residual_jvp_can_forbid_batch_replay_fallback() -> None:
+    stiffness = diags([2.0, 3.0], format="csr")
+    free = np.asarray([0, 1], dtype=np.int64)
+    base_u = np.asarray([0.0, 0.0], dtype=np.float64)
+    rhs = np.asarray([0.0, 0.0], dtype=np.float64)
+    base_residual = np.asarray([0.0, 0.0], dtype=np.float64)
+    calls = {"single_fallback": 0}
+
+    def assemble_residual(
+        u: np.ndarray,
+        *,
+        residual_only: bool = False,
+        free_override: np.ndarray | None = None,
+        external_load_override: np.ndarray | None = None,
+        **_kwargs,
+    ):
+        calls["single_fallback"] += 1
+        f_ext = rhs if external_load_override is None else external_load_override
+        free_out = free if free_override is None else free_override
+        residual = np.asarray(stiffness @ u, dtype=np.float64)[free_out] - f_ext[free_out]
+        return stiffness, f_ext, free_out, residual, f_ext[free_out], {}
+
+    def failing_batch_evaluator(*_args, **_kwargs):
+        raise RuntimeError("hip batch unavailable")
+
+    cache = ResidualJvpBatchCache(
+        assemble_residual=assemble_residual,
+        base_u=base_u,
+        base_free=free,
+        base_residual=base_residual,
+        reference_f_ext=rhs,
+        batch_residual_evaluator=failing_batch_evaluator,
+        batch_replay_backend="hip_full_residual",
+        allow_batch_replay_fallback=False,
+    )
+
+    with pytest.raises(RuntimeError, match="CPU fallback is disabled"):
+        build_fd_jvp_submatrix(
+            cache=cache,
+            free=free,
+            target_rows=np.asarray([0], dtype=np.int64),
+            support_cols=np.asarray([0, 1], dtype=np.int64),
+            epsilon=1.0e-6,
+            batch_chunk_size=2,
+        )
+
+    summary = cache.summary()
+    assert summary["allow_batch_replay_fallback"] is False
+    assert summary["batch_replay_fallback_count"] == 2
+    assert summary["batch_replay_backend_error"] == "hip batch unavailable"
+    assert calls["single_fallback"] == 0
 
 
 def test_cached_residual_jvp_batch_probe_can_promote_gate_candidate(

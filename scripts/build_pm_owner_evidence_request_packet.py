@@ -567,6 +567,12 @@ def build_packet(
         ]
     )
     summary = _as_dict(register.get("summary"))
+    canonical_release_area_evidence = _as_dict(register.get("canonical_release_area_evidence"))
+    release_area_blocker_ids = [
+        str(item)
+        for item in _as_list(canonical_release_area_evidence.get("release_area_blocker_ids"))
+        if str(item)
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
@@ -576,6 +582,7 @@ def build_packet(
         "pm_release_gate_reviewer_handoff": str(reviewer_handoff or ""),
         "ga_enterprise_signoff_intake_packet": str(ga_signoff_intake_packet),
         "pm_summary_line": str(register.get("pm_summary_line", "")),
+        "canonical_release_area_evidence": canonical_release_area_evidence,
         "summary_line": (
             "PM owner evidence request packet: "
             f"{'PASS' if contract_pass else 'BLOCKED'} | owners={len(packets)} | "
@@ -590,6 +597,13 @@ def build_packet(
                 packet["release_tier_request_count"] for packet in release_tier_packets
             ),
             "open_blocker_count": len(rows),
+            "release_area_blocker_count": len(release_area_blocker_ids),
+            "release_area_green_count": int(
+                canonical_release_area_evidence.get("release_area_green_count", 0) or 0
+            ),
+            "release_area_total_count": int(
+                canonical_release_area_evidence.get("release_area_total_count", 0) or 0
+            ),
             "open_blocker_with_release_tier_impact_count": sum(
                 1 for row in rows if _as_list(row.get("blocked_release_tiers"))
             ),
@@ -798,6 +812,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `pm_summary_line`: `{payload['pm_summary_line']}`",
         f"- `contract_pass`: `{payload['contract_pass']}`",
         f"- `evidence_closure_pass`: `{payload['summary']['evidence_closure_pass']}`",
+        f"- `release_area_summary`: `{payload['canonical_release_area_evidence'].get('release_area_summary', '')}`",
+        f"- `release_area_blocker_count`: `{payload['summary']['release_area_blocker_count']}`",
         f"- `expected_intake_open_blocker_count`: `{payload['summary']['expected_intake_open_blocker_count']}`",
         f"- `release_tier_request_count`: `{payload['summary']['release_tier_request_count']}`",
         f"- `release_tier_impact_contract_pass`: `{payload['summary']['release_tier_impact_contract_pass']}`",

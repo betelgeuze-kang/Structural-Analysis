@@ -56,6 +56,9 @@ def test_ux_new_user_observation_blocks_when_missing(tmp_path: Path) -> None:
     )
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
     assert "observation_file_missing" in payload["blockers"]
     assert "completion_minutes" in payload["summary"]["missing_fields"]
@@ -68,6 +71,9 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
 
     assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["reason_code"] == "PASS"
     assert payload["checks"]["completion_30min_pass"] is True
     assert payload["checks"]["elapsed_30min_pass"] is True

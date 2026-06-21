@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "command_result": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "Wrote long design optimization solver loop report: /home/betelgeuze/건축구조분석/implementation/phase1/release/design_optimization/design_optimization_solver_loop_long_report.json\n"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "receipt_path": "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
+  "schema_version": "fresh-validation-receipt-builder.v1"
+}

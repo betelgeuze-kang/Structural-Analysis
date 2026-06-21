@@ -86,6 +86,9 @@ def test_build_sidecars_from_complete_intake_passes_preflight(tmp_path: Path) ->
     )
 
     assert external_payload["updates"]["hardest_external_10case"]["receipt_status"] == "attached"
+    assert "source_commit_sha" in external_payload
+    assert external_payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert external_payload["reused_evidence"] is False
     assert external_payload["updates"]["hardest_external_10case"]["submission_lifecycle_status"] == (
         "submitted_receipt_attached"
     )
@@ -150,6 +153,48 @@ def test_build_sidecars_require_complete_rejects_partial_manifest(tmp_path: Path
         assert "RH-002" in str(exc)
     else:
         raise AssertionError("partial intake should fail when require_complete=True")
+
+
+def test_metadata_only_sidecar_refresh_preserves_pending_rows(tmp_path: Path) -> None:
+    base_external = _write_json(
+        tmp_path / "base-external.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "updates": {
+                "hardest_external_10case": {
+                    "submission_receipt": "pending",
+                    "receipt_status": "pending_external_submission_receipt",
+                }
+            },
+        },
+    )
+    base_residual = _write_json(
+        tmp_path / "base-residual.json",
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {
+                    "status": "pending",
+                    "closure_evidence_status": "pending",
+                }
+            },
+        },
+    )
+
+    external_payload, residual_payload = builder.build_metadata_only_sidecars(
+        base_external_updates=base_external,
+        base_residual_updates=base_residual,
+        repo_root=tmp_path,
+    )
+
+    assert external_payload["reused_evidence"] is True
+    assert residual_payload["reused_evidence"] is True
+    assert external_payload["updates"]["hardest_external_10case"]["submission_receipt"] == "pending"
+    assert external_payload["updates"]["hardest_external_10case"]["receipt_status"] == (
+        "pending_external_submission_receipt"
+    )
+    assert external_payload["updates"]["tpu_hffb"] == {}
+    assert "does not create, infer, or attach receipts" in external_payload["claim_boundary"]
 
 
 def test_build_sidecars_cli_writes_outputs_and_summary(tmp_path: Path) -> None:

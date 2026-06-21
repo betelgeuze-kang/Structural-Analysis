@@ -133,6 +133,9 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
     )
 
     assert payload["schema_version"] == "workstation-delivery-readiness.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["contract_pass"] is True
     assert payload["workstation_delivery_service_ready"] is True
     assert payload["summary_line"].startswith("Workstation delivery readiness: PASS")

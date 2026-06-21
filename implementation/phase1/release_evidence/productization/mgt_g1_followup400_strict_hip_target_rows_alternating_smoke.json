@@ -1,0 +1,122 @@
+{
+  "schema_version": "mgt-g1-alternating-newton-controller.v1",
+  "generated_at": "2026-06-21T03:24:37.403621+00:00",
+  "status": "partial",
+  "g1_alternating_newton_controller_ready": true,
+  "g1_closure_assessment": {
+    "g1_closure_claimed": false,
+    "strict_hip_engine_governs": true,
+    "strict_hip_runtime_governs": false,
+    "evidence_child_receipt_path": null,
+    "evidence_location": null,
+    "full_load_direct_residual_passed": false,
+    "relative_increment_verified": false,
+    "relative_increment_passed": false,
+    "material_newton_state_dependent_passed": false,
+    "hip_residual_engine_contract_passed": false,
+    "frozen_only_is_not_state_dependent_closure": false,
+    "fallback_zero_passed": false,
+    "child_fallback_zero_passed": false,
+    "blockers": [
+      "strict_hip_runtime_unavailable",
+      "no_promoted_child_receipt"
+    ]
+  },
+  "controller": {
+    "enabled": true,
+    "attempted": true,
+    "max_cycles": 1,
+    "promotion_count": 0,
+    "stop_reason": "strict_hip_runtime_unavailable",
+    "min_relative_improvement": 1e-06,
+    "runtime_budget_seconds": 25.0,
+    "runtime_budget_exceeded": false,
+    "child_timeout_seconds": 20.0,
+    "child_timeout_grace_seconds": 30.0,
+    "lane_sequence": [
+      "row_fd_component"
+    ],
+    "row_target_counts": [
+      4
+    ],
+    "row_support_column_counts": [
+      4
+    ],
+    "row_fd_max_support_columns": 8,
+    "row_support_selection": "target_rows",
+    "row_batch_replay_backend": "hip_full_residual",
+    "row_require_hip_batch_replay": true,
+    "strict_hip_residual_engine": true,
+    "strict_hip_residual_engine_fallback_zero_expectation": true,
+    "strict_hip_runtime_preflight": {
+      "available": false,
+      "torch_imported": true,
+      "torch_rocm_build": true,
+      "torch_hip_device_available": false,
+      "torch_version": "2.6.0+rocm6.1",
+      "torch_rocm_version": "6.1.40091-a8dbc0c19",
+      "reason": "torch_hip_device_unavailable"
+    },
+    "global_tangent_regularization_factors": [
+      1e-06
+    ],
+    "global_preconditioner_input_scales": [
+      0.25
+    ],
+    "global_krylov_preconditioner_mode": "none",
+    "global_krylov_preconditioner_mode_disabled_reason": "hip_batch_replay_required_suppresses_cpu_current_tangent_preconditioner",
+    "global_krylov_max_iterations": 2,
+    "global_krylov_difference_scheme": "forward",
+    "global_krylov_batch_replay_backend": "hip_full_residual",
+    "global_krylov_require_hip_batch_replay": true,
+    "allow_frozen_shell_material_tangent_hip_replay": false,
+    "allow_state_dependent_shell_material_tangent_hip_replay": true,
+    "global_krylov_linear_solver_backend": "torch_hip_gmres",
+    "global_krylov_linear_solver_backend_auto_selected_reason": "",
+    "global_krylov_probe_max_step": 1e-05,
+    "global_krylov_residual_scale_floor": 1.0,
+    "global_krylov_min_relative_improvement": 1e-06,
+    "global_secant_family_seed_enabled": false,
+    "global_max_secant_family_promotions": 1,
+    "global_secant_family_window_sizes": [
+      4,
+      8,
+      16
+    ],
+    "global_secant_family_ridge_factors": [
+      0.0,
+      1e-08
+    ],
+    "global_secant_family_alpha_values": [
+      1.0,
+      0.5,
+      0.25,
+      0.125,
+      0.0625
+    ],
+    "global_secant_family_min_relative_improvement": 1e-06
+  },
+  "initial_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+  "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+  "output_final_checkpoint_written": false,
+  "initial_frontier_direct_residual_inf_n": 5.74426714604332,
+  "final_direct_residual_inf_n": 5.74426714604332,
+  "rows": [],
+  "promoted_rows": [],
+  "runtime_seconds": 0.868717380995804,
+  "claim_boundary": {
+    "cpu_diagnostic_only": false,
+    "official_rocm_hip_closure_required": true,
+    "child_receipts_are_source_of_residual_progress": true,
+    "timeouts_do_not_claim_descent": true,
+    "row_fd_component_lane_is_candidate_generation_only": true,
+    "global_krylov_lane_requires_full_assembly_replay": true,
+    "strict_hip_residual_engine_active": true,
+    "residual_replay_requires_hip_only": true,
+    "cpu_fallback_expectation_zero_suppressed": true,
+    "rocm_hip_runtime_available": false,
+    "strict_hip_runtime_preflight_passed": false,
+    "g1_closure_claimed": false,
+    "host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency": true
+  }
+}

@@ -7,11 +7,13 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 from urllib.parse import urlparse
 
 
 SCHEMA_VERSION = "license-status-closure-report.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/license_status_closure_report.json")
 DEFAULT_TEMPLATE = Path("docs/templates/license_status.template.json")
@@ -39,6 +41,18 @@ PLACEHOLDER_MARKERS = ("TODO", "TBD", "PLACEHOLDER", "TEMPLATE", "REPLACE_ME", "
 
 def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -234,6 +248,9 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc().isoformat(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "license_status_path": str(license_status_path),
         "contract_pass": not blockers,
         "reason_code": "PASS" if not blockers else "ERR_LICENSE_STATUS_NOT_CLOSED",

@@ -7,10 +7,12 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "ux-new-user-observation-report.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_OBSERVATION = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json")
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
@@ -39,6 +41,18 @@ REQUIRED_FIELDS = (
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -186,6 +200,9 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_UX_NEW_USER_OBSERVATION_REQUIRED",
         "observation_path": str(observation_path),
