@@ -603,9 +603,38 @@ def build_snapshot(
     lane_count = _as_int(fresh_summary.get("lane_count"), 0)
     fresh_receipts = _as_int(fresh_summary.get("fresh_validation_receipt_pass_count"), 0)
     fresh_present = _as_int(fresh_summary.get("fresh_validation_receipt_present_count"), 0)
-    fresh_ready = bool(_contract_pass(fresh) and lane_count > 0 and fresh_receipts >= lane_count and fresh_present >= lane_count)
+    fresh_rows = [row for row in _as_list(fresh.get("rows")) if isinstance(row, dict)]
+    fresh_row_pass_count = sum(1 for row in fresh_rows if row.get("pass") is True)
+    fresh_row_fresh_count = sum(
+        1 for row in fresh_rows if row.get("fresh_validation_receipt_fresh") is True
+    )
+    fresh_row_contract_count = sum(
+        1 for row in fresh_rows if row.get("fresh_validation_receipt_contract_pass") is True
+    )
+    fresh_rows_ready = bool(
+        not fresh_rows
+        or (
+            len(fresh_rows) >= lane_count
+            and fresh_row_pass_count >= lane_count
+            and fresh_row_fresh_count >= lane_count
+            and fresh_row_contract_count >= lane_count
+        )
+    )
+    fresh_ready = bool(
+        _contract_pass(fresh)
+        and lane_count > 0
+        and fresh_receipts >= lane_count
+        and fresh_present >= lane_count
+        and fresh_rows_ready
+    )
     if not fresh_ready:
         blockers.extend(f"fresh_full_validation::{item}" for item in _as_list(fresh.get("blockers")))
+        if fresh_rows and fresh_row_pass_count < lane_count:
+            blockers.append("fresh_full_validation::row_pass_count_below_lane_count")
+        if fresh_rows and fresh_row_fresh_count < lane_count:
+            blockers.append("fresh_full_validation::row_fresh_receipt_count_below_lane_count")
+        if fresh_rows and fresh_row_contract_count < lane_count:
+            blockers.append("fresh_full_validation::row_contract_pass_count_below_lane_count")
         if not _as_list(fresh.get("blockers")):
             blockers.append("fresh_full_validation:not_ready")
 
@@ -832,6 +861,10 @@ def build_snapshot(
                 "lane_count": lane_count,
                 "fresh_validation_receipt_present_count": fresh_present,
                 "fresh_validation_receipt_pass_count": fresh_receipts,
+                "row_count": len(fresh_rows),
+                "row_pass_count": fresh_row_pass_count,
+                "row_fresh_receipt_count": fresh_row_fresh_count,
+                "row_contract_pass_count": fresh_row_contract_count,
                 "ready": fresh_ready,
             },
             "customer_shadow": {

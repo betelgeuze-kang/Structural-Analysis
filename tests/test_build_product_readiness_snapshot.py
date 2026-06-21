@@ -1259,6 +1259,52 @@ def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Pa
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 8,
+            "fresh_validation_receipt_pass_count": 8,
+        },
+        "rows": [
+            {
+                "lane_id": f"lane_{index}",
+                "pass": True,
+                "fresh_validation_receipt_fresh": index != 0,
+                "fresh_validation_receipt_contract_pass": True,
+            }
+            for index in range(8)
+        ],
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["fresh_full_validation"]["row_count"] == 8
+    assert payload["components"]["fresh_full_validation"]["row_pass_count"] == 8
+    assert payload["components"]["fresh_full_validation"]["row_fresh_receipt_count"] == 7
+    assert payload["components"]["fresh_full_validation"]["ready"] is False
+    assert (
+        "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+
+
 def test_snapshot_requires_schema_versions_for_release_operation_inputs(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
