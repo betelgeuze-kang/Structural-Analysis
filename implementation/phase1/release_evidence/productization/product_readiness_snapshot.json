@@ -293,7 +293,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-21T11:01:22.323247+00:00",
+  "generated_at": "2026-06-21T11:03:06.278075+00:00",
   "independent_product_ready": false,
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
@@ -301,7 +301,7 @@
   "reused_evidence": false,
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "source_commit_sha": "e24887d7923025b4c721efab1f720f5b57ebcc38",
+  "source_commit_sha": "0d3ce24f1b90de2d855d1ebb665c33899dca41ef",
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -445,14 +445,21 @@
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
-        "changed_paths_since_source_commit": [],
+        "changed_paths_since_source_commit": [
+          "README.md",
+          "docs/ai/dispatch/opencode_hip_consistency_blocked_receipt_refresh_20260621T201000Z.md",
+          "docs/commercialization-gap-current-state.md",
+          "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+          "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
+          "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+        ],
         "generated_at": "2026-06-21T11:01:11.776670+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": true,
+        "source_commit_matches_head": false,
         "source_commit_sha": "e24887d7923025b4c721efab1f720f5b57ebcc38",
         "source_state_fresh": true,
-        "source_state_kind": "exact"
+        "source_state_kind": "receipt_only_commit"
       },
       {
         "artifact": "customer_shadow_evidence_status",
@@ -684,19 +691,9 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [
-        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
-        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "docs/ai/dispatch/opencode_hip_consistency_blocked_receipt_refresh_20260621T201000Z.md"
-      ],
+      "dirty_paths": [],
       "non_receipt_dirty_paths": [],
-      "status_rows": [
-        " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
-        " M implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
-        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
-        "?? docs/ai/dispatch/opencode_hip_consistency_blocked_receipt_refresh_20260621T201000Z.md"
-      ]
+      "status_rows": []
     }
   },
   "status": "stale_or_inconsistent",
