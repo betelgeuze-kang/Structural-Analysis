@@ -41,4 +41,4 @@
 | ux UX | blocked | human_new_user_observation_missing_or_failed, human_new_user_30min_sample_evidence_missing |
 | support Support | pass | none |
 | security Security | blocked | license_status_not_configured |
-| github_sync GitHub Development Sync | blocked | github_sync_preflight::worktree_not_clean, github_sync_preflight::main_remote_not_ancestor_of_head, github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |
+| github_sync GitHub Development Sync | blocked | github_sync_preflight::main_remote_not_ancestor_of_head, github_sync_preflight::remote_mutation_approval_required, github_sync_remote_sync_pending, github_sync_preflight_not_synced |

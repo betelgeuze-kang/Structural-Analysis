@@ -8,7 +8,6 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
-    "github_sync::github_sync_preflight::worktree_not_clean",
     "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
     "github_sync::github_sync_preflight::remote_mutation_approval_required",
     "github_sync::github_sync_remote_sync_pending",
@@ -52,7 +51,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-21T11:59:22.412497+00:00",
+  "generated_at": "2026-06-21T12:00:00.712542+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -381,7 +380,6 @@
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
     "security::license_status_not_configured",
-    "github_sync::github_sync_preflight::worktree_not_clean",
     "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
     "github_sync::github_sync_preflight::remote_mutation_approval_required",
     "github_sync::github_sync_remote_sync_pending",
@@ -907,7 +905,6 @@
         "github_development_sync_preflight": "<live-git-state>"
       },
       "blockers": [
-        "github_sync_preflight::worktree_not_clean",
         "github_sync_preflight::main_remote_not_ancestor_of_head",
         "github_sync_preflight::remote_mutation_approval_required",
         "github_sync_remote_sync_pending",
@@ -922,14 +919,14 @@
         "github_sync_remote_mutation_approval_pending": true,
         "github_sync_remote_safety_ok": true,
         "github_sync_remote_sync_needed": true,
-        "github_sync_worktree_clean": false
+        "github_sync_worktree_clean": true
       },
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 1,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 2,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -979,7 +976,6 @@
       "ux::human_new_user_observation_missing_or_failed",
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
-      "github_sync::github_sync_preflight::worktree_not_clean",
       "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "github_sync::github_sync_remote_sync_pending",
@@ -1005,6 +1001,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
+  "source_commit_sha": "5aaf6ede0fb7a11b77d35285c4109d4834f56d00",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
