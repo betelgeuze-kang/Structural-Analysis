@@ -1,6 +1,7 @@
 {
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers",
     "hip_consistency_proof_runtime::dev_kfd_missing",
@@ -183,6 +184,59 @@
     }
   },
   "child_exit_code": null,
+  "child_gate_evidence": {
+    "blockers": [
+      "child_consistent_residual_jacobian_newton_not_proven",
+      "child_direct_residual_gate_not_proven",
+      "child_direct_residual_newton_ready_not_proven",
+      "child_fallback_zero_not_proven",
+      "child_full_load_closure_not_proven",
+      "child_material_newton_breadth_not_proven",
+      "child_observed_load_scale_below_required_full_load",
+      "child_relative_increment_gate_not_proven"
+    ],
+    "consistent_residual_jacobian_newton_passed": false,
+    "direct_residual_gate_passed": false,
+    "direct_residual_newton_ready": false,
+    "fallback_zero_passed": false,
+    "full_load_closure_passed": false,
+    "full_load_tolerance": 1e-12,
+    "load_scale_passed": false,
+    "material_newton_breadth_passed": false,
+    "observed_load_scale": null,
+    "ready": false,
+    "relative_increment_gate_passed": false,
+    "required_load_scale": 1.0,
+    "schema_version": "g1-child-gate-evidence.v1"
+  },
+  "child_hip_residual_refresh_evidence": {
+    "blockers": [
+      "child_global_krylov_component_missing",
+      "child_current_tangent_residual_row_component_missing"
+    ],
+    "components": {
+      "current_tangent_residual_row_correction": {
+        "accepted_state_refresh_backend": "",
+        "accepted_state_refresh_cpu_used": false,
+        "accepted_state_refresh_hip_used": false,
+        "hip_required": false,
+        "present": false,
+        "promoted_to_final_state": false,
+        "ready": false
+      },
+      "matrix_free_global_krylov": {
+        "accepted_state_refresh_backend": "",
+        "accepted_state_refresh_cpu_used": false,
+        "accepted_state_refresh_hip_used": false,
+        "hip_required": false,
+        "present": false,
+        "promoted_to_final_state": false,
+        "ready": false
+      }
+    },
+    "ready": false,
+    "schema_version": "g1-child-hip-residual-refresh-evidence.v1"
+  },
   "child_safety_requirements": [
     "child_reused_evidence_false",
     "child_source_commit_matches_lane",
@@ -192,7 +246,8 @@
     "external_hip_consistency_proof_gate_passed",
     "child_material_newton_breadth_passed",
     "child_cpu_acceptance_refresh_not_blocked",
-    "child_fallback_zero_passed"
+    "child_fallback_zero_passed",
+    "child_hip_required_accepted_residual_refresh_proven"
   ],
   "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, consistent residual/Jacobian Newton closure, material Newton breadth, customer, validation, or ROCm/HIP closure evidence. The child probe must explicitly prove full-load closure, HIP residual residency, consistent residual/Jacobian Newton closure, fallback-zero behavior, and material Newton breadth. The separate HIP-required residual/Jacobian consistency receipt must also pass without blockers. A checkpoint below load_scale 1.0 is blocked before execution, and a checkpoint that claims load_scale >= 1.0 is also blocked when its metadata exposes an accepted frontier below the required full load or a failed bracket below full load.",
   "command": [
@@ -229,7 +284,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T09:19:41.637085+00:00",
+  "generated_at": "2026-06-21T10:58:31.945457+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -259,6 +314,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "source_commit_sha": "2a6c65cec4c65bd8bd216cc597bb7a2e51aa0b6a",
   "status": "blocked"
 }

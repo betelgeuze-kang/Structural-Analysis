@@ -46,12 +46,12 @@
     "g1::production_rocm_hip_residency_not_closed",
     "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
     "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
+    "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
     "g1_full_load_lane::child_direct_residual_gate_not_proven",
     "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
     "g1_full_load_lane::child_fallback_zero_not_proven",
     "g1_full_load_lane::child_full_load_closure_not_proven",
-    "g1_full_load_lane::child_gate_evidence_missing",
-    "g1_full_load_lane::child_hip_residual_refresh_evidence_missing",
+    "g1_full_load_lane::child_global_krylov_component_missing",
     "g1_full_load_lane::child_material_newton_breadth_not_proven",
     "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
     "g1_full_load_lane::child_relative_increment_gate_not_proven",
@@ -61,6 +61,7 @@
     "g1_full_load_lane::hip_consistency_proof_has_blockers",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
     "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+    "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
     "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
     "g1_full_load_lane::observed_load_scale_below_required_full_load",
     "g1_full_mesh_full_load_not_closed",
@@ -104,7 +105,6 @@
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
     "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
-    "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
     "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
@@ -160,22 +160,65 @@
           "child_direct_residual_newton_ready_not_proven",
           "child_fallback_zero_not_proven",
           "child_full_load_closure_not_proven",
-          "child_gate_evidence_missing",
           "child_material_newton_breadth_not_proven",
           "child_observed_load_scale_below_required_full_load",
           "child_relative_increment_gate_not_proven"
         ],
-        "evidence": {},
+        "evidence": {
+          "blockers": [
+            "child_consistent_residual_jacobian_newton_not_proven",
+            "child_direct_residual_gate_not_proven",
+            "child_direct_residual_newton_ready_not_proven",
+            "child_fallback_zero_not_proven",
+            "child_full_load_closure_not_proven",
+            "child_material_newton_breadth_not_proven",
+            "child_observed_load_scale_below_required_full_load",
+            "child_relative_increment_gate_not_proven"
+          ],
+          "consistent_residual_jacobian_newton_passed": false,
+          "direct_residual_gate_passed": false,
+          "direct_residual_newton_ready": false,
+          "fallback_zero_passed": false,
+          "full_load_closure_passed": false,
+          "full_load_tolerance": 1e-12,
+          "load_scale_passed": false,
+          "material_newton_breadth_passed": false,
+          "observed_load_scale": null,
+          "ready": false,
+          "relative_increment_gate_passed": false,
+          "required_load_scale": 1.0,
+          "schema_version": "g1-child-gate-evidence.v1"
+        },
         "ready": false
       },
       "full_load_hip_newton_child_gate_ready": false,
       "full_load_hip_newton_child_hip_residual_refresh": {
         "blockers": [
-          "child_hip_residual_refresh_evidence_missing",
+          "child_current_tangent_residual_row_component_missing",
+          "child_global_krylov_component_missing",
           "current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
           "matrix_free_global_krylov_child_hip_residual_refresh_not_ready"
         ],
-        "components": {},
+        "components": {
+          "current_tangent_residual_row_correction": {
+            "accepted_state_refresh_backend": "",
+            "accepted_state_refresh_cpu_used": false,
+            "accepted_state_refresh_hip_used": false,
+            "hip_required": false,
+            "present": false,
+            "promoted_to_final_state": false,
+            "ready": false
+          },
+          "matrix_free_global_krylov": {
+            "accepted_state_refresh_backend": "",
+            "accepted_state_refresh_cpu_used": false,
+            "accepted_state_refresh_hip_used": false,
+            "hip_required": false,
+            "present": false,
+            "promoted_to_final_state": false,
+            "ready": false
+          }
+        },
         "ready": false
       },
       "full_load_hip_newton_child_hip_residual_refresh_ready": false,
@@ -251,7 +294,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-21T10:53:28.348678+00:00",
+  "generated_at": "2026-06-21T10:58:37.347811+00:00",
   "independent_product_ready": false,
   "paid_pilot_ready": false,
   "reason_code": "STALE_OR_INCONSISTENT",
@@ -259,7 +302,7 @@
   "reused_evidence": false,
   "schema_valid": true,
   "schema_version": "product-readiness-snapshot.v1",
-  "source_commit_sha": "81930f964b84c9bb7e77c386b3b9920f8f9aa230",
+  "source_commit_sha": "2a6c65cec4c65bd8bd216cc597bb7a2e51aa0b6a",
   "state_consistency": {
     "github_actions_runner_policy": {
       "blockers": [],
@@ -403,29 +446,14 @@
       },
       {
         "artifact": "g1_full_load_hip_newton_lane_report",
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.json",
-          "implementation/phase1/release_evidence/full_validation/design_optimization_refresh.fresh_validation_receipt.result.json",
-          "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
-          "implementation/phase1/support_bundle_manifest.json",
-          "scripts/build_product_readiness_snapshot.py",
-          "scripts/check_github_actions_self_hosted_runner_status.py",
-          "scripts/run_g1_full_load_hip_newton_lane.py",
-          "scripts/verify_quality_gate.py",
-          "tests/test_build_product_readiness_snapshot.py",
-          "tests/test_check_github_actions_self_hosted_runner_status.py",
-          "tests/test_mgt_direct_residual_newton_probe.py",
-          "tests/test_product_readiness_snapshot_doc_sync.py",
-          "tests/test_run_g1_full_load_hip_newton_lane.py",
-          "tests/test_verify_quality_gate.py"
-        ],
-        "generated_at": "2026-06-21T09:19:41.637085+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-21T10:58:31.945457+00:00",
         "metadata_complete": true,
         "reused_evidence": false,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_matches_head": true,
+        "source_commit_sha": "2a6c65cec4c65bd8bd216cc597bb7a2e51aa0b6a",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "customer_shadow_evidence_status",
@@ -657,9 +685,15 @@
     },
     "worktree": {
       "dirty": false,
-      "dirty_paths": [],
+      "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        "docs/ai/dispatch/opencode_g1_lane_blocked_evidence_refresh_review_20260621T200000Z.md"
+      ],
       "non_receipt_dirty_paths": [],
-      "status_rows": []
+      "status_rows": [
+        " M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json",
+        "?? docs/ai/dispatch/opencode_g1_lane_blocked_evidence_refresh_review_20260621T200000Z.md"
+      ]
     }
   },
   "status": "stale_or_inconsistent",
