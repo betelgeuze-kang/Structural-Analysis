@@ -79,13 +79,17 @@ def _g1_child_gate_evidence(*, ready: bool = True) -> dict:
     }
 
 
-def _g1_hip_consistency_proof(*, ready: bool = True) -> dict:
+def _g1_hip_consistency_proof(
+    *,
+    ready: bool = True,
+    source_commit_sha: str = "abc123",
+) -> dict:
     return {
         "path": "implementation/phase1/release_evidence/productization/"
         "mgt_residual_jacobian_consistency_hip_required_probe.json",
         "present": True,
         "status": "ready" if ready else "partial",
-        "source_commit_sha": "abc123",
+        "source_commit_sha": source_commit_sha,
         "reused_evidence": False,
         "rocm_hip_required": True,
         "consistent_residual_jacobian_newton_gate_passed": ready,
@@ -178,7 +182,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "status": "ready",
         "checkpoint": {"load_scale": 1.0},
         "full_load_input_pass": True,
-        "hip_consistency_proof": _g1_hip_consistency_proof(),
+        "hip_consistency_proof": _g1_hip_consistency_proof(source_commit_sha=commit),
         "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
         "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
