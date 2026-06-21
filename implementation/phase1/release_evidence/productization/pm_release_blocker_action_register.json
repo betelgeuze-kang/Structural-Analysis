@@ -18,7 +18,7 @@
     "release_area_total_count": 16
   },
   "contract_pass": false,
-  "generated_at": "2026-06-21T07:57:49.200761+00:00",
+  "generated_at": "2026-06-21T08:01:37.315194+00:00",
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -519,8 +519,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 10,
-        "main_ahead_count": 32,
+        "feature_ahead_count": 12,
+        "main_ahead_count": 34,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -531,9 +531,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 10,
+        "feature_ahead_count": 12,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 32,
+        "main_ahead_count": 34,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -596,8 +596,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 10,
-        "main_ahead_count": 32,
+        "feature_ahead_count": 12,
+        "main_ahead_count": 34,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -608,9 +608,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 10,
+        "feature_ahead_count": 12,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 32,
+        "main_ahead_count": 34,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -673,8 +673,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 10,
-        "main_ahead_count": 32,
+        "feature_ahead_count": 12,
+        "main_ahead_count": 34,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -685,9 +685,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 10,
+        "feature_ahead_count": 12,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 32,
+        "main_ahead_count": 34,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -750,8 +750,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 10,
-        "main_ahead_count": 32,
+        "feature_ahead_count": 12,
+        "main_ahead_count": 34,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -762,9 +762,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 10,
+        "feature_ahead_count": 12,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 32,
+        "main_ahead_count": 34,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",

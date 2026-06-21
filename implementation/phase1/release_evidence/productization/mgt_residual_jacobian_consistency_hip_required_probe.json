@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-21T07:57:44.987392+00:00",
-  "source_commit_sha": "74eb3f1467bb72fd9a79e1bd47b5801853a5d50f",
+  "generated_at": "2026-06-21T08:01:33.041272+00:00",
+  "source_commit_sha": "05e6b71f182d5df90dad7855b2979f87662d92ea",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -10,7 +10,7 @@
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-21T07:57:44.989398+00:00",
+    "checked_at": "2026-06-21T08:01:33.043113+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -67,7 +67,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.8789563750033267
+    "total_seconds": 0.8748547909926856
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [
