@@ -1031,16 +1031,21 @@ def build_snapshot(
     }
 
 
-def _strip_volatile_for_compare(payload: Any) -> Any:
+def _strip_volatile_for_compare(
+    payload: Any,
+    path: tuple[str, ...] = (),
+) -> Any:
     """Return ``payload`` with volatile ``generated_at`` fields removed recursively."""
     if isinstance(payload, dict):
+        worktree_diagnostic_path = path == ("state_consistency", "worktree")
         return {
-            key: _strip_volatile_for_compare(value)
+            key: _strip_volatile_for_compare(value, (*path, key))
             for key, value in payload.items()
             if key != "generated_at"
+            and not (worktree_diagnostic_path and key in {"status_rows", "dirty_paths"})
         }
     if isinstance(payload, list):
-        return [_strip_volatile_for_compare(item) for item in payload]
+        return [_strip_volatile_for_compare(item, path) for item in payload]
     return payload
 
 
