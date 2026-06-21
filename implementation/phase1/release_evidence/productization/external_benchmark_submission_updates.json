@@ -6,10 +6,10 @@
     "base_external_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
     "basis_kind": "existing_sidecar_metadata_refresh"
   },
-  "generated_at": "2026-06-21T05:52:48.096165+00:00",
+  "generated_at": "2026-06-21T06:05:58.430986+00:00",
   "reused_evidence": true,
   "schema_version": "external-benchmark-submission-updates.v1",
-  "source_commit_sha": "de0002a2165a066b9fc50c876893fea92cd8f378",
+  "source_commit_sha": "4908ec72a04e71720c28583cbf17f9308c3a2a7a",
   "updates": {
     "hardest_external_10case": {
       "closure_evidence_path": "",

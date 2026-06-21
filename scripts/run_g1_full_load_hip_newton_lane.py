@@ -155,10 +155,21 @@ def build_lane_report(
         "full_load_input_pass": full_load_input_pass,
         "dry_run": bool(dry_run),
         "command": command,
+        "child_safety_requirements": [
+            "child_reused_evidence_false",
+            "child_source_commit_matches_lane",
+            "child_observed_load_scale_at_required_full_load",
+            "child_hip_residual_engine_contract_passed",
+            "child_material_newton_breadth_passed",
+            "child_cpu_acceptance_refresh_not_blocked",
+            "child_fallback_zero_passed",
+        ],
         "claim_boundary": (
             "This lane is a strict execution wrapper for representative full-load "
             "G1 HIP Newton evidence. It does not synthesize residual, increment, "
-            "customer, validation, or ROCm/HIP closure evidence. A checkpoint below "
+            "material Newton breadth, customer, validation, or ROCm/HIP closure evidence. "
+            "The child probe must explicitly prove full-load closure, HIP residual residency, "
+            "fallback-zero behavior, and material Newton breadth. A checkpoint below "
             "load_scale 1.0 is blocked before execution."
         ),
     }
@@ -252,6 +263,14 @@ def _child_safety_blockers(
     residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
     if residual_contract.get("hip_residual_engine_contract_passed") is not True:
         blockers.append("child_hip_residual_engine_contract_not_proven")
+    material_newton_passed = bool(
+        child_gate.get("material_newton_breadth_passed") is True
+        or residual_contract.get("material_newton_gate_passed") is True
+        or residual_contract.get("state_dependent_material_newton_closure_passed")
+        is True
+    )
+    if not material_newton_passed:
+        blockers.append("child_material_newton_breadth_not_proven")
     if child_gate.get("cpu_acceptance_refresh_closure_blocked") is True:
         blockers.append("child_cpu_acceptance_refresh_closure_blocked")
     return blockers

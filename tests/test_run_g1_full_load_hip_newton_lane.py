@@ -72,6 +72,8 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert "--allow-state-dependent-shell-material-tangent-hip-replay" in command
     assert "hip_full_residual_resident" in command
     assert "hip_full_residual" in command
+    assert "child_material_newton_breadth_passed" in payload["child_safety_requirements"]
+    assert "material Newton breadth" in payload["claim_boundary"]
 
 
 def test_child_probe_result_must_report_full_load_and_fallback_zero(
@@ -104,6 +106,7 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
                     "gate_assessment": {
                         "full_load_closure_passed": True,
                         "fallback_zero_passed": True,
+                        "material_newton_breadth_passed": True,
                         "full_load_closure_gate": {
                             "observed_load_scale": 1.0,
                             "required_load_scale": 1.0,
@@ -139,6 +142,7 @@ def _write_acceptance_child(
     reused_evidence: bool,
     hip_engine_passed: bool,
     observed_load_scale: float,
+    material_newton_breadth_passed: bool = True,
     cpu_acceptance_refresh_closure_blocked: bool = False,
 ) -> None:
     child.write_text(
@@ -154,6 +158,7 @@ def _write_acceptance_child(
                 "gate_assessment": {
                     "full_load_closure_passed": True,
                     "fallback_zero_passed": True,
+                    "material_newton_breadth_passed": material_newton_breadth_passed,
                     "full_load_closure_gate": {
                         "observed_load_scale": observed_load_scale,
                         "required_load_scale": 1.0,
@@ -416,6 +421,42 @@ def test_child_cpu_acceptance_refresh_blocked_blocks_lane_promotion(
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert "child_cpu_acceptance_refresh_closure_blocked" in payload["blockers"]
+
+
+def test_child_material_newton_breadth_not_proven_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+            material_newton_breadth_passed=False,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "child_material_newton_breadth_not_proven" in payload["blockers"]
 
 
 def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> None:
