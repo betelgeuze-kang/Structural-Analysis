@@ -1,7 +1,6 @@
 {
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
-    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers",
     "hip_consistency_proof_runtime::dev_kfd_missing",
@@ -284,7 +283,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T10:58:31.945457+00:00",
+  "generated_at": "2026-06-21T11:01:11.776670+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
@@ -301,7 +300,7 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+    "source_commit_sha": "e24887d7923025b4c721efab1f720f5b57ebcc38",
     "status": "partial"
   },
   "load_path_provenance": {
@@ -314,6 +313,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "2a6c65cec4c65bd8bd216cc597bb7a2e51aa0b6a",
+  "source_commit_sha": "e24887d7923025b4c721efab1f720f5b57ebcc38",
   "status": "blocked"
 }
