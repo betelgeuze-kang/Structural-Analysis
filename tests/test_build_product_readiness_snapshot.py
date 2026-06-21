@@ -432,6 +432,50 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["blockers"] == []
 
 
+def test_snapshot_blocks_package_pyproject_name_mismatch(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "package.json", {
+        "name": "structural-optimization-workbench-ui",
+        "version": "1.0.0",
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["paid_pilot_ready"] is False
+    assert payload["components"]["product_identity"]["name_matches"] is False
+    assert payload["components"]["product_identity"]["version_matches"] is True
+    assert "product_identity_name_mismatch:package_json_vs_pyproject" in payload["blockers"]
+    assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+
+
+def test_snapshot_blocks_package_pyproject_version_mismatch(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_text(
+        tmp_path / "pyproject.toml",
+        '[project]\nname = "structural-optimization-workbench"\nversion = "0.1.0"\n',
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["paid_pilot_ready"] is False
+    assert payload["components"]["product_identity"]["name_matches"] is True
+    assert payload["components"]["product_identity"]["version_matches"] is False
+    assert "product_identity_version_mismatch:package_json_vs_pyproject" in payload["blockers"]
+    assert "product_identity_name_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+
+
 def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)

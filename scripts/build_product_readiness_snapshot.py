@@ -419,18 +419,24 @@ def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list
             pyproject_name = line.split("=", 1)[1].strip().strip('"')
         if line.startswith("version"):
             pyproject_version = line.split("=", 1)[1].strip().strip('"')
-    matches = bool(
-        package_name
-        and package_version
-        and package_name == pyproject_name
-        and package_version == pyproject_version
+    name_matches = bool(package_name and pyproject_name and package_name == pyproject_name)
+    version_matches = bool(
+        package_version and pyproject_version and package_version == pyproject_version
     )
-    if not matches:
-        blockers.append("product_identity_mismatch:package_json_vs_pyproject")
+    if not package_name or not pyproject_name:
+        blockers.append("product_identity_name_missing:package_json_or_pyproject")
+    elif not name_matches:
+        blockers.append("product_identity_name_mismatch:package_json_vs_pyproject")
+    if not package_version or not pyproject_version:
+        blockers.append("product_identity_version_missing:package_json_or_pyproject")
+    elif not version_matches:
+        blockers.append("product_identity_version_mismatch:package_json_vs_pyproject")
     return {
         "package_json": {"name": package_name, "version": package_version},
         "pyproject": {"name": pyproject_name, "version": pyproject_version},
-        "matches": matches,
+        "name_matches": name_matches,
+        "version_matches": version_matches,
+        "matches": bool(name_matches and version_matches),
     }
 
 
