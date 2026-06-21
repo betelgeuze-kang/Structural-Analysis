@@ -15,6 +15,7 @@ import numpy as np
 
 
 SCHEMA_VERSION = "g1-full-load-hip-newton-lane.v1"
+ROOT = Path(__file__).resolve().parent.parent
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_CHECKPOINT = (
     PRODUCTIZATION
@@ -25,6 +26,19 @@ DEFAULT_OUT = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
 DEFAULT_CHILD_OUT = PRODUCTIZATION / "g1_full_load_hip_newton_direct_probe.json"
 DIRECT_PROBE = Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py")
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
+    PRODUCTIZATION / "g1_checkpoint_retention_manifest.json",
+    PRODUCTIZATION / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+)
+NPZ_PATH_KEYS: tuple[str, ...] = (
+    "path",
+    "compact_checkpoint",
+    "retained_checkpoint",
+    "retained_checkpoint_npz",
+    "retained_checkpoint_at_time",
+    "checkpoint_path",
+    "checkpoint_npz",
+)
 
 
 def _now_utc_iso() -> str:
@@ -35,7 +49,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -80,6 +94,172 @@ def _load_checkpoint_meta(path: Path) -> tuple[dict[str, Any], list[str]]:
     }, blockers
 
 
+def _normalize_workspace_path(value: object) -> Path | None:
+    if not isinstance(value, str):
+        return None
+    stripped = value.strip()
+    if not stripped or not stripped.lower().endswith(".npz"):
+        return None
+    candidate = Path(stripped)
+    if candidate.is_absolute():
+        return candidate
+    return candidate
+
+
+def _collect_npz_paths_from_json(payload: object) -> set[Path]:
+    found: set[Path] = set()
+    if isinstance(payload, dict):
+        for key, value in payload.items():
+            if key in NPZ_PATH_KEYS and isinstance(value, str):
+                resolved = _normalize_workspace_path(value)
+                if resolved is not None:
+                    found.add(resolved)
+                continue
+            if isinstance(value, dict):
+                inner_path = value.get("path")
+                if isinstance(inner_path, str) and key in NPZ_PATH_KEYS:
+                    resolved = _normalize_workspace_path(inner_path)
+                    if resolved is not None:
+                        found.add(resolved)
+            found.update(_collect_npz_paths_from_json(value))
+    elif isinstance(payload, list):
+        for entry in payload:
+            found.update(_collect_npz_paths_from_json(entry))
+    return found
+
+
+def _scan_evidence_checkpoint_paths(
+    sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
+) -> tuple[list[Path], list[dict[str, Any]]]:
+    candidates: list[Path] = []
+    per_source: list[dict[str, Any]] = []
+    for source in sources:
+        entry: dict[str, Any] = {
+            "path": str(source),
+            "available": False,
+            "candidate_count": 0,
+            "candidate_paths_sample": [],
+        }
+        if not source.exists():
+            per_source.append(entry)
+            continue
+        try:
+            payload = json.loads(source.read_text(encoding="utf-8"))
+        except Exception as exc:
+            entry["error"] = exc.__class__.__name__
+            per_source.append(entry)
+            continue
+        entry["available"] = True
+        paths = sorted(_collect_npz_paths_from_json(payload))
+        for path in paths:
+            if path not in candidates:
+                candidates.append(path)
+        entry["candidate_count"] = len(paths)
+        entry["candidate_paths_sample"] = [str(p) for p in paths[:12]]
+        per_source.append(entry)
+    return candidates, per_source
+
+
+def _auto_select_checkpoint(
+    *,
+    required_load_scale: float,
+    full_load_tolerance: float,
+    sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
+) -> dict[str, Any]:
+    candidates, per_source = _scan_evidence_checkpoint_paths(sources)
+    observed: list[dict[str, Any]] = []
+    for path in candidates:
+        meta, _blockers = _load_checkpoint_meta(path)
+        entry = {
+            "path": str(path),
+            "exists": path.exists(),
+            "load_scale": meta.get("load_scale"),
+            "schema": meta.get("schema", ""),
+            "dof_count": meta.get("dof_count"),
+        }
+        observed.append(entry)
+    loadable = [
+        entry
+        for entry in observed
+        if entry["exists"] and isinstance(entry["load_scale"], (int, float))
+    ]
+    if not loadable:
+        return {
+            "mode": "auto_select",
+            "sources": per_source,
+            "candidate_count": len(candidates),
+            "loadable_count": 0,
+            "unloadable_count": len(observed),
+            "highest_observed_load_scale": None,
+            "loadable_candidates": [],
+            "selected_checkpoint": None,
+            "selection_reason": "no_loadable_candidates",
+        }
+    ranked = sorted(
+        loadable,
+        key=lambda e: float(e["load_scale"]),
+        reverse=True,
+    )
+    best = ranked[0]
+    best_load = float(best["load_scale"])
+    meets_full_load = best_load >= float(required_load_scale) - float(full_load_tolerance)
+    reason = (
+        "full_load_candidate_selected"
+        if meets_full_load
+        else "highest_sub_full_load_candidate_selected"
+    )
+    return {
+        "mode": "auto_select",
+        "sources": per_source,
+        "candidate_count": len(candidates),
+        "loadable_count": len(loadable),
+        "unloadable_count": len(observed) - len(loadable),
+        "highest_observed_load_scale": best_load,
+        "loadable_candidates": ranked[:12],
+        "selected_checkpoint": {
+            "path": str(best["path"]),
+            "load_scale": best_load,
+            "meets_full_load": meets_full_load,
+            "schema": best.get("schema", ""),
+            "dof_count": best.get("dof_count"),
+        },
+        "selection_reason": reason,
+    }
+
+
+def _resolve_checkpoint(
+    *,
+    requested: Path | None,
+    required_load_scale: float,
+    full_load_tolerance: float,
+    sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
+) -> tuple[Path | None, dict[str, Any]]:
+    if requested is None:
+        selection = _auto_select_checkpoint(
+            required_load_scale=required_load_scale,
+            full_load_tolerance=full_load_tolerance,
+            sources=sources,
+        )
+        selected = selection.get("selected_checkpoint") or {}
+        selected_path = selected.get("path")
+        if not selected_path:
+            return None, {
+                "requested_path": None,
+                "mode": "auto_select",
+                "selection": selection,
+            }
+        return Path(selected_path), {
+            "requested_path": None,
+            "mode": "auto_select",
+            "selection": selection,
+        }
+    return requested, {
+        "requested_path": str(requested),
+        "mode": "explicit",
+        "selection": None,
+    }
+
+
 def _direct_probe_command(
     *,
     checkpoint_npz: Path,
@@ -122,15 +302,26 @@ def _direct_probe_command(
 
 def build_lane_report(
     *,
-    checkpoint_npz: Path = DEFAULT_CHECKPOINT,
+    checkpoint_npz: Path | None = None,
     output_json: Path = DEFAULT_CHILD_OUT,
     mgt_path: Path | None = None,
     required_load_scale: float = 1.0,
     full_load_tolerance: float = 1.0e-12,
     dry_run: bool = False,
+    evidence_sources: tuple[Path, ...] = CHECKPOINT_EVIDENCE_SOURCES,
 ) -> tuple[dict[str, Any], int]:
     generated_at = _now_utc_iso()
-    checkpoint_meta, blockers = _load_checkpoint_meta(checkpoint_npz)
+    resolved_checkpoint, checkpoint_resolution = _resolve_checkpoint(
+        requested=checkpoint_npz,
+        required_load_scale=required_load_scale,
+        full_load_tolerance=full_load_tolerance,
+        sources=evidence_sources,
+    )
+    if resolved_checkpoint is None:
+        checkpoint_meta = {"path": None, "load_scale": None}
+        blockers = ["auto_select_no_loadable_candidates"]
+    else:
+        checkpoint_meta, blockers = _load_checkpoint_meta(resolved_checkpoint)
     observed_load_scale = checkpoint_meta.get("load_scale")
     full_load_input_pass = bool(
         observed_load_scale is not None
@@ -139,7 +330,7 @@ def build_lane_report(
     if not full_load_input_pass and "checkpoint_load_scale_missing" not in blockers:
         blockers.append("checkpoint_load_scale_below_required_full_load")
     command = _direct_probe_command(
-        checkpoint_npz=checkpoint_npz,
+        checkpoint_npz=resolved_checkpoint or DEFAULT_CHECKPOINT,
         output_json=output_json,
         mgt_path=mgt_path,
     )
@@ -150,6 +341,7 @@ def build_lane_report(
         "engine_version": ENGINE_VERSION,
         "reused_evidence": False,
         "checkpoint": checkpoint_meta,
+        "checkpoint_resolution": checkpoint_resolution,
         "required_load_scale": float(required_load_scale),
         "full_load_tolerance": float(full_load_tolerance),
         "full_load_input_pass": full_load_input_pass,
@@ -276,9 +468,25 @@ def _child_safety_blockers(
     return blockers
 
 
+def _checkpoint_path_arg(value: str) -> Path | None:
+    stripped = value.strip()
+    if stripped.lower() == "auto":
+        return None
+    return Path(stripped)
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--checkpoint-npz", type=Path, default=DEFAULT_CHECKPOINT)
+    parser.add_argument(
+        "--checkpoint-npz",
+        type=_checkpoint_path_arg,
+        default=None,
+        help=(
+            "Path to the G1 checkpoint .npz to feed the direct residual Newton probe. "
+            "Omit this option, or pass the literal value 'auto', to scan configured "
+            "status/manifest JSON files and select the highest-load candidate."
+        ),
+    )
     parser.add_argument("--child-output-json", type=Path, default=DEFAULT_CHILD_OUT)
     parser.add_argument("--mgt-path", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)

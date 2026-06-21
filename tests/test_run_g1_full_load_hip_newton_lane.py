@@ -477,3 +477,151 @@ def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> 
     assert exit_code == 1
     assert payload["status"] == "blocked"
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+
+
+def _write_evidence_source(
+    source: Path,
+    *,
+    candidates: list[Path],
+    prefix_keys: tuple[str, ...] = ("compact_checkpoint", "retained_checkpoint_npz"),
+) -> None:
+    payload: dict[str, Any] = {
+        "schema_version": "test-evidence-source.v1",
+        "entries": [{key: str(path) for key in prefix_keys} for path in candidates],
+    }
+    flat: dict[str, Any] = {}
+    for path in candidates:
+        flat[f"entry_{path.stem}"] = {
+            "compact_checkpoint": str(path),
+            "retained_checkpoint_npz": {"path": str(path)},
+        }
+    payload.update(flat)
+    source.parent.mkdir(parents=True, exist_ok=True)
+    source.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+
+def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
+    sub = _checkpoint(tmp_path / "sub.npz", load_scale=0.4)
+    full = _checkpoint(tmp_path / "full.npz", load_scale=1.0)
+    medium = _checkpoint(tmp_path / "medium.npz", load_scale=0.7)
+    source = tmp_path / "source.json"
+    _write_evidence_source(
+        source,
+        candidates=[sub, medium, full],
+        prefix_keys=("compact_checkpoint",),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ready_to_run"
+    assert payload["full_load_input_pass"] is True
+    resolution = payload["checkpoint_resolution"]
+    assert resolution["mode"] == "auto_select"
+    assert resolution["selection"]["candidate_count"] == 3
+    assert resolution["selection"]["loadable_count"] == 3
+    assert resolution["selection"]["highest_observed_load_scale"] == 1.0
+    assert resolution["selection"]["selected_checkpoint"]["path"] == str(full)
+    assert resolution["selection"]["selection_reason"] == "full_load_candidate_selected"
+    assert Path(payload["checkpoint"]["path"]) == full
+
+
+def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> None:
+    low = _checkpoint(tmp_path / "low.npz", load_scale=0.4)
+    medium = _checkpoint(tmp_path / "medium.npz", load_scale=0.7)
+    higher_sub = _checkpoint(tmp_path / "higher_sub.npz", load_scale=0.95)
+    source = tmp_path / "source.json"
+    _write_evidence_source(
+        source,
+        candidates=[low, medium, higher_sub],
+        prefix_keys=("compact_checkpoint",),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["full_load_input_pass"] is False
+    assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    resolution = payload["checkpoint_resolution"]
+    assert resolution["mode"] == "auto_select"
+    assert resolution["selection"]["highest_observed_load_scale"] == 0.95
+    assert (
+        resolution["selection"]["selected_checkpoint"]["path"] == str(higher_sub)
+    )
+    assert (
+        resolution["selection"]["selection_reason"]
+        == "highest_sub_full_load_candidate_selected"
+    )
+    assert payload["checkpoint"]["load_scale"] == 0.95
+
+
+def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
+    explicit = _checkpoint(tmp_path / "explicit.npz", load_scale=0.656)
+    full = _checkpoint(tmp_path / "full.npz", load_scale=1.0)
+    source = tmp_path / "source.json"
+    _write_evidence_source(
+        source,
+        candidates=[full],
+        prefix_keys=("compact_checkpoint",),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=explicit,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 1
+    resolution = payload["checkpoint_resolution"]
+    assert resolution["mode"] == "explicit"
+    assert resolution["selection"] is None
+    assert resolution["requested_path"] == str(explicit)
+    assert Path(payload["checkpoint"]["path"]) == explicit
+    assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+
+
+def test_auto_select_with_no_loadable_candidates_blocks(tmp_path: Path) -> None:
+    source = tmp_path / "source.json"
+    _write_evidence_source(
+        source,
+        candidates=[],
+        prefix_keys=("compact_checkpoint",),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert "auto_select_no_loadable_candidates" in payload["blockers"]
+    resolution = payload["checkpoint_resolution"]
+    assert resolution["mode"] == "auto_select"
+    assert resolution["selection"]["selection_reason"] == "no_loadable_candidates"
+    assert resolution["selection"]["selected_checkpoint"] is None
+
+
+def test_cli_auto_select_default_and_auto_arg_use_evidence_scan(tmp_path: Path) -> None:
+    out = tmp_path / "lane.json"
+    default_args = run_g1_full_load_hip_newton_lane.build_parser().parse_args(
+        ["--dry-run", "--out", str(out)]
+    )
+    assert default_args.checkpoint_npz is None
+
+    args = run_g1_full_load_hip_newton_lane.build_parser().parse_args(
+        ["--checkpoint-npz", "auto", "--dry-run", "--out", str(out)]
+    )
+    assert args.checkpoint_npz is None
+    assert args.dry_run is True
