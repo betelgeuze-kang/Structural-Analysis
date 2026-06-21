@@ -640,6 +640,109 @@ def test_cpu_acceptance_refresh_blocks_hip_required_closure() -> None:
     )
 
 
+def test_cpu_acceptance_refresh_gate_flag_covers_row_correction_component(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The gate-level ``cpu_acceptance_refresh_closure_blocked`` flag must be
+    True when EITHER the matrix-free global Krylov OR the current-tangent
+    residual-row correction promoted a HIP-required final state via CPU
+    residual acceptance or CPU tangent refresh. A row-only CPU leak would
+    otherwise leave the gate flag False while the audit-level
+    ``fallback_zero_audit`` still records the boundary.
+    """
+    mgt_path = tmp_path / "test.mgt"
+    mgt_path.write_bytes(FIXTURE_MGT.read_bytes())
+    checkpoint = tmp_path / "state.npz"
+    _make_checkpoint_npz(checkpoint, dof_count=60)
+
+    monkeypatch.setattr(
+        direct_probe, "_rocm_hip_runtime_preflight", _mock_hip_preflight_available
+    )
+    monkeypatch.setattr(
+        direct_probe.HipFullResidualBatchBackend,
+        "prepare",
+        _MockHipBackend.prepare,
+    )
+
+    real_check = direct_probe._cpu_acceptance_refresh_closure_blocked
+    call_count = {"n": 0}
+
+    def fake_check(component: dict[str, Any]) -> bool:
+        call_count["n"] += 1
+        is_row_correction = "per_state_batch_replay_enabled" in component
+        if is_row_correction:
+            return True
+        return real_check(component)
+
+    monkeypatch.setattr(
+        direct_probe, "_cpu_acceptance_refresh_closure_blocked", fake_check
+    )
+
+    payload = run_mgt_direct_residual_newton_probe(
+        mgt_path=mgt_path,
+        checkpoint_npz=checkpoint,
+        enable_current_tangent_residual_row_correction=True,
+        current_tangent_residual_row_batch_replay_backend="hip_full_residual",
+        current_tangent_residual_row_require_hip_batch_replay=True,
+        current_tangent_residual_row_use_residual_only_assembly=True,
+        current_tangent_residual_row_batch_alpha_replay=True,
+    )
+
+    assert call_count["n"] == 2, (
+        f"Expected _cpu_acceptance_refresh_closure_blocked to be called "
+        f"exactly twice (global krylov + row correction), got {call_count['n']}"
+    )
+    gate = payload["gate_assessment"]
+    assert gate["cpu_acceptance_refresh_closure_blocked"] is True
+    assert "rocm_hip_acceptance_refresh_required_for_closure" in payload["blockers"]
+    assert payload["direct_residual_newton_ready"] is False
+    assert payload["gate_assessment"]["fallback_zero_passed"] is False
+
+
+def test_cpu_acceptance_refresh_gate_flag_still_false_when_no_cpu_refresh(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """Regression: the gate-level ``cpu_acceptance_refresh_closure_blocked``
+    flag must remain False when neither component uses CPU acceptance or
+    CPU tangent refresh.
+    """
+    mgt_path = tmp_path / "test.mgt"
+    mgt_path.write_bytes(FIXTURE_MGT.read_bytes())
+    checkpoint = tmp_path / "state.npz"
+    _make_checkpoint_npz(checkpoint, dof_count=60)
+
+    monkeypatch.setattr(
+        direct_probe, "_rocm_hip_runtime_preflight", _mock_hip_preflight_available
+    )
+    monkeypatch.setattr(
+        direct_probe.HipFullResidualBatchBackend,
+        "prepare",
+        _MockHipBackend.prepare,
+    )
+
+    real_check = direct_probe._cpu_acceptance_refresh_closure_blocked
+
+    def fake_check(component: dict[str, Any]) -> bool:
+        return real_check(component)
+
+    monkeypatch.setattr(
+        direct_probe, "_cpu_acceptance_refresh_closure_blocked", fake_check
+    )
+
+    payload = run_mgt_direct_residual_newton_probe(
+        mgt_path=mgt_path,
+        checkpoint_npz=checkpoint,
+        enable_current_tangent_residual_row_correction=True,
+        current_tangent_residual_row_batch_replay_backend="hip_full_residual",
+        current_tangent_residual_row_require_hip_batch_replay=True,
+        current_tangent_residual_row_use_residual_only_assembly=True,
+        current_tangent_residual_row_batch_alpha_replay=True,
+    )
+
+    gate = payload["gate_assessment"]
+    assert gate["cpu_acceptance_refresh_closure_blocked"] is False
+
+
 def test_direct_residual_cli_requires_explicit_cpu_diagnostic_ack(tmp_path: Path) -> None:
     out = tmp_path / "mgt_direct_residual_newton_probe.json"
     proc = subprocess.run(
@@ -1117,6 +1220,9 @@ def test_g1_fallback_zero_audit_fails_global_krylov_host_gmres() -> None:
             "require_hip_batch_replay": True,
             "require_hip_krylov_solver": False,
             "host_krylov_solver_used": True,
+            "accepted_state_refresh_backend": "hip_full_residual",
+            "accepted_state_refresh_hip_used": True,
+            "accepted_state_refresh_cpu_used": False,
         },
         row_correction={
             "enabled": False,
@@ -1127,8 +1233,8 @@ def test_g1_fallback_zero_audit_fails_global_krylov_host_gmres() -> None:
     )
 
     assert audit["fallback_zero_passed"] is False
-    assert audit["fallback_zero_boundary_count"] == 1
-    assert audit["fallback_zero_boundaries"][0]["boundary"] == "global_krylov_host_gmres_used_with_hip_required"
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert "global_krylov_host_gmres_used_with_hip_required" in boundaries
 
 
 def test_g1_fallback_zero_audit_fails_global_krylov_hip_replay_unavailable() -> None:
@@ -1153,6 +1259,57 @@ def test_g1_fallback_zero_audit_fails_global_krylov_hip_replay_unavailable() -> 
     assert audit["fallback_zero_boundary_count"] >= 1
     boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
     assert "global_krylov_hip_replay_required_unavailable" in boundaries
+
+
+def test_g1_fallback_zero_audit_fails_promoted_global_without_hip_refresh() -> None:
+    audit = _g1_fallback_zero_audit(
+        global_krylov={
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "require_hip_batch_replay": True,
+            "accepted_state_refresh_backend": "cpu_full_assembly",
+            "accepted_state_refresh_cpu_used": False,
+            "accepted_state_refresh_hip_used": False,
+        },
+        row_correction={
+            "enabled": False,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": False,
+        },
+    )
+
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert audit["fallback_zero_passed"] is False
+    assert "global_krylov_hip_required_residual_refresh_missing" in boundaries
+
+
+def test_g1_fallback_zero_audit_fails_promoted_row_without_hip_refresh() -> None:
+    audit = _g1_fallback_zero_audit(
+        global_krylov={
+            "enabled": False,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": False,
+        },
+        row_correction={
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "require_hip_batch_replay": True,
+            "accepted_state_refresh_backend": "",
+            "accepted_state_refresh_cpu_used": False,
+            "accepted_state_refresh_hip_used": False,
+            "accepted_state_tangent_refresh_backend": "hip_finite_difference_residual_jvp",
+            "accepted_state_tangent_refresh_hip_used": True,
+            "accepted_state_tangent_refresh_cpu_used": False,
+        },
+    )
+
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert audit["fallback_zero_passed"] is False
+    assert "row_correction_hip_required_residual_refresh_missing" in boundaries
 
 
 def test_g1_fallback_zero_audit_fails_global_krylov_hip_krylov_solver_unavailable() -> None:
@@ -2518,6 +2675,35 @@ def test_row_correction_alpha_candidates_record_hip_batch_group_metadata(
         and row["batch_alpha_replay_index"] == row["hip_batch_group_index"]
         for row in trial_rows
     )
+
+
+def test_hip_residual_engine_contract_blocks_required_unattempted_component() -> None:
+    contract = direct_probe._g1_hip_residual_engine_contract(
+        {},
+        {
+            "enabled": True,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": True,
+            "batch_replay_backend": "hip_full_residual",
+        },
+    )
+
+    assert contract["hip_residual_engine_required"] is True
+    assert contract["hip_residual_engine_contract_passed"] is False
+    assert (
+        "current_tangent_residual_row_correction::hip_required_component_not_attempted"
+        in contract["hip_residual_engine_blockers"]
+    )
+    row = next(
+        row
+        for row in contract["hip_residual_engine_rows"]
+        if row["component"] == "current_tangent_residual_row_correction"
+    )
+    assert row["active"] is True
+    assert row["attempted"] is False
+    assert row["promoted_to_final_state"] is False
+    assert row["passed"] is False
 
 
 def test_row_correction_fd_jacobian_records_hip_batch_group_metadata(

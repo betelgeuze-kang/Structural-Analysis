@@ -29,6 +29,11 @@ DEFAULT_HIP_CONSISTENCY_PROOF = (
 )
 DIRECT_PROBE = Path("implementation/phase1/run_mgt_direct_residual_newton_probe.py")
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+HIP_RESIDUAL_REPLAY_BACKENDS = {
+    "hip_full_residual",
+    "hip_full_residual_resident",
+    "rust_hip_full_residual_ffi",
+}
 CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
     PRODUCTIZATION / "g1_checkpoint_retention_manifest.json",
     PRODUCTIZATION / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
@@ -645,6 +650,7 @@ def build_lane_report(
             "child_material_newton_breadth_passed",
             "child_cpu_acceptance_refresh_not_blocked",
             "child_fallback_zero_passed",
+            "child_hip_required_accepted_residual_refresh_proven",
         ],
         "claim_boundary": (
             "This lane is a strict execution wrapper for representative full-load "
@@ -787,7 +793,40 @@ def _child_safety_blockers(
         blockers.append("child_cpu_acceptance_refresh_closure_blocked")
     if child_gate.get("fallback_zero_passed") is not True:
         blockers.append("child_fallback_zero_not_proven")
+    blockers.extend(_child_hip_residual_refresh_blockers(child_payload))
     blockers.extend(_child_gate_audit_consistency_blockers(child_gate))
+    return blockers
+
+
+def _child_hip_residual_refresh_blockers(child_payload: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    components = (
+        ("matrix_free_global_krylov", "child_global_krylov"),
+        (
+            "current_tangent_residual_row_correction",
+            "child_current_tangent_residual_row",
+        ),
+    )
+    for component_key, blocker_prefix in components:
+        component = child_payload.get(component_key)
+        if not isinstance(component, dict):
+            blockers.append(f"{blocker_prefix}_component_missing")
+            continue
+        if not (
+            component.get("require_hip_batch_replay")
+            or component.get("require_hip_krylov_solver")
+        ):
+            blockers.append(f"{blocker_prefix}_hip_not_required")
+        if component.get("promoted_to_final_state") is not True:
+            blockers.append(f"{blocker_prefix}_not_promoted_to_final_state")
+        backend = str(component.get("accepted_state_refresh_backend", "") or "")
+        if (
+            backend not in HIP_RESIDUAL_REPLAY_BACKENDS
+            or component.get("accepted_state_refresh_hip_used") is not True
+        ):
+            blockers.append(f"{blocker_prefix}_hip_residual_refresh_not_proven")
+        if component.get("accepted_state_refresh_cpu_used") is True:
+            blockers.append(f"{blocker_prefix}_cpu_residual_refresh_used")
     return blockers
 
 

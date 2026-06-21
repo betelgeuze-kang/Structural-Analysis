@@ -1279,6 +1279,15 @@ def _g1_fallback_zero_audit(
 ) -> dict[str, Any]:
     boundaries: list[dict[str, Any]] = []
 
+    def _hip_required_residual_refresh_missing(component: dict[str, Any]) -> bool:
+        if not component.get("promoted_to_final_state"):
+            return False
+        backend = str(component.get("accepted_state_refresh_backend", "") or "")
+        return bool(
+            not component.get("accepted_state_refresh_hip_used")
+            or backend not in HIP_RESIDUAL_REPLAY_BACKENDS
+        )
+
     def _hip_required_tangent_refresh_missing(component: dict[str, Any]) -> bool:
         backend = str(component.get("accepted_state_tangent_refresh_backend", "") or "")
         return bool(
@@ -1370,6 +1379,15 @@ def _g1_fallback_zero_audit(
                     "detail": "cpu_residual_acceptance_refresh_used",
                 }
             )
+        if _hip_required_residual_refresh_missing(global_krylov):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_hip_required_residual_refresh_missing",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "hip_required_residual_acceptance_refresh_missing",
+                    "backend": global_krylov.get("accepted_state_refresh_backend"),
+                }
+            )
         if global_krylov.get("accepted_state_tangent_refresh_cpu_used"):
             boundaries.append(
                 {
@@ -1416,6 +1434,15 @@ def _g1_fallback_zero_audit(
                     "boundary": "row_correction_cpu_residual_acceptance_refresh_used",
                     "path": "current_tangent_residual_row_correction",
                     "detail": "row_cpu_residual_acceptance_refresh_used",
+                }
+            )
+        if _hip_required_residual_refresh_missing(row_correction):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_hip_required_residual_refresh_missing",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_hip_required_residual_acceptance_refresh_missing",
+                    "backend": row_correction.get("accepted_state_refresh_backend"),
                 }
             )
         if row_correction.get("accepted_state_tangent_refresh_cpu_used"):
@@ -1477,6 +1504,9 @@ def _g1_hip_residual_engine_contract(
             or component.get("attempted")
             or component.get("promoted_to_final_state")
         )
+        attempted_or_promoted = bool(
+            component.get("attempted") or component.get("promoted_to_final_state")
+        )
         require_hip = bool(
             component.get("require_hip_batch_replay")
             or component.get("require_hip_krylov_solver")
@@ -1488,6 +1518,8 @@ def _g1_hip_residual_engine_contract(
             blockers.append("component_not_active")
         if not require_hip:
             blockers.append("hip_not_required")
+        if active and require_hip and not attempted_or_promoted:
+            blockers.append("hip_required_component_not_attempted")
         if require_hip and not backend_is_hip:
             blockers.append("residual_replay_backend_not_hip")
         if component.get("host_krylov_solver_used"):
@@ -1513,6 +1545,10 @@ def _g1_hip_residual_engine_contract(
             {
                 "component": name,
                 "active": active,
+                "attempted": bool(component.get("attempted")),
+                "promoted_to_final_state": bool(
+                    component.get("promoted_to_final_state")
+                ),
                 "require_hip": require_hip,
                 "batch_replay_backend": backend,
                 "backend_is_hip": backend_is_hip,
@@ -7121,8 +7157,11 @@ def run_mgt_direct_residual_newton_probe(
     relative_increment_gate_passed = bool(
         final_gate_candidate.get("relative_increment_gate_passed")
     )
-    cpu_acceptance_refresh_closure_blocked = _cpu_acceptance_refresh_closure_blocked(
-        matrix_free_global_krylov
+    cpu_acceptance_refresh_closure_blocked = bool(
+        _cpu_acceptance_refresh_closure_blocked(matrix_free_global_krylov)
+        or _cpu_acceptance_refresh_closure_blocked(
+            current_tangent_residual_row_correction
+        )
     )
     fallback_zero_audit = _g1_fallback_zero_audit(
         matrix_free_global_krylov,
@@ -7133,6 +7172,15 @@ def run_mgt_direct_residual_newton_probe(
         matrix_free_global_krylov,
         current_tangent_residual_row_correction,
     )
+    hip_residual_engine_contract_passed = bool(
+        hip_residual_engine_contract["hip_residual_engine_contract_passed"]
+    )
+    hip_residual_engine_required = bool(
+        hip_residual_engine_contract["hip_residual_engine_required"]
+    )
+    hip_residual_engine_gate_passed = bool(
+        not hip_residual_engine_required or hip_residual_engine_contract_passed
+    )
     full_load_closure_gate = _full_load_closure_gate(load_scale)
     full_load_closure_passed = bool(full_load_closure_gate["passed"])
     converged = bool(
@@ -7142,6 +7190,7 @@ def run_mgt_direct_residual_newton_probe(
         and full_load_closure_passed
         and not cpu_acceptance_refresh_closure_blocked
         and fallback_zero_passed
+        and hip_residual_engine_gate_passed
     )
     output_final_checkpoint_meta: dict[str, Any] | None = None
     final_state_improved = final_direct_residual_inf < base_residual_inf
@@ -7378,6 +7427,7 @@ def run_mgt_direct_residual_newton_probe(
             "hip_krylov_solver_required_unavailable": (
                 hip_krylov_solver_required_unavailable
             ),
+            "hip_residual_engine_gate_passed": hip_residual_engine_gate_passed,
             "cpu_acceptance_refresh_closure_blocked": (
                 cpu_acceptance_refresh_closure_blocked
             ),
@@ -7483,6 +7533,20 @@ def run_mgt_direct_residual_newton_probe(
             *(
                 ["rocm_hip_acceptance_refresh_required_for_closure"]
                 if cpu_acceptance_refresh_closure_blocked
+                else []
+            ),
+            *(
+                [
+                    "hip_residual_engine_contract_not_closed",
+                    *[
+                        f"hip_residual_engine::{blocker}"
+                        for blocker in hip_residual_engine_contract[
+                            "hip_residual_engine_blockers"
+                        ]
+                    ],
+                ]
+                if hip_residual_engine_required
+                and not hip_residual_engine_contract_passed
                 else []
             ),
             *(["g1_fallback_zero_audit_not_closed"] if not fallback_zero_passed else []),

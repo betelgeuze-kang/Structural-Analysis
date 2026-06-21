@@ -22,6 +22,28 @@ sys.modules[SPEC.name] = run_g1_full_load_hip_newton_lane
 SPEC.loader.exec_module(run_g1_full_load_hip_newton_lane)
 
 
+def _hip_component(
+    *,
+    backend: str,
+    require_hip_krylov_solver: bool = False,
+    hip_krylov_solver_used: bool = False,
+    accepted_state_refresh_hip_used: bool = True,
+    accepted_state_refresh_cpu_used: bool = False,
+) -> dict[str, Any]:
+    return {
+        "enabled": True,
+        "attempted": True,
+        "promoted_to_final_state": True,
+        "batch_replay_backend": backend,
+        "require_hip_batch_replay": True,
+        "require_hip_krylov_solver": require_hip_krylov_solver,
+        "hip_krylov_solver_used": hip_krylov_solver_used,
+        "accepted_state_refresh_backend": backend,
+        "accepted_state_refresh_hip_used": accepted_state_refresh_hip_used,
+        "accepted_state_refresh_cpu_used": accepted_state_refresh_cpu_used,
+    }
+
+
 def _checkpoint(
     path: Path,
     *,
@@ -98,6 +120,10 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
         "external_hip_consistency_proof_gate_passed"
         in payload["child_safety_requirements"]
     )
+    assert (
+        "child_hip_required_accepted_residual_refresh_proven"
+        in payload["child_safety_requirements"]
+    )
     assert "material Newton breadth" in payload["claim_boundary"]
     assert "separate HIP-required residual/Jacobian" in payload["claim_boundary"]
 
@@ -127,6 +153,14 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
                     "source_commit_sha": lane_source_commit,
                     "reused_evidence": False,
                     "direct_residual_newton_ready": True,
+                    "matrix_free_global_krylov": _hip_component(
+                        backend="hip_full_residual_resident",
+                        require_hip_krylov_solver=True,
+                        hip_krylov_solver_used=True,
+                    ),
+                    "current_tangent_residual_row_correction": _hip_component(
+                        backend="hip_full_residual",
+                    ),
                     "residual_contract": {
                         "hip_residual_engine_contract_passed": True,
                         "consistent_residual_jacobian_newton_gate_passed": True,
@@ -406,38 +440,57 @@ def _write_acceptance_child(
     material_newton_breadth_passed: bool = True,
     consistent_residual_jacobian_newton_passed: bool = True,
     cpu_acceptance_refresh_closure_blocked: bool = False,
+    include_hip_components: bool = True,
+    global_refresh_backend: str = "hip_full_residual_resident",
+    row_refresh_backend: str = "hip_full_residual",
+    global_refresh_hip_used: bool = True,
+    row_refresh_hip_used: bool = True,
+    global_refresh_cpu_used: bool = False,
+    row_refresh_cpu_used: bool = False,
 ) -> None:
+    payload: dict[str, Any] = {
+        "schema_version": "mgt-direct-residual-newton-probe.v1",
+        "source_commit_sha": source_commit_sha,
+        "reused_evidence": reused_evidence,
+        "direct_residual_newton_ready": True,
+        "residual_contract": {
+            "hip_residual_engine_contract_passed": hip_engine_passed,
+            "consistent_residual_jacobian_newton_gate_passed": (
+                consistent_residual_jacobian_newton_passed
+            ),
+        },
+        "gate_assessment": {
+            "full_load_closure_passed": True,
+            "fallback_zero_passed": fallback_zero_passed,
+            "material_newton_breadth_passed": material_newton_breadth_passed,
+            "consistent_residual_jacobian_newton_passed": (
+                consistent_residual_jacobian_newton_passed
+            ),
+            "full_load_closure_gate": {
+                "observed_load_scale": observed_load_scale,
+                "required_load_scale": 1.0,
+            },
+            "cpu_acceptance_refresh_closure_blocked": (
+                cpu_acceptance_refresh_closure_blocked
+            ),
+        },
+        "blockers": [],
+    }
+    if include_hip_components:
+        payload["matrix_free_global_krylov"] = _hip_component(
+            backend=global_refresh_backend,
+            require_hip_krylov_solver=True,
+            hip_krylov_solver_used=True,
+            accepted_state_refresh_hip_used=global_refresh_hip_used,
+            accepted_state_refresh_cpu_used=global_refresh_cpu_used,
+        )
+        payload["current_tangent_residual_row_correction"] = _hip_component(
+            backend=row_refresh_backend,
+            accepted_state_refresh_hip_used=row_refresh_hip_used,
+            accepted_state_refresh_cpu_used=row_refresh_cpu_used,
+        )
     child.write_text(
-        json.dumps(
-            {
-                "schema_version": "mgt-direct-residual-newton-probe.v1",
-                "source_commit_sha": source_commit_sha,
-                "reused_evidence": reused_evidence,
-                "direct_residual_newton_ready": True,
-                "residual_contract": {
-                    "hip_residual_engine_contract_passed": hip_engine_passed,
-                    "consistent_residual_jacobian_newton_gate_passed": (
-                        consistent_residual_jacobian_newton_passed
-                    ),
-                },
-                "gate_assessment": {
-                    "full_load_closure_passed": True,
-                    "fallback_zero_passed": fallback_zero_passed,
-                    "material_newton_breadth_passed": material_newton_breadth_passed,
-                    "consistent_residual_jacobian_newton_passed": (
-                        consistent_residual_jacobian_newton_passed
-                    ),
-                    "full_load_closure_gate": {
-                        "observed_load_scale": observed_load_scale,
-                        "required_load_scale": 1.0,
-                    },
-                    "cpu_acceptance_refresh_closure_blocked": (
-                        cpu_acceptance_refresh_closure_blocked
-                    ),
-                },
-                "blockers": [],
-            }
-        ),
+        json.dumps(payload),
         encoding="utf-8",
     )
 
@@ -756,6 +809,98 @@ def test_child_cpu_acceptance_refresh_blocked_blocks_lane_promotion(
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
     assert "child_cpu_acceptance_refresh_closure_blocked" in payload["blockers"]
+
+
+def test_child_missing_hip_refresh_components_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+            include_hip_components=False,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "child_global_krylov_component_missing" in payload["blockers"]
+    assert "child_current_tangent_residual_row_component_missing" in payload["blockers"]
+
+
+def test_child_non_hip_residual_refresh_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+            global_refresh_backend="cpu_full_assembly",
+            global_refresh_hip_used=False,
+            row_refresh_backend="cpu_full_assembly",
+            row_refresh_hip_used=False,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "child_global_krylov_hip_residual_refresh_not_proven" in payload["blockers"]
+    assert (
+        "child_current_tangent_residual_row_hip_residual_refresh_not_proven"
+        in payload["blockers"]
+    )
 
 
 def test_child_fallback_zero_not_proven_blocks_lane_promotion(
