@@ -281,6 +281,120 @@ def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
     assert not child.exists()
 
 
+def test_blocked_hip_proof_skips_subprocess_invocation(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha="stale-proof-commit",
+    )
+
+    def fail_run(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError(
+            "subprocess.run must not be invoked while the HIP proof is blocked"
+        )
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fail_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["child_exit_code"] is None
+    assert "hip_consistency_proof_source_commit_sha_mismatch" in payload["blockers"]
+    assert payload["hip_consistency_proof"]["present"] is True
+    assert payload["hip_consistency_proof"]["source_commit_sha"] == "stale-proof-commit"
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is True
+    assert not child.exists()
+
+
+def test_blocked_hip_proof_dry_run_reports_blocked_not_ready_to_run(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["rocm_hip_runtime_unavailable"],
+    )
+
+    def fail_run(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError(
+            "subprocess.run must not be invoked while the HIP proof is blocked"
+        )
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fail_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["child_exit_code"] is None
+    assert payload["status"] != "ready_to_run"
+    assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
+    assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert payload["full_load_input_pass"] is True
+    assert payload["load_path_provenance_pass"] is True
+
+
+def test_blocked_hip_proof_runtime_blocker_blocks_before_dry_run_returns_ready(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=False,
+        blockers=["rocm_hip_runtime_unavailable"],
+        runtime_blockers=["dev_kfd_missing"],
+    )
+
+    def fail_run(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError(
+            "subprocess.run must not be invoked while HIP runtime blockers remain"
+        )
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fail_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=True,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert "hip_consistency_proof_runtime::dev_kfd_missing" in payload["blockers"]
+    assert payload["hip_consistency_proof"]["runtime_blockers"] == ["dev_kfd_missing"]
+
+
 def _write_acceptance_child(
     child: Path,
     *,

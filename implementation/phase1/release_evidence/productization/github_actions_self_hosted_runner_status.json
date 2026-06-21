@@ -1,16 +1,13 @@
 {
-  "blockers": [
-    "github_actions_self_hosted_runner_query_failed",
-    "self_hosted_runner_matching_labels_missing"
-  ],
+  "blockers": [],
   "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
-  "contract_pass": false,
+  "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-21T08:47:21.308742+00:00",
-  "matching_runner_count": 0,
-  "online_matching_runner_count": 0,
-  "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
-  "ready_runner_count": 0,
+  "generated_at": "2026-06-21T08:57:27.432540+00:00",
+  "matching_runner_count": 1,
+  "online_matching_runner_count": 1,
+  "query_error": "",
+  "ready_runner_count": 1,
   "repo": "betelgeuze-kang/Structural-Analysis",
   "required_labels": [
     "self-hosted",
@@ -18,9 +15,27 @@
     "x64"
   ],
   "reused_evidence": false,
-  "rows": [],
-  "runner_count": 0,
+  "rows": [
+    {
+      "busy": false,
+      "id": 21,
+      "idle": true,
+      "labels": [
+        "self-hosted",
+        "Linux",
+        "X64"
+      ],
+      "matches_required_labels": true,
+      "missing_required_labels": [],
+      "name": "betelgeuze-X570S-AORUS-ELITE",
+      "online": true,
+      "os": "Linux",
+      "ready": true,
+      "status": "online"
+    }
+  ],
+  "runner_count": 1,
   "schema_version": "github-actions-self-hosted-runner-status.v1",
-  "source_commit_sha": "ae913ef62a473a18aec5a7c51814a72e7cecebf0",
-  "status": "blocked"
+  "source_commit_sha": "029f50d72a2202150a366fdf71b96faca01b9aba",
+  "status": "ready"
 }
