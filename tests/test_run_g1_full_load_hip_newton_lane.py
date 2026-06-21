@@ -25,6 +25,8 @@ SPEC.loader.exec_module(run_g1_full_load_hip_newton_lane)
 def _hip_component(
     *,
     backend: str,
+    attempted: bool = True,
+    promoted_to_final_state: bool = True,
     require_hip_krylov_solver: bool = False,
     hip_krylov_solver_used: bool = False,
     accepted_state_refresh_hip_used: bool = True,
@@ -32,8 +34,8 @@ def _hip_component(
 ) -> dict[str, Any]:
     return {
         "enabled": True,
-        "attempted": True,
-        "promoted_to_final_state": True,
+        "attempted": attempted,
+        "promoted_to_final_state": promoted_to_final_state,
         "batch_replay_backend": backend,
         "require_hip_batch_replay": True,
         "require_hip_krylov_solver": require_hip_krylov_solver,
@@ -106,7 +108,7 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     )
 
     command = payload["command"]
-    assert exit_code == 0
+    assert exit_code == 0, payload["blockers"]
     assert payload["status"] == "ready_to_run"
     assert payload["contract_pass"] is False
     assert payload["full_load_input_pass"] is True
@@ -196,7 +198,7 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
         hip_consistency_proof_json=proof,
     )
 
-    assert exit_code == 0
+    assert exit_code == 0, payload["blockers"]
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["child_exit_code"] == 0
@@ -447,6 +449,8 @@ def _write_acceptance_child(
     row_refresh_hip_used: bool = True,
     global_refresh_cpu_used: bool = False,
     row_refresh_cpu_used: bool = False,
+    global_promoted: bool = True,
+    row_promoted: bool = True,
 ) -> None:
     payload: dict[str, Any] = {
         "schema_version": "mgt-direct-residual-newton-probe.v1",
@@ -479,6 +483,7 @@ def _write_acceptance_child(
     if include_hip_components:
         payload["matrix_free_global_krylov"] = _hip_component(
             backend=global_refresh_backend,
+            promoted_to_final_state=global_promoted,
             require_hip_krylov_solver=True,
             hip_krylov_solver_used=True,
             accepted_state_refresh_hip_used=global_refresh_hip_used,
@@ -486,6 +491,7 @@ def _write_acceptance_child(
         )
         payload["current_tangent_residual_row_correction"] = _hip_component(
             backend=row_refresh_backend,
+            promoted_to_final_state=row_promoted,
             accepted_state_refresh_hip_used=row_refresh_hip_used,
             accepted_state_refresh_cpu_used=row_refresh_cpu_used,
         )
@@ -850,8 +856,67 @@ def test_child_missing_hip_refresh_components_blocks_lane_promotion(
     assert exit_code == 1
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
-    assert "child_global_krylov_component_missing" in payload["blockers"]
-    assert "child_current_tangent_residual_row_component_missing" in payload["blockers"]
+    assert (
+        "child_global_krylov_component_missing" in payload["blockers"]
+    )
+    assert (
+        "child_current_tangent_residual_row_component_missing"
+        in payload["blockers"]
+    )
+
+
+def test_child_unpromoted_secondary_hip_component_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    monkeypatch.setattr(
+        run_g1_full_load_hip_newton_lane, "_git_head", lambda: "lane-head-commit"
+    )
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        assert check is False
+        _write_acceptance_child(
+            child,
+            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+            reused_evidence=False,
+            hip_engine_passed=True,
+            observed_load_scale=1.0,
+            row_promoted=False,
+            row_refresh_backend="",
+            row_refresh_hip_used=False,
+        )
+        return Result()
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "child_current_tangent_residual_row_not_promoted_to_final_state"
+        in payload["blockers"]
+    )
+    assert (
+        "child_current_tangent_residual_row_hip_residual_refresh_not_proven"
+        in payload["blockers"]
+    )
 
 
 def test_child_non_hip_residual_refresh_blocks_lane_promotion(
