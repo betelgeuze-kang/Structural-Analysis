@@ -283,11 +283,14 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T11:38:05.840980+00:00",
+  "generated_at": "2026-06-21T11:43:43.410270+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
+    "cpu_diagnostic_assembler_used": false,
+    "execution_mode": "hip_required_runtime_unavailable_no_cpu_fallback",
     "path": "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json",
     "present": true,
+    "production_hip_residual_jacobian_path": false,
     "receipt_blockers": [
       "rocm_hip_runtime_unavailable",
       "hip_runtime::dev_kfd_missing",
@@ -300,7 +303,7 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "19c2e75333135f116f7bac4a1b320327524604c8",
+    "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
     "status": "partial"
   },
   "load_path_provenance": {
@@ -313,6 +316,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "19c2e75333135f116f7bac4a1b320327524604c8",
+  "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
   "status": "blocked"
 }
