@@ -70,11 +70,17 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
 
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         checkpoint_npz=checkpoint,
         output_json=tmp_path / "child.json",
         dry_run=True,
+        hip_consistency_proof_json=proof,
     )
 
     command = payload["command"]
@@ -174,15 +180,7 @@ def test_missing_hip_consistency_proof_blocks_lane_promotion(
         returncode = 0
 
     def fake_run(command: list[str], *, check: bool) -> Result:
-        assert check is False
-        _write_acceptance_child(
-            child,
-            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
-            reused_evidence=False,
-            hip_engine_passed=True,
-            observed_load_scale=1.0,
-        )
-        return Result()
+        raise AssertionError("child probe must not run without HIP proof")
 
     monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
 
@@ -198,6 +196,8 @@ def test_missing_hip_consistency_proof_blocks_lane_promotion(
     assert payload["contract_pass"] is False
     assert "hip_consistency_proof_receipt_missing_or_unreadable" in payload["blockers"]
     assert payload["hip_consistency_proof"]["present"] is False
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
 
 
 def test_partial_hip_consistency_proof_blocks_lane_promotion(
@@ -212,15 +212,7 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
         returncode = 0
 
     def fake_run(command: list[str], *, check: bool) -> Result:
-        assert check is False
-        _write_acceptance_child(
-            child,
-            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
-            reused_evidence=False,
-            hip_engine_passed=True,
-            observed_load_scale=1.0,
-        )
-        return Result()
+        raise AssertionError("child probe must not run while HIP proof is blocked")
 
     monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
     _write_hip_consistency_proof(
@@ -242,6 +234,8 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert payload["contract_pass"] is False
     assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
 
 
 def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
@@ -256,15 +250,7 @@ def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
         returncode = 0
 
     def fake_run(command: list[str], *, check: bool) -> Result:
-        assert check is False
-        _write_acceptance_child(
-            child,
-            source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
-            reused_evidence=False,
-            hip_engine_passed=True,
-            observed_load_scale=1.0,
-        )
-        return Result()
+        raise AssertionError("child probe must not run with HIP runtime blockers")
 
     monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
     _write_hip_consistency_proof(
@@ -291,6 +277,8 @@ def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
     assert "hip_consistency_proof_runtime::dev_dri_missing" in payload["blockers"]
     assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
 
 
 def _write_acceptance_child(
@@ -371,6 +359,11 @@ def test_child_reused_evidence_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -392,6 +385,7 @@ def test_child_reused_evidence_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -406,6 +400,11 @@ def test_child_source_commit_mismatch_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha="lane-head-commit",
+    )
 
     class Result:
         returncode = 0
@@ -430,6 +429,7 @@ def test_child_source_commit_mismatch_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -444,6 +444,11 @@ def test_child_missing_source_commit_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -465,6 +470,7 @@ def test_child_missing_source_commit_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -479,6 +485,11 @@ def test_child_observed_load_scale_below_required_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -500,6 +511,7 @@ def test_child_observed_load_scale_below_required_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -514,6 +526,11 @@ def test_child_invalid_observed_load_scale_blocks_without_crashing(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -535,6 +552,7 @@ def test_child_invalid_observed_load_scale_blocks_without_crashing(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -549,6 +567,11 @@ def test_child_hip_residual_engine_contract_not_proven_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -570,6 +593,7 @@ def test_child_hip_residual_engine_contract_not_proven_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -584,6 +608,11 @@ def test_child_cpu_acceptance_refresh_blocked_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -606,6 +635,7 @@ def test_child_cpu_acceptance_refresh_blocked_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -620,6 +650,11 @@ def test_child_fallback_zero_not_proven_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -642,6 +677,7 @@ def test_child_fallback_zero_not_proven_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -656,6 +692,11 @@ def test_child_material_newton_breadth_not_proven_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -678,6 +719,7 @@ def test_child_material_newton_breadth_not_proven_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -692,6 +734,11 @@ def test_child_consistent_residual_jacobian_not_proven_blocks_lane_promotion(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -714,6 +761,7 @@ def test_child_consistent_residual_jacobian_not_proven_blocks_lane_promotion(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -731,6 +779,11 @@ def test_child_diagnostic_jacobian_inclusion_does_not_prove_consistency(
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
     child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     class Result:
         returncode = 0
@@ -761,6 +814,7 @@ def test_child_diagnostic_jacobian_inclusion_does_not_prove_consistency(
         checkpoint_npz=checkpoint,
         output_json=child,
         dry_run=False,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -1177,11 +1231,17 @@ def test_load_path_provenance_clean_history_passes_claimed_full_load(
         frontier_load_scale=1.0,
         failed_bracket_load_scales=[],
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         checkpoint_npz=checkpoint,
         output_json=tmp_path / "child.json",
         dry_run=True,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 0
@@ -1195,11 +1255,17 @@ def test_load_path_provenance_absent_does_not_block_claimed_full_load(
     tmp_path: Path,
 ) -> None:
     checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         checkpoint_npz=checkpoint,
         output_json=tmp_path / "child.json",
         dry_run=True,
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 0
@@ -1271,11 +1337,17 @@ def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
         candidates=[sub, medium, full],
         prefix_keys=("compact_checkpoint",),
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         output_json=tmp_path / "child.json",
         dry_run=True,
         evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 0
@@ -1338,11 +1410,17 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
         candidates=[low, medium, higher_sub],
         prefix_keys=("compact_checkpoint",),
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         output_json=tmp_path / "child.json",
         dry_run=False,
         evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -1371,12 +1449,18 @@ def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
         candidates=[full],
         prefix_keys=("compact_checkpoint",),
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         checkpoint_npz=explicit,
         output_json=tmp_path / "child.json",
         dry_run=False,
         evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -1404,11 +1488,17 @@ def test_auto_select_ignores_generic_npz_path_records(tmp_path: Path) -> None:
         ),
         encoding="utf-8",
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         output_json=tmp_path / "child.json",
         dry_run=False,
         evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1
@@ -1426,11 +1516,17 @@ def test_auto_select_with_no_loadable_candidates_blocks(tmp_path: Path) -> None:
         candidates=[],
         prefix_keys=("compact_checkpoint",),
     )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
 
     payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
         output_json=tmp_path / "child.json",
         dry_run=True,
         evidence_sources=(source,),
+        hip_consistency_proof_json=proof,
     )
 
     assert exit_code == 1

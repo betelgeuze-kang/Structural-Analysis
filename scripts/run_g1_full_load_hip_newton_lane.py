@@ -676,6 +676,14 @@ def build_lane_report(
             "blockers": [*load_path_provenance_blockers, *hip_consistency_blockers],
             "child_exit_code": None,
         }, 1
+    if hip_consistency_blockers:
+        return {
+            **base_payload,
+            "status": "blocked",
+            "contract_pass": False,
+            "blockers": list(hip_consistency_blockers),
+            "child_exit_code": None,
+        }, 1
     if dry_run:
         return {
             **base_payload,
