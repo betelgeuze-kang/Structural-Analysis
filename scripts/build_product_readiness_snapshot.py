@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
+import sys
 from typing import Any
 
 try:
@@ -145,6 +146,19 @@ def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str
     except Exception:
         return []
     return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def _git_status_short(repo_root: Path) -> list[str]:
+    try:
+        output = subprocess.check_output(
+            ["git", "status", "--short", "--untracked-files=normal"],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.rstrip() for line in output.splitlines() if line.strip()]
 
 
 def _receipt_commit_allowed_paths(paths: SnapshotInputPaths) -> set[str]:
@@ -405,6 +419,34 @@ def _external_benchmark_receipt_counts(
     }
 
 
+def _g1_child_hip_residual_refresh_summary(
+    lane_payload: dict[str, Any],
+) -> dict[str, Any]:
+    evidence = _as_dict(lane_payload.get("child_hip_residual_refresh_evidence"))
+    components = _as_dict(evidence.get("components"))
+    required_components = (
+        "matrix_free_global_krylov",
+        "current_tangent_residual_row_correction",
+    )
+    component_ready = {
+        key: bool(_as_dict(components.get(key)).get("ready"))
+        for key in required_components
+    }
+    blockers = [str(item) for item in _as_list(evidence.get("blockers"))]
+    if not evidence:
+        blockers.append("child_hip_residual_refresh_evidence_missing")
+    for key, ready in component_ready.items():
+        if not ready:
+            blockers.append(f"{key}_child_hip_residual_refresh_not_ready")
+    blockers = sorted(dict.fromkeys(blockers))
+    ready = bool(evidence.get("ready") is True and not blockers)
+    return {
+        "ready": ready,
+        "blockers": blockers,
+        "components": components,
+    }
+
+
 def _pyproject_project_metadata(
     repo_root: Path,
     path: Path,
@@ -485,6 +527,14 @@ def build_snapshot(
     blockers: list[str] = []
     repo_root = repo_root.resolve()
     current_commit = source_commit_sha if source_commit_sha is not None else _git_head(repo_root)
+    worktree_status_rows = (
+        []
+        if source_commit_sha is not None
+        else _git_status_short(repo_root)
+    )
+    worktree_dirty = bool(worktree_status_rows)
+    if worktree_dirty:
+        blockers.append("stale_or_inconsistent:worktree_dirty")
 
     readme = _read_text(repo_root, paths.readme, blockers)
     current_state = _read_text(repo_root, paths.current_state, blockers)
@@ -730,17 +780,26 @@ def build_snapshot(
     g1_lane_load_scale_pass = bool(
         g1_lane_observed_load >= g1_lane_required_load - g1_lane_load_tolerance
     )
+    g1_lane_child_hip_refresh = _g1_child_hip_residual_refresh_summary(
+        g1_full_load_lane
+    )
+    g1_lane_child_hip_refresh_ready = bool(g1_lane_child_hip_refresh["ready"])
     g1_full_load_lane_ready = bool(
         _contract_pass(g1_full_load_lane)
         and str(g1_full_load_lane.get("status", "")).lower() == "ready"
         and g1_lane_reused_ok
         and g1_lane_full_load_input_pass
         and g1_lane_load_scale_pass
+        and g1_lane_child_hip_refresh_ready
         and not _as_list(g1_full_load_lane.get("blockers"))
     )
     if not g1_full_load_lane_ready:
         lane_blockers = _as_list(g1_full_load_lane.get("blockers"))
         blockers.extend(f"g1_full_load_lane::{item}" for item in lane_blockers)
+        blockers.extend(
+            f"g1_full_load_lane::{item}"
+            for item in _as_list(g1_lane_child_hip_refresh.get("blockers"))
+        )
         if not g1_lane_reused_ok:
             blockers.append("g1_full_load_lane::reused_evidence_not_false")
         if not g1_lane_full_load_input_pass:
@@ -915,6 +974,12 @@ def build_snapshot(
                 "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
                 "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
                 "full_load_hip_newton_lane_required_load_scale": g1_lane_required_load,
+                "full_load_hip_newton_child_hip_residual_refresh_ready": (
+                    g1_lane_child_hip_refresh_ready
+                ),
+                "full_load_hip_newton_child_hip_residual_refresh": (
+                    g1_lane_child_hip_refresh
+                ),
             },
             "product_identity": identity,
             "github_actions_runner_policy": {
@@ -938,6 +1003,10 @@ def build_snapshot(
             "open_blocker_counts": blocker_count_sources,
             "metadata_rows": metadata_rows,
             "github_actions_runner_policy": runner_policy,
+            "worktree": {
+                "dirty": worktree_dirty,
+                "status_rows": worktree_status_rows,
+            },
         },
         "artifacts": {
             field: str(getattr(paths, field))
@@ -946,18 +1015,125 @@ def build_snapshot(
     }
 
 
+def _strip_volatile_for_compare(payload: Any) -> Any:
+    """Return ``payload`` with volatile ``generated_at`` fields removed recursively."""
+    if isinstance(payload, dict):
+        return {
+            key: _strip_volatile_for_compare(value)
+            for key, value in payload.items()
+            if key != "generated_at"
+        }
+    if isinstance(payload, list):
+        return [_strip_volatile_for_compare(item) for item in payload]
+    return payload
+
+
+def _differing_top_level_keys(
+    existing: dict[str, Any],
+    generated: dict[str, Any],
+    prefix: str = "",
+) -> list[str]:
+    """Return a list of dotted paths whose values differ between two normalized snapshots."""
+    if existing == generated:
+        return []
+    if not isinstance(existing, dict) or not isinstance(generated, dict):
+        return [prefix] if prefix else ["<root>"]
+    differences: list[str] = []
+    for key in sorted(set(existing) | set(generated)):
+        sub_prefix = f"{prefix}.{key}" if prefix else key
+        if existing.get(key) != generated.get(key):
+            if isinstance(existing.get(key), dict) and isinstance(generated.get(key), dict):
+                differences.extend(
+                    _differing_top_level_keys(existing[key], generated[key], sub_prefix)
+                )
+            else:
+                differences.append(sub_prefix)
+    return differences
+
+
+def check_snapshot_consistency(
+    *,
+    repo_root: Path,
+    out_path: Path,
+    paths: SnapshotInputPaths = SnapshotInputPaths(),
+    source_commit_sha: str | None = None,
+) -> tuple[bool, str, dict[str, Any] | None]:
+    """Non-mutating check that the stored snapshot matches a freshly generated one.
+
+    The volatile ``generated_at`` field is ignored. All other semantic fields
+    (commit, status, evidence freshness, blockers, component flags) must match.
+
+    Returns ``(ok, message, generated_payload)``. ``generated_payload`` is the
+    freshly generated snapshot for diagnostics when ``ok`` is ``False``.
+    """
+    if not out_path.exists():
+        return False, f"snapshot_missing:{out_path.as_posix()}", None
+    try:
+        existing = json.loads(out_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return False, f"snapshot_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}", None
+    if not isinstance(existing, dict):
+        return False, f"snapshot_invalid_object:{out_path.as_posix()}", None
+
+    generated = build_snapshot(
+        repo_root=repo_root,
+        paths=paths,
+        source_commit_sha=source_commit_sha,
+    )
+
+    existing_normalized = _strip_volatile_for_compare(existing)
+    generated_normalized = _strip_volatile_for_compare(generated)
+
+    if existing_normalized == generated_normalized:
+        return True, "snapshot_consistent", generated
+
+    differences = _differing_top_level_keys(existing_normalized, generated_normalized)
+    return (
+        False,
+        "snapshot_semantic_mismatch:" + ",".join(differences),
+        generated,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Non-mutating: compare the existing --out file with a freshly generated "
+            "snapshot (ignoring generated_at) and exit non-zero if the stored "
+            "snapshot is missing, unreadable, or semantically different. When "
+            "combined with --fail-blocked, the matched snapshot must also be "
+            "release-ready."
+        ),
+    )
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    payload = build_snapshot()
     out = _resolve(ROOT, args.out)
+    if args.check:
+        ok, message, generated = check_snapshot_consistency(
+            repo_root=ROOT,
+            out_path=out,
+        )
+        if not ok:
+            print(f"Product readiness snapshot check FAILED: {message}", file=sys.stderr)
+            return 2
+        if args.fail_blocked and generated is not None and not generated["release_ready"]:
+            print(
+                "Product readiness snapshot check FAILED: snapshot_consistent_but_not_release_ready",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"Product readiness snapshot check: {message}")
+        return 0
+    payload = build_snapshot()
     out.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     out.write_text(text, encoding="utf-8")

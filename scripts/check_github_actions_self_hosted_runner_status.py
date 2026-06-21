@@ -9,6 +9,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
 
 
@@ -172,6 +173,83 @@ def _parse_labels(value: str) -> tuple[str, ...]:
     return labels or DEFAULT_REQUIRED_LABELS
 
 
+def _strip_volatile_for_compare(payload: Any) -> Any:
+    if isinstance(payload, dict):
+        return {
+            key: _strip_volatile_for_compare(value)
+            for key, value in payload.items()
+            if key != "generated_at"
+        }
+    if isinstance(payload, list):
+        return [_strip_volatile_for_compare(item) for item in payload]
+    return payload
+
+
+def _differing_paths(existing: Any, generated: Any, prefix: str = "") -> list[str]:
+    if existing == generated:
+        return []
+    if isinstance(existing, dict) and isinstance(generated, dict):
+        paths: list[str] = []
+        for key in sorted(set(existing) | set(generated)):
+            sub_prefix = f"{prefix}.{key}" if prefix else str(key)
+            paths.extend(
+                _differing_paths(
+                    existing.get(key),
+                    generated.get(key),
+                    sub_prefix,
+                )
+            )
+        return paths
+    if isinstance(existing, list) and isinstance(generated, list):
+        if len(existing) != len(generated):
+            return [f"{prefix}.length" if prefix else "length"]
+        paths: list[str] = []
+        for index, (existing_item, generated_item) in enumerate(zip(existing, generated)):
+            sub_prefix = f"{prefix}[{index}]" if prefix else f"[{index}]"
+            paths.extend(_differing_paths(existing_item, generated_item, sub_prefix))
+        return paths
+    return [prefix or "<root>"]
+
+
+def check_status_consistency(
+    *,
+    out_path: Path,
+    repo: str = DEFAULT_REPO,
+    required_labels: tuple[str, ...] = DEFAULT_REQUIRED_LABELS,
+    runner_rows: list[dict[str, Any]] | None = None,
+    query_error: str = "",
+) -> tuple[bool, str, dict[str, Any] | None]:
+    if not out_path.exists():
+        return False, f"runner_status_missing:{out_path.as_posix()}", None
+    try:
+        existing = json.loads(out_path.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return (
+            False,
+            f"runner_status_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}",
+            None,
+        )
+    if not isinstance(existing, dict):
+        return False, f"runner_status_invalid_object:{out_path.as_posix()}", None
+
+    generated = build_status(
+        repo=repo,
+        required_labels=required_labels,
+        runner_rows=runner_rows,
+        query_error=query_error,
+    )
+    existing_normalized = _strip_volatile_for_compare(existing)
+    generated_normalized = _strip_volatile_for_compare(generated)
+    if existing_normalized == generated_normalized:
+        return True, "runner_status_consistent", generated
+    differences = _differing_paths(existing_normalized, generated_normalized)
+    return (
+        False,
+        "runner_status_semantic_mismatch:" + ",".join(differences),
+        generated,
+    )
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=DEFAULT_REPO)
@@ -180,6 +258,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help=(
+            "Non-mutating: compare the existing --out status with a freshly computed "
+            "status, ignoring generated_at only. Exit non-zero if the stored status "
+            "is missing, unreadable, semantically stale, or blocked with --fail-blocked."
+        ),
+    )
     return parser
 
 
@@ -190,6 +277,28 @@ def main(argv: list[str] | None = None) -> int:
         runner_rows, query_error = _load_runner_rows(args.input_json)
     else:
         runner_rows, query_error = _query_runner_rows(args.repo)
+    if args.check:
+        ok, message, generated = check_status_consistency(
+            out_path=args.out,
+            repo=args.repo,
+            required_labels=required_labels,
+            runner_rows=runner_rows,
+            query_error=query_error,
+        )
+        if not ok:
+            print(f"GitHub Actions self-hosted runner status check FAILED: {message}", file=sys.stderr)
+            return 2
+        if args.fail_blocked and generated is not None and not generated["contract_pass"]:
+            print(
+                "GitHub Actions self-hosted runner status check FAILED: runner_status_consistent_but_blocked",
+                file=sys.stderr,
+            )
+            return 1
+        if args.json and generated is not None:
+            print(json.dumps(generated, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(f"GitHub Actions self-hosted runner status check: {message}")
+        return 0
     payload = build_status(
         repo=args.repo,
         required_labels=required_labels,

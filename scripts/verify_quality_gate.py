@@ -88,12 +88,15 @@ def _command_groups(mode: str) -> list[list[str]]:
                 "scripts/check_github_actions_self_hosted_runner_status.py",
                 "--out",
                 "implementation/phase1/release_evidence/productization/github_actions_self_hosted_runner_status.json",
+                "--check",
+                "--fail-blocked",
             ],
             [
                 _python(),
                 "scripts/build_product_readiness_snapshot.py",
                 "--out",
                 "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+                "--check",
                 "--fail-blocked",
             ],
             [

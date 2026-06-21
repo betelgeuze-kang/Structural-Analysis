@@ -96,3 +96,28 @@ def test_docs_pm_release_area_and_handoff_counts_match_register() -> None:
         text = path.read_text(encoding="utf-8")
         for fragment in expected_fragments:
             assert fragment in text, (path, fragment)
+
+
+def test_docs_describe_release_mode_as_non_mutating_checks() -> None:
+    required_fragments = [
+        "check_github_actions_self_hosted_runner_status.py",
+        "--check --fail-blocked",
+        "build_product_readiness_snapshot.py",
+        "without rewriting tracked evidence",
+    ]
+    forbidden_fragments = [
+        "Release mode refreshes that self-hosted runner status",
+        "refreshes self-hosted runner status, rebuilds the canonical product readiness snapshot",
+        "self-hosted runner 상태를 다시 수집",
+    ]
+
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in required_fragments[:3]:
+            assert fragment in text, (path, fragment)
+        assert (
+            required_fragments[3] in text
+            or "재작성하지 않고 `--check`로 검증" in text
+        ), path
+        for fragment in forbidden_fragments:
+            assert fragment not in text, (path, fragment)

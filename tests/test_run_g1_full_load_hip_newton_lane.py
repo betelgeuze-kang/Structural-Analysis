@@ -202,6 +202,13 @@ def test_child_probe_result_must_report_full_load_and_fallback_zero(
     assert payload["status"] == "ready"
     assert payload["contract_pass"] is True
     assert payload["child_exit_code"] == 0
+    assert payload["child_hip_residual_refresh_evidence"]["ready"] is True
+    child_components = payload["child_hip_residual_refresh_evidence"]["components"]
+    assert child_components["matrix_free_global_krylov"]["ready"] is True
+    assert (
+        child_components["current_tangent_residual_row_correction"]["ready"]
+        is True
+    )
     assert payload["blockers"] == []
 
 
@@ -917,6 +924,18 @@ def test_child_unpromoted_secondary_hip_component_blocks_lane_promotion(
         "child_current_tangent_residual_row_hip_residual_refresh_not_proven"
         in payload["blockers"]
     )
+    evidence = payload["child_hip_residual_refresh_evidence"]
+    assert evidence["ready"] is False
+    assert (
+        "child_current_tangent_residual_row_not_promoted_to_final_state"
+        in evidence["blockers"]
+    )
+    assert (
+        evidence["components"]["current_tangent_residual_row_correction"][
+            "ready"
+        ]
+        is False
+    )
 
 
 def test_child_non_hip_residual_refresh_blocks_lane_promotion(
@@ -1487,6 +1506,57 @@ def test_cli_writes_blocked_receipt_and_fails_when_requested(tmp_path: Path) -> 
     assert exit_code == 1
     assert payload["status"] == "blocked"
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    evidence = payload["child_hip_residual_refresh_evidence"]
+    assert evidence["ready"] is False
+    assert "child_global_krylov_component_missing" in evidence["blockers"]
+    assert (
+        "child_current_tangent_residual_row_component_missing"
+        in evidence["blockers"]
+    )
+    assert evidence["components"]["matrix_free_global_krylov"]["present"] is False
+    assert (
+        evidence["components"]["current_tangent_residual_row_correction"][
+            "present"
+        ]
+        is False
+    )
+
+
+def test_cli_dry_run_receipt_keeps_child_hip_evidence_contract(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    proof = tmp_path / "hip-proof.json"
+    out = tmp_path / "lane.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    exit_code = run_g1_full_load_hip_newton_lane.main(
+        [
+            "--checkpoint-npz",
+            str(checkpoint),
+            "--hip-consistency-proof-json",
+            str(proof),
+            "--out",
+            str(out),
+            "--dry-run",
+        ]
+    )
+
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert payload["status"] == "ready_to_run"
+    assert payload["contract_pass"] is False
+    evidence = payload["child_hip_residual_refresh_evidence"]
+    assert evidence["schema_version"] == "g1-child-hip-residual-refresh-evidence.v1"
+    assert evidence["ready"] is False
+    assert "child_global_krylov_component_missing" in evidence["blockers"]
+    assert (
+        "child_current_tangent_residual_row_component_missing"
+        in evidence["blockers"]
+    )
 
 
 def test_load_path_provenance_frontier_below_full_load_blocks_claimed_full_load(

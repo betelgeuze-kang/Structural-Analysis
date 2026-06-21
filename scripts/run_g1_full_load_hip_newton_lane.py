@@ -34,6 +34,13 @@ HIP_RESIDUAL_REPLAY_BACKENDS = {
     "hip_full_residual_resident",
     "rust_hip_full_residual_ffi",
 }
+HIP_CHILD_RESIDUAL_COMPONENTS: tuple[tuple[str, str], ...] = (
+    ("matrix_free_global_krylov", "child_global_krylov"),
+    (
+        "current_tangent_residual_row_correction",
+        "child_current_tangent_residual_row",
+    ),
+)
 CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
     PRODUCTIZATION / "g1_checkpoint_retention_manifest.json",
     PRODUCTIZATION / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
@@ -640,6 +647,9 @@ def build_lane_report(
         "dry_run": bool(dry_run),
         "command": command,
         "hip_consistency_proof": hip_consistency_proof,
+        "child_hip_residual_refresh_evidence": (
+            _child_hip_residual_refresh_evidence({})
+        ),
         "child_safety_requirements": [
             "child_reused_evidence_false",
             "child_source_commit_matches_lane",
@@ -710,6 +720,9 @@ def build_lane_report(
             child_payload = {}
     child_gate = child_payload.get("gate_assessment") if isinstance(child_payload, dict) else {}
     child_gate = child_gate if isinstance(child_gate, dict) else {}
+    child_hip_residual_refresh_evidence = _child_hip_residual_refresh_evidence(
+        child_payload
+    )
     safety_blockers = _child_safety_blockers(
         child_payload=child_payload,
         child_gate=child_gate,
@@ -737,6 +750,7 @@ def build_lane_report(
         ],
         "child_exit_code": int(result.returncode),
         "child_output_json": str(output_json),
+        "child_hip_residual_refresh_evidence": child_hip_residual_refresh_evidence,
     }, 0 if child_ready else 1
 
 
@@ -800,14 +814,7 @@ def _child_safety_blockers(
 
 def _child_hip_residual_refresh_blockers(child_payload: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
-    components = (
-        ("matrix_free_global_krylov", "child_global_krylov"),
-        (
-            "current_tangent_residual_row_correction",
-            "child_current_tangent_residual_row",
-        ),
-    )
-    for component_key, blocker_prefix in components:
+    for component_key, blocker_prefix in HIP_CHILD_RESIDUAL_COMPONENTS:
         component = child_payload.get(component_key)
         if not isinstance(component, dict):
             blockers.append(f"{blocker_prefix}_component_missing")
@@ -828,6 +835,56 @@ def _child_hip_residual_refresh_blockers(child_payload: dict[str, Any]) -> list[
         if component.get("accepted_state_refresh_cpu_used") is True:
             blockers.append(f"{blocker_prefix}_cpu_residual_refresh_used")
     return blockers
+
+
+def _child_hip_residual_refresh_evidence(
+    child_payload: dict[str, Any],
+) -> dict[str, Any]:
+    components: dict[str, Any] = {}
+    for component_key, _blocker_prefix in HIP_CHILD_RESIDUAL_COMPONENTS:
+        component = child_payload.get(component_key)
+        if not isinstance(component, dict):
+            components[component_key] = {
+                "present": False,
+                "ready": False,
+                "hip_required": False,
+                "promoted_to_final_state": False,
+                "accepted_state_refresh_backend": "",
+                "accepted_state_refresh_hip_used": False,
+                "accepted_state_refresh_cpu_used": False,
+            }
+            continue
+        backend = str(component.get("accepted_state_refresh_backend", "") or "")
+        hip_required = bool(
+            component.get("require_hip_batch_replay")
+            or component.get("require_hip_krylov_solver")
+        )
+        promoted = component.get("promoted_to_final_state") is True
+        hip_refresh_used = component.get("accepted_state_refresh_hip_used") is True
+        cpu_refresh_used = component.get("accepted_state_refresh_cpu_used") is True
+        ready = bool(
+            hip_required
+            and promoted
+            and backend in HIP_RESIDUAL_REPLAY_BACKENDS
+            and hip_refresh_used
+            and not cpu_refresh_used
+        )
+        components[component_key] = {
+            "present": True,
+            "ready": ready,
+            "hip_required": hip_required,
+            "promoted_to_final_state": promoted,
+            "accepted_state_refresh_backend": backend,
+            "accepted_state_refresh_hip_used": hip_refresh_used,
+            "accepted_state_refresh_cpu_used": cpu_refresh_used,
+        }
+    blockers = _child_hip_residual_refresh_blockers(child_payload)
+    return {
+        "schema_version": "g1-child-hip-residual-refresh-evidence.v1",
+        "ready": not blockers,
+        "blockers": blockers,
+        "components": components,
+    }
 
 
 def _child_gate_audit_consistency_blockers(child_gate: dict[str, Any]) -> list[str]:

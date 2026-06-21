@@ -31,6 +31,32 @@ def _write_text(path: Path, text: str) -> Path:
     return path
 
 
+def _g1_child_hip_refresh_evidence(*, ready: bool = True) -> dict:
+    component = {
+        "present": True,
+        "ready": ready,
+        "hip_required": True,
+        "promoted_to_final_state": ready,
+        "accepted_state_refresh_backend": "hip_full_residual",
+        "accepted_state_refresh_hip_used": ready,
+        "accepted_state_refresh_cpu_used": False,
+    }
+    return {
+        "schema_version": "g1-child-hip-residual-refresh-evidence.v1",
+        "ready": ready,
+        "blockers": [] if ready else [
+            "child_current_tangent_residual_row_not_promoted_to_final_state"
+        ],
+        "components": {
+            "matrix_free_global_krylov": {
+                **component,
+                "accepted_state_refresh_backend": "hip_full_residual_resident",
+            },
+            "current_tangent_residual_row_correction": component,
+        },
+    }
+
+
 def _paths(tmp_path: Path) -> SnapshotInputPaths:
     return SnapshotInputPaths(
         readme=Path("README.md"),
@@ -109,6 +135,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "status": "ready",
         "checkpoint": {"load_scale": 1.0},
         "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
         "blockers": [],
     })
     _write_json(tmp_path / "ux_new_user_observation_report.json", {
@@ -678,6 +705,38 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
     assert metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"] == [
         "solver_core.py",
     ]
+
+
+def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_only(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(tmp_path / "solver_core.py", "print('uncommitted solver change')\n")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["status"] == "stale_or_inconsistent"
+    assert payload["evidence_fresh"] is False
+    assert "stale_or_inconsistent:worktree_dirty" in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is True
+    assert payload["state_consistency"]["worktree"]["status_rows"] == [
+        "?? solver_core.py",
+    ]
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
 
 
 def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path) -> None:
@@ -1480,6 +1539,54 @@ def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "status": "ready",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    g1_component = payload["components"]["g1"]
+    assert g1_component["full_load_hip_newton_lane_ready"] is False
+    assert (
+        g1_component[
+            "full_load_hip_newton_child_hip_residual_refresh_ready"
+        ]
+        is False
+    )
+    assert (
+        "g1_full_load_lane::child_hip_residual_refresh_evidence_missing"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
 def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
@@ -1554,6 +1661,7 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
         "required_load_scale": 1.0,
         "full_load_tolerance": 1.0e-12,
         "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
         "blockers": [],
     })
 
@@ -1571,3 +1679,271 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
     )
     assert "g1_full_load_lane::reused_evidence_not_false" in payload["blockers"]
     assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_check_passes_when_stored_snapshot_matches_current_inputs(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    # Simulate the volatile generated_at advancing on a subsequent regeneration.
+    existing = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    existing["generated_at"] = "2099-01-01T00:00:00+00:00"
+    snapshot_path.write_text(
+        json.dumps(existing, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is True
+    assert message == "snapshot_consistent"
+    assert generated is not None
+    assert generated["release_ready"] is True
+
+
+def test_snapshot_check_fails_when_stored_snapshot_is_missing(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_missing:")
+    assert "product_readiness_snapshot.json" in message
+    assert generated is None
+    assert snapshot_path.exists() is False
+
+
+def test_snapshot_check_fails_when_stored_snapshot_is_unreadable(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot_path.write_text("{ this is not valid json", encoding="utf-8")
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_unreadable:")
+    assert "product_readiness_snapshot.json" in message
+    assert generated is None
+
+
+def test_snapshot_check_fails_when_stored_snapshot_is_semantically_different(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    # Inject a stale semantic change that must be detected by --check.
+    payload["status"] = "ready"
+    payload["evidence_fresh"] = True
+    payload["release_ready"] = True
+    payload["blockers"] = []
+    payload["blocker_count"] = 0
+    payload["components"]["pm_release"]["release_area_green_count"] = 0
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_semantic_mismatch:")
+    assert "components.pm_release.release_area_green_count" in message
+    assert generated is not None
+    assert generated["status"] == "ready"
+    assert generated["components"]["pm_release"]["release_area_green_count"] == 16
+
+
+def test_snapshot_check_fails_when_stored_snapshot_blocks_count_drifts(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    payload["blockers"] = []
+    payload["blocker_count"] = 0
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    # Change an upstream input so the freshly generated snapshot accumulates a
+    # new blocker. The stored snapshot must be reported as stale.
+    ci_payload = json.loads(
+        (tmp_path / "github_actions_ci_streak_evidence.json").read_text(encoding="utf-8")
+    )
+    ci_payload["contract_pass"] = False
+    ci_payload["summary"]["pr_threshold_pass"] = False
+    ci_payload["summary"]["nightly_threshold_pass"] = False
+    ci_payload["lanes"] = {
+        "pr": {"blockers": ["pr_github_actions_30_consecutive_pass_evidence_missing"]},
+        "nightly": {"blockers": ["nightly_github_actions_30_consecutive_pass_evidence_missing"]},
+    }
+    _write_json(tmp_path / "github_actions_ci_streak_evidence.json", ci_payload)
+
+    ok, message, _generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_semantic_mismatch:")
+    assert "blockers" in message
+    assert "components.github_actions_ci_streak.ready" in message
+
+
+def test_snapshot_check_ignores_volatile_generated_at_only(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    existing = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    # Top-level and nested generated_at must be ignored, every other field
+    # must still match.
+    existing["generated_at"] = "1900-01-01T00:00:00+00:00"
+    for row in existing["state_consistency"]["metadata_rows"]:
+        row["generated_at"] = "1900-01-01T00:00:00+00:00"
+    snapshot_path.write_text(
+        json.dumps(existing, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, _generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is True
+    assert message == "snapshot_consistent"
+
+
+def test_main_check_returns_zero_on_match_and_writes_nothing(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+    snapshot_path.write_text('{"schema_version":"product-readiness-snapshot.v1"}\n', encoding="utf-8")
+
+    monkeypatch.setattr(
+        build_product_readiness_snapshot, "ROOT", tmp_path
+    )
+
+    def fake_check_snapshot_consistency(
+        *,
+        repo_root,
+        out_path,
+        paths=build_product_readiness_snapshot.SnapshotInputPaths(),
+        source_commit_sha=None,
+    ):
+        assert repo_root == tmp_path
+        assert out_path == snapshot_path
+        return True, "snapshot_consistent", {"release_ready": True}
+
+    monkeypatch.setattr(
+        build_product_readiness_snapshot,
+        "check_snapshot_consistency",
+        fake_check_snapshot_consistency,
+    )
+    mtime_before = snapshot_path.stat().st_mtime_ns
+    contents_before = snapshot_path.read_text(encoding="utf-8")
+
+    exit_code = build_product_readiness_snapshot.main(
+        [
+            "--out",
+            "product_readiness_snapshot.json",
+            "--check",
+        ]
+    )
+
+    assert exit_code == 0
+    assert snapshot_path.stat().st_mtime_ns == mtime_before
+    assert snapshot_path.read_text(encoding="utf-8") == contents_before
+
+
+def test_main_check_returns_nonzero_on_missing_snapshot(
+    tmp_path: Path, monkeypatch
+) -> None:
+    _write_ready_snapshot_inputs(tmp_path, commit="abc123")
+    monkeypatch.setattr(build_product_readiness_snapshot, "ROOT", tmp_path)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+    assert not snapshot_path.exists()
+
+    exit_code = build_product_readiness_snapshot.main(
+        [
+            "--out",
+            "product_readiness_snapshot.json",
+            "--check",
+        ]
+    )
+
+    assert exit_code == 2
+    assert not snapshot_path.exists()

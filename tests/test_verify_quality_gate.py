@@ -68,10 +68,23 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert "scripts/check_github_actions_runner_policy.py --fail-blocked" in output
     assert "scripts/check_github_actions_self_hosted_runner_status.py" in output
     assert "github_actions_self_hosted_runner_status.json" in output
+    runner_status_line = next(
+        line for line in output.splitlines()
+        if "scripts/check_github_actions_self_hosted_runner_status.py" in line
+    )
+    assert " --check" in runner_status_line
+    assert " --fail-blocked" in runner_status_line
     assert "scripts/build_product_readiness_snapshot.py" in output
     assert "product_readiness_snapshot.json" in output
     assert "tests/test_product_readiness_snapshot_doc_sync.py" in output
     assert "--fail-blocked" in output
+    # The canonical snapshot gate must run as a non-mutating --check.
+    snapshot_gate_line = next(
+        line for line in output.splitlines()
+        if "scripts/build_product_readiness_snapshot.py" in line
+    )
+    assert " --check" in snapshot_gate_line
+    assert " --fail-blocked" in snapshot_gate_line
     assert output.index("scripts/check_github_actions_runner_policy.py") < output.index(
         "scripts/check_github_actions_self_hosted_runner_status.py"
     )
@@ -101,10 +114,59 @@ def test_quality_gate_release_mode_returns_nonzero_but_runs_followup_checks(
     rendered = [" ".join(command) for command in calls]
     assert exit_code == 1
     assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
+    runner_status_line = next(
+        item for item in rendered
+        if "scripts/check_github_actions_self_hosted_runner_status.py" in item
+    )
+    assert " --check" in runner_status_line
+    assert " --fail-blocked" in runner_status_line
+    # The snapshot gate must run as a non-mutating --check that can also
+    # still report a non-zero exit when the stored snapshot is stale.
+    snapshot_gate_line = next(
+        item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item
+    )
+    assert " --check" in snapshot_gate_line
+    assert " --fail-blocked" in snapshot_gate_line
     assert any("tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered)
     assert rendered[-1] == "git diff --check"
     assert rendered.index(
         next(item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item)
     ) < rendered.index(
         next(item for item in rendered if "tests/test_product_readiness_snapshot_doc_sync.py" in item)
+    )
+
+
+def test_quality_gate_release_mode_continues_after_runner_status_failure(
+    monkeypatch,
+) -> None:
+    calls: list[list[str]] = []
+
+    def fake_run(command, *, cwd, check):
+        calls.append(command)
+        rendered = " ".join(command)
+        if "scripts/check_github_actions_self_hosted_runner_status.py" in rendered:
+            return SimpleNamespace(returncode=2)
+        return SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(verify_quality_gate.subprocess, "run", fake_run)
+
+    exit_code = verify_quality_gate.main(["--mode", "release"])
+
+    rendered = [" ".join(command) for command in calls]
+    assert exit_code == 2
+    assert any(
+        "scripts/check_github_actions_self_hosted_runner_status.py" in item
+        for item in rendered
+    )
+    assert any("scripts/build_product_readiness_snapshot.py" in item for item in rendered)
+    assert any("tests/test_product_readiness_snapshot_doc_sync.py" in item for item in rendered)
+    assert rendered[-1] == "git diff --check"
+    assert rendered.index(
+        next(
+            item
+            for item in rendered
+            if "scripts/check_github_actions_self_hosted_runner_status.py" in item
+        )
+    ) < rendered.index(
+        next(item for item in rendered if "scripts/build_product_readiness_snapshot.py" in item)
     )
