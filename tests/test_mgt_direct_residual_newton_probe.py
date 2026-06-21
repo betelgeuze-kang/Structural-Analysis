@@ -538,6 +538,60 @@ def test_torch_hip_gmres_requires_available_hip_device(monkeypatch) -> None:
     assert meta["unavailable_reason"] == "torch_hip_device_unavailable"
 
 
+def test_rocm_device_runtime_diagnostics_reports_missing_device_nodes(tmp_path: Path) -> None:
+    payload = direct_probe._rocm_device_runtime_diagnostics(
+        kfd_path=tmp_path / "missing-kfd",
+        dri_path=tmp_path / "missing-dri",
+    )
+
+    assert payload["device_nodes"]["kfd"]["exists"] is False
+    assert payload["device_nodes"]["dri"]["exists"] is False
+    assert "dev_kfd_missing" in payload["runtime_blockers"]
+    assert "dev_dri_missing" in payload["runtime_blockers"]
+    assert "rocminfo" in payload["rocm_commands"]
+    assert isinstance(payload["process_group_ids"], list)
+
+
+def test_rocm_hip_runtime_preflight_keeps_device_node_blockers(
+    monkeypatch,
+) -> None:
+    fake_torch = types.SimpleNamespace(
+        __version__="2.6.0+rocm6.1",
+        version=types.SimpleNamespace(hip="6.1.40091"),
+        cuda=types.SimpleNamespace(is_available=lambda: False),
+    )
+    monkeypatch.setitem(sys.modules, "torch", fake_torch)
+    monkeypatch.setattr(
+        direct_probe,
+        "_rocm_device_runtime_diagnostics",
+        lambda: {
+            "device_nodes": {
+                "kfd": {"path": "/dev/kfd", "exists": False},
+                "dri": {"path": "/dev/dri", "exists": False},
+            },
+            "process_group_ids": [1000],
+            "rocm_commands": {
+                "rocminfo": "/usr/bin/rocminfo",
+                "rocm_smi": "/usr/local/bin/rocm-smi",
+                "hipcc": None,
+            },
+            "visibility_settings": {},
+            "runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+        },
+    )
+
+    payload = direct_probe._rocm_hip_runtime_preflight()
+
+    assert payload["hip_available"] is False
+    assert payload["torch_importable"] is True
+    assert payload["torch_rocm_build"] is True
+    assert payload["torch_hip_device_available"] is False
+    assert payload["unavailable_reason"] == "torch_hip_device_unavailable"
+    assert payload["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
+    assert payload["device_nodes"]["kfd"]["exists"] is False
+    assert payload["rocm_commands"]["rocminfo"] == "/usr/bin/rocminfo"
+
+
 def test_cpu_acceptance_refresh_blocks_hip_required_closure() -> None:
     assert _cpu_acceptance_refresh_closure_blocked(
         {

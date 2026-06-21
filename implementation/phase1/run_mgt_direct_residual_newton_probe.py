@@ -6,7 +6,9 @@ from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
 import json
+import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -68,6 +70,12 @@ HIP_RESIDUAL_BATCH_REPLAY_BACKENDS = {
     "hip_full_residual_resident",
     "rust_hip_full_residual_ffi",
 }
+ROCM_VISIBILITY_SETTING_KEYS = (
+    "HIP_VISIBLE_DEVICES",
+    "ROCR_VISIBLE_DEVICES",
+    "CUDA_VISIBLE_DEVICES",
+    "HSA_OVERRIDE_GFX_VERSION",
+)
 
 
 def _git_head() -> str:
@@ -979,6 +987,79 @@ def _normalize_global_krylov_linear_solver_backend(value: str) -> str:
     return "scipy_host_gmres"
 
 
+def _device_path_status(path: Path) -> dict[str, Any]:
+    payload: dict[str, Any] = {
+        "path": str(path),
+        "exists": path.exists(),
+    }
+    if not payload["exists"]:
+        return payload
+    try:
+        stat_result = path.stat()
+    except Exception as exc:
+        payload["stat_error"] = exc.__class__.__name__
+        return payload
+    payload.update(
+        {
+            "is_dir": path.is_dir(),
+            "is_char_device": bool(os.stat(path).st_mode and path.is_char_device()),
+            "mode_octal": f"{stat_result.st_mode & 0o7777:04o}",
+            "uid": int(stat_result.st_uid),
+            "gid": int(stat_result.st_gid),
+            "readable": os.access(path, os.R_OK),
+            "writable": os.access(path, os.W_OK),
+        }
+    )
+    if path.is_dir():
+        try:
+            entries = sorted(child.name for child in path.iterdir())
+        except Exception as exc:
+            payload["list_error"] = exc.__class__.__name__
+        else:
+            payload["entry_count"] = len(entries)
+            payload["entries_sample"] = entries[:20]
+            payload["render_nodes"] = [
+                name for name in entries if name.startswith("renderD")
+            ]
+    return payload
+
+
+def _rocm_device_runtime_diagnostics(
+    *,
+    kfd_path: Path = Path("/dev/kfd"),
+    dri_path: Path = Path("/dev/dri"),
+) -> dict[str, Any]:
+    kfd = _device_path_status(kfd_path)
+    dri = _device_path_status(dri_path)
+    blockers: list[str] = []
+    if not kfd.get("exists"):
+        blockers.append("dev_kfd_missing")
+    elif not (kfd.get("readable") and kfd.get("writable")):
+        blockers.append("dev_kfd_not_readable_writable")
+    if not dri.get("exists"):
+        blockers.append("dev_dri_missing")
+    elif not dri.get("render_nodes"):
+        blockers.append("dev_dri_render_nodes_missing")
+    return {
+        "device_nodes": {
+            "kfd": kfd,
+            "dri": dri,
+        },
+        "process_group_ids": sorted(int(group) for group in os.getgroups()),
+        "rocm_commands": {
+            "rocminfo": shutil.which("rocminfo"),
+            "rocm_smi": shutil.which("rocm-smi"),
+            "hipcc": shutil.which("hipcc"),
+        },
+        "visibility_settings": {
+            key: os.environ.get(key)
+            for key in ROCM_VISIBILITY_SETTING_KEYS
+            if key in os.environ
+        },
+        "runtime_blockers": blockers,
+    }
+
+
 def _rocm_hip_runtime_preflight() -> dict[str, Any]:
     payload: dict[str, Any] = {
         "checked_at": datetime.now(timezone.utc).isoformat(),
@@ -987,6 +1068,7 @@ def _rocm_hip_runtime_preflight() -> dict[str, Any]:
         "torch_rocm_build": False,
         "torch_hip_device_available": False,
     }
+    payload.update(_rocm_device_runtime_diagnostics())
     try:
         import torch  # type: ignore[import-not-found]
     except Exception as exc:  # pragma: no cover - depends on runtime image
