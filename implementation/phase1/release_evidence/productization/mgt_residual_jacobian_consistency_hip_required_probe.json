@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-21T11:13:12.317968+00:00",
-  "source_commit_sha": "ba220799de71230dbb399138160b23531da98737",
+  "generated_at": "2026-06-21T11:16:38.883736+00:00",
+  "source_commit_sha": "5a55ee224fcc1e38a4b6841b3f6f569634fe06b2",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -10,7 +10,7 @@
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": true,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-21T11:13:12.319778+00:00",
+    "checked_at": "2026-06-21T11:16:38.885500+00:00",
     "hip_available": false,
     "torch_importable": true,
     "torch_rocm_build": true,
@@ -56,7 +56,7 @@
     "torch_rocm_version": "6.1.40091-a8dbc0c19",
     "unavailable_reason": "torch_hip_device_unavailable"
   },
-  "component_only": true,
+  "component_only": false,
   "checkpoint": {
     "path": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
   },
@@ -67,7 +67,7 @@
   "runtime_metrics": {
     "setup_and_reference_seconds": 0.0,
     "base_assembly_seconds": 0.0,
-    "total_seconds": 0.8618973949996871
+    "total_seconds": 0.8716136689999985
   },
   "claim_boundary": "Production ROCm/HIP residual-Jacobian consistency was requested, but no usable HIP runtime was available. The probe did not fall back to the CPU diagnostic path and does not close G1.",
   "blockers": [
