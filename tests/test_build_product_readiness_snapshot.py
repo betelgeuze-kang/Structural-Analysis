@@ -2006,7 +2006,7 @@ def test_snapshot_check_passes_when_stored_snapshot_matches_current_inputs(
         source_commit_sha=commit,
     )
 
-    assert ok is True
+    assert ok is True, message
     assert message == "snapshot_consistent"
     assert generated is not None
     assert generated["release_ready"] is True
@@ -2017,7 +2017,14 @@ def test_snapshot_check_fails_when_stored_snapshot_is_missing(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+    snapshot_path = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "productization"
+        / "product_readiness_snapshot.json"
+    )
 
     ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
         repo_root=tmp_path,
@@ -2074,6 +2081,7 @@ def test_snapshot_check_fails_when_stored_snapshot_is_semantically_different(
     payload["blockers"] = []
     payload["blocker_count"] = 0
     payload["components"]["pm_release"]["release_area_green_count"] = 0
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
     snapshot_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -2175,7 +2183,7 @@ def test_snapshot_check_ignores_volatile_generated_at_only(
         source_commit_sha=commit,
     )
 
-    assert ok is True
+    assert ok is True, message
     assert message == "snapshot_consistent"
 
 
@@ -2210,6 +2218,68 @@ def test_snapshot_check_ignores_top_level_snapshot_source_commit_only(
     assert generated["source_commit_sha"] == commit
 
 
+def test_snapshot_check_accepts_receipt_only_commit_boundary_diagnostics(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    evidence_commit = _commit_all(tmp_path, "evidence")
+    snapshot_path = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release_evidence"
+        / "productization"
+        / "product_readiness_snapshot.json"
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+    assert payload["source_commit_sha"] == evidence_commit
+    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] = True
+    metadata_rows["pm_release_gate_report"]["source_state_kind"] = "exact"
+    metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"] = []
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    snapshot_commit = _commit_all(tmp_path, "snapshot")
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert ok is True, message
+    assert message == "snapshot_consistent"
+    assert generated is not None
+    assert generated["source_commit_sha"] == snapshot_commit
+    generated_rows = {
+        row["artifact"]: row
+        for row in generated["state_consistency"]["metadata_rows"]
+    }
+    assert (
+        generated_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert generated_rows["pm_release_gate_report"]["source_state_fresh"] is True
+
+
 def test_snapshot_check_keeps_nested_source_commit_rows_semantic(
     tmp_path: Path,
 ) -> None:
@@ -2225,6 +2295,72 @@ def test_snapshot_check_keeps_nested_source_commit_rows_semantic(
     payload["state_consistency"]["metadata_rows"][0]["source_commit_sha"] = (
         "stale-upstream-evidence-commit"
     )
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_semantic_mismatch:")
+    assert "state_consistency.metadata_rows" in message
+    assert generated is not None
+
+
+def test_snapshot_check_ignores_receipt_only_metadata_diagnostics(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    for row in payload["state_consistency"]["metadata_rows"]:
+        row["changed_paths_since_source_commit"] = [
+            "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        ]
+        row["source_commit_matches_head"] = False
+        row["source_state_kind"] = "receipt_only_commit"
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is True
+    assert message == "snapshot_consistent"
+    assert generated is not None
+
+
+def test_snapshot_check_keeps_metadata_freshness_verdict_semantic(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    payload["state_consistency"]["metadata_rows"][0]["source_state_fresh"] = False
     snapshot_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

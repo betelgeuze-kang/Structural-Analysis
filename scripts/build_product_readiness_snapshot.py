@@ -167,7 +167,21 @@ def _git_status_path(row: str) -> str:
     return text
 
 
-def _receipt_commit_allowed_paths(paths: SnapshotInputPaths) -> set[str]:
+def _path_key_for_repo_path(repo_root: Path, path: Path) -> str:
+    if path.is_absolute():
+        try:
+            return path.resolve().relative_to(repo_root.resolve()).as_posix()
+        except ValueError:
+            return path.as_posix()
+    return path.as_posix()
+
+
+def _receipt_commit_allowed_paths(
+    paths: SnapshotInputPaths,
+    *,
+    repo_root: Path = ROOT,
+    additional_paths: tuple[Path, ...] = (),
+) -> set[str]:
     allowed_fields = {
         "readme",
         "current_state",
@@ -191,7 +205,10 @@ def _receipt_commit_allowed_paths(paths: SnapshotInputPaths) -> set[str]:
         _path_key
         for field in allowed_fields
         if (_path_key := _path_key_for_receipt(getattr(paths, field)))
-    } | {_path_key_for_receipt(DEFAULT_OUT)}
+    } | {
+        _path_key_for_receipt(DEFAULT_OUT),
+        *(_path_key_for_repo_path(repo_root, path) for path in additional_paths),
+    }
 
 
 def _path_key_for_receipt(path: Path) -> str:
@@ -586,11 +603,16 @@ def build_snapshot(
     repo_root: Path = ROOT,
     paths: SnapshotInputPaths = SnapshotInputPaths(),
     source_commit_sha: str | None = None,
+    additional_receipt_paths: tuple[Path, ...] = (),
 ) -> dict[str, Any]:
     blockers: list[str] = []
     repo_root = repo_root.resolve()
     current_commit = source_commit_sha if source_commit_sha is not None else _git_head(repo_root)
-    allowed_receipt_paths = _receipt_commit_allowed_paths(paths)
+    allowed_receipt_paths = _receipt_commit_allowed_paths(
+        paths,
+        repo_root=repo_root,
+        additional_paths=additional_receipt_paths,
+    )
     worktree_status_rows = (
         []
         if source_commit_sha is not None
@@ -1113,16 +1135,34 @@ def _strip_volatile_for_compare(
     the checked-in snapshot. Committing the snapshot necessarily advances HEAD,
     so freshness is enforced through the metadata source-state rows and blocker
     set rather than by requiring that wrapper field to equal the current commit.
-    Nested source_commit_sha fields remain semantic.
+    Nested source_commit_sha and freshness verdicts remain semantic. Metadata
+    rows also include commit-boundary diagnostics that legitimately change
+    when a receipt-only snapshot refresh is checked in, so those diagnostics
+    are excluded from consistency comparison while the underlying freshness
+    verdict is still enforced.
     """
     if isinstance(payload, dict):
         worktree_diagnostic_path = path == ("state_consistency", "worktree")
+        metadata_row_path = (
+            len(path) == 2
+            and path[0] == "state_consistency"
+            and path[1] == "metadata_rows"
+        )
         return {
             key: _strip_volatile_for_compare(value, (*path, key))
             for key, value in payload.items()
             if key != "generated_at"
             and not (path == () and key == "source_commit_sha")
             and not (worktree_diagnostic_path and key in {"status_rows", "dirty_paths"})
+            and not (
+                metadata_row_path
+                and key
+                in {
+                    "changed_paths_since_source_commit",
+                    "source_commit_matches_head",
+                    "source_state_kind",
+                }
+            )
         }
     if isinstance(payload, list):
         return [_strip_volatile_for_compare(item, path) for item in payload]
@@ -1181,6 +1221,7 @@ def check_snapshot_consistency(
         repo_root=repo_root,
         paths=paths,
         source_commit_sha=source_commit_sha,
+        additional_receipt_paths=(out_path,),
     )
 
     existing_normalized = _strip_volatile_for_compare(existing)
