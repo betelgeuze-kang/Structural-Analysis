@@ -1784,6 +1784,47 @@ def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
     assert payload["paid_pilot_ready"] is False
 
 
+def test_snapshot_blocks_ready_g1_lane_with_stale_hip_consistency_proof_source(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["hip_consistency_proof"] = {
+        **_g1_hip_consistency_proof(ready=True),
+        "source_commit_sha": "old-hip-proof-source",
+    }
+    # Simulate a buggy lane report that forgot to mirror the source mismatch
+    # at the lane top level. The canonical snapshot must still block release.
+    g1_lane["blockers"] = []
+    g1_lane["contract_pass"] = True
+    g1_lane["status"] = "ready"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof_ready"
+    ] is False
+    assert proof["ready"] is False
+    assert proof["source_commit_sha"] == "old-hip-proof-source"
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
 def test_snapshot_blocks_ready_g1_lane_with_invalid_child_hip_refresh_schema(
     tmp_path: Path,
 ) -> None:

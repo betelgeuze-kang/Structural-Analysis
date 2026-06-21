@@ -517,6 +517,8 @@ def _g1_child_gate_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
 
 def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
     proof = _as_dict(lane_payload.get("hip_consistency_proof"))
+    lane_source_commit = str(lane_payload.get("source_commit_sha", "") or "")
+    proof_source_commit = str(proof.get("source_commit_sha", "") or "")
     receipt_blockers = [str(item) for item in _as_list(proof.get("receipt_blockers"))]
     runtime_blockers = [str(item) for item in _as_list(proof.get("runtime_blockers"))]
     blockers = [str(item) for item in _as_list(lane_payload.get("blockers"))]
@@ -525,6 +527,10 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     ]
     if not proof:
         proof_blockers.append("hip_consistency_proof_missing")
+    if not proof_source_commit:
+        proof_blockers.append("hip_consistency_proof_source_commit_sha_missing")
+    elif lane_source_commit and proof_source_commit != lane_source_commit:
+        proof_blockers.append("hip_consistency_proof_source_commit_sha_mismatch")
     if proof.get("reused_evidence") is not False:
         proof_blockers.append("hip_consistency_proof_reused_evidence_not_false")
     if proof.get("rocm_hip_required") is not True:
@@ -552,7 +558,7 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         "path": str(proof.get("path", "")),
         "present": bool(proof.get("present")),
         "status": str(proof.get("status", "")),
-        "source_commit_sha": str(proof.get("source_commit_sha", "") or ""),
+        "source_commit_sha": proof_source_commit,
         "reused_evidence": proof.get("reused_evidence"),
         "rocm_hip_required": proof.get("rocm_hip_required"),
         "consistent_residual_jacobian_newton_gate_passed": proof.get(
