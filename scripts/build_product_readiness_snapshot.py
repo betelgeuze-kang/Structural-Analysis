@@ -105,6 +105,118 @@ def _git_head(repo_root: Path) -> str:
         return ""
 
 
+def _git_rev_parse(repo_root: Path, value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "--verify", text],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _commit_matches(value: Any, current_commit: str) -> bool:
+    text = str(value or "").strip()
+    if not text or not current_commit:
+        return False
+    return current_commit.startswith(text) or text.startswith(current_commit)
+
+
+def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str) -> list[str]:
+    if not source_commit or not current_commit:
+        return []
+    try:
+        output = subprocess.check_output(
+            ["git", "diff", "--name-only", f"{source_commit}..{current_commit}"],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.strip() for line in output.splitlines() if line.strip()]
+
+
+def _receipt_commit_allowed_paths(paths: SnapshotInputPaths) -> set[str]:
+    allowed_fields = {
+        "readme",
+        "current_state",
+        "pm_report",
+        "gap_closure_status",
+        "fresh_full_validation",
+        "g1_terminal_gate",
+        "g1_full_load_hip_newton_lane",
+        "customer_shadow",
+        "workstation_delivery",
+        "independent_product",
+        "blocker_action_register",
+        "github_actions_ci_streak",
+        "ux_new_user_observation",
+        "license_status_closure",
+        "external_benchmark_submission_readiness",
+        "external_benchmark_submission_updates",
+        "self_hosted_runner_status",
+    }
+    return {
+        _path_key
+        for field in allowed_fields
+        if (_path_key := _path_key_for_receipt(getattr(paths, field)))
+    } | {_path_key_for_receipt(DEFAULT_OUT)}
+
+
+def _path_key_for_receipt(path: Path) -> str:
+    return path.as_posix()
+
+
+def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
+    if path in allowed_paths:
+        return True
+    if path in {"README.md", "docs/commercialization-gap-current-state.md"}:
+        return True
+    if path.startswith("implementation/phase1/release_evidence/productization/"):
+        return path.endswith((".json", ".md"))
+    if path in {
+        "implementation/phase1/customer_shadow_evidence_status.json",
+        "implementation/phase1/workstation_delivery_readiness.json",
+        "implementation/phase1/release/independent_product_readiness.json",
+        "implementation/phase1/release/external_benchmark_submission_readiness.json",
+    }:
+        return True
+    return False
+
+
+def _source_state_freshness(
+    *,
+    repo_root: Path,
+    source_commit: Any,
+    current_commit: str,
+    changed_paths_cache: dict[str, list[str]],
+    allowed_receipt_paths: set[str],
+) -> tuple[bool, str, list[str]]:
+    if _commit_matches(source_commit, current_commit):
+        return True, "exact", []
+    source = _git_rev_parse(repo_root, str(source_commit or ""))
+    current = _git_rev_parse(repo_root, current_commit)
+    if not source or not current:
+        return False, "unresolved_source_commit", []
+    if source not in changed_paths_cache:
+        changed_paths_cache[source] = _git_diff_name_only(repo_root, source, current)
+    changed_paths = changed_paths_cache[source]
+    non_receipt_paths = [
+        path
+        for path in changed_paths
+        if not _receipt_commit_allowed_path(path, allowed_receipt_paths)
+    ]
+    if not non_receipt_paths:
+        return True, "receipt_only_commit", changed_paths
+    return False, "non_receipt_paths_changed", non_receipt_paths
+
+
 def _as_bool(value: Any) -> bool:
     return bool(value)
 
@@ -187,18 +299,31 @@ def _doc_open_blocker_count(text: str) -> int | None:
 def _metadata_rows(
     *,
     artifacts: dict[str, dict[str, Any]],
+    repo_root: Path,
     current_commit: str,
+    allowed_receipt_paths: set[str],
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
+    changed_paths_cache: dict[str, list[str]] = {}
     for name, payload in artifacts.items():
         source_commit = payload.get("source_commit_sha")
         generated_at = payload.get("generated_at")
+        source_state_fresh, source_state_kind, changed_paths = _source_state_freshness(
+            repo_root=repo_root,
+            source_commit=source_commit,
+            current_commit=current_commit,
+            changed_paths_cache=changed_paths_cache,
+            allowed_receipt_paths=allowed_receipt_paths,
+        )
         row = {
             "artifact": name,
             "generated_at": generated_at,
             "source_commit_sha": source_commit,
             "reused_evidence": payload.get("reused_evidence"),
-            "source_commit_matches_head": bool(source_commit and source_commit == current_commit),
+            "source_commit_matches_head": bool(_commit_matches(source_commit, current_commit)),
+            "source_state_fresh": source_state_fresh,
+            "source_state_kind": source_state_kind,
+            "changed_paths_since_source_commit": changed_paths,
             "metadata_complete": bool(generated_at and source_commit is not None and "reused_evidence" in payload),
         }
         rows.append(row)
@@ -408,11 +533,16 @@ def build_snapshot(
         "github_actions_self_hosted_runner_status": self_hosted_runner_status,
     }
     blockers.extend(_schema_version_blockers(schema_artifacts))
-    metadata_rows = _metadata_rows(artifacts=metadata_artifacts, current_commit=current_commit)
+    metadata_rows = _metadata_rows(
+        artifacts=metadata_artifacts,
+        repo_root=repo_root,
+        current_commit=current_commit,
+        allowed_receipt_paths=_receipt_commit_allowed_paths(paths),
+    )
     for row in metadata_rows:
         if not row["metadata_complete"]:
             blockers.append(f"stale_or_inconsistent:metadata_incomplete:{row['artifact']}")
-        elif not row["source_commit_matches_head"]:
+        elif not row["source_state_fresh"]:
             blockers.append(f"stale_or_inconsistent:source_commit_mismatch:{row['artifact']}")
 
     pm_release_ready = bool(

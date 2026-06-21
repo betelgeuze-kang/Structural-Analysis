@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 
@@ -186,6 +187,107 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
     )
 
 
+def _write_stable_non_receipt_inputs(tmp_path: Path) -> None:
+    _write_json(tmp_path / "package.json", {
+        "name": "structural-optimization-workbench",
+        "version": "1.0.0",
+    })
+    _write_text(
+        tmp_path / "pyproject.toml",
+        '[project]\nname = "structural-optimization-workbench"\nversion = "1.0.0"\n',
+    )
+    _write_text(
+        tmp_path / ".github/workflows/ci.yml",
+        (
+            "name: CI\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || "
+            "'[\"self-hosted\",\"linux\",\"x64\"]') }}\n"
+        ),
+    )
+
+
+def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
+    _write_text(
+        tmp_path / "README.md",
+        "PM release areas are `16/16` green. Current action register has `0` open blocker handoffs.\n",
+    )
+    _write_text(
+        tmp_path / "docs/commercialization-gap-current-state.md",
+        "PM release areas are `16/16` green. The open blocker total is `0`.\n",
+    )
+    _write_json(tmp_path / "pm_release_gate_report.json", {
+        "schema_version": "pm-release-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "limited_commercial_release_ready": True,
+        "release_area_gate_ready": True,
+        "full_release_gate_ready": True,
+        "paid_pilot_candidate": True,
+        "ga_enterprise_ready": True,
+        "release_area_matrix": [{"ok": True} for _ in range(16)],
+        "release_area_blockers": [],
+        "full_release_blockers": [],
+    })
+    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
+        "schema_version": "pm-release-blocker-action-register.v1",
+        "summary": {"open_blocker_count": 0},
+    })
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 8,
+            "fresh_validation_receipt_pass_count": 8,
+        },
+        "blockers": [],
+    })
+    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
+        "schema_version": "customer-shadow-evidence-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "blockers": [],
+    })
+    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "claim_boundary": (
+            "Full-mesh/full-load physical residual+increment/material Newton gate "
+            "is closed with fallback_count=0."
+        ),
+        "blockers": [],
+    })
+    _write_common_metadata(tmp_path, commit=commit)
+
+
+def _init_git_repo(tmp_path: Path) -> None:
+    subprocess.check_call(["git", "init"], cwd=tmp_path, stdout=subprocess.DEVNULL)
+    subprocess.check_call(
+        ["git", "config", "user.email", "test@example.com"],
+        cwd=tmp_path,
+    )
+    subprocess.check_call(["git", "config", "user.name", "Test"], cwd=tmp_path)
+
+
+def _commit_all(tmp_path: Path, message: str) -> str:
+    subprocess.check_call(["git", "add", "."], cwd=tmp_path)
+    subprocess.check_call(["git", "commit", "-m", message], cwd=tmp_path, stdout=subprocess.DEVNULL)
+    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True).strip()
+
+
 def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
@@ -328,6 +430,73 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["release_ready"] is True
     assert payload["blocker_count"] == 0
     assert payload["blockers"] == []
+
+
+def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    receipt_commit = _commit_all(tmp_path, "receipt")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["source_commit_sha"] == receipt_commit
+    assert payload["schema_valid"] is True
+    assert payload["evidence_fresh"] is True
+    assert payload["status"] == "ready"
+    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "receipt_only_commit"
+    )
+    assert not [
+        blocker
+        for blocker in payload["blockers"]
+        if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
+    ]
+
+
+def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    _write_text(tmp_path / "solver_core.py", "print('changed after evidence')\n")
+    _commit_all(tmp_path, "solver code change")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+    metadata_rows = {
+        row["artifact"]: row
+        for row in payload["state_consistency"]["metadata_rows"]
+    }
+
+    assert payload["status"] == "stale_or_inconsistent"
+    assert payload["evidence_fresh"] is False
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
+        in payload["blockers"]
+    )
+    assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_state_kind"]
+        == "non_receipt_paths_changed"
+    )
+    assert metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"] == [
+        "solver_core.py",
+    ]
 
 
 def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path) -> None:

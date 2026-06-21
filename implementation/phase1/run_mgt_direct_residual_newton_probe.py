@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import time
@@ -57,6 +58,7 @@ from mgt_shell_load_path import surface_pressure_load_path_filter
 
 
 SCHEMA_VERSION = "mgt-direct-residual-newton-probe.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_direct_residual_newton_probe.json"
 DEFAULT_CHECKPOINT = (
     PRODUCTIZATION / "mgt_uncoarsened_boundary_pdelta_relaxed_checkpoints/accepted_load_0p656.npz"
@@ -66,6 +68,18 @@ HIP_RESIDUAL_BATCH_REPLAY_BACKENDS = {
     "hip_full_residual_resident",
     "rust_hip_full_residual_ffi",
 }
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[2],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _load_checkpoint(path: Path) -> tuple[dict[str, Any], np.ndarray, np.ndarray | None, np.ndarray | None]:
@@ -1059,6 +1073,9 @@ def _hip_runtime_unavailable_direct_probe_payload(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "status": "partial",
         "direct_residual_newton_ready": False,
         "source": {
@@ -1069,6 +1086,12 @@ def _hip_runtime_unavailable_direct_probe_payload(
         "rocm_hip_runtime_preflight": hip_preflight,
         "residual_contract": {
             "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
+            "material_newton_gate_passed": False,
+            "state_dependent_material_newton_closure_passed": False,
+            "material_newton_breadth_blockers": [
+                "rocm_hip_runtime_unavailable",
+                "material_newton_not_executed",
+            ],
             "hip_residual_engine_contract_passed": False,
             "hip_residual_engine_required": bool(
                 global_require_hip_batch_replay or row_require_hip_batch_replay
@@ -1107,6 +1130,11 @@ def _hip_runtime_unavailable_direct_probe_payload(
             "direct_residual_gate_passed": False,
             "relative_increment_gate_verified": False,
             "relative_increment_gate_passed": False,
+            "material_newton_breadth_passed": False,
+            "material_newton_breadth_blockers": [
+                "rocm_hip_runtime_unavailable",
+                "material_newton_not_executed",
+            ],
             "rocm_hip_runtime_available": False,
             "fallback_zero_audit": fallback_zero_audit,
             "fallback_zero_passed": False,
@@ -7101,9 +7129,19 @@ def run_mgt_direct_residual_newton_probe(
     host_krylov_solver_closure_blocked = bool(
         matrix_free_global_krylov.get("host_krylov_solver_closure_blocked")
     )
+    material_newton_breadth_blockers = [
+        "material_newton_breadth_not_proven",
+    ]
+    if apply_shell_material_tangent and allow_state_dependent_shell_material_tangent_hip_replay:
+        material_newton_breadth_blockers.append(
+            "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "status": "ready" if converged else "partial",
         "direct_residual_newton_ready": converged,
         "checkpoint": checkpoint_meta,
@@ -7121,6 +7159,9 @@ def run_mgt_direct_residual_newton_probe(
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
             "shell_pressure_load_path_meta": pressure_load_path_meta,
             "shell_material_tangent_residual_applied": bool(apply_shell_material_tangent),
+            "material_newton_gate_passed": False,
+            "state_dependent_material_newton_closure_passed": False,
+            "material_newton_breadth_blockers": material_newton_breadth_blockers,
             "allow_frozen_shell_material_tangent_hip_replay": bool(
                 allow_frozen_shell_material_tangent_hip_replay
             ),
@@ -7220,6 +7261,8 @@ def run_mgt_direct_residual_newton_probe(
             "full_load_closure_gate": full_load_closure_gate,
             "full_load_closure_passed": full_load_closure_passed,
             "direct_residual_newton_ready_requires_full_load": True,
+            "material_newton_breadth_passed": False,
+            "material_newton_breadth_blockers": material_newton_breadth_blockers,
             "hip_batch_replay_required_unavailable": (
                 hip_batch_replay_required_unavailable
             ),

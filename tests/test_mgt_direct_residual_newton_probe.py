@@ -790,6 +790,9 @@ def test_direct_residual_hip_required_preflight_stops_before_missing_inputs(
 
     assert output.exists()
     assert json.loads(output.read_text(encoding="utf-8"))["blockers"] == payload["blockers"]
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["status"] == "partial"
     assert payload["direct_residual_newton_ready"] is False
     assert payload["rocm_hip_runtime_preflight"]["hip_available"] is False
@@ -810,8 +813,16 @@ def test_direct_residual_hip_required_preflight_stops_before_missing_inputs(
     )
 
     gate = payload["gate_assessment"]
+    assert gate["material_newton_breadth_passed"] is False
+    assert gate["material_newton_breadth_blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "material_newton_not_executed",
+    ]
     assert gate["fallback_zero_passed"] is False
     assert gate["fallback_zero_audit"]["fallback_zero_boundary_count"] == 1
+    residual_contract = payload["residual_contract"]
+    assert residual_contract["material_newton_gate_passed"] is False
+    assert residual_contract["state_dependent_material_newton_closure_passed"] is False
 
 
 def test_direct_residual_non_hip_missing_mgt_behavior_unchanged(tmp_path: Path) -> None:
@@ -1780,6 +1791,12 @@ def test_frozen_shell_material_hip_replay_does_not_claim_material_newton_closure
         ]
         is True
     )
+    assert payload["residual_contract"]["material_newton_gate_passed"] is False
+    assert payload["gate_assessment"]["material_newton_breadth_passed"] is False
+    assert (
+        "material_newton_breadth_not_proven"
+        in payload["gate_assessment"]["material_newton_breadth_blockers"]
+    )
     material_meta = payload.get("shell_material")
     if isinstance(material_meta, dict):
         assert material_meta.get("material_newton_gate_passed") is None
@@ -2065,6 +2082,13 @@ def test_state_dependent_claim_boundary_conservative_for_host_operator_refresh(
             "state_dependent_shell_material_tangent_hip_replay_is_not_production_residency"
         ]
         is True
+    )
+    assert payload["residual_contract"]["material_newton_gate_passed"] is False
+    assert payload["residual_contract"]["state_dependent_material_newton_closure_passed"] is False
+    assert payload["gate_assessment"]["material_newton_breadth_passed"] is False
+    assert (
+        "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        in payload["gate_assessment"]["material_newton_breadth_blockers"]
     )
 
 
