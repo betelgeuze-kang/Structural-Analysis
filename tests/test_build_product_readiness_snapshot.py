@@ -432,6 +432,61 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["blockers"] == []
 
 
+def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_text(
+        tmp_path / "README.md",
+        "PM release areas are `15/16` green. Current action register has `1` open blocker handoffs.\n",
+    )
+    _write_text(
+        tmp_path / "docs/commercialization-gap-current-state.md",
+        "PM release areas are `15/16` green. The open blocker total is `1`.\n",
+    )
+    _write_json(tmp_path / "pm_release_gate_report.json", {
+        "schema_version": "pm-release-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "limited_commercial_release_ready": False,
+        "release_area_gate_ready": False,
+        "full_release_gate_ready": False,
+        "paid_pilot_candidate": True,
+        "ga_enterprise_ready": True,
+        "release_area_matrix": [{"ok": True} for _ in range(15)] + [{"ok": False}],
+        "release_area_blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+        "full_release_blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
+    })
+    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
+        "schema_version": "pm-release-blocker-action-register.v1",
+        "summary": {"open_blocker_count": 1},
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["schema_valid"] is True
+    assert payload["evidence_fresh"] is True
+    assert payload["status"] == "blocked"
+    assert payload["components"]["pm_release"]["contract_pass"] is True
+    assert payload["components"]["pm_release"]["full_release_gate_ready"] is False
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+    assert (
+        "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+        in payload["blockers"]
+    )
+    assert "contract_pass fields are component contract results" in (
+        payload["claim_boundary"]["contract_pass_vs_release_ready"]
+    )
+
+
 def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path: Path) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
