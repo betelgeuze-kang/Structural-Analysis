@@ -1,14 +1,15 @@
 {
   "blockers": [
+    "github_actions_self_hosted_runner_query_failed",
     "self_hosted_runner_matching_labels_missing"
   ],
   "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-21T07:29:04.293108+00:00",
+  "generated_at": "2026-06-21T07:36:46.356283+00:00",
   "matching_runner_count": 0,
   "online_matching_runner_count": 0,
-  "query_error": "",
+  "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
   "ready_runner_count": 0,
   "repo": "betelgeuze-kang/Structural-Analysis",
   "required_labels": [
@@ -20,6 +21,6 @@
   "rows": [],
   "runner_count": 0,
   "schema_version": "github-actions-self-hosted-runner-status.v1",
-  "source_commit_sha": "bb2944ccf393ac87c4a557ec0a8856770b0ddcca",
+  "source_commit_sha": "2aabcb829f7937e58102ffd9a20b5e943d3380ca",
   "status": "blocked"
 }
