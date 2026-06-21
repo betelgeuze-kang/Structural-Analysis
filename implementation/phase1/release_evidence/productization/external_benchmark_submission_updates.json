@@ -1,14 +1,15 @@
 {
+  "claim_boundary": "Metadata-only refresh preserves existing external benchmark sidecar rows and marks reused_evidence=true. It does not create, infer, or attach receipts.",
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_basis": {
     "actual_external_submission_receipts_attached": false,
-    "basis_kind": "release_publication_ready_update",
-    "note": "Current checkout has the P0 publication bundle and full-submission-ready EB queues, but no external benchmark service receipts are attached yet.",
-    "publication_evidence_index_path": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
-    "release_tag": "structural-analysis-artifacts-2026-04-26",
-    "release_url": "https://github.com/betelgeuze-kang/Structural-Analysis/releases/tag/structural-analysis-artifacts-2026-04-26"
+    "base_external_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
+    "basis_kind": "existing_sidecar_metadata_refresh"
   },
-  "generated_at": "2026-05-05T05:05:53Z",
+  "generated_at": "2026-06-21T05:52:48.096165+00:00",
+  "reused_evidence": true,
   "schema_version": "external-benchmark-submission-updates.v1",
+  "source_commit_sha": "de0002a2165a066b9fc50c876893fea92cd8f378",
   "updates": {
     "hardest_external_10case": {
       "closure_evidence_path": "",

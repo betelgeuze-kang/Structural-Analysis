@@ -489,13 +489,17 @@ def build_snapshot(
         readiness=external_benchmark_readiness,
         updates=external_benchmark_updates,
     )
+    external_benchmark_updates_fresh = external_benchmark_updates.get("reused_evidence") is False
     external_benchmark_ready = bool(
         _contract_pass(external_benchmark_readiness)
+        and external_benchmark_updates_fresh
         and external_benchmark_receipts["queue_count"] >= 4
         and external_benchmark_receipts["attached_count"] >= external_benchmark_receipts["queue_count"]
         and external_benchmark_receipts["pending_count"] == 0
     )
     if not external_benchmark_ready:
+        if not external_benchmark_updates_fresh:
+            blockers.append("external_benchmark::submission_updates_reused_evidence_not_fresh")
         blockers.append(
             "external_benchmark::submission_receipts_pending="
             f"{max(external_benchmark_receipts['pending_count'], 0)}"
@@ -516,14 +520,32 @@ def build_snapshot(
         blockers.extend(
             f"g1::{item}" for item in _as_list(g1.get("full_g1_closure_blockers"))
         )
+    g1_lane_checkpoint = _as_dict(g1_full_load_lane.get("checkpoint"))
+    g1_lane_observed_load = _as_float(g1_lane_checkpoint.get("load_scale"), default=-1.0)
+    g1_lane_required_load = _as_float(g1_full_load_lane.get("required_load_scale"), default=1.0)
+    g1_lane_load_tolerance = _as_float(g1_full_load_lane.get("full_load_tolerance"), default=1.0e-12)
+    g1_lane_reused_ok = g1_full_load_lane.get("reused_evidence") is False
+    g1_lane_full_load_input_pass = g1_full_load_lane.get("full_load_input_pass") is True
+    g1_lane_load_scale_pass = bool(
+        g1_lane_observed_load >= g1_lane_required_load - g1_lane_load_tolerance
+    )
     g1_full_load_lane_ready = bool(
         _contract_pass(g1_full_load_lane)
         and str(g1_full_load_lane.get("status", "")).lower() == "ready"
+        and g1_lane_reused_ok
+        and g1_lane_full_load_input_pass
+        and g1_lane_load_scale_pass
         and not _as_list(g1_full_load_lane.get("blockers"))
     )
     if not g1_full_load_lane_ready:
         lane_blockers = _as_list(g1_full_load_lane.get("blockers"))
         blockers.extend(f"g1_full_load_lane::{item}" for item in lane_blockers)
+        if not g1_lane_reused_ok:
+            blockers.append("g1_full_load_lane::reused_evidence_not_false")
+        if not g1_lane_full_load_input_pass:
+            blockers.append("g1_full_load_lane::full_load_input_not_pass")
+        if not g1_lane_load_scale_pass:
+            blockers.append("g1_full_load_lane::observed_load_scale_below_required_full_load")
         if not lane_blockers:
             blockers.append("g1_full_load_lane:not_ready")
 
@@ -579,6 +601,7 @@ def build_snapshot(
         and external_benchmark_ready
         and fresh_ready
         and g1_full_mesh_ready
+        and g1_full_load_lane_ready
         and identity["matches"]
         and runner_policy_ready
         and self_hosted_runner_ready
@@ -671,6 +694,8 @@ def build_snapshot(
             "external_benchmark_receipts": {
                 "contract_pass": bool(external_benchmark_readiness.get("contract_pass")),
                 **external_benchmark_receipts,
+                "updates_reused_evidence": external_benchmark_updates.get("reused_evidence"),
+                "updates_fresh": external_benchmark_updates_fresh,
                 "ready": external_benchmark_ready,
             },
             "g1": {
@@ -681,6 +706,10 @@ def build_snapshot(
                 "full_load_hip_newton_lane_status": str(
                     g1_full_load_lane.get("status", "")
                 ),
+                "full_load_hip_newton_lane_reused_evidence": g1_full_load_lane.get("reused_evidence"),
+                "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
+                "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
+                "full_load_hip_newton_lane_required_load_scale": g1_lane_required_load,
             },
             "product_identity": identity,
             "github_actions_runner_policy": {

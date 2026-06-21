@@ -54,3 +54,79 @@ def test_runner_policy_accepts_self_hosted_expression(tmp_path: Path) -> None:
     assert payload["contract_pass"] is True
     assert payload["status"] == "pass"
     assert payload["blockers"] == []
+
+
+def test_runner_policy_accepts_multiline_self_hosted_labels(tmp_path: Path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text(
+        (
+            "name: CI\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on:\n"
+            "      - self-hosted\n"
+            "      - linux\n"
+            "      - x64\n"
+        ),
+        encoding="utf-8",
+    )
+
+    payload = check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["rows"][0]["runs_on"] == "self-hosted, linux, x64"
+    assert payload["blockers"] == []
+
+
+def test_runner_policy_blocks_multiline_github_hosted_labels(tmp_path: Path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text(
+        (
+            "name: CI\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on:\n"
+            "      - ubuntu-latest\n"
+        ),
+        encoding="utf-8",
+    )
+
+    payload = check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["blockers"] == [
+        ".github/workflows/ci.yml:4:github_hosted_runner_label:ubuntu-latest"
+    ]
+
+
+def test_runner_policy_accepts_runner_group_label_object(tmp_path: Path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text(
+        (
+            "name: CI\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on:\n"
+            "      group: structural-self-hosted\n"
+            "      labels:\n"
+            "        - self-hosted\n"
+            "        - linux\n"
+            "        - x64\n"
+        ),
+        encoding="utf-8",
+    )
+
+    payload = check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["rows"][0]["runs_on"] == "self-hosted, linux, x64"
+    assert payload["blockers"] == []

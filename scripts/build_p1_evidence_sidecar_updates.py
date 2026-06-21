@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -31,6 +32,7 @@ from preflight_p1_evidence_sidecar_intake import (  # noqa: E402
 
 
 SCHEMA_VERSION = "p1-evidence-sidecar-intake.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_EXTERNAL_OUT = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES
 DEFAULT_RESIDUAL_OUT = DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES
 EXTERNAL_SUBMISSION_IDS = {
@@ -113,6 +115,26 @@ def _existing_updates(path: Path | None) -> dict[str, dict[str, Any]]:
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head(repo_root: Path) -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_root,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _metadata_fields(*, repo_root: Path, reused_evidence: bool) -> dict[str, Any]:
+    return {
+        "source_commit_sha": _git_head(repo_root),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": reused_evidence,
+    }
 
 
 def _normalize_reference(reference: str, *, repo_root: Path) -> str:
@@ -262,21 +284,81 @@ def build_sidecars(
     external_payload = {
         "schema_version": "external-benchmark-submission-updates.v1",
         "generated_at": generated_at,
+        **_metadata_fields(repo_root=repo_root, reused_evidence=False),
         "evidence_basis": {
             "basis_kind": "p1_evidence_intake_manifest",
             "intake_manifest": str(intake_manifest),
             "actual_external_submission_receipts_attached": all(bool(row) for row in external_updates.values()),
         },
+        "claim_boundary": (
+            "External benchmark update sidecars are generated only from intake manifest rows "
+            "or preserved pending rows. They do not synthesize submission receipts."
+        ),
         "updates": external_updates,
     }
     residual_payload = {
         "schema_version": "residual-holdout-closure-updates.v1",
         "generated_at": generated_at,
+        **_metadata_fields(repo_root=repo_root, reused_evidence=False),
         "evidence_basis": {
             "basis_kind": "p1_evidence_intake_manifest",
             "intake_manifest": str(intake_manifest),
             "actual_closure_evidence_attached": all(bool(row) for row in residual_updates.values()),
         },
+        "claim_boundary": (
+            "Residual holdout update sidecars are generated only from intake manifest rows "
+            "or preserved pending rows. They do not synthesize closure evidence."
+        ),
+        "updates": residual_updates,
+    }
+    return external_payload, residual_payload
+
+
+def build_metadata_only_sidecars(
+    *,
+    base_external_updates: Path | None,
+    base_residual_updates: Path | None,
+    repo_root: Path,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    generated_at = _now()
+    external_updates = {
+        queue_id: dict(_existing_updates(base_external_updates).get(queue_id, {}))
+        for queue_id in EXTERNAL_EXPECTED_QUEUE_IDS
+    }
+    residual_updates = {
+        work_item_id: dict(_existing_updates(base_residual_updates).get(work_item_id, {}))
+        for work_item_id in RESIDUAL_EXPECTED_WORK_ITEM_IDS
+    }
+    external_payload = {
+        "schema_version": "external-benchmark-submission-updates.v1",
+        "generated_at": generated_at,
+        **_metadata_fields(repo_root=repo_root, reused_evidence=True),
+        "evidence_basis": {
+            "basis_kind": "existing_sidecar_metadata_refresh",
+            "base_external_updates": str(base_external_updates or ""),
+            "actual_external_submission_receipts_attached": all(bool(row.get("receipt_url")) for row in external_updates.values()),
+        },
+        "claim_boundary": (
+            "Metadata-only refresh preserves existing external benchmark sidecar rows and "
+            "marks reused_evidence=true. It does not create, infer, or attach receipts."
+        ),
+        "updates": external_updates,
+    }
+    residual_payload = {
+        "schema_version": "residual-holdout-closure-updates.v1",
+        "generated_at": generated_at,
+        **_metadata_fields(repo_root=repo_root, reused_evidence=True),
+        "evidence_basis": {
+            "basis_kind": "existing_sidecar_metadata_refresh",
+            "base_residual_updates": str(base_residual_updates or ""),
+            "actual_closure_evidence_attached": all(
+                bool(row.get("closure_evidence_path")) for row in residual_updates.values()
+            ),
+        },
+        "claim_boundary": (
+            "Metadata-only refresh preserves existing residual holdout sidecar rows and "
+            "marks reused_evidence=true. It does not create, infer, or attach closure evidence."
+        ),
         "updates": residual_updates,
     }
     return external_payload, residual_payload
@@ -340,7 +422,7 @@ def _failure_summary(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--intake-manifest", type=Path, required=True)
+    parser.add_argument("--intake-manifest", type=Path)
     parser.add_argument("--base-external-updates", type=Path, default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES)
     parser.add_argument("--base-residual-updates", type=Path, default=DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES)
     parser.add_argument("--external-out", type=Path, default=DEFAULT_EXTERNAL_OUT)
@@ -349,6 +431,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--summary-out", type=Path)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--require-complete", action="store_true")
+    parser.add_argument("--metadata-only-existing", action="store_true")
     parser.add_argument("--fail-open", action="store_true")
     return parser
 
@@ -356,13 +439,22 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        external_payload, residual_payload = build_sidecars(
-            intake_manifest=args.intake_manifest,
-            base_external_updates=args.base_external_updates,
-            base_residual_updates=args.base_residual_updates,
-            repo_root=args.repo_root,
-            require_complete=args.require_complete,
-        )
+        if args.metadata_only_existing:
+            external_payload, residual_payload = build_metadata_only_sidecars(
+                base_external_updates=args.base_external_updates,
+                base_residual_updates=args.base_residual_updates,
+                repo_root=args.repo_root,
+            )
+        else:
+            if args.intake_manifest is None:
+                raise ValueError("--intake-manifest is required unless --metadata-only-existing is set")
+            external_payload, residual_payload = build_sidecars(
+                intake_manifest=args.intake_manifest,
+                base_external_updates=args.base_external_updates,
+                base_residual_updates=args.base_residual_updates,
+                repo_root=args.repo_root,
+                require_complete=args.require_complete,
+            )
         summary = _summary(
             external_payload=external_payload,
             residual_payload=residual_payload,

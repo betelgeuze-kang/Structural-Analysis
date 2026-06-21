@@ -1,0 +1,32 @@
+{
+  "artifacts": {
+    "external_benchmark_submission_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
+    "repo_root": ".",
+    "residual_holdout_closure_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
+  },
+  "blockers": [
+    "external_receipt_or_closure_pending:hardest_external_10case",
+    "external_receipt_or_closure_pending:tpu_hffb",
+    "external_receipt_or_closure_pending:peer_spd_hinge",
+    "external_receipt_or_closure_pending:korean_public_structures"
+  ],
+  "contract_pass": false,
+  "reason_code": "ERR_P1_EVIDENCE_SIDECAR_INTAKE_PENDING",
+  "schema_version": "p1-evidence-sidecar-intake.v1",
+  "summary": {
+    "evidence_contract_pass": false,
+    "external_closure_evidence_attached_count": 0,
+    "external_expected_queue_count": 4,
+    "external_expected_rows_present": true,
+    "external_receipt_attached_count": 0,
+    "external_receipt_pending_count": 4,
+    "external_update_row_count": 4,
+    "residual_closed_count": 3,
+    "residual_closure_evidence_attached_count": 3,
+    "residual_closure_pending_count": 0,
+    "residual_expected_rows_present": true,
+    "residual_expected_work_item_count": 3,
+    "residual_update_row_count": 3,
+    "structure_only_contract_pass": true
+  }
+}

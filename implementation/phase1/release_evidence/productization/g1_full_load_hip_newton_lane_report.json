@@ -40,14 +40,14 @@
     "finite_difference"
   ],
   "contract_pass": false,
-  "dry_run": true,
+  "dry_run": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T05:31:57.500453+00:00",
+  "generated_at": "2026-06-21T05:49:58.614490+00:00",
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "97c5161a6abc5a9e237fc13726088286e512079c",
+  "source_commit_sha": "de0002a2165a066b9fc50c876893fea92cd8f378",
   "status": "blocked"
 }

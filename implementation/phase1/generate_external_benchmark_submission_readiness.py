@@ -7,8 +7,10 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_RELEASE_GAP_REPORT = Path("implementation/phase1/release/release_gap_report.json")
 DEFAULT_COMMERCIAL_READINESS_REPORT = Path("implementation/phase1/commercial_readiness_report.json")
 DEFAULT_TPU_HFFB_BENCHMARK_REPORT = Path("implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json")
@@ -54,6 +56,18 @@ SUBMISSION_LANE_DEFAULTS = {
         "closure_evidence_required": "korean_public_structures_submission_receipt_or_authority_review_hold",
     },
 }
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parents[2],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -589,9 +603,17 @@ def build_submission_readiness(
     return {
         "schema_version": "1.0",
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "contract_pass": contract_pass,
         "reason_code": reason_code,
         "reason": REASONS[reason_code],
+        "claim_boundary": (
+            "External benchmark submission readiness is a local queue/readiness projection. "
+            "It does not create or attach external benchmark submission receipts; receipt "
+            "closure remains governed by external_benchmark_submission_updates."
+        ),
         "checks": {
             "core_holdouts_closed": core_holdouts_closed,
             "diversified_benchmark_gates_pass": diversified_benchmark_gates_pass,

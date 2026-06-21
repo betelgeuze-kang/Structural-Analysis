@@ -38,11 +38,95 @@ def _display_path(path: Path, workflow_dir: Path) -> str:
         return str(path)
 
 
-def _runs_on_value(line: str) -> str | None:
-    stripped = line.strip()
-    if not stripped.startswith("runs-on:"):
-        return None
-    return stripped.split(":", 1)[1].strip().strip('"').strip("'")
+def _indent(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
+
+
+def _clean_scalar(value: str) -> str:
+    value = value.strip()
+    if value.startswith("#"):
+        return ""
+    if " #" in value:
+        value = value.split(" #", 1)[0].strip()
+    return value.strip().strip('"').strip("'")
+
+
+def _collect_nested_list_values(
+    *,
+    lines: list[str],
+    start_index: int,
+    parent_indent: int,
+) -> tuple[list[str], int]:
+    values: list[str] = []
+    index = start_index
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            index += 1
+            continue
+        if _indent(line) <= parent_indent:
+            break
+        if stripped.startswith("- "):
+            value = _clean_scalar(stripped[2:])
+            if value:
+                values.append(value)
+        index += 1
+    return values, index
+
+
+def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
+    entries: list[tuple[int, str]] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        stripped = line.strip()
+        if not stripped.startswith("runs-on:"):
+            index += 1
+            continue
+        line_number = index + 1
+        runs_on_indent = _indent(line)
+        inline_value = _clean_scalar(stripped.split(":", 1)[1])
+        if inline_value:
+            entries.append((line_number, inline_value))
+            index += 1
+            continue
+
+        values: list[str] = []
+        child_index = index + 1
+        while child_index < len(lines):
+            child = lines[child_index]
+            child_stripped = child.strip()
+            if not child_stripped or child_stripped.startswith("#"):
+                child_index += 1
+                continue
+            child_indent = _indent(child)
+            if child_indent <= runs_on_indent:
+                break
+            if child_stripped.startswith("- "):
+                value = _clean_scalar(child_stripped[2:])
+                if value:
+                    values.append(value)
+                child_index += 1
+                continue
+            if child_stripped.startswith("labels:"):
+                label_value = _clean_scalar(child_stripped.split(":", 1)[1])
+                if label_value:
+                    values.append(label_value)
+                    child_index += 1
+                    continue
+                nested, next_index = _collect_nested_list_values(
+                    lines=lines,
+                    start_index=child_index + 1,
+                    parent_indent=child_indent,
+                )
+                values.extend(nested)
+                child_index = next_index
+                continue
+            child_index += 1
+        entries.append((line_number, ", ".join(values)))
+        index = child_index
+    return entries
 
 
 def check_runner_policy(*, workflow_dir: Path = DEFAULT_WORKFLOW_DIR) -> dict[str, Any]:
@@ -51,10 +135,8 @@ def check_runner_policy(*, workflow_dir: Path = DEFAULT_WORKFLOW_DIR) -> dict[st
     blockers: list[str] = []
     for workflow in _workflow_files(workflow_dir):
         rel_path = _display_path(workflow, workflow_dir)
-        for line_number, line in enumerate(workflow.read_text(encoding="utf-8").splitlines(), start=1):
-            value = _runs_on_value(line)
-            if value is None:
-                continue
+        lines = workflow.read_text(encoding="utf-8").splitlines()
+        for line_number, value in _runs_on_entries(lines):
             github_hosted = bool(GITHUB_HOSTED_LABEL_RE.search(value))
             uses_self_hosted_default = "self-hosted" in value
             row = {

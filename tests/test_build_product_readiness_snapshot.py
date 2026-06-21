@@ -147,7 +147,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "external-benchmark-submission-updates.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
-        "reused_evidence": True,
+        "reused_evidence": False,
         "updates": {
             f"EB-{idx:03d}": {
                 "receipt_url": f"https://example.invalid/eb/{idx}",
@@ -804,6 +804,111 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
     assert "external_benchmark::submission_receipts_pending=4" in payload["blockers"]
 
 
+def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_text(
+        tmp_path / "README.md",
+        "PM release areas are `16/16` green. Current action register has `0` open blocker handoffs.\n",
+    )
+    _write_text(
+        tmp_path / "docs/commercialization-gap-current-state.md",
+        "PM release areas are `16/16` green. The open blocker total is `0`.\n",
+    )
+    _write_json(tmp_path / "pm_release_gate_report.json", {
+        "schema_version": "pm-release-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "limited_commercial_release_ready": True,
+        "release_area_gate_ready": True,
+        "full_release_gate_ready": True,
+        "paid_pilot_candidate": True,
+        "ga_enterprise_ready": True,
+        "release_area_matrix": [{"ok": True} for _ in range(16)],
+        "release_area_blockers": [],
+        "full_release_blockers": [],
+    })
+    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
+        "schema_version": "pm-release-blocker-action-register.v1",
+        "summary": {"open_blocker_count": 0},
+    })
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 8,
+            "fresh_validation_receipt_pass_count": 8,
+        },
+        "blockers": [],
+    })
+    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
+        "schema_version": "customer-shadow-evidence-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "blockers": [],
+    })
+    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "full_g1_closure_ready": True,
+        "full_g1_closure_blockers": [],
+        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+        "blockers": [],
+    })
+    _write_common_metadata(tmp_path, commit=commit)
+    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
+        "schema_version": "external-benchmark-submission-readiness.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "summary": {
+            "submission_queue_count": 4,
+            "submission_receipt_attached_count": 4,
+            "submission_receipt_pending_count": 0,
+        },
+    })
+    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
+        "schema_version": "external-benchmark-submission-updates.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "updates": {
+            f"EB-{idx:03d}": {
+                "receipt_url": f"https://example.invalid/eb/{idx}",
+                "receipt_status": "attached",
+                "closure_evidence_status": "attached",
+            }
+            for idx in range(1, 5)
+        },
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["external_benchmark_receipts"]["updates_fresh"] is False
+    assert payload["components"]["external_benchmark_receipts"]["ready"] is False
+    assert (
+        "external_benchmark::submission_updates_reused_evidence_not_fresh"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
 def test_snapshot_requires_schema_versions_for_release_operation_inputs(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
@@ -971,4 +1076,102 @@ def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load"
         in payload["blockers"]
     )
+    assert "g1_full_load_lane::full_load_input_not_pass" in payload["blockers"]
+    assert (
+        "g1_full_load_lane::observed_load_scale_below_required_full_load"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_text(
+        tmp_path / "README.md",
+        "PM release areas are `16/16` green. Current action register has `0` open blocker handoffs.\n",
+    )
+    _write_text(
+        tmp_path / "docs/commercialization-gap-current-state.md",
+        "PM release areas are `16/16` green. The open blocker total is `0`.\n",
+    )
+    _write_json(tmp_path / "pm_release_gate_report.json", {
+        "schema_version": "pm-release-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "limited_commercial_release_ready": True,
+        "release_area_gate_ready": True,
+        "full_release_gate_ready": True,
+        "paid_pilot_candidate": True,
+        "ga_enterprise_ready": True,
+        "release_area_matrix": [{"ok": True} for _ in range(16)],
+        "release_area_blockers": [],
+        "full_release_blockers": [],
+    })
+    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
+        "schema_version": "pm-release-blocker-action-register.v1",
+        "summary": {"open_blocker_count": 0},
+    })
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 8,
+            "fresh_validation_receipt_pass_count": 8,
+        },
+        "blockers": [],
+    })
+    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
+        "schema_version": "customer-shadow-evidence-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
+        "blockers": [],
+    })
+    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "full_g1_closure_ready": True,
+        "full_g1_closure_blockers": [],
+        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+        "blockers": [],
+    })
+    _write_common_metadata(tmp_path, commit=commit)
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "status": "ready",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["g1"]["full_mesh_full_load_ready"] is True
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert (
+        payload["components"]["g1"]["full_load_hip_newton_lane_reused_evidence"]
+        is True
+    )
+    assert "g1_full_load_lane::reused_evidence_not_false" in payload["blockers"]
     assert payload["paid_pilot_ready"] is False
