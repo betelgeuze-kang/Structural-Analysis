@@ -31,3 +31,18 @@ def test_readiness_snapshot_summary_is_doc_synced() -> None:
 
     for path in DOCS:
         assert expected in path.read_text(encoding="utf-8"), path
+
+
+def test_docs_do_not_claim_github_sync_complete_while_snapshot_blocks() -> None:
+    payload = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    github_sync_blocked = any(
+        str(blocker).startswith("pm_release::github_sync::")
+        for blocker in payload["blockers"]
+    )
+    if not github_sync_blocked:
+        return
+
+    forbidden = "GitHub development sync is complete"
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        assert forbidden not in text, path
