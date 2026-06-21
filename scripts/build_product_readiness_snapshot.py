@@ -515,6 +515,54 @@ def _g1_child_gate_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
+    proof = _as_dict(lane_payload.get("hip_consistency_proof"))
+    receipt_blockers = [str(item) for item in _as_list(proof.get("receipt_blockers"))]
+    runtime_blockers = [str(item) for item in _as_list(proof.get("runtime_blockers"))]
+    blockers = [str(item) for item in _as_list(lane_payload.get("blockers"))]
+    proof_blockers = [
+        item for item in blockers if item.startswith("hip_consistency_proof")
+    ]
+    if not proof:
+        proof_blockers.append("hip_consistency_proof_missing")
+    if proof.get("reused_evidence") is not False:
+        proof_blockers.append("hip_consistency_proof_reused_evidence_not_false")
+    if proof.get("rocm_hip_required") is not True:
+        proof_blockers.append("hip_consistency_proof_rocm_hip_not_required")
+    if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
+        proof_blockers.append("hip_consistency_proof_gate_not_passed")
+    if receipt_blockers:
+        proof_blockers.append("hip_consistency_proof_has_blockers")
+    proof_blockers.extend(
+        f"hip_consistency_proof_runtime::{item}" for item in runtime_blockers
+    )
+    proof_blockers = sorted(dict.fromkeys(proof_blockers))
+    ready = bool(
+        proof
+        and proof.get("reused_evidence") is False
+        and proof.get("rocm_hip_required") is True
+        and proof.get("consistent_residual_jacobian_newton_gate_passed") is True
+        and not receipt_blockers
+        and not runtime_blockers
+        and not proof_blockers
+    )
+    return {
+        "ready": ready,
+        "blockers": proof_blockers,
+        "path": str(proof.get("path", "")),
+        "present": bool(proof.get("present")),
+        "status": str(proof.get("status", "")),
+        "source_commit_sha": str(proof.get("source_commit_sha", "") or ""),
+        "reused_evidence": proof.get("reused_evidence"),
+        "rocm_hip_required": proof.get("rocm_hip_required"),
+        "consistent_residual_jacobian_newton_gate_passed": proof.get(
+            "consistent_residual_jacobian_newton_gate_passed"
+        ),
+        "receipt_blockers": receipt_blockers,
+        "runtime_blockers": runtime_blockers,
+    }
+
+
 def _pyproject_project_metadata(
     repo_root: Path,
     path: Path,
@@ -882,6 +930,9 @@ def build_snapshot(
     g1_lane_child_hip_refresh_ready = bool(g1_lane_child_hip_refresh["ready"])
     g1_lane_child_gate = _g1_child_gate_summary(g1_full_load_lane)
     g1_lane_child_gate_ready = bool(g1_lane_child_gate["ready"])
+    g1_lane_hip_consistency_proof = _g1_hip_consistency_proof_summary(
+        g1_full_load_lane
+    )
     g1_full_load_lane_ready = bool(
         _contract_pass(g1_full_load_lane)
         and str(g1_full_load_lane.get("status", "")).lower() == "ready"
@@ -890,6 +941,7 @@ def build_snapshot(
         and g1_lane_load_scale_pass
         and g1_lane_child_hip_refresh_ready
         and g1_lane_child_gate_ready
+        and bool(g1_lane_hip_consistency_proof["ready"])
         and not _as_list(g1_full_load_lane.get("blockers"))
     )
     if not g1_full_load_lane_ready:
@@ -902,6 +954,10 @@ def build_snapshot(
         blockers.extend(
             f"g1_full_load_lane::{item}"
             for item in _as_list(g1_lane_child_gate.get("blockers"))
+        )
+        blockers.extend(
+            f"g1_full_load_lane::{item}"
+            for item in _as_list(g1_lane_hip_consistency_proof.get("blockers"))
         )
         if not g1_lane_reused_ok:
             blockers.append("g1_full_load_lane::reused_evidence_not_false")
@@ -1088,6 +1144,12 @@ def build_snapshot(
                     g1_lane_child_gate_ready
                 ),
                 "full_load_hip_newton_child_gate": g1_lane_child_gate,
+                "full_load_hip_newton_hip_consistency_proof_ready": (
+                    bool(g1_lane_hip_consistency_proof["ready"])
+                ),
+                "full_load_hip_newton_hip_consistency_proof": (
+                    g1_lane_hip_consistency_proof
+                ),
             },
             "product_identity": identity,
             "github_actions_runner_policy": {

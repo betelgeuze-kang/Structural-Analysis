@@ -79,6 +79,27 @@ def _g1_child_gate_evidence(*, ready: bool = True) -> dict:
     }
 
 
+def _g1_hip_consistency_proof(*, ready: bool = True) -> dict:
+    return {
+        "path": "implementation/phase1/release_evidence/productization/"
+        "mgt_residual_jacobian_consistency_hip_required_probe.json",
+        "present": True,
+        "status": "ready" if ready else "partial",
+        "source_commit_sha": "abc123",
+        "reused_evidence": False,
+        "rocm_hip_required": True,
+        "consistent_residual_jacobian_newton_gate_passed": ready,
+        "receipt_blockers": [] if ready else [
+            "rocm_hip_runtime_unavailable",
+            "hip_residual_jacobian_consistency_not_executed",
+        ],
+        "runtime_blockers": [] if ready else [
+            "dev_kfd_missing",
+            "dev_dri_missing",
+        ],
+    }
+
+
 def _paths(tmp_path: Path) -> SnapshotInputPaths:
     return SnapshotInputPaths(
         readme=Path("README.md"),
@@ -157,6 +178,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "status": "ready",
         "checkpoint": {"load_scale": 1.0},
         "full_load_input_pass": True,
+        "hip_consistency_proof": _g1_hip_consistency_proof(),
         "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
         "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
@@ -1690,6 +1712,73 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
     )
     assert (
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_records_ready_g1_hip_consistency_proof_component(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
+    assert payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof_ready"
+    ] is True
+    assert proof["ready"] is True
+    assert proof["rocm_hip_required"] is True
+    assert proof["consistent_residual_jacobian_newton_gate_passed"] is True
+    assert proof["receipt_blockers"] == []
+    assert proof["runtime_blockers"] == []
+
+
+def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["hip_consistency_proof"] = _g1_hip_consistency_proof(ready=False)
+    # Simulate a buggy lane report that forgot to mirror proof blockers at the
+    # lane top level. The canonical snapshot must still block release.
+    g1_lane["blockers"] = []
+    g1_lane["contract_pass"] = True
+    g1_lane["status"] = "ready"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof_ready"
+    ] is False
+    assert proof["ready"] is False
+    assert proof["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
+    assert "g1_full_load_lane::hip_consistency_proof_gate_not_passed" in payload["blockers"]
+    assert "g1_full_load_lane::hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
         in payload["blockers"]
     )
     assert payload["paid_pilot_ready"] is False
