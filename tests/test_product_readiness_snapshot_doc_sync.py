@@ -41,7 +41,9 @@ def test_readiness_snapshot_summary_is_doc_synced() -> None:
     )
 
     for path in DOCS:
-        assert expected in path.read_text(encoding="utf-8"), path
+        text = path.read_text(encoding="utf-8")
+        assert expected in text, path
+        assert "build_product_readiness_snapshot.py --json --no-write" in text, path
 
 
 def test_docs_do_not_claim_github_sync_complete_while_snapshot_blocks() -> None:
@@ -109,6 +111,9 @@ def test_docs_describe_release_mode_as_non_mutating_checks() -> None:
         "query failure remains a blocker",
         "query failure는 blocker로 남기며",
     ]
+    query_error_override_fragments = [
+        "--write-query-error-evidence",
+    ]
     forbidden_fragments = [
         "Release mode refreshes that self-hosted runner status",
         "refreshes self-hosted runner status, rebuilds the canonical product readiness snapshot",
@@ -124,5 +129,6 @@ def test_docs_describe_release_mode_as_non_mutating_checks() -> None:
             or "재작성하지 않고 `--check`로 검증" in text
         ), path
         assert any(fragment in text for fragment in runner_query_failure_fragments), path
+        assert any(fragment in text for fragment in query_error_override_fragments), path
         for fragment in forbidden_fragments:
             assert fragment not in text, (path, fragment)

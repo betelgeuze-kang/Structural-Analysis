@@ -145,6 +145,32 @@ def test_self_hosted_runner_status_check_passes_without_writing(
     assert out.read_text(encoding="utf-8") == before
 
 
+def test_self_hosted_runner_status_check_ignores_top_level_source_commit_wrapper(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "runner-status.json"
+    payload = runner_status.build_status(
+        repo="owner/repo",
+        runner_rows=[_matching_runner()],
+    )
+    payload["source_commit_sha"] = "previous-wrapper-commit"
+    out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = runner_status.check_status_consistency(
+        out_path=out,
+        repo="owner/repo",
+        runner_rows=[_matching_runner()],
+    )
+
+    assert ok is True
+    assert message == "runner_status_consistent"
+    assert generated is not None
+    assert generated["contract_pass"] is True
+
+
 def test_self_hosted_runner_status_check_fails_when_missing(
     tmp_path: Path,
 ) -> None:
@@ -226,3 +252,74 @@ def test_self_hosted_runner_status_main_check_does_not_write(
 
     assert exit_code == 0
     assert out.read_text(encoding="utf-8") == before
+
+
+def test_self_hosted_runner_status_main_preserves_existing_on_live_query_failure(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    out = tmp_path / "runner-status.json"
+    payload = runner_status.build_status(
+        repo="owner/repo",
+        runner_rows=[_matching_runner()],
+    )
+    out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    before = out.read_text(encoding="utf-8")
+
+    monkeypatch.setattr(
+        runner_status,
+        "_query_runner_rows",
+        lambda repo: ([], "lookup api.github.com: Temporary failure in name resolution"),
+    )
+
+    exit_code = runner_status.main(
+        [
+            "--repo",
+            "owner/repo",
+            "--out",
+            str(out),
+        ]
+    )
+
+    assert exit_code == 2
+    assert out.read_text(encoding="utf-8") == before
+
+
+def test_self_hosted_runner_status_main_can_explicitly_write_query_error_evidence(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    out = tmp_path / "runner-status.json"
+    payload = runner_status.build_status(
+        repo="owner/repo",
+        runner_rows=[_matching_runner()],
+    )
+    out.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        runner_status,
+        "_query_runner_rows",
+        lambda repo: ([], "lookup api.github.com: Temporary failure in name resolution"),
+    )
+
+    exit_code = runner_status.main(
+        [
+            "--repo",
+            "owner/repo",
+            "--out",
+            str(out),
+            "--write-query-error-evidence",
+        ]
+    )
+
+    written = json.loads(out.read_text(encoding="utf-8"))
+    assert exit_code == 0
+    assert written["contract_pass"] is False
+    assert written["query_error"] == "lookup api.github.com: Temporary failure in name resolution"
+    assert "github_actions_self_hosted_runner_query_failed" in written["blockers"]

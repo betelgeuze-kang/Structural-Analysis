@@ -650,6 +650,12 @@ def build_lane_report(
         "child_hip_residual_refresh_evidence": (
             _child_hip_residual_refresh_evidence({})
         ),
+        "child_gate_evidence": _child_gate_evidence(
+            {},
+            {},
+            required_load_scale=float(required_load_scale),
+            full_load_tolerance=float(full_load_tolerance),
+        ),
         "child_safety_requirements": [
             "child_reused_evidence_false",
             "child_source_commit_matches_lane",
@@ -723,6 +729,12 @@ def build_lane_report(
     child_hip_residual_refresh_evidence = _child_hip_residual_refresh_evidence(
         child_payload
     )
+    child_gate_evidence = _child_gate_evidence(
+        child_payload,
+        child_gate,
+        required_load_scale=float(required_load_scale),
+        full_load_tolerance=float(full_load_tolerance),
+    )
     safety_blockers = _child_safety_blockers(
         child_payload=child_payload,
         child_gate=child_gate,
@@ -751,6 +763,7 @@ def build_lane_report(
         "child_exit_code": int(result.returncode),
         "child_output_json": str(output_json),
         "child_hip_residual_refresh_evidence": child_hip_residual_refresh_evidence,
+        "child_gate_evidence": child_gate_evidence,
     }, 0 if child_ready else 1
 
 
@@ -783,26 +796,38 @@ def _child_safety_blockers(
         observed_load_value >= float(required_load_scale) - float(full_load_tolerance)
     ):
         blockers.append("child_observed_load_scale_below_required_full_load")
+    if child_payload.get("direct_residual_newton_ready") is not True:
+        blockers.append("child_direct_residual_newton_ready_not_proven")
+    if child_gate.get("full_load_closure_passed") is not True:
+        blockers.append("child_full_load_closure_not_proven")
+    if child_gate.get("direct_residual_gate_passed") is not True:
+        blockers.append("child_direct_residual_gate_not_proven")
+    if child_gate.get("relative_increment_gate_passed") is not True:
+        blockers.append("child_relative_increment_gate_not_proven")
     residual_contract = child_payload.get("residual_contract")
     residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
     if residual_contract.get("hip_residual_engine_contract_passed") is not True:
         blockers.append("child_hip_residual_engine_contract_not_proven")
     consistent_jacobian_passed = bool(
         child_gate.get("consistent_residual_jacobian_newton_passed") is True
-        or child_gate.get("residual_jacobian_consistency_ready") is True
-        or residual_contract.get("consistent_residual_jacobian_newton_gate_passed")
-        is True
     )
     if not consistent_jacobian_passed:
         blockers.append("child_consistent_residual_jacobian_newton_not_proven")
-    material_newton_passed = bool(
-        child_gate.get("material_newton_breadth_passed") is True
-        or residual_contract.get("material_newton_gate_passed") is True
-        or residual_contract.get("state_dependent_material_newton_closure_passed")
+    if (
+        residual_contract.get("consistent_residual_jacobian_newton_gate_passed")
         is True
-    )
+        and not consistent_jacobian_passed
+    ):
+        blockers.append("child_consistent_residual_jacobian_contract_gate_conflict")
+    material_newton_passed = bool(child_gate.get("material_newton_breadth_passed") is True)
     if not material_newton_passed:
         blockers.append("child_material_newton_breadth_not_proven")
+    if (
+        residual_contract.get("material_newton_gate_passed") is True
+        or residual_contract.get("state_dependent_material_newton_closure_passed")
+        is True
+    ) and not material_newton_passed:
+        blockers.append("child_material_newton_contract_gate_conflict")
     if child_gate.get("cpu_acceptance_refresh_closure_blocked") is True:
         blockers.append("child_cpu_acceptance_refresh_closure_blocked")
     if child_gate.get("fallback_zero_passed") is not True:
@@ -835,6 +860,85 @@ def _child_hip_residual_refresh_blockers(child_payload: dict[str, Any]) -> list[
         if component.get("accepted_state_refresh_cpu_used") is True:
             blockers.append(f"{blocker_prefix}_cpu_residual_refresh_used")
     return blockers
+
+
+def _child_gate_evidence(
+    child_payload: dict[str, Any],
+    child_gate: dict[str, Any],
+    *,
+    required_load_scale: float,
+    full_load_tolerance: float,
+) -> dict[str, Any]:
+    closure_gate = child_gate.get("full_load_closure_gate")
+    closure_gate = closure_gate if isinstance(closure_gate, dict) else {}
+    observed_child_load = closure_gate.get("observed_load_scale")
+    try:
+        observed_load_value = float(observed_child_load)
+    except (TypeError, ValueError):
+        observed_load_value = None
+    load_scale_passed = bool(
+        observed_load_value is not None
+        and observed_load_value >= float(required_load_scale) - float(full_load_tolerance)
+    )
+    blockers: list[str] = []
+    if child_payload.get("direct_residual_newton_ready") is not True:
+        blockers.append("child_direct_residual_newton_ready_not_proven")
+    if child_gate.get("full_load_closure_passed") is not True:
+        blockers.append("child_full_load_closure_not_proven")
+    if not load_scale_passed:
+        blockers.append("child_observed_load_scale_below_required_full_load")
+    if child_gate.get("direct_residual_gate_passed") is not True:
+        blockers.append("child_direct_residual_gate_not_proven")
+    if child_gate.get("relative_increment_gate_passed") is not True:
+        blockers.append("child_relative_increment_gate_not_proven")
+    if child_gate.get("fallback_zero_passed") is not True:
+        blockers.append("child_fallback_zero_not_proven")
+    if child_gate.get("material_newton_breadth_passed") is not True:
+        blockers.append("child_material_newton_breadth_not_proven")
+    if child_gate.get("consistent_residual_jacobian_newton_passed") is not True:
+        blockers.append("child_consistent_residual_jacobian_newton_not_proven")
+    residual_contract = child_payload.get("residual_contract")
+    residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
+    if (
+        residual_contract.get("consistent_residual_jacobian_newton_gate_passed")
+        is True
+        and child_gate.get("consistent_residual_jacobian_newton_passed") is not True
+    ):
+        blockers.append("child_consistent_residual_jacobian_contract_gate_conflict")
+    if (
+        residual_contract.get("material_newton_gate_passed") is True
+        or residual_contract.get("state_dependent_material_newton_closure_passed")
+        is True
+    ) and child_gate.get("material_newton_breadth_passed") is not True:
+        blockers.append("child_material_newton_contract_gate_conflict")
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "schema_version": "g1-child-gate-evidence.v1",
+        "ready": not blockers,
+        "blockers": blockers,
+        "direct_residual_newton_ready": child_payload.get(
+            "direct_residual_newton_ready"
+        )
+        is True,
+        "full_load_closure_passed": child_gate.get("full_load_closure_passed")
+        is True,
+        "direct_residual_gate_passed": child_gate.get("direct_residual_gate_passed")
+        is True,
+        "relative_increment_gate_passed": (
+            child_gate.get("relative_increment_gate_passed") is True
+        ),
+        "fallback_zero_passed": child_gate.get("fallback_zero_passed") is True,
+        "material_newton_breadth_passed": (
+            child_gate.get("material_newton_breadth_passed") is True
+        ),
+        "consistent_residual_jacobian_newton_passed": (
+            child_gate.get("consistent_residual_jacobian_newton_passed") is True
+        ),
+        "observed_load_scale": observed_load_value,
+        "required_load_scale": float(required_load_scale),
+        "full_load_tolerance": float(full_load_tolerance),
+        "load_scale_passed": load_scale_passed,
+    }
 
 
 def _child_hip_residual_refresh_evidence(

@@ -365,6 +365,19 @@ def _schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
     ]
 
 
+def _exact_schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
+    expected = {
+        "g1_full_load_hip_newton_lane_report": "g1-full-load-hip-newton-lane.v1",
+    }
+    blockers: list[str] = []
+    for name, expected_schema in expected.items():
+        payload = artifacts.get(name, {})
+        schema = payload.get("schema_version")
+        if schema and schema != expected_schema:
+            blockers.append(f"schema_invalid:unexpected_schema_version:{name}")
+    return blockers
+
+
 def _collect_lane_blockers(payload: dict[str, Any]) -> list[str]:
     blockers = [str(item) for item in _as_list(payload.get("blockers"))]
     lanes = _as_dict(payload.get("lanes"))
@@ -441,6 +454,8 @@ def _g1_child_hip_residual_refresh_summary(
     blockers = [str(item) for item in _as_list(evidence.get("blockers"))]
     if not evidence:
         blockers.append("child_hip_residual_refresh_evidence_missing")
+    elif evidence.get("schema_version") != "g1-child-hip-residual-refresh-evidence.v1":
+        blockers.append("child_hip_residual_refresh_evidence_schema_invalid")
     for key, ready in component_ready.items():
         if not ready:
             blockers.append(f"{key}_child_hip_residual_refresh_not_ready")
@@ -450,6 +465,36 @@ def _g1_child_hip_residual_refresh_summary(
         "ready": ready,
         "blockers": blockers,
         "components": components,
+    }
+
+
+def _g1_child_gate_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
+    evidence = _as_dict(lane_payload.get("child_gate_evidence"))
+    blockers = [str(item) for item in _as_list(evidence.get("blockers"))]
+    if not evidence:
+        blockers.append("child_gate_evidence_missing")
+    elif evidence.get("schema_version") != "g1-child-gate-evidence.v1":
+        blockers.append("child_gate_evidence_schema_invalid")
+    for key, blocker in (
+        ("direct_residual_newton_ready", "child_direct_residual_newton_ready_not_proven"),
+        ("direct_residual_gate_passed", "child_direct_residual_gate_not_proven"),
+        ("relative_increment_gate_passed", "child_relative_increment_gate_not_proven"),
+        ("full_load_closure_passed", "child_full_load_closure_not_proven"),
+        ("load_scale_passed", "child_observed_load_scale_below_required_full_load"),
+        ("fallback_zero_passed", "child_fallback_zero_not_proven"),
+        ("material_newton_breadth_passed", "child_material_newton_breadth_not_proven"),
+        (
+            "consistent_residual_jacobian_newton_passed",
+            "child_consistent_residual_jacobian_newton_not_proven",
+        ),
+    ):
+        if evidence.get(key) is not True:
+            blockers.append(blocker)
+    blockers = sorted(dict.fromkeys(blockers))
+    return {
+        "ready": bool(evidence.get("ready") is True and not blockers),
+        "blockers": blockers,
+        "evidence": evidence,
     }
 
 
@@ -649,7 +694,11 @@ def build_snapshot(
         "github_actions_runner_policy": runner_policy,
         "github_actions_self_hosted_runner_status": self_hosted_runner_status,
     }
-    blockers.extend(_schema_version_blockers(schema_artifacts))
+    schema_blockers = [
+        *_schema_version_blockers(schema_artifacts),
+        *_exact_schema_version_blockers(schema_artifacts),
+    ]
+    blockers.extend(schema_blockers)
     metadata_rows = _metadata_rows(
         artifacts=metadata_artifacts,
         repo_root=repo_root,
@@ -809,6 +858,8 @@ def build_snapshot(
         g1_full_load_lane
     )
     g1_lane_child_hip_refresh_ready = bool(g1_lane_child_hip_refresh["ready"])
+    g1_lane_child_gate = _g1_child_gate_summary(g1_full_load_lane)
+    g1_lane_child_gate_ready = bool(g1_lane_child_gate["ready"])
     g1_full_load_lane_ready = bool(
         _contract_pass(g1_full_load_lane)
         and str(g1_full_load_lane.get("status", "")).lower() == "ready"
@@ -816,6 +867,7 @@ def build_snapshot(
         and g1_lane_full_load_input_pass
         and g1_lane_load_scale_pass
         and g1_lane_child_hip_refresh_ready
+        and g1_lane_child_gate_ready
         and not _as_list(g1_full_load_lane.get("blockers"))
     )
     if not g1_full_load_lane_ready:
@@ -824,6 +876,10 @@ def build_snapshot(
         blockers.extend(
             f"g1_full_load_lane::{item}"
             for item in _as_list(g1_lane_child_hip_refresh.get("blockers"))
+        )
+        blockers.extend(
+            f"g1_full_load_lane::{item}"
+            for item in _as_list(g1_lane_child_gate.get("blockers"))
         )
         if not g1_lane_reused_ok:
             blockers.append("g1_full_load_lane::reused_evidence_not_false")
@@ -867,6 +923,7 @@ def build_snapshot(
     schema_valid = bool(
         current_commit
         and all(payload.get("schema_version") for payload in schema_artifacts.values())
+        and not schema_blockers
     )
     if not schema_valid:
         blockers.append("schema_invalid:required_snapshot_inputs_missing")
@@ -1005,6 +1062,10 @@ def build_snapshot(
                 "full_load_hip_newton_child_hip_residual_refresh": (
                     g1_lane_child_hip_refresh
                 ),
+                "full_load_hip_newton_child_gate_ready": (
+                    g1_lane_child_gate_ready
+                ),
+                "full_load_hip_newton_child_gate": g1_lane_child_gate,
             },
             "product_identity": identity,
             "github_actions_runner_policy": {
@@ -1046,13 +1107,21 @@ def _strip_volatile_for_compare(
     payload: Any,
     path: tuple[str, ...] = (),
 ) -> Any:
-    """Return ``payload`` with volatile ``generated_at`` fields removed recursively."""
+    """Return ``payload`` with non-semantic snapshot wrapper fields removed.
+
+    The top-level source commit records the repository point used to generate
+    the checked-in snapshot. Committing the snapshot necessarily advances HEAD,
+    so freshness is enforced through the metadata source-state rows and blocker
+    set rather than by requiring that wrapper field to equal the current commit.
+    Nested source_commit_sha fields remain semantic.
+    """
     if isinstance(payload, dict):
         worktree_diagnostic_path = path == ("state_consistency", "worktree")
         return {
             key: _strip_volatile_for_compare(value, (*path, key))
             for key, value in payload.items()
             if key != "generated_at"
+            and not (path == () and key == "source_commit_sha")
             and not (worktree_diagnostic_path and key in {"status_rows", "dirty_paths"})
         }
     if isinstance(payload, list):
@@ -1092,8 +1161,9 @@ def check_snapshot_consistency(
 ) -> tuple[bool, str, dict[str, Any] | None]:
     """Non-mutating check that the stored snapshot matches a freshly generated one.
 
-    The volatile ``generated_at`` field is ignored. All other semantic fields
-    (commit, status, evidence freshness, blockers, component flags) must match.
+    Volatile ``generated_at`` fields and the top-level ``source_commit_sha``
+    wrapper are ignored. Nested source commits, status, evidence freshness,
+    blockers, and component flags must match.
 
     Returns ``(ok, message, generated_payload)``. ``generated_payload`` is the
     freshly generated snapshot for diagnostics when ``ok`` is ``False``.
@@ -1133,14 +1203,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
+        "--no-write",
+        action="store_true",
+        help=(
+            "Build and print the snapshot without writing --out. Use this for "
+            "inspection so protected evidence files are not refreshed accidentally."
+        ),
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help=(
             "Non-mutating: compare the existing --out file with a freshly generated "
-            "snapshot (ignoring generated_at) and exit non-zero if the stored "
-            "snapshot is missing, unreadable, or semantically different. When "
-            "combined with --fail-blocked, the matched snapshot must also be "
-            "release-ready."
+            "snapshot (ignoring generated_at and the top-level source_commit_sha "
+            "wrapper) and exit non-zero if the stored snapshot is missing, unreadable, "
+            "or semantically different. When combined with --fail-blocked, the "
+            "matched snapshot must also be release-ready."
         ),
     )
     return parser
@@ -1166,9 +1244,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Product readiness snapshot check: {message}")
         return 0
     payload = build_snapshot()
-    out.parent.mkdir(parents=True, exist_ok=True)
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
-    out.write_text(text, encoding="utf-8")
+    if not args.no_write:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text, encoding="utf-8")
     print(text if args.json else f"Product readiness snapshot: {payload['status']}", end="" if args.json else "\n")
     return 1 if args.fail_blocked and not payload["release_ready"] else 0
 

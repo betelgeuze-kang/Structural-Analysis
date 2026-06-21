@@ -173,15 +173,16 @@ def _parse_labels(value: str) -> tuple[str, ...]:
     return labels or DEFAULT_REQUIRED_LABELS
 
 
-def _strip_volatile_for_compare(payload: Any) -> Any:
+def _strip_volatile_for_compare(payload: Any, path: tuple[str, ...] = ()) -> Any:
     if isinstance(payload, dict):
         return {
-            key: _strip_volatile_for_compare(value)
+            key: _strip_volatile_for_compare(value, (*path, key))
             for key, value in payload.items()
             if key != "generated_at"
+            and not (path == () and key == "source_commit_sha")
         }
     if isinstance(payload, list):
-        return [_strip_volatile_for_compare(item) for item in payload]
+        return [_strip_volatile_for_compare(item, path) for item in payload]
     return payload
 
 
@@ -259,12 +260,21 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
+        "--write-query-error-evidence",
+        action="store_true",
+        help=(
+            "Allow a live gh api query failure to overwrite an existing runner-status "
+            "evidence file. The default preserves the last evidence on query failure."
+        ),
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help=(
             "Non-mutating: compare the existing --out status with a freshly computed "
-            "status, ignoring generated_at only. Exit non-zero if the stored status "
-            "is missing, unreadable, semantically stale, or blocked with --fail-blocked."
+            "status, ignoring generated_at and the top-level source_commit_sha wrapper. "
+            "Exit non-zero if the stored status is missing, unreadable, semantically "
+            "stale, or blocked with --fail-blocked."
         ),
     )
     return parser
@@ -299,6 +309,18 @@ def main(argv: list[str] | None = None) -> int:
         else:
             print(f"GitHub Actions self-hosted runner status check: {message}")
         return 0
+    if (
+        args.input_json is None
+        and query_error
+        and args.out.exists()
+        and not args.write_query_error_evidence
+    ):
+        print(
+            "GitHub Actions self-hosted runner status: preserving existing evidence "
+            f"after live query failure: {query_error}",
+            file=sys.stderr,
+        )
+        return 2
     payload = build_status(
         repo=args.repo,
         required_labels=required_labels,

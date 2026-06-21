@@ -57,6 +57,28 @@ def _g1_child_hip_refresh_evidence(*, ready: bool = True) -> dict:
     }
 
 
+def _g1_child_gate_evidence(*, ready: bool = True) -> dict:
+    return {
+        "schema_version": "g1-child-gate-evidence.v1",
+        "ready": ready,
+        "blockers": [] if ready else [
+            "child_direct_residual_gate_not_proven",
+            "child_relative_increment_gate_not_proven",
+        ],
+        "direct_residual_newton_ready": ready,
+        "full_load_closure_passed": ready,
+        "direct_residual_gate_passed": ready,
+        "relative_increment_gate_passed": ready,
+        "fallback_zero_passed": ready,
+        "material_newton_breadth_passed": ready,
+        "consistent_residual_jacobian_newton_passed": ready,
+        "observed_load_scale": 1.0 if ready else 0.656,
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "load_scale_passed": ready,
+    }
+
+
 def _paths(tmp_path: Path) -> SnapshotInputPaths:
     return SnapshotInputPaths(
         readme=Path("README.md"),
@@ -136,6 +158,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "checkpoint": {"load_scale": 1.0},
         "full_load_input_pass": True,
         "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+        "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
     })
     _write_json(tmp_path / "ux_new_user_observation_report.json", {
@@ -1503,6 +1526,31 @@ def test_snapshot_requires_schema_versions_for_release_operation_inputs(tmp_path
     )
 
 
+def test_snapshot_blocks_unexpected_g1_full_load_lane_schema(tmp_path: Path) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["schema_version"] = "g1-full-load-hip-newton-lane.v0"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert (
+        "schema_invalid:unexpected_schema_version:g1_full_load_hip_newton_lane_report"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+
+
 def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
     commit = "abc123"
     _write_text(
@@ -1614,6 +1662,7 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
         "required_load_scale": 1.0,
         "full_load_tolerance": 1.0e-12,
         "full_load_input_pass": True,
+        "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
     })
 
@@ -1642,6 +1691,182 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
     assert (
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready"
         in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_ready_g1_lane_with_invalid_child_hip_refresh_schema(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    child_hip_refresh = _g1_child_hip_refresh_evidence()
+    child_hip_refresh["schema_version"] = "wrong-schema.v1"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "status": "ready",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": child_hip_refresh,
+        "child_gate_evidence": _g1_child_gate_evidence(),
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert (
+        payload["components"]["g1"][
+            "full_load_hip_newton_child_hip_residual_refresh_ready"
+        ]
+        is False
+    )
+    assert (
+        "g1_full_load_lane::child_hip_residual_refresh_evidence_schema_invalid"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_ready_g1_lane_without_child_gate_evidence(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "status": "ready",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    g1_component = payload["components"]["g1"]
+    assert g1_component["full_load_hip_newton_lane_ready"] is False
+    assert g1_component["full_load_hip_newton_child_gate_ready"] is False
+    assert "g1_full_load_lane::child_gate_evidence_missing" in payload["blockers"]
+    assert "g1_full_load_lane::child_direct_residual_gate_not_proven" in payload["blockers"]
+    assert "g1_full_load_lane::child_relative_increment_gate_not_proven" in payload["blockers"]
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_ready_g1_lane_with_invalid_child_gate_schema(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    child_gate_evidence = _g1_child_gate_evidence()
+    child_gate_evidence["schema_version"] = "wrong-schema.v1"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": True,
+        "status": "ready",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+        "child_gate_evidence": child_gate_evidence,
+        "blockers": [],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert payload["components"]["g1"]["full_load_hip_newton_child_gate_ready"] is False
+    assert "g1_full_load_lane::child_gate_evidence_schema_invalid" in payload["blockers"]
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_surfaces_g1_child_contract_gate_conflict_blockers(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    child_gate_evidence = _g1_child_gate_evidence(ready=False)
+    child_gate_evidence["blockers"].extend([
+        "child_material_newton_contract_gate_conflict",
+        "child_consistent_residual_jacobian_contract_gate_conflict",
+    ])
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
+        "schema_version": "g1-full-load-hip-newton-lane.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": False,
+        "contract_pass": False,
+        "status": "blocked",
+        "checkpoint": {"load_scale": 1.0},
+        "required_load_scale": 1.0,
+        "full_load_tolerance": 1.0e-12,
+        "full_load_input_pass": True,
+        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+        "child_gate_evidence": child_gate_evidence,
+        "blockers": [
+            "child_direct_residual_gate_not_proven",
+            "child_relative_increment_gate_not_proven",
+            "child_material_newton_contract_gate_conflict",
+            "child_consistent_residual_jacobian_contract_gate_conflict",
+        ],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
+    assert (
+        "g1_full_load_lane::child_material_newton_contract_gate_conflict"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::child_direct_residual_gate_not_proven"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::child_relative_increment_gate_not_proven"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::child_consistent_residual_jacobian_contract_gate_conflict"
+        in payload["blockers"]
+    )
+    child_gate = payload["components"]["g1"]["full_load_hip_newton_child_gate"]
+    assert "child_material_newton_contract_gate_conflict" in child_gate["blockers"]
+    assert (
+        "child_consistent_residual_jacobian_contract_gate_conflict"
+        in child_gate["blockers"]
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -1721,6 +1946,7 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
         "full_load_tolerance": 1.0e-12,
         "full_load_input_pass": True,
         "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+        "child_gate_evidence": _g1_child_gate_evidence(),
         "blockers": [],
     })
 
@@ -1953,6 +2179,70 @@ def test_snapshot_check_ignores_volatile_generated_at_only(
     assert message == "snapshot_consistent"
 
 
+def test_snapshot_check_ignores_top_level_snapshot_source_commit_only(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    payload["source_commit_sha"] = "new-wrapper-commit-after-snapshot-was-checked-in"
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is True
+    assert message == "snapshot_consistent"
+    assert generated is not None
+    assert generated["source_commit_sha"] == commit
+
+
+def test_snapshot_check_keeps_nested_source_commit_rows_semantic(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+    payload["state_consistency"]["metadata_rows"][0]["source_commit_sha"] = (
+        "stale-upstream-evidence-commit"
+    )
+    snapshot_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
+        repo_root=tmp_path,
+        out_path=snapshot_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert ok is False
+    assert message.startswith("snapshot_semantic_mismatch:")
+    assert "state_consistency.metadata_rows" in message
+    assert generated is not None
+
+
 def test_snapshot_check_ignores_receipt_only_worktree_diagnostics(
     tmp_path: Path,
 ) -> None:
@@ -2070,6 +2360,62 @@ def test_main_check_returns_zero_on_match_and_writes_nothing(
     assert exit_code == 0
     assert snapshot_path.stat().st_mtime_ns == mtime_before
     assert snapshot_path.read_text(encoding="utf-8") == contents_before
+
+
+def test_main_no_write_prints_snapshot_without_touching_out(
+    tmp_path: Path,
+    monkeypatch,
+    capsys,
+) -> None:
+    snapshot_path = tmp_path / "product_readiness_snapshot.json"
+    snapshot_path.write_text(
+        '{"schema_version":"existing-product-readiness-snapshot.v1"}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(build_product_readiness_snapshot, "ROOT", tmp_path)
+
+    def fake_build_snapshot():
+        return {
+            "schema_version": "product-readiness-snapshot.v1",
+            "status": "ready",
+            "release_ready": True,
+        }
+
+    monkeypatch.setattr(
+        build_product_readiness_snapshot,
+        "build_snapshot",
+        fake_build_snapshot,
+    )
+    mtime_before = snapshot_path.stat().st_mtime_ns
+    contents_before = snapshot_path.read_text(encoding="utf-8")
+
+    exit_code = build_product_readiness_snapshot.main(
+        [
+            "--out",
+            "product_readiness_snapshot.json",
+            "--json",
+            "--no-write",
+        ]
+    )
+
+    output = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert output["schema_version"] == "product-readiness-snapshot.v1"
+    assert snapshot_path.stat().st_mtime_ns == mtime_before
+    assert snapshot_path.read_text(encoding="utf-8") == contents_before
+
+
+def test_help_documents_non_mutating_snapshot_modes(capsys) -> None:
+    try:
+        build_product_readiness_snapshot.main(["--help"])
+    except SystemExit as exc:
+        assert exc.code == 0
+
+    output = capsys.readouterr().out
+    normalized = " ".join(output.split())
+    assert "--no-write" in output
+    assert "protected evidence files are not refreshed accidentally" in normalized
+    assert "top-level source_commit_sha wrapper" in normalized
 
 
 def test_main_check_returns_nonzero_on_missing_snapshot(
