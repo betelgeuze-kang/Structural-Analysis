@@ -818,11 +818,17 @@ def test_direct_residual_hip_required_preflight_stops_before_missing_inputs(
         "rocm_hip_runtime_unavailable",
         "material_newton_not_executed",
     ]
+    assert gate["consistent_residual_jacobian_newton_passed"] is False
+    assert gate["consistent_residual_jacobian_newton_blockers"] == [
+        "rocm_hip_runtime_unavailable",
+        "consistent_residual_jacobian_newton_not_executed",
+    ]
     assert gate["fallback_zero_passed"] is False
     assert gate["fallback_zero_audit"]["fallback_zero_boundary_count"] == 1
     residual_contract = payload["residual_contract"]
     assert residual_contract["material_newton_gate_passed"] is False
     assert residual_contract["state_dependent_material_newton_closure_passed"] is False
+    assert residual_contract["consistent_residual_jacobian_newton_gate_passed"] is False
 
 
 def test_direct_residual_non_hip_missing_mgt_behavior_unchanged(tmp_path: Path) -> None:
@@ -1794,6 +1800,14 @@ def test_frozen_shell_material_hip_replay_does_not_claim_material_newton_closure
     assert payload["residual_contract"]["material_newton_gate_passed"] is False
     assert payload["gate_assessment"]["material_newton_breadth_passed"] is False
     assert (
+        payload["residual_contract"]["consistent_residual_jacobian_newton_gate_passed"]
+        is False
+    )
+    assert (
+        payload["gate_assessment"]["consistent_residual_jacobian_newton_passed"]
+        is False
+    )
+    assert (
         "material_newton_breadth_not_proven"
         in payload["gate_assessment"]["material_newton_breadth_blockers"]
     )
@@ -2085,7 +2099,9 @@ def test_state_dependent_claim_boundary_conservative_for_host_operator_refresh(
     )
     assert payload["residual_contract"]["material_newton_gate_passed"] is False
     assert payload["residual_contract"]["state_dependent_material_newton_closure_passed"] is False
+    assert payload["residual_contract"]["consistent_residual_jacobian_newton_gate_passed"] is False
     assert payload["gate_assessment"]["material_newton_breadth_passed"] is False
+    assert payload["gate_assessment"]["consistent_residual_jacobian_newton_passed"] is False
     assert (
         "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
         in payload["gate_assessment"]["material_newton_breadth_blockers"]

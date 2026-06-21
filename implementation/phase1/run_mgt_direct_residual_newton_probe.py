@@ -1088,6 +1088,11 @@ def _hip_runtime_unavailable_direct_probe_payload(
             "definition": "R(u, lambda) = F_int(u) - lambda * F_ext",
             "material_newton_gate_passed": False,
             "state_dependent_material_newton_closure_passed": False,
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "consistent_residual_jacobian_newton_blockers": [
+                "rocm_hip_runtime_unavailable",
+                "consistent_residual_jacobian_newton_not_executed",
+            ],
             "material_newton_breadth_blockers": [
                 "rocm_hip_runtime_unavailable",
                 "material_newton_not_executed",
@@ -1134,6 +1139,11 @@ def _hip_runtime_unavailable_direct_probe_payload(
             "material_newton_breadth_blockers": [
                 "rocm_hip_runtime_unavailable",
                 "material_newton_not_executed",
+            ],
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_blockers": [
+                "rocm_hip_runtime_unavailable",
+                "consistent_residual_jacobian_newton_not_executed",
             ],
             "rocm_hip_runtime_available": False,
             "fallback_zero_audit": fallback_zero_audit,
@@ -7132,8 +7142,14 @@ def run_mgt_direct_residual_newton_probe(
     material_newton_breadth_blockers = [
         "material_newton_breadth_not_proven",
     ]
+    consistent_residual_jacobian_newton_blockers = [
+        "consistent_residual_jacobian_newton_not_proven",
+    ]
     if apply_shell_material_tangent and allow_state_dependent_shell_material_tangent_hip_replay:
         material_newton_breadth_blockers.append(
+            "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
+        )
+        consistent_residual_jacobian_newton_blockers.append(
             "state_dependent_host_shell_operator_refresh_not_production_rocm_hip_residency"
         )
     payload = {
@@ -7161,6 +7177,10 @@ def run_mgt_direct_residual_newton_probe(
             "shell_material_tangent_residual_applied": bool(apply_shell_material_tangent),
             "material_newton_gate_passed": False,
             "state_dependent_material_newton_closure_passed": False,
+            "consistent_residual_jacobian_newton_gate_passed": False,
+            "consistent_residual_jacobian_newton_blockers": (
+                consistent_residual_jacobian_newton_blockers
+            ),
             "material_newton_breadth_blockers": material_newton_breadth_blockers,
             "allow_frozen_shell_material_tangent_hip_replay": bool(
                 allow_frozen_shell_material_tangent_hip_replay
@@ -7263,6 +7283,10 @@ def run_mgt_direct_residual_newton_probe(
             "direct_residual_newton_ready_requires_full_load": True,
             "material_newton_breadth_passed": False,
             "material_newton_breadth_blockers": material_newton_breadth_blockers,
+            "consistent_residual_jacobian_newton_passed": False,
+            "consistent_residual_jacobian_newton_blockers": (
+                consistent_residual_jacobian_newton_blockers
+            ),
             "hip_batch_replay_required_unavailable": (
                 hip_batch_replay_required_unavailable
             ),

@@ -356,6 +356,7 @@ def build_lane_report(
             "child_source_commit_matches_lane",
             "child_observed_load_scale_at_required_full_load",
             "child_hip_residual_engine_contract_passed",
+            "child_consistent_residual_jacobian_newton_passed",
             "child_material_newton_breadth_passed",
             "child_cpu_acceptance_refresh_not_blocked",
             "child_fallback_zero_passed",
@@ -363,10 +364,12 @@ def build_lane_report(
         "claim_boundary": (
             "This lane is a strict execution wrapper for representative full-load "
             "G1 HIP Newton evidence. It does not synthesize residual, increment, "
-            "material Newton breadth, customer, validation, or ROCm/HIP closure evidence. "
+            "consistent residual/Jacobian Newton closure, material Newton breadth, "
+            "customer, validation, or ROCm/HIP closure evidence. "
             "The child probe must explicitly prove full-load closure, HIP residual residency, "
-            "fallback-zero behavior, and material Newton breadth. A checkpoint below "
-            "load_scale 1.0 is blocked before execution."
+            "consistent residual/Jacobian Newton closure, fallback-zero behavior, "
+            "and material Newton breadth. A checkpoint below load_scale 1.0 is "
+            "blocked before execution."
         ),
     }
     if blockers:
@@ -459,6 +462,14 @@ def _child_safety_blockers(
     residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
     if residual_contract.get("hip_residual_engine_contract_passed") is not True:
         blockers.append("child_hip_residual_engine_contract_not_proven")
+    consistent_jacobian_passed = bool(
+        child_gate.get("consistent_residual_jacobian_newton_passed") is True
+        or child_gate.get("residual_jacobian_consistency_ready") is True
+        or residual_contract.get("consistent_residual_jacobian_newton_gate_passed")
+        is True
+    )
+    if not consistent_jacobian_passed:
+        blockers.append("child_consistent_residual_jacobian_newton_not_proven")
     material_newton_passed = bool(
         child_gate.get("material_newton_breadth_passed") is True
         or residual_contract.get("material_newton_gate_passed") is True
