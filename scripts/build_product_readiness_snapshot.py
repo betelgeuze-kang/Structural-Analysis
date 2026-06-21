@@ -161,6 +161,13 @@ def _git_status_short(repo_root: Path) -> list[str]:
     return [line.rstrip() for line in output.splitlines() if line.strip()]
 
 
+def _git_status_path(row: str) -> str:
+    text = row[3:].strip() if len(row) > 3 else row.strip()
+    if " -> " in text:
+        return text.rsplit(" -> ", 1)[1].strip()
+    return text
+
+
 def _receipt_commit_allowed_paths(paths: SnapshotInputPaths) -> set[str]:
     allowed_fields = {
         "readme",
@@ -527,12 +534,19 @@ def build_snapshot(
     blockers: list[str] = []
     repo_root = repo_root.resolve()
     current_commit = source_commit_sha if source_commit_sha is not None else _git_head(repo_root)
+    allowed_receipt_paths = _receipt_commit_allowed_paths(paths)
     worktree_status_rows = (
         []
         if source_commit_sha is not None
         else _git_status_short(repo_root)
     )
-    worktree_dirty = bool(worktree_status_rows)
+    worktree_dirty_paths = [_git_status_path(row) for row in worktree_status_rows]
+    worktree_non_receipt_dirty_paths = [
+        path
+        for path in worktree_dirty_paths
+        if not _receipt_commit_allowed_path(path, allowed_receipt_paths)
+    ]
+    worktree_dirty = bool(worktree_non_receipt_dirty_paths)
     if worktree_dirty:
         blockers.append("stale_or_inconsistent:worktree_dirty")
 
@@ -629,7 +643,7 @@ def build_snapshot(
         artifacts=metadata_artifacts,
         repo_root=repo_root,
         current_commit=current_commit,
-        allowed_receipt_paths=_receipt_commit_allowed_paths(paths),
+        allowed_receipt_paths=allowed_receipt_paths,
     )
     for row in metadata_rows:
         if not row["metadata_complete"]:
@@ -1006,6 +1020,8 @@ def build_snapshot(
             "worktree": {
                 "dirty": worktree_dirty,
                 "status_rows": worktree_status_rows,
+                "dirty_paths": worktree_dirty_paths,
+                "non_receipt_dirty_paths": worktree_non_receipt_dirty_paths,
             },
         },
         "artifacts": {

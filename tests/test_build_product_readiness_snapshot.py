@@ -733,10 +733,46 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
     assert payload["state_consistency"]["worktree"]["status_rows"] == [
         "?? solver_core.py",
     ]
+    assert payload["state_consistency"]["worktree"]["dirty_paths"] == [
+        "solver_core.py",
+    ]
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == [
+        "solver_core.py",
+    ]
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "receipt_only_commit"
     )
+
+
+def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    pm_report = json.loads((tmp_path / "pm_release_gate_report.json").read_text())
+    pm_report["generated_at"] = "2026-06-21T00:00:01+00:00"
+    _write_json(tmp_path / "pm_release_gate_report.json", pm_report)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is False
+    assert payload["state_consistency"]["worktree"]["status_rows"] == [
+        " M pm_release_gate_report.json",
+    ]
+    assert payload["state_consistency"]["worktree"]["dirty_paths"] == [
+        "pm_release_gate_report.json",
+    ]
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []
+    assert payload["status"] == "ready"
+    assert payload["evidence_fresh"] is True
 
 
 def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path) -> None:
