@@ -590,6 +590,37 @@ def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
 
 
+def test_auto_select_ignores_generic_npz_path_records(tmp_path: Path) -> None:
+    generic = _checkpoint(tmp_path / "generic_deleted_candidate.npz", load_scale=1.0)
+    frontier = _checkpoint(tmp_path / "frontier.npz", load_scale=0.8)
+    source = tmp_path / "source.json"
+    source.write_text(
+        json.dumps(
+            {
+                "schema_version": "test-evidence-source.v1",
+                "documented_deleted_checkpoint_candidates": [
+                    {"path": str(generic)},
+                ],
+                "latest_frontier_compact_checkpoint": str(frontier),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(source,),
+    )
+
+    assert exit_code == 1
+    selection = payload["checkpoint_resolution"]["selection"]
+    assert selection["candidate_count"] == 1
+    assert selection["selected_checkpoint"]["path"] == str(frontier)
+    assert selection["highest_observed_load_scale"] == 0.8
+    assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+
+
 def test_auto_select_with_no_loadable_candidates_blocks(tmp_path: Path) -> None:
     source = tmp_path / "source.json"
     _write_evidence_source(

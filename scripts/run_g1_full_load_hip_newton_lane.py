@@ -31,8 +31,8 @@ CHECKPOINT_EVIDENCE_SOURCES: tuple[Path, ...] = (
     PRODUCTIZATION / "mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
 )
 NPZ_PATH_KEYS: tuple[str, ...] = (
-    "path",
     "compact_checkpoint",
+    "latest_frontier_compact_checkpoint",
     "retained_checkpoint",
     "retained_checkpoint_npz",
     "retained_checkpoint_at_time",
@@ -106,25 +106,25 @@ def _normalize_workspace_path(value: object) -> Path | None:
     return candidate
 
 
-def _collect_npz_paths_from_json(payload: object) -> set[Path]:
-    found: set[Path] = set()
+def _collect_npz_paths_from_json(payload: object) -> list[Path]:
+    found: list[Path] = []
     if isinstance(payload, dict):
         for key, value in payload.items():
             if key in NPZ_PATH_KEYS and isinstance(value, str):
                 resolved = _normalize_workspace_path(value)
                 if resolved is not None:
-                    found.add(resolved)
+                    found.append(resolved)
                 continue
             if isinstance(value, dict):
                 inner_path = value.get("path")
                 if isinstance(inner_path, str) and key in NPZ_PATH_KEYS:
                     resolved = _normalize_workspace_path(inner_path)
                     if resolved is not None:
-                        found.add(resolved)
-            found.update(_collect_npz_paths_from_json(value))
+                        found.append(resolved)
+            found.extend(_collect_npz_paths_from_json(value))
     elif isinstance(payload, list):
         for entry in payload:
-            found.update(_collect_npz_paths_from_json(entry))
+            found.extend(_collect_npz_paths_from_json(entry))
     return found
 
 
@@ -150,7 +150,10 @@ def _scan_evidence_checkpoint_paths(
             per_source.append(entry)
             continue
         entry["available"] = True
-        paths = sorted(_collect_npz_paths_from_json(payload))
+        paths: list[Path] = []
+        for path in _collect_npz_paths_from_json(payload):
+            if path not in paths:
+                paths.append(path)
         for path in paths:
             if path not in candidates:
                 candidates.append(path)
@@ -168,10 +171,11 @@ def _auto_select_checkpoint(
 ) -> dict[str, Any]:
     candidates, per_source = _scan_evidence_checkpoint_paths(sources)
     observed: list[dict[str, Any]] = []
-    for path in candidates:
+    for index, path in enumerate(candidates):
         meta, _blockers = _load_checkpoint_meta(path)
         entry = {
             "path": str(path),
+            "candidate_index": index,
             "exists": path.exists(),
             "load_scale": meta.get("load_scale"),
             "schema": meta.get("schema", ""),
@@ -197,7 +201,7 @@ def _auto_select_checkpoint(
         }
     ranked = sorted(
         loadable,
-        key=lambda e: float(e["load_scale"]),
+        key=lambda e: (float(e["load_scale"]), int(e["candidate_index"])),
         reverse=True,
     )
     best = ranked[0]
