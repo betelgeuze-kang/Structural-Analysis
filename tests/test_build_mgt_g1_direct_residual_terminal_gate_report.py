@@ -33,6 +33,8 @@ def _fixtures(tmp_path: Path, *, terminal_stop_reason: str = "residual_gate_stat
             "schema_version": "mgt-direct-residual-newton-probe.v1",
             "status": "partial",
             "direct_residual_newton_ready": False,
+            "checkpoint": {"load_scale": 0.656},
+            "base_direct_residual": {"load_scale": 0.656},
             "final_direct_residual": {"direct_residual_inf_n": 1.0e-6},
             "gate_assessment": {
                 "residual_tolerance_n": 1.0e-3,
@@ -95,6 +97,12 @@ def test_terminal_gate_report_cross_checks_direct_residual_and_increment_receipt
     assert payload["input_checksums"][str(fixtures["summary"])].startswith("sha256:")
     assert payload["direct_residual_terminal_gate_ready"] is True
     assert payload["direct_residual_newton_gate_ready"] is True
+    assert payload["full_g1_closure_ready"] is False
+    assert payload["full_g1_closure_checks"]["terminal_checkpoint_gate_ready"] is True
+    assert payload["full_g1_closure_checks"]["full_load_gate_passed"] is False
+    assert "full_load_gate_not_closed" in payload["full_g1_closure_blockers"]
+    assert payload["measurements"]["terminal_load_scale"] == 0.656
+    assert payload["thresholds"]["full_load_tolerance"] == 1.0e-12
     assert payload["checks"]["strict_residual_gate_passed"] is True
     assert payload["checks"]["terminal_increment_gate_passed"] is True
     assert "does not close full-mesh/full-load" in payload["claim_boundary"]

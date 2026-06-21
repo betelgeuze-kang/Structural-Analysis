@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -31,6 +32,7 @@ from plan_source_boundary_cleanup import DEFAULT_ALLOWLIST_MANIFEST, _git_files 
 
 
 SCHEMA_VERSION = "independent-commercial-product-readiness.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_COMMERCIALIZATION_STATUS = Path("implementation/phase1/release/independent_product_readiness.json")
 DEFAULT_INDEPENDENT_PLAN = Path("docs/independent-commercial-productization-plan.md")
 DEFAULT_PRODUCTION_SECURITY_DOC = Path("docs/production-ops-security.md")
@@ -64,6 +66,18 @@ def _load_json(path: Path | None) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=SCRIPT_DIR.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _read_text(path: Path) -> str:
@@ -512,6 +526,9 @@ def build_report(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "contract_pass": independent_ready,
         "independent_commercial_product_ready": independent_ready,
         "full_autonomous_replacement_ready": full_autonomous_ready,
@@ -523,6 +540,12 @@ def build_report(
             f"full_autonomous_replacement_ready={full_autonomous_ready}"
         ),
         "recommended_claim": commercialization_payload.get("recommended_claim", ""),
+        "claim_boundary": (
+            "Independent commercial product readiness requires strict external benchmark receipts, "
+            "residual holdout closure, production/runtime/ops packaging, and claim governance. "
+            "The separate workstation delivery-service gate does not close these independent-product "
+            "requirements by itself."
+        ),
         "gates": gates,
         "workstation_delivery_service": workstation_delivery_service,
         "blockers": blockers,

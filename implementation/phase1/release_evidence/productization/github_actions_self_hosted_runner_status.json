@@ -1,0 +1,25 @@
+{
+  "blockers": [
+    "self_hosted_runner_matching_labels_missing"
+  ],
+  "claim_boundary": "This is read-only GitHub Actions self-hosted runner metadata. PASS only means at least one runner with the required labels is online and idle at collection time; it does not create CI streak evidence, mutate billing, or register a runner.",
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-21T05:42:50.588313+00:00",
+  "matching_runner_count": 0,
+  "online_matching_runner_count": 0,
+  "query_error": "",
+  "ready_runner_count": 0,
+  "repo": "betelgeuze-kang/Structural-Analysis",
+  "required_labels": [
+    "self-hosted",
+    "linux",
+    "x64"
+  ],
+  "reused_evidence": false,
+  "rows": [],
+  "runner_count": 0,
+  "schema_version": "github-actions-self-hosted-runner-status.v1",
+  "source_commit_sha": "97c5161a6abc5a9e237fc13726088286e512079c",
+  "status": "blocked"
+}

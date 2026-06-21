@@ -82,6 +82,14 @@ def _first_iteration(payload: dict[str, Any]) -> dict[str, Any]:
     return first
 
 
+def _first_float(*values: Any) -> float | None:
+    for value in values:
+        parsed = _float_or_none(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
 def build_report(
     *,
     direct_replay_path: Path = DEFAULT_DIRECT_REPLAY,
@@ -94,6 +102,8 @@ def build_report(
 
     final_direct = _as_dict(direct_replay.get("final_direct_residual"))
     direct_gate = _as_dict(direct_replay.get("gate_assessment"))
+    direct_base = _as_dict(direct_replay.get("base_direct_residual"))
+    direct_checkpoint = _as_dict(direct_replay.get("checkpoint"))
     first_terminal_iteration = _first_iteration(terminal_equilibrium)
     summary_replay = _as_dict(gate_summary.get("direct_residual_gate_replay"))
     summary_assessment = _as_dict(summary_replay.get("gate_assessment"))
@@ -110,6 +120,15 @@ def build_report(
     increment_tolerance = _float_or_none(direct_gate.get("relative_increment_tolerance"))
     terminal_relative_increment = _float_or_none(first_terminal_iteration.get("relative_increment"))
     residual_match_abs_tol = 1.0e-12
+    full_load_tolerance = 1.0e-12
+    terminal_load_scale = _first_float(
+        direct_gate.get("load_scale_at_closure"),
+        direct_gate.get("observed_load_scale"),
+        _as_dict(direct_gate.get("full_load_closure_gate")).get("observed_load_scale"),
+        direct_base.get("load_scale"),
+        direct_checkpoint.get("load_scale"),
+        gate_summary.get("load_scale"),
+    )
 
     checks = {
         "direct_replay_present": bool(direct_replay),
@@ -161,6 +180,16 @@ def build_report(
     )
     blockers = [name for name, passed in checks.items() if not passed]
     ready = not blockers
+    full_load_gate_passed = bool(
+        terminal_load_scale is not None and terminal_load_scale >= 1.0 - full_load_tolerance
+    )
+    full_g1_closure_blockers = [
+        *(["full_load_gate_not_closed"] if not full_load_gate_passed else []),
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "material_newton_breadth_not_closed",
+        "production_rocm_hip_residency_not_closed",
+    ]
+    full_g1_closure_ready = bool(ready and not full_g1_closure_blockers)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -176,6 +205,8 @@ def build_report(
         "contract_pass": ready,
         "direct_residual_terminal_gate_ready": ready,
         "direct_residual_newton_gate_ready": ready,
+        "full_g1_closure_ready": full_g1_closure_ready,
+        "full_g1_closure_blockers": full_g1_closure_blockers,
         "reason_code": "PASS" if ready else "ERR_G1_DIRECT_RESIDUAL_TERMINAL_GATE_BLOCKED",
         "summary_line": (
             "G1 direct residual terminal gate: "
@@ -184,6 +215,13 @@ def build_report(
             f"increment={terminal_relative_increment}"
         ),
         "checks": checks,
+        "full_g1_closure_checks": {
+            "terminal_checkpoint_gate_ready": ready,
+            "full_load_gate_passed": full_load_gate_passed,
+            "full_mesh_nonlinear_equilibrium_closed": False,
+            "material_newton_breadth_closed": False,
+            "production_rocm_hip_residency_closed": False,
+        },
         "blockers": blockers,
         "thresholds": {
             "direct_residual_replay_tolerance_n": direct_tolerance,
@@ -191,12 +229,14 @@ def build_report(
             "strict_residual_tolerance_n": strict_residual_tolerance,
             "relative_increment_tolerance": increment_tolerance,
             "residual_match_abs_tolerance_n": residual_match_abs_tol,
+            "full_load_tolerance": full_load_tolerance,
         },
         "measurements": {
             "direct_replay_final_residual_inf_n": final_direct_residual,
             "terminal_equilibrium_final_residual_inf_n": terminal_final_residual,
             "summary_latest_direct_residual_inf_n": summary_latest_residual,
             "terminal_relative_increment": terminal_relative_increment,
+            "terminal_load_scale": terminal_load_scale,
             "terminal_stop_reason": first_terminal_iteration.get("stop_reason"),
         },
         "artifacts": {

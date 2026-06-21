@@ -130,6 +130,31 @@ def _skipped_output_final_checkpoint_meta(
     }
 
 
+def _full_load_closure_gate(
+    load_scale: float,
+    *,
+    required_load_scale: float = 1.0,
+    tolerance: float = 1.0e-12,
+) -> dict[str, Any]:
+    observed = float(load_scale)
+    required = float(required_load_scale)
+    tol = float(tolerance)
+    passed = bool(np.isfinite(observed) and observed >= required - tol)
+    return {
+        "required": True,
+        "required_load_scale": required,
+        "observed_load_scale": observed,
+        "tolerance": tol,
+        "passed": passed,
+        "claim_boundary": (
+            "Full G1 closure requires the representative full mesh at full load "
+            "scale 1.0. A sub-full-load checkpoint can be diagnostic evidence, "
+            "but it must not be promoted to full-mesh/full-load nonlinear "
+            "equilibrium closure."
+        ),
+    }
+
+
 def _active_free(stiffness: Any, restrained: set[int]) -> tuple[np.ndarray, np.ndarray]:
     diag = np.asarray(stiffness.diagonal(), dtype=np.float64)
     active = np.asarray(np.where(np.abs(diag) > 1.0e-9)[0], dtype=np.int64)
@@ -1133,6 +1158,37 @@ def _g1_fallback_zero_audit(
     row_correction: dict[str, Any],
 ) -> dict[str, Any]:
     boundaries: list[dict[str, Any]] = []
+
+    def _hip_required_tangent_refresh_missing(component: dict[str, Any]) -> bool:
+        backend = str(component.get("accepted_state_tangent_refresh_backend", "") or "")
+        return bool(
+            component.get("accepted_state_tangent_refresh_closure_blocked")
+            or component.get("hip_required_tangent_refresh_unavailable_after_promotion")
+            or component.get("frozen_support_graph_after_hip_residual_promotion")
+            or backend.startswith("not_refreshed")
+            or backend.startswith("frozen_")
+        )
+
+    def _list(value: Any) -> list[Any]:
+        return value if isinstance(value, list) else []
+
+    def _per_state_replay_non_hip_trial(component: dict[str, Any]) -> dict[str, Any] | None:
+        for pass_index, row_pass in enumerate(_list(component.get("passes"))):
+            if not isinstance(row_pass, dict):
+                continue
+            for trial_index, trial in enumerate(_list(row_pass.get("trial_rows"))):
+                if not isinstance(trial, dict):
+                    continue
+                if trial.get("per_state_batch_replay") and not trial.get(
+                    "hip_full_residual_batch_replay"
+                ):
+                    return {
+                        "pass_index": int(pass_index),
+                        "trial_index": int(trial_index),
+                        "residual_batch_backend": trial.get("residual_batch_backend"),
+                    }
+        return None
+
     global_promoted = bool(global_krylov.get("promoted_to_final_state"))
     global_attempted = bool(global_krylov.get("attempted"))
     global_hip_required = bool(
@@ -1202,6 +1258,19 @@ def _g1_fallback_zero_audit(
                     "detail": "cpu_tangent_refresh_used",
                 }
             )
+        if _hip_required_tangent_refresh_missing(global_krylov):
+            boundaries.append(
+                {
+                    "boundary": "global_krylov_hip_required_tangent_refresh_missing",
+                    "path": "matrix_free_global_krylov",
+                    "detail": "hip_required_tangent_refresh_missing",
+                    "backend": global_krylov.get("accepted_state_tangent_refresh_backend"),
+                    "reason": (
+                        global_krylov.get("accepted_state_tangent_refresh_closure_blocker")
+                        or global_krylov.get("accepted_state_tangent_refresh_skipped_reason")
+                    ),
+                }
+            )
 
     if (row_promoted or row_attempted) and row_hip_required:
         if row_correction.get("hip_batch_replay_required_unavailable"):
@@ -1235,6 +1304,29 @@ def _g1_fallback_zero_audit(
                     "boundary": "row_correction_cpu_tangent_refresh_used",
                     "path": "current_tangent_residual_row_correction",
                     "detail": "row_cpu_tangent_refresh_used",
+                }
+            )
+        if _hip_required_tangent_refresh_missing(row_correction):
+            boundaries.append(
+                {
+                    "boundary": "row_correction_hip_required_tangent_refresh_missing",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "row_hip_required_tangent_refresh_missing",
+                    "backend": row_correction.get("accepted_state_tangent_refresh_backend"),
+                    "reason": (
+                        row_correction.get("accepted_state_tangent_refresh_closure_blocker")
+                        or row_correction.get("accepted_state_tangent_refresh_skipped_reason")
+                    ),
+                }
+            )
+        non_hip_per_state_trial = _per_state_replay_non_hip_trial(row_correction)
+        if non_hip_per_state_trial is not None:
+            boundaries.append(
+                {
+                    "boundary": "row_correction_per_state_replay_non_hip_trial",
+                    "path": "current_tangent_residual_row_correction",
+                    "detail": "per_state_replay_trial_did_not_use_hip_residual_backend",
+                    **non_hip_per_state_trial,
                 }
             )
 
@@ -1425,6 +1517,7 @@ def run_mgt_direct_residual_newton_probe(
     current_tangent_residual_row_directional_probe_alpha: float = 0.0,
     current_tangent_residual_row_shell_normal_participation_threshold: float = 0.7071067811865476,
     current_tangent_residual_row_use_residual_only_assembly: bool = False,
+    current_tangent_residual_row_per_state_batch_replay: bool = False,
     current_tangent_residual_row_batch_alpha_replay: bool = False,
     current_tangent_residual_row_batch_fd_replay: bool = False,
     current_tangent_residual_row_batch_fd_replay_chunk_size: int = 64,
@@ -4801,6 +4894,12 @@ def run_mgt_direct_residual_newton_probe(
             row_batch_alpha_replay_requested = bool(
                 current_tangent_residual_row_batch_alpha_replay
             )
+            row_per_state_replay_requested = bool(
+                current_tangent_residual_row_per_state_batch_replay
+            )
+            row_per_state_replay = bool(
+                row_per_state_replay_requested and use_row_residual_only
+            )
             row_batch_alpha_replay = bool(
                 row_batch_alpha_replay_requested and use_row_residual_only
             )
@@ -4827,6 +4926,9 @@ def run_mgt_direct_residual_newton_probe(
             current_tangent_residual_row_correction["batch_alpha_replay_enabled"] = (
                 row_batch_alpha_replay
             )
+            current_tangent_residual_row_correction["per_state_batch_replay_enabled"] = (
+                row_per_state_replay
+            )
             current_tangent_residual_row_correction["batch_fd_replay_enabled"] = (
                 row_batch_fd_replay
             )
@@ -4852,12 +4954,19 @@ def run_mgt_direct_residual_newton_probe(
                 current_tangent_residual_row_correction[
                     "batch_alpha_replay_disabled_reason"
                 ] = "requires_residual_only_assembly"
+            if row_per_state_replay_requested and not use_row_residual_only:
+                current_tangent_residual_row_correction[
+                    "per_state_batch_replay_disabled_reason"
+                ] = "requires_residual_only_assembly"
             if row_batch_fd_replay_requested and not use_row_residual_only:
                 current_tangent_residual_row_correction[
                     "batch_fd_replay_disabled_reason"
                 ] = "requires_residual_only_assembly"
             row_residual_only_eval_count = 0
             row_full_assembly_eval_count = 0
+            row_per_state_replay_batch_count = 0
+            row_per_state_replay_state_count = 0
+            row_per_state_replay_seconds = 0.0
             row_batch_alpha_replay_batch_count = 0
             row_batch_alpha_replay_state_count = 0
             row_batch_alpha_replay_seconds = 0.0
@@ -4968,7 +5077,7 @@ def run_mgt_direct_residual_newton_probe(
                 ] = True
                 return True
 
-            def evaluate_row_candidate(
+            def evaluate_row_candidate_cpu(
                 candidate_u: np.ndarray,
             ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
                 nonlocal row_residual_only_eval_count, row_full_assembly_eval_count
@@ -4991,12 +5100,30 @@ def run_mgt_direct_residual_newton_probe(
                     row_full_assembly_eval_count += 1
                 return result
 
+            def evaluate_row_candidate(
+                candidate_u: np.ndarray,
+            ) -> tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
+                if not row_per_state_replay:
+                    return evaluate_row_candidate_cpu(candidate_u)
+                results = evaluate_row_candidates_batch(
+                    [np.asarray(candidate_u, dtype=np.float64)],
+                    replay_role="per_state",
+                )
+                if len(results) == 1:
+                    return results[0]
+                if row_require_hip_batch_replay:
+                    raise RuntimeError("hip_required_per_state_replay_unavailable")
+                return evaluate_row_candidate_cpu(candidate_u)
+
             def _evaluate_row_candidates_state_dependent(
                 candidate_us: list[np.ndarray],
                 *,
                 replay_role: str,
             ) -> list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]]:
                 nonlocal row_residual_only_eval_count
+                nonlocal row_per_state_replay_batch_count
+                nonlocal row_per_state_replay_state_count
+                nonlocal row_per_state_replay_seconds
                 nonlocal row_batch_alpha_replay_batch_count
                 nonlocal row_batch_alpha_replay_state_count
                 nonlocal row_batch_alpha_replay_seconds
@@ -5067,7 +5194,11 @@ def run_mgt_direct_residual_newton_probe(
                             "state_dependent_shell_material_tangent_operator_refresh_backend"
                         ] = "host_shell_operator_refresh"
                         row_residual_only_eval_count += 1
-                        if replay_role == "finite_difference":
+                        if replay_role == "per_state":
+                            row_per_state_replay_batch_count += 1
+                            row_per_state_replay_state_count += 1
+                            row_per_state_replay_seconds += elapsed
+                        elif replay_role == "finite_difference":
                             row_batch_fd_replay_batch_count += 1
                             row_batch_fd_replay_state_count += 1
                             row_batch_fd_replay_seconds += elapsed
@@ -5090,13 +5221,20 @@ def run_mgt_direct_residual_newton_probe(
                             ),
                             "residual_only_assembly": True,
                             "residual_only_free_override": True,
+                            "per_state_batch_replay": bool(replay_role == "per_state"),
                             "batch_alpha_replay": bool(replay_role == "alpha"),
                             "batch_fd_replay": bool(replay_role == "finite_difference"),
+                            "residual_row_per_state_batch_replay": bool(
+                                replay_role == "per_state"
+                            ),
                             "residual_row_batch_alpha_replay": bool(replay_role == "alpha"),
                             "residual_row_batch_fd_replay": bool(replay_role == "finite_difference"),
                             "residual_row_batch_replay_role": replay_role,
                             "residual_row_batch_group_size": 1,
                             "residual_row_batch_group_index": 0,
+                            "per_state_batch_replay_seconds": elapsed
+                            if replay_role == "per_state"
+                            else 0.0,
                             "batch_alpha_replay_seconds": elapsed if replay_role == "alpha" else 0.0,
                             "batch_fd_replay_seconds": elapsed if replay_role == "finite_difference" else 0.0,
                             "batch_size": 1,
@@ -5138,6 +5276,9 @@ def run_mgt_direct_residual_newton_probe(
             ) -> list[tuple[Any, np.ndarray, np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]]:
                 nonlocal row_residual_only_eval_count
                 nonlocal row_full_assembly_eval_count
+                nonlocal row_per_state_replay_batch_count
+                nonlocal row_per_state_replay_state_count
+                nonlocal row_per_state_replay_seconds
                 nonlocal row_batch_alpha_replay_batch_count
                 nonlocal row_batch_alpha_replay_state_count
                 nonlocal row_batch_alpha_replay_seconds
@@ -5169,15 +5310,21 @@ def run_mgt_direct_residual_newton_probe(
                         replay_role=replay_role,
                     )
                 batch_enabled = (
-                    row_batch_fd_replay
+                    row_per_state_replay
+                    if replay_role == "per_state"
+                    else row_batch_fd_replay
                     if replay_role == "finite_difference"
                     else row_batch_alpha_replay
                 )
                 if not batch_enabled:
-                    return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                    if replay_role != "per_state" and row_per_state_replay:
+                        return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                    return [evaluate_row_candidate_cpu(candidate_u) for candidate_u in candidate_us]
                 states = np.asarray(candidate_us, dtype=np.float64)
                 if states.ndim != 2:
-                    return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                    if replay_role != "per_state" and row_per_state_replay:
+                        return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                    return [evaluate_row_candidate_cpu(candidate_u) for candidate_u in candidate_us]
                 batch_started = time.perf_counter()
                 hip_backend = row_hip_residual_backend()
                 elapsed = float(time.perf_counter() - batch_started)
@@ -5205,7 +5352,7 @@ def run_mgt_direct_residual_newton_probe(
                         ] = str(exc)
                         if hip_batch_replay_required_unavailable("hip_backend_evaluate_failed"):
                             return []
-                        return [evaluate_row_candidate(candidate_u) for candidate_u in candidate_us]
+                        return [evaluate_row_candidate_cpu(candidate_u) for candidate_u in candidate_us]
                 else:
                     if hip_batch_replay_required_unavailable("hip_backend_prepare_failed_or_disabled"):
                         return []
@@ -5242,7 +5389,11 @@ def run_mgt_direct_residual_newton_probe(
                     }
                 rhs = np.asarray(f_ext[free], dtype=np.float64)
                 row_residual_only_eval_count += int(states.shape[0])
-                if replay_role == "finite_difference":
+                if replay_role == "per_state":
+                    row_per_state_replay_batch_count += 1
+                    row_per_state_replay_state_count += int(states.shape[0])
+                    row_per_state_replay_seconds += elapsed
+                elif replay_role == "finite_difference":
                     row_batch_fd_replay_batch_count += 1
                     row_batch_fd_replay_state_count += int(states.shape[0])
                     row_batch_fd_replay_seconds += elapsed
@@ -5254,14 +5405,21 @@ def run_mgt_direct_residual_newton_probe(
                     **batch_meta,
                     "residual_only_assembly": True,
                     "residual_only_free_override": True,
+                    "per_state_batch_replay": bool(replay_role == "per_state"),
                     "batch_alpha_replay": bool(replay_role == "alpha"),
                     "batch_fd_replay": bool(replay_role == "finite_difference"),
+                    "residual_row_per_state_batch_replay": bool(
+                        replay_role == "per_state"
+                    ),
                     "residual_row_batch_alpha_replay": bool(replay_role == "alpha"),
                     "residual_row_batch_fd_replay": bool(
                         replay_role == "finite_difference"
                     ),
                     "residual_row_batch_replay_role": replay_role,
                     "residual_row_batch_group_size": int(states.shape[0]),
+                    "per_state_batch_replay_seconds": elapsed
+                    if replay_role == "per_state"
+                    else 0.0,
                     "batch_alpha_replay_seconds": elapsed
                     if replay_role == "alpha"
                     else 0.0,
@@ -6125,6 +6283,7 @@ def run_mgt_direct_residual_newton_probe(
                             for source, alpha, direction_sign in signed_row_alpha_rows
                         ]
                         candidate_start = len(trial_rows)
+                        candidate_row_index = int(len(candidate_rows_meta))
                         candidate_eval_inputs: list[tuple[str, float, float, np.ndarray]] = []
                         for alpha_source, alpha, direction_sign in signed_row_alpha_rows:
                             candidate_eval_inputs.append(
@@ -6191,6 +6350,7 @@ def run_mgt_direct_residual_newton_probe(
                             )
                             trial_row = {
                                 "row_correction_pass": int(row_pass),
+                                "candidate_row_index": int(candidate_row_index),
                                 "target_mode": target_mode,
                                 "target_row_count": int(actual_target_count),
                                 "configured_target_count": int(target_row_count),
@@ -6221,6 +6381,11 @@ def run_mgt_direct_residual_newton_probe(
                                 "free_dof_set_stable": free_is_stable,
                                 "residual_only_assembly": bool(
                                     candidate_meta.get("residual_only_assembly")
+                                ),
+                                "per_state_batch_replay": bool(
+                                    candidate_meta.get(
+                                        "residual_row_per_state_batch_replay"
+                                    )
                                 ),
                                 "batch_alpha_replay": bool(
                                     candidate_meta.get(
@@ -6300,6 +6465,7 @@ def run_mgt_direct_residual_newton_probe(
                             )
                             candidate_rows_meta.append(
                                 {
+                                    "candidate_row_index": int(candidate_row_index),
                                     "target_mode": target_mode,
                                     "target_row_count": int(actual_target_count),
                                     "configured_target_count": int(target_row_count),
@@ -6434,6 +6600,15 @@ def run_mgt_direct_residual_newton_probe(
                 promotion_count += 1
                 current_u = trial_vectors[best_gate_trial_index]
                 accepted_trial = trial_rows[best_gate_trial_index]
+                accepted_candidate_meta = next(
+                    (
+                        candidate_meta
+                        for candidate_meta in candidate_rows_meta
+                        if int(candidate_meta.get("candidate_row_index", -1))
+                        == int(accepted_trial.get("candidate_row_index", -2))
+                    ),
+                    None,
+                )
                 terminal_row_promotion = bool(promotion_count >= max_row_promotions)
                 stop_after_row_promotion = False
                 hip_residual_refresh_available = bool(
@@ -6477,21 +6652,133 @@ def run_mgt_direct_residual_newton_probe(
                         )
                     else:
                         if jacobian_mode == "finite_difference":
-                            row_acceptance_refresh_meta.update(
-                                {
-                                    "accepted_state_tangent_refresh_backend": (
-                                        "frozen_previous_support_graph_fd_residual_jvp"
-                                    ),
-                                    "accepted_state_tangent_refresh_cpu_used": False,
-                                    "accepted_state_tangent_refresh_skipped_reason": (
-                                        "finite_difference_residual_jvp_reuses_previous_support_graph"
-                                    ),
-                                    "frozen_support_graph_after_hip_residual_promotion": True,
-                                    "frozen_support_graph_scope": (
-                                        "support_selection_scaffold_only"
-                                    ),
-                                }
+                            refresh_support_cols = (
+                                list(accepted_candidate_meta.get("support_columns", []))
+                                if isinstance(accepted_candidate_meta, dict)
+                                else []
                             )
+                            refresh_support_cols = [
+                                int(value)
+                                for value in refresh_support_cols
+                                if 0 <= int(value) < int(current_free.size)
+                            ]
+                            refresh_meta_rows: list[dict[str, Any]] = []
+                            refresh_jvp_norms: list[float] = []
+                            refresh_stable = bool(row_batch_fd_replay and refresh_support_cols)
+                            refresh_reason = ""
+                            if refresh_stable:
+                                refresh_entries: list[tuple[int, float, np.ndarray]] = []
+                                for support_col in refresh_support_cols:
+                                    global_dof = int(current_free[int(support_col)])
+                                    epsilon = fd_epsilon_base * max(
+                                        abs(float(current_u[global_dof])),
+                                        1.0,
+                                    )
+                                    probe_u = np.asarray(current_u, dtype=np.float64).copy()
+                                    probe_u[global_dof] += float(epsilon)
+                                    refresh_entries.append(
+                                        (int(support_col), float(epsilon), probe_u)
+                                    )
+                                refresh_results = evaluate_row_candidates_batch(
+                                    [
+                                        np.asarray(probe_u, dtype=np.float64)
+                                        for _support_col, _epsilon, probe_u in refresh_entries
+                                    ],
+                                    replay_role="finite_difference",
+                                )
+                                if len(refresh_results) != len(refresh_entries):
+                                    refresh_stable = False
+                                    refresh_reason = "hip_fd_refresh_result_count_mismatch"
+                                for (
+                                    support_col,
+                                    epsilon,
+                                    _probe_u,
+                                ), refresh_result in zip(
+                                    refresh_entries,
+                                    refresh_results,
+                                ):
+                                    (
+                                        _refresh_k,
+                                        _refresh_f,
+                                        refresh_free,
+                                        refresh_residual,
+                                        _refresh_rhs,
+                                        refresh_meta,
+                                    ) = refresh_result
+                                    refresh_meta_rows.append(dict(refresh_meta))
+                                    if not (
+                                        refresh_free.shape == current_free.shape
+                                        and np.array_equal(refresh_free, current_free)
+                                    ):
+                                        refresh_stable = False
+                                        refresh_reason = "hip_fd_refresh_free_dof_changed"
+                                        break
+                                    if not refresh_meta.get("hip_full_residual_batch_replay"):
+                                        refresh_stable = False
+                                        refresh_reason = "hip_fd_refresh_non_hip_residual_backend"
+                                        break
+                                    full_jvp = (
+                                        np.asarray(refresh_residual, dtype=np.float64)
+                                        - np.asarray(current_residual, dtype=np.float64)
+                                    ) / float(epsilon)
+                                    fd_jvp_cache[int(support_col)] = (
+                                        np.asarray(full_jvp, dtype=np.float64),
+                                        float(epsilon),
+                                    )
+                                    refresh_jvp_norms.append(float(np.linalg.norm(full_jvp)))
+                            else:
+                                refresh_reason = (
+                                    "hip_fd_batch_replay_disabled_or_empty_support"
+                                )
+                            if refresh_stable:
+                                row_acceptance_refresh_meta.update(
+                                    {
+                                        "accepted_state_tangent_refresh_backend": (
+                                            "hip_finite_difference_residual_jvp"
+                                        ),
+                                        "accepted_state_tangent_refresh_hip_used": True,
+                                        "accepted_state_tangent_refresh_cpu_used": False,
+                                        "accepted_state_tangent_refresh_column_count": int(
+                                            len(refresh_support_cols)
+                                        ),
+                                        "accepted_state_tangent_refresh_support_source": (
+                                            "accepted_candidate_support_columns"
+                                        ),
+                                        "accepted_state_tangent_refresh_residual_batch_backends": sorted(
+                                            {
+                                                str(meta.get("residual_batch_backend"))
+                                                for meta in refresh_meta_rows
+                                                if meta.get("residual_batch_backend")
+                                            }
+                                        ),
+                                        "accepted_state_tangent_refresh_jvp_l2_min": float(
+                                            min(refresh_jvp_norms)
+                                        )
+                                        if refresh_jvp_norms
+                                        else 0.0,
+                                        "accepted_state_tangent_refresh_jvp_l2_max": float(
+                                            max(refresh_jvp_norms)
+                                        )
+                                        if refresh_jvp_norms
+                                        else 0.0,
+                                    }
+                                )
+                            else:
+                                row_acceptance_refresh_meta.update(
+                                    {
+                                        "accepted_state_tangent_refresh_backend": (
+                                            "frozen_previous_support_graph_fd_residual_jvp"
+                                        ),
+                                        "accepted_state_tangent_refresh_cpu_used": False,
+                                        "accepted_state_tangent_refresh_skipped_reason": (
+                                            refresh_reason
+                                        ),
+                                        "frozen_support_graph_after_hip_residual_promotion": True,
+                                        "frozen_support_graph_scope": (
+                                            "support_selection_scaffold_only"
+                                        ),
+                                    }
+                                )
                         else:
                             stop_after_row_promotion = True
                             row_acceptance_refresh_meta.update(
@@ -6630,6 +6917,15 @@ def run_mgt_direct_residual_newton_probe(
                     "best_gate_eligible_candidate": best_gate_candidate_row,
                     "residual_only_eval_count": int(row_residual_only_eval_count),
                     "full_assembly_eval_count": int(row_full_assembly_eval_count),
+                    "per_state_batch_replay_batch_count": int(
+                        row_per_state_replay_batch_count
+                    ),
+                    "per_state_batch_replay_state_count": int(
+                        row_per_state_replay_state_count
+                    ),
+                    "per_state_batch_replay_seconds": float(
+                        row_per_state_replay_seconds
+                    ),
                     "batch_alpha_replay_batch_count": int(
                         row_batch_alpha_replay_batch_count
                     ),
@@ -6717,10 +7013,13 @@ def run_mgt_direct_residual_newton_probe(
         matrix_free_global_krylov,
         current_tangent_residual_row_correction,
     )
+    full_load_closure_gate = _full_load_closure_gate(load_scale)
+    full_load_closure_passed = bool(full_load_closure_gate["passed"])
     converged = bool(
         best_improved
         and direct_residual_gate_passed
         and relative_increment_gate_passed
+        and full_load_closure_passed
         and not cpu_acceptance_refresh_closure_blocked
         and fallback_zero_passed
     )
@@ -6918,6 +7217,9 @@ def run_mgt_direct_residual_newton_probe(
             "relative_increment_gate_verified": relative_increment_gate_verified,
             "relative_increment_gate_passed": relative_increment_gate_passed,
             "direct_residual_newton_ready_requires_increment_gate": True,
+            "full_load_closure_gate": full_load_closure_gate,
+            "full_load_closure_passed": full_load_closure_passed,
+            "direct_residual_newton_ready_requires_full_load": True,
             "hip_batch_replay_required_unavailable": (
                 hip_batch_replay_required_unavailable
             ),
@@ -6975,7 +7277,23 @@ def run_mgt_direct_residual_newton_probe(
             "ridge/windowed secant-family subspace, and matrix-free finite-difference "
             "consistent-Jacobian subspace, an opt-in global matrix-free residual-JVP Krylov "
             "direction, plus a current-tangent residual-row least-squares correction. It is not full closure unless both direct residual and "
-            "increment gates pass."
+            "increment gates pass at full load scale 1.0."
+            + (
+                f" Current checkpoint load scale is {load_scale:.15g}, so this "
+                "receipt is sub-full-load diagnostic evidence and cannot close "
+                "full G1."
+                if not full_load_closure_passed
+                else ""
+            )
+            + (
+                " Per-state residual-row HIP batch replay only routes individual "
+                "diagnostic trial residual evaluations through the selected HIP "
+                "residual backend; it does not close full G1, full-load/full-mesh "
+                "equilibrium, material Newton breadth, or production ROCm/HIP "
+                "residency."
+                if current_tangent_residual_row_per_state_batch_replay
+                else ""
+            )
             + (
                 " Frozen shell-material tangent HIP replay freezes the current accepted "
                 "state shell material CSR for ROCm/HIP residual replay; it is not "
@@ -7020,6 +7338,7 @@ def run_mgt_direct_residual_newton_probe(
             ),
             *(["g1_fallback_zero_audit_not_closed"] if not fallback_zero_passed else []),
             *([] if direct_residual_gate_passed else ["direct_residual_gate_not_closed"]),
+            *([] if full_load_closure_passed else ["full_load_gate_not_closed"]),
             *(
                 []
                 if relative_increment_gate_passed
@@ -7599,6 +7918,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--current-tangent-residual-row-per-state-batch-replay",
+        action="store_true",
+        help=(
+            "Replay individual residual-row probe/candidate states through the selected "
+            "residual batch backend when residual-only assembly is enabled. This is a "
+            "diagnostic coverage path, not full G1 closure evidence."
+        ),
+    )
+    parser.add_argument(
         "--current-tangent-residual-row-batch-alpha-replay",
         action="store_true",
         help=(
@@ -7923,6 +8251,9 @@ def main(argv: list[str] | None = None) -> int:
         ),
         current_tangent_residual_row_use_residual_only_assembly=(
             args.current_tangent_residual_row_use_residual_only_assembly
+        ),
+        current_tangent_residual_row_per_state_batch_replay=(
+            args.current_tangent_residual_row_per_state_batch_replay
         ),
         current_tangent_residual_row_batch_alpha_replay=(
             args.current_tangent_residual_row_batch_alpha_replay

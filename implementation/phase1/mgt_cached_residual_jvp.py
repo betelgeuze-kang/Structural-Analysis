@@ -34,6 +34,7 @@ class ResidualJvpBatchCache:
         prefer_residual_only: bool = True,
         batch_residual_evaluator: Callable[..., tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]] | None = None,
         batch_replay_backend: str = "cpu",
+        allow_batch_replay_fallback: bool = True,
         hipcc: Any = None,
         force_rebuild_hip: bool = False,
     ) -> None:
@@ -45,6 +46,7 @@ class ResidualJvpBatchCache:
         self._prefer_residual_only = bool(prefer_residual_only)
         self._batch_residual_evaluator = batch_residual_evaluator
         self._batch_replay_backend = str(batch_replay_backend or "cpu")
+        self._allow_batch_replay_fallback = bool(allow_batch_replay_fallback)
         self._hipcc = hipcc
         self._force_rebuild_hip = bool(force_rebuild_hip)
         self._cache: dict[tuple[int, float], tuple[np.ndarray, dict[str, Any]]] = {}
@@ -196,6 +198,11 @@ class ResidualJvpBatchCache:
             except Exception as exc:  # pragma: no cover - recorded in probe JSON
                 self._batch_replay_backend_error = str(exc)
                 self._batch_replay_fallback_count += len(chunk_indices)
+                if not self._allow_batch_replay_fallback:
+                    raise RuntimeError(
+                        "batch residual replay failed and CPU fallback is disabled: "
+                        f"{exc}"
+                    ) from exc
                 self._request_count -= len(chunk_indices)
                 self._miss_count -= len(chunk_indices)
                 for result_index in chunk_indices:
@@ -275,6 +282,7 @@ class ResidualJvpBatchCache:
             "assembly_seconds": float(self._assembly_seconds),
             "batch_residual_replay_enabled": self._batch_residual_evaluator is not None,
             "batch_replay_backend": self._batch_replay_backend,
+            "allow_batch_replay_fallback": bool(self._allow_batch_replay_fallback),
             "batch_replay_count": int(self._batch_replay_count),
             "batch_replay_state_count": int(self._batch_replay_state_count),
             "batch_replay_seconds": float(self._batch_replay_seconds),

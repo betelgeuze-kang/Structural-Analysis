@@ -22,6 +22,7 @@
     ]
   },
   "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "gates": [
     {
       "blockers": [],
@@ -146,10 +147,12 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-12T19:20:55.583361+00:00",
+  "generated_at": "2026-06-21T05:35:49.236935+00:00",
   "independent_commercial_product_ready": false,
   "reason_code": "PASS",
+  "reused_evidence": false,
   "schema_version": "workstation-delivery-readiness.v1",
+  "source_commit_sha": "97c5161a6abc5a9e237fc13726088286e512079c",
   "status": "ready",
   "summary_line": "Workstation delivery readiness: PASS | gates=8/8",
   "workstation_delivery_service_ready": true

@@ -1,0 +1,53 @@
+{
+  "blockers": [
+    "checkpoint_load_scale_below_required_full_load"
+  ],
+  "checkpoint": {
+    "dof_count": 78282,
+    "load_scale": 0.656,
+    "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_candidate1_target4_support4_final_checkpoint.npz",
+    "schema": "mgt-direct-residual-newton-state.v1"
+  },
+  "child_exit_code": null,
+  "claim_boundary": "This lane is a strict execution wrapper for representative full-load G1 HIP Newton evidence. It does not synthesize residual, increment, customer, validation, or ROCm/HIP closure evidence. A checkpoint below load_scale 1.0 is blocked before execution.",
+  "command": [
+    "/usr/bin/python3",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
+    "--checkpoint-npz",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_candidate1_target4_support4_final_checkpoint.npz",
+    "--output-json",
+    "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
+    "--apply-shell-material-tangent",
+    "--allow-state-dependent-shell-material-tangent-hip-replay",
+    "--enable-matrix-free-global-krylov",
+    "--matrix-free-global-krylov-batch-replay-backend",
+    "hip_full_residual_resident",
+    "--matrix-free-global-krylov-require-hip-batch-replay",
+    "--matrix-free-global-krylov-linear-solver-backend",
+    "torch_hip_gmres",
+    "--matrix-free-global-krylov-scaling-mode",
+    "residual_diagonal_displacement",
+    "--matrix-free-global-krylov-preconditioner-mode",
+    "current_tangent",
+    "--matrix-free-global-krylov-full-assembly-trial-replay",
+    "--enable-current-tangent-residual-row-correction",
+    "--current-tangent-residual-row-use-residual-only-assembly",
+    "--current-tangent-residual-row-per-state-batch-replay",
+    "--current-tangent-residual-row-batch-replay-backend",
+    "hip_full_residual",
+    "--current-tangent-residual-row-require-hip-batch-replay",
+    "--current-tangent-residual-row-jacobian-mode",
+    "finite_difference"
+  ],
+  "contract_pass": false,
+  "dry_run": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "full_load_input_pass": false,
+  "full_load_tolerance": 1e-12,
+  "generated_at": "2026-06-21T05:31:57.500453+00:00",
+  "required_load_scale": 1.0,
+  "reused_evidence": false,
+  "schema_version": "g1-full-load-hip-newton-lane.v1",
+  "source_commit_sha": "97c5161a6abc5a9e237fc13726088286e512079c",
+  "status": "blocked"
+}

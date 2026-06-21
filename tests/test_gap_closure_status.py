@@ -21,6 +21,10 @@ def test_report_gap_closure_status() -> None:
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "gap-closure-status.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
+    assert "does not create external receipts" in payload["claim_boundary"]
     assert "drawing_comparison_p1_p3" in payload["sections"]
     assert payload["sections"]["drawing_comparison_p1_p3"]["status"] == "complete"
     assert payload["delivery_status"] in {"ready", "review_required", "missing"}

@@ -1,6 +1,7 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
   "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "generated_at": "2026-06-19T15:59:30.279153+00:00",
   "lanes": {
     "nightly": {
@@ -17,15 +18,22 @@
       "job_start_blocker_count": 0,
       "job_start_blockers": [],
       "lane": "nightly",
+      "local_github_hosted_runner_default": false,
       "local_pull_request_trigger_present": false,
       "local_required_trigger_present": true,
       "local_schedule_trigger_present": true,
+      "local_self_hosted_runner_default": true,
       "local_workflow": {
         "exists": true,
+        "github_hosted_runner_default": false,
         "name": "Nightly Full Quality",
         "path": ".github/workflows/nightly-full-quality.yml",
         "pull_request_trigger_present": false,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
         "schedule_trigger_present": true,
+        "self_hosted_runner_default": true,
         "trigger_events": [
           "schedule",
           "workflow_dispatch"
@@ -34,6 +42,9 @@
       },
       "local_workflow_dispatch_trigger_present": true,
       "local_workflow_present": true,
+      "local_workflow_runs_on": [
+        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+      ],
       "local_workflow_trigger_events": [
         "schedule",
         "workflow_dispatch"
@@ -123,15 +134,22 @@
         }
       ],
       "lane": "pr",
+      "local_github_hosted_runner_default": false,
       "local_pull_request_trigger_present": true,
       "local_required_trigger_present": true,
       "local_schedule_trigger_present": false,
+      "local_self_hosted_runner_default": true,
       "local_workflow": {
         "exists": true,
+        "github_hosted_runner_default": false,
         "name": "CI",
         "path": ".github/workflows/ci.yml",
         "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
         "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
         "trigger_events": [
           "pull_request",
           "push"
@@ -140,6 +158,9 @@
       },
       "local_workflow_dispatch_trigger_present": false,
       "local_workflow_present": true,
+      "local_workflow_runs_on": [
+        "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+      ],
       "local_workflow_trigger_events": [
         "pull_request",
         "push"
@@ -165,7 +186,9 @@
   "limit": 100,
   "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "repo": "betelgeuze-kang/Structural-Analysis",
+  "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
+  "source_commit_sha": "97c5161a6abc5a9e237fc13726088286e512079c",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -183,13 +206,19 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 3,
+    "local_workflow_metadata_generated_at": "2026-06-21T05:33:49.813058+00:00",
     "local_workflows": [
       {
         "exists": true,
+        "github_hosted_runner_default": false,
         "name": "CI",
         "path": ".github/workflows/ci.yml",
         "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
         "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
         "trigger_events": [
           "pull_request",
           "push"
@@ -198,10 +227,15 @@
       },
       {
         "exists": true,
+        "github_hosted_runner_default": false,
         "name": "Nightly Full Quality",
         "path": ".github/workflows/nightly-full-quality.yml",
         "pull_request_trigger_present": false,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
         "schedule_trigger_present": true,
+        "self_hosted_runner_default": true,
         "trigger_events": [
           "schedule",
           "workflow_dispatch"
@@ -210,10 +244,15 @@
       },
       {
         "exists": true,
+        "github_hosted_runner_default": false,
         "name": "Publish Release Assets",
         "path": ".github/workflows/release-publish.yml",
         "pull_request_trigger_present": false,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
         "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
         "trigger_events": [
           "workflow_dispatch"
         ],

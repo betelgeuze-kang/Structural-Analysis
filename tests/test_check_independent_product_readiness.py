@@ -133,6 +133,10 @@ def test_independent_product_readiness_blocks_current_missing_strict_and_ops_gat
     )
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
+    assert "workstation delivery-service gate does not close" in payload["claim_boundary"]
     assert payload["independent_commercial_product_ready"] is False
     assert payload["full_autonomous_replacement_ready"] is False
     assert "Strict external and residual holdout evidence::external_submission_receipts_pending" in payload["blockers"]
@@ -210,6 +214,9 @@ def test_independent_product_readiness_passes_when_product_gates_close(tmp_path:
     )
 
     assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["independent_commercial_product_ready"] is True
     assert payload["full_autonomous_replacement_ready"] is False
     assert payload["readiness_score"] == 100.0

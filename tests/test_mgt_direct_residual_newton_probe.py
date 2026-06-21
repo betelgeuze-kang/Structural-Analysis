@@ -21,6 +21,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     _component_breakdown,
     _cpu_acceptance_refresh_closure_blocked,
     _expand_support_to_node_blocks,
+    _full_load_closure_gate,
     _g1_fallback_zero_audit,
     _g1_hip_residual_engine_contract,
     _load_checkpoint,
@@ -74,6 +75,17 @@ def test_parse_matrix_free_basis_sources_normalizes_aliases() -> None:
     )
 
 
+def test_full_load_closure_gate_rejects_sub_full_load_checkpoint() -> None:
+    sub_full = _full_load_closure_gate(0.656)
+    full = _full_load_closure_gate(1.0)
+
+    assert sub_full["required"] is True
+    assert sub_full["observed_load_scale"] == 0.656
+    assert sub_full["passed"] is False
+    assert "must not be promoted" in sub_full["claim_boundary"]
+    assert full["passed"] is True
+
+
 def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
     default_args = parse_args([])
     assert default_args.current_tangent_residual_row_use_residual_only_assembly is False
@@ -85,6 +97,7 @@ def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
     assert default_args.apply_shell_material_tangent is False
     assert default_args.allow_frozen_shell_material_tangent_hip_replay is False
     assert default_args.allow_state_dependent_shell_material_tangent_hip_replay is False
+    assert default_args.current_tangent_residual_row_per_state_batch_replay is False
     assert default_args.compact_output_final_checkpoint is False
     assert default_args.matrix_free_global_krylov_full_assembly_trial_replay is False
     assert default_args.include_residual_component_breakdown is False
@@ -110,6 +123,7 @@ def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
             "--current-tangent-residual-row-support-selection",
             "target_rows",
             "--current-tangent-residual-row-use-residual-only-assembly",
+            "--current-tangent-residual-row-per-state-batch-replay",
             "--current-tangent-residual-row-batch-replay-backend",
             "hip_full_residual",
             "--current-tangent-residual-row-require-hip-batch-replay",
@@ -133,6 +147,7 @@ def test_direct_residual_parser_exposes_residual_row_fastpath_flag() -> None:
     assert enabled_args.current_tangent_residual_row_jacobian_mode == "finite_difference"
     assert enabled_args.current_tangent_residual_row_support_selection == "target_rows"
     assert enabled_args.current_tangent_residual_row_use_residual_only_assembly is True
+    assert enabled_args.current_tangent_residual_row_per_state_batch_replay is True
     assert enabled_args.current_tangent_residual_row_batch_replay_backend == "hip_full_residual"
     assert enabled_args.current_tangent_residual_row_require_hip_batch_replay is True
     assert enabled_args.current_tangent_residual_row_allow_negative_alphas is True
@@ -1116,6 +1131,30 @@ def test_g1_fallback_zero_audit_fails_global_krylov_cpu_refresh_used() -> None:
     assert "global_krylov_cpu_tangent_refresh_used" in boundaries
 
 
+def test_g1_fallback_zero_audit_fails_global_krylov_missing_tangent_refresh() -> None:
+    audit = _g1_fallback_zero_audit(
+        global_krylov={
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "require_hip_batch_replay": True,
+            "accepted_state_refresh_hip_used": True,
+            "accepted_state_tangent_refresh_backend": "not_refreshed_not_needed_after_global_krylov",
+            "accepted_state_tangent_refresh_cpu_used": False,
+        },
+        row_correction={
+            "enabled": False,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": False,
+        },
+    )
+
+    assert audit["fallback_zero_passed"] is False
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert "global_krylov_hip_required_tangent_refresh_missing" in boundaries
+
+
 def test_g1_fallback_zero_audit_fails_global_krylov_cpu_fallback_suppressed() -> None:
     audit = _g1_fallback_zero_audit(
         global_krylov={
@@ -1205,6 +1244,66 @@ def test_g1_fallback_zero_audit_fails_row_correction_cpu_refresh_used() -> None:
     boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
     assert "row_correction_cpu_residual_acceptance_refresh_used" in boundaries
     assert "row_correction_cpu_tangent_refresh_used" in boundaries
+
+
+def test_g1_fallback_zero_audit_fails_row_correction_frozen_tangent_refresh() -> None:
+    audit = _g1_fallback_zero_audit(
+        global_krylov={
+            "enabled": False,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": False,
+        },
+        row_correction={
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": True,
+            "require_hip_batch_replay": True,
+            "accepted_state_refresh_hip_used": True,
+            "accepted_state_tangent_refresh_backend": (
+                "frozen_previous_support_graph_fd_residual_jvp"
+            ),
+            "accepted_state_tangent_refresh_cpu_used": False,
+            "frozen_support_graph_after_hip_residual_promotion": True,
+        },
+    )
+
+    assert audit["fallback_zero_passed"] is False
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert "row_correction_hip_required_tangent_refresh_missing" in boundaries
+
+
+def test_g1_fallback_zero_audit_fails_row_correction_per_state_non_hip_trial() -> None:
+    audit = _g1_fallback_zero_audit(
+        global_krylov={
+            "enabled": False,
+            "attempted": False,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": False,
+        },
+        row_correction={
+            "enabled": True,
+            "attempted": True,
+            "promoted_to_final_state": False,
+            "require_hip_batch_replay": True,
+            "per_state_batch_replay_enabled": True,
+            "passes": [
+                {
+                    "trial_rows": [
+                        {
+                            "per_state_batch_replay": True,
+                            "hip_full_residual_batch_replay": False,
+                            "residual_batch_backend": "cpu",
+                        }
+                    ]
+                }
+            ],
+        },
+    )
+
+    assert audit["fallback_zero_passed"] is False
+    boundaries = {b["boundary"] for b in audit["fallback_zero_boundaries"]}
+    assert "row_correction_per_state_replay_non_hip_trial" in boundaries
 
 
 def test_g1_fallback_zero_audit_aggregates_multiple_boundaries() -> None:
@@ -1474,6 +1573,51 @@ def test_frozen_shell_material_hip_replay_row_correction_records_frozen_metadata
         row_correction.get("batch_replay_backend_disabled_reason")
         != "state_dependent_shell_material_tangent_requires_cpu_batch"
     )
+
+
+def test_row_correction_per_state_hip_batch_replay_records_trial_metadata(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    mgt_path = tmp_path / "test.mgt"
+    mgt_path.write_bytes(FIXTURE_MGT.read_bytes())
+    checkpoint = tmp_path / "state.npz"
+    _make_checkpoint_npz(checkpoint, dof_count=60)
+
+    monkeypatch.setattr(
+        direct_probe, "_rocm_hip_runtime_preflight", _mock_hip_preflight_available
+    )
+    monkeypatch.setattr(
+        direct_probe.HipFullResidualBatchBackend,
+        "prepare",
+        _MockHipBackend.prepare,
+    )
+
+    payload = run_mgt_direct_residual_newton_probe(
+        mgt_path=mgt_path,
+        checkpoint_npz=checkpoint,
+        enable_current_tangent_residual_row_correction=True,
+        current_tangent_residual_row_use_residual_only_assembly=True,
+        current_tangent_residual_row_per_state_batch_replay=True,
+        current_tangent_residual_row_batch_replay_backend="hip_full_residual",
+        current_tangent_residual_row_require_hip_batch_replay=True,
+    )
+
+    row_correction = payload["current_tangent_residual_row_correction"]
+    assert row_correction["enabled"] is True
+    assert row_correction["per_state_batch_replay_enabled"] is True
+    assert row_correction["per_state_batch_replay_state_count"] > 0
+    assert row_correction.get("batch_replay_backend_disabled_reason") is None
+    assert any(
+        row.get("per_state_batch_replay") is True
+        and row.get("hip_full_residual_batch_replay") is True
+        for row in row_correction["trial_rows"]
+    )
+    gate = payload["gate_assessment"]
+    assert gate["full_load_closure_passed"] is False
+    assert gate["full_load_closure_gate"]["observed_load_scale"] == 0.656
+    assert "full_load_gate_not_closed" in payload["blockers"]
+    assert "does not close full G1" in payload["claim_boundary"]
+    assert "sub-full-load diagnostic evidence" in payload["claim_boundary"]
 
 
 def test_frozen_shell_material_hip_replay_without_frozen_flag_disables_row_correction(
@@ -2376,10 +2520,11 @@ def test_row_correction_hip_required_multipass_stops_without_cpu_tangent_refresh
     }
     assert "row_correction_cpu_residual_acceptance_refresh_used" not in boundaries
     assert "row_correction_cpu_tangent_refresh_used" not in boundaries
-    assert payload["gate_assessment"]["fallback_zero_passed"] is True
+    assert "row_correction_hip_required_tangent_refresh_missing" in boundaries
+    assert payload["gate_assessment"]["fallback_zero_passed"] is False
 
 
-def test_row_correction_hip_required_fd_multipass_reuses_frozen_support_scaffold(
+def test_row_correction_hip_required_fd_multipass_refreshes_tangent_with_hip_jvp(
     tmp_path: Path, monkeypatch: Any
 ) -> None:
     mgt_path = tmp_path / "test.mgt"
@@ -2419,11 +2564,12 @@ def test_row_correction_hip_required_fd_multipass_reuses_frozen_support_scaffold
     assert row_correction["accepted_state_refresh_cpu_used"] is False
     assert (
         row_correction["accepted_state_tangent_refresh_backend"]
-        == "frozen_previous_support_graph_fd_residual_jvp"
+        == "hip_finite_difference_residual_jvp"
     )
+    assert row_correction["accepted_state_tangent_refresh_hip_used"] is True
     assert row_correction["accepted_state_tangent_refresh_cpu_used"] is False
-    assert row_correction["frozen_support_graph_after_hip_residual_promotion"] is True
-    assert row_correction["frozen_support_graph_scope"] == "support_selection_scaffold_only"
+    assert row_correction["accepted_state_tangent_refresh_column_count"] > 0
+    assert "frozen_support_graph_after_hip_residual_promotion" not in row_correction
     assert row_correction["support_selection"] == "target_rows"
     assert any(
         candidate["jacobian"]["stiffness_free_support_selection"]
@@ -2439,6 +2585,8 @@ def test_row_correction_hip_required_fd_multipass_reuses_frozen_support_scaffold
     }
     assert "row_correction_cpu_residual_acceptance_refresh_used" not in boundaries
     assert "row_correction_cpu_tangent_refresh_used" not in boundaries
+    assert "row_correction_hip_required_tangent_refresh_missing" not in boundaries
+    assert payload["gate_assessment"]["fallback_zero_passed"] is True
 
 
 def test_row_correction_terminal_hip_promotion_uses_hip_residual_refresh(
@@ -2486,6 +2634,7 @@ def test_row_correction_terminal_hip_promotion_uses_hip_residual_refresh(
     }
     assert "row_correction_cpu_residual_acceptance_refresh_used" not in boundaries
     assert "row_correction_cpu_tangent_refresh_used" not in boundaries
+    assert "row_correction_hip_required_tangent_refresh_missing" in boundaries
 
 
 def test_state_dependent_spy_wins_behaviorally_over_frozen_when_both_flags_set(

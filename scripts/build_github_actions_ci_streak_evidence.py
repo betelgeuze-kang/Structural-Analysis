@@ -14,6 +14,7 @@ from typing import Any
 
 
 SCHEMA_VERSION = "github-actions-ci-streak-evidence.v1"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json")
 DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
 DEFAULT_LOCAL_WORKFLOW_DIR = Path(".github/workflows")
@@ -63,6 +64,18 @@ KNOWN_GITHUB_TRIGGER_EVENTS = frozenset(
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=Path(__file__).resolve().parent.parent,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
 
 
 def _gh_env() -> dict[str, str]:
@@ -185,6 +198,15 @@ def _job_start_blocker_code(message: str) -> str:
     text = message.lower()
     if "payments have failed" in text or "spending limit" in text or "billing" in text:
         return "github_actions_billing_or_spending_limit"
+    if (
+        "self-hosted runner" in text
+        or "self hosted runner" in text
+        or "no runner matching" in text
+        or "no online and idle runners" in text
+        or "all eligible runners are offline" in text
+        or "waiting for a runner" in text
+    ):
+        return "github_actions_self_hosted_runner_unavailable"
     return "github_actions_job_start_blocked"
 
 
@@ -322,6 +344,20 @@ def _workflow_trigger_events(path: Path) -> list[str]:
     return sorted(events)
 
 
+def _workflow_runs_on_values(path: Path) -> list[str]:
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except Exception:
+        return []
+    values: list[str] = []
+    for raw_line in lines:
+        stripped = raw_line.strip()
+        if not stripped.startswith("runs-on:"):
+            continue
+        values.append(stripped.split(":", 1)[1].strip().strip("\"'"))
+    return values
+
+
 def _local_workflows(workflow_dir: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     if not workflow_dir.exists():
@@ -337,12 +373,23 @@ def _local_workflows(workflow_dir: Path) -> list[dict[str, Any]]:
         except Exception:
             name = ""
         trigger_events = _workflow_trigger_events(path)
+        runs_on_values = _workflow_runs_on_values(path)
+        self_hosted_default = bool(
+            runs_on_values and all("self-hosted" in value for value in runs_on_values)
+        )
+        github_hosted_default = any(
+            re.search(r"\b(?:ubuntu|windows|macos)-(?:latest|\d{2}\.\d{2})\b", value)
+            for value in runs_on_values
+        )
         rows.append(
             {
                 "name": name,
                 "path": path.as_posix(),
                 "exists": path.exists(),
                 "trigger_events": trigger_events,
+                "runs_on": runs_on_values,
+                "self_hosted_runner_default": self_hosted_default,
+                "github_hosted_runner_default": github_hosted_default,
                 "pull_request_trigger_present": "pull_request" in trigger_events,
                 "schedule_trigger_present": "schedule" in trigger_events,
                 "workflow_dispatch_trigger_present": "workflow_dispatch" in trigger_events,
@@ -370,6 +417,13 @@ def _local_trigger_status(lane: str, local_workflow: dict[str, Any]) -> dict[str
     local_pull_request_trigger_present = "pull_request" in local_trigger_events
     local_schedule_trigger_present = "schedule" in local_trigger_events
     local_workflow_dispatch_trigger_present = "workflow_dispatch" in local_trigger_events
+    local_runs_on = [
+        str(item)
+        for item in local_workflow.get("runs_on", [])
+        if isinstance(item, str)
+    ]
+    local_self_hosted_runner_default = local_workflow.get("self_hosted_runner_default") is True
+    local_github_hosted_runner_default = local_workflow.get("github_hosted_runner_default") is True
     if lane == "pr":
         local_required_trigger_present = local_pull_request_trigger_present
     else:
@@ -378,6 +432,9 @@ def _local_trigger_status(lane: str, local_workflow: dict[str, Any]) -> dict[str
         )
     return {
         "local_workflow_trigger_events": sorted(local_trigger_events),
+        "local_workflow_runs_on": local_runs_on,
+        "local_self_hosted_runner_default": local_self_hosted_runner_default,
+        "local_github_hosted_runner_default": local_github_hosted_runner_default,
         "local_required_trigger_present": local_required_trigger_present,
         "local_pull_request_trigger_present": local_pull_request_trigger_present,
         "local_schedule_trigger_present": local_schedule_trigger_present,
@@ -536,6 +593,9 @@ def build_evidence(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "reused_evidence": False,
         "repo": repo,
         "threshold": threshold,
         "limit": limit,
@@ -622,6 +682,9 @@ def refresh_local_workflow_metadata(
         _as_dict(lanes.get("nightly")).get("local_required_trigger_present")
     )
     payload["summary"] = summary
+    payload["source_commit_sha"] = _git_head()
+    payload["engine_version"] = ENGINE_VERSION
+    payload["reused_evidence"] = True
     payload["claim_boundary"] = (
         str(payload.get("claim_boundary", "")).rstrip()
         + " Local workflow trigger metadata is parsed from the current checkout and does not refresh "

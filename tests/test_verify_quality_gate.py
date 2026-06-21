@@ -57,3 +57,27 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         "scripts/check_independent_product_readiness.py"
     )
     assert "git diff --check" in output
+
+
+def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> None:
+    exit_code = verify_quality_gate.main(["--mode", "release", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "scripts/check_github_actions_runner_policy.py --fail-blocked" in output
+    assert "scripts/check_github_actions_self_hosted_runner_status.py" in output
+    assert "github_actions_self_hosted_runner_status.json" in output
+    assert "scripts/build_product_readiness_snapshot.py" in output
+    assert "product_readiness_snapshot.json" in output
+    assert "tests/test_product_readiness_snapshot_doc_sync.py" in output
+    assert "--fail-blocked" in output
+    assert output.index("scripts/check_github_actions_runner_policy.py") < output.index(
+        "scripts/check_github_actions_self_hosted_runner_status.py"
+    )
+    assert output.index("scripts/check_github_actions_self_hosted_runner_status.py") < output.index(
+        "scripts/build_product_readiness_snapshot.py"
+    )
+    assert output.index("scripts/build_product_readiness_snapshot.py") < output.index(
+        "tests/test_product_readiness_snapshot_doc_sync.py"
+    )
+    assert output.index("tests/test_product_readiness_snapshot_doc_sync.py") < output.index("git diff --check")

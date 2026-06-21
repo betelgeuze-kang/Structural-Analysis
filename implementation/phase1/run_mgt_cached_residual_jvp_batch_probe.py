@@ -535,6 +535,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
     residual_batch_replay_chunk_size: int = 1,
     enable_batch_jvp_replay: bool = False,
     enable_batch_alpha_replay: bool = True,
+    allow_batch_replay_fallback: bool = True,
     hipcc: Path = Path("/opt/rocm/bin/hipcc"),
     force_rebuild_hip: bool = False,
 ) -> dict[str, Any]:
@@ -616,6 +617,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         "alpha_batch_state_count": 0,
         "alpha_batch_seconds": 0.0,
         "alpha_batch_fallback_count": 0,
+        "allow_batch_replay_fallback": bool(allow_batch_replay_fallback),
         "backend_error": "",
     }
     cache = ResidualJvpBatchCache(
@@ -627,6 +629,7 @@ def run_mgt_cached_residual_jvp_batch_probe(
         prefer_residual_only=True,
         batch_residual_evaluator=batch_residual_evaluator if batch_jvp_replay_enabled else None,
         batch_replay_backend=batch_backend,
+        allow_batch_replay_fallback=bool(allow_batch_replay_fallback),
         hipcc=hipcc,
         force_rebuild_hip=bool(force_rebuild_hip),
     )
@@ -800,6 +803,11 @@ def run_mgt_cached_residual_jvp_batch_probe(
                     residual_batch_replay_meta["alpha_batch_fallback_count"] = int(
                         residual_batch_replay_meta["alpha_batch_fallback_count"]
                     ) + len(chunk_us)
+                    if not bool(allow_batch_replay_fallback):
+                        raise RuntimeError(
+                            "alpha residual batch replay failed and CPU fallback is disabled: "
+                            f"{exc}"
+                        ) from exc
                     for alpha_float, candidate_u in zip(chunk_alphas, chunk_us, strict=False):
                         append_single_candidate(
                             float(alpha_float),
@@ -1340,6 +1348,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Keep alpha candidate replay on the single-state residual path.",
     )
+    parser.add_argument(
+        "--forbid-batch-replay-fallback",
+        action="store_true",
+        help=(
+            "Fail instead of replaying failed batch JVP/alpha candidates through "
+            "single-state CPU residual assembly. Use this for HIP-required G1 diagnostics."
+        ),
+    )
     parser.add_argument("--hipcc", type=Path, default=Path("/opt/rocm/bin/hipcc"))
     parser.add_argument("--force-rebuild-hip", action="store_true")
     parser.add_argument(
@@ -1393,6 +1409,7 @@ def main(argv: list[str] | None = None) -> int:
         residual_batch_replay_chunk_size=args.residual_batch_replay_chunk_size,
         enable_batch_jvp_replay=bool(args.enable_batch_jvp_replay),
         enable_batch_alpha_replay=not bool(args.disable_batch_alpha_replay),
+        allow_batch_replay_fallback=not bool(args.forbid_batch_replay_fallback),
         hipcc=args.hipcc,
         force_rebuild_hip=bool(args.force_rebuild_hip),
     )

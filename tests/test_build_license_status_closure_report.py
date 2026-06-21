@@ -29,6 +29,9 @@ def test_license_status_closure_blocks_not_configured_status(tmp_path: Path) -> 
     )
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert "license_status_not_active" in payload["blockers"]
     assert "license_tier_missing" in payload["blockers"]
     assert payload["summary"]["owner_action"].startswith("Populate license_status.json")
@@ -63,6 +66,9 @@ def test_license_status_closure_passes_populated_future_license(tmp_path: Path) 
     )
 
     assert payload["contract_pass"] is True
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is False
     assert payload["blockers"] == []
     assert payload["summary"]["product_scope_count"] == 4
     assert payload["summary"]["evidence_ref_kind"] == "local_path"
