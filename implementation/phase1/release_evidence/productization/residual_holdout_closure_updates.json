@@ -6,10 +6,10 @@
     "base_residual_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
     "basis_kind": "existing_sidecar_metadata_refresh"
   },
-  "generated_at": "2026-06-21T09:01:31.220278+00:00",
+  "generated_at": "2026-06-21T09:05:23.139099+00:00",
   "reused_evidence": true,
   "schema_version": "residual-holdout-closure-updates.v1",
-  "source_commit_sha": "2b3599ad7f67c4b6b5af75cdd8ad1b71a3fdaecd",
+  "source_commit_sha": "773cb0670f8d60e4da035831748aa23cc2df816e",
   "updates": {
     "RH-001": {
       "closed_at_utc": "2026-06-05T13:35:55.060315+00:00",

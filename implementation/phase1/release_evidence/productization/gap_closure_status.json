@@ -1,7 +1,7 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-21T09:01:43.977099+00:00",
-  "source_commit_sha": "2b3599ad7f67c4b6b5af75cdd8ad1b71a3fdaecd",
+  "generated_at": "2026-06-21T09:05:28.965855+00:00",
+  "source_commit_sha": "773cb0670f8d60e4da035831748aa23cc2df816e",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "overall_status": "ready",
