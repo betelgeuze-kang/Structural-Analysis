@@ -1389,6 +1389,80 @@ function buildCommercialWorkflowBreadthSnapshot(resource: ResourceState): Snapsh
   }
 }
 
+function buildDeveloperPreviewSnapshot(resource: ResourceState): Snapshot {
+  if (resource.status !== 'ready' || !resource.data) {
+    return missingSnapshot('Developer Preview readiness JSON을 아직 읽지 못했습니다.')
+  }
+  const categories = getRecord(resource.data, 'categories')
+  const numerical = getRecord(categories, 'numerical')
+  const benchmark = getRecord(categories, 'benchmark')
+  const softwareProduct = getRecord(categories, 'software product')
+  const futureCommercial = getRecord(categories, 'future commercial')
+  const ready = firstBoolean(resource.data.developer_preview_ready)
+  const blockerCount = firstNumber(resource.data.blocker_count) ?? 0
+  const futureCount = firstNumber(resource.data.future_commercial_blocker_count) ?? 0
+  const scope = getRecord(resource.data, 'scope')
+  const includedScope = getArray(scope, 'included').map(asString).filter(Boolean)
+  const excludedScope = getArray(scope, 'excluded').map(asString).filter(Boolean)
+  const scopeSummary = includedScope.length
+    ? includedScope.slice(0, 2).join('; ')
+    : 'public/open benchmark import and local GUI review'
+  const exclusionSummary = excludedScope.length
+    ? excludedScope.slice(0, 3).join('; ')
+    : 'permit automation; engineer replacement; SaaS/account/license server'
+  return {
+    statusLabel: ready ? 'Developer Preview ready' : 'Developer Preview blocked',
+    tone: ready ? 'ok' : 'warn',
+    metrics: [
+      { label: 'Numerical', value: compactCount(firstNumber(numerical.blocker_count) ?? 0) },
+      { label: 'Benchmark', value: compactCount(firstNumber(benchmark.blocker_count) ?? 0) },
+      { label: 'Software product', value: compactCount(firstNumber(softwareProduct.blocker_count) ?? 0) },
+      { label: 'Future commercial', value: compactCount(futureCount), note: 'visible, non-blocking for Developer Preview' },
+      { label: 'Scope', value: compactCount(includedScope.length), note: scopeSummary },
+      { label: 'Excluded', value: compactCount(excludedScope.length), note: exclusionSummary },
+    ],
+    note: `Developer Preview blockers=${compactCount(blockerCount)}; scope=${scopeSummary}; excludes=${exclusionSummary}; customer shadow, license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain Commercial Release blockers.`,
+    sourceLabel: resource.source || 'developer_preview_readiness.json',
+  }
+}
+
+function buildCoreApiContractSnapshot(resultResource: ResourceState, reportResource: ResourceState): Snapshot {
+  if (
+    resultResource.status !== 'ready'
+    || reportResource.status !== 'ready'
+    || !resultResource.data
+    || !reportResource.data
+  ) {
+    return missingSnapshot('Phase 1 core API result/report JSON을 아직 읽지 못했습니다.')
+  }
+  const result = resultResource.data
+  const report = reportResource.data
+  const resultStatus = asString(result.status) || 'missing'
+  const reportStatus = asString(report.status) || 'missing'
+  const contractPass = firstBoolean(report.contract_pass)
+  const convergenceRows = getArray(result, 'convergence_history').filter(isRecord)
+  const unsupportedRows = getArray(result, 'unsupported_features').filter(isRecord)
+  const blockedFields = getArray(report, 'developer_preview_blocked_fields')
+  const metrics = getRecord(result, 'metrics')
+  const nodeCount = firstNumber(metrics.node_count)
+  const elementCount = firstNumber(metrics.element_count)
+  const checksum = asString(result.input_checksum)
+  return {
+    statusLabel: contractPass ? 'Core API contract ready' : 'Core API contract blocked',
+    tone: contractPass ? 'ok' : 'warn',
+    metrics: [
+      { label: 'Result', value: resultStatus },
+      { label: 'Report', value: reportStatus },
+      { label: 'Nodes', value: compactCount(nodeCount) },
+      { label: 'Elements', value: compactCount(elementCount) },
+      { label: 'Convergence', value: compactCount(convergenceRows.length) },
+      { label: 'Unsupported', value: compactCount(unsupportedRows.length || blockedFields.length) },
+    ],
+    note: `schema=${asString(result.claim_boundary_version) || 'unknown'}; checksum=${shorten(checksum, 22)}; GUI reads stable AnalysisResult and ValidationReport JSON, not generated HTML.`,
+    sourceLabel: `${sourceLabel(resultResource.source)} + ${sourceLabel(reportResource.source)}`,
+  }
+}
+
 function buildAuthoringFamilyCorpusSnapshot(resource: ResourceState): Snapshot {
   if (resource.status !== 'ready' || !resource.data) {
     return missingSnapshot('native authoring family corpus summary를 아직 읽지 못했습니다.')
@@ -3278,6 +3352,9 @@ function App() {
         benchmark,
         committeeSummary,
         committeeReport,
+        developerPreview,
+        coreApiResult,
+        coreApiReport,
         commercialWorkflowBreadth,
         releaseGap,
         registry,
@@ -3353,6 +3430,15 @@ function App() {
           './implementation/phase1/release/committee_review/committee_review_package_report.json',
         ]),
         fetchFirstJson([
+          './implementation/phase1/release_evidence/productization/developer_preview_readiness.json',
+        ]),
+        fetchFirstJson([
+          './implementation/phase1/release_evidence/productization/phase1_core_api_model_health_result.json',
+        ]),
+        fetchFirstJson([
+          './implementation/phase1/release_evidence/productization/phase1_core_api_model_health_report.json',
+        ]),
+        fetchFirstJson([
           './implementation/phase1/release/commercial_workflow_breadth_report.json',
         ]),
         fetchFirstJson([
@@ -3398,6 +3484,9 @@ function App() {
           benchmark,
           committeeSummary,
           committeeReport,
+          developerPreview,
+          coreApiResult,
+          coreApiReport,
           commercialWorkflowBreadth,
           releaseGap,
           registry,
@@ -3559,6 +3648,8 @@ function App() {
   const commercialWorkflowBreadthSnapshot = buildCommercialWorkflowBreadthSnapshot(
     resources.commercialWorkflowBreadth,
   )
+  const developerPreviewSnapshot = buildDeveloperPreviewSnapshot(resources.developerPreview)
+  const coreApiContractSnapshot = buildCoreApiContractSnapshot(resources.coreApiResult, resources.coreApiReport)
   const surfaceSnapshots: Record<ReviewSurfaceId, Snapshot> = {
     viewer: buildViewerSnapshot(resources.viewer),
     'drawing-review': buildDrawingSnapshot(resources.drawing),
@@ -5365,6 +5456,89 @@ function App() {
               </div>
             )}
           </div>
+        </div>
+        <div className="advanced-holdout-card">
+          <div className="advanced-holdout-card__top">
+            <div>
+              <p className="advanced-holdout-card__title">Phase 1 Core API Contract</p>
+              <p className="advanced-holdout-card__subnote">
+                GUI가 Python API의 AnalysisResult와 ValidationReport JSON을 직접 읽어 model_health 계약을 표시합니다.
+              </p>
+            </div>
+            <span className={`status-pill status-pill--${coreApiContractSnapshot.tone}`}>
+              {coreApiContractSnapshot.statusLabel}
+            </span>
+          </div>
+          <div className="mini-metric-grid mini-metric-grid--artifact mini-metric-grid--holdout">
+            {coreApiContractSnapshot.metrics.map((metric) => (
+              <div key={`core-api-contract-${metric.label}`} className="mini-metric">
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+              </div>
+            ))}
+          </div>
+          <p className="advanced-holdout-card__subnote">{coreApiContractSnapshot.note}</p>
+          <p className="panel__source">source: {coreApiContractSnapshot.sourceLabel}</p>
+          {resources.coreApiResult.source || resources.coreApiReport.source ? (
+            <div className="authoring-actions">
+              {resources.coreApiResult.source ? (
+                <a
+                  className="button button--ghost"
+                  href={resources.coreApiResult.source}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open Core API result JSON
+                </a>
+              ) : null}
+              {resources.coreApiReport.source ? (
+                <a
+                  className="button button--ghost"
+                  href={resources.coreApiReport.source}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open Core API validation report JSON
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+        <div className="advanced-holdout-card">
+          <div className="advanced-holdout-card__top">
+            <div>
+              <p className="advanced-holdout-card__title">Open Benchmark Developer Preview</p>
+              <p className="advanced-holdout-card__subnote">
+                Developer Preview와 Commercial Release gate를 분리합니다. 고객 shadow, 라이선스/법무 승인,
+                상용 SLA, 30-run CI streak, external approval receipt는 미래 상용 release blocker로만 표시합니다.
+              </p>
+            </div>
+            <span className={`status-pill status-pill--${developerPreviewSnapshot.tone}`}>
+              {developerPreviewSnapshot.statusLabel}
+            </span>
+          </div>
+          <div className="mini-metric-grid mini-metric-grid--artifact mini-metric-grid--holdout">
+            {developerPreviewSnapshot.metrics.map((metric) => (
+              <div key={`developer-preview-${metric.label}`} className="mini-metric">
+                <span>{metric.label}</span>
+                <strong>{metric.value}</strong>
+              </div>
+            ))}
+          </div>
+          <p className="advanced-holdout-card__subnote">{developerPreviewSnapshot.note}</p>
+          <p className="panel__source">source: {developerPreviewSnapshot.sourceLabel}</p>
+          {resources.developerPreview.source ? (
+            <div className="authoring-actions">
+              <a
+                className="button button--ghost"
+                href={resources.developerPreview.source}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Developer Preview readiness JSON
+              </a>
+            </div>
+          ) : null}
         </div>
         <div className="advanced-holdout-card">
           <div className="advanced-holdout-card__top">

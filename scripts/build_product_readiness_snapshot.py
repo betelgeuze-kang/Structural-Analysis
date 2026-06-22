@@ -58,12 +58,14 @@ class SnapshotInputPaths:
     github_actions_ci_streak: Path = PRODUCTIZATION / "github_actions_ci_streak_evidence.json"
     ux_new_user_observation: Path = PRODUCTIZATION / "ux_new_user_observation_report.json"
     license_status_closure: Path = PRODUCTIZATION / "license_status_closure_report.json"
+    paid_pilot_scope_guard: Path = PRODUCTIZATION / "paid_pilot_scope_guard_report.json"
     external_benchmark_submission_readiness: Path = (
         Path("implementation/phase1/release/external_benchmark_submission_readiness.json")
     )
     external_benchmark_submission_updates: Path = (
         PRODUCTIZATION / "external_benchmark_submission_updates.json"
     )
+    phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
     self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
     pyproject_toml: Path = Path("pyproject.toml")
@@ -197,8 +199,10 @@ def _receipt_commit_allowed_paths(
         "github_actions_ci_streak",
         "ux_new_user_observation",
         "license_status_closure",
+        "paid_pilot_scope_guard",
         "external_benchmark_submission_readiness",
         "external_benchmark_submission_updates",
+        "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
     }
     return {
@@ -352,6 +356,16 @@ def _metadata_rows(
     for name, payload in artifacts.items():
         source_commit = payload.get("source_commit_sha")
         generated_at = payload.get("generated_at")
+        input_checksum = _first_present(
+            payload,
+            (
+                "input_checksum",
+                "input_checksums",
+                "input_sha256",
+                "input_artifact_checksum",
+                "source_checksum",
+            ),
+        )
         source_state_fresh, source_state_kind, changed_paths = _source_state_freshness(
             repo_root=repo_root,
             source_commit=source_commit,
@@ -364,6 +378,7 @@ def _metadata_rows(
             "generated_at": generated_at,
             "source_commit_sha": source_commit,
             "reused_evidence": payload.get("reused_evidence"),
+            "input_checksum_present": _truthy_presence(input_checksum),
             "source_commit_matches_head": bool(_commit_matches(source_commit, current_commit)),
             "source_state_fresh": source_state_fresh,
             "source_state_kind": source_state_kind,
@@ -372,6 +387,23 @@ def _metadata_rows(
         }
         rows.append(row)
     return rows
+
+
+def _first_present(payload: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        if key in payload:
+            return payload.get(key)
+    return None
+
+
+def _truthy_presence(value: Any) -> bool:
+    if value is None or value is False:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
 
 
 def _schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
@@ -589,6 +621,176 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     }
 
 
+def _workstation_delivery_summary(workstation: dict[str, Any]) -> dict[str, Any]:
+    gates = [row for row in _as_list(workstation.get("gates")) if isinstance(row, dict)]
+    passed_gate_count = sum(1 for row in gates if row.get("ok") is True)
+    delivery_package = next(
+        (
+            row
+            for row in gates
+            if str(row.get("label", "")).lower() == "delivery package manifest"
+        ),
+        {},
+    )
+    required_sections = _as_dict(delivery_package.get("required_sections"))
+    claim_boundary = _as_dict(workstation.get("claim_boundary"))
+    forbidden = [str(item).lower() for item in _as_list(claim_boundary.get("forbidden"))]
+    allowed = str(claim_boundary.get("allowed", "")).lower()
+    acceptance_package_ready = bool(
+        delivery_package.get("ok") is True
+        and required_sections.get("ACCEPTANCE_PACKET.md") is True
+        and delivery_package.get("manifest_acceptance_reference_pass") is True
+    )
+    engineer_review_boundary_ready = bool(
+        "engineer review" in allowed
+        and any("structural engineer replacement" in item for item in forbidden)
+        and any("full autonomous replacement" in item for item in forbidden)
+    )
+    return {
+        "gate_count": len(gates),
+        "passed_gate_count": passed_gate_count,
+        "all_gates_passed": bool(gates and passed_gate_count == len(gates)),
+        "workstation_delivery_8_of_8": bool(len(gates) >= 8 and passed_gate_count >= 8),
+        "acceptance_package_ready": acceptance_package_ready,
+        "engineer_review_boundary_ready": engineer_review_boundary_ready,
+        "claim_boundary": claim_boundary,
+    }
+
+
+def _root_blocker_stream(blocker: str) -> str:
+    text = blocker.lower()
+    if (
+        text.startswith("stale_or_inconsistent:")
+        or text.startswith("pm_release::github_sync::")
+        or "github_sync" in text
+        or "source_commit" in text
+        or "input_checksum" in text
+    ):
+        return "release freshness/sync"
+    if (
+        text.startswith("ci_streak::")
+        or text.startswith("self_hosted_runner::")
+        or text.startswith("runner_policy::")
+        or "basic_ci" in text
+        or "ci_30" in text
+        or "runner" in text
+    ):
+        return "CI runner/streak"
+    if text.startswith("human_ux::") or "::ux::" in text:
+        return "human UX"
+    if text.startswith("license::") or "::security::license" in text:
+        return "license/legal"
+    if text.startswith("customer_shadow::"):
+        return "customer shadow"
+    if text.startswith("external_benchmark::") or "external_receipt" in text or "external_submission" in text:
+        return "external benchmark"
+    if text.startswith("fresh_full_validation::"):
+        return "fresh validation"
+    if text.startswith("g1") or "::g1" in text:
+        return "G1 solver"
+    return "release freshness/sync"
+
+
+def _root_blockers(blockers: list[str]) -> dict[str, dict[str, Any]]:
+    streams = (
+        "release freshness/sync",
+        "CI runner/streak",
+        "human UX",
+        "license/legal",
+        "customer shadow",
+        "external benchmark",
+        "fresh validation",
+        "G1 solver",
+    )
+    grouped: dict[str, list[str]] = {stream: [] for stream in streams}
+    for blocker in blockers:
+        grouped.setdefault(_root_blocker_stream(blocker), []).append(blocker)
+    return {
+        stream: {
+            "blocked": bool(items),
+            "blocker_count": len(items),
+            "blockers": items,
+        }
+        for stream, items in grouped.items()
+    }
+
+
+PHASE0_BLOCKER_CATEGORY_BY_STREAM = {
+    "G1 solver": "numerical",
+    "external benchmark": "benchmark",
+    "fresh validation": "benchmark",
+    "release freshness/sync": "software product",
+    "CI runner/streak": "software product",
+    "human UX": "software product",
+    "customer shadow": "future commercial",
+    "license/legal": "future commercial",
+}
+
+
+PHASE0_BLOCKER_CATEGORY_DESCRIPTIONS = {
+    "numerical": (
+        "Solver math and deterministic equilibrium evidence: full mesh/load, residual, "
+        "increment, Jacobian/material Newton, fallback-zero, and CPU/HIP parity."
+    ),
+    "benchmark": (
+        "Reference corpus and validation evidence: external benchmark receipts, fresh "
+        "validation receipts, and benchmark scorecard coverage."
+    ),
+    "software product": (
+        "Developer Preview productization evidence: release freshness/sync, CI/runner "
+        "streaks, generated artifact consistency, and human UX workflow observation."
+    ),
+    "future commercial": (
+        "Commercial Release evidence kept outside the Developer Preview blocker bar: "
+        "customer shadow projects, product/legal license approvals, license server/SLA "
+        "style obligations, and related commercial accountability."
+    ),
+}
+
+
+def _phase0_blocker_categories(
+    root_blockers: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    categories = {
+        category: {
+            "blocked": False,
+            "blocker_count": 0,
+            "root_streams": [],
+            "blockers": [],
+            "description": PHASE0_BLOCKER_CATEGORY_DESCRIPTIONS[category],
+        }
+        for category in (
+            "numerical",
+            "benchmark",
+            "software product",
+            "future commercial",
+        )
+    }
+    uncategorized: list[str] = []
+    for stream, summary in root_blockers.items():
+        category = PHASE0_BLOCKER_CATEGORY_BY_STREAM.get(stream)
+        blockers = _as_list(summary.get("blockers")) if isinstance(summary, dict) else []
+        if category is None:
+            uncategorized.extend(blockers)
+            continue
+        row = categories[category]
+        if blockers:
+            row["blocked"] = True
+            row["root_streams"].append(stream)
+            row["blocker_count"] += len(blockers)
+            row["blockers"].extend(blockers)
+    if uncategorized:
+        row = categories["software product"]
+        row["blocked"] = True
+        row["root_streams"].append("uncategorized")
+        row["blocker_count"] += len(uncategorized)
+        row["blockers"].extend(uncategorized)
+    for row in categories.values():
+        row["root_streams"] = sorted(dict.fromkeys(row["root_streams"]))
+        row["blockers"] = sorted(dict.fromkeys(str(item) for item in row["blockers"]))
+    return categories
+
+
 def _pyproject_project_metadata(
     repo_root: Path,
     path: Path,
@@ -716,6 +918,7 @@ def build_snapshot(
     ci_streak = _load_json(repo_root, paths.github_actions_ci_streak, blockers)
     ux_new_user = _load_json(repo_root, paths.ux_new_user_observation, blockers)
     license_status = _load_json(repo_root, paths.license_status_closure, blockers)
+    scope_guard = _load_json(repo_root, paths.paid_pilot_scope_guard, blockers)
     external_benchmark_readiness = _load_json(
         repo_root,
         paths.external_benchmark_submission_readiness,
@@ -724,6 +927,11 @@ def build_snapshot(
     external_benchmark_updates = _load_json(
         repo_root,
         paths.external_benchmark_submission_updates,
+        blockers,
+    )
+    phase3_release_control_cleanup_plan = _load_json(
+        repo_root,
+        paths.phase3_release_control_cleanup_plan,
         blockers,
     )
     self_hosted_runner_status = _load_json(repo_root, paths.self_hosted_runner_status, blockers)
@@ -782,6 +990,7 @@ def build_snapshot(
         "github_actions_ci_streak_evidence": ci_streak,
         "ux_new_user_observation_report": ux_new_user,
         "license_status_closure_report": license_status,
+        "paid_pilot_scope_guard_report": scope_guard,
         "external_benchmark_submission_readiness": external_benchmark_readiness,
         "external_benchmark_submission_updates": external_benchmark_updates,
     }
@@ -801,11 +1010,14 @@ def build_snapshot(
         current_commit=current_commit,
         allowed_receipt_paths=allowed_receipt_paths,
     )
+    enforce_input_checksums = source_commit_sha is None
     for row in metadata_rows:
         if not row["metadata_complete"]:
             blockers.append(f"stale_or_inconsistent:metadata_incomplete:{row['artifact']}")
         elif not row["source_state_fresh"]:
             blockers.append(f"stale_or_inconsistent:source_commit_mismatch:{row['artifact']}")
+        if enforce_input_checksums and not row["input_checksum_present"]:
+            blockers.append(f"stale_or_inconsistent:input_checksum_missing:{row['artifact']}")
 
     pm_release_ready = bool(
         pm_report.get("limited_commercial_release_ready")
@@ -921,6 +1133,18 @@ def build_snapshot(
         if not license_blockers:
             blockers.append("license:not_ready")
 
+    scope_guard_checks = _as_dict(scope_guard.get("checks"))
+    supported_scope_guard_ready = bool(
+        _contract_pass(scope_guard)
+        and not _as_list(scope_guard.get("blockers"))
+        and all(value is True for value in scope_guard_checks.values())
+    )
+    if not supported_scope_guard_ready:
+        scope_blockers = _as_list(scope_guard.get("blockers"))
+        blockers.extend(f"assisted_service_scope::{item}" for item in scope_blockers)
+        if not scope_blockers:
+            blockers.append("assisted_service_scope:not_ready")
+
     external_benchmark_receipts = _external_benchmark_receipt_counts(
         readiness=external_benchmark_readiness,
         updates=external_benchmark_updates,
@@ -1018,8 +1242,15 @@ def build_snapshot(
     workstation_delivery_ready = bool(
         _contract_pass(workstation) and not _as_list(workstation.get("blockers"))
     )
+    workstation_summary = _workstation_delivery_summary(workstation)
     if not workstation_delivery_ready:
         blockers.extend(f"workstation_delivery::{item}" for item in _as_list(workstation.get("blockers")))
+    if not workstation_summary["workstation_delivery_8_of_8"]:
+        blockers.append("workstation_delivery::workstation_delivery_8_of_8_not_ready")
+    if not workstation_summary["acceptance_package_ready"]:
+        blockers.append("workstation_delivery::acceptance_package_not_ready")
+    if not workstation_summary["engineer_review_boundary_ready"]:
+        blockers.append("workstation_delivery::engineer_review_claim_boundary_not_ready")
     independent_product_ready = bool(
         (independent.get("independent_commercial_product_ready") or _contract_pass(independent))
         and not _as_list(independent.get("blockers"))
@@ -1056,6 +1287,33 @@ def build_snapshot(
     blockers = sorted(dict.fromkeys(str(item) for item in blockers if str(item)))
     stale_or_inconsistent = any(item.startswith("stale_or_inconsistent:") for item in blockers)
     evidence_fresh = bool(schema_valid and not stale_or_inconsistent)
+    github_sync_clean = not any(
+        str(item).startswith("pm_release::github_sync::") for item in blockers
+    )
+    full_quality_ready = bool(pm_release_ready)
+    assisted_service_pilot_ready = bool(
+        schema_valid
+        and evidence_fresh
+        and workstation_delivery_ready
+        and workstation_summary["workstation_delivery_8_of_8"]
+        and supported_scope_guard_ready
+        and full_quality_ready
+        and github_sync_clean
+        and ux_human_ready
+        and license_ready
+        and workstation_summary["acceptance_package_ready"]
+        and workstation_summary["engineer_review_boundary_ready"]
+    )
+    solver_product_pilot_ready = bool(
+        schema_valid
+        and evidence_fresh
+        and independent_product_ready
+        and g1_full_mesh_ready
+        and g1_full_load_lane_ready
+        and external_benchmark_ready
+        and customer_ready
+        and fresh_ready
+    )
     paid_pilot_ready = bool(
         schema_valid
         and evidence_fresh
@@ -1073,9 +1331,26 @@ def build_snapshot(
         and runner_policy_ready
         and self_hosted_runner_ready
     )
-    ga_enterprise_ready = bool(paid_pilot_ready and independent_product_ready and pm_report.get("ga_enterprise_ready"))
+    limited_commercial_ready = bool(
+        assisted_service_pilot_ready
+        and solver_product_pilot_ready
+        and (
+            pm_report.get("limited_commercial_ready")
+            or pm_report.get("limited_commercial_release_ready")
+        )
+    )
+    ga_enterprise_ready = bool(
+        limited_commercial_ready
+        and independent_product_ready
+        and pm_report.get("ga_enterprise_ready")
+    )
     release_ready = bool(paid_pilot_ready and not blockers)
     status = "ready" if release_ready else ("stale_or_inconsistent" if stale_or_inconsistent else "blocked")
+    root_blockers = _root_blockers(blockers)
+    blocker_categories = _phase0_blocker_categories(root_blockers)
+    phase3_cleanup_handoff = _as_dict(
+        phase3_release_control_cleanup_plan.get("human_handoff")
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1085,7 +1360,11 @@ def build_snapshot(
         "reused_evidence": False,
         "schema_valid": schema_valid,
         "evidence_fresh": evidence_fresh,
+        "stale_or_inconsistent": stale_or_inconsistent,
         "workstation_delivery_ready": workstation_delivery_ready,
+        "assisted_service_pilot_ready": assisted_service_pilot_ready,
+        "solver_product_pilot_ready": solver_product_pilot_ready,
+        "limited_commercial_ready": limited_commercial_ready,
         "paid_pilot_ready": paid_pilot_ready,
         "independent_product_ready": independent_product_ready,
         "ga_enterprise_ready": ga_enterprise_ready,
@@ -1094,7 +1373,21 @@ def build_snapshot(
         "reason_code": "PASS" if release_ready else status.upper(),
         "blocker_count": len(blockers),
         "blockers": blockers,
+        "root_blockers": root_blockers,
+        "blocker_categories": blocker_categories,
         "claim_boundary": {
+            "assisted_service_pilot": (
+                "assisted_service_pilot_ready is the engineer-review workstation service track. "
+                "It requires workstation delivery 8/8, supported-scope guard, full quality, clean "
+                "GitHub sync, real human UX observation, product/legal license approval, acceptance "
+                "package, and explicit proxy/fallback/engineer-review boundaries. It does not relax "
+                "solver_product gates."
+            ),
+            "solver_product": (
+                "solver_product_pilot_ready keeps the independent solver-product bar: G1 full "
+                "mesh/load 1.0 with residual+increment/material Newton/Jacobian/fallback-zero and "
+                "production HIP evidence, EB 4/4, customer shadow 3/3, and fresh validation 8/8."
+            ),
             "paid_pilot": (
                 "paid_pilot_ready requires a clean canonical snapshot, full PM release-area gate, "
                 "tracked CI streaks, human new-user observation, product/legal license closure, EB "
@@ -1164,6 +1457,11 @@ def build_snapshot(
                 "status": str(_as_dict(license_status.get("summary")).get("status", "")),
                 "ready": license_ready,
             },
+            "paid_pilot_scope_guard": {
+                "contract_pass": bool(scope_guard.get("contract_pass")),
+                "ready": supported_scope_guard_ready,
+                "checks": scope_guard_checks,
+            },
             "external_benchmark_receipts": {
                 "contract_pass": bool(external_benchmark_readiness.get("contract_pass")),
                 **external_benchmark_receipts,
@@ -1216,6 +1514,29 @@ def build_snapshot(
                 ),
                 "ready": self_hosted_runner_ready,
             },
+            "assisted_service_pilot": {
+                "ready": assisted_service_pilot_ready,
+                "workstation_delivery_8_of_8": workstation_summary["workstation_delivery_8_of_8"],
+                "supported_scope_guard_ready": supported_scope_guard_ready,
+                "full_quality_ready": full_quality_ready,
+                "github_sync_clean": github_sync_clean,
+                "human_ux_observation_ready": ux_human_ready,
+                "license_approval_ready": license_ready,
+                "acceptance_package_ready": workstation_summary["acceptance_package_ready"],
+                "engineer_review_boundary_ready": workstation_summary[
+                    "engineer_review_boundary_ready"
+                ],
+                "claim_boundary": workstation_summary["claim_boundary"],
+            },
+            "solver_product": {
+                "ready": solver_product_pilot_ready,
+                "independent_product_ready": independent_product_ready,
+                "g1_full_mesh_full_load_ready": g1_full_mesh_ready,
+                "g1_full_load_hip_newton_lane_ready": g1_full_load_lane_ready,
+                "external_benchmark_4_of_4_ready": external_benchmark_ready,
+                "customer_shadow_3_of_3_ready": customer_ready,
+                "fresh_validation_8_of_8_ready": fresh_ready,
+            },
         },
         "state_consistency": {
             "release_area_counts": release_area_sources,
@@ -1227,6 +1548,49 @@ def build_snapshot(
                 "status_rows": worktree_status_rows,
                 "dirty_paths": worktree_dirty_paths,
                 "non_receipt_dirty_paths": worktree_non_receipt_dirty_paths,
+                "phase3_release_control_cleanup_plan": {
+                    "path": str(paths.phase3_release_control_cleanup_plan),
+                    "status": phase3_release_control_cleanup_plan.get("status", "missing"),
+                    "contract_pass": bool(phase3_release_control_cleanup_plan.get("contract_pass")),
+                    "candidate_release_control_commit_set_count": phase3_release_control_cleanup_plan.get(
+                        "candidate_release_control_commit_set_count",
+                        0,
+                    ),
+                    "path_role_counts": phase3_release_control_cleanup_plan.get("path_role_counts", {}),
+                    "recommended_action_counts": phase3_release_control_cleanup_plan.get(
+                        "recommended_action_counts",
+                        {},
+                    ),
+                    "track_or_add_required_path_count": len(
+                        _as_list(
+                            phase3_release_control_cleanup_plan.get(
+                                "track_or_add_required_paths"
+                            )
+                        )
+                    ),
+                    "resolve_or_commit_dirty_tracked_path_count": len(
+                        _as_list(
+                            phase3_release_control_cleanup_plan.get(
+                                "resolve_or_commit_dirty_tracked_paths"
+                            )
+                        )
+                    ),
+                    "human_git_action_required": bool(
+                        phase3_release_control_cleanup_plan.get("human_git_action_required")
+                    ),
+                    "codex_commit_or_push_performed": bool(
+                        phase3_release_control_cleanup_plan.get("codex_commit_or_push_performed")
+                    ),
+                    "human_handoff_status": phase3_cleanup_handoff.get("status", ""),
+                    "human_handoff_next_action": phase3_cleanup_handoff.get("next_action", ""),
+                    "human_handoff_suggested_command_count": len(
+                        _as_list(phase3_cleanup_handoff.get("suggested_local_command_args"))
+                    ),
+                    "human_handoff_push_or_release_command_included": bool(
+                        phase3_cleanup_handoff.get("push_or_release_command_included")
+                    ),
+                    "claim_boundary": phase3_release_control_cleanup_plan.get("claim_boundary", ""),
+                },
             },
         },
         "artifacts": {

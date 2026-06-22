@@ -1,6 +1,6 @@
 {
   "schema_version": "ai-review-queue-contract.v1",
-  "generated_at": "2026-06-18T15:01:37.002051+00:00",
+  "generated_at": "2026-06-22T15:33:46.498174+00:00",
   "status": "contract_ready",
   "queue_item_states": [
     "pending_review",

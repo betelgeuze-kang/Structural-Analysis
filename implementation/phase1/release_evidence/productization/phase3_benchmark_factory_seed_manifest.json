@@ -1,0 +1,1102 @@
+{
+  "case_count": 26,
+  "claim_boundary": "Generated analytic-small and element-patch seed manifest only. This is not the full Phase 3 corpus breadth target.",
+  "lane_count": 2,
+  "lanes": [
+    "analytic-small",
+    "element-patch"
+  ],
+  "rows": [
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e1_load_10",
+      "checksum": "sha256:236615a9bee5ccdeb0b13ccb439630c6236a2abec29e5aaa4b30aabf2cd88928",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e1_load_25",
+      "checksum": "sha256:59967e5b46145a118552c2ff8f6973f0c9888287a5a5a6090821841e0d27c451",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e1_load_50",
+      "checksum": "sha256:85acb650a11dbfebd4dd6c7e4fb6bdd457c20cb728ffb08de3052ae0d96cc662",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e1_load_75",
+      "checksum": "sha256:467adf73413585bd49f57da395ffdc0d31fb1d44909a0e41879dd8dce414f70e",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e1_load_100",
+      "checksum": "sha256:9bf9e4d86d15fa95d6de81150661db8ee4bcf96524085c774dcf267a8a263138",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e2_load_10",
+      "checksum": "sha256:264c9953ed07cb3e552a5264ea78f986d4dc03bdba361a6d1cbb96974776f951",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e2_load_25",
+      "checksum": "sha256:9725e55656d4810e11b943a81608e1c5aa5e3ece2d765dec16aa1274ad21d2d6",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e2_load_50",
+      "checksum": "sha256:937f50101e9a978bc94e84c4b3b8d0b72e514719945ece6ebd913d29ca424692",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e2_load_75",
+      "checksum": "sha256:ec1fec2d47df57a9c6bd52f84b3542494fbe23f56474a4e6ad3a994e7354bb59",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e2_load_100",
+      "checksum": "sha256:9d66a05b166fbc20162c5c6c4cb9ecaf9daa59386cbc0bff9e519547c73dd3f5",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e3_load_10",
+      "checksum": "sha256:2c67bc8733e1d5ae346923cdf2e5c21c2a0057dd0cf1c8992f4243de678ad4e7",
+      "commercial_use_allowed": true,
+      "element_count": 3,
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 4,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e3_load_25",
+      "checksum": "sha256:b852d4175780ebba74779287b7bea65c303bee5763306ca01829b72ef82bd31f",
+      "commercial_use_allowed": true,
+      "element_count": 3,
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 4,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e3_load_50",
+      "checksum": "sha256:9ad49288e458b5517c7277f7b2773f73a86c9a29540ad62565513077e97e4b1b",
+      "commercial_use_allowed": true,
+      "element_count": 3,
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 4,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e3_load_75",
+      "checksum": "sha256:8f2a5d9f658705a64dd847cd34da4e5ca9b70b357adb3b6d2a8ff459b74a5e4e",
+      "commercial_use_allowed": true,
+      "element_count": 3,
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 4,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e3_load_100",
+      "checksum": "sha256:d815cf15805faa22913395203c6320fcaee72bacd7c7969c9f0b18576734275c",
+      "commercial_use_allowed": true,
+      "element_count": 3,
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 4,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e4_load_10",
+      "checksum": "sha256:67474bfa3f4bc1bde4a4450ce185708b3c998a533d9a8e0e2ab105f8ec299479",
+      "commercial_use_allowed": true,
+      "element_count": 4,
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 5,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e4_load_25",
+      "checksum": "sha256:f64e8591c304fefe73c018a09b9354352bcb7dfa9d105914f6e016b0a49eb973",
+      "commercial_use_allowed": true,
+      "element_count": 4,
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 5,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e4_load_50",
+      "checksum": "sha256:f1292459267401696aafb9b922a22a706806d211d11159746c15fc29a812ff76",
+      "commercial_use_allowed": true,
+      "element_count": 4,
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 5,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e4_load_75",
+      "checksum": "sha256:877e39240a84cb82aca1f6f447f7511e3cb486cca72419ce3cf3fb08bdcda921",
+      "commercial_use_allowed": true,
+      "element_count": 4,
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 5,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction_ux",
+        "tip_ux"
+      ],
+      "case_id": "axial_chain_e4_load_100",
+      "checksum": "sha256:9bbdb9d3c050539204db2412f036eed05fe09d8b8f029f4982ef915f7bcb1246",
+      "commercial_use_allowed": true,
+      "element_count": 4,
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "analytic-small",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 5,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "analytic-small"
+      ],
+      "source_id": "repo_generated_analytic_axial",
+      "source_url_or_doi": "generated://structural_analysis/analytic_axial_chain",
+      "structural_family": "axial_bar",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_x_origin",
+      "checksum": "sha256:f00b57b6787b0eef82195c0744598ffc0cd316c2155601a83c946f478dc8dcb2",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.064,
+        "tip_dof": "UX"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_x_translated",
+      "checksum": "sha256:4f15d50e79080200b67cb32535eb95cf7d08c5c2a3451693de5f91b9aee3cd8e",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.064,
+        "tip_dof": "UX"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_y_origin",
+      "checksum": "sha256:d518596f7ca8c1bdc0d7a2ce0d43d7472e5a9e7d28411cd69cb0c38765726397",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.064,
+        "tip_dof": "UY"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_y_translated",
+      "checksum": "sha256:4949a808d77ef114d8d316b715737750a715d0beac5f377a52be20cf1a455438",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.064,
+        "tip_dof": "UY"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_z_origin",
+      "checksum": "sha256:5fbc7f4b422b8c33da16bf886e0ee552d81c399dfb44b2f703c25b92e71a650e",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.064,
+        "tip_dof": "UZ"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "linear_static",
+      "available_reference_outputs": [
+        "base_reaction",
+        "base_reaction_dof",
+        "tip_displacement",
+        "tip_dof"
+      ],
+      "case_id": "element_patch_z_translated",
+      "checksum": "sha256:e456f3369b8077e62ef26199f0ea94a969c19590033c4d3a01f77e32918da62f",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.064,
+        "tip_dof": "UZ"
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "small_displacement_linear_elastic_axial_response",
+        "3d_truss_nodes_with_transverse_dofs_restrained",
+        "single_material_single_area_prismatic_bar"
+      ],
+      "lane": "element-patch",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "element-patch"
+      ],
+      "source_id": "repo_generated_element_patch",
+      "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
+      "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    }
+  ],
+  "schema_version": "phase3-benchmark-factory-manifest.v1"
+}

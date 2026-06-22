@@ -1,7 +1,7 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -9,6 +9,7 @@
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
       "github_sync::github_sync_preflight::worktree_not_clean",
+      "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
@@ -18,13 +19,14 @@
     "release_area_total_count": 16
   },
   "contract_pass": false,
-  "generated_at": "2026-06-21T09:32:10.191219+00:00",
+  "generated_at": "2026-06-21T15:29:04.806935+00:00",
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass.",
+    "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
     "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
     "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
     "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
@@ -518,8 +520,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 20,
-        "main_ahead_count": 54,
+        "feature_ahead_count": 3,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -530,10 +532,87 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 20,
+        "feature_ahead_count": 3,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 54,
-        "main_fast_forward_possible": true,
+        "main_ahead_count": 3,
+        "main_fast_forward_possible": false,
+        "pending_remote_update_count": 2,
+        "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+        "remote_mutation_approval_pending": true,
+        "remote_mutation_approved": false,
+        "remote_safety_ok": true,
+        "remote_sync_needed": true,
+        "source_policy": "explicit_r4_approval_required_before_remote_mutation",
+        "state": "blocked"
+      },
+      "external_input_required": true,
+      "handoff": {
+        "checks": {
+          "acceptance_criteria_present": true,
+          "evidence_artifacts_present": true,
+          "expected_intake_artifact_present": true,
+          "owner_action_present": true,
+          "owner_assigned": true,
+          "reproduction_commands_present": true,
+          "verification_commands_present": true
+        },
+        "expected_intake_artifact": "",
+        "handoff_ready": true,
+        "handoff_state": "external_owner_input_ready"
+      },
+      "handoff_ready": true,
+      "handoff_state": "external_owner_input_ready",
+      "namespace": "github_sync",
+      "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner": "release_owner",
+      "owner_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+      "owner_input_required": true,
+      "reproduction_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+      ],
+      "resolution_type": "r4_remote_mutation_approval_required",
+      "scope": "release_area",
+      "status": "open",
+      "title": "GitHub Development Sync",
+      "verification_commands": [
+        "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+        "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+        "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+      ]
+    },
+    {
+      "acceptance_criteria": [
+        "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+        "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+        "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+        "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+      ],
+      "blocker_code": "github_sync_preflight::main_remote_not_ancestor_of_head",
+      "blocker_id": "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
+      "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+      "evidence_artifacts": {
+        "github_development_sync_preflight": "<live-git-state>",
+        "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+      },
+      "evidence_snapshot": {
+        "feature_ahead_count": 3,
+        "main_ahead_count": 3,
+        "pending_remote_update_count": 2,
+        "r4_risk": "Main CI and external reviewers immediately see the current commits.",
+        "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
+        "remote_mutation_approval_pending": true,
+        "remote_mutation_approved": false,
+        "remote_sync_needed": true,
+        "status": "blocked"
+      },
+      "evidence_status": {
+        "approval_phrase": "feature push + main fast-forward 승인",
+        "feature_ahead_count": 3,
+        "feature_fast_forward_possible": true,
+        "main_ahead_count": 3,
+        "main_fast_forward_possible": false,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
@@ -595,8 +674,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 20,
-        "main_ahead_count": 54,
+        "feature_ahead_count": 3,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -607,10 +686,10 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 20,
+        "feature_ahead_count": 3,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 54,
-        "main_fast_forward_possible": true,
+        "main_ahead_count": 3,
+        "main_fast_forward_possible": false,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
@@ -672,8 +751,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 20,
-        "main_ahead_count": 54,
+        "feature_ahead_count": 3,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -684,10 +763,10 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 20,
+        "feature_ahead_count": 3,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 54,
-        "main_fast_forward_possible": true,
+        "main_ahead_count": 3,
+        "main_fast_forward_possible": false,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
@@ -749,8 +828,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 20,
-        "main_ahead_count": 54,
+        "feature_ahead_count": 3,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -761,10 +840,10 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 20,
+        "feature_ahead_count": 3,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 54,
-        "main_fast_forward_possible": true,
+        "main_ahead_count": 3,
+        "main_fast_forward_possible": false,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
@@ -1553,21 +1632,21 @@
   "schema_version": "pm-release-blocker-action-register.v1",
   "summary": {
     "all_open_blockers_have_handoff": true,
-    "external_input_required_count": 13,
-    "external_owner_input_ready_count": 13,
+    "external_input_required_count": 14,
+    "external_owner_input_ready_count": 14,
     "full_release_gate_ready": false,
-    "ga_enterprise_blocker_count": 20,
+    "ga_enterprise_blocker_count": 21,
     "handoff_not_ready_count": 0,
-    "handoff_ready_count": 20,
+    "handoff_ready_count": 21,
     "limited_commercial_milestone_ready": true,
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "local_remediation_ready_count": 7,
     "milestone_blocker_count": 0,
-    "open_blocker_count": 20,
-    "owner_input_required_count": 13,
+    "open_blocker_count": 21,
+    "owner_input_required_count": 14,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
     "release_area_total_count": 16

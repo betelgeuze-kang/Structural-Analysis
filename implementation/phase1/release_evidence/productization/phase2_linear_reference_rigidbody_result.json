@@ -1,0 +1,38 @@
+{
+  "analysis_type": "linear_static",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "convergence_history": [],
+  "developer_preview": true,
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:f641e21744ae1ef328db9f136d301f5c7f891d287dfaf25b1549bc6dac5ac0f9",
+  "metrics": {
+    "claim_boundary": "linear_static_axial_truss_preview_only",
+    "element_count": 1,
+    "fallback_used": false,
+    "free_stiffness_order": 2,
+    "load_count": 1,
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "node_count": 2,
+    "regularization_used": false,
+    "sparse_backend_used": false,
+    "stiffness_order": 6,
+    "stiffness_storage": "dense_numpy",
+    "support_count": 2
+  },
+  "solver": "phase2_linear_reference_rigid_body_guard",
+  "status": "blocked",
+  "tolerance": 1e-08,
+  "unsupported_features": [
+    {
+      "constrained_dof_count": 4,
+      "detail": "Singular matrix",
+      "fallback_used": false,
+      "free_dof_count": 2,
+      "guard_outcome": "blocked",
+      "kind": "linear_static_singular_stiffness",
+      "mechanism_guard": "singular_or_rigid_body",
+      "regularization_used": false
+    }
+  ],
+  "warnings": []
+}

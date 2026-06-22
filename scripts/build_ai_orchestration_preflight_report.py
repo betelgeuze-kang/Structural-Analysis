@@ -14,10 +14,11 @@ from typing import Any
 
 
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json")
-DEFAULT_OPENCODE_MODEL = "opencode-go/minimax-m3"
+DEFAULT_OPENCODE_MODEL = "opencode-go/deepseek-v4-pro"
 OPENCODE_DEEPSEEK_V4_PRO_MODEL = "opencode-go/deepseek-v4-pro"
 OPENCODE_MINIMAX_M3_MODEL = "opencode-go/minimax-m3"
 OPENCODE_GLM52_MODEL = "opencode-go/glm-5.2"
+DEFAULT_OPENCODE_ASSIGNMENT_CURSOR_MODEL = "composer-2.5"
 DEFAULT_OPENCODE_XDG_DATA_HOME = Path("/tmp/codex-opencode-xdg-data")
 DEFAULT_OPENCODE_GO_MIRROR_XDG_DATA_HOME = Path("/tmp/codex-opencode-go-xdg-data")
 REQUIRED_FILES = [
@@ -198,6 +199,17 @@ def _configured_opencode_model() -> str:
     return _normalize_opencode_model(requested)
 
 
+def _opencode_assignment_routed_to_cursor() -> bool:
+    return os.environ.get("AI_WORKER_OPENCODE_ASSIGNMENT_MODE", "cursor-composer-2.5") != "opencode"
+
+
+def _opencode_assignment_cursor_model() -> str:
+    return os.environ.get(
+        "AI_WORKER_OPENCODE_ASSIGNMENT_CURSOR_MODEL",
+        DEFAULT_OPENCODE_ASSIGNMENT_CURSOR_MODEL,
+    )
+
+
 def _model_rows(output: str) -> list[str]:
     return [line.strip() for line in output.splitlines() if line.strip() and not line.startswith("\x1b")]
 
@@ -212,6 +224,7 @@ def build_report() -> dict[str, Any]:
     opencode_name, opencode_path = _which("opencode")
     opencode_version = ""
     opencode_model = _configured_opencode_model()
+    opencode_assignment_routed_to_cursor = _opencode_assignment_routed_to_cursor()
     opencode_worker_env, opencode_xdg_data_home = _opencode_worker_env()
     opencode_models_pass = False
     opencode_models_output = ""
@@ -232,6 +245,7 @@ def build_report() -> dict[str, Any]:
         "opencode_worker_cli_present": bool(opencode_path),
         "opencode_model_registry_query_pass": bool(opencode_path and opencode_models_pass),
         "opencode_worker_configured_model_available": opencode_configured_model_available,
+        "opencode_assignment_routed_to_cursor": opencode_assignment_routed_to_cursor,
     }
     blockers = [
         *(["required_orchestration_files_missing"] if not checks["required_files_present"] else []),
@@ -240,15 +254,22 @@ def build_report() -> dict[str, Any]:
         *(["worker_shell_syntax_failed"] if not checks["worker_shell_syntax_pass"] else []),
         *(["opencode_json_invalid"] if not checks["opencode_json_valid"] else []),
         *(["cursor_worker_cli_missing"] if not checks["cursor_worker_cli_present"] else []),
-        *(["opencode_worker_cli_missing"] if not checks["opencode_worker_cli_present"] else []),
+        *(
+            ["opencode_worker_cli_missing"]
+            if not opencode_assignment_routed_to_cursor and not checks["opencode_worker_cli_present"]
+            else []
+        ),
         *(
             ["opencode_model_registry_query_failed"]
-            if checks["opencode_worker_cli_present"] and not checks["opencode_model_registry_query_pass"]
+            if not opencode_assignment_routed_to_cursor
+            and checks["opencode_worker_cli_present"]
+            and not checks["opencode_model_registry_query_pass"]
             else []
         ),
         *(
             ["opencode_worker_configured_model_unavailable"]
-            if checks["opencode_worker_cli_present"]
+            if not opencode_assignment_routed_to_cursor
+            and checks["opencode_worker_cli_present"]
             and checks["opencode_model_registry_query_pass"]
             and not checks["opencode_worker_configured_model_available"]
             else []
@@ -269,6 +290,8 @@ def build_report() -> dict[str, Any]:
             "opencode_version": opencode_version.strip(),
             "opencode_configured_model": opencode_model,
             "opencode_configured_model_available": opencode_configured_model_available,
+            "opencode_assignment_routed_to_cursor": opencode_assignment_routed_to_cursor,
+            "opencode_assignment_cursor_model": _opencode_assignment_cursor_model(),
             "opencode_xdg_data_home": opencode_xdg_data_home,
             "opencode_model_count": len(opencode_model_rows),
             "required_file_count": len(REQUIRED_FILES),
@@ -284,9 +307,9 @@ def build_report() -> dict[str, Any]:
         },
         "claim_boundary": (
             "This report verifies Cursor/OpenCode worker bridge readiness and local OpenCode model-registry "
-            "availability for the configured worker model. It does not prove remote model credentials, successful "
-            "inference, or release readiness. Codex still owns goal tracking, diff review, verification, and final "
-            "acceptance."
+            "availability when OpenCode assignment mode is enabled, plus the current routing of OpenCode-assigned "
+            "slices to Cursor. It does not prove remote model credentials, successful inference, worker execution, "
+            "or release readiness. Codex still owns goal tracking, diff review, verification, and final acceptance."
         ),
     }
 

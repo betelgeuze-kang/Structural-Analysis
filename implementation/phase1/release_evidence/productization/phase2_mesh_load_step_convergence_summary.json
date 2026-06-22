@@ -1,0 +1,60 @@
+{
+  "all_rows_contract_pass": true,
+  "all_series_force_gates_passed": true,
+  "all_tangent_gates_passed": true,
+  "analysis_type": "nonlinear_static_mesh_load_step_convergence_seed",
+  "artifacts": {
+    "related_material_mesh_newton_summary": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
+    "result": "implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_result.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_mesh_load_step_convergence_summary.json"
+  },
+  "blockers_remaining": [
+    "general_frame_shell_mesh_load_step_convergence_not_closed",
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "general_sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "broad_material_newton_breadth_not_closed"
+  ],
+  "case_count": 9,
+  "claim_boundary": "This is a narrow 1D strain-cubic axial material mesh/load-step convergence seed over a small element-count and load-partition grid. It does not close general frame/shell meshes, representative full-mesh/full-load nonlinear equilibrium, production sparse/GPU backends, or G1.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "element_counts": [
+    1,
+    2,
+    4
+  ],
+  "engine_version": "1.0.0",
+  "fallback_used": false,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-21T21:33:41.255525+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "scripts/build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:349239e0adcfea958193433e436facaa3d8535793278cbb0b4e980c93490070d",
+    "scripts/verify_quality_gate.py": "sha256:66126113aac6cf144f6a21e501bab13f87a49172e51af03f33769fcde55f3e2c",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb",
+    "tests/test_build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:4b8b609507f70a2f7506879d5a0a97ca0aab9222779e0146ba206658a51d2fb6"
+  },
+  "load_partition_counts": [
+    1,
+    2,
+    4
+  ],
+  "matrix_backend": "numpy_linalg_solve_dense",
+  "mesh_load_step_convergence_closure_claim": false,
+  "partition_tip_spread_by_element_count_m": {
+    "1": 8.72635297355373e-14,
+    "2": 8.72635297355373e-14,
+    "4": 8.72635297355373e-14
+  },
+  "regularization_used": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-mesh-load-step-convergence-artifacts.v1",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "status": "ready",
+  "tip_displacement_spread_m": 8.72635297355373e-14,
+  "tip_displacement_tolerance_m": 1e-10,
+  "truth_class": "analytic_1d_material_mesh_convergence_truth"
+}

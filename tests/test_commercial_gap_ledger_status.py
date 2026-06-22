@@ -324,13 +324,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert rows["G1"]["evidence"]["direct_residual_newton_status"] == "partial"
     assert rows["G1"]["evidence"]["direct_residual_newton_ready"] is False
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_status"] == "ready"
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_ready"] is True
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_status"] == "partial"
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_ready"] is False
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_blockers"] == [
+        "component_only_diagnostic_not_consistency_closure"
+    ]
     assert (
         rows["G1"]["evidence"]["residual_jacobian_consistency_base_residual_inf_n"]
         > 1.0
     )
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_direction_rows"]
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_direction_rows"] == []
     component_breakdown = rows["G1"]["evidence"][
         "residual_jacobian_consistency_component_breakdown"
     ]
@@ -349,11 +352,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     ]
     assert hotspot_rows
     assert hotspot_rows[0]["dominant_component"] == "shell_membrane"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_focused_regdirect_checkpoint_component_status"
+    ] == "partial"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_focused_regdirect_checkpoint_component_only"
+    ] is True
     scale_sweep = rows["G1"]["evidence"][
         "residual_jacobian_consistency_state_scale_sweep"
     ]
-    assert scale_sweep[0]["state_scale"] == 0.0
-    assert scale_sweep[0]["residual_inf_n"] < scale_sweep[-1]["residual_inf_n"]
+    assert scale_sweep == []
     assert rows["G1"]["evidence"]["equilibrium_newton_state_scale_status"] == "partial"
     assert (
         rows["G1"]["evidence"]["equilibrium_newton_state_scale_final_residual_inf_n"]

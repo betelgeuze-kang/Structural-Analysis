@@ -10,11 +10,19 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "github-actions-ci-streak-evidence.v1"
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json")
 DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
 DEFAULT_LOCAL_WORKFLOW_DIR = Path(".github/workflows")
@@ -74,7 +82,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -599,6 +607,7 @@ def build_evidence(
         "generated_at": _now_utc_iso(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums([local_workflow_dir], repo_root=REPO_ROOT),
         "reused_evidence": False,
         "repo": repo,
         "threshold": threshold,
@@ -688,6 +697,10 @@ def refresh_local_workflow_metadata(
     payload["summary"] = summary
     payload["source_commit_sha"] = _git_head()
     payload["engine_version"] = ENGINE_VERSION
+    payload["input_checksums"] = input_checksums(
+        [existing_evidence_path, local_workflow_dir],
+        repo_root=REPO_ROOT,
+    )
     payload["reused_evidence"] = True
     claim_boundary = str(payload.get("claim_boundary", "")).strip()
     claim_boundary = claim_boundary.replace(LOCAL_METADATA_CLAIM_BOUNDARY, "").strip()

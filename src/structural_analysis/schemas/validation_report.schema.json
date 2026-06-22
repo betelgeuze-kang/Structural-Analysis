@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Structural Analysis Validation Report",
+  "type": "object",
+  "required": [
+    "status",
+    "contract_pass",
+    "engine_version",
+    "input_checksum",
+    "tolerance",
+    "convergence_history",
+    "developer_preview",
+    "claim_boundary_version"
+  ],
+  "properties": {
+    "status": {"enum": ["pass", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "engine_version": {"type": "string"},
+    "input_checksum": {"type": "string"},
+    "tolerance": {"type": "number"},
+    "convergence_history": {"type": "array"},
+    "passed_fields": {"type": "array"},
+    "unsupported_fields": {"type": "array"},
+    "developer_preview_blocked_fields": {"type": "array"},
+    "developer_preview": {"const": true},
+    "claim_boundary_version": {"const": "developer-preview-core-api-v1"}
+  }
+}

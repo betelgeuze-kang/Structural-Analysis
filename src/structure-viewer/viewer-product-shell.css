@@ -207,6 +207,45 @@ body.structural-surface.viewer-product-shell[data-si-shell='workspace'] #viewpor
   display: block;
 }
 
+@media (max-width: 720px) {
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] {
+    --product-topbar-height: auto;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] #app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] header.app-topbar {
+    min-height: 0;
+    padding: 10px;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] .app-topbar__primary {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    gap: 8px;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-control {
+    grid-template-columns: 1fr;
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-control__actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-run-action {
+    min-height: 34px;
+    padding-inline: 9px;
+  }
+}
+
 @media (max-width: 1100px) {
   body.structural-surface.viewer-product-shell[data-si-shell='product'] .top-search-shell {
     max-width: 42vw;

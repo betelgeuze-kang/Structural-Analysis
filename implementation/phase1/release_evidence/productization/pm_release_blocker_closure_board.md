@@ -1,11 +1,11 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=20 | external_owner_ready=13 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=21 | external_owner_ready=14 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `20`
+- `open_blocker_count`: `21`
 - `release_area_summary`: `12/16`
-- `release_area_blocker_count`: `9`
+- `release_area_blocker_count`: `10`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -17,6 +17,7 @@
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_completion_evidence` | Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
 | `github_sync::github_sync_preflight::worktree_not_clean` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
+| `github_sync::github_sync_preflight::main_remote_not_ancestor_of_head` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
 | `github_sync::github_sync_preflight::remote_mutation_approval_required` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
 | `github_sync::github_sync_remote_sync_pending` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
 | `github_sync::github_sync_preflight_not_synced` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |

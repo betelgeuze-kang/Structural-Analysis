@@ -289,6 +289,51 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert not child.exists()
 
 
+def test_cpu_diagnostic_hip_consistency_proof_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        raise AssertionError("child probe must not run with CPU diagnostic HIP proof")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=True,
+        cpu_diagnostic_assembler_used=True,
+        production_hip_residual_jacobian_path=False,
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
+        in payload["blockers"]
+    )
+    assert (
+        "hip_consistency_proof_production_hip_path_not_proven"
+        in payload["blockers"]
+    )
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
+
+
 def test_hip_runtime_blockers_propagate_to_lane_blockers_and_summary(
     tmp_path: Path,
     monkeypatch: Any,

@@ -1,0 +1,98 @@
+{
+  "analysis_type": "linear_static",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "convergence_history": [
+    {
+      "iteration": 1,
+      "relative_increment": 0.1,
+      "relative_residual": 0.0,
+      "residual_norm": 0.0,
+      "status": "ready",
+      "step": "linear_static"
+    }
+  ],
+  "developer_preview": true,
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:721e136f51bdf890b7169547d49c0d9ebda9a686afbb8c868abde8c396bd0eb2",
+  "metrics": {
+    "claim_boundary": "linear_static_axial_truss_preview_only",
+    "constrained_dof_count": 5,
+    "constrained_reaction_norm": 100.0,
+    "displacements": {
+      "N1": {
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "UX": 0.1,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "element_count": 1,
+    "energy_balance_error": 0.0,
+    "external_forces": {
+      "N1": {
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "UX": 100.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "fallback_used": false,
+    "free_dof_count": 1,
+    "free_residual_norm": 0.0,
+    "free_stiffness_order": 1,
+    "internal_forces": {
+      "N1": {
+        "UX": -100.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "UX": 100.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "linear_ramp_external_work": 5.0,
+    "load_count": 1,
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "max_displacement": 0.1,
+    "node_count": 2,
+    "reactions": {
+      "N1": {
+        "UX": -100.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      },
+      "N2": {
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0
+      }
+    },
+    "regularization_used": false,
+    "relative_residual": 0.0,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_norm": 0.0,
+    "sparse_backend_used": false,
+    "stiffness_order": 6,
+    "stiffness_storage": "dense_numpy",
+    "stiffness_symmetry_error": 0.0,
+    "strain_energy": 5.0,
+    "support_count": 2,
+    "tangent_jacobian_equals_assembled_stiffness": true,
+    "tangent_jacobian_storage": "dense_numpy"
+  },
+  "solver": "phase2_linear_reference_axial_bar",
+  "status": "ready",
+  "tolerance": 1e-08,
+  "unsupported_features": [],
+  "warnings": []
+}

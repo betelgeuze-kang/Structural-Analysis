@@ -147,12 +147,23 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-21T11:58:07.894291+00:00",
+  "generated_at": "2026-06-21T18:08:38.065709+00:00",
   "independent_commercial_product_ready": false,
+  "input_checksums": {
+    "implementation/phase1/client_input_validation_report.json": "sha256:516c051f8f68126e80626cc65363bd23ea579fe36c46d60976a50dec1ec5d98a",
+    "implementation/phase1/structure_viewer_browser_performance_probe.json": "sha256:bf7c000487aee9b46112110b3b8a3f65e43806babd3e96b44bc4e3ffafba64d4",
+    "implementation/phase1/structure_viewer_visual_regression_baseline.json": "sha256:70908d83636063c26f0fb0136f928365e0fca2dc826dcefa44efffe8dc1b6503",
+    "implementation/phase1/workstation_delivery_package_manifest.json": "sha256:2edc0da2014ccfc074d683e7098f63812687c3bea37759aa540f76b2f590c516",
+    "implementation/phase1/workstation_delivery_viewer_smoke.json": "sha256:3a14e8951ca2a595489c56f1a7ebc21cad22423c7213ca840f0e3fe1ec732d9e",
+    "implementation/phase1/workstation_hardware_profile.json": "sha256:6f3836677e9a49bc2085d17b4ffc110b99b80b6b17021978ca16c579b320891a",
+    "implementation/phase1/workstation_job_record.json": "sha256:98ca6d9daabe04dbf8485199fc90a818acfcd0034734ffc073d1d4b08e270c72",
+    "implementation/phase1/workstation_job_retention_policy.json": "sha256:d1a96e348d5c5f4d0b1341fe768b51c9b00e1dc21949bbeca098711bf4eca03e",
+    "implementation/phase1/workstation_service_budget.json": "sha256:cc74c453c597c82529b7c77cf011d162982478bc8f67a51e21ec3df0eca05860"
+  },
   "reason_code": "PASS",
   "reused_evidence": false,
   "schema_version": "workstation-delivery-readiness.v1",
-  "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
   "status": "ready",
   "summary_line": "Workstation delivery readiness: PASS | gates=8/8",
   "workstation_delivery_service_ready": true

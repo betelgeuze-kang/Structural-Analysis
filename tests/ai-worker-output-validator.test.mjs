@@ -87,6 +87,56 @@ esac
   return commandPath;
 }
 
+function makeQuotaExhaustedMockOpencode(binDir, expectedModel) {
+  const commandPath = path.join(binDir, 'opencode');
+  fs.writeFileSync(
+    commandPath,
+    `#!/usr/bin/env bash
+case "\${1:-}" in
+  models)
+    printf '%s\\n' '${expectedModel}'
+    ;;
+  run)
+    echo 'usage limit exhausted for this billing period' >&2
+    exit 42
+    ;;
+  *)
+    echo 'unexpected opencode args' >&2
+    exit 2
+    ;;
+esac
+`,
+    { mode: 0o755 },
+  );
+  return commandPath;
+}
+
+function makeModelCheckingMockCursor(binDir, expectedModel) {
+  const commandPath = path.join(binDir, 'cursor-agent');
+  fs.writeFileSync(
+    commandPath,
+    `#!/usr/bin/env bash
+seen=''
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = '--model' ]; then
+    seen="\${2:-}"
+    break
+  fi
+  shift
+done
+if [ "$seen" != '${expectedModel}' ]; then
+  echo 'unexpected cursor model' >&2
+  exit 9
+fi
+cat <<'WORKER_OUTPUT'
+${validWorkerOutput}
+WORKER_OUTPUT
+`,
+    { mode: 0o755 },
+  );
+  return commandPath;
+}
+
 function wrapperFixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-worker-wrapper-'));
   const binDir = path.join(dir, 'bin');
@@ -192,7 +242,7 @@ spawnBackedTest('cursor wrapper prints only validated summaries and removes vali
 
 spawnBackedTest('opencode wrapper prints only validated summaries and removes valid raw output', () => {
   const fixture = wrapperFixture();
-  makeMockCommand(fixture.binDir, 'opencode', validWorkerOutput);
+  makeMockCommand(fixture.binDir, 'cursor-agent', validWorkerOutput);
 
   const result = runWrapper(opencodeWrapper, fixture);
 
@@ -202,13 +252,14 @@ spawnBackedTest('opencode wrapper prints only validated summaries and removes va
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.summary.md')).length, 1);
 });
 
-spawnBackedTest('opencode wrapper defaults to MiniMax M3 model', () => {
+spawnBackedTest('opencode wrapper routes assignment to Cursor composer-2.5', () => {
   const fixture = wrapperFixture();
-  const expectedModel = 'opencode-go/minimax-m3';
-  makeModelCheckingMockOpencode(fixture.binDir, expectedModel);
+  makeModelCheckingMockCursor(fixture.binDir, 'composer-2.5');
   const env = wrapperEnv(fixture);
   delete env.OPENCODE_MODEL;
   delete env.AI_WORKER_OPENCODE_MODEL;
+  delete env.CURSOR_AGENT_MODEL;
+  delete env.AI_WORKER_OPENCODE_ASSIGNMENT_CURSOR_MODEL;
   env.AI_WORKER_OPENCODE_MODEL_CHECK = '1';
   env.AI_WORKER_OPENCODE_NETWORK_PREFLIGHT = '0';
   env.AI_WORKER_OPENCODE_XDG_DATA_HOME = path.join(fixture.dir, 'xdg');
@@ -216,6 +267,27 @@ spawnBackedTest('opencode wrapper defaults to MiniMax M3 model', () => {
   const result = runWrapper(opencodeWrapper, fixture, env);
 
   assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /OpenCode worker assignment is routed to Cursor model composer-2\.5/);
+  assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
+});
+
+spawnBackedTest('opencode assignment routing ignores exhausted opencode and uses Cursor composer-2.5', () => {
+  const fixture = wrapperFixture();
+  makeQuotaExhaustedMockOpencode(fixture.binDir, 'opencode-go/deepseek-v4-pro');
+  makeModelCheckingMockCursor(fixture.binDir, 'composer-2.5');
+  const env = wrapperEnv(fixture);
+  delete env.OPENCODE_MODEL;
+  delete env.AI_WORKER_OPENCODE_MODEL;
+  delete env.CURSOR_AGENT_MODEL;
+  delete env.AI_WORKER_OPENCODE_ASSIGNMENT_CURSOR_MODEL;
+  env.AI_WORKER_OPENCODE_MODEL_CHECK = '1';
+  env.AI_WORKER_OPENCODE_NETWORK_PREFLIGHT = '0';
+  env.AI_WORKER_OPENCODE_XDG_DATA_HOME = path.join(fixture.dir, 'xdg');
+
+  const result = runWrapper(opencodeWrapper, fixture, env);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /OpenCode worker assignment is routed to Cursor model composer-2\.5/);
   assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
 });
 

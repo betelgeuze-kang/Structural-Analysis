@@ -49,9 +49,16 @@ def file_sha256(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _checksum_ignored(path: Path) -> bool:
+    ignored_dirs = {"__pycache__", ".pytest_cache"}
+    return bool(ignored_dirs.intersection(path.parts)) or path.suffix in {".pyc", ".pyo"}
+
+
 def directory_sha256(path: Path) -> str:
     digest = hashlib.sha256()
-    for child in sorted(item for item in path.rglob("*") if item.is_file()):
+    for child in sorted(
+        item for item in path.rglob("*") if item.is_file() and not _checksum_ignored(item)
+    ):
         relative = child.relative_to(path).as_posix()
         digest.update(relative.encode("utf-8"))
         digest.update(b"\0")

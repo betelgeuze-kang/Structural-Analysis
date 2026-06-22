@@ -8,11 +8,19 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "workstation-delivery-readiness.v1"
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_OUT = Path("implementation/phase1/workstation_delivery_readiness.json")
 DEFAULT_HARDWARE_PROFILE = Path("implementation/phase1/workstation_hardware_profile.json")
 DEFAULT_SERVICE_BUDGET = Path("implementation/phase1/workstation_service_budget.json")
@@ -33,7 +41,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -396,6 +404,20 @@ def check_workstation_delivery_readiness(
         "generated_at": _now_utc_iso(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(
+            [
+                hardware_profile,
+                service_budget,
+                delivery_package_manifest,
+                client_input_validation_report,
+                job_record,
+                job_retention_policy,
+                viewer_browser_performance_probe,
+                viewer_visual_regression_baseline,
+                delivery_viewer_smoke,
+            ],
+            repo_root=REPO_ROOT,
+        ),
         "reused_evidence": False,
         "contract_pass": contract_pass,
         "workstation_delivery_service_ready": contract_pass,

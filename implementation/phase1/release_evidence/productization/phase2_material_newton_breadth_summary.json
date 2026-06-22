@@ -1,0 +1,74 @@
+{
+  "analysis_type": "nonlinear_static_scalar_material_breadth_seed",
+  "artifacts": {
+    "related_scalar_newton_globalization_summary": "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
+    "scalar_axial_laws": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_scalar_axial_laws.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json"
+  },
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "mesh_load_step_nonlinear_convergence_suite_not_closed",
+    "sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "general_newton_jacobian_assembly_not_closed"
+  ],
+  "claim_boundary": "Deterministic scalar material-Newton breadth seed across multiple constitutive laws using the same explicit F_internal_minus_F_external residual contract, consistent tangent, residual/increment gates, and backtracking line search without regularization or fallback false PASS. This does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-21T18:49:20.221077+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "scripts/build_phase2_material_newton_breadth_artifacts.py": "sha256:70ddf9616395c00cbc1e69d27b8e6dafa160c2d36e3445bfc12b4ac7e6d13248",
+    "scripts/verify_quality_gate.py": "sha256:bc3c47b94f611c21450f22ff65d2929bcc54ee66538eedbe9ca2159319f3a7cc",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:a9293e754702b41cdf5efd02e824ad300e3b3c7d102ea7a0920611fa09c2aef9",
+    "tests/test_build_phase2_material_newton_breadth_artifacts.py": "sha256:d38dee83861672f3a9fb8f84982ca28fb5dc07b0ebb65a59b4cfd494c0b95893"
+  },
+  "law_summaries": [
+    {
+      "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+      "displacement_gate_passed": true,
+      "displacement_m": 0.3930027389711051,
+      "fallback_used": false,
+      "final_increment_abs_m": 5.0450936265225813e-17,
+      "increment_gate_passed": true,
+      "law_contract_pass": true,
+      "model_kind": "scalar_nonlinear_axial_cubic_spring",
+      "regularization_used": false,
+      "relative_residual": 2.842170943040401e-16,
+      "residual_gate_passed": true,
+      "tangent_gate_passed": true
+    },
+    {
+      "case_id": "phase2_scalar_nonlinear_axial_bilinear_hardening",
+      "displacement_gate_passed": true,
+      "displacement_m": 1.4,
+      "fallback_used": false,
+      "final_increment_abs_m": 0.0,
+      "increment_gate_passed": true,
+      "law_contract_pass": true,
+      "model_kind": "scalar_nonlinear_axial_bilinear_hardening",
+      "regularization_used": false,
+      "relative_residual": 0.0,
+      "residual_gate_passed": true,
+      "tangent_gate_passed": true
+    }
+  ],
+  "material_law_count": 2,
+  "material_newton_closure_claim": false,
+  "matrix_backend": "numpy_linalg_solve_scalar",
+  "model_kinds": [
+    "scalar_nonlinear_axial_cubic_spring",
+    "scalar_nonlinear_axial_bilinear_hardening"
+  ],
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-material-newton-breadth-artifacts.v1",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "sparse_backend_used": false,
+  "status": "ready",
+  "truth_class": "analytic_truth"
+}

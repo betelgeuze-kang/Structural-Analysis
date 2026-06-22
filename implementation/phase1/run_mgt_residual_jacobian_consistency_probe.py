@@ -24,6 +24,7 @@ from run_mgt_direct_residual_newton_probe import (  # noqa: E402
     PRODUCTIZATION,
     _git_head,
     _rocm_hip_runtime_preflight,
+    run_mgt_direct_residual_newton_probe,
 )
 from run_mgt_equilibrium_newton_setup import build_direct_residual_assembler  # noqa: E402
 from run_mgt_full_frame_6dof_sparse_equilibrium import (  # noqa: E402
@@ -42,6 +43,16 @@ from run_mgt_surface_shell_bending_tangent import _triangle_shell_bending_stiffn
 
 SCHEMA_VERSION = "mgt-residual-jacobian-consistency-probe.v1"
 DEFAULT_OUT = PRODUCTIZATION / "mgt_residual_jacobian_consistency_probe.json"
+
+
+def _write_json_payload(output_json: Path | None, payload: dict[str, Any]) -> None:
+    if output_json is None:
+        return
+    output_json.parent.mkdir(parents=True, exist_ok=True)
+    output_json.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _max_abs(values: np.ndarray) -> float:
@@ -92,6 +103,141 @@ def _direction_deterministic_free_sample(
         "seed": int(seed),
         "selected_free_rows_head": [int(row) for row in selected[:20].tolist()],
         "selected_global_dofs_head": [int(free[int(row)]) for row in selected[:20].tolist()],
+    }
+
+
+def _hip_required_direct_probe_kwargs(
+    *,
+    mgt_path: Path,
+    checkpoint_npz: Path,
+    shell_pressure_load_path_policy: str,
+) -> dict[str, Any]:
+    return {
+        "mgt_path": mgt_path,
+        "checkpoint_npz": checkpoint_npz,
+        "output_json": None,
+        "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+        "apply_shell_material_tangent": True,
+        "allow_state_dependent_shell_material_tangent_hip_replay": True,
+        "include_residual_component_breakdown": False,
+        "max_trust_iterations": 0,
+        "enable_secant_subspace_globalization": False,
+        "max_secant_subspace_promotions": 0,
+        "enable_secant_family_globalization": False,
+        "max_secant_family_promotions": 0,
+        "enable_matrix_free_jacobian_subspace": False,
+        "max_matrix_free_jacobian_subspace_promotions": 0,
+        "enable_matrix_free_global_krylov": True,
+        "matrix_free_global_krylov_max_iterations": 1,
+        "matrix_free_global_krylov_batch_replay_backend": (
+            "hip_full_residual_resident"
+        ),
+        "matrix_free_global_krylov_require_hip_batch_replay": True,
+        "matrix_free_global_krylov_linear_solver_backend": "torch_hip_gmres",
+        "matrix_free_global_krylov_full_assembly_trial_replay": False,
+        "enable_current_tangent_residual_row_correction": True,
+        "max_current_tangent_residual_row_corrections": 1,
+        "current_tangent_residual_row_target_counts": (1,),
+        "current_tangent_residual_row_support_column_counts": (1,),
+        "current_tangent_residual_row_jacobian_mode": "finite_difference",
+        "current_tangent_residual_row_per_state_batch_replay": True,
+        "current_tangent_residual_row_batch_alpha_replay": True,
+        "current_tangent_residual_row_batch_fd_replay": True,
+        "current_tangent_residual_row_batch_replay_backend": "hip_full_residual",
+        "current_tangent_residual_row_require_hip_batch_replay": True,
+    }
+
+
+def _assess_hip_required_direct_probe_payload(
+    child_payload: dict[str, Any],
+) -> dict[str, Any]:
+    residual_contract = child_payload.get("residual_contract")
+    residual_contract = residual_contract if isinstance(residual_contract, dict) else {}
+    gate_assessment = child_payload.get("gate_assessment")
+    gate_assessment = gate_assessment if isinstance(gate_assessment, dict) else {}
+    global_krylov = child_payload.get("matrix_free_global_krylov")
+    global_krylov = global_krylov if isinstance(global_krylov, dict) else {}
+    row_correction = child_payload.get("current_tangent_residual_row_correction")
+    row_correction = row_correction if isinstance(row_correction, dict) else {}
+
+    hip_required = bool(residual_contract.get("hip_residual_engine_required"))
+    hip_contract_passed = bool(
+        residual_contract.get("hip_residual_engine_contract_passed")
+    )
+    consistent_gate_passed = bool(
+        gate_assessment.get("consistent_residual_jacobian_newton_passed")
+    )
+    production_hip_path = bool(
+        hip_required
+        and (
+            global_krylov.get("require_hip_batch_replay")
+            or global_krylov.get("require_hip_krylov_solver")
+            or row_correction.get("require_hip_batch_replay")
+        )
+    )
+    blockers: list[str] = []
+    if child_payload.get("reused_evidence") is not False:
+        blockers.append("hip_direct_probe_reused_evidence_not_false")
+    if child_payload.get("source_commit_sha") in {None, ""}:
+        blockers.append("hip_direct_probe_source_commit_sha_missing")
+    if not production_hip_path:
+        blockers.append("hip_direct_probe_production_hip_path_not_required")
+    if not hip_contract_passed:
+        blockers.append("hip_direct_probe_hip_residual_engine_contract_not_closed")
+        for blocker in residual_contract.get("hip_residual_engine_blockers") or []:
+            if isinstance(blocker, str) and blocker:
+                blockers.append(f"hip_residual_engine::{blocker}")
+    if not consistent_gate_passed:
+        blockers.append("hip_direct_probe_consistent_residual_jacobian_not_closed")
+        for blocker in (
+            gate_assessment.get("consistent_residual_jacobian_newton_blockers")
+            or residual_contract.get("consistent_residual_jacobian_newton_blockers")
+            or []
+        ):
+            if isinstance(blocker, str) and blocker:
+                blockers.append(f"consistent_residual_jacobian::{blocker}")
+    if gate_assessment.get("fallback_zero_passed") is not True:
+        blockers.append("hip_direct_probe_fallback_zero_not_closed")
+    return {
+        "production_hip_residual_jacobian_path": production_hip_path,
+        "hip_residual_engine_contract_passed": hip_contract_passed,
+        "consistent_residual_jacobian_newton_gate_passed": consistent_gate_passed,
+        "blockers": sorted(dict.fromkeys(blockers)),
+        "matrix_free_global_krylov": {
+            "enabled": bool(global_krylov.get("enabled")),
+            "attempted": bool(global_krylov.get("attempted")),
+            "batch_replay_backend": str(
+                global_krylov.get("batch_replay_backend", "") or ""
+            ),
+            "require_hip_batch_replay": bool(
+                global_krylov.get("require_hip_batch_replay")
+            ),
+            "require_hip_krylov_solver": bool(
+                global_krylov.get("require_hip_krylov_solver")
+            ),
+            "hip_krylov_solver_used": bool(
+                global_krylov.get("hip_krylov_solver_used")
+            ),
+            "accepted_state_refresh_cpu_used": bool(
+                global_krylov.get("accepted_state_refresh_cpu_used")
+            ),
+        },
+        "current_tangent_residual_row_correction": {
+            "enabled": bool(row_correction.get("enabled")),
+            "attempted": bool(row_correction.get("attempted")),
+            "batch_replay_backend": str(
+                row_correction.get("batch_replay_backend", "") or ""
+            ),
+            "require_hip_batch_replay": bool(
+                row_correction.get("require_hip_batch_replay")
+            ),
+            "accepted_state_refresh_cpu_used": bool(
+                row_correction.get("accepted_state_refresh_cpu_used")
+            ),
+            "accepted_state_tangent_refresh_cpu_used": bool(
+                row_correction.get("accepted_state_tangent_refresh_cpu_used")
+            ),
+        },
     }
 
 
@@ -1674,33 +1820,97 @@ def run_mgt_residual_jacobian_consistency_probe(
                 "hip_residual_jacobian_consistency_not_executed",
             ],
         }
-        if output_json is not None:
-            output_json.parent.mkdir(parents=True, exist_ok=True)
-            output_json.write_text(
-                json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
-                encoding="utf-8",
-            )
+        _write_json_payload(output_json, payload)
         return payload
     if require_hip_residual_engine:
+        child_started = time.perf_counter()
+        try:
+            child_payload = run_mgt_direct_residual_newton_probe(
+                **_hip_required_direct_probe_kwargs(
+                    mgt_path=mgt_path,
+                    checkpoint_npz=checkpoint_npz,
+                    shell_pressure_load_path_policy=shell_pressure_load_path_policy,
+                )
+            )
+            child_error: str | None = None
+        except Exception as exc:
+            child_payload = {}
+            child_error = f"{exc.__class__.__name__}: {exc}"
+        hip_proof = _assess_hip_required_direct_probe_payload(child_payload)
+        child_blockers = (
+            child_payload.get("blockers") if isinstance(child_payload, dict) else []
+        )
+        child_blockers = child_blockers if isinstance(child_blockers, list) else []
+        blockers = [
+            *hip_proof["blockers"],
+            *[f"hip_direct_probe::{item}" for item in child_blockers if isinstance(item, str)],
+        ]
+        if child_error is not None:
+            blockers.append("hip_direct_probe_execution_failed")
+        blockers = sorted(dict.fromkeys(blockers))
+        gate_passed = bool(
+            hip_proof["production_hip_residual_jacobian_path"]
+            and hip_proof["hip_residual_engine_contract_passed"]
+            and hip_proof["consistent_residual_jacobian_newton_gate_passed"]
+            and not blockers
+        )
         payload = {
             "schema_version": SCHEMA_VERSION,
             "generated_at": generated_at,
             "source_commit_sha": source_commit_sha,
             "engine_version": ENGINE_VERSION,
             "reused_evidence": False,
-            "status": "partial",
-            "residual_jacobian_consistency_ready": False,
-            "consistent_residual_jacobian_newton_passed": False,
-            "consistent_residual_jacobian_newton_gate_passed": False,
+            "status": "ready" if gate_passed else "partial",
+            "residual_jacobian_consistency_ready": gate_passed,
+            "consistent_residual_jacobian_newton_passed": gate_passed,
+            "consistent_residual_jacobian_newton_gate_passed": gate_passed,
             "rocm_hip_required": True,
-            "execution_mode": "hip_required_path_not_implemented_no_cpu_fallback",
+            "execution_mode": "hip_required_direct_probe_no_cpu_fallback",
             "cpu_diagnostic_assembler_used": False,
-            "production_hip_residual_jacobian_path": False,
+            "production_hip_residual_jacobian_path": bool(
+                hip_proof["production_hip_residual_jacobian_path"]
+            ),
             "rocm_hip_runtime_preflight": hip_preflight,
             "component_only": bool(component_only),
             "checkpoint": {"path": str(checkpoint_npz)},
-            "load_scale": None,
+            "load_scale": (
+                child_payload.get("checkpoint", {}).get("load_scale")
+                if isinstance(child_payload.get("checkpoint"), dict)
+                else None
+            ),
             "shell_pressure_load_path_policy": str(shell_pressure_load_path_policy),
+            "hip_direct_probe": {
+                "schema_version": "mgt-residual-jacobian-consistency-hip-direct-proof.v1",
+                "executed": child_error is None,
+                "execution_error": child_error,
+                "elapsed_seconds": time.perf_counter() - child_started,
+                "source_commit_sha": child_payload.get("source_commit_sha")
+                if isinstance(child_payload, dict)
+                else None,
+                "status": child_payload.get("status")
+                if isinstance(child_payload, dict)
+                else None,
+                "direct_residual_newton_ready": child_payload.get(
+                    "direct_residual_newton_ready"
+                )
+                if isinstance(child_payload, dict)
+                else None,
+                "production_hip_residual_jacobian_path": bool(
+                    hip_proof["production_hip_residual_jacobian_path"]
+                ),
+                "hip_residual_engine_contract_passed": bool(
+                    hip_proof["hip_residual_engine_contract_passed"]
+                ),
+                "consistent_residual_jacobian_newton_gate_passed": bool(
+                    hip_proof["consistent_residual_jacobian_newton_gate_passed"]
+                ),
+                "matrix_free_global_krylov": hip_proof[
+                    "matrix_free_global_krylov"
+                ],
+                "current_tangent_residual_row_correction": hip_proof[
+                    "current_tangent_residual_row_correction"
+                ],
+            },
             "direction_rows": [],
             "state_scale_sweep": [],
             "runtime_metrics": {
@@ -1710,21 +1920,15 @@ def run_mgt_residual_jacobian_consistency_probe(
             },
             "claim_boundary": (
                 "Production ROCm/HIP residual-Jacobian consistency was requested and "
-                "a usable HIP runtime was reported, but this proof path does not yet "
-                "implement the production HIP residual/Jacobian evaluation. The probe "
-                "did not fall back to the CPU diagnostic assembler and does not close G1."
+                "routed to the HIP-required direct residual Newton proof path. The "
+                "probe does not use this module's CPU diagnostic assembler. This "
+                "receipt closes neither full G1 nor release readiness unless the "
+                "child HIP residual engine contract and consistent residual/Jacobian "
+                "Newton gate both pass without blockers."
             ),
-            "blockers": [
-                "hip_residual_jacobian_consistency_hip_path_not_implemented",
-                "hip_residual_jacobian_consistency_not_executed",
-            ],
+            "blockers": blockers,
         }
-        if output_json is not None:
-            output_json.parent.mkdir(parents=True, exist_ok=True)
-            output_json.write_text(
-                json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
-                encoding="utf-8",
-            )
+        _write_json_payload(output_json, payload)
         return payload
     assemble_residual, setup_meta = build_direct_residual_assembler(
         mgt_path=mgt_path,

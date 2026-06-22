@@ -14,6 +14,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
         "Build fresh publication candidate",
+        "Strict release quality gate",
         "Publish manifest-listed release assets",
         "Verify published release closure",
         "Hydrate published release assets",
@@ -26,6 +27,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert positions == sorted(positions)
     assert "permissions:\n  contents: write" in text
     assert "scripts/publish_github_release_assets.py" in text
+    assert "python scripts/verify_quality_gate.py --mode release" in text
     assert "--replace-existing" in text
     assert "scripts/check_release_p0_closure.py" in text
     assert "scripts/check_p0_closure_status.py" in text
@@ -45,6 +47,18 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "structural-post-publish-roundtrip.json" in text
     assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
+
+
+def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    strict_step = text.split("      - name: Strict release quality gate", 1)[1].split(
+        "      - name: Publish manifest-listed release assets", 1
+    )[0]
+
+    assert "python scripts/verify_quality_gate.py --mode release" in strict_step
+    assert text.index("Strict release quality gate") < text.index(
+        "Publish manifest-listed release assets"
+    )
 
 
 def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() -> None:

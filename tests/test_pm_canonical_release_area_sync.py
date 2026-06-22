@@ -69,7 +69,7 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
     expected_blockers = sorted(str(item) for item in report["release_area_blockers"])
 
     assert expected_green_total == (12, 16)
-    assert len(expected_blockers) == 9
+    assert len(expected_blockers) == 10
     assert _summary_green_total(report["summary_line"]) == expected_green_total
 
     audit = _load_json(PRODUCTIZATION / "pm_release_gate_completion_audit.json")

@@ -13,6 +13,15 @@ SNAPSHOT = (
     / "productization"
     / "product_readiness_snapshot.json"
 )
+DEVELOPER_PREVIEW = (
+    REPO_ROOT
+    / "implementation"
+    / "phase1"
+    / "release_evidence"
+    / "productization"
+    / "developer_preview_readiness.json"
+)
+DEVELOPER_PREVIEW_REPORT = DEVELOPER_PREVIEW.with_suffix(".md")
 INDEPENDENT_PRODUCT = (
     REPO_ROOT / "implementation" / "phase1" / "release" / "independent_product_readiness.json"
 )
@@ -28,10 +37,12 @@ DOCS = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "docs" / "commercialization-gap-current-state.md",
 ]
+APP = REPO_ROOT / "src" / "App.tsx"
 
 
 def test_readiness_snapshot_summary_is_doc_synced() -> None:
     payload = json.loads(SNAPSHOT.read_text(encoding="utf-8"))
+    categories = payload["blocker_categories"]
     expected = (
         "Canonical product readiness snapshot: "
         f"status `{payload['status']}`, "
@@ -39,11 +50,86 @@ def test_readiness_snapshot_summary_is_doc_synced() -> None:
         f"paid_pilot_ready=`{str(payload['paid_pilot_ready']).lower()}`, "
         f"release_ready=`{str(payload['release_ready']).lower()}`"
     )
+    expected_categories = (
+        "Canonical blocker categories: "
+        f"numerical `{categories['numerical']['blocker_count']}`, "
+        f"benchmark `{categories['benchmark']['blocker_count']}`, "
+        f"software product `{categories['software product']['blocker_count']}`, "
+        f"future commercial `{categories['future commercial']['blocker_count']}`"
+    )
 
     for path in DOCS:
         text = path.read_text(encoding="utf-8")
         assert expected in text, path
+        assert expected_categories in text, path
         assert "build_product_readiness_snapshot.py --json --no-write" in text, path
+
+
+def test_developer_preview_readiness_summary_is_doc_synced() -> None:
+    payload = json.loads(DEVELOPER_PREVIEW.read_text(encoding="utf-8"))
+    categories = payload["categories"]
+    scope = payload["scope"]
+    freeze_policy = scope["freeze_policy"]
+    scope_boundary_sync = payload["scope_boundary_sync"]
+    expected_fragments = [
+        "Open Benchmark Developer Preview readiness:",
+        "developer_preview_readiness.json",
+        "developer_preview_readiness.md",
+        f"developer_preview_ready=`{str(payload['developer_preview_ready']).lower()}`",
+        f"blocker_count `{payload['blocker_count']}`",
+        f"future_commercial_blocker_count `{payload['future_commercial_blocker_count']}`",
+        f"numerical `{categories['numerical']['blocker_count']}`",
+        f"benchmark `{categories['benchmark']['blocker_count']}`",
+        f"software product `{categories['software product']['blocker_count']}`",
+        f"new feature freeze `{freeze_policy['new_feature_development']}`",
+        f"AI training freeze `{freeze_policy['ai_training']}`",
+        f"GPU/HIP track `{freeze_policy['gpu_hip']}`",
+    ]
+    commercial_exclusions = [
+        "customer shadow",
+        "license approval",
+        "commercial SLA",
+        "30-run CI streak",
+        "external approval receipt",
+    ]
+
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in expected_fragments:
+            assert fragment in text, (path, fragment)
+        for fragment in commercial_exclusions:
+            assert fragment in text, (path, fragment)
+
+    report = DEVELOPER_PREVIEW_REPORT.read_text(encoding="utf-8")
+    assert "# Open Benchmark Developer Preview Readiness" in report
+    assert "## Included Scope" in report
+    assert "## Excluded Scope" in report
+    assert "## Freeze Policy" in report
+    assert "| future commercial |" in report
+    for key, value in freeze_policy.items():
+        assert f"`{key}`: `{value}`" in report
+    for fragment in scope["included"]:
+        assert fragment in report, fragment
+    for fragment in scope["excluded"]:
+        assert fragment in report, fragment
+
+    app = APP.read_text(encoding="utf-8")
+    gui_scope_contract = [
+        "function buildDeveloperPreviewSnapshot",
+        "getRecord(resource.data, 'scope')",
+        "getArray(scope, 'included')",
+        "getArray(scope, 'excluded')",
+        "scope=${scopeSummary}",
+        "excludes=${exclusionSummary}",
+        "customer shadow, license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain Commercial Release blockers",
+    ]
+    for fragment in gui_scope_contract:
+        assert fragment in app, fragment
+    assert scope_boundary_sync["status"] == "ready"
+    assert scope_boundary_sync["contract_pass"] is True
+    assert scope_boundary_sync["gui_surface"]["contract_pass"] is True
+    for surface in scope_boundary_sync["doc_surfaces"].values():
+        assert surface["contract_pass"] is True
 
 
 def test_docs_do_not_claim_github_sync_complete_while_snapshot_blocks() -> None:

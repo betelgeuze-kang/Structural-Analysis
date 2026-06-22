@@ -1,0 +1,49 @@
+{
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparisons": [
+    {
+      "actual": "F_internal_minus_F_external",
+      "expected": "F_internal_minus_F_external",
+      "field": "residual_formula",
+      "status": "pass"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "field": "regularization_used",
+      "status": "pass"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "field": "fallback_used",
+      "status": "pass"
+    }
+  ],
+  "contract_pass": true,
+  "convergence_history": [
+    {
+      "iteration": 1,
+      "relative_increment": 0.1,
+      "relative_residual": 0.0,
+      "residual_norm": 0.0,
+      "status": "ready",
+      "step": "linear_static"
+    }
+  ],
+  "developer_preview": true,
+  "developer_preview_blocked_fields": [],
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:721e136f51bdf890b7169547d49c0d9ebda9a686afbb8c868abde8c396bd0eb2",
+  "passed_fields": [
+    "engine_version",
+    "input_checksum",
+    "tolerance",
+    "convergence_history",
+    "claim_boundary_version"
+  ],
+  "status": "pass",
+  "tolerance": 1e-08,
+  "unsupported_fields": [],
+  "warnings": []
+}

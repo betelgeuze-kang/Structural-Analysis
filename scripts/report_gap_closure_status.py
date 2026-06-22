@@ -20,6 +20,25 @@ if str(REPO_ROOT) not in sys.path:
 from implementation.phase1.commercial_gap_ledger_status import (  # noqa: E402
     build_commercial_gap_ledger_status,
 )
+from scripts.release_evidence_metadata import input_checksums  # noqa: E402
+
+
+GAP_CLOSURE_INPUT_FILES = (
+    "delivery_evidence_bundle.json",
+    "gpu_solver_claim_receipt.json",
+    "gpu_newton_certification_checklist.json",
+    "commercial_solver_cross_validation.json",
+    "residual_holdout_closure_updates.json",
+    "design_optimization_cost_reduction_changes.json",
+    "mgt_native_reanalysis_pipeline.json",
+    "mgt_global_fea_condensed_solve.json",
+    "mgt_global_fea_readiness_gate.json",
+    "mgt_global_fea_mesh_contract_gate.json",
+    "rh_closure_checklist.json",
+    "rh_signed_closure_packet_template.json",
+    "ml_multi_objective_status.json",
+    "commercial_gap_ledger_status.json",
+)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -64,6 +83,11 @@ def _compact_ledger_requirements(rows: list[Any]) -> list[dict[str, Any]]:
 
 def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str, Any]:
     productization = Path(productization_dir or PRODUCTIZATION)
+    checksum_inputs = [
+        *(productization / filename for filename in GAP_CLOSURE_INPUT_FILES),
+        Path("docs/commercial-structural-solver-product-gap-ledger.md"),
+        Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
+    ]
     bundle = _load(productization / "delivery_evidence_bundle.json")
     gpu = _load(productization / "gpu_solver_claim_receipt.json")
     gpu_newton = _load(productization / "gpu_newton_certification_checklist.json")
@@ -178,6 +202,7 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(checksum_inputs, repo_root=REPO_ROOT),
         "reused_evidence": False,
         "overall_status": delivery_status,
         "delivery_status": delivery_status,

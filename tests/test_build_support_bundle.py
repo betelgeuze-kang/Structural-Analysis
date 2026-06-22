@@ -387,8 +387,10 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
                 "blockers": ["opencode_worker_configured_model_unavailable"],
                 "summary": {
                     "cursor_worker_cli": "cursor-agent",
-                    "opencode_configured_model": "opencode-go/minimax-m3",
+                    "opencode_configured_model": "opencode-go/deepseek-v4-pro",
                     "opencode_configured_model_available": False,
+                    "opencode_assignment_routed_to_cursor": True,
+                    "opencode_assignment_cursor_model": "composer-2.5",
                 },
             },
         ),

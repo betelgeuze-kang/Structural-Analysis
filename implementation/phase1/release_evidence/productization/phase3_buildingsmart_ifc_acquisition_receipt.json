@@ -1,0 +1,194 @@
+{
+  "blockers": [
+    "import_health_execution_missing",
+    "phase3_ifc_import_case_count_below_minimum",
+    "product_legal_license_review_pending",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
+  ],
+  "claim_boundary": "This receipt narrows the buildingSMART clean IFC lane from source identity to selected-file acquisition and import-health expectation contracts. It does not download or bundle IFC files, compute selected-file checksums, approve redistribution, execute import-health checks, or close Phase 3.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_use_allowed_source_count": 0,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "expected_import_health_contract_count": 2,
+  "generated_at": "2026-06-21T22:00:05.509051+00:00",
+  "import_health_execution_count": 0,
+  "input_checksums": {
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
+    "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
+  },
+  "phase3_closure_claim": false,
+  "phase3_ifc_import_case_requirement": {
+    "blocker": "phase3_ifc_import_case_count_below_minimum",
+    "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. This receipt authors expected import-health contracts for two clean buildingSMART files only; no dirty/negative IFC contracts or quantity-credit-ready IFC cases are claimed.",
+    "minimum_clean_dirty_import_case_count": 10,
+    "quantity_credit_ready_count": 0,
+    "remaining_import_contract_count": 8,
+    "selected_clean_import_contract_count": 2,
+    "selected_dirty_import_contract_count": 0,
+    "selected_total_import_contract_count": 2,
+    "status": "blocked"
+  },
+  "ready_source_count": 0,
+  "redistribution_allowed_source_count": 0,
+  "reused_evidence": false,
+  "schema_version": "phase3-buildingsmart-ifc-acquisition-receipt.v1",
+  "selected_file_count": 2,
+  "selected_files": [
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
+        "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "product_legal_license_review_pending",
+        "import_health_execution_missing",
+        "silent_import_loss_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_pcert_building_structural",
+      "claim_boundary": "This selected-file contract records acquisition and import-health expectations only. It does not attach the IFC file, compute its source checksum, approve redistribution, or prove solver-ready geometry/topology.",
+      "commercial_use_allowed": false,
+      "expected_import_health_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "expected_structural_classes_present": [
+          "IFCBEAM",
+          "IFCCOLUMN",
+          "IFCSLAB",
+          "IFCWALL"
+        ],
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_import_loss_policy": "fail_until_entity_scan_counts_and_unsupported_features_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Building-Structural.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-clean-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
+      "structural_family": "building_structural_ifc",
+      "truth_class": "geometry_and_import_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_pcert_building_structural.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_pcert_building_structural.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
+        "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "product_legal_license_review_pending",
+        "import_health_execution_missing",
+        "silent_import_loss_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_pcert_infra_bridge",
+      "claim_boundary": "This selected-file contract records acquisition and import-health expectations only. It does not attach the IFC file, compute its source checksum, approve redistribution, or prove solver-ready geometry/topology.",
+      "commercial_use_allowed": false,
+      "expected_import_health_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "expected_structural_classes_present": [
+          "IFCBEAM",
+          "IFCMEMBER",
+          "IFCSLAB"
+        ],
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_import_loss_policy": "fail_until_entity_scan_counts_and_unsupported_features_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Infra-Bridge.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-clean-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
+      "structural_family": "bridge_ifc",
+      "truth_class": "geometry_and_import_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_pcert_infra_bridge.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_pcert_infra_bridge.model_health_report.json"
+      ]
+    }
+  ],
+  "source_checksum_attached_count": 0,
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_file_acquired_count": 0,
+  "status": "blocked"
+}

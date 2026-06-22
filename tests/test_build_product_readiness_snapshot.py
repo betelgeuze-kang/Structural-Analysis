@@ -161,8 +161,10 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         github_actions_ci_streak=Path("github_actions_ci_streak_evidence.json"),
         ux_new_user_observation=Path("ux_new_user_observation_report.json"),
         license_status_closure=Path("license_status_closure_report.json"),
+        paid_pilot_scope_guard=Path("paid_pilot_scope_guard_report.json"),
         external_benchmark_submission_readiness=Path("external_benchmark_submission_readiness.json"),
         external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
+        phase3_release_control_cleanup_plan=Path("phase3_release_control_cleanup_plan.json"),
         self_hosted_runner_status=Path("github_actions_self_hosted_runner_status.json"),
         package_json=Path("package.json"),
         pyproject_toml=Path("pyproject.toml"),
@@ -175,6 +177,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "gap-closure-status.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"gaps.md": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
     })
@@ -182,15 +185,43 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "workstation-delivery-readiness.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"workstation_inputs.md": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "status": "ready",
+        "claim_boundary": {
+            "allowed": (
+                "workstation-based structural analysis/optimization deliverable "
+                "preparation with engineer review"
+            ),
+            "forbidden": [
+                "independent commercial structural analysis product",
+                "structural engineer replacement",
+                "full autonomous replacement",
+            ],
+        },
+        "gates": [
+            {"label": "Workstation hardware profile", "ok": True},
+            {"label": "Workstation service budget", "ok": True},
+            {
+                "label": "Delivery package manifest",
+                "ok": True,
+                "manifest_acceptance_reference_pass": True,
+                "required_sections": {"ACCEPTANCE_PACKET.md": True},
+            },
+            {"label": "Customer-open delivery viewer smoke", "ok": True},
+            {"label": "Viewer smoke and visual evidence", "ok": True},
+            {"label": "Client input validation report", "ok": True},
+            {"label": "Job reproducibility contract", "ok": True},
+            {"label": "Job retention and cleanup policy", "ok": True},
+        ],
         "blockers": [],
     })
     _write_json(tmp_path / "independent_product_readiness.json", {
         "schema_version": "independent-commercial-product-readiness.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"independent_inputs.md": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "independent_commercial_product_ready": True,
@@ -201,6 +232,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "github-actions-ci-streak-evidence.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"workflow_runs.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {
@@ -218,6 +250,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "g1-full-load-hip-newton-lane.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"g1_probes.json": "sha256:abc123"},
         "reused_evidence": False,
         "contract_pass": True,
         "status": "ready",
@@ -232,6 +265,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "ux-new-user-observation-report.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"ux_observation.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {
@@ -244,15 +278,37 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "license-status-closure-report.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"license_status.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {"status": "active"},
+        "blockers": [],
+    })
+    _write_json(tmp_path / "paid_pilot_scope_guard_report.json", {
+        "schema_version": "paid-pilot-scope-guard-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"scope.md": "sha256:123"},
+        "reused_evidence": True,
+        "contract_pass": True,
+        "reason_code": "PASS",
+        "checks": {
+            "all_required_scope_terms_present": True,
+            "commercial_v1_separate_validation_exclusions_present": True,
+            "commercial_v1_supported_scope_present": True,
+            "evidence_package_artifacts_present": True,
+            "no_prohibited_scope_claims_present": True,
+            "required_evidence_package_artifacts_green": True,
+            "scope_source_present": True,
+            "support_bundle_required_sections_present": True,
+        },
         "blockers": [],
     })
     _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
         "schema_version": "external-benchmark-submission-readiness.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"external_benchmark_queue.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {
@@ -265,6 +321,7 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "schema_version": "external-benchmark-submission-updates.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"external_benchmark_updates.json": "sha256:abc123"},
         "reused_evidence": False,
         "updates": {
             f"EB-{idx:03d}": {
@@ -274,6 +331,19 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
             }
             for idx in range(1, 5)
         },
+    })
+    _write_json(tmp_path / "phase3_release_control_cleanup_plan.json", {
+        "schema_version": "phase3-release-control-cleanup-plan.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "status": "ready",
+        "contract_pass": True,
+        "candidate_release_control_commit_set_count": 0,
+        "path_role_counts": {},
+        "recommended_action_counts": {},
+        "human_git_action_required": False,
+        "codex_commit_or_push_performed": False,
+        "claim_boundary": "No Phase 3 release-control cleanup is required for this fixture.",
     })
     _write_json(tmp_path / "package.json", {
         "name": "structural-optimization-workbench",
@@ -338,6 +408,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "schema_version": "pm-release-gate-report.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"pm_inputs.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "limited_commercial_release_ready": True,
@@ -357,6 +428,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "schema_version": "fresh-full-validation-lane-status.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"fresh_validation_inputs.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {
@@ -371,6 +443,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "schema_version": "customer-shadow-evidence-status.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"customer_shadow_inputs.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
@@ -381,6 +454,7 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
         "generated_at": "2026-06-21T00:00:00+00:00",
         "source_commit_sha": commit,
+        "input_checksums": {"g1_terminal_inputs.json": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
         "claim_boundary": (
@@ -546,11 +620,78 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["reused_evidence"] is False
     assert payload["evidence_fresh"] is True
     assert payload["paid_pilot_ready"] is True
+    assert payload["assisted_service_pilot_ready"] is True
+    assert payload["solver_product_pilot_ready"] is True
+    assert payload["limited_commercial_ready"] is True
     assert payload["independent_product_ready"] is True
     assert payload["ga_enterprise_ready"] is True
     assert payload["release_ready"] is True
     assert payload["blocker_count"] == 0
     assert payload["blockers"] == []
+    assert set(payload["root_blockers"]) == {
+        "release freshness/sync",
+        "CI runner/streak",
+        "human UX",
+        "license/legal",
+        "customer shadow",
+        "external benchmark",
+        "fresh validation",
+        "G1 solver",
+    }
+    assert set(payload["blocker_categories"]) == {
+        "numerical",
+        "benchmark",
+        "software product",
+        "future commercial",
+    }
+    assert all(
+        row["blocked"] is False and row["blocker_count"] == 0
+        for row in payload["blocker_categories"].values()
+    )
+
+
+def test_snapshot_separates_assisted_service_from_solver_product_gate(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
+        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": True,
+        "full_g1_closure_ready": False,
+        "full_g1_closure_blockers": ["full_load_gate_not_closed"],
+        "claim_boundary": "Terminal gate only; does not close full-mesh/full-load nonlinear equilibrium.",
+        "blockers": [],
+    })
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    g1_lane["status"] = "blocked"
+    g1_lane["contract_pass"] = False
+    g1_lane["checkpoint"] = {"load_scale": 0.656}
+    g1_lane["full_load_input_pass"] = False
+    g1_lane["child_gate_evidence"] = _g1_child_gate_evidence(ready=False)
+    g1_lane["blockers"] = ["checkpoint_load_scale_below_required_full_load"]
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert payload["components"]["assisted_service_pilot"]["ready"] is True
+    assert payload["assisted_service_pilot_ready"] is True
+    assert payload["solver_product_pilot_ready"] is False
+    assert payload["components"]["solver_product"]["g1_full_mesh_full_load_ready"] is False
+    assert payload["components"]["solver_product"]["g1_full_load_hip_newton_lane_ready"] is False
+    assert payload["root_blockers"]["G1 solver"]["blocked"] is True
+    assert "g1_full_mesh_full_load_not_closed" in payload["root_blockers"]["G1 solver"]["blockers"]
 
 
 def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
@@ -746,6 +887,39 @@ def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     ]
 
 
+def test_snapshot_blocks_missing_input_checksum_on_head_generation(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    ci_payload = json.loads(
+        (tmp_path / "github_actions_ci_streak_evidence.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    ci_payload.pop("input_checksums")
+    _write_json(tmp_path / "github_actions_ci_streak_evidence.json", ci_payload)
+    _commit_all(tmp_path, "evidence missing checksum")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    assert payload["status"] == "stale_or_inconsistent"
+    assert payload["evidence_fresh"] is False
+    assert (
+        "stale_or_inconsistent:input_checksum_missing:github_actions_ci_streak_evidence"
+        in payload["blockers"]
+    )
+    row = next(
+        row
+        for row in payload["state_consistency"]["metadata_rows"]
+        if row["artifact"] == "github_actions_ci_streak_evidence"
+    )
+    assert row["input_checksum_present"] is False
+
+
 def test_snapshot_accepts_dispatch_prompt_commit_as_receipt_boundary(
     tmp_path: Path,
 ) -> None:
@@ -856,10 +1030,86 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
     assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == [
         "solver_core.py",
     ]
+    cleanup_plan = payload["state_consistency"]["worktree"]["phase3_release_control_cleanup_plan"]
+    assert cleanup_plan == {
+        "path": "phase3_release_control_cleanup_plan.json",
+        "status": "ready",
+        "contract_pass": True,
+        "candidate_release_control_commit_set_count": 0,
+        "path_role_counts": {},
+        "recommended_action_counts": {},
+        "track_or_add_required_path_count": 0,
+        "resolve_or_commit_dirty_tracked_path_count": 0,
+        "human_git_action_required": False,
+        "codex_commit_or_push_performed": False,
+        "human_handoff_status": "",
+        "human_handoff_next_action": "",
+        "human_handoff_suggested_command_count": 0,
+        "human_handoff_push_or_release_command_included": False,
+        "claim_boundary": "No Phase 3 release-control cleanup is required for this fixture.",
+    }
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "receipt_only_commit"
     )
+
+
+def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path: Path) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _write_json(tmp_path / "phase3_release_control_cleanup_plan.json", {
+        "schema_version": "phase3-release-control-cleanup-plan.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": source_commit,
+        "status": "blocked",
+        "contract_pass": False,
+        "candidate_release_control_commit_set_count": 23,
+        "path_role_counts": {"generated_productization_evidence": 7},
+        "recommended_action_counts": {"track_generated_productization_evidence": 7},
+        "track_or_add_required_paths": ["phase3_seed_summary.json"],
+        "resolve_or_commit_dirty_tracked_paths": ["pyproject.toml"],
+        "human_git_action_required": True,
+        "codex_commit_or_push_performed": False,
+        "human_handoff": {
+            "status": "blocked_until_human_git_action",
+            "next_action": "owner_review_then_track_or_commit_required_inputs",
+            "suggested_local_command_args": [
+                ["git", "add", "--", "phase3_seed_summary.json"],
+                ["git", "add", "--", "pyproject.toml"],
+            ],
+            "push_or_release_command_included": False,
+        },
+        "claim_boundary": "Codex did not commit, push, release, or promote readiness.",
+    })
+    _commit_all(tmp_path, "receipt")
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+    )
+
+    cleanup_plan = payload["state_consistency"]["worktree"]["phase3_release_control_cleanup_plan"]
+    assert cleanup_plan["status"] == "blocked"
+    assert cleanup_plan["contract_pass"] is False
+    assert cleanup_plan["candidate_release_control_commit_set_count"] == 23
+    assert cleanup_plan["path_role_counts"] == {"generated_productization_evidence": 7}
+    assert cleanup_plan["recommended_action_counts"] == {
+        "track_generated_productization_evidence": 7
+    }
+    assert cleanup_plan["track_or_add_required_path_count"] == 1
+    assert cleanup_plan["resolve_or_commit_dirty_tracked_path_count"] == 1
+    assert cleanup_plan["human_git_action_required"] is True
+    assert cleanup_plan["codex_commit_or_push_performed"] is False
+    assert cleanup_plan["human_handoff_status"] == "blocked_until_human_git_action"
+    assert (
+        cleanup_plan["human_handoff_next_action"]
+        == "owner_review_then_track_or_commit_required_inputs"
+    )
+    assert cleanup_plan["human_handoff_suggested_command_count"] == 2
+    assert cleanup_plan["human_handoff_push_or_release_command_included"] is False
+    assert "Codex did not commit" in cleanup_plan["claim_boundary"]
 
 
 def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
@@ -1364,6 +1614,33 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
     assert "human_ux::observation_file_missing" in payload["blockers"]
     assert "license::license_status_not_active" in payload["blockers"]
     assert "external_benchmark::submission_receipts_pending=4" in payload["blockers"]
+    assert payload["blocker_categories"]["software product"]["blocked"] is True
+    assert "CI runner/streak" in payload["blocker_categories"]["software product"][
+        "root_streams"
+    ]
+    assert "human UX" in payload["blocker_categories"]["software product"][
+        "root_streams"
+    ]
+    assert (
+        "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing"
+        in payload["blocker_categories"]["software product"]["blockers"]
+    )
+    assert "human_ux::observation_file_missing" in payload["blocker_categories"][
+        "software product"
+    ]["blockers"]
+    assert "external benchmark" in payload["blocker_categories"]["benchmark"][
+        "root_streams"
+    ]
+    assert "external_benchmark::submission_receipts_pending=4" in payload[
+        "blocker_categories"
+    ]["benchmark"]["blockers"]
+    assert "license/legal" in payload["blocker_categories"]["future commercial"][
+        "root_streams"
+    ]
+    assert "license::license_status_not_active" in payload["blocker_categories"][
+        "future commercial"
+    ]["blockers"]
+    assert payload["blocker_categories"]["numerical"]["blocked"] is False
 
 
 def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:
@@ -1940,6 +2217,52 @@ def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
+        in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+
+
+def test_snapshot_blocks_g1_lane_when_hip_path_wired_but_gate_not_closed(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    g1_lane = json.loads(
+        (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    proof = _g1_hip_consistency_proof(ready=True)
+    proof["status"] = "partial"
+    proof["execution_mode"] = "hip_required_direct_probe_no_cpu_fallback"
+    proof["production_hip_residual_jacobian_path"] = True
+    proof["consistent_residual_jacobian_newton_gate_passed"] = False
+    proof["receipt_blockers"] = ["consistent_residual_jacobian_not_closed"]
+    proof["runtime_blockers"] = []
+    g1_lane["hip_consistency_proof"] = proof
+    g1_lane["blockers"] = []
+    g1_lane["contract_pass"] = True
+    g1_lane["status"] = "ready"
+    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    proof_summary = payload["components"]["g1"][
+        "full_load_hip_newton_hip_consistency_proof"
+    ]
+    assert proof_summary["production_hip_residual_jacobian_path"] is True
+    assert proof_summary["consistent_residual_jacobian_newton_gate_passed"] is False
+    assert proof_summary["ready"] is False
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_gate_not_passed"
+        in payload["blockers"]
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_has_blockers"
         in payload["blockers"]
     )
     assert payload["paid_pilot_ready"] is False

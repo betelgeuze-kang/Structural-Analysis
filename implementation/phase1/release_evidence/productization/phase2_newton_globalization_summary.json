@@ -1,0 +1,60 @@
+{
+  "actual": {
+    "displacement_m": 0.3930027389711051,
+    "final_increment_abs_m": 5.0450936265225813e-17,
+    "relative_residual": 2.842170943040401e-16,
+    "residual_kn": -2.842170943040401e-14
+  },
+  "analysis_type": "nonlinear_static_scalar_seed",
+  "artifacts": {
+    "related_scalar_load_step_summary": "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json",
+    "scalar_axial_result": "implementation/phase1/release_evidence/productization/phase2_newton_globalization_scalar_axial_result.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json"
+  },
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "mesh_load_step_nonlinear_convergence_suite_not_closed",
+    "sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "general_newton_jacobian_assembly_not_closed"
+  ],
+  "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+  "claim_boundary": "This proves a deterministic scalar nonlinear axial reference can be solved with explicit Newton-Raphson residual R=F_internal-F_external, consistent tangent stiffness, backtracking line-search globalization, and separate residual/increment convergence gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "displacement_gate_passed": true,
+  "engine_version": "1.0.0",
+  "errors": {
+    "displacement_abs_m": 2.942091015256665e-15
+  },
+  "expected": {
+    "displacement_m": 0.39300273897110216,
+    "increment_tolerance": 1e-12,
+    "residual_tolerance": 1e-10
+  },
+  "fallback_used": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-21T18:49:19.891593+00:00",
+  "globalization": "backtracking_line_search",
+  "increment_gate_passed": true,
+  "input_checksums": {
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:a9293e754702b41cdf5efd02e824ad300e3b3c7d102ea7a0920611fa09c2aef9"
+  },
+  "iteration_count": 7,
+  "line_search_step_count": 6,
+  "line_search_used": true,
+  "matrix_backend": "numpy_linalg_solve_scalar",
+  "nonlinear_newton_closure_claim": false,
+  "regularization_used": false,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "residual_gate_passed": true,
+  "schema_version": "phase2-newton-globalization-artifacts.v1",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "sparse_backend_used": false,
+  "status": "ready",
+  "tangent_gate_passed": true,
+  "truth_class": "analytic_truth"
+}

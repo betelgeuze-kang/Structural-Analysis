@@ -1,6 +1,8 @@
 {
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
+    "hip_consistency_proof_source_commit_sha_mismatch",
+    "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers",
     "hip_consistency_proof_runtime::dev_kfd_missing",
@@ -283,7 +285,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T11:58:22.760081+00:00",
+  "generated_at": "2026-06-21T13:43:39.392441+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -306,6 +308,13 @@
     "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
     "status": "partial"
   },
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:066df1a620dea86ad5fb4cd596aeeebecea767d38a679f5a6f275671df31d6a9",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:1a0723d57597d4afd757f8bbcbd9b3061730e4a4fe05b819007e73181137d624",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz": "sha256:83dca7fc4d3b0a79b8c4659f93cdc404ad3a0b30dbfe9d987f29f4d24fae67d2",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:d400fd848ae388b3829640a9c4af7c2f4de5c3cb532ef0afde76db282944e736"
+  },
   "load_path_provenance": {
     "context": {},
     "passed": true,
@@ -316,6 +325,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "aae41d5182c7ce4cfd3c15cdc1ce077251076096",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
   "status": "blocked"
 }

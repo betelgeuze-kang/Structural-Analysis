@@ -18,5 +18,7 @@
   ],
   "reproduce_bundle_id": "OWNER_INPUT_REQUIRED_REPRODUCE_BUNDLE_ID",
   "raw_data_retained_by_customer": true,
-  "redistribution_allowed": false
+  "redistribution_allowed": false,
+  "template_only": true,
+  "note": "Template only. Do not use as customer shadow evidence until populated from customer-retained completed-project review records."
 }

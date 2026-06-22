@@ -5,7 +5,7 @@
 This repository is operated from the Codex VS Code extension using the Codex goal feature.
 
 - Codex owns goal tracking, design, task slicing, review, verification planning, and final acceptance.
-- Cursor Agent auto mode and OpenCode worker may be used only as implementation workers for scoped local edits. The OpenCode wrapper default model is MiniMax M3 via registry id `opencode-go/minimax-m3`.
+- Cursor Agent auto mode and the OpenCode worker entrypoint may be used only as implementation workers for scoped local edits. Current OpenCode task assignment is routed to Cursor `composer-2.5`.
 - Human owner owns push, merge, deployment, release publication, production mutation, billing changes, and final accountability.
 
 ## Active Product Goal
@@ -25,7 +25,8 @@ Every G1-G10 and AI-G1-AI-G10 row must have authoritative evidence before it is 
 - For Cursor delegation, create a run-specific prompt file under `docs/ai/dispatch/` and call `./scripts/ai-worker-cursor.sh <prompt-file>`.
 - For OpenCode delegation, create a run-specific prompt file under `docs/ai/dispatch/` and call `./scripts/ai-worker-opencode.sh <prompt-file>`.
 - Prefer Cursor auto more actively for scoped implementation, focused edits, test-fix loops, and IDE-attached work where open files, selections, current UI state, or Cursor-specific tooling matter.
-- Prefer OpenCode worker on MiniMax M3 (`opencode-go/minimax-m3`) for large-context work, long logs/docs, broad repository sweeps, large diffs, and repeated implementation passes.
+- Route former OpenCode worker candidates through Cursor `composer-2.5` via `./scripts/ai-worker-opencode.sh`; do not expect that entrypoint to run OpenCode directly.
+- Current OpenCode task assignment is routed through `./scripts/ai-worker-opencode.sh` to Cursor `composer-2.5`; Codex still reviews the resulting diff and verification before acceptance.
 - Use workers sequentially, one scoped slice at a time.
 - Codex delegation tasks must stay short and include only goal, scope, candidate files, and verification criteria.
 - Treat a slice as a worker candidate when it is expected to involve 50+ LOC of implementation or mechanical edits, 3+ files, 10+ minutes of exploration, a broad grep/sweep, repeated test-fix cycles, or long logs/evidence/readiness-gate diagnosis.

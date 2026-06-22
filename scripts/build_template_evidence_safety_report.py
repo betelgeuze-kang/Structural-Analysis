@@ -31,6 +31,8 @@ PLACEHOLDER_MARKERS = (
     "TBD",
 )
 KNOWN_TEMPLATE_PROBES = {
+    "customer_shadow_evidence.template.json",
+    "fresh_validation_receipt.template.json",
     "license_status.template.json",
     "ux_new_user_observation.template.json",
     "independent_vv_attestation.template.json",
@@ -163,6 +165,54 @@ def _probe_ux_template(template_dir: Path) -> dict[str, Any]:
     }
 
 
+def _probe_customer_shadow_template(template_dir: Path) -> dict[str, Any]:
+    path = template_dir / "customer_shadow_evidence.template.json"
+    validator = _load_script_module(
+        "validate_customer_shadow_evidence",
+        Path("implementation/phase1/validate_customer_shadow_evidence.py"),
+    )
+    schema = _load_json(Path("implementation/phase1/customer_shadow_evidence.schema.json"))
+    report = validator.validate_payload(_load_json(path), schema)
+    blockers = [str(item) for item in report.get("blockers", [])]
+    expected = ["placeholder_marker_present"]
+    probe_pass = bool(not _reason_pass(report) and all(blocker in blockers for blocker in expected))
+    return {
+        "label": "customer_shadow_evidence_template_probe",
+        "template_path": str(path),
+        "contract_pass": probe_pass,
+        "validator_contract_pass": _reason_pass(report),
+        "expected_blockers_present": expected,
+        "observed_blockers": blockers,
+        "state": "template_rejected_as_customer_shadow_evidence" if probe_pass else "template_probe_failed",
+    }
+
+
+def _probe_fresh_validation_template(template_dir: Path) -> dict[str, Any]:
+    path = template_dir / "fresh_validation_receipt.template.json"
+    validator = _load_script_module(
+        "validate_fresh_validation_receipt",
+        Path("implementation/phase1/validate_fresh_validation_receipt.py"),
+    )
+    schema = _load_json(Path("implementation/phase1/fresh_validation_receipt.schema.json"))
+    report = validator.validate_payload(_load_json(path), schema)
+    blockers = [str(item) for item in report.get("blockers", [])]
+    expected = [
+        "fixed_value_mismatch:contract_pass",
+        "fixed_value_mismatch:reason_code",
+        "placeholder_marker_present",
+    ]
+    probe_pass = bool(not _reason_pass(report) and all(blocker in blockers for blocker in expected))
+    return {
+        "label": "fresh_validation_receipt_template_probe",
+        "template_path": str(path),
+        "contract_pass": probe_pass,
+        "validator_contract_pass": _reason_pass(report),
+        "expected_blockers_present": expected,
+        "observed_blockers": blockers,
+        "state": "template_rejected_as_fresh_validation_evidence" if probe_pass else "template_probe_failed",
+    }
+
+
 def _probe_ga_signoff_templates(template_dir: Path) -> list[dict[str, Any]]:
     module = _load_script_module(
         "build_ga_enterprise_signoff_intake_packet",
@@ -213,6 +263,8 @@ def _probe_ga_signoff_templates(template_dir: Path) -> list[dict[str, Any]]:
 
 def _validator_probes(template_dir: Path) -> list[dict[str, Any]]:
     return [
+        _probe_customer_shadow_template(template_dir),
+        _probe_fresh_validation_template(template_dir),
         _probe_license_template(template_dir),
         _probe_ux_template(template_dir),
         *_probe_ga_signoff_templates(template_dir),

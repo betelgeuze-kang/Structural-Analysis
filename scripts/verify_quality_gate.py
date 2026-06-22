@@ -78,6 +78,7 @@ def _command_groups(mode: str) -> list[list[str]]:
         return _pr_commands(p1_failure_mode="core")
     if mode == "release":
         return [
+            *_command_groups("full"),
             [
                 _python(),
                 "scripts/check_github_actions_runner_policy.py",
@@ -124,6 +125,17 @@ def _command_groups(mode: str) -> list[list[str]]:
             "--fail-below",
             "9.0",
         ],
+        [_python(), "scripts/build_developer_preview_readiness.py", "--check"],
+        [_python(), "scripts/build_phase1_core_api_contract_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_linear_reference_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_newton_globalization_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_nonlinear_load_step_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_material_newton_breadth_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_material_mesh_newton_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_patch_rigidbody_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_mesh_load_step_convergence_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase2_frame_shell_material_coupling_artifacts.py", "--check"],
+        [_python(), "scripts/build_phase3_benchmark_factory_artifacts.py", "--check"],
         [_python(), "scripts/check_workstation_delivery_readiness.py", "--json"],
         [_python(), "scripts/check_independent_product_readiness.py", "--json"],
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],

@@ -1,0 +1,84 @@
+{
+  "analysis_type": "nonlinear_static_scalar_load_step_seed",
+  "artifacts": {
+    "related_scalar_newton_globalization_summary": "implementation/phase1/release_evidence/productization/phase2_newton_globalization_summary.json",
+    "scalar_axial_partitions": "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_scalar_axial_partitions.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_nonlinear_load_step_summary.json"
+  },
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "mesh_load_step_nonlinear_convergence_suite_not_closed",
+    "sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "general_newton_jacobian_assembly_not_closed"
+  ],
+  "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+  "claim_boundary": "Deterministic scalar cubic-spring load-step partition convergence only. Each partition applies proportional load factors to the same reference case, continues from the previous accepted step displacement, and uses newton_raphson_scalar with F_internal_minus_F_external, consistent tangent, residual/increment gates, and backtracking line search. This does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, or production mesh load-step suites.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "expected_full_load_displacement_m": 0.39300273897110216,
+  "full_load_gate_passed": true,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-21T18:49:20.058653+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:a9293e754702b41cdf5efd02e824ad300e3b3c7d102ea7a0920611fa09c2aef9"
+  },
+  "max_partition_final_displacement_spread_m": 2.220446049250313e-16,
+  "nonlinear_newton_closure_claim": false,
+  "partition_spread_gate_passed": true,
+  "partition_step_counts": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "partition_summaries": [
+    {
+      "fallback_used": false,
+      "final_displacement_abs_error_m": 2.942091015256665e-15,
+      "final_displacement_m": 0.3930027389711051,
+      "partition_contract_pass": true,
+      "partition_step_count": 1,
+      "regularization_used": false,
+      "total_iteration_count": 7
+    },
+    {
+      "fallback_used": false,
+      "final_displacement_abs_error_m": 2.9976021664879227e-15,
+      "final_displacement_m": 0.39300273897110516,
+      "partition_contract_pass": true,
+      "partition_step_count": 2,
+      "regularization_used": false,
+      "total_iteration_count": 12
+    },
+    {
+      "fallback_used": false,
+      "final_displacement_abs_error_m": 3.164135620181696e-15,
+      "final_displacement_m": 0.3930027389711053,
+      "partition_contract_pass": true,
+      "partition_step_count": 4,
+      "regularization_used": false,
+      "total_iteration_count": 22
+    },
+    {
+      "fallback_used": false,
+      "final_displacement_abs_error_m": 2.942091015256665e-15,
+      "final_displacement_m": 0.3930027389711051,
+      "partition_contract_pass": true,
+      "partition_step_count": 8,
+      "regularization_used": false,
+      "total_iteration_count": 41
+    }
+  ],
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-nonlinear-load-step-artifacts.v1",
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "status": "ready",
+  "target_load_factor": 1.0,
+  "truth_class": "analytic_truth"
+}

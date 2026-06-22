@@ -1,0 +1,7 @@
+Goal: Advance Phase 2 deterministic solver closure by adding a narrow, honest tangent/Jacobian verification artifact for the canonical axial linear_static reference path.
+
+Scope: Inspect and, if low-risk, update only the Phase 2 axial linear_static artifact builder/tests and narrowly related solver metadata. Add evidence that the residual convention `R(u)=F_internal(u)-F_external` has a consistent tangent/Jacobian equal to the assembled dense stiffness for the axial reference case, preferably with finite-difference perturbation checks over free DOFs. Do not claim full G1 closure, nonlinear Newton closure, frame/shell/material coupling, sparse production backend, or GPU/HIP parity. Do not touch .env files or unrelated readiness artifacts.
+
+Candidate files: scripts/build_phase2_linear_reference_artifacts.py; tests/test_build_phase2_linear_reference_artifacts.py; src/structural_analysis/assembly/linear_static.py; src/structural_analysis/solvers/linear/static.py; implementation/phase1/release_evidence/productization/phase2_linear_reference_*.json.
+
+Verification criteria: Run focused pytest for Phase 2 artifacts and core API if changed, and `python3 scripts/build_phase2_linear_reference_artifacts.py --check`. The summary must keep `contract_pass: true`, `g1_closure_claim: false`, blockers visible, no regularization/fallback PASS, and any tangent/Jacobian evidence must be explicitly scoped to the narrow linear axial preview rather than Phase 2/G1 closure. Output only Changed files, Test results, Failed tests, Core diff summary, Blockers.

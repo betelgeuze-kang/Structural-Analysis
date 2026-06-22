@@ -869,7 +869,6 @@ def run_shell_material_rowcorr_budget_controller(
                 row_frontier_component_scale_mode
             ),
             "row_jacobian_mode": str(row_jacobian_mode),
-            "row_support_selection": str(row_support_selection),
             "row_fd_epsilon": float(row_fd_epsilon),
             "row_fd_max_support_columns": int(row_fd_max_support_columns),
             "row_batch_fd_replay": bool(row_batch_fd_replay),
@@ -978,7 +977,6 @@ def run_shell_material_rowcorr_budget_controller(
                 row_frontier_component_scale_mode
             ),
             "row_jacobian_mode": str(row_jacobian_mode),
-            "row_support_selection": str(row_support_selection),
             "row_fd_epsilon": float(row_fd_epsilon),
             "row_fd_max_support_columns": int(row_fd_max_support_columns),
             "row_batch_fd_replay": bool(row_batch_fd_replay),

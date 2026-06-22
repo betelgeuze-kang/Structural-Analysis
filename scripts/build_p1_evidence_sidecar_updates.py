@@ -29,6 +29,7 @@ from preflight_p1_evidence_sidecar_intake import (  # noqa: E402
     _reference_exists,
     build_preflight,
 )
+from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "p1-evidence-sidecar-intake.v1"
@@ -129,10 +130,11 @@ def _git_head(repo_root: Path) -> str:
         return ""
 
 
-def _metadata_fields(*, repo_root: Path, reused_evidence: bool) -> dict[str, Any]:
+def _metadata_fields(*, repo_root: Path, reused_evidence: bool, input_paths: list[Path]) -> dict[str, Any]:
     return {
         "source_commit_sha": _git_head(repo_root),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(input_paths, repo_root=repo_root),
         "reused_evidence": reused_evidence,
     }
 
@@ -284,7 +286,11 @@ def build_sidecars(
     external_payload = {
         "schema_version": "external-benchmark-submission-updates.v1",
         "generated_at": generated_at,
-        **_metadata_fields(repo_root=repo_root, reused_evidence=False),
+        **_metadata_fields(
+            repo_root=repo_root,
+            reused_evidence=False,
+            input_paths=[intake_manifest, *(path for path in (base_external_updates,) if path is not None)],
+        ),
         "evidence_basis": {
             "basis_kind": "p1_evidence_intake_manifest",
             "intake_manifest": str(intake_manifest),
@@ -299,7 +305,11 @@ def build_sidecars(
     residual_payload = {
         "schema_version": "residual-holdout-closure-updates.v1",
         "generated_at": generated_at,
-        **_metadata_fields(repo_root=repo_root, reused_evidence=False),
+        **_metadata_fields(
+            repo_root=repo_root,
+            reused_evidence=False,
+            input_paths=[intake_manifest, *(path for path in (base_residual_updates,) if path is not None)],
+        ),
         "evidence_basis": {
             "basis_kind": "p1_evidence_intake_manifest",
             "intake_manifest": str(intake_manifest),
@@ -332,7 +342,11 @@ def build_metadata_only_sidecars(
     external_payload = {
         "schema_version": "external-benchmark-submission-updates.v1",
         "generated_at": generated_at,
-        **_metadata_fields(repo_root=repo_root, reused_evidence=True),
+        **_metadata_fields(
+            repo_root=repo_root,
+            reused_evidence=True,
+            input_paths=[*(path for path in (base_external_updates,) if path is not None)],
+        ),
         "evidence_basis": {
             "basis_kind": "existing_sidecar_metadata_refresh",
             "base_external_updates": str(base_external_updates or ""),
@@ -347,7 +361,11 @@ def build_metadata_only_sidecars(
     residual_payload = {
         "schema_version": "residual-holdout-closure-updates.v1",
         "generated_at": generated_at,
-        **_metadata_fields(repo_root=repo_root, reused_evidence=True),
+        **_metadata_fields(
+            repo_root=repo_root,
+            reused_evidence=True,
+            input_paths=[*(path for path in (base_residual_updates,) if path is not None)],
+        ),
         "evidence_basis": {
             "basis_kind": "existing_sidecar_metadata_refresh",
             "base_residual_updates": str(base_residual_updates or ""),

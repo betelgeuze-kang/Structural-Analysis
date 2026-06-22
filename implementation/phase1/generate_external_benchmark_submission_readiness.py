@@ -8,9 +8,17 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
 
+SCRIPTS_DIR = Path(__file__).resolve().parents[2] / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+
+from release_evidence_metadata import input_checksums  # noqa: E402
+
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_RELEASE_GAP_REPORT = Path("implementation/phase1/release/release_gap_report.json")
 DEFAULT_COMMERCIAL_READINESS_REPORT = Path("implementation/phase1/commercial_readiness_report.json")
 DEFAULT_TPU_HFFB_BENCHMARK_REPORT = Path("implementation/phase1/open_data/wind/tpu_hffb_benchmark_gate_report.json")
@@ -62,7 +70,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parents[2],
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -752,6 +760,18 @@ def main() -> None:
             submission_updates_path and submission_updates_path.exists()
         ),
     }
+    payload["input_checksums"] = input_checksums(
+        [
+            Path(args.release_gap_report),
+            Path(args.commercial_readiness_report),
+            Path(args.tpu_hffb_benchmark_report),
+            Path(args.peer_spd_hinge_benchmark_report),
+            Path(args.peer_spd_hinge_fixture_regression_report),
+            Path(args.peer_spd_hinge_alignment_report),
+            *(path for path in (submission_updates_path,) if path is not None),
+        ],
+        repo_root=REPO_ROOT,
+    )
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")

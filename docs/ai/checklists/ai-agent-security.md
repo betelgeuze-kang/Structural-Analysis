@@ -5,11 +5,11 @@
 - [ ] Do not reveal secrets, tokens, passwords, private keys, cookies, or PII.
 - [ ] Keep `.env`, `.env.*`, `*.env`, and `*.env.*` unreadable to implementation agents; allow `.env.example` only.
 - [ ] Use prompt files for OpenCode handoff; do not pass full prompt bodies as argv.
-- [ ] Confirm OpenCode permission config denies external directory access.
+- [ ] If direct OpenCode mode is enabled, confirm OpenCode permission config denies external directory access.
 - [ ] Do not execute push/deploy/publish/release/migration/payment/cloud mutation without human approval.
 - [ ] Escalate permission changes, OAuth scope changes, service account changes, and production secrets to R3+.
 - [ ] Remember that `scripts/ai-dangerous-command-check.sh` is only a static wrapper-command check.
-- [ ] Enforce real execution boundaries with Codex sandbox settings, OpenCode permission config, scoped prompts, separate branches/worktrees when useful, and human gates.
+- [ ] Enforce real execution boundaries with Codex sandbox settings, Cursor/OpenCode permission config, scoped prompts, separate branches/worktrees when useful, and human gates.
 - [ ] Do not use `--dangerously-skip-permissions` for OpenCode worker runs.
 
 ## Prompt Handoff Safety

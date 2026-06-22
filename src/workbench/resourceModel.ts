@@ -29,6 +29,9 @@ export type ResourceMap = {
   benchmark: ResourceState
   committeeSummary: ResourceState
   committeeReport: ResourceState
+  developerPreview: ResourceState
+  coreApiResult: ResourceState
+  coreApiReport: ResourceState
   commercialWorkflowBreadth: ResourceState
   releaseGap: ResourceState
   registry: ResourceState
@@ -67,6 +70,9 @@ export function createInitialResources(): ResourceMap {
     benchmark: createResource(),
     committeeSummary: createResource(),
     committeeReport: createResource(),
+    developerPreview: createResource(),
+    coreApiResult: createResource(),
+    coreApiReport: createResource(),
     commercialWorkflowBreadth: createResource(),
     releaseGap: createResource(),
     registry: createResource(),

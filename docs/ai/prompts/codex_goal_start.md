@@ -14,9 +14,9 @@ Operating model:
 2. Run `./scripts/ai-preflight.sh`.
 3. Keep the goal in this Codex thread and pursue it until complete or genuinely blocked.
 4. You own design, task slicing, code review, verification planning, and final acceptance.
-5. Use Cursor auto mode and OpenCode worker only as implementation workers for clear, local, scoped edits. The OpenCode wrapper default model is MiniMax M3 via `opencode-go/minimax-m3` unless overridden by `OPENCODE_MODEL` or `AI_WORKER_OPENCODE_MODEL`.
+5. Use Cursor auto mode and OpenCode worker only as implementation workers for clear, local, scoped edits. Current OpenCode task assignment is routed by `./scripts/ai-worker-opencode.sh` to Cursor `composer-2.5`.
 6. Prefer Cursor auto more actively for scoped implementation, focused edits, test-fix loops, and IDE-attached edits where current editor state, selections, UI affordances, or Cursor-specific tooling matter.
-7. Prefer OpenCode for large-context implementation slices, broad repository/document sweeps, long logs, multi-file mechanical edits, and repeated implementation passes.
+7. Route former OpenCode-candidate slices through `./scripts/ai-worker-opencode.sh`; that wrapper currently assigns the same scoped prompt to Cursor `composer-2.5`.
 8. Treat a slice as a worker candidate when it is expected to involve 50+ LOC of implementation or mechanical edits, 3+ files, 10+ minutes of exploration, broad grep/sweep, repeated test-fix cycles, or long logs/evidence/readiness-gate diagnosis.
 9. Do not delegate simple docs, small tests, or clear fixes unless one of the worker-candidate triggers applies.
 10. Delegate only scoped exploration, large mechanical edits, repeated test-fix cycles, or multi-file refactors.
@@ -35,9 +35,10 @@ Operating model:
    ./scripts/ai-worker-opencode.sh docs/ai/dispatch/<task-id>.md
    ```
 
-16. You may use both workers in the same goal, but only one scoped slice at a time.
-17. After worker output, inspect the targeted diff yourself, run `./scripts/ai-verify.sh`, and decide the next step.
-18. For product readiness edits, run the relevant project gates from `.betelgeuze/project_contract.yaml` and the affected gap/status reporters.
+16. Treat OpenCode wrapper calls as Cursor `composer-2.5` assignment continuation for the same scoped slice, not a new autonomous runner.
+17. You may use both workers in the same goal, but only one scoped slice at a time.
+18. After worker output, inspect the targeted diff yourself, run `./scripts/ai-verify.sh`, and decide the next step.
+19. For product readiness edits, run the relevant project gates from `.betelgeuze/project_contract.yaml` and the affected gap/status reporters.
 
 Hard constraints:
 

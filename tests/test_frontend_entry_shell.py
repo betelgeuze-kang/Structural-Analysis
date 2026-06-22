@@ -34,6 +34,9 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "./implementation/phase1/release/committee_review/committee_review_dashboard.html" in app_tsx
     assert "./implementation/phase1/release/committee_review/committee_summary.json" in app_tsx
     assert "./implementation/phase1/release/committee_review/committee_review_package_report.json" in app_tsx
+    assert "./implementation/phase1/release_evidence/productization/developer_preview_readiness.json" in app_tsx
+    assert "./implementation/phase1/release_evidence/productization/phase1_core_api_model_health_result.json" in app_tsx
+    assert "./implementation/phase1/release_evidence/productization/phase1_core_api_model_health_report.json" in app_tsx
     assert "./implementation/phase1/release/commercial_workflow_breadth_report.json" in app_tsx
     assert "./implementation/phase1/release/release_gap_report.json" in app_tsx
     assert "./implementation/phase1/release/project_registry.json" in app_tsx
@@ -80,6 +83,19 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "authoringLocalRuntimeScenarioDepth: ResourceState" in resource_model
     assert "authoringLocalVariantWritebackTrace: ResourceState" in resource_model
     assert "authoringWritebackBreadth: ResourceState" in resource_model
+    assert "developerPreview: ResourceState" in resource_model
+    assert "coreApiResult: ResourceState" in resource_model
+    assert "coreApiReport: ResourceState" in resource_model
+    assert "function buildDeveloperPreviewSnapshot" in app_tsx
+    assert "Open Benchmark Developer Preview" in app_tsx
+    assert "Open Developer Preview readiness JSON" in app_tsx
+    assert "function buildCoreApiContractSnapshot" in app_tsx
+    assert "Phase 1 Core API Contract" in app_tsx
+    assert "Open Core API result JSON" in app_tsx
+    assert "Open Core API validation report JSON" in app_tsx
+    assert "resources.coreApiResult.source" in app_tsx
+    assert "resources.coreApiReport.source" in app_tsx
+    assert "external approval receipt" in app_tsx
     assert "function buildAuthoringRuntimeSubmissionLaneSnapshot" in app_tsx
     assert "function buildAuthoringRuntimeWritebackDepthSnapshot" in app_tsx
     assert "function buildAuthoringMultiProjectRuntimeWritebackSnapshot" in app_tsx

@@ -1,0 +1,505 @@
+{
+  "artifacts": {
+    "dataset_license_manifest": "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json",
+    "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
+  },
+  "blocker_count": 63,
+  "blockers": [
+    "g1::full_load_gate_not_closed",
+    "g1::full_mesh_nonlinear_equilibrium_not_closed",
+    "g1::material_newton_breadth_not_closed",
+    "g1::production_rocm_hip_residency_not_closed",
+    "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+    "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
+    "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+    "g1_full_load_lane::child_direct_residual_gate_not_proven",
+    "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
+    "g1_full_load_lane::child_fallback_zero_not_proven",
+    "g1_full_load_lane::child_full_load_closure_not_proven",
+    "g1_full_load_lane::child_global_krylov_component_missing",
+    "g1_full_load_lane::child_material_newton_breadth_not_proven",
+    "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
+    "g1_full_load_lane::child_relative_increment_gate_not_proven",
+    "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
+    "g1_full_load_lane::full_load_input_not_pass",
+    "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+    "g1_full_load_lane::hip_consistency_proof_has_blockers",
+    "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
+    "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
+    "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+    "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+    "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
+    "g1_full_load_lane::observed_load_scale_below_required_full_load",
+    "g1_full_mesh_full_load_not_closed",
+    "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
+    "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
+    "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:peer_spd_hinge",
+    "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:tpu_hffb",
+    "independent_product::Strict external and residual holdout evidence::external_submission_receipts_pending",
+    "independent_product::Strict external and residual holdout evidence::residual_holdout_closure_pending",
+    "dataset_license_manifest:authoritative_source_checksums_pending=4",
+    "dataset_license_manifest:expected_outputs_pending",
+    "dataset_license_manifest:license_or_redistribution_review_pending",
+    "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+    "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+    "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+    "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+    "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+    "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+    "fresh_full_validation::row_contract_pass_count_below_lane_count",
+    "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
+    "fresh_full_validation::row_pass_count_below_lane_count",
+    "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing",
+    "human_ux::approval_decision_not_accepted",
+    "human_ux::blocking_usability_issue_present",
+    "human_ux::completion_minutes_missing",
+    "human_ux::contract_signal_not_pass",
+    "human_ux::new_to_product_not_confirmed",
+    "human_ux::observation_file_missing",
+    "human_ux::participant_not_new_user",
+    "human_ux::required_fields_missing",
+    "pm_release::github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
+    "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+    "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
+    "pm_release::github_sync::github_sync_preflight_not_synced",
+    "pm_release::github_sync::github_sync_remote_sync_pending",
+    "pm_release::security::license_status_not_configured",
+    "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+    "pm_release::ux::human_new_user_observation_missing_or_failed",
+    "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+    "stale_or_inconsistent:worktree_dirty"
+  ],
+  "categories": {
+    "benchmark": {
+      "blocked": true,
+      "blocker_count": 13,
+      "blockers": [
+        "dataset_license_manifest:authoritative_source_checksums_pending=4",
+        "dataset_license_manifest:expected_outputs_pending",
+        "dataset_license_manifest:license_or_redistribution_review_pending",
+        "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+        "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+        "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+        "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+        "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+        "fresh_full_validation::row_contract_pass_count_below_lane_count",
+        "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
+        "fresh_full_validation::row_pass_count_below_lane_count",
+        "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing"
+      ]
+    },
+    "future commercial": {
+      "blocked": true,
+      "blocker_count": 23,
+      "blockers": [
+        "ci_streak::nightly::github_actions_query_failed",
+        "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
+        "ci_streak::pr::github_actions_query_failed",
+        "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
+        "customer_shadow::completed_evidence_row_count_below_minimum",
+        "customer_shadow::completed_shadow_case_count_below_minimum",
+        "customer_shadow::evidence_row_count_below_minimum",
+        "external_benchmark::submission_receipts_pending=4",
+        "external_benchmark::submission_update_receipts_below_queue_count",
+        "external_benchmark::submission_updates_reused_evidence_not_fresh",
+        "license::license_approval_reference_missing",
+        "license::license_approved_at_missing",
+        "license::license_approver_role_missing",
+        "license::license_evidence_ref_missing",
+        "license::license_expiry_missing_or_invalid",
+        "license::license_id_missing",
+        "license::license_issuer_or_approver_missing",
+        "license::license_product_scope_missing",
+        "license::license_status_not_active",
+        "license::license_tier_missing",
+        "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
+      ]
+    },
+    "numerical": {
+      "blocked": true,
+      "blocker_count": 32,
+      "blockers": [
+        "g1::full_load_gate_not_closed",
+        "g1::full_mesh_nonlinear_equilibrium_not_closed",
+        "g1::material_newton_breadth_not_closed",
+        "g1::production_rocm_hip_residency_not_closed",
+        "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+        "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
+        "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+        "g1_full_load_lane::child_direct_residual_gate_not_proven",
+        "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
+        "g1_full_load_lane::child_fallback_zero_not_proven",
+        "g1_full_load_lane::child_full_load_closure_not_proven",
+        "g1_full_load_lane::child_global_krylov_component_missing",
+        "g1_full_load_lane::child_material_newton_breadth_not_proven",
+        "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
+        "g1_full_load_lane::child_relative_increment_gate_not_proven",
+        "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
+        "g1_full_load_lane::full_load_input_not_pass",
+        "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+        "g1_full_load_lane::hip_consistency_proof_has_blockers",
+        "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
+        "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+        "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
+        "g1_full_load_lane::observed_load_scale_below_required_full_load",
+        "g1_full_mesh_full_load_not_closed",
+        "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
+        "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
+        "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:peer_spd_hinge",
+        "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:tpu_hffb",
+        "independent_product::Strict external and residual holdout evidence::external_submission_receipts_pending",
+        "independent_product::Strict external and residual holdout evidence::residual_holdout_closure_pending"
+      ]
+    },
+    "software product": {
+      "blocked": true,
+      "blocker_count": 18,
+      "blockers": [
+        "human_ux::approval_decision_not_accepted",
+        "human_ux::blocking_usability_issue_present",
+        "human_ux::completion_minutes_missing",
+        "human_ux::contract_signal_not_pass",
+        "human_ux::new_to_product_not_confirmed",
+        "human_ux::observation_file_missing",
+        "human_ux::participant_not_new_user",
+        "human_ux::required_fields_missing",
+        "pm_release::github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
+        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
+        "pm_release::github_sync::github_sync_preflight_not_synced",
+        "pm_release::github_sync::github_sync_remote_sync_pending",
+        "pm_release::security::license_status_not_configured",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+        "stale_or_inconsistent:worktree_dirty"
+      ]
+    }
+  },
+  "claim_boundary": "Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers but do not block Developer Preview.",
+  "commercial_release_ready": false,
+  "dataset_license_manifest": {
+    "blockers": [
+      "dataset_license_manifest:authoritative_source_checksums_pending=4",
+      "dataset_license_manifest:license_or_redistribution_review_pending",
+      "dataset_license_manifest:expected_outputs_pending"
+    ],
+    "contract_pass": false,
+    "dataset_count": 5,
+    "path": "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json",
+    "status": "blocked"
+  },
+  "developer_preview_ready": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "future_commercial_blocker_count": 23,
+  "future_commercial_blockers": [
+    "ci_streak::nightly::github_actions_query_failed",
+    "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
+    "ci_streak::pr::github_actions_query_failed",
+    "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
+    "customer_shadow::completed_evidence_row_count_below_minimum",
+    "customer_shadow::completed_shadow_case_count_below_minimum",
+    "customer_shadow::evidence_row_count_below_minimum",
+    "external_benchmark::submission_receipts_pending=4",
+    "external_benchmark::submission_update_receipts_below_queue_count",
+    "external_benchmark::submission_updates_reused_evidence_not_fresh",
+    "license::license_approval_reference_missing",
+    "license::license_approved_at_missing",
+    "license::license_approver_role_missing",
+    "license::license_evidence_ref_missing",
+    "license::license_expiry_missing_or_invalid",
+    "license::license_id_missing",
+    "license::license_issuer_or_approver_missing",
+    "license::license_product_scope_missing",
+    "license::license_status_not_active",
+    "license::license_tier_missing",
+    "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+    "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
+  ],
+  "generated_at": "2026-06-21T22:01:07.138632+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:bb5385985b7d71b33f0774add496494bfdcab63bcfcc856a31b08cc7171bff7a",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:d65577dfd0948c8d6967908064f129bf1dd7df5f02fc749316bbfac11f2311f7"
+  },
+  "product_snapshot_schema_version": "product-readiness-snapshot.v1",
+  "product_snapshot_status": "stale_or_inconsistent",
+  "reason_code": "ERR_DEVELOPER_PREVIEW_BLOCKED",
+  "reused_evidence": false,
+  "root_blocker_evidence": {
+    "phase3_release_control_cleanup_plan": {
+      "candidate_release_control_commit_set_count": 45,
+      "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
+      "codex_commit_or_push_performed": false,
+      "contract_pass": false,
+      "human_git_action_required": true,
+      "human_handoff_next_action": "owner_review_then_track_or_commit_required_inputs",
+      "human_handoff_push_or_release_command_included": false,
+      "human_handoff_status": "blocked_until_human_git_action",
+      "human_handoff_suggested_command_count": 6,
+      "path": "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
+      "path_role_counts": {
+        "focused_test": 13,
+        "generated_productization_evidence": 14,
+        "package_config_core_package": 3,
+        "reproduction_build_script": 14,
+        "source_input_report": 1
+      },
+      "recommended_action_counts": {
+        "resolve_or_commit_dirty_tracked_input": 2,
+        "track_focused_regression_test": 13,
+        "track_generated_productization_evidence": 14,
+        "track_package_config_or_core_package": 2,
+        "track_reproduction_builder_or_runner": 13,
+        "track_source_input_or_report": 1
+      },
+      "resolve_or_commit_dirty_tracked_path_count": 2,
+      "status": "blocked",
+      "track_or_add_required_path_count": 43
+    },
+    "product_snapshot_root_blockers": {
+      "CI runner/streak": {
+        "blocked": true,
+        "blocker_count": 7,
+        "blockers": [
+          "ci_streak::nightly::github_actions_query_failed",
+          "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
+          "ci_streak::pr::github_actions_query_failed",
+          "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
+          "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+          "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
+        ]
+      },
+      "G1 solver": {
+        "blocked": true,
+        "blocker_count": 25,
+        "blockers": [
+          "g1::full_load_gate_not_closed",
+          "g1::full_mesh_nonlinear_equilibrium_not_closed",
+          "g1::material_newton_breadth_not_closed",
+          "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+          "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
+          "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+          "g1_full_load_lane::child_direct_residual_gate_not_proven",
+          "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
+          "g1_full_load_lane::child_fallback_zero_not_proven",
+          "g1_full_load_lane::child_full_load_closure_not_proven",
+          "g1_full_load_lane::child_global_krylov_component_missing",
+          "g1_full_load_lane::child_material_newton_breadth_not_proven",
+          "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
+          "g1_full_load_lane::child_relative_increment_gate_not_proven",
+          "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready",
+          "g1_full_load_lane::full_load_input_not_pass",
+          "g1_full_load_lane::hip_consistency_proof_gate_not_passed",
+          "g1_full_load_lane::hip_consistency_proof_has_blockers",
+          "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
+          "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
+          "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+          "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
+          "g1_full_load_lane::observed_load_scale_below_required_full_load",
+          "g1_full_mesh_full_load_not_closed"
+        ]
+      },
+      "customer shadow": {
+        "blocked": true,
+        "blocker_count": 3,
+        "blockers": [
+          "customer_shadow::completed_evidence_row_count_below_minimum",
+          "customer_shadow::completed_shadow_case_count_below_minimum",
+          "customer_shadow::evidence_row_count_below_minimum"
+        ]
+      },
+      "external benchmark": {
+        "blocked": true,
+        "blocker_count": 8,
+        "blockers": [
+          "external_benchmark::submission_receipts_pending=4",
+          "external_benchmark::submission_update_receipts_below_queue_count",
+          "external_benchmark::submission_updates_reused_evidence_not_fresh",
+          "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:hardest_external_10case",
+          "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:korean_public_structures",
+          "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:peer_spd_hinge",
+          "independent_product::Strict external and residual holdout evidence::external_receipt_or_closure_pending:tpu_hffb",
+          "independent_product::Strict external and residual holdout evidence::external_submission_receipts_pending"
+        ]
+      },
+      "fresh validation": {
+        "blocked": true,
+        "blocker_count": 10,
+        "blockers": [
+          "fresh_full_validation::commercial_benchmark_torch::fresh_validation_receipt_missing",
+          "fresh_full_validation::external_benchmark_refresh::fresh_validation_receipt_missing",
+          "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing",
+          "fresh_full_validation::midas_exact_refresh::fresh_validation_receipt_missing",
+          "fresh_full_validation::performance_profile::fresh_validation_receipt_missing",
+          "fresh_full_validation::productization_heavy_profile::fresh_validation_receipt_missing",
+          "fresh_full_validation::row_contract_pass_count_below_lane_count",
+          "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
+          "fresh_full_validation::row_pass_count_below_lane_count",
+          "fresh_full_validation::surface_material_contact::fresh_validation_receipt_missing"
+        ]
+      },
+      "human UX": {
+        "blocked": true,
+        "blocker_count": 10,
+        "blockers": [
+          "human_ux::approval_decision_not_accepted",
+          "human_ux::blocking_usability_issue_present",
+          "human_ux::completion_minutes_missing",
+          "human_ux::contract_signal_not_pass",
+          "human_ux::new_to_product_not_confirmed",
+          "human_ux::observation_file_missing",
+          "human_ux::participant_not_new_user",
+          "human_ux::required_fields_missing",
+          "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+          "pm_release::ux::human_new_user_observation_missing_or_failed"
+        ]
+      },
+      "license/legal": {
+        "blocked": true,
+        "blocker_count": 11,
+        "blockers": [
+          "license::license_approval_reference_missing",
+          "license::license_approved_at_missing",
+          "license::license_approver_role_missing",
+          "license::license_evidence_ref_missing",
+          "license::license_expiry_missing_or_invalid",
+          "license::license_id_missing",
+          "license::license_issuer_or_approver_missing",
+          "license::license_product_scope_missing",
+          "license::license_status_not_active",
+          "license::license_tier_missing",
+          "pm_release::security::license_status_not_configured"
+        ]
+      },
+      "release freshness/sync": {
+        "blocked": true,
+        "blocker_count": 9,
+        "blockers": [
+          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
+          "independent_product::Strict external and residual holdout evidence::residual_holdout_closure_pending",
+          "pm_release::github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
+          "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+          "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
+          "pm_release::github_sync::github_sync_preflight_not_synced",
+          "pm_release::github_sync::github_sync_remote_sync_pending",
+          "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
+          "stale_or_inconsistent:worktree_dirty"
+        ]
+      }
+    }
+  },
+  "schema_version": "developer-preview-readiness.v1",
+  "scope": {
+    "excluded": [
+      "permit or code-compliance automation",
+      "structural engineer replacement",
+      "customer SLA or production support commitment",
+      "multi-tenant SaaS, account, permission, or license-server operation",
+      "customer shadow evidence as a Developer Preview blocker",
+      "product/legal commercial license approval as a Developer Preview blocker",
+      "30-run commercial CI streak or external approval receipts as Developer Preview blockers",
+      "AI/GNN predictions as independent truth before deterministic solver closure"
+    ],
+    "freeze_policy": {
+      "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+      "gpu_hip": "performance_track_after_cpu_reference_parity",
+      "new_feature_development": "frozen_until_developer_preview_baseline_is_clean"
+    },
+    "included": [
+      "IFC/MGT/neutral JSON import for public or locally acquired benchmark models",
+      "linear static, modal, buckling, and validated bounded nonlinear static paths",
+      "residual, reaction, energy, provenance, and reproducibility audit reports",
+      "Open benchmark scorecards and commercial-tool comparison imports",
+      "local desktop/web GUI review workflow for benchmark evidence"
+    ],
+    "product_name": "Structural Analysis Open Benchmark Developer Preview"
+  },
+  "scope_boundary_sync": {
+    "claim_boundary": "This receipt checks that Developer Preview scope and exclusions remain visible in README/current-state docs and that the GUI consumes the generated readiness scope instead of relying only on hardcoded Commercial Release wording.",
+    "contract_pass": true,
+    "doc_surfaces": {
+      "README.md": {
+        "contract_pass": true,
+        "excluded_scope_anchor_count": 5,
+        "excluded_scope_anchor_total": 5,
+        "excluded_scope_anchors": {
+          "ai_gnn_truth_claim": true,
+          "commercial_sla": true,
+          "engineer_replacement": true,
+          "permit_automation": true,
+          "saas_account_license_server": true
+        },
+        "future_commercial_boundary_anchor_count": 5,
+        "future_commercial_boundary_anchor_total": 5,
+        "future_commercial_boundary_anchors": {
+          "ci_streak": true,
+          "commercial_sla": true,
+          "customer_shadow": true,
+          "external_approval_receipt": true,
+          "license_approval": true
+        },
+        "included_scope_anchor_count": 4,
+        "included_scope_anchor_total": 4,
+        "included_scope_anchors": {
+          "benchmark_scorecard": true,
+          "deterministic_analysis_reporting": true,
+          "local_gui_review": true,
+          "public_open_benchmark_import": true
+        },
+        "present": true
+      },
+      "docs/commercialization-gap-current-state.md": {
+        "contract_pass": true,
+        "excluded_scope_anchor_count": 5,
+        "excluded_scope_anchor_total": 5,
+        "excluded_scope_anchors": {
+          "ai_gnn_truth_claim": true,
+          "commercial_sla": true,
+          "engineer_replacement": true,
+          "permit_automation": true,
+          "saas_account_license_server": true
+        },
+        "future_commercial_boundary_anchor_count": 5,
+        "future_commercial_boundary_anchor_total": 5,
+        "future_commercial_boundary_anchors": {
+          "ci_streak": true,
+          "commercial_sla": true,
+          "customer_shadow": true,
+          "external_approval_receipt": true,
+          "license_approval": true
+        },
+        "included_scope_anchor_count": 4,
+        "included_scope_anchor_total": 4,
+        "included_scope_anchors": {
+          "benchmark_scorecard": true,
+          "deterministic_analysis_reporting": true,
+          "local_gui_review": true,
+          "public_open_benchmark_import": true
+        },
+        "present": true
+      }
+    },
+    "gui_surface": {
+      "consumes_excluded_scope": true,
+      "consumes_included_scope": true,
+      "consumes_scope_record": true,
+      "contract_pass": true,
+      "future_commercial_boundary_present": true,
+      "path": "src/App.tsx",
+      "present": true,
+      "renders_exclusion_summary": true,
+      "renders_scope_summary": true
+    },
+    "status": "ready"
+  },
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "status": "blocked"
+}

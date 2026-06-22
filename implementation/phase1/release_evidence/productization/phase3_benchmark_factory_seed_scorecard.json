@@ -1,0 +1,884 @@
+{
+  "case_count": 26,
+  "claim_boundary": "This scorecard proves deterministic generated analytic-small and element-patch seed runners only. It does not close OpenSees, buildingSMART IFC, commercial cross-solver, large-model, or full Phase 3 quantity gates.",
+  "contract_pass": true,
+  "lanes": [
+    "analytic-small",
+    "element-patch"
+  ],
+  "pass_count": 26,
+  "rows": [
+    {
+      "actual_outputs": {
+        "base_reaction": -10.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.01,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e1_load_10",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "input_checksum": "sha256:236615a9bee5ccdeb0b13ccb439630c6236a2abec29e5aaa4b30aabf2cd88928",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:236615a9bee5ccdeb0b13ccb439630c6236a2abec29e5aaa4b30aabf2cd88928",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -25.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.025,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e1_load_25",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "input_checksum": "sha256:59967e5b46145a118552c2ff8f6973f0c9888287a5a5a6090821841e0d27c451",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:59967e5b46145a118552c2ff8f6973f0c9888287a5a5a6090821841e0d27c451",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -50.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.05,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e1_load_50",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "input_checksum": "sha256:85acb650a11dbfebd4dd6c7e4fb6bdd457c20cb728ffb08de3052ae0d96cc662",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:85acb650a11dbfebd4dd6c7e4fb6bdd457c20cb728ffb08de3052ae0d96cc662",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -75.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.075,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e1_load_75",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "input_checksum": "sha256:467adf73413585bd49f57da395ffdc0d31fb1d44909a0e41879dd8dce414f70e",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:467adf73413585bd49f57da395ffdc0d31fb1d44909a0e41879dd8dce414f70e",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -100.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.1,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e1_load_100",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "input_checksum": "sha256:9bf9e4d86d15fa95d6de81150661db8ee4bcf96524085c774dcf267a8a263138",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:9bf9e4d86d15fa95d6de81150661db8ee4bcf96524085c774dcf267a8a263138",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -10.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.01,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e2_load_10",
+      "contract_pass": true,
+      "element_count": 2,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "input_checksum": "sha256:264c9953ed07cb3e552a5264ea78f986d4dc03bdba361a6d1cbb96974776f951",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:264c9953ed07cb3e552a5264ea78f986d4dc03bdba361a6d1cbb96974776f951",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 3,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -25.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.025,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e2_load_25",
+      "contract_pass": true,
+      "element_count": 2,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "input_checksum": "sha256:9725e55656d4810e11b943a81608e1c5aa5e3ece2d765dec16aa1274ad21d2d6",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:9725e55656d4810e11b943a81608e1c5aa5e3ece2d765dec16aa1274ad21d2d6",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 3,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -50.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.05,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e2_load_50",
+      "contract_pass": true,
+      "element_count": 2,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "input_checksum": "sha256:937f50101e9a978bc94e84c4b3b8d0b72e514719945ece6ebd913d29ca424692",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:937f50101e9a978bc94e84c4b3b8d0b72e514719945ece6ebd913d29ca424692",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 3,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -75.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.075,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e2_load_75",
+      "contract_pass": true,
+      "element_count": 2,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "input_checksum": "sha256:ec1fec2d47df57a9c6bd52f84b3542494fbe23f56474a4e6ad3a994e7354bb59",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:ec1fec2d47df57a9c6bd52f84b3542494fbe23f56474a4e6ad3a994e7354bb59",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 3,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -100.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.1,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e2_load_100",
+      "contract_pass": true,
+      "element_count": 2,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "input_checksum": "sha256:9d66a05b166fbc20162c5c6c4cb9ecaf9daa59386cbc0bff9e519547c73dd3f5",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:9d66a05b166fbc20162c5c6c4cb9ecaf9daa59386cbc0bff9e519547c73dd3f5",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 3,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -10.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.01,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e3_load_10",
+      "contract_pass": true,
+      "element_count": 3,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "input_checksum": "sha256:2c67bc8733e1d5ae346923cdf2e5c21c2a0057dd0cf1c8992f4243de678ad4e7",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:2c67bc8733e1d5ae346923cdf2e5c21c2a0057dd0cf1c8992f4243de678ad4e7",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 4,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -24.999999999999993,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.025,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e3_load_25",
+      "contract_pass": true,
+      "element_count": 3,
+      "errors": {
+        "base_reaction_abs": 7.105427357601002e-15,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "input_checksum": "sha256:b852d4175780ebba74779287b7bea65c303bee5763306ca01829b72ef82bd31f",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:b852d4175780ebba74779287b7bea65c303bee5763306ca01829b72ef82bd31f",
+      "metrics": {
+        "energy_balance_error": 1.1102230246251565e-16,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 2.842170943040401e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 4,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -49.999999999999986,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.05,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e3_load_50",
+      "contract_pass": true,
+      "element_count": 3,
+      "errors": {
+        "base_reaction_abs": 1.4210854715202004e-14,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "input_checksum": "sha256:9ad49288e458b5517c7277f7b2773f73a86c9a29540ad62565513077e97e4b1b",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:9ad49288e458b5517c7277f7b2773f73a86c9a29540ad62565513077e97e4b1b",
+      "metrics": {
+        "energy_balance_error": 4.440892098500626e-16,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 2.842170943040401e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 4,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -75.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.075,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e3_load_75",
+      "contract_pass": true,
+      "element_count": 3,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "input_checksum": "sha256:8f2a5d9f658705a64dd847cd34da4e5ca9b70b357adb3b6d2a8ff459b74a5e4e",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:8f2a5d9f658705a64dd847cd34da4e5ca9b70b357adb3b6d2a8ff459b74a5e4e",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 4,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -99.99999999999997,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.1,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e3_load_100",
+      "contract_pass": true,
+      "element_count": 3,
+      "errors": {
+        "base_reaction_abs": 2.842170943040401e-14,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "input_checksum": "sha256:d815cf15805faa22913395203c6320fcaee72bacd7c7969c9f0b18576734275c",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:d815cf15805faa22913395203c6320fcaee72bacd7c7969c9f0b18576734275c",
+      "metrics": {
+        "energy_balance_error": 1.7763568394002505e-15,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 2.842170943040401e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 4,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -9.999999999999993,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.009999999999999995,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e4_load_10",
+      "contract_pass": true,
+      "element_count": 4,
+      "errors": {
+        "base_reaction_abs": 7.105427357601002e-15,
+        "tip_displacement_abs": 5.204170427930421e-18
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -10.0,
+        "tip_ux": 0.01
+      },
+      "input_checksum": "sha256:67474bfa3f4bc1bde4a4450ce185708b3c998a533d9a8e0e2ab105f8ec299479",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:67474bfa3f4bc1bde4a4450ce185708b3c998a533d9a8e0e2ab105f8ec299479",
+      "metrics": {
+        "energy_balance_error": 2.0816681711721685e-17,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 3.552713678800501e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 5,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -24.999999999999986,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.024999999999999988,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e4_load_25",
+      "contract_pass": true,
+      "element_count": 4,
+      "errors": {
+        "base_reaction_abs": 1.4210854715202004e-14,
+        "tip_displacement_abs": 1.3877787807814457e-17
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -25.0,
+        "tip_ux": 0.025
+      },
+      "input_checksum": "sha256:f64e8591c304fefe73c018a09b9354352bcb7dfa9d105914f6e016b0a49eb973",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:f64e8591c304fefe73c018a09b9354352bcb7dfa9d105914f6e016b0a49eb973",
+      "metrics": {
+        "energy_balance_error": 1.6653345369377348e-16,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 5.684341886080802e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 5,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -49.99999999999997,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.049999999999999975,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e4_load_50",
+      "contract_pass": true,
+      "element_count": 4,
+      "errors": {
+        "base_reaction_abs": 2.842170943040401e-14,
+        "tip_displacement_abs": 2.7755575615628914e-17
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -50.0,
+        "tip_ux": 0.05
+      },
+      "input_checksum": "sha256:f1292459267401696aafb9b922a22a706806d211d11159746c15fc29a812ff76",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:f1292459267401696aafb9b922a22a706806d211d11159746c15fc29a812ff76",
+      "metrics": {
+        "energy_balance_error": 6.661338147750939e-16,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 5.684341886080802e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 5,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -74.99999999999996,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.07499999999999997,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e4_load_75",
+      "contract_pass": true,
+      "element_count": 4,
+      "errors": {
+        "base_reaction_abs": 4.263256414560601e-14,
+        "tip_displacement_abs": 2.7755575615628914e-17
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -75.0,
+        "tip_ux": 0.075
+      },
+      "input_checksum": "sha256:877e39240a84cb82aca1f6f447f7511e3cb486cca72419ce3cf3fb08bdcda921",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:877e39240a84cb82aca1f6f447f7511e3cb486cca72419ce3cf3fb08bdcda921",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 5,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -99.99999999999994,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.09999999999999995,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "axial_chain_e4_load_100",
+      "contract_pass": true,
+      "element_count": 4,
+      "errors": {
+        "base_reaction_abs": 5.684341886080802e-14,
+        "tip_displacement_abs": 5.551115123125783e-17
+      },
+      "expected_outputs": {
+        "base_reaction_ux": -100.0,
+        "tip_ux": 0.1
+      },
+      "input_checksum": "sha256:9bbdb9d3c050539204db2412f036eed05fe09d8b8f029f4982ef915f7bcb1246",
+      "lane": "analytic-small",
+      "manifest_checksum": "sha256:9bbdb9d3c050539204db2412f036eed05fe09d8b8f029f4982ef915f7bcb1246",
+      "metrics": {
+        "energy_balance_error": 2.6645352591003757e-15,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 5.684341886080802e-16,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 5,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.064,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_x_origin",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.064,
+        "tip_dof": "UX"
+      },
+      "input_checksum": "sha256:f00b57b6787b0eef82195c0744598ffc0cd316c2155601a83c946f478dc8dcb2",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:f00b57b6787b0eef82195c0744598ffc0cd316c2155601a83c946f478dc8dcb2",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.06399999999999999,
+        "tip_dof": "UX"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_x_translated",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 1.3877787807814457e-17
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UX",
+        "tip_displacement": 0.064,
+        "tip_dof": "UX"
+      },
+      "input_checksum": "sha256:4f15d50e79080200b67cb32535eb95cf7d08c5c2a3451693de5f91b9aee3cd8e",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:4f15d50e79080200b67cb32535eb95cf7d08c5c2a3451693de5f91b9aee3cd8e",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.064,
+        "tip_dof": "UY"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_y_origin",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.064,
+        "tip_dof": "UY"
+      },
+      "input_checksum": "sha256:d518596f7ca8c1bdc0d7a2ce0d43d7472e5a9e7d28411cd69cb0c38765726397",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:d518596f7ca8c1bdc0d7a2ce0d43d7472e5a9e7d28411cd69cb0c38765726397",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.06399999999999999,
+        "tip_dof": "UY"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_y_translated",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 1.3877787807814457e-17
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UY",
+        "tip_displacement": 0.064,
+        "tip_dof": "UY"
+      },
+      "input_checksum": "sha256:4949a808d77ef114d8d316b715737750a715d0beac5f377a52be20cf1a455438",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:4949a808d77ef114d8d316b715737750a715d0beac5f377a52be20cf1a455438",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.064,
+        "tip_dof": "UZ"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_z_origin",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 0.0
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.064,
+        "tip_dof": "UZ"
+      },
+      "input_checksum": "sha256:5fbc7f4b422b8c33da16bf886e0ee552d81c399dfb44b2f703c25b92e71a650e",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:5fbc7f4b422b8c33da16bf886e0ee552d81c399dfb44b2f703c25b92e71a650e",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    },
+    {
+      "actual_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.06399999999999999,
+        "tip_dof": "UZ"
+      },
+      "analysis_type": "linear_static",
+      "case_id": "element_patch_z_translated",
+      "contract_pass": true,
+      "element_count": 1,
+      "errors": {
+        "base_reaction_abs": 0.0,
+        "tip_displacement_abs": 1.3877787807814457e-17
+      },
+      "expected_outputs": {
+        "base_reaction": -80.0,
+        "base_reaction_dof": "UZ",
+        "tip_displacement": 0.064,
+        "tip_dof": "UZ"
+      },
+      "input_checksum": "sha256:e456f3369b8077e62ef26199f0ea94a969c19590033c4d3a01f77e32918da62f",
+      "lane": "element-patch",
+      "manifest_checksum": "sha256:e456f3369b8077e62ef26199f0ea94a969c19590033c4d3a01f77e32918da62f",
+      "metrics": {
+        "energy_balance_error": 0.0,
+        "fallback_used": false,
+        "regularization_used": false,
+        "relative_residual": 0.0,
+        "residual_formula": "F_internal_minus_F_external"
+      },
+      "node_count": 2,
+      "status": "pass",
+      "truth_class": "analytic_truth"
+    }
+  ],
+  "schema_version": "phase3-benchmark-factory-scorecard.v1",
+  "status": "pass"
+}

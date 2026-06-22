@@ -13,6 +13,12 @@ from typing import Any
 
 import numpy as np
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import input_checksums  # noqa: E402
+
 
 SCHEMA_VERSION = "g1-full-load-hip-newton-lane.v1"
 ROOT = Path(__file__).resolve().parent.parent
@@ -544,6 +550,12 @@ def _hip_consistency_proof_assessment(
         blockers.append("hip_consistency_proof_source_commit_sha_mismatch")
     if payload.get("rocm_hip_required") is not True:
         blockers.append("hip_consistency_proof_rocm_hip_not_required")
+    if payload.get("cpu_diagnostic_assembler_used") is not False:
+        blockers.append(
+            "hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
+        )
+    if payload.get("production_hip_residual_jacobian_path") is not True:
+        blockers.append("hip_consistency_proof_production_hip_path_not_proven")
     if payload.get("consistent_residual_jacobian_newton_gate_passed") is not True:
         blockers.append("hip_consistency_proof_gate_not_passed")
     proof_blockers = payload.get("blockers")
@@ -636,11 +648,21 @@ def build_lane_report(
         proof_json=hip_consistency_proof_json,
         lane_source_commit_sha=source_commit_sha,
     )
+    checksum_inputs = [
+        *(
+            path
+            for path in (checkpoint_npz, resolved_checkpoint, mgt_path, hip_consistency_proof_json)
+            if path is not None
+        ),
+        *evidence_sources,
+        DIRECT_PROBE,
+    ]
     base_payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": generated_at,
         "source_commit_sha": source_commit_sha,
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(checksum_inputs, repo_root=ROOT),
         "reused_evidence": False,
         "checkpoint": checkpoint_meta,
         "checkpoint_resolution": checkpoint_resolution,

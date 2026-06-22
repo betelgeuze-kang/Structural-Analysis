@@ -1,0 +1,690 @@
+{
+  "analysis_type": "nonlinear_static_frame_shell_material_coupling_seed",
+  "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
+  "claim_boundary": "This is a two-free-DOF deterministic seed that assembles a frame axial component, a shell diaphragm shear component, and an off-diagonal material coupling tangent into one residual/Jacobian system. It does not close general frame-shell finite elements, production full-mesh/full-load G1, or design-code adequacy.",
+  "contract_pass": true,
+  "dense_solution": {
+    "contract_pass": true,
+    "convergence_history": [
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.0,
+          0.0
+        ],
+        "increment_abs_m": 0.2684563758389262,
+        "increment_gate_passed": false,
+        "iteration": 0,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "relative_residual": 1.0,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          -50.0,
+          -20.0
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "increment_abs_m": 0.004092238161529704,
+        "increment_gate_passed": false,
+        "iteration": 1,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -0.004092238161529707,
+          -0.0001583188082207631
+        ],
+        "relative_residual": 0.015477868612847345,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.7738934306423673,
+          0.06833724892955217
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.26436413767739647,
+          0.1396627102745533
+        ],
+        "increment_abs_m": 2.8670489043980396e-06,
+        "increment_gate_passed": false,
+        "iteration": 2,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -2.8670489044012355e-06,
+          2.8108858322136357e-07
+        ],
+        "relative_residual": 1.073481108278429e-05,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0005367405541392145,
+          2.627452246883877e-07
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2643612706284921,
+          0.1396629913631365
+        ],
+        "increment_abs_m": 1.3924972286361026e-12,
+        "increment_gate_passed": false,
+        "iteration": 3,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -1.3925164183301814e-12,
+          1.3075935643912694e-13
+        ],
+        "relative_residual": 5.2152415719319835e-12,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          2.6076207859659917e-10,
+          8.277822871605167e-13
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2643612706270996,
+          0.13966299136326726
+        ],
+        "increment_abs_m": 2.9434602357932303e-17,
+        "increment_gate_passed": true,
+        "iteration": 4,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 0,
+        "newton_increment_m": [
+          -1.8749505271068303e-18,
+          2.9434602357932303e-17
+        ],
+        "relative_residual": 7.105427357601002e-17,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          0.0,
+          -3.552713678800501e-15
+        ]
+      }
+    ],
+    "line_search_history": [
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2684563758389262,
+              0.13982102908277405
+            ],
+            "trial_relative_residual": 0.015477868612847345,
+            "trial_residual_kn": [
+              0.7738934306423673,
+              0.06833724892955217
+            ]
+          }
+        ],
+        "iteration": 0,
+        "newton_increment_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.26436413767739647,
+              0.1396627102745533
+            ],
+            "trial_relative_residual": 1.073481108278429e-05,
+            "trial_residual_kn": [
+              0.0005367405541392145,
+              2.627452246883877e-07
+            ]
+          }
+        ],
+        "iteration": 1,
+        "newton_increment_m": [
+          -0.004092238161529707,
+          -0.0001583188082207631
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2643612706284921,
+              0.1396629913631365
+            ],
+            "trial_relative_residual": 5.2152415719319835e-12,
+            "trial_residual_kn": [
+              2.6076207859659917e-10,
+              8.277822871605167e-13
+            ]
+          }
+        ],
+        "iteration": 2,
+        "newton_increment_m": [
+          -2.8670489044012355e-06,
+          2.8108858322136357e-07
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.26436413767739647,
+          0.1396627102745533
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2643612706270996,
+              0.13966299136326726
+            ],
+            "trial_relative_residual": 7.105427357601002e-17,
+            "trial_residual_kn": [
+              0.0,
+              -3.552713678800501e-15
+            ]
+          }
+        ],
+        "iteration": 3,
+        "newton_increment_m": [
+          -1.3925164183301814e-12,
+          1.3075935643912694e-13
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.2643612706284921,
+          0.1396629913631365
+        ]
+      }
+    ],
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "metrics": {
+      "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
+      "contract_pass": true,
+      "fallback_used": false,
+      "final_increment_abs_m": 2.9434602357932303e-17,
+      "free_displacements_m": [
+        0.2643612706270996,
+        0.13966299136326726
+      ],
+      "globalization": "backtracking_line_search",
+      "increment_gate_passed": true,
+      "increment_tolerance": 1e-12,
+      "iteration_count": 5,
+      "line_search_step_count": 4,
+      "line_search_used": false,
+      "matrix_backend": "numpy_linalg_solve_dense",
+      "regularization_used": false,
+      "relative_residual": 7.105427357601002e-17,
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_gate_passed": true,
+      "residual_kn": [
+        0.0,
+        -3.552713678800501e-15
+      ],
+      "residual_tolerance": 1e-10,
+      "sparse_backend_used": false,
+      "stiffness_storage": "numpy_dense_ndarray",
+      "tangent_definition": "dF_internal_du_consistent"
+    },
+    "sparse_backend_used": false,
+    "state": {
+      "component_forces_kn": [
+        {
+          "component": "frame_axial_material",
+          "dof": "frame_node_ux",
+          "force_kn": 48.324044103640794,
+          "tangent_kn_per_m": 188.38642576890896
+        },
+        {
+          "component": "shell_diaphragm_shear_material",
+          "dof": "shell_node_uy",
+          "force_kn": 16.827664752474803,
+          "tangent_kn_per_m": 121.46293133674021
+        },
+        {
+          "component": "frame_shell_material_coupling",
+          "dofs": [
+            "frame_node_ux",
+            "shell_node_uy"
+          ],
+          "frame_force_kn": 1.6759558963592072,
+          "off_diagonal_tangent_kn_per_m": 12.0,
+          "shell_force_kn": 3.172335247525195
+        }
+      ],
+      "external_forces_kn": [
+        50.0,
+        20.0
+      ],
+      "free_displacements_m": [
+        0.2643612706270996,
+        0.13966299136326726
+      ],
+      "free_dof_labels": [
+        "frame_node_ux",
+        "shell_node_uy"
+      ],
+      "internal_forces_kn": [
+        50.0,
+        19.999999999999996
+      ],
+      "jacobian_kn_per_m": [
+        [
+          188.38642576890896,
+          12.0
+        ],
+        [
+          12.0,
+          121.46293133674021
+        ]
+      ],
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_kn": [
+        0.0,
+        -3.552713678800501e-15
+      ]
+    },
+    "status": "ready",
+    "stiffness_storage": "numpy_dense_ndarray",
+    "unsupported_features": [],
+    "warnings": []
+  },
+  "dense_sparse_equivalence": {
+    "max_displacement_delta_m": 0.0,
+    "max_residual_delta_kn": 0.0,
+    "pass": true
+  },
+  "fallback_used": false,
+  "finite_difference_jacobian_check": {
+    "analytic_jacobian_kn_per_m": [
+      [
+        188.38642576890896,
+        12.0
+      ],
+      [
+        12.0,
+        121.46293133674021
+      ]
+    ],
+    "finite_difference_epsilon": 1e-07,
+    "finite_difference_jacobian_kn_per_m": [
+      [
+        188.38642578344889,
+        11.999999998124622
+      ],
+      [
+        12.00000001588819,
+        121.46293133952213
+      ]
+    ],
+    "free_dof_count": 2,
+    "max_abs_error": 1.5888190318946727e-08,
+    "pass": true
+  },
+  "frame_shell_material_coupling_closure_claim": false,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "globalization": "backtracking_line_search",
+  "off_diagonal_coupling_visible": true,
+  "regularization_used": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-frame-shell-material-coupling-result.v1",
+  "sparse_solution": {
+    "contract_pass": true,
+    "convergence_history": [
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.0,
+          0.0
+        ],
+        "increment_abs_m": 0.2684563758389262,
+        "increment_gate_passed": false,
+        "iteration": 0,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "relative_residual": 1.0,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          -50.0,
+          -20.0
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "increment_abs_m": 0.004092238161529704,
+        "increment_gate_passed": false,
+        "iteration": 1,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -0.004092238161529707,
+          -0.0001583188082207631
+        ],
+        "relative_residual": 0.015477868612847345,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.7738934306423673,
+          0.06833724892955217
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.26436413767739647,
+          0.1396627102745533
+        ],
+        "increment_abs_m": 2.8670489043980396e-06,
+        "increment_gate_passed": false,
+        "iteration": 2,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -2.867048904401235e-06,
+          2.8108858322136357e-07
+        ],
+        "relative_residual": 1.073481108278429e-05,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0005367405541392145,
+          2.627452246883877e-07
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2643612706284921,
+          0.1396629913631365
+        ],
+        "increment_abs_m": 1.3924972286361026e-12,
+        "increment_gate_passed": false,
+        "iteration": 3,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -1.3925164183301814e-12,
+          1.3075935643912696e-13
+        ],
+        "relative_residual": 5.2152415719319835e-12,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          2.6076207859659917e-10,
+          8.277822871605167e-13
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.2643612706270996,
+          0.13966299136326726
+        ],
+        "increment_abs_m": 2.9434602357932303e-17,
+        "increment_gate_passed": true,
+        "iteration": 4,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 0,
+        "newton_increment_m": [
+          -1.8749505271068303e-18,
+          2.9434602357932303e-17
+        ],
+        "relative_residual": 7.105427357601002e-17,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          0.0,
+          -3.552713678800501e-15
+        ]
+      }
+    ],
+    "line_search_history": [
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2684563758389262,
+              0.13982102908277405
+            ],
+            "trial_relative_residual": 0.015477868612847345,
+            "trial_residual_kn": [
+              0.7738934306423673,
+              0.06833724892955217
+            ]
+          }
+        ],
+        "iteration": 0,
+        "newton_increment_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.26436413767739647,
+              0.1396627102745533
+            ],
+            "trial_relative_residual": 1.073481108278429e-05,
+            "trial_residual_kn": [
+              0.0005367405541392145,
+              2.627452246883877e-07
+            ]
+          }
+        ],
+        "iteration": 1,
+        "newton_increment_m": [
+          -0.004092238161529707,
+          -0.0001583188082207631
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.2684563758389262,
+          0.13982102908277405
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2643612706284921,
+              0.1396629913631365
+            ],
+            "trial_relative_residual": 5.2152415719319835e-12,
+            "trial_residual_kn": [
+              2.6076207859659917e-10,
+              8.277822871605167e-13
+            ]
+          }
+        ],
+        "iteration": 2,
+        "newton_increment_m": [
+          -2.867048904401235e-06,
+          2.8108858322136357e-07
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.26436413767739647,
+          0.1396627102745533
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.2643612706270996,
+              0.13966299136326726
+            ],
+            "trial_relative_residual": 7.105427357601002e-17,
+            "trial_residual_kn": [
+              0.0,
+              -3.552713678800501e-15
+            ]
+          }
+        ],
+        "iteration": 3,
+        "newton_increment_m": [
+          -1.3925164183301814e-12,
+          1.3075935643912696e-13
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.2643612706284921,
+          0.1396629913631365
+        ]
+      }
+    ],
+    "matrix_backend": "scipy_sparse_spsolve_cpu",
+    "metrics": {
+      "case_id": "phase2_frame_shell_material_coupled_2dof_seed",
+      "contract_pass": true,
+      "fallback_used": false,
+      "final_increment_abs_m": 2.9434602357932303e-17,
+      "free_displacements_m": [
+        0.2643612706270996,
+        0.13966299136326726
+      ],
+      "globalization": "backtracking_line_search",
+      "increment_gate_passed": true,
+      "increment_tolerance": 1e-12,
+      "iteration_count": 5,
+      "line_search_step_count": 4,
+      "line_search_used": false,
+      "matrix_backend": "scipy_sparse_spsolve_cpu",
+      "regularization_used": false,
+      "relative_residual": 7.105427357601002e-17,
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_gate_passed": true,
+      "residual_kn": [
+        0.0,
+        -3.552713678800501e-15
+      ],
+      "residual_tolerance": 1e-10,
+      "sparse_backend_used": true,
+      "stiffness_storage": "scipy_sparse_csr",
+      "tangent_definition": "dF_internal_du_consistent"
+    },
+    "sparse_backend_used": true,
+    "state": {
+      "component_forces_kn": [
+        {
+          "component": "frame_axial_material",
+          "dof": "frame_node_ux",
+          "force_kn": 48.324044103640794,
+          "tangent_kn_per_m": 188.38642576890896
+        },
+        {
+          "component": "shell_diaphragm_shear_material",
+          "dof": "shell_node_uy",
+          "force_kn": 16.827664752474803,
+          "tangent_kn_per_m": 121.46293133674021
+        },
+        {
+          "component": "frame_shell_material_coupling",
+          "dofs": [
+            "frame_node_ux",
+            "shell_node_uy"
+          ],
+          "frame_force_kn": 1.6759558963592072,
+          "off_diagonal_tangent_kn_per_m": 12.0,
+          "shell_force_kn": 3.172335247525195
+        }
+      ],
+      "external_forces_kn": [
+        50.0,
+        20.0
+      ],
+      "free_displacements_m": [
+        0.2643612706270996,
+        0.13966299136326726
+      ],
+      "free_dof_labels": [
+        "frame_node_ux",
+        "shell_node_uy"
+      ],
+      "internal_forces_kn": [
+        50.0,
+        19.999999999999996
+      ],
+      "jacobian_kn_per_m": [
+        [
+          188.38642576890896,
+          12.0
+        ],
+        [
+          12.0,
+          121.46293133674021
+        ]
+      ],
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_kn": [
+        0.0,
+        -3.552713678800501e-15
+      ]
+    },
+    "status": "ready",
+    "stiffness_storage": "scipy_sparse_csr",
+    "unsupported_features": [],
+    "warnings": []
+  },
+  "status": "ready",
+  "truth_class": "assembled_coupling_truth"
+}

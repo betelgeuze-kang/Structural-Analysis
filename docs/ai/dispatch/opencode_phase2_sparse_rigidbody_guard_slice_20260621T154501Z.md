@@ -1,0 +1,7 @@
+Goal: Advance Phase 2 deterministic solver closure by adding narrow, honest evidence for sparse/dense matrix backend metadata and rigid-body/singular guard behavior in the canonical linear_static axial preview path.
+
+Scope: Inspect and, if low-risk, update only the Phase 2 axial linear_static path and its artifact/tests. Keep claim boundaries explicit: do not close G1, do not claim full-mesh/full-load nonlinear readiness, do not add external dependencies beyond the current package contract, and do not touch .env files. If implementing, prefer small changes that expose matrix backend/storage metadata, residual/increment convergence fields, and explicit blocked rigid-body or singular-mechanism cases without regularization or false PASS.
+
+Candidate files: src/structural_analysis/assembly/linear_static.py; src/structural_analysis/solvers/linear/static.py; scripts/build_phase2_linear_reference_artifacts.py; tests/test_build_phase2_linear_reference_artifacts.py; tests/test_structural_analysis_core_api.py; implementation/phase1/release_evidence/productization/phase2_linear_reference_*.json.
+
+Verification criteria: Run focused pytest for Phase 2/core API files if changed. Phase 2 summary must stay contract_pass true only for the narrow axial reference evidence, g1_closure_claim false, blockers_remaining visible, regularization_used false, fallback_used false, and any rigid-body/singular case must be blocked/degraded explicitly rather than PASS. Output only Changed files, Test results, Failed tests, Core diff summary, Blockers.

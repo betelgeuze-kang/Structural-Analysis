@@ -1,6 +1,6 @@
 {
   "schema_version": "midas-gen-same-mesh-result.v1",
-  "generated_at": "2026-06-18T14:55:59.132117+00:00",
+  "generated_at": "2026-06-22T15:33:28.293108+00:00",
   "source": {
     "kind": "midas_gen_export_proxy",
     "note": "Proxy same-mesh metrics from commercial HF export medians aligned to optimized MGT SHA256. Replace with live MIDAS Gen result JSON when available.",

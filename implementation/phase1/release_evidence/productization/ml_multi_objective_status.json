@@ -1,6 +1,6 @@
 {
   "schema_version": "ml-multi-objective-status.v1",
-  "generated_at": "2026-06-18T15:01:36.969221+00:00",
+  "generated_at": "2026-06-22T15:33:46.467838+00:00",
   "status": "production_shadow_solver_gated_ready",
   "production_ml_wired": true,
   "multi_objective_pareto_wired": false,
@@ -8,14 +8,14 @@
   "research_pareto_front_count": 3,
   "ml_surrogate_production_gate": {
     "schema_version": "ml-surrogate-production-gate.v1",
-    "generated_at": "2026-06-18T15:01:36.969091+00:00",
+    "generated_at": "2026-06-22T15:33:46.467726+00:00",
     "opt_in_env": "PHASE1_ML_SURROGATE_OPT_IN",
     "checkpoint_env": "PHASE1_ML_SURROGATE_CHECKPOINT",
     "disable_env": "PHASE1_ML_SURROGATE_DISABLE",
     "opt_in_enabled": true,
     "forced_disabled": false,
     "checkpoint_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/checkpoint.pt",
-    "checkpoint_sha256": "af51d1c7aaad28efb623f81827ec8d21d70aff0e5034254d0f1904226eb9c9e7",
+    "checkpoint_sha256": "ae2e254244f71a5beb443c349f45b6269c45bd89cfcf60770db66c6074929622",
     "checkpoint_ready": true,
     "checkpoint_validated": true,
     "activation_enabled": true,
@@ -32,66 +32,66 @@
     "solver_fallback_receipt_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json",
     "validation_summary": {
       "train": {
-        "count": 309,
+        "count": 310,
         "mae": {
-          "max_dcr": 0.0710755971907663,
-          "member_story_drift_contribution_pct": 4.40844043264053e-10,
-          "log1p_group_cost_proxy": 1.1225377884242954e-06
+          "max_dcr": 0.044992671431299265,
+          "member_story_drift_contribution_pct": 2.185910702848685e-09,
+          "log1p_group_cost_proxy": 0.0010241404071799198
         },
         "p95_abs_error": {
-          "max_dcr": 0.2221259686268612,
-          "member_story_drift_contribution_pct": 1.7642071636902998e-09,
-          "log1p_group_cost_proxy": 4.112836507275118e-06
+          "max_dcr": 0.19198589722484896,
+          "member_story_drift_contribution_pct": 6.484377874926841e-09,
+          "log1p_group_cost_proxy": 0.003675727433798182
         },
         "max_abs_error": {
-          "max_dcr": 0.30127517646654633,
-          "member_story_drift_contribution_pct": 1.114850055328187e-08,
-          "log1p_group_cost_proxy": 1.2520967129781013e-05
+          "max_dcr": 0.5787505332446468,
+          "member_story_drift_contribution_pct": 6.68919987456551e-08,
+          "log1p_group_cost_proxy": 0.017303500784469072
         }
       },
       "validation": {
-        "count": 116,
+        "count": 112,
         "mae": {
-          "max_dcr": 0.09359743877436073,
-          "member_story_drift_contribution_pct": 4.980363439113549e-07,
-          "log1p_group_cost_proxy": 5.0583734531162545e-05
+          "max_dcr": 0.05810305118474126,
+          "member_story_drift_contribution_pct": 3.5687513761363333e-09,
+          "log1p_group_cost_proxy": 0.0020968375100086567
         },
         "p95_abs_error": {
-          "max_dcr": 0.2875053277438434,
-          "member_story_drift_contribution_pct": 2.755915648466889e-09,
-          "log1p_group_cost_proxy": 7.128249291499245e-06
+          "max_dcr": 0.22536758067990656,
+          "member_story_drift_contribution_pct": 1.659780237694974e-08,
+          "log1p_group_cost_proxy": 0.004162694886316709
         },
         "max_abs_error": {
-          "max_dcr": 0.8475418237792511,
-          "member_story_drift_contribution_pct": 5.77013658972364e-05,
-          "log1p_group_cost_proxy": 0.005669367004332848
+          "max_dcr": 0.7504004206157461,
+          "member_story_drift_contribution_pct": 8.911884909201806e-08,
+          "log1p_group_cost_proxy": 0.07298938741851302
         }
       },
       "test": {
-        "count": 92,
+        "count": 95,
         "mae": {
-          "max_dcr": 0.10049882927974284,
-          "member_story_drift_contribution_pct": 1.2550410178183449e-06,
-          "log1p_group_cost_proxy": 0.0001250375354288021
+          "max_dcr": 0.07021730037048725,
+          "member_story_drift_contribution_pct": 4.387175542443587e-09,
+          "log1p_group_cost_proxy": 0.0026573011598131024
         },
         "p95_abs_error": {
-          "max_dcr": 0.2809347408156612,
-          "member_story_drift_contribution_pct": 5.304854325954846e-09,
-          "log1p_group_cost_proxy": 8.756670329779232e-06
+          "max_dcr": 0.25034830073669734,
+          "member_story_drift_contribution_pct": 1.4884550070259902e-08,
+          "log1p_group_cost_proxy": 0.0050224266928866525
         },
         "max_abs_error": {
-          "max_dcr": 0.40694044201888485,
-          "member_story_drift_contribution_pct": 5.7702083555710715e-05,
-          "log1p_group_cost_proxy": 0.0056696984264634764
+          "max_dcr": 0.5762948973597686,
+          "member_story_drift_contribution_pct": 8.581190719114673e-08,
+          "log1p_group_cost_proxy": 0.07710366757451936
         }
       }
     },
     "uncertainty_contract": {
       "method": "holdout_abs_error_quantile",
       "p95_error_targets": {
-        "max_dcr": 0.2809347408156612,
-        "member_story_drift_contribution_pct": 5.304854325954846e-09,
-        "log1p_group_cost_proxy": 8.756670329779232e-06
+        "max_dcr": 0.25034830073669734,
+        "member_story_drift_contribution_pct": 1.4884550070259902e-08,
+        "log1p_group_cost_proxy": 0.0050224266928866525
       },
       "confidence_label": "bounded_shadow"
     },

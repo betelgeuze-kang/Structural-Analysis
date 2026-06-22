@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Structural Analysis Canonical Model",
+  "type": "object",
+  "required": ["schema_version", "units", "coordinate_system", "nodes", "elements"],
+  "properties": {
+    "schema_version": {
+      "const": "structural-analysis-canonical-model.v1"
+    },
+    "units": {
+      "type": "object",
+      "required": ["length", "force"],
+      "properties": {
+        "length": {"type": "string"},
+        "force": {"type": "string"}
+      }
+    },
+    "coordinate_system": {
+      "type": "object",
+      "required": ["axis_order", "up_axis"],
+      "properties": {
+        "axis_order": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "up_axis": {"type": "string"}
+      }
+    },
+    "nodes": {"type": "array"},
+    "elements": {"type": "array"},
+    "unsupported_features": {"type": "array"},
+    "warnings": {"type": "array"}
+  }
+}

@@ -1,0 +1,502 @@
+{
+  "claim_boundary": "Deterministic scalar material-Newton breadth seed across multiple constitutive laws using the same explicit F_internal_minus_F_external residual contract, consistent tangent, residual/increment gates, and backtracking line search without regularization or fallback false PASS. This does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
+  "contract_pass": true,
+  "g1_closure_claim": false,
+  "globalization": "backtracking_line_search",
+  "material_law_count": 2,
+  "material_laws": [
+    {
+      "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+      "displacement_gate_passed": true,
+      "fallback_used": false,
+      "increment_gate_passed": true,
+      "law_contract_pass": true,
+      "model_kind": "scalar_nonlinear_axial_cubic_spring",
+      "regularization_used": false,
+      "residual_gate_passed": true,
+      "result": {
+        "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+        "claim_boundary": "This records one scalar material law solved with explicit R=F_internal-F_external, consistent tangent, backtracking line search, and separate residual/increment gates. It does not close general material Newton breadth on meshes, frame/shell/material coupling, sparse production backends, full-mesh/full-load G1, or GPU/HIP parity.",
+        "contract_pass": true,
+        "convergence_history": [
+          {
+            "accepted": true,
+            "displacement_m": 0.0,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.5,
+            "increment_gate_passed": false,
+            "internal_force_kn": 0.0,
+            "iteration": 0,
+            "line_search_alpha": 0.5,
+            "line_search_attempt_count": 2,
+            "newton_increment_m": 1.0,
+            "relative_residual": 1.0,
+            "residual_gate_passed": false,
+            "residual_kn": -100.0,
+            "tangent_kn_per_m": 100.0
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.5,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.08823529411764708,
+            "increment_gate_passed": false,
+            "internal_force_kn": 175.0,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": -0.08823529411764706,
+            "relative_residual": 0.75,
+            "residual_gate_passed": false,
+            "residual_kn": 75.0,
+            "tangent_kn_per_m": 850.0
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.4117647058823529,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.01805838879042232,
+            "increment_gate_passed": false,
+            "internal_force_kn": 110.99124771015671,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": -0.018058388790422344,
+            "relative_residual": 0.10991247710156714,
+            "residual_gate_passed": false,
+            "residual_kn": 10.991247710156713,
+            "tangent_kn_per_m": 608.6505190311418
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.3937063170919306,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.0007025439308940284,
+            "increment_gate_passed": false,
+            "internal_force_kn": 100.39694715119872,
+            "iteration": 3,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": -0.0007025439308940558,
+            "relative_residual": 0.003969471511987166,
+            "residual_gate_passed": false,
+            "residual_kn": 0.3969471511987166,
+            "tangent_kn_per_m": 565.0139923542754
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.3930037731610366,
+            "external_force_kn": 100.0,
+            "increment_abs": 1.0341876930386462e-06,
+            "increment_gate_passed": false,
+            "internal_force_kn": 100.00058261573565,
+            "iteration": 4,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": -1.0341876930606496e-06,
+            "relative_residual": 5.826157356523254e-06,
+            "residual_gate_passed": false,
+            "residual_kn": 0.0005826157356523254,
+            "tangent_kn_per_m": 563.3558971564344
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.39300273897334354,
+            "external_force_kn": 100.0,
+            "increment_abs": 2.2384316622492406e-12,
+            "increment_gate_passed": false,
+            "internal_force_kn": 100.00000000126101,
+            "iteration": 5,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": -2.2384071401945666e-12,
+            "relative_residual": 1.261014404008165e-11,
+            "residual_gate_passed": true,
+            "residual_kn": 1.261014404008165e-09,
+            "tangent_kn_per_m": 563.35345852165
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.3930027389711051,
+            "external_force_kn": 100.0,
+            "increment_abs": 5.0450936265225813e-17,
+            "increment_gate_passed": true,
+            "internal_force_kn": 99.99999999999997,
+            "iteration": 6,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 0,
+            "newton_increment_m": 5.0450936265225813e-17,
+            "relative_residual": 2.842170943040401e-16,
+            "residual_gate_passed": true,
+            "residual_kn": -2.842170943040401e-14,
+            "tangent_kn_per_m": 563.3534585163718
+          }
+        ],
+        "fallback_used": false,
+        "g1_closure_claim": false,
+        "globalization": "backtracking_line_search",
+        "line_search_history": [
+          {
+            "attempt_count": 2,
+            "attempts": [
+              {
+                "accepted": false,
+                "alpha": 1.0,
+                "trial_displacement_m": 1.0,
+                "trial_relative_residual": 10.0,
+                "trial_residual_kn": 1000.0
+              },
+              {
+                "accepted": true,
+                "alpha": 0.5,
+                "trial_displacement_m": 0.5,
+                "trial_relative_residual": 0.75,
+                "trial_residual_kn": 75.0
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": 1.0,
+            "selected_alpha": 0.5,
+            "starting_displacement_m": 0.0
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.4117647058823529,
+                "trial_relative_residual": 0.10991247710156714,
+                "trial_residual_kn": 10.991247710156713
+              }
+            ],
+            "iteration": 1,
+            "newton_increment_m": -0.08823529411764706,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.5
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.3937063170919306,
+                "trial_relative_residual": 0.003969471511987166,
+                "trial_residual_kn": 0.3969471511987166
+              }
+            ],
+            "iteration": 2,
+            "newton_increment_m": -0.018058388790422344,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.4117647058823529
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.3930037731610366,
+                "trial_relative_residual": 5.826157356523254e-06,
+                "trial_residual_kn": 0.0005826157356523254
+              }
+            ],
+            "iteration": 3,
+            "newton_increment_m": -0.0007025439308940558,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.3937063170919306
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.39300273897334354,
+                "trial_relative_residual": 1.261014404008165e-11,
+                "trial_residual_kn": 1.261014404008165e-09
+              }
+            ],
+            "iteration": 4,
+            "newton_increment_m": -1.0341876930606496e-06,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.3930037731610366
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.3930027389711051,
+                "trial_relative_residual": 2.842170943040401e-16,
+                "trial_residual_kn": -2.842170943040401e-14
+              }
+            ],
+            "iteration": 5,
+            "newton_increment_m": -2.2384071401945666e-12,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.39300273897334354
+          }
+        ],
+        "material_newton_closure_claim": false,
+        "matrix_backend": "numpy_linalg_solve_scalar",
+        "metrics": {
+          "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+          "contract_pass": true,
+          "displacement_m": 0.3930027389711051,
+          "external_force_kn": 100.0,
+          "fallback_used": false,
+          "final_increment_abs_m": 5.0450936265225813e-17,
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": true,
+          "increment_tolerance": 1e-12,
+          "internal_force_kn": 99.99999999999997,
+          "iteration_count": 7,
+          "line_search_step_count": 6,
+          "line_search_used": true,
+          "matrix_backend": "numpy_linalg_solve_scalar",
+          "regularization_used": false,
+          "relative_residual": 2.842170943040401e-16,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_gate_passed": true,
+          "residual_kn": -2.842170943040401e-14,
+          "residual_tolerance": 1e-10,
+          "sparse_backend_used": false,
+          "tangent_definition": "dF_internal_du_consistent",
+          "tangent_kn_per_m": 563.3534585163718
+        },
+        "model_kind": "scalar_nonlinear_axial_cubic_spring",
+        "problem": {
+          "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
+          "claim_boundary": "Deterministic scalar axial constitutive reference only. Not a full mesh, frame, shell, or production nonlinear solver.",
+          "cubic_stiffness_kn_per_m3": 1000.0,
+          "external_force_kn": 100.0,
+          "initial_displacement_m": 0.0,
+          "linear_stiffness_kn_per_m": 100.0,
+          "model_kind": "scalar_nonlinear_axial_cubic_spring",
+          "residual_contract": "F_internal_minus_F_external",
+          "truth_class": "analytic_truth",
+          "units": {
+            "force": "kN",
+            "length": "m"
+          }
+        },
+        "regularization_used": false,
+        "residual_contract": "F_internal_minus_F_external",
+        "residual_formula": "F_internal_minus_F_external",
+        "schema_version": "phase2-material-newton-breadth-scalar-law-result.v1",
+        "sparse_backend_used": false,
+        "status": "ready",
+        "tangent_definition": "dF_internal_du_consistent",
+        "truth_class": "analytic_truth",
+        "unsupported_features": [],
+        "verification": {
+          "displacement_abs_error_m": 2.942091015256665e-15,
+          "displacement_gate_passed": true,
+          "equilibrium_residual_kn": -2.842170943040401e-14,
+          "expected_displacement_m": 0.39300273897110216,
+          "tangent_finite_difference_check": {
+            "abs_error": 5.60023636353435e-08,
+            "analytic_tangent_kn_per_m": 563.3534585163718,
+            "displacement_m": 0.3930027389711051,
+            "finite_difference_epsilon": 1e-08,
+            "finite_difference_tangent_kn_per_m": 563.3534584603694,
+            "pass": true
+          },
+          "tangent_gate_passed": true
+        },
+        "warnings": []
+      },
+      "tangent_gate_passed": true
+    },
+    {
+      "case_id": "phase2_scalar_nonlinear_axial_bilinear_hardening",
+      "displacement_gate_passed": true,
+      "fallback_used": false,
+      "increment_gate_passed": true,
+      "law_contract_pass": true,
+      "model_kind": "scalar_nonlinear_axial_bilinear_hardening",
+      "regularization_used": false,
+      "residual_gate_passed": true,
+      "result": {
+        "case_id": "phase2_scalar_nonlinear_axial_bilinear_hardening",
+        "claim_boundary": "This records one scalar material law solved with explicit R=F_internal-F_external, consistent tangent, backtracking line search, and separate residual/increment gates. It does not close general material Newton breadth on meshes, frame/shell/material coupling, sparse production backends, full-mesh/full-load G1, or GPU/HIP parity.",
+        "contract_pass": true,
+        "convergence_history": [
+          {
+            "accepted": true,
+            "displacement_m": 0.0,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.5,
+            "increment_gate_passed": false,
+            "internal_force_kn": 0.0,
+            "iteration": 0,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": 0.5,
+            "relative_residual": 1.0,
+            "residual_gate_passed": false,
+            "residual_kn": -100.0,
+            "tangent_kn_per_m": 200.0
+          },
+          {
+            "accepted": true,
+            "displacement_m": 0.5,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.8999999999999999,
+            "increment_gate_passed": false,
+            "internal_force_kn": 55.0,
+            "iteration": 1,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 1,
+            "newton_increment_m": 0.9,
+            "relative_residual": 0.45,
+            "residual_gate_passed": false,
+            "residual_kn": -45.0,
+            "tangent_kn_per_m": 50.0
+          },
+          {
+            "accepted": true,
+            "displacement_m": 1.4,
+            "external_force_kn": 100.0,
+            "increment_abs": 0.0,
+            "increment_gate_passed": true,
+            "internal_force_kn": 100.0,
+            "iteration": 2,
+            "line_search_alpha": 1.0,
+            "line_search_attempt_count": 0,
+            "newton_increment_m": -0.0,
+            "relative_residual": 0.0,
+            "residual_gate_passed": true,
+            "residual_kn": 0.0,
+            "tangent_kn_per_m": 50.0
+          }
+        ],
+        "fallback_used": false,
+        "g1_closure_claim": false,
+        "globalization": "backtracking_line_search",
+        "line_search_history": [
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 0.5,
+                "trial_relative_residual": 0.45,
+                "trial_residual_kn": -45.0
+              }
+            ],
+            "iteration": 0,
+            "newton_increment_m": 0.5,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.0
+          },
+          {
+            "attempt_count": 1,
+            "attempts": [
+              {
+                "accepted": true,
+                "alpha": 1.0,
+                "trial_displacement_m": 1.4,
+                "trial_relative_residual": 0.0,
+                "trial_residual_kn": 0.0
+              }
+            ],
+            "iteration": 1,
+            "newton_increment_m": 0.9,
+            "selected_alpha": 1.0,
+            "starting_displacement_m": 0.5
+          }
+        ],
+        "material_newton_closure_claim": false,
+        "matrix_backend": "numpy_linalg_solve_scalar",
+        "metrics": {
+          "case_id": "phase2_scalar_nonlinear_axial_bilinear_hardening",
+          "contract_pass": true,
+          "displacement_m": 1.4,
+          "external_force_kn": 100.0,
+          "fallback_used": false,
+          "final_increment_abs_m": 0.0,
+          "globalization": "backtracking_line_search",
+          "increment_gate_passed": true,
+          "increment_tolerance": 1e-12,
+          "internal_force_kn": 100.0,
+          "iteration_count": 3,
+          "line_search_step_count": 2,
+          "line_search_used": false,
+          "matrix_backend": "numpy_linalg_solve_scalar",
+          "regularization_used": false,
+          "relative_residual": 0.0,
+          "residual_formula": "F_internal_minus_F_external",
+          "residual_gate_passed": true,
+          "residual_kn": 0.0,
+          "residual_tolerance": 1e-10,
+          "sparse_backend_used": false,
+          "tangent_definition": "dF_internal_du_consistent",
+          "tangent_kn_per_m": 50.0
+        },
+        "model_kind": "scalar_nonlinear_axial_bilinear_hardening",
+        "problem": {
+          "case_id": "phase2_scalar_nonlinear_axial_bilinear_hardening",
+          "claim_boundary": "Deterministic scalar axial constitutive reference only. Not a full mesh, frame, shell, or production nonlinear solver.",
+          "elastic_stiffness_kn_per_m": 200.0,
+          "external_force_kn": 100.0,
+          "initial_displacement_m": 0.0,
+          "model_kind": "scalar_nonlinear_axial_bilinear_hardening",
+          "post_yield_stiffness_kn_per_m": 50.0,
+          "residual_contract": "F_internal_minus_F_external",
+          "truth_class": "analytic_truth",
+          "units": {
+            "force": "kN",
+            "length": "m"
+          },
+          "yield_force_kn": 40.0
+        },
+        "regularization_used": false,
+        "residual_contract": "F_internal_minus_F_external",
+        "residual_formula": "F_internal_minus_F_external",
+        "schema_version": "phase2-material-newton-breadth-scalar-law-result.v1",
+        "sparse_backend_used": false,
+        "status": "ready",
+        "tangent_definition": "dF_internal_du_consistent",
+        "truth_class": "analytic_truth",
+        "unsupported_features": [],
+        "verification": {
+          "displacement_abs_error_m": 2.220446049250313e-15,
+          "displacement_gate_passed": true,
+          "equilibrium_residual_kn": 0.0,
+          "expected_displacement_m": 1.4000000000000021,
+          "tangent_finite_difference_check": {
+            "abs_error": 1.2623786460608244e-07,
+            "analytic_tangent_kn_per_m": 50.0,
+            "displacement_m": 1.4,
+            "finite_difference_epsilon": 1e-08,
+            "finite_difference_tangent_kn_per_m": 49.999999873762135,
+            "pass": true
+          },
+          "tangent_gate_passed": true
+        },
+        "warnings": []
+      },
+      "tangent_gate_passed": true
+    }
+  ],
+  "material_newton_closure_claim": false,
+  "model_kinds": [
+    "scalar_nonlinear_axial_cubic_spring",
+    "scalar_nonlinear_axial_bilinear_hardening"
+  ],
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-material-newton-breadth-scalar-laws.v1",
+  "solver_config": {
+    "increment_tolerance": 1e-12,
+    "max_iterations": 25,
+    "residual_tolerance": 1e-10
+  },
+  "status": "ready",
+  "truth_class": "analytic_truth"
+}

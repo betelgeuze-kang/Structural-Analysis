@@ -67,6 +67,8 @@ def test_preflight_passes_when_configured_opencode_model_is_registered(tmp_path:
     assert payload["checks"]["opencode_worker_configured_model_available"] is True
     assert payload["summary"]["opencode_configured_model"] == "opencode-go/minimax-m3"
     assert payload["summary"]["opencode_configured_model_available"] is True
+    assert payload["summary"]["opencode_assignment_routed_to_cursor"] is True
+    assert payload["summary"]["opencode_assignment_cursor_model"] == "composer-2.5"
     assert payload["diagnostics"]["opencode_model_rows"] == [
         "opencode-go/minimax-m3",
         "opencode/big-pickle",
@@ -115,6 +117,7 @@ def test_preflight_blocks_when_configured_opencode_model_is_not_registered(
     monkeypatch.setenv("PATH", _prepend_path(bin_dir))
     monkeypatch.setenv("AI_WORKER_OPENCODE_MODEL", "opencode-go/minimax-m3")
     monkeypatch.setenv("AI_WORKER_OPENCODE_XDG_DATA_HOME", str(tmp_path / "xdg"))
+    monkeypatch.setenv("AI_WORKER_OPENCODE_ASSIGNMENT_MODE", "opencode")
 
     payload = build_preflight_module.build_report()
 
@@ -127,9 +130,9 @@ def test_preflight_blocks_when_configured_opencode_model_is_not_registered(
     assert payload["summary"]["opencode_model_count"] == 1
 
 
-def test_preflight_uses_minimax_m3_as_default_model(tmp_path: Path, monkeypatch) -> None:
+def test_preflight_uses_deepseek_v4_pro_as_default_model(tmp_path: Path, monkeypatch) -> None:
     _seed_orchestration_files(tmp_path)
-    bin_dir = _seed_worker_clis(tmp_path, model_rows=["opencode-go/minimax-m3"])
+    bin_dir = _seed_worker_clis(tmp_path, model_rows=["opencode-go/deepseek-v4-pro"])
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("HOME", str(tmp_path / "home"))
     monkeypatch.setenv("PATH", _prepend_path(bin_dir))
@@ -139,7 +142,7 @@ def test_preflight_uses_minimax_m3_as_default_model(tmp_path: Path, monkeypatch)
 
     payload = build_preflight_module.build_report()
 
-    assert payload["summary"]["opencode_configured_model"] == "opencode-go/minimax-m3"
+    assert payload["summary"]["opencode_configured_model"] == "opencode-go/deepseek-v4-pro"
     assert payload["contract_pass"] is True
 
 
@@ -148,7 +151,7 @@ def test_preflight_uses_opencode_go_mirror_when_account_store_is_read_only(
     monkeypatch,
 ) -> None:
     _seed_orchestration_files(tmp_path)
-    bin_dir = _seed_worker_clis(tmp_path, model_rows=["opencode-go/minimax-m3"])
+    bin_dir = _seed_worker_clis(tmp_path, model_rows=["opencode-go/deepseek-v4-pro"])
     source_home = tmp_path / "snap" / "code" / "247" / ".local" / "share"
     _write(source_home / "opencode" / "auth.json", "{}\n")
     _write(source_home / "opencode" / "account.json", "{}\n")
@@ -168,7 +171,7 @@ def test_preflight_uses_opencode_go_mirror_when_account_store_is_read_only(
 
     mirror_home = tmp_dir / "codex-opencode-go-xdg-data"
     assert payload["contract_pass"] is True
-    assert payload["summary"]["opencode_configured_model"] == "opencode-go/minimax-m3"
+    assert payload["summary"]["opencode_configured_model"] == "opencode-go/deepseek-v4-pro"
     assert payload["summary"]["opencode_xdg_data_home"] == str(mirror_home)
     assert (mirror_home / "opencode" / "auth.json").is_symlink()
     assert (mirror_home / "opencode" / "account.json").is_symlink()

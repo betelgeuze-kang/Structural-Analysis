@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-06-18T15:00:15.245854+00:00",
+  "generated_at": "2026-06-22T15:38:03.283391+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -89,11 +89,7 @@
         "external_receipt_or_closure_pending:korean_public_structures",
         "external_receipt_or_closure_pending:peer_spd_hinge",
         "external_receipt_or_closure_pending:tpu_hffb",
-        "external_submission_receipts_pending",
-        "residual_closure_pending:RH-001",
-        "residual_closure_pending:RH-002",
-        "residual_closure_pending:RH-003",
-        "residual_holdout_closure_pending"
+        "external_submission_receipts_pending"
       ]
     },
     {

@@ -1,0 +1,555 @@
+{
+  "blockers": [
+    "dirty_import_execution_missing",
+    "per_file_license_review_pending",
+    "silent_data_loss_negative_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
+  ],
+  "claim_boundary": "This receipt narrows the buildingSMART dirty IFC lane from source identity to selected-file acquisition and expected negative/import-hardening contracts. It does not download or bundle IFC files, compute selected-file checksums, approve redistribution, execute import-health checks, or close Phase 3.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_use_allowed_source_count": 0,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "dirty_import_execution_count": 0,
+  "engine_version": "1.0.0",
+  "expected_negative_import_contract_count": 8,
+  "generated_at": "2026-06-21T22:00:05.509317+00:00",
+  "input_checksums": {
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:3ac0b18511deb83cfeaaa31ad9120ace6ef9c81b0f565e83aeb8378ee62ba748",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
+    "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
+  },
+  "phase3_closure_claim": false,
+  "phase3_ifc_import_case_requirement": {
+    "blocker": "dirty_ifc_import_execution_missing",
+    "claim_boundary": "These eight community IFC files fill the dirty/negative expected-contract selection gap, but they do not count toward Phase 3 quantity credit until files are acquired, checksummed, license-reviewed, and import health is executed.",
+    "minimum_clean_dirty_import_case_count": 10,
+    "quantity_credit_ready_count": 0,
+    "selected_dirty_import_contract_count": 8,
+    "status": "blocked"
+  },
+  "ready_source_count": 0,
+  "redistribution_allowed_source_count": 0,
+  "reused_evidence": false,
+  "schema_version": "phase3-buildingsmart-dirty-ifc-acquisition-receipt.v1",
+  "selected_file_count": 8,
+  "selected_files": [
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_duplex_architectural",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_architectural",
+          "community_sample_not_official"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Duplex_A_20110907.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_architectural.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_architectural.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_duplex_electrical",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_electrical",
+          "structural_entities_may_be_sparse"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Duplex_Electrical_20121207.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_electrical.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_electrical.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_duplex_mep",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_mep",
+          "structural_entities_may_be_sparse"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Duplex_MEP_20110907.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_mep.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_duplex_mep.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_clinic_architectural",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_architectural",
+          "community_sample_not_official"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Clinic_Architectural.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_architectural.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_architectural.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_clinic_electrical",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_electrical",
+          "structural_entities_may_be_sparse"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Clinic_Electrical.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_electrical.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_electrical.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_clinic_hvac",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_hvac",
+          "structural_entities_may_be_sparse"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Clinic_HVAC.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_hvac.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_hvac.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_clinic_plumbing",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "discipline_model_plumbing",
+          "structural_entities_may_be_sparse"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Clinic_Plumbing.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_plumbing.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_plumbing.model_health_report.json"
+      ]
+    },
+    {
+      "acquisition_command": [
+        "python3",
+        "-c",
+        "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
+        "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc"
+      ],
+      "blockers": [
+        "source_file_not_acquired",
+        "source_sha256_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "case_id": "buildingsmart_community_clinic_structural",
+      "claim_boundary": "This dirty/community IFC contract records acquisition and expected block/warning behavior only. It does not attach the IFC file, compute its source checksum, approve redistribution, execute import health, or prove solver-ready geometry.",
+      "commercial_use_allowed": false,
+      "expected_negative_import_contract": {
+        "adapter": "structural_analysis.io.ifc.load_ifc_step",
+        "analysis_type": "model_health",
+        "expected_negative_signals": [
+          "community_sample_not_official",
+          "validation_status_unverified"
+        ],
+        "expected_result_status": "blocked",
+        "expected_status": "blocked",
+        "phase3_quantity_credit_claim": false,
+        "required_blocked_fields": [
+          "ifc_geometry_not_canonicalized"
+        ],
+        "required_warning_fragments": [
+          "IFC adapter is STEP text scan only"
+        ],
+        "silent_data_loss_policy": "fail_until_warnings_blocks_and_entity_counts_are_receipt_visible",
+        "solver_accuracy_claim": false,
+        "source_format": "ifc_step",
+        "text_scan_only": true
+      },
+      "filename": "Clinic_Structural.ifc",
+      "local_path": "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc",
+      "redistribution_allowed": false,
+      "selected_benchmark_lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "source_checksum_status": "pending_until_operator_acquisition",
+      "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
+      "source_sha256": "",
+      "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
+      "structural_family": "community_ifc_import_hardening",
+      "truth_class": "negative_or_import_hardening_truth",
+      "verification_command_after_acquisition": [
+        "python3",
+        "-m",
+        "structural_analysis.api.cli",
+        "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc",
+        "--analysis-type",
+        "model_health",
+        "--out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_structural.model_health_result.json",
+        "--report-out",
+        "implementation/phase1/release_evidence/productization/buildingsmart_community_clinic_structural.model_health_report.json"
+      ]
+    }
+  ],
+  "source_checksum_attached_count": 0,
+  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_file_acquired_count": 0,
+  "status": "blocked"
+}

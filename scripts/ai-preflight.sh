@@ -51,7 +51,7 @@ if command -v opencode >/dev/null 2>&1; then
   ok "opencode found: $(command -v opencode)"
   ok "opencode version: $(opencode --version)"
 else
-  note "opencode not found; OpenCode worker wrapper will fail until installed"
+  note "opencode not found; current OpenCode assignment routing still uses Cursor, direct OpenCode mode would require the CLI"
 fi
 
 echo

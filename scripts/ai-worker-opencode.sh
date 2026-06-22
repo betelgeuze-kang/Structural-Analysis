@@ -7,7 +7,7 @@ if [[ ! -f "$prompt_file" ]]; then
   exit 2
 fi
 
-OPENCODE_DEFAULT_MODEL="opencode-go/minimax-m3"
+OPENCODE_DEFAULT_MODEL="opencode-go/deepseek-v4-pro"
 OPENCODE_DEEPSEEK_V4_PRO_MODEL="opencode-go/deepseek-v4-pro"
 OPENCODE_MINIMAX_M3_MODEL="opencode-go/minimax-m3"
 OPENCODE_GLM52_MODEL="opencode-go/glm-5.2"
@@ -24,12 +24,22 @@ case "$OPENCODE_MODEL" in
     ;;
 esac
 OPENCODE_TIMEOUT_SECONDS="${AI_WORKER_OPENCODE_TIMEOUT_SECONDS:-600}"
+OPENCODE_USAGE_FALLBACK_ENABLED="${AI_WORKER_OPENCODE_USAGE_FALLBACK_ENABLED:-1}"
+OPENCODE_USAGE_FALLBACK_CURSOR_MODEL="${AI_WORKER_OPENCODE_USAGE_FALLBACK_CURSOR_MODEL:-composer-2.5}"
+OPENCODE_ASSIGNMENT_CURSOR_MODEL="${AI_WORKER_OPENCODE_ASSIGNMENT_CURSOR_MODEL:-composer-2.5}"
 case "$OPENCODE_TIMEOUT_SECONDS" in
   ""|*[!0-9]*)
     echo "AI_WORKER_OPENCODE_TIMEOUT_SECONDS must be a positive integer number of seconds." >&2
     exit 2
     ;;
 esac
+
+# Compatibility entrypoint: current OpenCode task assignment is routed directly
+# to Cursor composer-2.5, preserving prompt-file handoff and summary validation.
+./scripts/ai-dangerous-command-check.sh "CURSOR_AGENT_MODEL=${OPENCODE_ASSIGNMENT_CURSOR_MODEL} ./scripts/ai-worker-cursor.sh <prompt-file>"
+echo "OpenCode worker assignment is routed to Cursor model ${OPENCODE_ASSIGNMENT_CURSOR_MODEL}." >&2
+CURSOR_AGENT_MODEL="$OPENCODE_ASSIGNMENT_CURSOR_MODEL" ./scripts/ai-worker-cursor.sh "$prompt_file"
+exit $?
 
 if ! command -v opencode >/dev/null 2>&1; then
   if [ -x "${HOME}/.local/bin/opencode" ]; then
@@ -59,6 +69,21 @@ summary_output="$output_dir/${run_id}.summary.md"
 chmod 700 "$output_dir" 2>/dev/null || true
 : > "$raw_output"
 chmod 600 "$raw_output" 2>/dev/null || true
+
+opencode_usage_exhausted() {
+  [ -f "$raw_output" ] || return 1
+  LC_ALL=C grep -Eiq \
+    '((quota|usage|credit|credits|limit|limits).*(exhaust|exceeded|reached|depleted|spent|used up|insufficient|unavailable))|((exhaust|exceeded|reached|depleted|spent|used up|insufficient).*(quota|usage|credit|credits|limit|limits))|payment required|402' \
+    "$raw_output"
+}
+
+run_cursor_usage_fallback() {
+  if [ "$OPENCODE_USAGE_FALLBACK_ENABLED" = "0" ]; then
+    return 1
+  fi
+  echo "OpenCode usage/quota appears exhausted; delegating same prompt to Cursor model ${OPENCODE_USAGE_FALLBACK_CURSOR_MODEL}." >&2
+  CURSOR_AGENT_MODEL="$OPENCODE_USAGE_FALLBACK_CURSOR_MODEL" ./scripts/ai-worker-cursor.sh "$prompt_file"
+}
 
 # VS Code snap sessions can set XDG_DATA_HOME to the active OpenCode account
 # store. Prefer it when writable so provider/model registry state is preserved;
@@ -198,11 +223,19 @@ if [ "$worker_status" -eq 124 ]; then
 fi
 
 if [ "$worker_status" -ne 0 ]; then
+  if opencode_usage_exhausted; then
+    run_cursor_usage_fallback
+    exit $?
+  fi
   echo "OpenCode worker failed with exit status ${worker_status}. Raw output captured at ${raw_output}; not printing raw output." >&2
   exit "$worker_status"
 fi
 
 if ! node scripts/validate-ai-worker-output.mjs --sanitize-out "$summary_output" "$raw_output"; then
+  if opencode_usage_exhausted; then
+    run_cursor_usage_fallback
+    exit $?
+  fi
   echo "OpenCode worker output failed format validation. Raw output captured at ${raw_output}; not printing raw output." >&2
   exit 3
 fi

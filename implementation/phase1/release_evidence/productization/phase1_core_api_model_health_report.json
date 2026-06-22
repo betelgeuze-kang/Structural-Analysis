@@ -1,0 +1,42 @@
+{
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparisons": [
+    {
+      "actual": 1,
+      "expected": 1,
+      "field": "element_count",
+      "status": "pass"
+    },
+    {
+      "actual": 2,
+      "expected": 2,
+      "field": "node_count",
+      "status": "pass"
+    }
+  ],
+  "contract_pass": true,
+  "convergence_history": [
+    {
+      "iteration": 0,
+      "relative_increment": 0.0,
+      "residual_norm": 0.0,
+      "status": "ready",
+      "step": "model_health"
+    }
+  ],
+  "developer_preview": true,
+  "developer_preview_blocked_fields": [],
+  "engine_version": "1.0.0",
+  "input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
+  "passed_fields": [
+    "engine_version",
+    "input_checksum",
+    "tolerance",
+    "convergence_history",
+    "claim_boundary_version"
+  ],
+  "status": "pass",
+  "tolerance": 1e-08,
+  "unsupported_fields": [],
+  "warnings": []
+}
