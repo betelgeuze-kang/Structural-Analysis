@@ -57,6 +57,30 @@ def test_developer_preview_excludes_future_commercial_blockers(tmp_path: Path) -
 
     assert payload["developer_preview_ready"] is True
     assert payload["commercial_release_ready"] is False
+    assert payload["reused_evidence"] is False
+    assert "does_not_create_authoritative_closure_evidence" in payload["reuse_policy"]
+    assert payload["input_checksum_policy"] == (
+        "product_snapshot_readiness_semantic_subset_excludes_self_referential_"
+        "developer_preview_metadata"
+    )
+    assert payload["input_artifacts"]["product_readiness_snapshot"]["present"] is True
+    assert payload["input_artifacts"]["product_readiness_snapshot"]["schema_version"] == (
+        "product-readiness-snapshot.v1"
+    )
+    assert payload["input_artifacts"]["product_readiness_snapshot"]["input_checksum"].startswith(
+        "sha256:"
+    )
+    assert payload["input_artifacts"]["dataset_license_manifest"]["present"] is True
+    assert payload["input_artifacts"]["dataset_license_manifest"]["schema_version"] == (
+        "developer-preview-dataset-license-manifest.v1"
+    )
+    assert payload["input_artifacts"]["dataset_license_manifest"]["input_checksum"].startswith(
+        "sha256:"
+    )
+    closure_visibility = payload["gap_ledger_closure_requirement_visibility"]
+    assert closure_visibility["source_status"] == "missing"
+    assert closure_visibility["closure_requirement_fail_count"] == 0
+    assert closure_visibility["nonclosed_failed_closure_requirement_ids"] == []
     assert payload["blockers"] == []
     assert payload["scope"]["freeze_policy"] == {
         "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
@@ -100,6 +124,37 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
                     },
                 },
             },
+            "components": {
+                "gap_ledger_evidence_audit": {
+                    "status": "ready",
+                    "contract_pass": True,
+                    "full_gap_ledger_ready": False,
+                    "ledger_split_summary": {
+                        "commercial_solver": {
+                            "row_count": 10,
+                            "nonclosed_row_count": 3,
+                            "closure_requirement_count": 18,
+                            "closure_requirement_pass_count": 3,
+                            "closure_requirement_fail_count": 15,
+                            "nonclosed_rows_with_failed_closure_requirements_count": 3,
+                            "nonclosed_failed_closure_requirement_ids": [
+                                "G1:full_load_scale_1_0_reached",
+                                "G6:eb_receipt_hardest_external_10case",
+                                "G7:operator_manifest_source_mapping_clear",
+                            ],
+                        },
+                        "ai_engine": {
+                            "row_count": 10,
+                            "nonclosed_row_count": 0,
+                            "closure_requirement_count": 0,
+                            "closure_requirement_pass_count": 0,
+                            "closure_requirement_fail_count": 0,
+                            "nonclosed_rows_with_failed_closure_requirements_count": 0,
+                            "nonclosed_failed_closure_requirement_ids": [],
+                        },
+                    },
+                },
+            },
         },
     )
     manifest = _write_json(
@@ -133,6 +188,22 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
     assert cleanup_plan["status"] == "blocked"
     assert cleanup_plan["candidate_release_control_commit_set_count"] == 23
     assert cleanup_plan["human_git_action_required"] is True
+    closure_visibility = payload["gap_ledger_closure_requirement_visibility"]
+    assert closure_visibility["source_status"] == "ready"
+    assert closure_visibility["source_contract_pass"] is True
+    assert closure_visibility["source_full_gap_ledger_ready"] is False
+    assert closure_visibility["closure_requirement_count"] == 18
+    assert closure_visibility["closure_requirement_pass_count"] == 3
+    assert closure_visibility["closure_requirement_fail_count"] == 15
+    assert closure_visibility["nonclosed_rows_with_failed_closure_requirements_count"] == 3
+    assert closure_visibility["nonclosed_failed_closure_requirement_ids"] == [
+        "G1:full_load_scale_1_0_reached",
+        "G6:eb_receipt_hardest_external_10case",
+        "G7:operator_manifest_source_mapping_clear",
+    ]
+    commercial_solver = closure_visibility["ledgers"]["commercial_solver"]
+    assert commercial_solver["closure_requirement_fail_count"] == 15
+    assert "does not add Developer Preview blockers" in closure_visibility["claim_boundary"]
 
 
 def test_developer_preview_scope_boundary_sync_receipt_checks_docs_and_gui(
@@ -191,6 +262,14 @@ def test_developer_preview_scope_boundary_sync_receipt_checks_docs_and_gui(
     sync = payload["scope_boundary_sync"]
     assert sync["status"] == "ready"
     assert sync["contract_pass"] is True
+    assert sync["surface_groups"]["readme"]["path"] == "README.md"
+    assert sync["surface_groups"]["readme"]["contract_pass"] is True
+    assert sync["surface_groups"]["reports"]["surface_count"] == 1
+    assert sync["surface_groups"]["reports"]["contract_pass_count"] == 1
+    assert sync["surface_groups"]["reports"]["surfaces"][
+        "docs/commercialization-gap-current-state.md"
+    ]["contract_pass"] is True
+    assert sync["surface_groups"]["gui"]["contract_pass"] is True
     assert sync["doc_surfaces"]["README.md"]["included_scope_anchor_count"] == 4
     assert sync["doc_surfaces"]["README.md"]["excluded_scope_anchor_count"] == 5
     assert sync["gui_surface"]["consumes_included_scope"] is True
@@ -201,13 +280,99 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
     payload = build_developer_preview_readiness.build_dataset_license_manifest(repo_root=REPO_ROOT)
 
     assert payload["schema_version"] == "developer-preview-dataset-license-manifest.v1"
-    assert payload["contract_pass"] is False
+    assert payload["status"] == "ready"
+    assert payload["contract_pass"] is True
     assert payload["dataset_count"] == 5
     assert "analytic_truth" in payload["truth_classes"]
     assert "dataset_license_manifest:source_checksums_pending" not in payload["blockers"]
-    assert "dataset_license_manifest:authoritative_source_checksums_pending=4" in payload["blockers"]
+    assert payload["blockers"] == []
+    manifest_contract = payload["manifest_policy_contract"]
+    assert manifest_contract["status"] == "ready"
+    assert manifest_contract["contract_pass"] is True
+    assert manifest_contract["policy_fixed"] is True
+    assert manifest_contract["phase3_lane_coverage_contract_pass"] is True
+    assert manifest_contract["developer_preview_seed_contract"] == {
+        "status": "ready",
+        "contract_pass": True,
+        "bundle_eligible_source_ids": ["analytic-small"],
+        "required_checks": [
+            "repo_generated_license",
+            "source_checksums",
+            "per_case_seed_checksums",
+            "expected_outputs_attached",
+            "non_bundled_external_sources_visible",
+        ],
+    }
+    assert manifest_contract["additional_repo_generated_seed_lanes"] == [
+        "nonlinear-material-mesh"
+    ]
+    assert manifest_contract["repo_generated_bundle_source_ids"] == ["analytic-small"]
+    assert manifest_contract["non_bundled_source_ids"] == [
+        "opensees-megatall",
+        "buildingsmart-ifc-samples",
+        "ifc-query-and-gui-public-corpus",
+        "commercial-cross-solver-imports",
+    ]
+    assert manifest_contract["authoritative_checksum_complete_source_ids"] == ["analytic-small"]
+    assert manifest_contract["authoritative_checksum_pending_source_ids"] == [
+        "opensees-megatall",
+        "buildingsmart-ifc-samples",
+        "ifc-query-and-gui-public-corpus",
+        "commercial-cross-solver-imports",
+    ]
+    assert manifest_contract["expected_outputs_attached_source_ids"] == ["analytic-small"]
+    assert manifest_contract["expected_outputs_pending_source_ids"] == [
+        "opensees-megatall",
+        "buildingsmart-ifc-samples",
+        "ifc-query-and-gui-public-corpus",
+        "commercial-cross-solver-imports",
+    ]
+    assert manifest_contract["redistribution_allowed_source_ids"] == ["analytic-small"]
+    assert manifest_contract["redistribution_pending_source_ids"] == [
+        "opensees-megatall",
+        "buildingsmart-ifc-samples",
+        "ifc-query-and-gui-public-corpus",
+        "commercial-cross-solver-imports",
+    ]
+    assert manifest_contract["pending_counts"] == {
+        "authoritative_source_checksums_pending": 4,
+        "license_or_redistribution_pending": 4,
+        "expected_outputs_pending": 4,
+    }
+    assert payload["phase3_external_corpus_readiness"] == {
+        "status": "blocked",
+        "contract_pass": False,
+        "blockers": [
+            "phase3_external_corpus:authoritative_source_checksums_pending=4",
+            "phase3_external_corpus:license_or_redistribution_review_pending",
+            "phase3_external_corpus:expected_outputs_pending",
+        ],
+        "authoritative_checksum_pending_source_ids": [
+            "opensees-megatall",
+            "buildingsmart-ifc-samples",
+            "ifc-query-and-gui-public-corpus",
+            "commercial-cross-solver-imports",
+        ],
+        "redistribution_pending_source_ids": [
+            "opensees-megatall",
+            "buildingsmart-ifc-samples",
+            "ifc-query-and-gui-public-corpus",
+            "commercial-cross-solver-imports",
+        ],
+        "expected_outputs_pending_source_ids": [
+            "opensees-megatall",
+            "buildingsmart-ifc-samples",
+            "ifc-query-and-gui-public-corpus",
+            "commercial-cross-solver-imports",
+        ],
+        "claim_boundary": (
+            "These blockers prevent full Phase 3 corpus quantity credit and Developer "
+            "Preview RC final-gate promotion, but they do not block the seed-only "
+            "dataset/license manifest deliverable."
+        ),
+    }
     assert payload["phase3_lane_coverage"] == {
-        "covered_lane_count": 9,
+        "covered_lane_count": 10,
         "required_lane_count": 9,
         "covered_lanes": [
             "analytic-small",
@@ -217,10 +382,12 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
             "element-patch",
             "ifc-query-and-gui",
             "large-model-performance",
+            "nonlinear-material-mesh",
             "opensees-medium",
             "opensees-megatall",
         ],
         "missing_lanes": [],
+        "additional_repo_generated_seed_lanes": ["nonlinear-material-mesh"],
         "contract_pass": True,
     }
     assert payload["phase3_acquisition_plan"]["status"] == "blocked"
@@ -236,6 +403,11 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
 
     analytic = sources["analytic-small"]
     assert analytic["developer_preview_bundle_policy"] == "repo_generated_cases_may_be_bundled"
+    assert analytic["selected_benchmark_lanes"] == [
+        "analytic-small",
+        "element-patch",
+        "nonlinear-material-mesh",
+    ]
     assert analytic["checksum_status"] == "complete_repo_generated_seed_manifest_and_factory_sources"
     assert analytic["source_files"]
     assert all(row["checksum"].startswith("sha256:") for row in analytic["source_files"])
@@ -315,6 +487,35 @@ def test_markdown_report_lists_scope_and_nonblocking_future_commercial(tmp_path:
             "evidence_fresh": True,
             "release_ready": False,
             "blockers": ["license::license_status_not_active"],
+            "components": {
+                "gap_ledger_evidence_audit": {
+                    "status": "ready",
+                    "contract_pass": True,
+                    "full_gap_ledger_ready": False,
+                    "ledger_split_summary": {
+                        "commercial_solver": {
+                            "row_count": 10,
+                            "nonclosed_row_count": 3,
+                            "closure_requirement_count": 18,
+                            "closure_requirement_pass_count": 3,
+                            "closure_requirement_fail_count": 15,
+                            "nonclosed_rows_with_failed_closure_requirements_count": 3,
+                            "nonclosed_failed_closure_requirement_ids": [
+                                "G1:full_load_scale_1_0_reached",
+                            ],
+                        },
+                        "ai_engine": {
+                            "row_count": 10,
+                            "nonclosed_row_count": 0,
+                            "closure_requirement_count": 0,
+                            "closure_requirement_pass_count": 0,
+                            "closure_requirement_fail_count": 0,
+                            "nonclosed_rows_with_failed_closure_requirements_count": 0,
+                            "nonclosed_failed_closure_requirement_ids": [],
+                        },
+                    },
+                },
+            },
         },
     )
     manifest = _write_json(
@@ -340,6 +541,16 @@ def test_markdown_report_lists_scope_and_nonblocking_future_commercial(tmp_path:
     assert "IFC/MGT/neutral JSON import" in markdown
     assert "customer shadow evidence as a Developer Preview blocker" in markdown
     assert "commercial license/legal approval" in markdown
+    assert "does_not_create_authoritative_closure_evidence" in markdown
+    assert "## Gap Ledger Closure Requirement Visibility" in markdown
+    assert "`closure_requirements`: `3/18`" in markdown
+    assert "`failed_closure_requirements`: `15`" in markdown
+    assert "`G1:full_load_scale_1_0_reached`" in markdown
+    assert "does not add Developer Preview blockers" in markdown
+    assert (
+        "product_snapshot_readiness_semantic_subset_excludes_self_referential_"
+        "developer_preview_metadata"
+    ) in markdown
     assert "## Freeze Policy" in markdown
     assert "`new_feature_development`: `frozen_until_developer_preview_baseline_is_clean`" in markdown
     assert (

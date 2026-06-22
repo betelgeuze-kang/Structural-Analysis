@@ -7,6 +7,15 @@ WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "r
 WORKFLOWS_DIR = WORKFLOW.parent
 
 
+def _step_block(text: str, name: str, *, until: str | None = None) -> str:
+    start = f"      - name: {name}"
+    block = text.split(start, 1)[1]
+    if until is not None:
+        return block.split(f"      - name: {until}", 1)[0]
+    marker = "\n      - name: "
+    return block.split(marker, 1)[0]
+
+
 def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
@@ -51,14 +60,45 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
 
 def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    strict_step = text.split("      - name: Strict release quality gate", 1)[1].split(
-        "      - name: Publish manifest-listed release assets", 1
-    )[0]
+    strict_step = _step_block(
+        text,
+        "Strict release quality gate",
+        until="Publish manifest-listed release assets",
+    )
+    publish_step = _step_block(
+        text,
+        "Publish manifest-listed release assets",
+        until="Verify published release closure",
+    )
 
     assert "python scripts/verify_quality_gate.py --mode release" in strict_step
+    assert "continue-on-error" not in strict_step
+    assert "if: always()" not in strict_step
+    assert "|| true" not in strict_step
+    assert "scripts/publish_github_release_assets.py" not in strict_step
+    assert "python scripts/verify_quality_gate.py --mode release" not in publish_step
+    assert "continue-on-error" not in publish_step
+    assert "if: always()" not in publish_step
+    assert "|| true" not in publish_step
     assert text.index("Strict release quality gate") < text.index(
         "Publish manifest-listed release assets"
     )
+
+
+def test_release_publish_workflow_does_not_promote_manifest_on_failed_publication_path() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    upload_step = _step_block(
+        text,
+        "Upload publication evidence",
+        until="Promote verified manifest",
+    )
+    promote_step = _step_block(text, "Promote verified manifest")
+
+    assert "if: always()" in upload_step
+    assert "if-no-files-found: error" in upload_step
+    assert "if: always()" not in promote_step
+    assert "continue-on-error" not in promote_step
+    assert "git push origin HEAD" in promote_step
 
 
 def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() -> None:

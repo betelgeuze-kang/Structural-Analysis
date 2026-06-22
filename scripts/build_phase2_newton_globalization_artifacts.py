@@ -10,6 +10,8 @@ from pathlib import Path
 import sys
 from typing import Any
 
+import numpy as np
+
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = ROOT / "src"
@@ -27,6 +29,7 @@ from structural_analysis.solvers.nonlinear.newton import (  # noqa: E402
     expected_scalar_equilibrium_displacement,
     finite_difference_tangent_check,
     newton_raphson_scalar,
+    newton_raphson_vector,
 )
 
 
@@ -34,6 +37,37 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_RESULT_OUT = PRODUCTIZATION / "phase2_newton_globalization_scalar_axial_result.json"
 DEFAULT_SUMMARY_OUT = PRODUCTIZATION / "phase2_newton_globalization_summary.json"
 SCHEMA_VERSION = "phase2-newton-globalization-artifacts.v1"
+
+
+class ZeroResidualSingularScalar:
+    case_id = "phase2_zero_residual_singular_scalar"
+    external_force_kn = 0.0
+    initial_displacement_m = 0.0
+
+    def internal_force(self, displacement_m: float) -> float:
+        return 0.0
+
+    def tangent_stiffness(self, displacement_m: float) -> float:
+        return 0.0
+
+    def residual(self, displacement_m: float) -> float:
+        return 0.0
+
+    def reference_force_scale(self) -> float:
+        return 1.0
+
+
+class ZeroResidualSingularVector:
+    case_id = "phase2_zero_residual_singular_vector"
+
+    def reference_force_scale(self) -> float:
+        return 1.0
+
+    def initial_free_displacements_m(self) -> np.ndarray:
+        return np.array([0.0])
+
+    def assemble(self, free_displacements_m: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        return np.array([0.0]), np.array([[0.0]])
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -104,6 +138,18 @@ def build_newton_globalization_artifacts(
         max_iterations=25,
     )
     solution = newton_raphson_scalar(problem, config=config)
+    unsupported_backend_solution = newton_raphson_scalar(
+        problem,
+        config=NewtonRaphsonConfig(matrix_backend="scipy_sparse_spsolve_cpu"),
+    )
+    singular_scalar_solution = newton_raphson_scalar(
+        ZeroResidualSingularScalar(),
+        config=NewtonRaphsonConfig(),
+    )
+    singular_vector_solution = newton_raphson_vector(
+        ZeroResidualSingularVector(),
+        config=NewtonRaphsonConfig(),
+    )
     expected_displacement_m = expected_scalar_equilibrium_displacement(problem)
     displacement_error = abs(solution.displacement_m - expected_displacement_m)
     tangent_check = finite_difference_tangent_check(problem, solution.displacement_m)
@@ -120,6 +166,27 @@ def build_newton_globalization_artifacts(
     tangent_gate_passed = bool(tangent_check["pass"])
     displacement_gate_passed = displacement_error <= 1.0e-10
     line_search_history_present = len(solution.line_search_history) > 0
+    unsupported_backend_guard_passed = bool(
+        unsupported_backend_solution.status == "blocked"
+        and unsupported_backend_solution.metrics.get("contract_pass") is False
+        and unsupported_backend_solution.metrics.get("detail") == "unsupported_matrix_backend"
+        and unsupported_backend_solution.metrics.get("regularization_used") is False
+        and unsupported_backend_solution.metrics.get("fallback_used") is False
+    )
+    singular_tangent_guard_passed = bool(
+        singular_scalar_solution.status == "blocked"
+        and singular_scalar_solution.metrics.get("contract_pass") is False
+        and singular_scalar_solution.metrics.get("detail")
+        == "singular_tangent_stiffness_at_residual_gate"
+        and singular_vector_solution.status == "blocked"
+        and singular_vector_solution.metrics.get("contract_pass") is False
+        and singular_vector_solution.metrics.get("detail")
+        == "singular_tangent_stiffness_at_residual_gate"
+        and singular_scalar_solution.metrics.get("regularization_used") is False
+        and singular_scalar_solution.metrics.get("fallback_used") is False
+        and singular_vector_solution.metrics.get("regularization_used") is False
+        and singular_vector_solution.metrics.get("fallback_used") is False
+    )
     contract_pass = (
         solution.status == "ready"
         and bool(metrics.get("contract_pass"))
@@ -131,6 +198,8 @@ def build_newton_globalization_artifacts(
         and no_regularization_or_fallback
         and tangent_gate_passed
         and displacement_gate_passed
+        and unsupported_backend_guard_passed
+        and singular_tangent_guard_passed
         and metrics.get("residual_formula") == RESIDUAL_FORMULA
     )
 
@@ -178,6 +247,59 @@ def build_newton_globalization_artifacts(
         "displacement_gate_passed": displacement_gate_passed,
         "regularization_used": metrics.get("regularization_used"),
         "fallback_used": metrics.get("fallback_used"),
+        "unsupported_backend_guard_passed": unsupported_backend_guard_passed,
+        "singular_tangent_guard_passed": singular_tangent_guard_passed,
+        "unsupported_backend_guard": {
+            "configured_matrix_backend": "scipy_sparse_spsolve_cpu",
+            "status": unsupported_backend_solution.status,
+            "contract_pass": bool(
+                unsupported_backend_solution.metrics.get("contract_pass")
+            ),
+            "detail": unsupported_backend_solution.metrics.get("detail"),
+            "regularization_used": unsupported_backend_solution.metrics.get(
+                "regularization_used"
+            ),
+            "fallback_used": unsupported_backend_solution.metrics.get("fallback_used"),
+            "unsupported_feature_kinds": [
+                str(row.get("kind", ""))
+                for row in unsupported_backend_solution.unsupported_features
+                if isinstance(row, dict)
+            ],
+        },
+        "singular_tangent_guard": {
+            "scalar": {
+                "status": singular_scalar_solution.status,
+                "contract_pass": bool(
+                    singular_scalar_solution.metrics.get("contract_pass")
+                ),
+                "detail": singular_scalar_solution.metrics.get("detail"),
+                "regularization_used": singular_scalar_solution.metrics.get(
+                    "regularization_used"
+                ),
+                "fallback_used": singular_scalar_solution.metrics.get("fallback_used"),
+                "unsupported_feature_kinds": [
+                    str(row.get("kind", ""))
+                    for row in singular_scalar_solution.unsupported_features
+                    if isinstance(row, dict)
+                ],
+            },
+            "vector": {
+                "status": singular_vector_solution.status,
+                "contract_pass": bool(
+                    singular_vector_solution.metrics.get("contract_pass")
+                ),
+                "detail": singular_vector_solution.metrics.get("detail"),
+                "regularization_used": singular_vector_solution.metrics.get(
+                    "regularization_used"
+                ),
+                "fallback_used": singular_vector_solution.metrics.get("fallback_used"),
+                "unsupported_feature_kinds": [
+                    str(row.get("kind", ""))
+                    for row in singular_vector_solution.unsupported_features
+                    if isinstance(row, dict)
+                ],
+            },
+        },
         "iteration_count": metrics.get("iteration_count"),
         "expected": {
             "displacement_m": expected_displacement_m,
@@ -213,7 +335,9 @@ def build_newton_globalization_artifacts(
             "with explicit Newton-Raphson residual R=F_internal-F_external, consistent "
             "tangent stiffness, backtracking line-search globalization, and separate "
             "residual/increment convergence gates without regularization or fallback "
-            "false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, "
+            "false PASS; unsupported scalar matrix backend requests and singular "
+            "tangent/Jacobian zero-residual mechanisms remain blocked. "
+            "It does not close G1 full-mesh/full-load nonlinear equilibrium, "
             "general frame/shell/material coupling, sparse production matrix backends, "
             "or production GPU/HIP gates."
         ),

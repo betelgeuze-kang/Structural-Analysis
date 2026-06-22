@@ -30,6 +30,7 @@ export type ResourceMap = {
   committeeSummary: ResourceState
   committeeReport: ResourceState
   developerPreview: ResourceState
+  phase5GuiWorkflow: ResourceState
   coreApiResult: ResourceState
   coreApiReport: ResourceState
   commercialWorkflowBreadth: ResourceState
@@ -71,6 +72,7 @@ export function createInitialResources(): ResourceMap {
     committeeSummary: createResource(),
     committeeReport: createResource(),
     developerPreview: createResource(),
+    phase5GuiWorkflow: createResource(),
     coreApiResult: createResource(),
     coreApiReport: createResource(),
     commercialWorkflowBreadth: createResource(),

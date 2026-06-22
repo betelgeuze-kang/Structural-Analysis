@@ -35,9 +35,38 @@ def test_commercial_operator_reference_contract_stays_blocked_without_operator_o
     assert payload["required_reference_solver_count"] == 2
     assert payload["current_reference_solver_count"] == 0
     assert payload["import_template"].endswith("phase4_commercial_comparison_import_template.json")
+    diagnostic_order = [
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance",
+    ]
+    diagnostic_policy = payload["comparison_diagnostic_policy"]
+    assert diagnostic_policy["policy_id"] == "modeling_assumption_first"
+    assert diagnostic_policy["commercial_outputs_are_absolute_truth"] is False
+    assert diagnostic_policy["solver_correctness_claim_allowed"] is False
+    assert diagnostic_policy["diagnostic_order"] == diagnostic_order
+    gui_traceability = payload["gui_traceability_contract"]
+    assert gui_traceability["status"] == "ready"
+    assert gui_traceability["contract_pass"] is True
+    assert gui_traceability["required_trace_dimensions"] == ["member", "story", "mode"]
+    assert gui_traceability["missing_trace_dimensions_are_blocking"] is True
+    assert gui_traceability["operator_trace_rows_available"] is False
 
     required_fields = payload["required_package_fields"]
     for field in [
+        "modeling_assumption_diagnostic_order",
         "permission_scope",
         "reference_solvers",
         "raw_input_files",
@@ -55,10 +84,15 @@ def test_commercial_operator_reference_contract_stays_blocked_without_operator_o
     assert "two_independent_reference_solvers_required" in rule_ids
     assert "operator_permission_must_be_attached" in rule_ids
     assert "all_raw_files_need_sha256" in rule_ids
+    assert "modeling_assumption_first_diagnosis_required" in rule_ids
     assert "commercial_outputs_are_not_absolute_truth" in rule_ids
+    assert payload["operator_reference_package_template"]["modeling_assumption_diagnostic_order"] == diagnostic_order
     assert "operator_reference_package_missing" in payload["remaining_blockers"]
     assert "two_reference_solver_comparison_not_available" in payload["remaining_blockers"]
+    assert "operator_comparison_trace_rows_missing" in payload["remaining_blockers"]
     assert "does not include operator files" in payload["claim_boundary"]
+    assert "execute modeling-assumption diagnostics" in payload["claim_boundary"]
+    assert "execute GUI story/member/mode trace rows" in payload["claim_boundary"]
     assert "close Phase 3, Phase 4, Phase 6" in payload["claim_boundary"]
 
 

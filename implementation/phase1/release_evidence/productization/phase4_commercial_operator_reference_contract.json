@@ -1,21 +1,83 @@
 {
-  "claim_boundary": "This artifact defines the operator-attached commercial reference output package contract only. It does not include operator files, grant permission, record SHA256 checksums for real operator data, ingest commercial results, compare two independent reference solvers, expose GUI story/member/mode traceability, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
+  "claim_boundary": "This artifact defines the operator-attached commercial reference output package contract only. It does not include operator files, grant permission, record SHA256 checksums for real operator data, ingest commercial results, execute modeling-assumption diagnostics, compare two independent reference solvers, execute GUI story/member/mode trace rows for operator data, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparison_diagnostic_policy": {
+    "commercial_outputs_are_absolute_truth": false,
+    "diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "policy_id": "modeling_assumption_first",
+    "required_trace": "Every material comparison delta must cite checked modeling assumptions before it can be escalated as a solver-behavior hypothesis.",
+    "solver_correctness_claim_allowed": false
+  },
   "contract_pass": false,
   "current_reference_solver_count": 0,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-21T22:00:05.508452+00:00",
+  "generated_at": "2026-06-22T19:21:50.944213+00:00",
+  "gui_traceability_contract": {
+    "contract_pass": true,
+    "focused_tests": [
+      "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
+      "tests/test_structure_viewer_explainability_report_contract.py"
+    ],
+    "missing_trace_dimensions_are_blocking": true,
+    "operator_trace_rows_available": false,
+    "report_export": "src/structure-viewer/viewer-report-export.js",
+    "required_trace_dimensions": [
+      "member",
+      "story",
+      "mode"
+    ],
+    "schema_version": "structure-viewer-commercial-tool-crosswalk.v1",
+    "status": "ready",
+    "viewer_model": "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"
+  },
   "import_template": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:50f8ae957a4f85f70cf6b59878c074cfb0775afe502ffc0ec2d501c96cf8cdd5",
     "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
-    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:a874758a3ec42764ce90786d778bb7d6666802ffb542d805183a343e45c9ba5c",
-    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:641eca8d8dd12e5be9754d5d10b515f66fd51fe7a464e8d96abb78ff3ba0f97f"
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "sha256:01baf1908f4460e1249574459aefb2014168b4aabd82abc1055963fc7cfea3d9",
+    "tests/test_structure_viewer_explainability_report_contract.py": "sha256:8eb32cc892762d1962852f86aa6311ffd0136b298e6951c2375750971f6f6d3a"
   },
   "operator_reference_package_template": {
     "case_id": "OPERATOR_CASE_ID",
     "file_checksums": {},
+    "modeling_assumption_diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
     "modeling_convention": {
       "convergence_tolerance": "DECLARED_BY_OPERATOR",
       "damping_policy": "DECLARED_BY_OPERATOR",
@@ -65,11 +127,12 @@
     "operator_file_checksums_missing",
     "two_reference_solver_comparison_not_available",
     "commercial_cross_solver_execution_missing",
-    "gui_story_member_mode_trace_not_implemented"
+    "operator_comparison_trace_rows_missing"
   ],
   "required_package_fields": [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostic_order",
     "operator_name",
     "operator_contact_or_internal_ticket",
     "permission_scope",
@@ -101,7 +164,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_rules": [
@@ -123,6 +186,11 @@
     {
       "description": "Units, local axes, offsets, releases, mass, damping, P-Delta, eigensolver, load combinations, and convergence tolerance must be declared.",
       "rule_id": "modeling_convention_must_be_declared",
+      "severity": "blocking"
+    },
+    {
+      "description": "Comparison deltas must be triaged against the declared modeling-assumption order before any solver-correctness hypothesis is recorded.",
+      "rule_id": "modeling_assumption_first_diagnosis_required",
       "severity": "blocking"
     },
     {

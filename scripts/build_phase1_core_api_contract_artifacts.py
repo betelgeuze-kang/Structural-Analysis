@@ -183,6 +183,53 @@ def _run_cli_contract(
         return _read_json(result_path), _read_json(report_path)
 
 
+def _run_cli_reference_mismatch_contract(
+    *,
+    repo_root: Path,
+    model_path: Path,
+    reference_payload: dict[str, Any],
+) -> dict[str, Any]:
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir)
+        reference_path = tmp_path / "phase1_core_api_mismatch_reference.json"
+        result_path = tmp_path / "phase1_core_api_mismatch_result.json"
+        report_path = tmp_path / "phase1_core_api_mismatch_report.json"
+        reference_path.write_text(_json_text(reference_payload), encoding="utf-8")
+        env = os.environ.copy()
+        env["PYTHONPATH"] = (
+            str(SRC_ROOT)
+            if not env.get("PYTHONPATH")
+            else f"{SRC_ROOT}{os.pathsep}{env['PYTHONPATH']}"
+        )
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "structural_analysis.api.cli",
+                str(model_path),
+                "--analysis-type",
+                "model_health",
+                "--reference",
+                str(reference_path),
+                "--out",
+                str(result_path),
+                "--report-out",
+                str(report_path),
+            ],
+            cwd=repo_root,
+            env=env,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        report_payload = _read_json(report_path) if report_path.exists() else {}
+        return {
+            "returncode": completed.returncode,
+            "stderr": completed.stderr.strip(),
+            "report": report_payload,
+        }
+
+
 @contextmanager
 def _model_path_for_generation(
     *,
@@ -237,13 +284,33 @@ def build_contract_artifacts(
             key: reference_payload[key] for key in sorted(reference_payload)
         }
         report = validate(result, sorted_reference_payload)
+        mismatch_reference_payload = {"element_count": 1, "node_count": 999}
+        mismatch_report = validate(result, mismatch_reference_payload)
+        cli_mismatch_contract = _run_cli_reference_mismatch_contract(
+            repo_root=repo_root,
+            model_path=model_path,
+            reference_payload=mismatch_reference_payload,
+        )
 
     result_payload = result.to_dict()
     report_payload = report.to_dict()
+    mismatch_report_payload = mismatch_report.to_dict()
+    cli_mismatch_report_payload = cli_mismatch_contract["report"]
     cli_contract_pass = (
         cli_result_payload == result_payload
         and cli_report_payload == report_payload
         and cli_report_payload.get("contract_pass") is True
+    )
+    reference_mismatch_contract_pass = bool(
+        mismatch_report_payload.get("contract_pass") is False
+        and mismatch_report_payload.get("status") == "blocked"
+        and "reference_mismatch:node_count"
+        in mismatch_report_payload.get("developer_preview_blocked_fields", [])
+        and cli_mismatch_contract["returncode"] == 2
+        and cli_mismatch_report_payload.get("contract_pass") is False
+        and cli_mismatch_report_payload.get("status") == "blocked"
+        and "reference_mismatch:node_count"
+        in cli_mismatch_report_payload.get("developer_preview_blocked_fields", [])
     )
     schema_validation = _schema_validation_summary(
         repo_root=repo_root,
@@ -255,6 +322,7 @@ def build_contract_artifacts(
     contract_pass = bool(
         report_payload["contract_pass"]
         and cli_contract_pass
+        and reference_mismatch_contract_pass
         and schema_validation["contract_pass"]
     )
     summary_payload = {
@@ -305,6 +373,19 @@ def build_contract_artifacts(
             "result_claim_boundary_version": cli_result_payload.get("claim_boundary_version"),
             "report_claim_boundary_version": cli_report_payload.get("claim_boundary_version"),
         },
+        "reference_validation_contract": {
+            "status": "ready" if reference_mismatch_contract_pass else "blocked",
+            "contract_pass": reference_mismatch_contract_pass,
+            "python_api_blocks_reference_mismatch": mismatch_report_payload.get("contract_pass") is False,
+            "cli_blocks_reference_mismatch": cli_mismatch_contract["returncode"] == 2,
+            "python_api_blocked_fields": mismatch_report_payload.get(
+                "developer_preview_blocked_fields", []
+            ),
+            "cli_blocked_fields": cli_mismatch_report_payload.get(
+                "developer_preview_blocked_fields", []
+            ),
+            "mismatch_field": "node_count",
+        },
         "model_input_checksum": result_payload["input_checksum"],
         "expected_model_input_checksum": _payload_checksum(sample_model_payload()),
         "tolerance": result_payload["tolerance"],
@@ -327,6 +408,7 @@ def build_contract_artifacts(
             "These artifacts prove the GUI can consume the stable Phase 1 core API "
             "model_health result and validation report schema, and that the CLI emits "
             "the same JSON envelopes as the Python API for the same canonical model. "
+            "Reference mismatches are blocking validation outcomes in both surfaces. "
             "The package also has narrow axial-truss linear_static and 1D material-mesh "
             "nonlinear_static preview paths, but these artifacts do not close general "
             "linear frame/shell, modal, buckling, nonlinear, external benchmark, or "

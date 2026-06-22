@@ -37,6 +37,8 @@ GAP_CLOSURE_INPUT_FILES = (
     "rh_closure_checklist.json",
     "rh_signed_closure_packet_template.json",
     "ml_multi_objective_status.json",
+    "ai_freeze_boundary_status.json",
+    "gap_ledger_evidence_audit.json",
     "commercial_gap_ledger_status.json",
 )
 
@@ -95,6 +97,8 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
     rh = _load(productization / "residual_holdout_closure_updates.json")
     changes = _load(productization / "design_optimization_cost_reduction_changes.json")
     alignment = changes.get("member_alignment") if isinstance(changes.get("member_alignment"), dict) else {}
+    ai_freeze_boundary = _load(productization / "ai_freeze_boundary_status.json")
+    gap_ledger_evidence_audit = _load(productization / "gap_ledger_evidence_audit.json")
 
     rh_updates = rh.get("updates") if isinstance(rh.get("updates"), dict) else {}
     supplementary_attached = sum(
@@ -184,6 +188,26 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
                 "research_pareto_front_count"
             ),
         },
+        "ai_freeze_boundary": {
+            "status": ai_freeze_boundary.get("status", "missing"),
+            "contract_pass": bool(ai_freeze_boundary.get("contract_pass") is True),
+            "autonomous_ai_engine_claim": bool(ai_freeze_boundary.get("autonomous_ai_engine_claim") is True),
+            "surrogate_truth_claim_frozen": bool(ai_freeze_boundary.get("surrogate_truth_claim_frozen") is True),
+            "ai_training_frozen": bool(ai_freeze_boundary.get("ai_training_frozen") is True),
+            "shadow_solver_gated_only": bool(ai_freeze_boundary.get("shadow_solver_gated_only") is True),
+            "production_pareto_policy_claim": bool(ai_freeze_boundary.get("production_pareto_policy_claim") is True),
+            "claim_boundary": ai_freeze_boundary.get("claim_boundary"),
+        },
+        "gap_ledger_evidence_audit": {
+            "status": gap_ledger_evidence_audit.get("status", "missing"),
+            "contract_pass": bool(gap_ledger_evidence_audit.get("contract_pass") is True),
+            "row_count": int(gap_ledger_evidence_audit.get("row_count", 0) or 0),
+            "closed_row_count": int(gap_ledger_evidence_audit.get("closed_row_count", 0) or 0),
+            "nonclosed_row_count": int(gap_ledger_evidence_audit.get("nonclosed_row_count", 0) or 0),
+            "closed_evidence_coverage": gap_ledger_evidence_audit.get("closed_evidence_coverage", {}),
+            "nonclosed_visibility": gap_ledger_evidence_audit.get("nonclosed_visibility", {}),
+            "claim_boundary": gap_ledger_evidence_audit.get("claim_boundary"),
+        },
     }
 
     blockers = list(bundle.get("blockers") or [])
@@ -221,6 +245,8 @@ def build_gap_closure_status(productization_dir: Path | None = None) -> dict[str
             "delivery_evidence_bundle": str(productization / "delivery_evidence_bundle.json"),
             "residual_holdout_closure_updates": str(productization / "residual_holdout_closure_updates.json"),
             "commercial_gap_ledger_status": str(productization / "commercial_gap_ledger_status.json"),
+            "ai_freeze_boundary_status": str(productization / "ai_freeze_boundary_status.json"),
+            "gap_ledger_evidence_audit": str(productization / "gap_ledger_evidence_audit.json"),
         },
         "claim_boundary": (
             "This is a read-only rollup of gap-ledger and productization evidence status. "

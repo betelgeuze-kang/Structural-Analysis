@@ -5,6 +5,9 @@ import {
   type ResourceMap,
   type ResourceState,
 } from './workbench/resourceModel'
+import { DeveloperPreviewWorkflowPanel } from './workbench/DeveloperPreviewWorkflowPanel'
+import { developerPreviewWorkflowSteps } from './workbench/developerPreviewWorkflow'
+import { buildDeveloperPreviewWorkflowState } from './workbench/developerPreviewWorkflowState'
 
 type StatusTone = 'ok' | 'warn' | 'missing'
 type ReviewSurfaceId = 'viewer' | 'drawing-review' | 'real-drawing-3d' | 'benchmark-review' | 'committee'
@@ -3353,6 +3356,7 @@ function App() {
         committeeSummary,
         committeeReport,
         developerPreview,
+        phase5GuiWorkflow,
         coreApiResult,
         coreApiReport,
         commercialWorkflowBreadth,
@@ -3433,6 +3437,9 @@ function App() {
           './implementation/phase1/release_evidence/productization/developer_preview_readiness.json',
         ]),
         fetchFirstJson([
+          './implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json',
+        ]),
+        fetchFirstJson([
           './implementation/phase1/release_evidence/productization/phase1_core_api_model_health_result.json',
         ]),
         fetchFirstJson([
@@ -3485,6 +3492,7 @@ function App() {
           committeeSummary,
           committeeReport,
           developerPreview,
+          phase5GuiWorkflow,
           coreApiResult,
           coreApiReport,
           commercialWorkflowBreadth,
@@ -3649,6 +3657,33 @@ function App() {
     resources.commercialWorkflowBreadth,
   )
   const developerPreviewSnapshot = buildDeveloperPreviewSnapshot(resources.developerPreview)
+  const phase5WorkflowData = resources.phase5GuiWorkflow.data ?? {}
+  const phase5WorkflowStatus = asString(phase5WorkflowData.status) || resources.phase5GuiWorkflow.status
+  const phase5WorkflowTone: StatusTone =
+    resources.phase5GuiWorkflow.status === 'missing' || resources.phase5GuiWorkflow.status === 'error'
+      ? 'missing'
+      : phase5WorkflowStatus === 'ready'
+        ? 'ok'
+        : 'warn'
+  const phase5WorkflowStatusLabel =
+    resources.phase5GuiWorkflow.status === 'ready'
+      ? `workflow ${phase5WorkflowStatus}`
+      : `workflow ${resources.phase5GuiWorkflow.status}`
+  const phase5ShellStepCount = firstNumber(
+    phase5WorkflowData.workflow_shell_step_pass_count,
+    phase5WorkflowData.actual_gui_workflow_step_pass_count,
+  ) ?? 0
+  const phase5ExecutionStepCount = firstNumber(phase5WorkflowData.execution_workflow_step_pass_count) ?? 0
+  const phase5RequiredStepCount = firstNumber(phase5WorkflowData.required_workflow_step_count) ?? developerPreviewWorkflowSteps.length
+  const phase5BlockerCount = getArray(phase5WorkflowData, 'blockers').length
+  const phase5ObservationPass = firstBoolean(phase5WorkflowData.human_ux_observation_claim) === true
+  const phase5RouteState = buildDeveloperPreviewWorkflowState({
+    workflowShellStepPassCount: phase5ShellStepCount,
+    executionWorkflowStepPassCount: phase5ExecutionStepCount,
+    requiredWorkflowStepCount: phase5RequiredStepCount,
+    humanObservationPass: phase5ObservationPass,
+    blockerCount: phase5BlockerCount,
+  })
   const coreApiContractSnapshot = buildCoreApiContractSnapshot(resources.coreApiResult, resources.coreApiReport)
   const surfaceSnapshots: Record<ReviewSurfaceId, Snapshot> = {
     viewer: buildViewerSnapshot(resources.viewer),
@@ -4281,6 +4316,18 @@ function App() {
           </a>
         </div>
       </section>
+
+      <DeveloperPreviewWorkflowPanel
+        statusTone={phase5WorkflowTone}
+        statusLabel={phase5WorkflowStatusLabel}
+        shellStepCountLabel={`${compactCount(phase5ShellStepCount)}/${compactCount(phase5RequiredStepCount)}`}
+        executionStepCountLabel={`${compactCount(phase5ExecutionStepCount)}/${compactCount(phase5RequiredStepCount)}`}
+        observationStatusLabel={phase5ObservationPass ? 'ready' : 'blocked'}
+        blockerCountLabel={compactCount(phase5BlockerCount)}
+        routeState={phase5RouteState}
+        steps={developerPreviewWorkflowSteps}
+        sourceLabel={resources.phase5GuiWorkflow.source || 'phase5_gui_workflow_readiness_receipt.json'}
+      />
 
       <section className="workspace">
         <div className="panel">

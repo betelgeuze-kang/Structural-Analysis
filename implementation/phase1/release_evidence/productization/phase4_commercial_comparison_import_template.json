@@ -1,10 +1,37 @@
 {
   "claim_boundary": "This artifact authors the commercial comparison import template and mapping expectations only. It does not attach operator files, grant redistribution permission, ingest commercial outputs, compare two independent reference solvers, or close Phase 4/Phase 6.",
   "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparison_diagnostic_policy": {
+    "commercial_outputs_are_absolute_truth": false,
+    "diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "difference_triage": "When comparison metrics differ, diagnose declared modeling convention differences before attributing correctness to any solver.",
+    "policy_id": "modeling_assumption_first",
+    "required_result_field": "modeling_assumption_diagnostics",
+    "solver_correctness_claim_allowed": false
+  },
   "contract_pass": true,
   "csv_columns": [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostic_status",
+    "primary_modeling_assumption_delta",
+    "modeling_assumption_delta_codes",
     "engine_name",
     "engine_version",
     "input_checksum",
@@ -25,11 +52,11 @@
   ],
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-21T22:00:05.508269+00:00",
+  "generated_at": "2026-06-22T19:21:50.913579+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:50f8ae957a4f85f70cf6b59878c074cfb0775afe502ffc0ec2d501c96cf8cdd5",
     "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
-    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:a874758a3ec42764ce90786d778bb7d6666802ffb542d805183a343e45c9ba5c"
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211"
   },
   "json_template": {
     "case_id": "OPERATOR_CASE_ID",
@@ -43,6 +70,29 @@
     "input_checksum": "sha256:OPERATOR_INPUT_SHA256",
     "member_force_metrics": [],
     "modal_metrics": [],
+    "modeling_assumption_diagnostics": {
+      "delta_codes": [],
+      "diagnostic_order": [
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance"
+      ],
+      "notes": [],
+      "primary_delta": null,
+      "status": "missing|matched|differences_found|blocked"
+    },
     "modeling_convention_id": "CONVENTION_ID",
     "node_member_mapping_coverage": {
       "member_ratio": 0.0,
@@ -65,6 +115,7 @@
     "Attach raw commercial-tool export files outside bundled repo data.",
     "Record SHA256 for every operator-attached input and result file.",
     "Declare modeling convention for units, local axes, releases, offsets, mass source, damping, P-Delta, eigen solver, load combinations, and convergence tolerance.",
+    "Triage result deltas through the modeling-assumption diagnostic order before recording any solver-correctness hypothesis.",
     "Keep commercial-tool outputs as comparison references, not absolute truth.",
     "Mark missing mappings, warnings, and unsupported features explicitly; silent drops are blocking."
   ],
@@ -79,6 +130,7 @@
   "required_result_fields": [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostics",
     "engine_name",
     "engine_version",
     "input_checksum",
@@ -98,7 +150,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "ready",
   "template_scope": {
     "commercial_results_are_absolute_truth": false,

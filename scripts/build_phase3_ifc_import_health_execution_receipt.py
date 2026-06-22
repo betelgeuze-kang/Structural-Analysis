@@ -34,6 +34,15 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_ifc_import_health_execution_receipt.json"
 PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT = 10
+SILENT_IMPORT_LOSS_REQUIRED_ACCOUNTING_FIELDS = [
+    "record_count",
+    "parsed_record_count",
+    "entity_counts",
+    "structural_entity_count",
+    "material_entity_count",
+    "section_entity_count",
+    "load_related_entity_count",
+]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -156,6 +165,19 @@ def _case_receipt(repo_root: Path, row: dict[str, Any], *, execute: bool) -> dic
         "source_sha256": "",
         "import_health_executed": False,
         "import_health_contract_pass": False,
+        "silent_import_loss_gate": {
+            "status": "blocked",
+            "contract_pass": False,
+            "executed": False,
+            "silent_import_loss_zero": False,
+            "visible_entity_accounting": False,
+            "required_accounting_fields": SILENT_IMPORT_LOSS_REQUIRED_ACCOUNTING_FIELDS,
+            "blockers": [
+                "source_file_not_acquired",
+                "source_sha256_missing",
+                "silent_import_loss_gate_not_executed",
+            ],
+        },
         "quantity_credit_ready": False,
         "blockers": [],
         "claim_boundary": (
@@ -177,16 +199,21 @@ def _case_receipt(repo_root: Path, row: dict[str, Any], *, execute: bool) -> dic
     if not execute:
         base["status"] = "blocked"
         base["blockers"] = ["import_health_execution_not_requested"]
+        base["silent_import_loss_gate"]["blockers"] = [
+            "silent_import_loss_gate_not_executed"
+        ]
         return base
 
     execution = _run_model_health(repo_root, local_path, str(row["case_id"]))
+    result = execution["result"]
+    result_metrics = result.get("metrics", {}) if isinstance(result.get("metrics"), dict) else {}
     report = execution["report"]
     unsupported = {
         item.get("kind")
-        for item in execution["result"].get("unsupported_features", [])
+        for item in result.get("unsupported_features", [])
         if isinstance(item, dict)
     }
-    warnings = execution["result"].get("warnings", [])
+    warnings = result.get("warnings", [])
     required_warning_fragments = row["contract"].get("required_warning_fragments", [])
     warning_pass = all(
         any(fragment in warning for warning in warnings)
@@ -205,11 +232,42 @@ def _case_receipt(repo_root: Path, row: dict[str, Any], *, execute: bool) -> dic
         and blocked_pass
         and status_pass
     )
+    accounting_fields = row["contract"].get(
+        "required_metadata_fields",
+        SILENT_IMPORT_LOSS_REQUIRED_ACCOUNTING_FIELDS,
+    )
+    visible_entity_accounting = all(field in result_metrics for field in accounting_fields)
+    unsupported_visible = bool(result.get("unsupported_features"))
+    warning_visible = bool(warnings)
+    silent_gate_blockers = [
+        *(["visible_entity_accounting_missing"] if not visible_entity_accounting else []),
+        *(["unsupported_feature_visibility_missing"] if not unsupported_visible else []),
+        *(["import_warning_visibility_missing"] if not warning_visible else []),
+        *(["import_health_contract_failed"] if not contract_pass else []),
+    ]
+    silent_import_loss_gate = {
+        "status": "pass" if not silent_gate_blockers else "blocked",
+        "contract_pass": not silent_gate_blockers,
+        "executed": True,
+        "silent_import_loss_zero": not silent_gate_blockers,
+        "visible_entity_accounting": visible_entity_accounting,
+        "required_accounting_fields": accounting_fields,
+        "record_count": result_metrics.get("record_count"),
+        "parsed_record_count": result_metrics.get("parsed_record_count"),
+        "structural_entity_count": result_metrics.get("structural_entity_count"),
+        "material_entity_count": result_metrics.get("material_entity_count"),
+        "section_entity_count": result_metrics.get("section_entity_count"),
+        "load_related_entity_count": result_metrics.get("load_related_entity_count"),
+        "unsupported_feature_count": len(result.get("unsupported_features", [])),
+        "warning_count": len(warnings),
+        "blockers": silent_gate_blockers,
+    }
     base.update(
         {
             "status": "blocked",
             "import_health_executed": True,
             "import_health_contract_pass": contract_pass,
+            "silent_import_loss_gate": silent_import_loss_gate,
             "execution": execution,
             "blockers": [] if contract_pass else ["import_health_contract_failed"],
         }
@@ -233,7 +291,25 @@ def build_phase3_ifc_import_health_execution_receipt(
     acquired_count = sum(1 for row in case_receipts if row["source_file_acquired"])
     checksum_count = sum(1 for row in case_receipts if row["source_sha256"])
     contract_pass_count = sum(1 for row in case_receipts if row["import_health_contract_pass"])
+    silent_gate_pass_count = sum(
+        1 for row in case_receipts if row["silent_import_loss_gate"]["contract_pass"]
+    )
+    visible_entity_accounting_count = sum(
+        1 for row in case_receipts if row["silent_import_loss_gate"]["visible_entity_accounting"]
+    )
     quantity_credit_ready_count = sum(1 for row in case_receipts if row["quantity_credit_ready"])
+    silent_import_loss_gate_blockers = sorted(
+        {
+            blocker
+            for row in case_receipts
+            for blocker in row["silent_import_loss_gate"]["blockers"]
+        }
+    )
+    silent_import_loss_gate_contract_pass = bool(
+        len(case_receipts) >= PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT
+        and silent_gate_pass_count == len(case_receipts)
+        and quantity_credit_ready_count >= PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT
+    )
     return {
         "schema_version": "phase3-ifc-import-health-execution-receipt.v1",
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -261,6 +337,29 @@ def build_phase3_ifc_import_health_execution_receipt(
         "source_checksum_attached_count": checksum_count,
         "import_health_execution_count": executed_count,
         "import_health_contract_pass_count": contract_pass_count,
+        "visible_entity_accounting_case_count": visible_entity_accounting_count,
+        "silent_import_loss_gate_pass_count": silent_gate_pass_count,
+        "silent_import_loss_gate": {
+            "status": "pass" if silent_import_loss_gate_contract_pass else "blocked",
+            "contract_pass": silent_import_loss_gate_contract_pass,
+            "silent_import_loss_zero": silent_import_loss_gate_contract_pass,
+            "required_case_count": PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT,
+            "candidate_case_count": len(case_receipts),
+            "source_file_acquired_count": acquired_count,
+            "source_checksum_attached_count": checksum_count,
+            "import_health_execution_count": executed_count,
+            "visible_entity_accounting_case_count": visible_entity_accounting_count,
+            "case_gate_pass_count": silent_gate_pass_count,
+            "quantity_credit_ready_count": quantity_credit_ready_count,
+            "blockers": silent_import_loss_gate_blockers
+            or ["phase3_ifc_import_case_quantity_credit_missing"],
+            "claim_boundary": (
+                "This gate proves zero silent IFC import loss only when every selected "
+                "clean/dirty IFC case is acquired, checksummed, import-health executed, "
+                "entity-accounted, and quantity-credit ready. Text-scan accounting is "
+                "not solver-ready geometry evidence."
+            ),
+        },
         "quantity_credit_ready_count": quantity_credit_ready_count,
         "case_receipts": case_receipts,
         "blockers": blockers,

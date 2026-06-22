@@ -1446,12 +1446,354 @@ select {
   color: var(--color-text-light);
 }
 
+.developer-preview-workflow {
+  max-width: 1440px;
+  margin: 0 auto 20px;
+}
+
+.developer-preview-workflow__summary,
+.developer-preview-workflow__steps {
+  display: grid;
+  gap: 12px;
+}
+
+.developer-preview-workflow__summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.developer-preview-workflow__status-vocabulary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 14px;
+}
+
+.developer-preview-workflow__value-kind-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -6px 0 14px;
+}
+
+.developer-preview-workflow__status-vocabulary span,
+.developer-preview-workflow__value-kind-legend span {
+  border: 1px solid rgba(148, 168, 190, 0.28);
+  border-radius: 999px;
+  color: #a6b7c8;
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 7px 10px;
+}
+
+.developer-preview-workflow__steps {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.developer-preview-workflow__route-state {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 12px;
+  align-items: stretch;
+  margin: 0 0 14px;
+  padding: 14px;
+  border: 1px solid rgba(244, 181, 107, 0.22);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(244, 181, 107, 0.08), rgba(255, 255, 255, 0.02)),
+    rgba(8, 16, 26, 0.54);
+}
+
+.developer-preview-workflow__route-copy {
+  min-width: 0;
+}
+
+.developer-preview-workflow__route-copy strong {
+  display: block;
+  margin-top: 4px;
+  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.developer-preview-workflow__route-copy p:last-child {
+  margin: 8px 0 0;
+  color: #a6b7c8;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+.developer-preview-workflow__route-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.developer-preview-workflow__selection-state {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(79, 183, 173, 0.2);
+  border-radius: 8px;
+  background: rgba(79, 183, 173, 0.06);
+}
+
+.developer-preview-workflow__selection-state strong {
+  display: block;
+  margin-top: 4px;
+  color: #d8e4ef;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.developer-preview-workflow__selection-channels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.developer-preview-workflow__selection-channels span {
+  border: 1px solid rgba(79, 183, 173, 0.24);
+  border-radius: 999px;
+  color: #b7d8d7;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 10px;
+}
+
+.developer-preview-workflow__worker-boundary {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(145, 215, 255, 0.22);
+  border-radius: 8px;
+  background: rgba(145, 215, 255, 0.06);
+}
+
+.developer-preview-workflow__worker-boundary strong {
+  display: block;
+  margin-top: 4px;
+  color: #d8e4ef;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.developer-preview-workflow__worker-boundary p:last-child {
+  margin: 8px 0 0;
+  color: #a6b7c8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.developer-preview-workflow__worker-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.developer-preview-workflow__worker-tasks span {
+  border: 1px solid rgba(145, 215, 255, 0.26);
+  border-radius: 999px;
+  color: #c5e9ff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 10px;
+}
+
+.developer-preview-workflow__evidence-console {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid rgba(244, 181, 107, 0.24);
+  border-radius: 8px;
+  background: rgba(244, 181, 107, 0.07);
+}
+
+.developer-preview-workflow__evidence-console strong {
+  display: block;
+  margin-top: 4px;
+  color: #d8e4ef;
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.developer-preview-workflow__evidence-console p:last-child {
+  margin: 8px 0 0;
+  color: #a6b7c8;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.developer-preview-workflow__evidence-console-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.developer-preview-workflow__evidence-console-features span {
+  border: 1px solid rgba(244, 181, 107, 0.28);
+  border-radius: 999px;
+  color: #ffd9aa;
+  font-size: 0.74rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 7px 10px;
+}
+
+.developer-preview-workflow__step {
+  min-width: 0;
+  min-height: 280px;
+  padding: 14px;
+  border: 1px solid rgba(148, 168, 190, 0.18);
+  border-radius: 8px;
+  background: rgba(8, 16, 26, 0.62);
+}
+
+.developer-preview-workflow__step-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.developer-preview-workflow__step-head .status-pill {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.developer-preview-workflow__index {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(244, 181, 107, 0.32);
+  border-radius: 6px;
+  color: #ffd9aa;
+  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-size: 0.78rem;
+}
+
+.developer-preview-workflow__anchor {
+  margin: 0;
+  color: var(--si-accent, var(--color-accent-cool));
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.developer-preview-workflow__step h3 {
+  margin: 4px 0 0;
+  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.developer-preview-workflow__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+
+.developer-preview-workflow__signals span {
+  max-width: 100%;
+  padding: 4px 7px;
+  border: 1px solid rgba(79, 183, 173, 0.18);
+  border-radius: 6px;
+  background: rgba(79, 183, 173, 0.08);
+  color: #b7d8d7;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.developer-preview-workflow__signals b {
+  display: block;
+  color: #91d7ff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.developer-preview-workflow__capabilities {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.developer-preview-workflow__capabilities li {
+  color: #a6b7c8;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.developer-preview-workflow__provenance {
+  margin-top: 14px;
+  border: 1px solid rgba(148, 168, 190, 0.2);
+  border-radius: 8px;
+  background: rgba(8, 16, 26, 0.42);
+}
+
+.developer-preview-workflow__provenance summary {
+  cursor: pointer;
+  color: #d8e4ef;
+  font-size: 0.82rem;
+  font-weight: 900;
+  list-style-position: inside;
+  padding: 11px 12px;
+}
+
+.developer-preview-workflow__provenance dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+.developer-preview-workflow__provenance div {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.28fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.developer-preview-workflow__provenance dt,
+.developer-preview-workflow__provenance dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.developer-preview-workflow__provenance dt {
+  color: #91d7ff;
+  font-weight: 900;
+}
+
+.developer-preview-workflow__provenance dd {
+  color: #a6b7c8;
+}
+
 @media (max-width: 1180px) {
   .hero,
   .workspace,
   .route-grid,
   .artifact-grid,
-  .authoring-grid {
+  .authoring-grid,
+  .developer-preview-workflow__steps {
     grid-template-columns: 1fr;
   }
 
@@ -1459,7 +1801,13 @@ select {
   .hero__status-rail,
   .preview-panel__meta,
   .route-summary,
-  .route-summary__cards {
+  .route-summary__cards,
+  .developer-preview-workflow__summary,
+  .developer-preview-workflow__route-state,
+  .developer-preview-workflow__selection-state,
+  .developer-preview-workflow__worker-boundary,
+  .developer-preview-workflow__evidence-console,
+  .developer-preview-workflow__route-metrics {
     grid-template-columns: 1fr;
   }
 
@@ -1470,6 +1818,10 @@ select {
   .panel__hint {
     max-width: none;
     text-align: left;
+  }
+
+  .developer-preview-workflow__provenance div {
+    grid-template-columns: 1fr;
   }
 }
 

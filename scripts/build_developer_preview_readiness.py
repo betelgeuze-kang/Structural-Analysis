@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -43,6 +44,11 @@ PHASE3_BENCHMARK_LANES = (
     "commercial-cross-solver",
     "large-model-performance",
 )
+REPO_GENERATED_SEED_LANES = (
+    "analytic-small",
+    "element-patch",
+    "nonlinear-material-mesh",
+)
 
 INCLUDED_SCOPE = [
     "IFC/MGT/neutral JSON import for public or locally acquired benchmark models",
@@ -59,16 +65,31 @@ EXCLUDED_SCOPE = [
     "customer shadow evidence as a Developer Preview blocker",
     "product/legal commercial license approval as a Developer Preview blocker",
     "30-run commercial CI streak or external approval receipts as Developer Preview blockers",
-    "AI/GNN predictions as independent truth before deterministic solver closure",
+    (
+        "AI/GNN/surrogate predictions as independent truth before deterministic "
+        "reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed"
+    ),
 ]
 FREEZE_POLICY = {
     "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
     "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
     "gpu_hip": "performance_track_after_cpu_reference_parity",
 }
-SCOPE_BOUNDARY_DOCS = (
-    Path("README.md"),
+REUSE_POLICY = (
+    "derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; "
+    "does_not_create_authoritative_closure_evidence"
+)
+INPUT_CHECKSUM_POLICY = (
+    "product_snapshot_readiness_semantic_subset_excludes_self_referential_"
+    "developer_preview_metadata"
+)
+SCOPE_BOUNDARY_README = Path("README.md")
+SCOPE_BOUNDARY_REPORTS = (
     Path("docs/commercialization-gap-current-state.md"),
+)
+SCOPE_BOUNDARY_DOCS = (
+    SCOPE_BOUNDARY_README,
+    *SCOPE_BOUNDARY_REPORTS,
 )
 SCOPE_BOUNDARY_GUI = Path("src/App.tsx")
 SCOPE_INCLUDED_ANCHORS = {
@@ -88,7 +109,7 @@ SCOPE_EXCLUDED_ANCHORS = {
     "engineer_replacement": ("engineer replacement", "기술사 대체"),
     "saas_account_license_server": ("SaaS/account/license server", "SaaS/accounts/license server"),
     "commercial_sla": ("commercial SLA",),
-    "ai_gnn_truth_claim": ("AI/GNN truth",),
+    "ai_gnn_truth_claim": ("AI/GNN truth", "AI/GNN/surrogate truth"),
 }
 FUTURE_COMMERCIAL_ANCHORS = {
     "customer_shadow": ("customer shadow",),
@@ -114,6 +135,17 @@ def _as_dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
 
 
+def _as_list(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _as_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _read_optional_text(repo_root: Path, path: Path) -> str:
     resolved = path if path.is_absolute() else repo_root / path
     try:
@@ -131,13 +163,12 @@ def _anchor_coverage(text: str, anchors: dict[str, tuple[str, ...]]) -> dict[str
 
 
 def _scope_boundary_sync(repo_root: Path) -> dict[str, Any]:
-    doc_surfaces: dict[str, dict[str, Any]] = {}
-    for path in SCOPE_BOUNDARY_DOCS:
+    def surface_contract(path: Path) -> dict[str, Any]:
         text = _read_optional_text(repo_root, path)
         included = _anchor_coverage(text, SCOPE_INCLUDED_ANCHORS)
         excluded = _anchor_coverage(text, SCOPE_EXCLUDED_ANCHORS)
         future = _anchor_coverage(text, FUTURE_COMMERCIAL_ANCHORS)
-        doc_surfaces[path.as_posix()] = {
+        return {
             "present": bool(text),
             "included_scope_anchor_count": sum(included.values()),
             "included_scope_anchor_total": len(included),
@@ -153,6 +184,12 @@ def _scope_boundary_sync(repo_root: Path) -> dict[str, Any]:
             "future_commercial_boundary_anchors": future,
         }
 
+    readme_surface = surface_contract(SCOPE_BOUNDARY_README)
+    report_surfaces = {path.as_posix(): surface_contract(path) for path in SCOPE_BOUNDARY_REPORTS}
+    doc_surfaces: dict[str, dict[str, Any]] = {
+        SCOPE_BOUNDARY_README.as_posix(): readme_surface,
+        **report_surfaces,
+    }
     gui_text = _read_optional_text(repo_root, SCOPE_BOUNDARY_GUI)
     gui_contract = {
         "present": bool(gui_text),
@@ -173,6 +210,21 @@ def _scope_boundary_sync(repo_root: Path) -> dict[str, Any]:
     return {
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
+        "surface_groups": {
+            "readme": {
+                "path": SCOPE_BOUNDARY_README.as_posix(),
+                **readme_surface,
+            },
+            "reports": {
+                "surface_count": len(report_surfaces),
+                "contract_pass_count": sum(1 for row in report_surfaces.values() if row["contract_pass"]),
+                "surfaces": report_surfaces,
+            },
+            "gui": {
+                "path": SCOPE_BOUNDARY_GUI.as_posix(),
+                **gui_contract,
+            },
+        },
         "doc_surfaces": doc_surfaces,
         "gui_surface": {
             "path": SCOPE_BOUNDARY_GUI.as_posix(),
@@ -180,8 +232,66 @@ def _scope_boundary_sync(repo_root: Path) -> dict[str, Any]:
         },
         "claim_boundary": (
             "This receipt checks that Developer Preview scope and exclusions remain visible "
-            "in README/current-state docs and that the GUI consumes the generated readiness "
+            "in README, report surfaces, and that the GUI consumes the generated readiness "
             "scope instead of relying only on hardcoded Commercial Release wording."
+        ),
+    }
+
+
+def _gap_ledger_closure_requirement_visibility(
+    product_snapshot: dict[str, Any],
+) -> dict[str, Any]:
+    components = _as_dict(product_snapshot.get("components"))
+    audit = _as_dict(components.get("gap_ledger_evidence_audit"))
+    split_summary = _as_dict(audit.get("ledger_split_summary"))
+    ledgers: dict[str, dict[str, Any]] = {}
+    total_failed_ids: list[str] = []
+    total_requirement_count = 0
+    total_pass_count = 0
+    total_fail_count = 0
+    total_nonclosed_failed_rows = 0
+    for ledger_name in ("commercial_solver", "ai_engine"):
+        row = _as_dict(split_summary.get(ledger_name))
+        failed_ids = [
+            str(item)
+            for item in _as_list(row.get("nonclosed_failed_closure_requirement_ids"))
+            if str(item)
+        ]
+        requirement_count = _as_int(row.get("closure_requirement_count"))
+        pass_count = _as_int(row.get("closure_requirement_pass_count"))
+        fail_count = _as_int(row.get("closure_requirement_fail_count"))
+        nonclosed_failed_rows = _as_int(
+            row.get("nonclosed_rows_with_failed_closure_requirements_count")
+        )
+        total_requirement_count += requirement_count
+        total_pass_count += pass_count
+        total_fail_count += fail_count
+        total_nonclosed_failed_rows += nonclosed_failed_rows
+        total_failed_ids.extend(failed_ids)
+        ledgers[ledger_name] = {
+            "row_count": _as_int(row.get("row_count")),
+            "nonclosed_row_count": _as_int(row.get("nonclosed_row_count")),
+            "closure_requirement_count": requirement_count,
+            "closure_requirement_pass_count": pass_count,
+            "closure_requirement_fail_count": fail_count,
+            "nonclosed_rows_with_failed_closure_requirements_count": nonclosed_failed_rows,
+            "nonclosed_failed_closure_requirement_ids": failed_ids,
+        }
+    return {
+        "source": "product_readiness_snapshot.components.gap_ledger_evidence_audit",
+        "source_status": str(audit.get("status", "missing")),
+        "source_contract_pass": bool(audit.get("contract_pass") is True),
+        "source_full_gap_ledger_ready": bool(audit.get("full_gap_ledger_ready") is True),
+        "closure_requirement_count": total_requirement_count,
+        "closure_requirement_pass_count": total_pass_count,
+        "closure_requirement_fail_count": total_fail_count,
+        "nonclosed_rows_with_failed_closure_requirements_count": total_nonclosed_failed_rows,
+        "nonclosed_failed_closure_requirement_ids": sorted(dict.fromkeys(total_failed_ids)),
+        "ledgers": ledgers,
+        "claim_boundary": (
+            "This is a visibility summary for existing gap-ledger closure requirements. "
+            "It does not add Developer Preview blockers, close G1/G6/G7, create external "
+            "receipts, or promote commercial readiness."
         ),
     }
 
@@ -282,6 +392,78 @@ def _source_file_rows(repo_root: Path, paths: list[Path]) -> list[dict[str, Any]
     return rows
 
 
+def _input_artifact_summary(
+    *,
+    path: Path,
+    payload: dict[str, Any],
+    checksums: dict[str, str],
+) -> dict[str, Any]:
+    return {
+        "path": path.as_posix(),
+        "present": bool(payload),
+        "schema_version": str(payload.get("schema_version", "missing")),
+        "status": str(payload.get("status", "missing")),
+        "source_commit_sha": payload.get("source_commit_sha"),
+        "input_checksum": checksums.get(str(path), "missing"),
+    }
+
+
+def _stable_payload_sha256(payload: Any) -> str:
+    encoded = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+def _product_snapshot_readiness_input(payload: dict[str, Any]) -> dict[str, Any]:
+    state_consistency = _as_dict(payload.get("state_consistency"))
+    worktree = _as_dict(state_consistency.get("worktree"))
+    return {
+        "schema_version": payload.get("schema_version"),
+        "status": payload.get("status"),
+        "schema_valid": payload.get("schema_valid"),
+        "evidence_fresh": payload.get("evidence_fresh"),
+        "release_ready": payload.get("release_ready"),
+        "blockers": payload.get("blockers", []),
+        "root_blockers": _as_dict(payload.get("root_blockers")),
+        "phase3_release_control_cleanup_plan": _as_dict(
+            worktree.get("phase3_release_control_cleanup_plan")
+        ),
+    }
+
+
+def _developer_preview_input_checksums(
+    *,
+    repo_root: Path,
+    product_snapshot_path: Path,
+    product_snapshot: dict[str, Any],
+    dataset_license_manifest_path: Path,
+) -> dict[str, str]:
+    dataset_checksums = input_checksums(
+        [dataset_license_manifest_path],
+        repo_root=repo_root,
+    )
+    product_checksum = (
+        _stable_payload_sha256(_product_snapshot_readiness_input(product_snapshot))
+        if product_snapshot
+        else "missing"
+    )
+    return dict(
+        sorted(
+            {
+                str(product_snapshot_path): product_checksum,
+                str(dataset_license_manifest_path): dataset_checksums.get(
+                    str(dataset_license_manifest_path),
+                    "missing",
+                ),
+            }.items()
+        )
+    )
+
+
 def _acquisition_policy_for_lanes(acquisition_plan: dict[str, Any], lanes: list[str]) -> dict[str, Any]:
     wanted = set(lanes)
     rows = [
@@ -338,16 +520,37 @@ def build_developer_preview_readiness(
     product_state = _as_dict(product_snapshot.get("state_consistency"))
     product_worktree = _as_dict(product_state.get("worktree"))
     scope_boundary_sync = _scope_boundary_sync(repo_root)
+    closure_requirement_visibility = _gap_ledger_closure_requirement_visibility(
+        product_snapshot
+    )
+    input_paths = [product_snapshot_path, dataset_license_manifest_path]
+    input_checksum_map = _developer_preview_input_checksums(
+        repo_root=repo_root,
+        product_snapshot_path=product_snapshot_path,
+        product_snapshot=product_snapshot,
+        dataset_license_manifest_path=dataset_license_manifest_path,
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": source_commit_sha or git_head(repo_root),
         "engine_version": engine_version(repo_root),
-        "input_checksums": input_checksums(
-            [product_snapshot_path, dataset_license_manifest_path],
-            repo_root=repo_root,
-        ),
+        "input_checksums": input_checksum_map,
         "reused_evidence": False,
+        "reuse_policy": REUSE_POLICY,
+        "input_checksum_policy": INPUT_CHECKSUM_POLICY,
+        "input_artifacts": {
+            "product_readiness_snapshot": _input_artifact_summary(
+                path=product_snapshot_path,
+                payload=product_snapshot,
+                checksums=input_checksum_map,
+            ),
+            "dataset_license_manifest": _input_artifact_summary(
+                path=dataset_license_manifest_path,
+                payload=manifest,
+                checksums=input_checksum_map,
+            ),
+        },
         "product_snapshot_schema_version": product_snapshot.get("schema_version", PRODUCT_SNAPSHOT_SCHEMA_VERSION),
         "product_snapshot_status": product_snapshot.get("status", "missing"),
         "developer_preview_ready": developer_preview_ready,
@@ -378,12 +581,15 @@ def build_developer_preview_readiness(
                 product_worktree.get("phase3_release_control_cleanup_plan")
             ),
         },
+        "gap_ledger_closure_requirement_visibility": closure_requirement_visibility,
         "scope_boundary_sync": scope_boundary_sync,
         "claim_boundary": (
             "Developer Preview is an open benchmark workstation preview, not a commercial "
             "structural solver beta. Customer shadow, commercial license/legal approval, "
             "commercial SLA, 30-run CI streak, and external approval receipts remain visible "
-            "as future Commercial Release blockers but do not block Developer Preview."
+            "as future Commercial Release blockers but do not block Developer Preview. "
+            "AI/GNN/surrogate truth claims stay frozen until the deterministic reference "
+            "solver, residual/Jacobian/Newton closure, and benchmark truth are fixed."
         ),
         "artifacts": {
             "product_readiness_snapshot": str(product_snapshot_path),
@@ -426,12 +632,13 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "developer_preview_bundle_policy": "repo_generated_cases_may_be_bundled",
             "checksum_status": "complete_repo_generated_seed_manifest_and_factory_sources",
             "source_checksum_policy": (
-                "Repo-generated analytic/component cases carry per-case checksums in the "
-                "Phase 3 seed manifest and source-file checksums for the generator path."
+                "Repo-generated analytic/component/material-mesh seed cases carry per-case "
+                "checksums in the Phase 3 seed manifest and source-file checksums for the "
+                "generator path."
             ),
             "source_files": analytic_source_file_rows,
             "expected_outputs_status": "attached_for_seed_cases",
-            "selected_benchmark_lanes": ["analytic-small", "element-patch"],
+            "selected_benchmark_lanes": list(REPO_GENERATED_SEED_LANES),
             "status": "planned",
         },
         {
@@ -563,10 +770,115 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         status = str(row["checksum_status"])
         checksum_status_counts[status] = checksum_status_counts.get(status, 0) + 1
     covered_lanes = sorted({lane for row in sources for lane in row["selected_benchmark_lanes"]})
-    blockers = [
-        "dataset_license_manifest:authoritative_source_checksums_pending=4",
-        "dataset_license_manifest:license_or_redistribution_review_pending",
-        "dataset_license_manifest:expected_outputs_pending",
+    repo_generated_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if row["developer_preview_bundle_policy"] == "repo_generated_cases_may_be_bundled"
+    ]
+    non_bundled_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if row["developer_preview_bundle_policy"] != "repo_generated_cases_may_be_bundled"
+    ]
+    authoritative_checksum_complete_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if str(row["checksum_status"]).startswith("complete_")
+    ]
+    authoritative_checksum_pending_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if row["source_id"] not in authoritative_checksum_complete_source_ids
+    ]
+    expected_outputs_attached_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if str(row["expected_outputs_status"]).startswith("attached_")
+    ]
+    expected_outputs_pending_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if row["source_id"] not in expected_outputs_attached_source_ids
+    ]
+    redistribution_allowed_source_ids = [
+        str(row["source_id"]) for row in sources if row["redistribution_allowed"] is True
+    ]
+    redistribution_pending_source_ids = [
+        str(row["source_id"]) for row in sources if row["redistribution_allowed"] is not True
+    ]
+    required_phase3_lanes = set(PHASE3_BENCHMARK_LANES)
+    covered_lane_set = set(covered_lanes)
+    phase3_lane_coverage_contract_pass = required_phase3_lanes.issubset(covered_lane_set)
+    extra_seed_lanes = sorted(covered_lane_set.difference(required_phase3_lanes))
+    repo_generated_seed_contract_pass = bool(
+        phase3_lane_coverage_contract_pass
+        and repo_generated_source_ids
+        and sorted(repo_generated_source_ids) == sorted(redistribution_allowed_source_ids)
+        and set(repo_generated_source_ids).issubset(authoritative_checksum_complete_source_ids)
+        and set(repo_generated_source_ids).issubset(expected_outputs_attached_source_ids)
+    )
+    external_corpus_blockers = [
+        "phase3_external_corpus:authoritative_source_checksums_pending="
+        f"{len(authoritative_checksum_pending_source_ids)}",
+        "phase3_external_corpus:license_or_redistribution_review_pending",
+        "phase3_external_corpus:expected_outputs_pending",
+    ]
+    manifest_policy_contract = {
+        "status": "ready",
+        "contract_pass": True,
+        "policy_fixed": True,
+        "phase3_lane_coverage_contract_pass": phase3_lane_coverage_contract_pass,
+        "required_phase3_corpus_lanes": sorted(PHASE3_BENCHMARK_LANES),
+        "additional_repo_generated_seed_lanes": extra_seed_lanes,
+        "developer_preview_seed_contract": {
+            "status": "ready" if repo_generated_seed_contract_pass else "blocked",
+            "contract_pass": repo_generated_seed_contract_pass,
+            "bundle_eligible_source_ids": repo_generated_source_ids,
+            "required_checks": [
+                "repo_generated_license",
+                "source_checksums",
+                "per_case_seed_checksums",
+                "expected_outputs_attached",
+                "non_bundled_external_sources_visible",
+            ],
+        },
+        "repo_generated_bundle_source_ids": repo_generated_source_ids,
+        "non_bundled_source_ids": non_bundled_source_ids,
+        "redistribution_allowed_source_ids": redistribution_allowed_source_ids,
+        "redistribution_pending_source_ids": redistribution_pending_source_ids,
+        "authoritative_checksum_complete_source_ids": authoritative_checksum_complete_source_ids,
+        "authoritative_checksum_pending_source_ids": authoritative_checksum_pending_source_ids,
+        "expected_outputs_attached_source_ids": expected_outputs_attached_source_ids,
+        "expected_outputs_pending_source_ids": expected_outputs_pending_source_ids,
+        "pending_counts": {
+            "authoritative_source_checksums_pending": len(
+                authoritative_checksum_pending_source_ids
+            ),
+            "license_or_redistribution_pending": len(redistribution_pending_source_ids),
+            "expected_outputs_pending": len(expected_outputs_pending_source_ids),
+        },
+        "claim_boundary": (
+            "The Developer Preview dataset/license manifest is fixed for the bundled "
+            "repo-generated seed corpus. External OpenSees, buildingSMART, IFC query, "
+            "and commercial/operator sources remain non-bundled until authoritative "
+            "checksum, license, and expected-output evidence exists."
+        ),
+    }
+    phase3_external_corpus_readiness = {
+        "status": "blocked",
+        "contract_pass": False,
+        "blockers": external_corpus_blockers,
+        "authoritative_checksum_pending_source_ids": authoritative_checksum_pending_source_ids,
+        "redistribution_pending_source_ids": redistribution_pending_source_ids,
+        "expected_outputs_pending_source_ids": expected_outputs_pending_source_ids,
+        "claim_boundary": (
+            "These blockers prevent full Phase 3 corpus quantity credit and Developer "
+            "Preview RC final-gate promotion, but they do not block the seed-only "
+            "dataset/license manifest deliverable."
+        ),
+    }
+    blockers = [] if repo_generated_seed_contract_pass else [
+        "dataset_license_manifest:repo_generated_seed_contract_not_ready"
     ]
     return {
         "schema_version": "developer-preview-dataset-license-manifest.v1",
@@ -598,17 +910,20 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             repo_root=repo_root,
         ),
         "reused_evidence": False,
-        "status": "blocked",
-        "contract_pass": False,
+        "status": "ready" if repo_generated_seed_contract_pass else "blocked",
+        "contract_pass": repo_generated_seed_contract_pass,
         "dataset_count": len(sources),
         "truth_classes": sorted({str(row["truth_class"]) for row in sources}),
         "checksum_status_counts": dict(sorted(checksum_status_counts.items())),
+        "manifest_policy_contract": manifest_policy_contract,
+        "phase3_external_corpus_readiness": phase3_external_corpus_readiness,
         "phase3_lane_coverage": {
             "covered_lane_count": len(covered_lanes),
             "required_lane_count": len(PHASE3_BENCHMARK_LANES),
             "covered_lanes": covered_lanes,
             "missing_lanes": sorted(set(PHASE3_BENCHMARK_LANES).difference(covered_lanes)),
-            "contract_pass": covered_lanes == sorted(PHASE3_BENCHMARK_LANES),
+            "additional_repo_generated_seed_lanes": extra_seed_lanes,
+            "contract_pass": phase3_lane_coverage_contract_pass,
         },
         "phase3_acquisition_plan": {
             "status": phase3_acquisition_plan.get("status"),
@@ -628,8 +943,9 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "sources": sources,
         "blockers": blockers,
         "claim_boundary": (
-            "This manifest fixes Developer Preview dataset/license policy. It does not bundle "
-            "upstream OpenSees, buildingSMART, or commercial solver data and does not grant "
+            "This manifest fixes Developer Preview dataset/license policy for the bundled "
+            "repo-generated seed corpus. It does not bundle upstream OpenSees, "
+            "buildingSMART, IFC query, or commercial solver data and does not grant "
             "commercial redistribution rights."
         ),
     }
@@ -643,6 +959,12 @@ def _markdown(payload: dict[str, Any]) -> str:
     included = scope.get("included") if isinstance(scope.get("included"), list) else []
     excluded = scope.get("excluded") if isinstance(scope.get("excluded"), list) else []
     freeze_policy = scope.get("freeze_policy") if isinstance(scope.get("freeze_policy"), dict) else {}
+    closure_visibility = _as_dict(payload.get("gap_ledger_closure_requirement_visibility"))
+    failed_requirement_ids = [
+        str(item)
+        for item in _as_list(closure_visibility.get("nonclosed_failed_closure_requirement_ids"))
+        if str(item)
+    ]
     lines = [
         "# Open Benchmark Developer Preview Readiness",
         "",
@@ -652,6 +974,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `blocker_count`: `{payload.get('blocker_count')}`",
         f"- `future_commercial_blocker_count`: `{payload.get('future_commercial_blocker_count')}`",
         f"- `source_commit_sha`: `{payload.get('source_commit_sha')}`",
+        f"- `reuse_policy`: `{payload.get('reuse_policy')}`",
+        f"- `input_checksum_policy`: `{payload.get('input_checksum_policy')}`",
         "",
         "## Blocker Categories",
         "",
@@ -665,6 +989,44 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| {category} | {int(row.get('blocker_count', 0) or 0)} | "
             f"{'no, future commercial only' if category == 'future commercial' else 'yes'} |"
         )
+    lines.extend(
+        [
+            "",
+            "## Gap Ledger Closure Requirement Visibility",
+            "",
+            f"- `source_status`: `{closure_visibility.get('source_status', 'missing')}`",
+            f"- `source_full_gap_ledger_ready`: `{closure_visibility.get('source_full_gap_ledger_ready', False)}`",
+            f"- `closure_requirements`: `{closure_visibility.get('closure_requirement_pass_count', 0)}/"
+            f"{closure_visibility.get('closure_requirement_count', 0)}`",
+            f"- `failed_closure_requirements`: `{closure_visibility.get('closure_requirement_fail_count', 0)}`",
+            f"- `nonclosed_rows_with_failed_closure_requirements`: "
+            f"`{closure_visibility.get('nonclosed_rows_with_failed_closure_requirements_count', 0)}`",
+        ]
+    )
+    if failed_requirement_ids:
+        lines.extend(["", "Failed requirement IDs:"])
+        lines.extend(f"- `{item}`" for item in failed_requirement_ids)
+    if closure_visibility.get("claim_boundary"):
+        lines.extend(["", str(closure_visibility.get("claim_boundary"))])
+    lines.extend(
+        [
+            "",
+            "## Scope Boundary Summary",
+            "",
+            (
+                "Developer Preview scope: public/open benchmark import, "
+                "deterministic analysis/reporting, benchmark scorecard, and local GUI review."
+            ),
+            (
+                "Excluded scope: permit automation, engineer replacement, "
+                "SaaS/account/license server, commercial SLA, and AI/GNN/surrogate truth claims."
+            ),
+            (
+                "Future Commercial Release blockers: customer shadow, license approval, "
+                "commercial SLA, 30-run CI streak, and external approval receipts."
+            ),
+        ]
+    )
     lines.extend(["", "## Included Scope", ""])
     lines.extend(f"- {item}" for item in included if isinstance(item, str))
     lines.extend(["", "## Excluded Scope", ""])

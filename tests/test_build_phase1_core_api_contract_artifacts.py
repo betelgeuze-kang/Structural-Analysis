@@ -77,6 +77,18 @@ def test_contract_artifacts_are_generated_from_core_api_path(tmp_path: Path) -> 
     assert cli_contract["report_input_checksum"] == report["input_checksum"]
     assert cli_contract["result_claim_boundary_version"] == "developer-preview-core-api-v1"
     assert cli_contract["report_claim_boundary_version"] == "developer-preview-core-api-v1"
+    reference_contract = summary["reference_validation_contract"]
+    assert reference_contract["status"] == "ready"
+    assert reference_contract["contract_pass"] is True
+    assert reference_contract["python_api_blocks_reference_mismatch"] is True
+    assert reference_contract["cli_blocks_reference_mismatch"] is True
+    assert reference_contract["python_api_blocked_fields"] == [
+        "reference_mismatch:node_count"
+    ]
+    assert reference_contract["cli_blocked_fields"] == [
+        "reference_mismatch:node_count"
+    ]
+    assert reference_contract["mismatch_field"] == "node_count"
     schema_validation = summary["schema_validation"]
     assert schema_validation["contract_pass"] is True
     assert schema_validation["result_schema"] == "src/structural_analysis/schemas/result.schema.json"
@@ -102,6 +114,7 @@ def test_contract_artifacts_are_generated_from_core_api_path(tmp_path: Path) -> 
         "nonlinear_static_material_mesh_axial_chain",
     ]
     assert "CLI emits the same JSON envelopes as the Python API" in summary["claim_boundary"]
+    assert "Reference mismatches are blocking validation outcomes" in summary["claim_boundary"]
     assert "narrow axial-truss linear_static" in summary["claim_boundary"]
     assert "1D material-mesh nonlinear_static preview paths" in summary["claim_boundary"]
     assert "do not close general linear frame/shell" in summary["claim_boundary"]

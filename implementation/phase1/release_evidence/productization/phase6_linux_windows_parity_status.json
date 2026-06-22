@@ -1,0 +1,210 @@
+{
+  "blocked_by": [
+    "git_clean_clone_reproduction_not_passed",
+    "linux_windows_parity_receipts_missing",
+    "platform_replay_receipt_missing:linux",
+    "platform_replay_receipt_missing:windows"
+  ],
+  "claim_boundary": "This receipt defines and checks the Linux/Windows platform replay evidence required for the Developer Preview RC parity gate. It does not prove parity until independent passing Linux and Windows receipts are attached, and it does not replace the separate git clean-clone reproduction gate.",
+  "comparison_requirements": [
+    "same source_commit_sha or explicit commit mapping",
+    "same expected_scorecard.case_count",
+    "same expected_scorecard.pass_count",
+    "same expected_scorecard.lane_case_counts",
+    "same residual_formula",
+    "stable manifest and scorecard SHA256 values",
+    "working_tree_clean=true and local_dirty_inputs=[]"
+  ],
+  "contract_pass": false,
+  "current_platform_receipts": [],
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "expected_scorecard": {
+    "case_count": 30,
+    "expected_output_comparison_count": 88,
+    "expected_output_comparison_pass_count": 88,
+    "expected_output_contract_pass": true,
+    "fallback_used": false,
+    "lane_case_counts": {
+      "analytic-small": 20,
+      "element-patch": 6,
+      "nonlinear-material-mesh": 4
+    },
+    "lanes": [
+      "analytic-small",
+      "element-patch",
+      "nonlinear-material-mesh"
+    ],
+    "pass_count": 30,
+    "regularization_used": false,
+    "residual_formula": "F_internal_minus_F_external",
+    "status": "pass"
+  },
+  "expected_stable_artifact_checksums": {
+    "acquisition_plan": "sha256:eab702070ce3b2ae61e0680e2a318ccf7b50ff5a1a314c6307664d7ca5798c9a",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:117fa9054f7ce6214da91e7bcda9229b73f70f9fbaa21d5f554a5f468c5e9bd5",
+    "buildingsmart_ifc_acquisition_receipt": "sha256:79c35101bfccff07441b87b7a7dfdbcd1cf8303ea3377883b3b10cc83787ed4b",
+    "commercial_comparison_import_template": "sha256:7b7136a1f0035f31db23485ae3feb5e6ec62201caf256f2c5812a4ad153125b8",
+    "commercial_operator_reference_contract": "sha256:63cfb49ae92b1d8be313f9e1d24d7d5a181f6ce15128790bc4fe318840a76274",
+    "commercial_operator_reference_ingest_validator": "sha256:abaa50a2264c4f8c3f99d9b6dd76913325bca3d73aec773ae840ac8fcbc09439",
+    "ifc_import_health_execution_receipt": "sha256:1263e2706b497c6ef2ebf8aeecf400b0d69b599ac23dc75963fb2df517b82813",
+    "ifc_source_license_receipt": "sha256:7c365f672e13d7f7184b0875f77a6fa146ed57a29dac60aa8b11c7a4e4073c4f",
+    "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "opensees_source_license_receipt": "sha256:d74dbe004cc0b6a272626e226bb97a9b7c88c1163cad590bb159154d36e5b785",
+    "phase4_analytic_physical_fallback_scorecard": "sha256:26df6cae6c317802e274e818867e692ede4be79d9fc5c10d8562108a6ffffa91",
+    "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "summary": "sha256:74ef692c3d803cbb8b132a696778ee228ab882bf34946cb011b28dc023b836be"
+  },
+  "generated_at": "2026-06-22T20:01:50.986967+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:46c3794fa92fee6073f8e11ffdd35281ab805c7cd56cf0e38370472b186f51cf",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:1e5338b07fbd33fc1554276e7ca83b16e80c806c9848e592be036a0be29c8329",
+    "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json": "missing",
+    "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json": "missing",
+    "scripts/build_phase6_linux_windows_parity_status.py": "sha256:92c992257ac23fafd8a8c0798d5f47e7b7f855bda54ae23f1497157321dfd356"
+  },
+  "missing_platform_receipts": [
+    "linux",
+    "windows"
+  ],
+  "owner_action": "Attach passing Linux and Windows platform replay receipts from the same tracked source state, then rerun this parity status receipt before promoting the RC parity gate.",
+  "parity_comparison_contract": {
+    "blocked_platforms": [],
+    "checksum_keys": [
+      "acquisition_plan",
+      "buildingsmart_dirty_ifc_acquisition_receipt",
+      "buildingsmart_ifc_acquisition_receipt",
+      "commercial_comparison_import_template",
+      "commercial_operator_reference_contract",
+      "commercial_operator_reference_ingest_validator",
+      "ifc_import_health_execution_receipt",
+      "ifc_source_license_receipt",
+      "manifest",
+      "opensees_source_license_receipt",
+      "phase4_analytic_physical_fallback_scorecard",
+      "scorecard",
+      "summary"
+    ],
+    "contract_pass": false,
+    "current_platform_receipt_count": 0,
+    "local_dirty_inputs_allowed": false,
+    "missing_platforms": [
+      "linux",
+      "windows"
+    ],
+    "required_platform_receipt_count": 2,
+    "required_platforms": [
+      "linux",
+      "windows"
+    ],
+    "scorecard_identity_fields": [
+      "case_count",
+      "pass_count",
+      "expected_output_comparison_count",
+      "expected_output_comparison_pass_count",
+      "lane_case_counts"
+    ]
+  },
+  "platform_receipt_paths": {
+    "linux": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+    "windows": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json"
+  },
+  "platform_receipt_schema": "phase6-linux-windows-platform-replay-receipt.v1",
+  "platform_receipt_template": {
+    "commands": [
+      {
+        "command": "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+        "return_code": 0
+      },
+      {
+        "command": "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+        "return_code": 0
+      }
+    ],
+    "contract_pass": false,
+    "expected_scorecard": {
+      "case_count": 30,
+      "expected_output_comparison_count": 88,
+      "expected_output_comparison_pass_count": 88,
+      "expected_output_contract_pass": true,
+      "fallback_used": false,
+      "lane_case_counts": {
+        "analytic-small": 20,
+        "element-patch": 6,
+        "nonlinear-material-mesh": 4
+      },
+      "lanes": [
+        "analytic-small",
+        "element-patch",
+        "nonlinear-material-mesh"
+      ],
+      "pass_count": 30,
+      "regularization_used": false,
+      "residual_formula": "F_internal_minus_F_external",
+      "status": "pass"
+    },
+    "local_dirty_inputs": [],
+    "node_version": "OPERATOR_RECORDED_NODE_VERSION",
+    "os_name": "OPERATOR_RECORDED_OS_NAME",
+    "os_version": "OPERATOR_RECORDED_OS_VERSION",
+    "platform": "linux|windows",
+    "python_version": "OPERATOR_RECORDED_PYTHON_VERSION",
+    "schema_version": "phase6-linux-windows-platform-replay-receipt.v1",
+    "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+    "stable_artifact_checksums": {
+      "acquisition_plan": "sha256:eab702070ce3b2ae61e0680e2a318ccf7b50ff5a1a314c6307664d7ca5798c9a",
+      "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:117fa9054f7ce6214da91e7bcda9229b73f70f9fbaa21d5f554a5f468c5e9bd5",
+      "buildingsmart_ifc_acquisition_receipt": "sha256:79c35101bfccff07441b87b7a7dfdbcd1cf8303ea3377883b3b10cc83787ed4b",
+      "commercial_comparison_import_template": "sha256:7b7136a1f0035f31db23485ae3feb5e6ec62201caf256f2c5812a4ad153125b8",
+      "commercial_operator_reference_contract": "sha256:63cfb49ae92b1d8be313f9e1d24d7d5a181f6ce15128790bc4fe318840a76274",
+      "commercial_operator_reference_ingest_validator": "sha256:abaa50a2264c4f8c3f99d9b6dd76913325bca3d73aec773ae840ac8fcbc09439",
+      "ifc_import_health_execution_receipt": "sha256:1263e2706b497c6ef2ebf8aeecf400b0d69b599ac23dc75963fb2df517b82813",
+      "ifc_source_license_receipt": "sha256:7c365f672e13d7f7184b0875f77a6fa146ed57a29dac60aa8b11c7a4e4073c4f",
+      "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+      "opensees_source_license_receipt": "sha256:d74dbe004cc0b6a272626e226bb97a9b7c88c1163cad590bb159154d36e5b785",
+      "phase4_analytic_physical_fallback_scorecard": "sha256:26df6cae6c317802e274e818867e692ede4be79d9fc5c10d8562108a6ffffa91",
+      "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+      "summary": "sha256:74ef692c3d803cbb8b132a696778ee228ab882bf34946cb011b28dc023b836be"
+    },
+    "working_tree_clean": true
+  },
+  "platform_rows": [
+    {
+      "blockers": [
+        "platform_replay_receipt_missing:linux"
+      ],
+      "contract_pass": false,
+      "platform": "linux",
+      "receipt_path": "implementation/phase1/release_evidence/productization/phase6_linux_platform_replay_receipt.json",
+      "receipt_present": false,
+      "status": "missing"
+    },
+    {
+      "blockers": [
+        "platform_replay_receipt_missing:windows"
+      ],
+      "contract_pass": false,
+      "platform": "windows",
+      "receipt_path": "implementation/phase1/release_evidence/productization/phase6_windows_platform_replay_receipt.json",
+      "receipt_present": false,
+      "status": "missing"
+    }
+  ],
+  "required_commands": [
+    "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+    "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
+    "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
+    "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
+    "python3 scripts/build_phase6_linux_windows_parity_status.py --check"
+  ],
+  "required_platforms": [
+    "linux",
+    "windows"
+  ],
+  "reuse_policy": "phase6_parity_status_aggregates_phase3_seed_replay_expectations",
+  "reused_evidence": true,
+  "schema_version": "phase6-linux-windows-parity-status.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "status": "blocked",
+  "summary_line": "Phase 6 Linux/Windows parity: BLOCKED | receipts=0/2 | missing=linux,windows"
+}

@@ -151,6 +151,10 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         current_state=Path("docs/commercialization-gap-current-state.md"),
         pm_report=Path("pm_release_gate_report.json"),
         gap_closure_status=Path("gap_closure_status.json"),
+        commercial_gap_ledger_status=Path("commercial_gap_ledger_status.json"),
+        gap_ledger_evidence_audit=Path("gap_ledger_evidence_audit.json"),
+        developer_preview_readiness=Path("developer_preview_readiness.json"),
+        developer_preview_rc_status=Path("developer_preview_rc_status.json"),
         fresh_full_validation=Path("fresh_full_validation_lane_status.json"),
         g1_terminal_gate=Path("mgt_g1_direct_residual_terminal_gate_report.json"),
         g1_full_load_hip_newton_lane=Path("g1_full_load_hip_newton_lane_report.json"),
@@ -180,6 +184,159 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "input_checksums": {"gaps.md": "sha256:abc123"},
         "reused_evidence": True,
         "contract_pass": True,
+    })
+    _write_json(tmp_path / "commercial_gap_ledger_status.json", {
+        "schema_version": "commercial-gap-ledger-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
+            "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
+            "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
+        },
+        "reused_evidence": True,
+        "reuse_policy": (
+            "summarizes_existing_gap_ledgers_and_productization_receipts; "
+            "does_not_create_authoritative_closure_evidence"
+        ),
+        "status": "closed",
+        "commercial_solver_gap_ready": True,
+        "ai_engine_gap_ready": True,
+        "full_gap_ledger_ready": True,
+        "summary": {
+            "total_count": 20,
+            "closed_count": 20,
+            "partial_count": 0,
+            "open_count": 0,
+            "external_blocked_count": 0,
+            "locally_closable_open_count": 0,
+        },
+        "blockers": [],
+        "next_locally_closable_gaps": [],
+        "rows": [
+            {
+                "id": f"G{index}",
+                "ledger": "commercial_solver",
+                "status": "closed",
+                "closed": True,
+                "locally_closable": False,
+                "blockers": [],
+            }
+            for index in range(1, 11)
+        ] + [
+            {
+                "id": f"AI-G{index}",
+                "ledger": "ai_engine",
+                "status": "closed",
+                "closed": True,
+                "locally_closable": False,
+                "blockers": [],
+            }
+            for index in range(1, 11)
+        ],
+    })
+    _write_json(tmp_path / "gap_ledger_evidence_audit.json", {
+        "schema_version": "gap-ledger-evidence-audit.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
+        "reused_evidence": True,
+        "status": "ready",
+        "contract_pass": True,
+        "ledger_status": "closed",
+        "full_gap_ledger_ready": True,
+        "row_count": 20,
+        "closed_row_count": 20,
+        "nonclosed_row_count": 0,
+        "row_outcomes": [
+            {
+                "id": f"G{index}",
+                "ledger": "commercial_solver",
+                "closed": True,
+                "evidence_present": True,
+                "blocker_count": 0,
+                "claim_boundary_present": True,
+            }
+            for index in range(1, 11)
+        ] + [
+            {
+                "id": f"AI-G{index}",
+                "ledger": "ai_engine",
+                "closed": True,
+                "evidence_present": True,
+                "blocker_count": 0,
+                "claim_boundary_present": True,
+            }
+            for index in range(1, 11)
+        ],
+        "blockers": [],
+        "claim_boundary": (
+            "Fixture audit verifies row evidence visibility only; it does not "
+            "create commercial release readiness."
+        ),
+    })
+    _write_json(tmp_path / "developer_preview_readiness.json", {
+        "schema_version": "developer-preview-readiness.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
+        "reused_evidence": False,
+        "status": "ready",
+        "developer_preview_ready": True,
+        "blocker_count": 0,
+        "blockers": [],
+        "future_commercial_blocker_count": 4,
+        "future_commercial_blockers": [
+            "customer_shadow::future_commercial_only",
+            "license::future_commercial_only",
+            "sla::future_commercial_only",
+            "external_approval::future_commercial_only",
+        ],
+        "categories": {
+            "numerical": {"blocked": False, "blocker_count": 0, "blockers": []},
+            "benchmark": {"blocked": False, "blocker_count": 0, "blockers": []},
+            "software product": {"blocked": False, "blocker_count": 0, "blockers": []},
+            "future commercial": {
+                "blocked": True,
+                "blocker_count": 4,
+                "blockers": [
+                    "customer_shadow::future_commercial_only",
+                    "license::future_commercial_only",
+                    "sla::future_commercial_only",
+                    "external_approval::future_commercial_only",
+                ],
+            },
+        },
+        "scope": {
+            "freeze_policy": {
+                "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+                "gpu_hip": "performance_track_after_cpu_reference_parity",
+                "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
+            },
+        },
+        "claim_boundary": (
+            "Fixture Developer Preview receipt; future Commercial Release blockers "
+            "remain visible but do not block the preview."
+        ),
+    })
+    _write_json(tmp_path / "developer_preview_rc_status.json", {
+        "schema_version": "developer-preview-rc-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
+        "reused_evidence": False,
+        "status": "ready",
+        "contract_pass": True,
+        "deliverable_count": 10,
+        "deliverable_pass_count": 10,
+        "final_gate_count": 9,
+        "final_gate_pass_count": 9,
+        "blockers": [],
+        "claim_boundary": (
+            "Fixture Developer Preview RC receipt; component status is informational "
+            "inside the paid-pilot snapshot."
+        ),
     })
     _write_json(tmp_path / "workstation_delivery_readiness.json", {
         "schema_version": "workstation-delivery-readiness.v1",
@@ -338,6 +495,10 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "source_commit_sha": commit,
         "status": "ready",
         "contract_pass": True,
+        "candidate_set_source": "",
+        "candidate_set_scope": "",
+        "current_worktree_diagnostics_included": False,
+        "current_worktree_diagnostic_source": "",
         "candidate_release_control_commit_set_count": 0,
         "path_role_counts": {},
         "recommended_action_counts": {},
@@ -626,6 +787,133 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["independent_product_ready"] is True
     assert payload["ga_enterprise_ready"] is True
     assert payload["release_ready"] is True
+    metadata_by_artifact = {
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
+    }
+    assert metadata_by_artifact["commercial_gap_ledger_status"]["metadata_complete"] is True
+    assert (
+        metadata_by_artifact["commercial_gap_ledger_status"]["input_checksum_present"]
+        is True
+    )
+    assert payload["components"]["commercial_gap_ledger_status"] == {
+        "status": "closed",
+        "commercial_solver_gap_ready": True,
+        "ai_engine_gap_ready": True,
+        "full_gap_ledger_ready": True,
+        "summary": {
+            "total_count": 20,
+            "closed_count": 20,
+            "partial_count": 0,
+            "open_count": 0,
+            "external_blocked_count": 0,
+            "locally_closable_open_count": 0,
+        },
+        "ledger_split_summary": {
+            "ai_engine": {
+                "row_count": 10,
+                "status_counts": {"closed": 10},
+                "nonclosed_row_ids": [],
+                "locally_closable_nonclosed_row_ids": [],
+            },
+            "commercial_solver": {
+                "row_count": 10,
+                "status_counts": {"closed": 10},
+                "nonclosed_row_ids": [],
+                "locally_closable_nonclosed_row_ids": [],
+            },
+        },
+        "blocker_count": 0,
+        "blockers": [],
+        "next_locally_closable_gaps": [],
+        "ready": True,
+    }
+    assert payload["components"]["gap_ledger_evidence_audit"] == {
+        "status": "ready",
+        "contract_pass": True,
+        "ledger_status": "closed",
+        "full_gap_ledger_ready": True,
+        "row_count": 20,
+        "closed_row_count": 20,
+        "nonclosed_row_count": 0,
+        "ledger_split_summary": {
+            "ai_engine": {
+                "row_count": 10,
+                "closed_row_count": 10,
+                "nonclosed_row_count": 0,
+                "evidence_present_count": 10,
+                "claim_boundary_present_count": 10,
+                "nonclosed_rows_with_blockers_count": 0,
+                "closure_requirement_count": 0,
+                "closure_requirement_pass_count": 0,
+                "closure_requirement_fail_count": 0,
+                "nonclosed_rows_with_failed_closure_requirements_count": 0,
+                "missing_evidence_ids": [],
+                "missing_claim_boundary_ids": [],
+                "nonclosed_missing_blocker_ids": [],
+                "nonclosed_failed_closure_requirement_ids": [],
+            },
+            "commercial_solver": {
+                "row_count": 10,
+                "closed_row_count": 10,
+                "nonclosed_row_count": 0,
+                "evidence_present_count": 10,
+                "claim_boundary_present_count": 10,
+                "nonclosed_rows_with_blockers_count": 0,
+                "closure_requirement_count": 0,
+                "closure_requirement_pass_count": 0,
+                "closure_requirement_fail_count": 0,
+                "nonclosed_rows_with_failed_closure_requirements_count": 0,
+                "missing_evidence_ids": [],
+                "missing_claim_boundary_ids": [],
+                "nonclosed_missing_blocker_ids": [],
+                "nonclosed_failed_closure_requirement_ids": [],
+            },
+        },
+        "blocker_count": 0,
+        "blockers": [],
+        "claim_boundary": (
+            "Fixture audit verifies row evidence visibility only; it does not "
+            "create commercial release readiness."
+        ),
+        "ready": True,
+    }
+    assert payload["components"]["developer_preview_readiness"] == {
+        "status": "ready",
+        "developer_preview_ready": True,
+        "blocker_count": 0,
+        "future_commercial_blocker_count": 4,
+        "category_counts": {
+            "benchmark": 0,
+            "future commercial": 4,
+            "numerical": 0,
+            "software product": 0,
+        },
+        "freeze_policy": {
+            "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+            "gpu_hip": "performance_track_after_cpu_reference_parity",
+            "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
+        },
+        "claim_boundary": (
+            "Fixture Developer Preview receipt; future Commercial Release blockers "
+            "remain visible but do not block the preview."
+        ),
+        "ready": True,
+    }
+    assert payload["components"]["developer_preview_rc"] == {
+        "status": "ready",
+        "contract_pass": True,
+        "deliverable_count": 10,
+        "deliverable_pass_count": 10,
+        "final_gate_count": 9,
+        "final_gate_pass_count": 9,
+        "blocker_count": 0,
+        "blockers": [],
+        "claim_boundary": (
+            "Fixture Developer Preview RC receipt; component status is informational "
+            "inside the paid-pilot snapshot."
+        ),
+        "ready": True,
+    }
     assert payload["blocker_count"] == 0
     assert payload["blockers"] == []
     assert set(payload["root_blockers"]) == {
@@ -647,6 +935,398 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert all(
         row["blocked"] is False and row["blocker_count"] == 0
         for row in payload["blocker_categories"].values()
+    )
+
+
+def test_snapshot_attaches_open_gap_ledger_audit_without_release_promotion(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "commercial_gap_ledger_status.json", {
+        "schema_version": "commercial-gap-ledger-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
+            "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
+            "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
+        },
+        "reused_evidence": True,
+        "reuse_policy": (
+            "summarizes_existing_gap_ledgers_and_productization_receipts; "
+            "does_not_create_authoritative_closure_evidence"
+        ),
+        "status": "open",
+        "commercial_solver_gap_ready": False,
+        "ai_engine_gap_ready": False,
+        "full_gap_ledger_ready": False,
+        "summary": {
+            "total_count": 20,
+            "closed_count": 17,
+            "partial_count": 2,
+            "open_count": 0,
+            "external_blocked_count": 1,
+            "locally_closable_open_count": 1,
+        },
+        "blockers": [
+            "G1:full_mesh_nonlinear_equilibrium_not_closed",
+            "G6:external_submission_receipts_pending",
+        ],
+        "next_locally_closable_gaps": ["G1"],
+        "rows": [
+            {
+                "id": "G1",
+                "ledger": "commercial_solver",
+                "status": "partial",
+                "closed": False,
+                "locally_closable": True,
+                "blockers": ["full_mesh_nonlinear_equilibrium_not_closed"],
+            },
+            {
+                "id": "G6",
+                "ledger": "commercial_solver",
+                "status": "external_blocked",
+                "closed": False,
+                "locally_closable": False,
+                "blockers": ["external_submission_receipts_pending"],
+            },
+            {
+                "id": "G7",
+                "ledger": "commercial_solver",
+                "status": "partial",
+                "closed": False,
+                "locally_closable": False,
+                "blockers": ["operator_attached_real_project_evidence_missing"],
+            },
+            *[
+                {
+                    "id": f"G{index}",
+                    "ledger": "commercial_solver",
+                    "status": "closed",
+                    "closed": True,
+                    "locally_closable": False,
+                    "blockers": [],
+                }
+                for index in (2, 3, 4, 5, 8, 9, 10)
+            ],
+            *[
+                {
+                    "id": f"AI-G{index}",
+                    "ledger": "ai_engine",
+                    "status": "closed",
+                    "closed": True,
+                    "locally_closable": False,
+                    "blockers": [],
+                }
+                for index in range(1, 11)
+            ],
+        ],
+    })
+    _write_json(tmp_path / "gap_ledger_evidence_audit.json", {
+        "schema_version": "gap-ledger-evidence-audit.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
+        "reused_evidence": True,
+        "status": "ready",
+        "contract_pass": True,
+        "ledger_status": "open",
+        "full_gap_ledger_ready": False,
+        "row_count": 20,
+        "closed_row_count": 17,
+        "nonclosed_row_count": 3,
+        "row_outcomes": [
+            {
+                "id": "G1",
+                "ledger": "commercial_solver",
+                "closed": False,
+                "evidence_present": True,
+                "blocker_count": 1,
+                "claim_boundary_present": True,
+                "closure_requirement_count": 8,
+                "closure_requirement_pass_count": 2,
+                "closure_requirement_fail_count": 6,
+                "closure_requirement_failed_ids": [
+                    "full_load_scale_1_0_reached",
+                    "full_line_mesh_nonlinear_equilibrium_closed",
+                    "full_frame_6dof_nonlinear_equilibrium_closed",
+                    "coupled_frame_surface_nonlinear_equilibrium_closed",
+                    "state_updated_material_newton_breadth_closed",
+                    "fallback_and_regularization_free_full_path",
+                ],
+            },
+            {
+                "id": "G6",
+                "ledger": "commercial_solver",
+                "closed": False,
+                "evidence_present": True,
+                "blocker_count": 1,
+                "claim_boundary_present": True,
+                "closure_requirement_count": 5,
+                "closure_requirement_pass_count": 1,
+                "closure_requirement_fail_count": 4,
+                "closure_requirement_failed_ids": [
+                    "eb_receipt_hardest_external_10case",
+                    "eb_receipt_korean_public_structures",
+                    "eb_receipt_peer_spd_hinge",
+                    "eb_receipt_tpu_hffb",
+                ],
+            },
+            {
+                "id": "G7",
+                "ledger": "commercial_solver",
+                "closed": False,
+                "evidence_present": True,
+                "blocker_count": 1,
+                "claim_boundary_present": True,
+                "closure_requirement_count": 5,
+                "closure_requirement_pass_count": 0,
+                "closure_requirement_fail_count": 5,
+                "closure_requirement_failed_ids": [
+                    "repo_benchmark_bridge_count_zero",
+                    "metadata_only_count_zero",
+                    "operator_attached_real_mgt_header_ok_minimum",
+                    "operator_manifest_source_mapping_clear",
+                    "operator_rights_boundary_clear",
+                ],
+            },
+            *[
+                {
+                    "id": f"G{index}",
+                    "ledger": "commercial_solver",
+                    "closed": True,
+                    "evidence_present": True,
+                    "blocker_count": 0,
+                    "claim_boundary_present": True,
+                }
+                for index in (2, 3, 4, 5, 8, 9, 10)
+            ],
+            *[
+                {
+                    "id": f"AI-G{index}",
+                    "ledger": "ai_engine",
+                    "closed": True,
+                    "evidence_present": True,
+                    "blocker_count": 0,
+                    "claim_boundary_present": True,
+                }
+                for index in range(1, 11)
+            ],
+        ],
+        "blockers": [],
+        "claim_boundary": (
+            "Audit confirms visibility only and does not override source ledger status."
+        ),
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    ledger = payload["components"]["commercial_gap_ledger_status"]
+    audit = payload["components"]["gap_ledger_evidence_audit"]
+    assert ledger["status"] == "open"
+    assert ledger["full_gap_ledger_ready"] is False
+    assert ledger["blocker_count"] == 2
+    assert ledger["next_locally_closable_gaps"] == ["G1"]
+    assert ledger["ledger_split_summary"] == {
+        "ai_engine": {
+            "row_count": 10,
+            "status_counts": {"closed": 10},
+            "nonclosed_row_ids": [],
+            "locally_closable_nonclosed_row_ids": [],
+        },
+        "commercial_solver": {
+            "row_count": 10,
+            "status_counts": {"closed": 7, "external_blocked": 1, "partial": 2},
+            "nonclosed_row_ids": ["G1", "G6", "G7"],
+            "locally_closable_nonclosed_row_ids": ["G1"],
+        },
+    }
+    assert ledger["ready"] is False
+    assert audit["status"] == "ready"
+    assert audit["contract_pass"] is True
+    assert audit["ledger_status"] == "open"
+    assert audit["full_gap_ledger_ready"] is False
+    assert audit["nonclosed_row_count"] == 3
+    assert audit["ledger_split_summary"] == {
+        "ai_engine": {
+            "row_count": 10,
+            "closed_row_count": 10,
+            "nonclosed_row_count": 0,
+            "evidence_present_count": 10,
+            "claim_boundary_present_count": 10,
+            "nonclosed_rows_with_blockers_count": 0,
+            "closure_requirement_count": 0,
+            "closure_requirement_pass_count": 0,
+            "closure_requirement_fail_count": 0,
+            "nonclosed_rows_with_failed_closure_requirements_count": 0,
+            "missing_evidence_ids": [],
+            "missing_claim_boundary_ids": [],
+            "nonclosed_missing_blocker_ids": [],
+            "nonclosed_failed_closure_requirement_ids": [],
+        },
+        "commercial_solver": {
+            "row_count": 10,
+            "closed_row_count": 7,
+            "nonclosed_row_count": 3,
+            "evidence_present_count": 10,
+            "claim_boundary_present_count": 10,
+            "nonclosed_rows_with_blockers_count": 3,
+            "closure_requirement_count": 18,
+            "closure_requirement_pass_count": 3,
+            "closure_requirement_fail_count": 15,
+            "nonclosed_rows_with_failed_closure_requirements_count": 3,
+            "missing_evidence_ids": [],
+            "missing_claim_boundary_ids": [],
+            "nonclosed_missing_blocker_ids": [],
+            "nonclosed_failed_closure_requirement_ids": [
+                "G1:coupled_frame_surface_nonlinear_equilibrium_closed",
+                "G1:fallback_and_regularization_free_full_path",
+                "G1:full_frame_6dof_nonlinear_equilibrium_closed",
+                "G1:full_line_mesh_nonlinear_equilibrium_closed",
+                "G1:full_load_scale_1_0_reached",
+                "G1:state_updated_material_newton_breadth_closed",
+                "G6:eb_receipt_hardest_external_10case",
+                "G6:eb_receipt_korean_public_structures",
+                "G6:eb_receipt_peer_spd_hinge",
+                "G6:eb_receipt_tpu_hffb",
+                "G7:metadata_only_count_zero",
+                "G7:operator_attached_real_mgt_header_ok_minimum",
+                "G7:operator_manifest_source_mapping_clear",
+                "G7:operator_rights_boundary_clear",
+                "G7:repo_benchmark_bridge_count_zero",
+            ],
+        },
+    }
+    assert audit["ready"] is True
+    assert payload["components"]["assisted_service_pilot"]["blockers"] == []
+    assert payload["components"]["solver_product"]["blockers"] == []
+    assert not any(str(blocker).startswith("gap_ledger") for blocker in payload["blockers"])
+
+
+def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercial_promotion(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "developer_preview_readiness.json", {
+        "schema_version": "developer-preview-readiness.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
+        "reused_evidence": False,
+        "status": "blocked",
+        "developer_preview_ready": False,
+        "blocker_count": 3,
+        "blockers": [
+            "g1::full_mesh_nonlinear_equilibrium_not_closed",
+            "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
+            "phase5::task_based_ux_not_observed",
+        ],
+        "future_commercial_blocker_count": 2,
+        "future_commercial_blockers": [
+            "customer_shadow::future_commercial_only",
+            "license::future_commercial_only",
+        ],
+        "categories": {
+            "numerical": {"blocked": True, "blocker_count": 1, "blockers": []},
+            "benchmark": {"blocked": True, "blocker_count": 1, "blockers": []},
+            "software product": {"blocked": True, "blocker_count": 1, "blockers": []},
+            "future commercial": {"blocked": True, "blocker_count": 2, "blockers": []},
+        },
+        "scope": {
+            "freeze_policy": {
+                "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+                "gpu_hip": "performance_track_after_cpu_reference_parity",
+                "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
+            },
+        },
+        "claim_boundary": (
+            "Developer Preview is not a commercial structural solver beta."
+        ),
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    component = payload["components"]["developer_preview_readiness"]
+    assert component["status"] == "blocked"
+    assert component["developer_preview_ready"] is False
+    assert component["blocker_count"] == 3
+    assert component["future_commercial_blocker_count"] == 2
+    assert component["category_counts"] == {
+        "benchmark": 1,
+        "future commercial": 2,
+        "numerical": 1,
+        "software product": 1,
+    }
+    assert component["ready"] is False
+    assert "commercial structural solver beta" in component["claim_boundary"]
+    assert payload["components"]["assisted_service_pilot"]["blockers"] == []
+    assert payload["components"]["solver_product"]["blockers"] == []
+    assert not any(
+        str(blocker).startswith("developer_preview")
+        for blocker in payload["blockers"]
+    )
+
+
+def test_snapshot_attaches_blocked_developer_preview_rc_without_solver_promotion(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "developer_preview_rc_status.json", {
+        "schema_version": "developer-preview-rc-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
+        "reused_evidence": False,
+        "status": "blocked",
+        "contract_pass": False,
+        "deliverable_count": 10,
+        "deliverable_pass_count": 10,
+        "final_gate_count": 9,
+        "final_gate_pass_count": 3,
+        "blockers": [
+            "final_gate_blocked:linux_windows_reproducibility_confirmed",
+            "final_gate_blocked:new_user_core_workflow_observation_passed",
+        ],
+        "claim_boundary": (
+            "Aggregates Developer Preview RC deliverables and final gates only; "
+            "does not close Commercial Release."
+        ),
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    component = payload["components"]["developer_preview_rc"]
+    assert component["status"] == "blocked"
+    assert component["contract_pass"] is False
+    assert component["deliverable_pass_count"] == 10
+    assert component["final_gate_pass_count"] == 3
+    assert component["blocker_count"] == 2
+    assert component["blockers"] == [
+        "final_gate_blocked:linux_windows_reproducibility_confirmed",
+        "final_gate_blocked:new_user_core_workflow_observation_passed",
+    ]
+    assert component["ready"] is False
+    assert payload["components"]["assisted_service_pilot"]["blockers"] == []
+    assert payload["components"]["solver_product"]["blockers"] == []
+    assert not any(
+        str(blocker).startswith("developer_preview_rc")
+        for blocker in payload["blockers"]
     )
 
 
@@ -686,12 +1366,79 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
     )
 
     assert payload["components"]["assisted_service_pilot"]["ready"] is True
+    assert payload["components"]["assisted_service_pilot"]["blocker_count"] == 0
+    assert payload["components"]["assisted_service_pilot"]["blockers"] == []
     assert payload["assisted_service_pilot_ready"] is True
     assert payload["solver_product_pilot_ready"] is False
     assert payload["components"]["solver_product"]["g1_full_mesh_full_load_ready"] is False
     assert payload["components"]["solver_product"]["g1_full_load_hip_newton_lane_ready"] is False
+    assert payload["components"]["solver_product"]["blocker_count"] == 2
+    assert payload["components"]["solver_product"]["blockers"] == [
+        "g1_full_mesh_full_load_not_ready",
+        "g1_full_load_hip_newton_lane_not_ready",
+    ]
     assert payload["root_blockers"]["G1 solver"]["blocked"] is True
     assert "g1_full_mesh_full_load_not_closed" in payload["root_blockers"]["G1 solver"]["blockers"]
+
+
+def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    independent = json.loads(
+        (tmp_path / "independent_product_readiness.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    independent["status"] = "blocked"
+    independent["contract_pass"] = False
+    independent["independent_commercial_product_ready"] = False
+    independent["blockers"] = [
+        "Strict external and residual holdout evidence::residual_holdout_closure_pending"
+    ]
+    _write_json(tmp_path / "independent_product_readiness.json", independent)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    expected = (
+        "independent_product::Strict external and residual holdout "
+        "evidence::residual_holdout_closure_pending"
+    )
+    assert expected in payload["root_blockers"]["G1 solver"]["blockers"]
+    assert expected in payload["blocker_categories"]["numerical"]["blockers"]
+    assert expected not in payload["root_blockers"]["release freshness/sync"]["blockers"]
+    assert expected not in payload["blocker_categories"]["software product"]["blockers"]
+
+
+def test_snapshot_separates_assisted_service_blockers_from_solver_product_blockers(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    ux_payload = json.loads((tmp_path / "ux_new_user_observation_report.json").read_text(encoding="utf-8"))
+    ux_payload["contract_pass"] = False
+    ux_payload["summary"] = {"completion_minutes": None, "max_completion_minutes": 30.0}
+    ux_payload["blockers"] = ["observation_file_missing"]
+    _write_json(tmp_path / "ux_new_user_observation_report.json", ux_payload)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assisted = payload["components"]["assisted_service_pilot"]
+    solver = payload["components"]["solver_product"]
+    assert assisted["ready"] is False
+    assert "human_ux_observation_not_ready" in assisted["blockers"]
+    assert "human_ux_observation_not_ready" not in solver["blockers"]
+    assert solver["ready"] is True
+    assert solver["blockers"] == []
 
 
 def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
@@ -984,10 +1731,22 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
 
     assert payload["status"] == "stale_or_inconsistent"
     assert payload["evidence_fresh"] is False
+    assert payload["snapshot_source_state_consistent"] is False
     assert (
         "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report"
         in payload["blockers"]
     )
+    assisted_blockers = payload["components"]["assisted_service_pilot"]["blockers"]
+    solver_blockers = payload["components"]["solver_product"]["blockers"]
+    assert "snapshot_source_state_not_consistent" in assisted_blockers
+    assert "snapshot_source_state_not_consistent" in solver_blockers
+    assert "evidence_not_fresh" not in assisted_blockers
+    assert "evidence_not_fresh" not in solver_blockers
+    assert (
+        payload["components"]["assisted_service_pilot"]["snapshot_source_state_consistent"]
+        is False
+    )
+    assert payload["components"]["solver_product"]["snapshot_source_state_consistent"] is False
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is False
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
@@ -1035,6 +1794,10 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
         "path": "phase3_release_control_cleanup_plan.json",
         "status": "ready",
         "contract_pass": True,
+        "candidate_set_source": "",
+        "candidate_set_scope": "",
+        "current_worktree_diagnostics_included": False,
+        "current_worktree_diagnostic_source": "",
         "candidate_release_control_commit_set_count": 0,
         "path_role_counts": {},
         "recommended_action_counts": {},
@@ -1065,6 +1828,18 @@ def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path:
         "source_commit_sha": source_commit,
         "status": "blocked",
         "contract_pass": False,
+        "candidate_set_source": (
+            "phase3_benchmark_factory_seed_git_clean_clone_reproduction."
+            "release_control_cleanup_plan"
+        ),
+        "candidate_set_scope": (
+            "Phase 3 seed git-clean-clone reproduction required-input set only; "
+            "it is not an exhaustive current-worktree dirty-path inventory."
+        ),
+        "current_worktree_diagnostics_included": False,
+        "current_worktree_diagnostic_source": (
+            "product_readiness_snapshot.state_consistency.worktree"
+        ),
         "candidate_release_control_commit_set_count": 23,
         "path_role_counts": {"generated_productization_evidence": 7},
         "recommended_action_counts": {"track_generated_productization_evidence": 7},
@@ -1093,6 +1868,16 @@ def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path:
     cleanup_plan = payload["state_consistency"]["worktree"]["phase3_release_control_cleanup_plan"]
     assert cleanup_plan["status"] == "blocked"
     assert cleanup_plan["contract_pass"] is False
+    assert (
+        cleanup_plan["candidate_set_source"]
+        == "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan"
+    )
+    assert "not an exhaustive current-worktree" in cleanup_plan["candidate_set_scope"]
+    assert cleanup_plan["current_worktree_diagnostics_included"] is False
+    assert (
+        cleanup_plan["current_worktree_diagnostic_source"]
+        == "product_readiness_snapshot.state_consistency.worktree"
+    )
     assert cleanup_plan["candidate_release_control_commit_set_count"] == 23
     assert cleanup_plan["path_role_counts"] == {"generated_productization_evidence": 7}
     assert cleanup_plan["recommended_action_counts"] == {
@@ -1109,7 +1894,74 @@ def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path:
     )
     assert cleanup_plan["human_handoff_suggested_command_count"] == 2
     assert cleanup_plan["human_handoff_push_or_release_command_included"] is False
+    component = payload["components"]["release_control_cleanup"]
+    assert component["local_worktree_dirty"] is False
+    assert component["dirty_path_count"] == 0
+    assert component["non_receipt_dirty_path_count"] == 0
+    assert component["remote_github_sync_clean"] is True
+    assert component["remote_github_sync_blocker_count"] == 0
+    assert component["cleanup_plan_status"] == "blocked"
+    assert component["cleanup_plan_contract_pass"] is False
+    assert (
+        component["cleanup_plan_candidate_set_source"]
+        == "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan"
+    )
+    assert "not an exhaustive current-worktree" in component["cleanup_plan_candidate_set_scope"]
+    assert component["cleanup_plan_current_worktree_diagnostics_included"] is False
+    assert (
+        component["cleanup_plan_current_worktree_diagnostic_source"]
+        == "product_readiness_snapshot.state_consistency.worktree"
+    )
+    assert component["cleanup_plan_candidate_path_count"] == 23
+    assert component["cleanup_plan_track_or_add_required_path_count"] == 1
+    assert component["cleanup_plan_resolve_or_commit_dirty_tracked_path_count"] == 1
+    assert component["cleanup_plan_path_role_counts"] == {
+        "generated_productization_evidence": 7
+    }
+    assert component["cleanup_plan_recommended_action_counts"] == {
+        "track_generated_productization_evidence": 7
+    }
+    assert component["human_git_action_required"] is True
+    assert component["codex_commit_or_push_performed"] is False
+    assert component["human_handoff_status"] == "blocked_until_human_git_action"
+    assert component["human_handoff_push_or_release_command_included"] is False
+    assert "remote GitHub sync are separate blockers" in component["claim_boundary"]
     assert "Codex did not commit" in cleanup_plan["claim_boundary"]
+
+
+def test_snapshot_separates_remote_github_sync_from_local_cleanup(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    pm_report = json.loads((tmp_path / "pm_release_gate_report.json").read_text(encoding="utf-8"))
+    pm_report["limited_commercial_release_ready"] = False
+    pm_report["release_area_gate_ready"] = False
+    pm_report["full_release_gate_ready"] = False
+    pm_report["release_area_blockers"] = [
+        "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_remote_sync_pending",
+    ]
+    pm_report["full_release_blockers"] = []
+    _write_json(tmp_path / "pm_release_gate_report.json", pm_report)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    component = payload["components"]["release_control_cleanup"]
+    assert component["local_worktree_dirty"] is False
+    assert component["non_receipt_dirty_path_count"] == 0
+    assert component["remote_github_sync_clean"] is False
+    assert component["remote_github_sync_blocker_count"] == 2
+    assert component["remote_github_sync_blockers"] == [
+        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "pm_release::github_sync::github_sync_remote_sync_pending",
+    ]
+    assert payload["root_blockers"]["release freshness/sync"]["blocked"] is True
+    assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
 
 
 def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(

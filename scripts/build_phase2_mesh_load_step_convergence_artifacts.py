@@ -77,6 +77,18 @@ def _tip_node(problem: Any) -> int:
     return max(node_index for node_index, _ in problem.external_forces_kn)
 
 
+def _row_has_guarded_solver_usage(row: dict[str, Any]) -> bool:
+    return bool(
+        row.get("regularization_used") is True
+        or row.get("fallback_used") is True
+        or any(
+            step.get("regularization_used") is True or step.get("fallback_used") is True
+            for step in row.get("steps", [])
+            if isinstance(step, dict)
+        )
+    )
+
+
 def _solve_partition(
     *,
     element_count: int,
@@ -127,13 +139,21 @@ def _solve_partition(
     )
     series_check = mesh_series_force_equilibrium_check(final_state)
     final_residual_inf_norm = float(np.linalg.norm(final_state.residual_kn, ord=np.inf))
+    row_regularization_used = bool(
+        any(step["regularization_used"] is True for step in steps)
+        or final_metrics.get("regularization_used") is True
+    )
+    row_fallback_used = bool(
+        any(step["fallback_used"] is True for step in steps)
+        or final_metrics.get("fallback_used") is True
+    )
     row_pass = (
         all(step["contract_pass"] for step in steps)
         and bool(final_metrics.get("contract_pass"))
         and bool(jacobian_check["pass"])
         and bool(series_check["pass"])
-        and all(step["regularization_used"] is False for step in steps)
-        and all(step["fallback_used"] is False for step in steps)
+        and not row_regularization_used
+        and not row_fallback_used
         and final_residual_inf_norm <= RESIDUAL_TOLERANCE_KN
     )
     return {
@@ -153,8 +173,8 @@ def _solve_partition(
         "tangent_gate_passed": bool(jacobian_check["pass"]),
         "series_force_gate_passed": bool(series_check["pass"]),
         "series_force_spread_kn": float(series_check.get("force_spread_kn", 0.0)),
-        "regularization_used": False,
-        "fallback_used": False,
+        "regularization_used": row_regularization_used,
+        "fallback_used": row_fallback_used,
     }
 
 
@@ -194,12 +214,16 @@ def build_phase2_mesh_load_step_convergence_artifacts(
             if row["element_count"] == element_count
         ]
         partition_spreads[str(element_count)] = max(element_tip_values) - min(element_tip_values)
+    regularization_used = any(row["regularization_used"] is True for row in rows)
+    fallback_used = any(row["fallback_used"] is True for row in rows)
+    guarded_solver_usage_present = any(_row_has_guarded_solver_usage(row) for row in rows)
     mesh_partition_contract_pass = (
         all(row["contract_pass"] for row in rows)
         and all(row["tangent_gate_passed"] for row in rows)
         and all(row["series_force_gate_passed"] for row in rows)
-        and all(row["regularization_used"] is False for row in rows)
-        and all(row["fallback_used"] is False for row in rows)
+        and not regularization_used
+        and not fallback_used
+        and not guarded_solver_usage_present
         and tip_spread <= TIP_DISPLACEMENT_TOLERANCE_M
         and all(value <= TIP_DISPLACEMENT_TOLERANCE_M for value in partition_spreads.values())
     )
@@ -220,8 +244,9 @@ def build_phase2_mesh_load_step_convergence_artifacts(
         "partition_tip_spread_by_element_count_m": partition_spreads,
         "tip_displacement_tolerance_m": TIP_DISPLACEMENT_TOLERANCE_M,
         "residual_tolerance_kn": RESIDUAL_TOLERANCE_KN,
-        "regularization_used": False,
-        "fallback_used": False,
+        "regularization_used": regularization_used,
+        "fallback_used": fallback_used,
+        "guarded_solver_usage_present": guarded_solver_usage_present,
         "g1_closure_claim": False,
         "mesh_load_step_convergence_closure_claim": False,
         "full_mesh_closure_claim": False,
@@ -264,8 +289,9 @@ def build_phase2_mesh_load_step_convergence_artifacts(
         "tip_displacement_spread_m": tip_spread,
         "partition_tip_spread_by_element_count_m": partition_spreads,
         "tip_displacement_tolerance_m": TIP_DISPLACEMENT_TOLERANCE_M,
-        "regularization_used": False,
-        "fallback_used": False,
+        "regularization_used": regularization_used,
+        "fallback_used": fallback_used,
+        "guarded_solver_usage_present": guarded_solver_usage_present,
         "g1_closure_claim": False,
         "mesh_load_step_convergence_closure_claim": False,
         "full_mesh_closure_claim": False,
@@ -363,4 +389,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

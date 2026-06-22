@@ -41,9 +41,12 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     )
     assert package_runner["module_command"] == "python -m structural_analysis.benchmark.cli"
     assert package_runner["invocation_surfaces"] == ["python_api_factory", "package_cli"]
-    assert package_runner["scope"] == "generated analytic-small and element-patch seed only"
+    assert package_runner["scope"] == (
+        "generated analytic-small, element-patch, and nonlinear material-mesh seed only"
+    )
     assert package_runner["same_manifest_as_python_factory"] is True
     assert package_runner["same_scorecard_as_python_factory"] is True
+    assert package_runner["expected_output_contract_pass"] is True
     assert package_runner["factory_manifest_checksum"] == (
         package_runner["package_cli_manifest_checksum"]
     )
@@ -52,10 +55,32 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     )
     assert package_runner["phase3_closure_claim"] is False
     assert package_runner["developer_preview_release_candidate_claim"] is False
-    assert summary["case_count"] == 26
-    assert summary["pass_count"] == 26
-    assert summary["lanes"] == ["analytic-small", "element-patch"]
-    assert summary["lane_case_counts"] == {"analytic-small": 20, "element-patch": 6}
+    assert summary["case_count"] == 30
+    assert summary["pass_count"] == 30
+    assert summary["lanes"] == [
+        "analytic-small",
+        "element-patch",
+        "nonlinear-material-mesh",
+    ]
+    assert summary["lane_case_counts"] == {
+        "analytic-small": 20,
+        "element-patch": 6,
+        "nonlinear-material-mesh": 4,
+    }
+    expected_comparison_count = sum(
+        len(row["expected_outputs"]) for row in manifest["rows"]
+    )
+    assert summary["scorecard_expected_output_comparison_count"] == expected_comparison_count
+    assert (
+        summary["scorecard_expected_output_comparison_pass_count"]
+        == expected_comparison_count
+    )
+    assert summary["scorecard_expected_output_contract_pass"] is True
+    assert package_runner["expected_output_comparison_count"] == expected_comparison_count
+    assert (
+        package_runner["expected_output_comparison_pass_count"]
+        == expected_comparison_count
+    )
     assert summary["artifacts"]["reproducibility_bundle"].endswith(
         "phase3_benchmark_factory_seed_reproducibility_bundle.json"
     )
@@ -72,7 +97,7 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     assert summary["all_cases_have_license_checksum_truth_and_expected_outputs"] is True
     assert summary["remaining_quantity_targets"] == {
         "analytic_component_cases_required": 20,
-        "analytic_component_cases_current": 20,
+        "analytic_component_cases_current": 30,
         "medium_structural_models_required": 5,
         "medium_structural_models_current": 0,
         "large_structural_models_required": 2,
@@ -102,14 +127,24 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
         if row["lane"] != "element-patch"
     )
 
-    assert manifest["case_count"] == 26
-    assert manifest["lanes"] == ["analytic-small", "element-patch"]
+    assert manifest["case_count"] == 30
+    assert manifest["lanes"] == [
+        "analytic-small",
+        "element-patch",
+        "nonlinear-material-mesh",
+    ]
     assert {
         row["element_count"]
         for row in manifest["rows"]
         if row["lane"] == "analytic-small"
     } == {1, 2, 3, 4}
     assert sum(1 for row in manifest["rows"] if row["lane"] == "element-patch") == 6
+    assert sum(1 for row in manifest["rows"] if row["lane"] == "nonlinear-material-mesh") == 4
+    nonlinear_rows = [row for row in manifest["rows"] if row["lane"] == "nonlinear-material-mesh"]
+    assert {row["analysis_type"] for row in nonlinear_rows} == {"nonlinear_static_material_mesh"}
+    assert {row["structural_family"] for row in nonlinear_rows} == {
+        "nonlinear_axial_material_mesh"
+    }
     for row in manifest["rows"]:
         assert row["truth_class"] == "analytic_truth"
         assert row["checksum"].startswith("sha256:")
@@ -119,10 +154,40 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
 
     assert scorecard["status"] == "pass"
     assert scorecard["contract_pass"] is True
+    assert scorecard["expected_output_comparison_count"] == expected_comparison_count
+    assert (
+        scorecard["expected_output_comparison_pass_count"]
+        == expected_comparison_count
+    )
+    assert scorecard["expected_output_contract_pass"] is True
     assert all(row["contract_pass"] is True for row in scorecard["rows"])
+    manifest_by_case = {row["case_id"]: row for row in manifest["rows"]}
+    for row in scorecard["rows"]:
+        expected_output_fields = set(manifest_by_case[row["case_id"]]["expected_outputs"])
+        comparison_fields = {comparison["field"] for comparison in row["expected_output_comparisons"]}
+        assert comparison_fields == expected_output_fields
+        assert row["expected_output_contract_pass"] is True
+        assert all(
+            comparison["status"] == "pass"
+            for comparison in row["expected_output_comparisons"]
+        )
     assert all(row["metrics"]["residual_formula"] == "F_internal_minus_F_external" for row in scorecard["rows"])
     assert all(row["metrics"]["regularization_used"] is False for row in scorecard["rows"])
     assert all(row["metrics"]["fallback_used"] is False for row in scorecard["rows"])
+    assert all(row["convergence_history"] for row in scorecard["rows"])
+    assert all(
+        "residual_norm" in history_row and "relative_increment" in history_row
+        for row in scorecard["rows"]
+        for history_row in row["convergence_history"]
+    )
+    nonlinear_score_rows = [
+        row for row in scorecard["rows"] if row["lane"] == "nonlinear-material-mesh"
+    ]
+    assert len(nonlinear_score_rows) == 4
+    assert all(row["metrics"]["residual_gate_passed"] is True for row in nonlinear_score_rows)
+    assert all(row["metrics"]["increment_gate_passed"] is True for row in nonlinear_score_rows)
+    assert all(row["metrics"]["assembled_jacobian_fd_pass"] is True for row in nonlinear_score_rows)
+    assert all(row["metrics"]["series_force_equilibrium_pass"] is True for row in nonlinear_score_rows)
 
     assert reproducibility_bundle["status"] == "ready"
     assert reproducibility_bundle["contract_pass"] is True
@@ -140,6 +205,7 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
         "buildingsmart_dirty_ifc_acquisition_receipt",
         "buildingsmart_ifc_acquisition_receipt",
         "commercial_comparison_import_template",
+        "phase4_analytic_physical_fallback_scorecard",
         "commercial_operator_reference_contract",
         "commercial_operator_reference_ingest_validator",
         "ifc_import_health_execution_receipt",
@@ -154,6 +220,7 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
         "buildingsmart_dirty_ifc_acquisition_receipt",
         "buildingsmart_ifc_acquisition_receipt",
         "commercial_comparison_import_template",
+        "phase4_analytic_physical_fallback_scorecard",
         "commercial_operator_reference_contract",
         "commercial_operator_reference_ingest_validator",
         "ifc_import_health_execution_receipt",
@@ -169,10 +236,17 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     )
     assert reproducibility_bundle["expected_scorecard"] == {
         "status": "pass",
-        "case_count": 26,
-        "pass_count": 26,
-        "lanes": ["analytic-small", "element-patch"],
-        "lane_case_counts": {"analytic-small": 20, "element-patch": 6},
+        "case_count": 30,
+        "pass_count": 30,
+        "lanes": ["analytic-small", "element-patch", "nonlinear-material-mesh"],
+        "lane_case_counts": {
+            "analytic-small": 20,
+            "element-patch": 6,
+            "nonlinear-material-mesh": 4,
+        },
+        "expected_output_comparison_count": expected_comparison_count,
+        "expected_output_comparison_pass_count": expected_comparison_count,
+        "expected_output_contract_pass": True,
         "residual_formula": "F_internal_minus_F_external",
         "regularization_used": False,
         "fallback_used": False,
@@ -193,6 +267,9 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
         "regeneration_commands"
     ]
     assert "python3 scripts/build_phase4_commercial_comparison_import_template.py --check" in reproducibility_bundle[
+        "regeneration_commands"
+    ]
+    assert "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --check" in reproducibility_bundle[
         "regeneration_commands"
     ]
     assert "python3 scripts/build_phase4_commercial_operator_reference_contract.py --check" in reproducibility_bundle[
@@ -247,6 +324,9 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     assert "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py" in reproducibility_bundle[
         "required_git_clean_clone_inputs"
     ]
+    assert "scripts/build_phase4_analytic_physical_fallback_scorecard.py" in reproducibility_bundle[
+        "required_git_clean_clone_inputs"
+    ]
     assert "src/structural_analysis" in reproducibility_bundle["required_git_clean_clone_inputs"]
     assert "tests/test_structural_analysis_benchmark_cli.py" in reproducibility_bundle[
         "required_clean_checkout_inputs"
@@ -266,6 +346,13 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     assert "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py" in reproducibility_bundle[
         "required_git_clean_clone_inputs"
     ]
+    assert "tests/test_build_phase4_analytic_physical_fallback_scorecard.py" in reproducibility_bundle[
+        "required_git_clean_clone_inputs"
+    ]
+    assert (
+        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json"
+        in reproducibility_bundle["required_git_clean_clone_inputs"]
+    )
     assert (
         "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json"
         in reproducibility_bundle["required_git_clean_clone_inputs"]
@@ -302,6 +389,7 @@ def test_phase3_benchmark_factory_check_detects_stale_outputs(tmp_path: Path) ->
     ifc_import_health_execution = tmp_path / "ifc_import_health_execution.json"
     opensees_source_license = tmp_path / "opensees_source_license.json"
     commercial_comparison_template = tmp_path / "commercial_comparison_template.json"
+    phase4_analytic_physical_fallback = tmp_path / "phase4_analytic_physical_fallback.json"
     commercial_operator_reference_contract = tmp_path / "commercial_operator_reference_contract.json"
     commercial_operator_reference_ingest_validator = (
         tmp_path / "commercial_operator_reference_ingest_validator.json"
@@ -319,6 +407,7 @@ def test_phase3_benchmark_factory_check_detects_stale_outputs(tmp_path: Path) ->
         ifc_import_health_execution_out=ifc_import_health_execution,
         opensees_source_license_out=opensees_source_license,
         commercial_comparison_template_out=commercial_comparison_template,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator,
         scorecard_out=scorecard,
@@ -339,6 +428,7 @@ def test_phase3_benchmark_factory_check_detects_stale_outputs(tmp_path: Path) ->
         ifc_import_health_execution_out=ifc_import_health_execution,
         opensees_source_license_out=opensees_source_license,
         commercial_comparison_template_out=commercial_comparison_template,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator,
         scorecard_out=scorecard,
@@ -358,6 +448,7 @@ def test_phase3_benchmark_factory_check_detects_reproducibility_bundle_drift(tmp
     ifc_import_health_execution = tmp_path / "ifc_import_health_execution.json"
     opensees_source_license = tmp_path / "opensees_source_license.json"
     commercial_comparison_template = tmp_path / "commercial_comparison_template.json"
+    phase4_analytic_physical_fallback = tmp_path / "phase4_analytic_physical_fallback.json"
     commercial_operator_reference_contract = tmp_path / "commercial_operator_reference_contract.json"
     commercial_operator_reference_ingest_validator = (
         tmp_path / "commercial_operator_reference_ingest_validator.json"
@@ -375,6 +466,7 @@ def test_phase3_benchmark_factory_check_detects_reproducibility_bundle_drift(tmp
         ifc_import_health_execution_out=ifc_import_health_execution,
         opensees_source_license_out=opensees_source_license,
         commercial_comparison_template_out=commercial_comparison_template,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator,
         scorecard_out=scorecard,
@@ -398,6 +490,7 @@ def test_phase3_benchmark_factory_check_detects_reproducibility_bundle_drift(tmp
         ifc_import_health_execution_out=ifc_import_health_execution,
         opensees_source_license_out=opensees_source_license,
         commercial_comparison_template_out=commercial_comparison_template,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator,
         scorecard_out=scorecard,

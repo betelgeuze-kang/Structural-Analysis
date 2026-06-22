@@ -27,6 +27,7 @@ DEFAULT_OUT = PRODUCTIZATION / "phase4_commercial_comparison_import_template.jso
 REQUIRED_RESULT_FIELDS = [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostics",
     "engine_name",
     "engine_version",
     "input_checksum",
@@ -43,9 +44,30 @@ REQUIRED_RESULT_FIELDS = [
     "unsupported_features",
 ]
 
+MODELING_ASSUMPTION_DIAGNOSTIC_ORDER = [
+    "unit_system",
+    "local_axis_convention",
+    "rigid_offset_policy",
+    "end_release_policy",
+    "diaphragm_policy",
+    "mass_source_policy",
+    "self_weight_policy",
+    "material_modulus_convention",
+    "shell_formulation",
+    "mesh_density",
+    "damping_policy",
+    "p_delta_policy",
+    "eigen_solver",
+    "load_combinations",
+    "convergence_tolerance",
+]
+
 CSV_COLUMNS = [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostic_status",
+    "primary_modeling_assumption_delta",
+    "modeling_assumption_delta_codes",
     "engine_name",
     "engine_version",
     "input_checksum",
@@ -122,11 +144,29 @@ def build_phase4_commercial_comparison_import_template(
             "supports_operator_attached_csv": True,
             "supports_operator_attached_json": True,
         },
+        "comparison_diagnostic_policy": {
+            "policy_id": "modeling_assumption_first",
+            "commercial_outputs_are_absolute_truth": False,
+            "solver_correctness_claim_allowed": False,
+            "diagnostic_order": MODELING_ASSUMPTION_DIAGNOSTIC_ORDER,
+            "required_result_field": "modeling_assumption_diagnostics",
+            "difference_triage": (
+                "When comparison metrics differ, diagnose declared modeling convention "
+                "differences before attributing correctness to any solver."
+            ),
+        },
         "required_result_fields": REQUIRED_RESULT_FIELDS,
         "csv_columns": CSV_COLUMNS,
         "json_template": {
             "case_id": "OPERATOR_CASE_ID",
             "modeling_convention_id": "CONVENTION_ID",
+            "modeling_assumption_diagnostics": {
+                "status": "missing|matched|differences_found|blocked",
+                "diagnostic_order": MODELING_ASSUMPTION_DIAGNOSTIC_ORDER,
+                "primary_delta": None,
+                "delta_codes": [],
+                "notes": [],
+            },
             "engine_name": "ETABS|SAP2000|MIDAS|RFEM|ABAQUS|OTHER",
             "engine_version": "ENGINE_VERSION",
             "input_checksum": "sha256:OPERATOR_INPUT_SHA256",
@@ -154,6 +194,7 @@ def build_phase4_commercial_comparison_import_template(
             "Attach raw commercial-tool export files outside bundled repo data.",
             "Record SHA256 for every operator-attached input and result file.",
             "Declare modeling convention for units, local axes, releases, offsets, mass source, damping, P-Delta, eigen solver, load combinations, and convergence tolerance.",
+            "Triage result deltas through the modeling-assumption diagnostic order before recording any solver-correctness hypothesis.",
             "Keep commercial-tool outputs as comparison references, not absolute truth.",
             "Mark missing mappings, warnings, and unsupported features explicitly; silent drops are blocking.",
         ],

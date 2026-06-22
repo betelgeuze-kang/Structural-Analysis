@@ -23,6 +23,7 @@ def build_runner_summary(
 ) -> dict[str, Any]:
     contract_pass = bool(
         scorecard.get("contract_pass") is True
+        and scorecard.get("expected_output_contract_pass") is True
         and manifest.get("case_count") == scorecard.get("case_count")
         and set(manifest.get("lanes", [])) == set(scorecard.get("lanes", []))
     )
@@ -34,15 +35,27 @@ def build_runner_summary(
         "module_command": "python -m structural_analysis.benchmark.cli",
         "case_count": scorecard.get("case_count", 0),
         "pass_count": scorecard.get("pass_count", 0),
+        "expected_output_comparison_count": scorecard.get(
+            "expected_output_comparison_count",
+            0,
+        ),
+        "expected_output_comparison_pass_count": scorecard.get(
+            "expected_output_comparison_pass_count",
+            0,
+        ),
+        "expected_output_contract_pass": bool(
+            scorecard.get("expected_output_contract_pass") is True
+        ),
         "lanes": scorecard.get("lanes", []),
         "manifest_out": str(manifest_out) if manifest_out else None,
         "scorecard_out": str(scorecard_out) if scorecard_out else None,
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
         "claim_boundary": (
-            "This package CLI runs the generated analytic-small and element-patch "
-            "benchmark seed only. It does not acquire OpenSees/buildingSMART/"
-            "commercial/large-model corpora and does not close full Phase 3 or "
+            "This package CLI runs the generated analytic-small, element-patch, "
+            "and nonlinear material-mesh benchmark seed only. It does not acquire "
+            "OpenSees/buildingSMART/commercial/large-model corpora and does not "
+            "close full Phase 3, full nonlinear full-mesh, G1 solver-core, or "
             "Developer Preview RC gates."
         ),
     }

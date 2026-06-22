@@ -22,6 +22,15 @@ DEVELOPER_PREVIEW = (
     / "developer_preview_readiness.json"
 )
 DEVELOPER_PREVIEW_REPORT = DEVELOPER_PREVIEW.with_suffix(".md")
+DEVELOPER_PREVIEW_RC = (
+    REPO_ROOT
+    / "implementation"
+    / "phase1"
+    / "release_evidence"
+    / "productization"
+    / "developer_preview_rc_status.json"
+)
+DEVELOPER_PREVIEW_RC_REPORT = DEVELOPER_PREVIEW_RC.with_suffix(".md")
 INDEPENDENT_PRODUCT = (
     REPO_ROOT / "implementation" / "phase1" / "release" / "independent_product_readiness.json"
 )
@@ -32,6 +41,14 @@ PM_BLOCKER_REGISTER = (
     / "release_evidence"
     / "productization"
     / "pm_release_blocker_action_register.json"
+)
+FRESHNESS_REPORT = (
+    REPO_ROOT
+    / "implementation"
+    / "phase1"
+    / "release_evidence"
+    / "productization"
+    / "release_evidence_freshness_report.json"
 )
 DOCS = [
     REPO_ROOT / "README.md",
@@ -92,12 +109,20 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
         "30-run CI streak",
         "external approval receipt",
     ]
+    ai_freeze_boundary = [
+        "AI/GNN/surrogate truth",
+        "deterministic reference solver",
+        "residual/Jacobian/Newton closure",
+        "benchmark truth",
+    ]
 
     for path in DOCS:
         text = path.read_text(encoding="utf-8")
         for fragment in expected_fragments:
             assert fragment in text, (path, fragment)
         for fragment in commercial_exclusions:
+            assert fragment in text, (path, fragment)
+        for fragment in ai_freeze_boundary:
             assert fragment in text, (path, fragment)
 
     report = DEVELOPER_PREVIEW_REPORT.read_text(encoding="utf-8")
@@ -111,6 +136,8 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
     for fragment in scope["included"]:
         assert fragment in report, fragment
     for fragment in scope["excluded"]:
+        assert fragment in report, fragment
+    for fragment in ai_freeze_boundary:
         assert fragment in report, fragment
 
     app = APP.read_text(encoding="utf-8")
@@ -130,6 +157,52 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
     assert scope_boundary_sync["gui_surface"]["contract_pass"] is True
     for surface in scope_boundary_sync["doc_surfaces"].values():
         assert surface["contract_pass"] is True
+
+
+def test_developer_preview_rc_status_summary_is_doc_synced() -> None:
+    payload = json.loads(DEVELOPER_PREVIEW_RC.read_text(encoding="utf-8"))
+    blocked_final_gates = [
+        gate["item"] for gate in payload["final_gates"] if not gate["contract_pass"]
+    ]
+    expected_gate_labels = {
+        "selected_medium_models_pass_or_approved_review": "selected medium models",
+        "large_models_crash_oom_free": "large crash/OOM-free execution",
+        "silent_import_loss_zero": "silent import loss zero",
+        "linux_windows_reproducibility_confirmed": "Linux/Windows reproducibility",
+        "new_user_core_workflow_observation_passed": "human new-user workflow observation",
+        "benchmark_results_clean_checkout_regenerated": "git clean-clone benchmark regeneration",
+    }
+    expected_fragments = [
+        "Developer Preview RC status:",
+        "developer_preview_rc_status.json",
+        "developer_preview_rc_status.md",
+        f"status `{payload['status']}`",
+        f"deliverables `{payload['deliverable_pass_count']}/{payload['deliverable_count']}`",
+        f"final gates `{payload['final_gate_pass_count']}/{payload['final_gate_count']}`",
+        "full Phase 3",
+        "G1 full nonlinear full-mesh/material Newton",
+        "Linux/Windows parity",
+        "human new-user workflow observation",
+        "clean-clone",
+    ]
+
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in expected_fragments:
+            assert fragment in text, (path, fragment)
+        for item in blocked_final_gates:
+            assert expected_gate_labels[item] in text, (path, item)
+
+    report = DEVELOPER_PREVIEW_RC_REPORT.read_text(encoding="utf-8")
+    assert "# Developer Preview RC Status" in report
+    assert "## Deliverables" in report
+    assert "## Final Gates" in report
+    assert "## Blockers" in report
+    assert "## Claim Boundary" in report
+    for item in blocked_final_gates:
+        assert item in report, item
+    for blocker in payload["blockers"]:
+        assert blocker in report, blocker
 
 
 def test_docs_do_not_claim_github_sync_complete_while_snapshot_blocks() -> None:
@@ -178,6 +251,22 @@ def test_docs_pm_release_area_and_handoff_counts_match_register() -> None:
         f"`{release_area_count}`",
         f"`{external_customer_count}`",
         f"`{fresh_count}`",
+    ]
+
+    for path in DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in expected_fragments:
+            assert fragment in text, (path, fragment)
+
+
+def test_docs_release_evidence_freshness_summary_matches_report() -> None:
+    payload = json.loads(FRESHNESS_REPORT.read_text(encoding="utf-8"))
+    summary = payload["summary"]
+    expected_fragments = [
+        "report_release_evidence_freshness.py",
+        "developer_preview_rc_status.json",
+        f"`{summary['pass_count']}/{summary['artifact_count']}`",
+        "Developer Preview RC final gates",
     ]
 
     for path in DOCS:

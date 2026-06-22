@@ -37,6 +37,7 @@ REQUIRED_FIELDS = (
     "new_to_product",
     "sample_project_id",
     "workflow_scope",
+    "workflow_steps",
     "observer",
     "started_at_utc",
     "completed_at_utc",
@@ -45,6 +46,14 @@ REQUIRED_FIELDS = (
     "evidence_ref",
     "approval_decision",
 )
+REQUIRED_WORKFLOW_STEPS = (
+    {"id": "import", "label": "Import"},
+    {"id": "model_health", "label": "Model Health"},
+    {"id": "analysis_setup", "label": "Analysis Setup"},
+    {"id": "run_monitor", "label": "Run & Monitor"},
+    {"id": "compare_report", "label": "Compare & Report"},
+)
+PASS_STEP_STATUSES = {"pass", "passed", "complete", "completed", "accepted", "ok", "success", "successful"}
 
 
 def _now_utc_iso() -> str:
@@ -111,6 +120,61 @@ def _as_int(value: Any, default: int = 0) -> int:
         return default
 
 
+def _normalize_step_id(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    normalized = value.strip().lower().replace("&", "and")
+    for char in (" ", "-", "/"):
+        normalized = normalized.replace(char, "_")
+    aliases = {
+        "run_and_monitor": "run_monitor",
+        "compare_and_report": "compare_report",
+    }
+    return aliases.get(normalized, normalized)
+
+
+def _workflow_step_rows(observation: dict[str, Any]) -> list[dict[str, Any]]:
+    raw_steps = observation.get("workflow_steps")
+    rows: list[dict[str, Any]] = []
+    if isinstance(raw_steps, dict):
+        iterable = [
+            {"id": key, **(value if isinstance(value, dict) else {"outcome": value})}
+            for key, value in raw_steps.items()
+        ]
+    elif isinstance(raw_steps, list):
+        iterable = raw_steps
+    else:
+        iterable = []
+
+    for raw in iterable:
+        if isinstance(raw, str):
+            step_id = _normalize_step_id(raw)
+            label = raw.strip()
+            outcome = ""
+            explicit_pass = None
+        elif isinstance(raw, dict):
+            step_id = _normalize_step_id(
+                raw.get("id") or raw.get("step_id") or raw.get("step") or raw.get("name") or raw.get("label")
+            )
+            label = str(raw.get("label") or raw.get("name") or raw.get("step") or step_id)
+            outcome = str(raw.get("outcome") or raw.get("status") or raw.get("result") or "").strip().lower()
+            explicit_pass = raw.get("pass") if "pass" in raw else raw.get("passed")
+        else:
+            continue
+        passed = bool(explicit_pass is True or outcome in PASS_STEP_STATUSES)
+        placeholder = _looks_placeholder(label) or _looks_placeholder(outcome)
+        rows.append(
+            {
+                "id": step_id,
+                "label": label,
+                "outcome": outcome,
+                "pass": passed,
+                "placeholder": placeholder,
+            }
+        )
+    return rows
+
+
 def _parse_datetime(value: Any) -> datetime | None:
     if not isinstance(value, str) or not value.strip():
         return None
@@ -149,6 +213,19 @@ def build_report(
     blocker_count = _as_int(observation.get("blocker_count"), 1)
     template_only = observation.get("template_only") is True
     template_note_present = _looks_placeholder(observation.get("note"))
+    workflow_rows = _workflow_step_rows(observation)
+    workflow_by_id = {row["id"]: row for row in workflow_rows if row["id"]}
+    required_step_ids = [str(step["id"]) for step in REQUIRED_WORKFLOW_STEPS]
+    missing_workflow_steps = [step_id for step_id in required_step_ids if step_id not in workflow_by_id]
+    not_passed_workflow_steps = [
+        step_id for step_id in required_step_ids if step_id in workflow_by_id and workflow_by_id[step_id]["pass"] is not True
+    ]
+    placeholder_workflow_steps = [
+        row["id"] or row["label"] for row in workflow_rows if row["placeholder"] is True
+    ]
+    workflow_step_pass_count = sum(
+        1 for step_id in required_step_ids if step_id in workflow_by_id and workflow_by_id[step_id]["pass"] is True
+    )
 
     checks = {
         "observation_file_present": observation_path.exists(),
@@ -170,6 +247,12 @@ def build_report(
             completion_minutes is not None
             and elapsed_minutes is not None
             and abs(completion_minutes - elapsed_minutes) <= timestamp_tolerance_minutes
+        ),
+        "workflow_steps_present": bool(workflow_rows),
+        "workflow_step_placeholders_absent": not placeholder_workflow_steps,
+        "all_required_workflow_steps_observed": not missing_workflow_steps,
+        "all_required_workflow_steps_passed": bool(
+            not missing_workflow_steps and not not_passed_workflow_steps and workflow_step_pass_count == len(required_step_ids)
         ),
         "blocker_count_zero_pass": blocker_count == 0,
         "approval_decision_pass": decision in ACCEPTED_DECISIONS,
@@ -201,6 +284,10 @@ def build_report(
             and not checks["completion_minutes_elapsed_match_pass"]
             else []
         ),
+        *(["workflow_steps_missing"] if not checks["workflow_steps_present"] else []),
+        *(["workflow_step_placeholders_present"] if not checks["workflow_step_placeholders_absent"] else []),
+        *(["required_workflow_steps_missing"] if not checks["all_required_workflow_steps_observed"] else []),
+        *(["required_workflow_step_not_passed"] if not checks["all_required_workflow_steps_passed"] else []),
         *(["blocking_usability_issue_present"] if not checks["blocker_count_zero_pass"] else []),
         *(["approval_decision_not_accepted"] if not checks["approval_decision_pass"] else []),
     ]
@@ -221,6 +308,7 @@ def build_report(
             f"UX new-user observation: {'PASS' if contract_pass else 'BLOCKED'} | "
             f"completion={completion_minutes if completion_minutes is not None else 'missing'}/{max_completion_minutes} min | "
             f"elapsed={elapsed_minutes if elapsed_minutes is not None else 'missing'}/{max_completion_minutes} min | "
+            f"workflow={workflow_step_pass_count}/{len(required_step_ids)} | "
             f"blockers={len(blockers)}"
         ),
         "summary": {
@@ -241,13 +329,23 @@ def build_report(
             "placeholder_fields": placeholder_fields,
             "template_only": template_only,
             "template_note_present": template_note_present,
+            "required_workflow_steps": list(REQUIRED_WORKFLOW_STEPS),
+            "workflow_steps": workflow_rows,
+            "workflow_step_count": len(workflow_rows),
+            "required_workflow_step_count": len(required_step_ids),
+            "workflow_step_pass_count": workflow_step_pass_count,
+            "missing_workflow_steps": missing_workflow_steps,
+            "not_passed_workflow_steps": not_passed_workflow_steps,
+            "placeholder_workflow_steps": placeholder_workflow_steps,
             "owner_action": (
                 "Attach a human new-user observation record for the sample project workflow, including "
-                "participant status, observer, timezone-aware start/end timestamps, wall-clock completion "
+                "participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, "
+                "Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion "
                 "minutes, blocker count, evidence reference, and accepted release decision."
             ),
         },
         "required_fields": list(REQUIRED_FIELDS),
+        "required_workflow_steps": list(REQUIRED_WORKFLOW_STEPS),
         "validation_commands": [
             f"python3 scripts/build_ux_new_user_observation_report.py --out {DEFAULT_OUT}",
             "python3 scripts/build_ux_new_user_observation_intake_packet.py "
@@ -279,6 +377,17 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `timestamp_tolerance_minutes`: `{payload['summary']['timestamp_tolerance_minutes']}`",
         f"- `completion_minutes_elapsed_match_pass`: "
         f"`{payload['checks']['completion_minutes_elapsed_match_pass']}`",
+        "",
+        "## Workflow Checks",
+        "",
+        f"- `workflow_step_pass_count`: `{payload['summary']['workflow_step_pass_count']}`",
+        f"- `required_workflow_step_count`: `{payload['summary']['required_workflow_step_count']}`",
+        f"- `all_required_workflow_steps_observed`: "
+        f"`{payload['checks']['all_required_workflow_steps_observed']}`",
+        f"- `all_required_workflow_steps_passed`: "
+        f"`{payload['checks']['all_required_workflow_steps_passed']}`",
+        f"- `missing_workflow_steps`: `{payload['summary']['missing_workflow_steps']}`",
+        f"- `not_passed_workflow_steps`: `{payload['summary']['not_passed_workflow_steps']}`",
         "",
         "## Required Fields",
         "",

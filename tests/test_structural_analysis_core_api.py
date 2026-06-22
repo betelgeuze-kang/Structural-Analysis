@@ -150,6 +150,77 @@ def test_core_api_model_health_result_keeps_provenance(tmp_path: Path) -> None:
     assert report.comparisons[0]["status"] == "pass"
 
 
+def test_validation_reference_mismatch_blocks_contract(tmp_path: Path) -> None:
+    model_path = tmp_path / "model.json"
+    _write_neutral_model(model_path)
+
+    model = load_model(model_path)
+    result = analyze(model, AnalysisConfig(analysis_type="model_health"))
+    report = validate(result, {"node_count": 999, "element_count": 1})
+
+    assert result.status == "ready"
+    assert report.status == "blocked"
+    assert report.contract_pass is False
+    assert report.passed_fields == []
+    assert report.unsupported_fields == []
+    assert report.developer_preview_blocked_fields == ["reference_mismatch:node_count"]
+    assert report.comparisons == [
+        {"field": "node_count", "expected": 999, "actual": 2, "status": "review"},
+        {"field": "element_count", "expected": 1, "actual": 1, "status": "pass"},
+    ]
+
+
+def test_cli_reference_mismatch_exits_blocked(tmp_path: Path) -> None:
+    model_path = tmp_path / "model.json"
+    result_path = tmp_path / "result.json"
+    report_path = tmp_path / "report.json"
+    reference_path = tmp_path / "reference.json"
+    _write_neutral_model(model_path)
+    reference_path.write_text(
+        json.dumps({"node_count": 999, "element_count": 1}, sort_keys=True),
+        encoding="utf-8",
+    )
+
+    env = os.environ.copy()
+    env["PYTHONPATH"] = (
+        str(SRC_ROOT)
+        if not env.get("PYTHONPATH")
+        else f"{SRC_ROOT}{os.pathsep}{env['PYTHONPATH']}"
+    )
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "structural_analysis.api.cli",
+            str(model_path),
+            "--analysis-type",
+            "model_health",
+            "--reference",
+            str(reference_path),
+            "--out",
+            str(result_path),
+            "--report-out",
+            str(report_path),
+        ],
+        cwd=REPO_ROOT,
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 2
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert result["status"] == "ready"
+    assert report["status"] == "blocked"
+    assert report["contract_pass"] is False
+    assert report["developer_preview_blocked_fields"] == ["reference_mismatch:node_count"]
+    comparisons = {row["field"]: row for row in report["comparisons"]}
+    assert comparisons["node_count"]["status"] == "review"
+    assert comparisons["element_count"]["status"] == "pass"
+
+
 def test_linear_static_axial_truss_uses_canonical_solver_path(tmp_path: Path) -> None:
     model_path = tmp_path / "truss.json"
     _write_linear_static_truss_model(model_path)

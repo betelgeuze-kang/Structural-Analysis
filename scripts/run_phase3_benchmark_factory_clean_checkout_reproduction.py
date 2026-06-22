@@ -48,14 +48,21 @@ COPY_FILES = [
     Path("scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py"),
     Path("scripts/build_phase3_ifc_source_license_receipt.py"),
     Path("scripts/build_phase3_ifc_import_health_execution_receipt.py"),
+    Path("scripts/build_phase3_ifc_query_gui_readiness_receipt.py"),
+    Path("scripts/build_phase3_medium_model_scorecard_readiness_receipt.py"),
+    Path("scripts/build_phase3_large_model_runner_readiness_receipt.py"),
     Path("scripts/build_phase3_opensees_source_license_receipt.py"),
     Path("scripts/build_phase4_commercial_comparison_import_template.py"),
+    Path("scripts/build_phase4_commercial_cross_solver_readiness_receipt.py"),
+    Path("scripts/build_phase4_analytic_physical_fallback_scorecard.py"),
     Path("scripts/build_phase4_commercial_operator_reference_contract.py"),
     Path("scripts/build_phase4_commercial_operator_reference_ingest_validator.py"),
     Path("scripts/phase3_benchmark_reproduction_contract.py"),
     Path("scripts/release_evidence_metadata.py"),
     Path("scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py"),
     Path("scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py"),
+    Path("src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"),
+    Path("src/structure-viewer/viewer-report-export.js"),
     Path("tests/test_build_phase3_benchmark_factory_artifacts.py"),
     Path("tests/test_build_phase3_benchmark_acquisition_artifacts.py"),
     Path("tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py"),
@@ -64,8 +71,11 @@ COPY_FILES = [
     Path("tests/test_build_phase3_ifc_import_health_execution_receipt.py"),
     Path("tests/test_build_phase3_opensees_source_license_receipt.py"),
     Path("tests/test_build_phase4_commercial_comparison_import_template.py"),
+    Path("tests/test_build_phase4_analytic_physical_fallback_scorecard.py"),
     Path("tests/test_build_phase4_commercial_operator_reference_contract.py"),
     Path("tests/test_build_phase4_commercial_operator_reference_ingest_validator.py"),
+    Path("tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py"),
+    Path("tests/test_structure_viewer_explainability_report_contract.py"),
     Path("tests/test_structural_analysis_benchmark_cli.py"),
     Path("tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py"),
     Path("tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py"),
@@ -74,6 +84,7 @@ COPY_FILES = [
     Path("implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"),
     Path("implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json"),
     Path("implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json"),
+    Path("implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json"),
     Path("implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json"),
     Path("implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"),
 ]
@@ -234,6 +245,19 @@ def build_phase3_clean_checkout_reproduction(
             ],
             [
                 "python3",
+                "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+                "--source-commit-sha",
+                source_commit,
+            ],
+            [
+                "python3",
+                "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+                "--check",
+                "--source-commit-sha",
+                source_commit,
+            ],
+            [
+                "python3",
                 "scripts/build_phase4_commercial_operator_reference_contract.py",
                 "--source-commit-sha",
                 source_commit,
@@ -305,8 +329,13 @@ def build_phase3_clean_checkout_reproduction(
                 "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
                 "scripts/build_phase3_ifc_source_license_receipt.py",
                 "scripts/build_phase3_ifc_import_health_execution_receipt.py",
+                "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
+                "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+                "scripts/build_phase3_large_model_runner_readiness_receipt.py",
                 "scripts/build_phase3_opensees_source_license_receipt.py",
                 "scripts/build_phase4_commercial_comparison_import_template.py",
+                "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
+                "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
                 "scripts/build_phase4_commercial_operator_reference_contract.py",
                 "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
                 "scripts/phase3_benchmark_reproduction_contract.py",
@@ -320,6 +349,7 @@ def build_phase3_clean_checkout_reproduction(
                 "tests/test_build_phase3_ifc_import_health_execution_receipt.py",
                 "tests/test_build_phase3_opensees_source_license_receipt.py",
                 "tests/test_build_phase4_commercial_comparison_import_template.py",
+                "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
                 "tests/test_build_phase4_commercial_operator_reference_contract.py",
                 "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
                 "tests/test_structural_analysis_benchmark_cli.py",
@@ -361,6 +391,9 @@ def build_phase3_clean_checkout_reproduction(
             "commercial_comparison_import_template": (
                 checkout_root / PRODUCTIZATION / "phase4_commercial_comparison_import_template.json"
             ),
+            "phase4_analytic_physical_fallback_scorecard": (
+                checkout_root / PRODUCTIZATION / "phase4_analytic_physical_fallback_scorecard.json"
+            ),
             "commercial_operator_reference_contract": (
                 checkout_root / PRODUCTIZATION / "phase4_commercial_operator_reference_contract.json"
             ),
@@ -387,7 +420,7 @@ def build_phase3_clean_checkout_reproduction(
         else:
             shutil.rmtree(checkout_root, ignore_errors=True)
 
-    command_pass = all(row["return_code"] == 0 for row in command_results) and len(command_results) == 22
+    command_pass = all(row["return_code"] == 0 for row in command_results) and len(command_results) == 24
     contract_pass = bool(command_pass and not blockers)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -412,7 +445,7 @@ def build_phase3_clean_checkout_reproduction(
         "blockers": blockers,
         "claim_boundary": (
             "This receipt proves one local isolated minimal worktree-copy replay of the generated "
-            "analytic-small and element-patch Phase 3 seed benchmark commands. It is not a full git "
+            "analytic-small, element-patch, and nonlinear material-mesh Phase 3 seed benchmark commands. It is not a full git "
             "clean clone, not Linux/Windows parity, not Developer Preview Release Candidate closure, "
             "and not full Phase 3 corpus closure."
         ),

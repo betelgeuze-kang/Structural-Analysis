@@ -1,0 +1,66 @@
+{
+  "base_url": "http://127.0.0.1:4173",
+  "blocked_workflow_steps": [
+    "import",
+    "model_health",
+    "analysis_setup",
+    "run_monitor",
+    "compare_report"
+  ],
+  "blocker": "preview_server_failed_before_browser_execution",
+  "browser_execution_passed": false,
+  "claim_boundary": "This receipt records an actual local attempt to run the Phase 5 task-based Playwright browser smoke. It proves browser execution only when the Playwright command exits 0 against a served app.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commands": {
+    "build": {
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-hBRCA9WQ.css                            29.81 kB │ gzip:  5.67 kB\ndist/assets/index-By40Pias.js                            281.22 kB │ gzip: 76.19 kB\n\n✓ built in 104ms\n"
+    },
+    "preview": {
+      "argv": [
+        "npm",
+        "run",
+        "preview",
+        "--",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "4173"
+      ],
+      "exit_code": 1,
+      "output_excerpt": "\n> structural-optimization-workbench@1.0.0 preview\n> vite preview --host 127.0.0.1 --port 4173\n\nerror when starting preview server:\nError: listen EPERM: operation not permitted 127.0.0.1:4173\n    at Server.setupListenHandle [as _listen2] (node:net:1886:21)\n    at listenInCluster (node:net:1965:12)\n    at doListen (node:net:2139:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:83:21) {\n  code: 'EPERM',\n  errno: -1,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 4173\n}\n"
+    }
+  },
+  "contract_pass": false,
+  "engine_version": "1.0.0",
+  "executed_workflow_steps": [],
+  "failed_phase": "preview_server_start",
+  "generated_at": "2026-06-22T19:49:11.633182+00:00",
+  "input_checksums": {
+    "package.json": "sha256:ea041fe994a1088c476c8c1ecd459af578b19d19d40aca6307c6dd4471b31275",
+    "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:1e071b071efd7474f20a46c93c41c89bd8a92bc27a66bb3bae722827d9ee24fa",
+    "src/App.tsx": "sha256:4c569fbbedb2c47a04ee0abb2f1ef57ac6d2285f09c152272f2a41f9f1f98f11",
+    "src/workbench/DeveloperPreviewWorkflowPanel.tsx": "sha256:43e0cd70a47fe8658a4eba06c8a7056b8fe3e4efc53b02e7cabd6cfba357da1b",
+    "src/workbench/developerPreviewWorkflow.ts": "sha256:8e3d45b02b721b7d35af4c093631c1e80b83c35935af682498e6732d2c11ae93",
+    "src/workbench/developerPreviewWorkflow.worker.ts": "sha256:bb8a425a4c4239e8a21b1db459f058699390fd5cf8922e2a16259a05939de065",
+    "src/workbench/developerPreviewWorkflowState.ts": "sha256:99ad24d06f523d8c7b9586b48ea39b15ccbd6be9189a2dab6451df43a67bf17f",
+    "tests/frontend/developer-preview-workflow.spec.ts": "sha256:e1f2fba0da689840d15ca71ebe3d3a5c724499af985ceaf02388429a0d3f101b"
+  },
+  "required_workflow_steps": [
+    "import",
+    "model_health",
+    "analysis_setup",
+    "run_monitor",
+    "compare_report"
+  ],
+  "schema_version": "phase5-task-based-ux-browser-execution.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "status": "blocked",
+  "summary_line": "Phase 5 task-based UX browser execution: BLOCKED | phase=preview_server_start | blocker=preview_server_failed_before_browser_execution",
+  "test_path": "tests/frontend/developer-preview-workflow.spec.ts"
+}

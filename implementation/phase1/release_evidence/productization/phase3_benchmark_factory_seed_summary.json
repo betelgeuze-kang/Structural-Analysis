@@ -14,56 +14,62 @@
     "ifc_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
     "manifest": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
     "opensees_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "phase4_analytic_physical_fallback_scorecard": "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
     "reproducibility_bundle": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
     "scorecard": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
     "summary": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
   },
-  "case_count": 26,
-  "claim_boundary": "This is a generated analytic-small benchmark factory seed. It proves manifest + checksum/license/truth/expected-output metadata and a deterministic scorecard run for generated axial and axis-aligned element patch cases only. The analytic/component quantity gate is satisfied only inside this generated axial family; it does not close OpenSees, buildingSMART IFC, commercial-cross-solver, or large-model gates.",
+  "case_count": 30,
+  "claim_boundary": "This is a generated analytic-small benchmark factory seed. It proves manifest + checksum/license/truth/expected-output metadata and a deterministic scorecard run for generated axial, axis-aligned element patch, and narrow nonlinear material-mesh axial-chain cases only. The analytic/component quantity gate is satisfied only inside these repo-generated seed families; it does not close OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or G1 solver-core gates.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": true,
   "engine_version": "1.0.0",
   "full_phase3_quantity_gates_met": false,
-  "generated_at": "2026-06-21T22:00:05.511224+00:00",
+  "generated_at": "2026-06-22T19:21:50.947528+00:00",
   "input_checksums": {
     "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
     "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
-    "src/structural_analysis/api/core.py": "sha256:ef477d1b05002353ae998b68270acc09109b93ee7d051dbc1d13d8e4b8c3f957",
+    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
     "src/structural_analysis/benchmark/__init__.py": "sha256:e12ee630f324fbbc3c326d656e1285e560c00fd981cf2730f502b9ee28ec7060",
-    "src/structural_analysis/benchmark/cli.py": "sha256:0c225263e5c7f275b57232533e05c9b997d4d14bf9815c30ac6fa55519ffbbd6",
-    "src/structural_analysis/benchmark/factory.py": "sha256:a599a5b724fa9bd829e0c82d90b0513610365f3f435af0aaa4e2165cd919e164",
+    "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
+    "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
     "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
-    "tests/test_structural_analysis_benchmark_cli.py": "sha256:3de76596b49b452b16a3d231b41c7609f0ece9fd11866b07c3cfec1c249fd412"
+    "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985"
   },
   "lane_case_counts": {
     "analytic-small": 20,
-    "element-patch": 6
+    "element-patch": 6,
+    "nonlinear-material-mesh": 4
   },
-  "lane_count": 2,
+  "lane_count": 3,
   "lanes": [
     "analytic-small",
-    "element-patch"
+    "element-patch",
+    "nonlinear-material-mesh"
   ],
   "package_benchmark_runner": {
     "contract_pass": true,
     "developer_preview_release_candidate_claim": false,
     "entry_point": "structural-analysis-benchmark = structural_analysis.benchmark.cli:main",
-    "factory_manifest_checksum": "sha256:d360c4e5c80dfc1ff884ea34cf448ee8d0786d7ce91fe8d697b863937c2c1124",
-    "factory_scorecard_checksum": "sha256:a4309276345443c220df781bc638e1e7f3dbacff2ae87e48daedbc05bd2e6a52",
+    "expected_output_comparison_count": 88,
+    "expected_output_comparison_pass_count": 88,
+    "expected_output_contract_pass": true,
+    "factory_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "factory_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "invocation_surfaces": [
       "python_api_factory",
       "package_cli"
     ],
     "module_command": "python -m structural_analysis.benchmark.cli",
-    "package_cli_manifest_checksum": "sha256:d360c4e5c80dfc1ff884ea34cf448ee8d0786d7ce91fe8d697b863937c2c1124",
-    "package_cli_scorecard_checksum": "sha256:a4309276345443c220df781bc638e1e7f3dbacff2ae87e48daedbc05bd2e6a52",
+    "package_cli_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "package_cli_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
     "phase3_closure_claim": false,
     "same_manifest_as_python_factory": true,
     "same_scorecard_as_python_factory": true,
-    "scope": "generated analytic-small and element-patch seed only",
+    "scope": "generated analytic-small, element-patch, and nonlinear material-mesh seed only",
     "status": "ready"
   },
-  "pass_count": 26,
+  "pass_count": 30,
   "phase3_closure_claim": false,
   "remaining_corpus_lanes": [
     {
@@ -101,7 +107,7 @@
     }
   ],
   "remaining_quantity_targets": {
-    "analytic_component_cases_current": 20,
+    "analytic_component_cases_current": 30,
     "analytic_component_cases_required": 20,
     "ifc_clean_dirty_import_cases_current": 0,
     "ifc_clean_dirty_import_cases_required": 10,
@@ -111,7 +117,10 @@
     "medium_structural_models_required": 5
   },
   "schema_version": "phase3-benchmark-factory-seed-artifacts.v1",
+  "scorecard_expected_output_comparison_count": 88,
+  "scorecard_expected_output_comparison_pass_count": 88,
+  "scorecard_expected_output_contract_pass": true,
   "scorecard_reproducible_from_manifest": true,
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "ready"
 }

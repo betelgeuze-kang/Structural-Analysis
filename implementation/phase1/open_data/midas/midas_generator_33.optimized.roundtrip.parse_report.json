@@ -1,7 +1,7 @@
 {
   "schema_version": "1.1",
   "run_id": "phase1-midas-mgt-converter",
-  "generated_at": "2026-06-22T15:38:11.943524+00:00",
+  "generated_at": "2026-06-22T19:15:56.768989+00:00",
   "inputs": {
     "mgt": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
     "json_out": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/open_data/midas/midas_generator_33.optimized.roundtrip.json",

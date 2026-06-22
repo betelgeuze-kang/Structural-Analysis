@@ -1,10 +1,11 @@
 {
-  "case_count": 26,
-  "claim_boundary": "Generated analytic-small and element-patch seed manifest only. This is not the full Phase 3 corpus breadth target.",
-  "lane_count": 2,
+  "case_count": 30,
+  "claim_boundary": "Generated analytic-small, element-patch, and nonlinear material-mesh seed manifest only. This is not the full Phase 3 corpus breadth target.",
+  "lane_count": 3,
   "lanes": [
     "analytic-small",
-    "element-patch"
+    "element-patch",
+    "nonlinear-material-mesh"
   ],
   "rows": [
     {
@@ -1094,6 +1095,206 @@
       "source_id": "repo_generated_element_patch",
       "source_url_or_doi": "generated://structural_analysis/element_patch_axis_aligned_axial",
       "structural_family": "axial_element_patch",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "nonlinear_static_material_mesh",
+      "available_reference_outputs": [
+        "assembled_jacobian_fd_pass",
+        "base_reaction_kn",
+        "increment_gate_passed",
+        "residual_gate_passed",
+        "series_force_equilibrium_pass",
+        "tip_displacement_m"
+      ],
+      "case_id": "nonlinear_material_mesh_e1_load_50",
+      "checksum": "sha256:7b15c38cd742fc280fa396ac236859a5a479954e045bb9ebc4842ba599f78022",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "assembled_jacobian_fd_pass": true,
+        "base_reaction_kn": -50.0,
+        "increment_gate_passed": true,
+        "residual_gate_passed": true,
+        "series_force_equilibrium_pass": true,
+        "tip_displacement_m": 0.28014314673221286
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "1d_axis_aligned_axial_chain_only",
+        "cubic_spring_material_law_f_internal_k_u_plus_c_u_cubed",
+        "newton_raphson_with_consistent_assembled_jacobian",
+        "developer_preview_seed_not_full_mesh_nonlinear_closure"
+      ],
+      "lane": "nonlinear-material-mesh",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "nonlinear-material-mesh"
+      ],
+      "source_id": "repo_generated_nonlinear_material_mesh",
+      "source_url_or_doi": "generated://structural_analysis/nonlinear_material_mesh_axial_chain",
+      "structural_family": "nonlinear_axial_material_mesh",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "nonlinear_static_material_mesh",
+      "available_reference_outputs": [
+        "assembled_jacobian_fd_pass",
+        "base_reaction_kn",
+        "increment_gate_passed",
+        "residual_gate_passed",
+        "series_force_equilibrium_pass",
+        "tip_displacement_m"
+      ],
+      "case_id": "nonlinear_material_mesh_e1_load_100",
+      "checksum": "sha256:1be38dbf4008a3c9fcad96637b427a9e58e41f420c11109dd5bb77bfd4693568",
+      "commercial_use_allowed": true,
+      "element_count": 1,
+      "expected_outputs": {
+        "assembled_jacobian_fd_pass": true,
+        "base_reaction_kn": -100.0,
+        "increment_gate_passed": true,
+        "residual_gate_passed": true,
+        "series_force_equilibrium_pass": true,
+        "tip_displacement_m": 0.39300273897110516
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "1d_axis_aligned_axial_chain_only",
+        "cubic_spring_material_law_f_internal_k_u_plus_c_u_cubed",
+        "newton_raphson_with_consistent_assembled_jacobian",
+        "developer_preview_seed_not_full_mesh_nonlinear_closure"
+      ],
+      "lane": "nonlinear-material-mesh",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 2,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "nonlinear-material-mesh"
+      ],
+      "source_id": "repo_generated_nonlinear_material_mesh",
+      "source_url_or_doi": "generated://structural_analysis/nonlinear_material_mesh_axial_chain",
+      "structural_family": "nonlinear_axial_material_mesh",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "nonlinear_static_material_mesh",
+      "available_reference_outputs": [
+        "assembled_jacobian_fd_pass",
+        "base_reaction_kn",
+        "increment_gate_passed",
+        "residual_gate_passed",
+        "series_force_equilibrium_pass",
+        "tip_displacement_m"
+      ],
+      "case_id": "nonlinear_material_mesh_e2_load_50",
+      "checksum": "sha256:23d939fe02b3a7d21dfcc1cbce39ec2e0475ad913c3749e2131d8cd53ffc5bc9",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "assembled_jacobian_fd_pass": true,
+        "base_reaction_kn": -50.0,
+        "increment_gate_passed": true,
+        "residual_gate_passed": true,
+        "series_force_equilibrium_pass": true,
+        "tip_displacement_m": 0.5602862934644257
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "1d_axis_aligned_axial_chain_only",
+        "cubic_spring_material_law_f_internal_k_u_plus_c_u_cubed",
+        "newton_raphson_with_consistent_assembled_jacobian",
+        "developer_preview_seed_not_full_mesh_nonlinear_closure"
+      ],
+      "lane": "nonlinear-material-mesh",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "nonlinear-material-mesh"
+      ],
+      "source_id": "repo_generated_nonlinear_material_mesh",
+      "source_url_or_doi": "generated://structural_analysis/nonlinear_material_mesh_axial_chain",
+      "structural_family": "nonlinear_axial_material_mesh",
+      "truth_class": "analytic_truth",
+      "version": "v1"
+    },
+    {
+      "analysis_type": "nonlinear_static_material_mesh",
+      "available_reference_outputs": [
+        "assembled_jacobian_fd_pass",
+        "base_reaction_kn",
+        "increment_gate_passed",
+        "residual_gate_passed",
+        "series_force_equilibrium_pass",
+        "tip_displacement_m"
+      ],
+      "case_id": "nonlinear_material_mesh_e2_load_100",
+      "checksum": "sha256:fa7ac5ef66448eb1a2ec8ef2110ef74a3847592964649bd73135c25652a58fe1",
+      "commercial_use_allowed": true,
+      "element_count": 2,
+      "expected_outputs": {
+        "assembled_jacobian_fd_pass": true,
+        "base_reaction_kn": -100.0,
+        "increment_gate_passed": true,
+        "residual_gate_passed": true,
+        "series_force_equilibrium_pass": true,
+        "tip_displacement_m": 0.7860054779422103
+      },
+      "file_format": "canonical_json",
+      "known_defects": [],
+      "known_modeling_assumptions": [
+        "1d_axis_aligned_axial_chain_only",
+        "cubic_spring_material_law_f_internal_k_u_plus_c_u_cubed",
+        "newton_raphson_with_consistent_assembled_jacobian",
+        "developer_preview_seed_not_full_mesh_nonlinear_closure"
+      ],
+      "lane": "nonlinear-material-mesh",
+      "license": {
+        "approval_status": "generated_in_repo_no_external_source",
+        "commercial_use_allowed": true,
+        "id": "repo-generated-analytic-v1",
+        "redistribution_allowed": true,
+        "spdx": "CC0-1.0"
+      },
+      "node_count": 3,
+      "redistribution_allowed": true,
+      "reference_solver_and_version": "closed_form_axial_bar_v1",
+      "selected_benchmark_lanes": [
+        "nonlinear-material-mesh"
+      ],
+      "source_id": "repo_generated_nonlinear_material_mesh",
+      "source_url_or_doi": "generated://structural_analysis/nonlinear_material_mesh_axial_chain",
+      "structural_family": "nonlinear_axial_material_mesh",
       "truth_class": "analytic_truth",
       "version": "v1"
     }

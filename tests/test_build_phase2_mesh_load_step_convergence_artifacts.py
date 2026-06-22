@@ -42,10 +42,14 @@ def test_phase2_mesh_load_step_convergence_builds_honest_grid_artifacts() -> Non
     )
     assert result["regularization_used"] is False
     assert result["fallback_used"] is False
+    assert result["guarded_solver_usage_present"] is False
     assert result["g1_closure_claim"] is False
     assert result["mesh_load_step_convergence_closure_claim"] is False
     assert result["full_mesh_closure_claim"] is False
     assert summary["g1_closure_claim"] is False
+    assert summary["regularization_used"] is False
+    assert summary["fallback_used"] is False
+    assert summary["guarded_solver_usage_present"] is False
     assert summary["mesh_load_step_convergence_closure_claim"] is False
     assert summary["full_mesh_closure_claim"] is False
     assert summary["blockers_remaining"] == [
@@ -77,6 +81,29 @@ def test_phase2_mesh_load_step_convergence_builds_honest_grid_artifacts() -> Non
         assert all(step["contract_pass"] is True for step in row["steps"])
 
 
+def test_phase2_mesh_load_step_flags_guarded_solver_usage_from_steps() -> None:
+    row = {
+        "regularization_used": False,
+        "fallback_used": False,
+        "steps": [
+            {"regularization_used": False, "fallback_used": False},
+            {"regularization_used": True, "fallback_used": False},
+        ],
+    }
+
+    assert module._row_has_guarded_solver_usage(row) is True
+
+
+def test_phase2_mesh_load_step_flags_guarded_solver_usage_from_row() -> None:
+    row = {
+        "regularization_used": False,
+        "fallback_used": True,
+        "steps": [{"regularization_used": False, "fallback_used": False}],
+    }
+
+    assert module._row_has_guarded_solver_usage(row) is True
+
+
 def test_phase2_mesh_load_step_convergence_check_detects_missing_outputs(tmp_path: Path) -> None:
     ok, message = module.check_phase2_mesh_load_step_convergence_artifacts(
         repo_root=REPO_ROOT,
@@ -86,4 +113,3 @@ def test_phase2_mesh_load_step_convergence_check_detects_missing_outputs(tmp_pat
 
     assert ok is False
     assert message.startswith("phase2_mesh_load_step_convergence_missing:")
-

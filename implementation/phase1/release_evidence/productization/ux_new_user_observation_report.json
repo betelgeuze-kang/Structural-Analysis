@@ -6,10 +6,15 @@
     "participant_not_new_user",
     "new_to_product_not_confirmed",
     "completion_minutes_missing",
+    "workflow_steps_missing",
+    "required_workflow_steps_missing",
+    "required_workflow_step_not_passed",
     "blocking_usability_issue_present",
     "approval_decision_not_accepted"
   ],
   "checks": {
+    "all_required_workflow_steps_observed": false,
+    "all_required_workflow_steps_passed": false,
     "approval_decision_pass": false,
     "blocker_count_zero_pass": false,
     "completed_at_utc_valid": false,
@@ -27,12 +32,14 @@
     "started_at_utc_valid": false,
     "template_note_absent": true,
     "template_only_absent": true,
-    "timestamp_order_pass": false
+    "timestamp_order_pass": false,
+    "workflow_step_placeholders_absent": true,
+    "workflow_steps_present": false
   },
   "claim_boundary": "This report validates a human new-user observation record. Automated browser rehearsal evidence does not satisfy the PM UX release-area gate by itself.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-21T13:43:25.751044+00:00",
+  "generated_at": "2026-06-22T18:16:29.046371+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ux_new_user_observation.json": "missing"
   },
@@ -44,6 +51,7 @@
     "new_to_product",
     "sample_project_id",
     "workflow_scope",
+    "workflow_steps",
     "observer",
     "started_at_utc",
     "completed_at_utc",
@@ -52,9 +60,31 @@
     "evidence_ref",
     "approval_decision"
   ],
+  "required_workflow_steps": [
+    {
+      "id": "import",
+      "label": "Import"
+    },
+    {
+      "id": "model_health",
+      "label": "Model Health"
+    },
+    {
+      "id": "analysis_setup",
+      "label": "Analysis Setup"
+    },
+    {
+      "id": "run_monitor",
+      "label": "Run & Monitor"
+    },
+    {
+      "id": "compare_report",
+      "label": "Compare & Report"
+    }
+  ],
   "reused_evidence": false,
   "schema_version": "ux-new-user-observation-report.v1",
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "summary": {
     "approval_decision": "",
     "blocker_count": 1,
@@ -69,6 +99,7 @@
       "new_to_product",
       "sample_project_id",
       "workflow_scope",
+      "workflow_steps",
       "observer",
       "started_at_utc",
       "completed_at_utc",
@@ -77,18 +108,53 @@
       "evidence_ref",
       "approval_decision"
     ],
+    "missing_workflow_steps": [
+      "import",
+      "model_health",
+      "analysis_setup",
+      "run_monitor",
+      "compare_report"
+    ],
     "new_to_product": false,
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "not_passed_workflow_steps": [],
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "participant_role": "",
     "placeholder_fields": [],
-    "release_blocker_count": 8,
+    "placeholder_workflow_steps": [],
+    "release_blocker_count": 11,
     "reported_blocker_count": 1,
+    "required_workflow_step_count": 5,
+    "required_workflow_steps": [
+      {
+        "id": "import",
+        "label": "Import"
+      },
+      {
+        "id": "model_health",
+        "label": "Model Health"
+      },
+      {
+        "id": "analysis_setup",
+        "label": "Analysis Setup"
+      },
+      {
+        "id": "run_monitor",
+        "label": "Run & Monitor"
+      },
+      {
+        "id": "compare_report",
+        "label": "Compare & Report"
+      }
+    ],
     "started_at_utc": null,
     "template_note_present": false,
     "template_only": false,
-    "timestamp_tolerance_minutes": 1.0
+    "timestamp_tolerance_minutes": 1.0,
+    "workflow_step_count": 0,
+    "workflow_step_pass_count": 0,
+    "workflow_steps": []
   },
-  "summary_line": "UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | blockers=8",
+  "summary_line": "UX new-user observation: BLOCKED | completion=missing/30.0 min | elapsed=missing/30.0 min | workflow=0/5 | blockers=11",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
     "python3 scripts/build_ux_new_user_observation_intake_packet.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",

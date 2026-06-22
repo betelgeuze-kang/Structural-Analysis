@@ -35,6 +35,14 @@ def test_ifc_import_health_execution_blocks_until_local_files_exist() -> None:
     assert payload["source_checksum_attached_count"] == 0
     assert payload["import_health_execution_count"] == 0
     assert payload["import_health_contract_pass_count"] == 0
+    assert payload["visible_entity_accounting_case_count"] == 0
+    assert payload["silent_import_loss_gate_pass_count"] == 0
+    assert payload["silent_import_loss_gate"]["status"] == "blocked"
+    assert payload["silent_import_loss_gate"]["contract_pass"] is False
+    assert payload["silent_import_loss_gate"]["silent_import_loss_zero"] is False
+    assert payload["silent_import_loss_gate"]["required_case_count"] == 10
+    assert payload["silent_import_loss_gate"]["candidate_case_count"] == 10
+    assert "silent_import_loss_gate_not_executed" in payload["silent_import_loss_gate"]["blockers"]
     assert payload["quantity_credit_ready_count"] == 0
     assert "source_file_not_acquired" in payload["blockers"]
     assert "source_sha256_missing" in payload["blockers"]
@@ -42,6 +50,7 @@ def test_ifc_import_health_execution_blocks_until_local_files_exist() -> None:
     assert "does not download files" in payload["claim_boundary"]
     assert {row["lane_kind"] for row in payload["case_receipts"]} == {"clean", "dirty"}
     assert all(row["quantity_credit_ready"] is False for row in payload["case_receipts"])
+    assert all(row["silent_import_loss_gate"]["contract_pass"] is False for row in payload["case_receipts"])
 
 
 def test_ifc_import_health_case_receipt_executes_expected_blocked_contract(tmp_path: Path) -> None:
@@ -80,6 +89,16 @@ def test_ifc_import_health_case_receipt_executes_expected_blocked_contract(tmp_p
     assert receipt["source_sha256"].startswith("sha256:")
     assert receipt["import_health_executed"] is True
     assert receipt["import_health_contract_pass"] is True
+    assert receipt["silent_import_loss_gate"]["status"] == "pass"
+    assert receipt["silent_import_loss_gate"]["contract_pass"] is True
+    assert receipt["silent_import_loss_gate"]["silent_import_loss_zero"] is True
+    assert receipt["silent_import_loss_gate"]["visible_entity_accounting"] is True
+    assert receipt["silent_import_loss_gate"]["record_count"] == 1
+    assert receipt["silent_import_loss_gate"]["parsed_record_count"] == 1
+    assert receipt["silent_import_loss_gate"]["structural_entity_count"] == 1
+    assert receipt["silent_import_loss_gate"]["unsupported_feature_count"] > 0
+    assert receipt["silent_import_loss_gate"]["warning_count"] > 0
+    assert receipt["silent_import_loss_gate"]["blockers"] == []
     assert receipt["quantity_credit_ready"] is False
     assert receipt["blockers"] == []
     assert receipt["execution"]["return_code"] == 2
@@ -87,6 +106,8 @@ def test_ifc_import_health_case_receipt_executes_expected_blocked_contract(tmp_p
     assert receipt["execution"]["report_exists"] is True
     assert receipt["execution"]["report"]["status"] == "blocked"
     assert receipt["execution"]["result"]["status"] == "blocked"
+    assert receipt["execution"]["result"]["metrics"]["record_count"] == 1
+    assert receipt["execution"]["result"]["metrics"]["entity_counts"]["IFCBEAM"] == 1
 
 
 def test_ifc_import_health_execution_check_detects_missing_output(tmp_path: Path) -> None:

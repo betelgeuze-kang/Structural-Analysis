@@ -509,7 +509,7 @@
   "frontier_chain_monotonic_nonincreasing": true,
   "frontier_improvement_inf_n": 13.225062840739767,
   "frontier_relative_improvement": 0.6971813369240955,
-  "generated_at": "2026-06-19T17:13:13.027984+00:00",
+  "generated_at": "2026-06-22T16:11:11.347720+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke.json": "sha256:1f60284e9da8fe028f3c89d0f123af99f4eb84263bb3935a42c677c53ad6b526",
     "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke.json": "sha256:16d8df644767686b8b8ce3c8915cda5ade1a79c8e8f7c48d92d6422bbbe353d2",
@@ -558,7 +558,7 @@
   "reused_evidence": true,
   "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v3",
   "shell_material_tangent_applied": true,
-  "source_commit_sha": "1c75673e0c95cf68cec1edbe68a6484062b98922",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "partial",
   "storage_policy": {
     "checkpoint_compactness_unknown_count": 1,

@@ -26,10 +26,10 @@ const data = {
 };
 const ingestPreview = {
   normalized_rows: [
-    {source_tool: 'ETABS 22', source_tool_profile: 'etabs', member_id: '911', section: 'W14X90', dcr_after: 0.89, story: 'L10'},
-    {source_tool: 'RFEM', source_tool_profile: 'rfem', member_id: '912', section: 'W14X76', dcr_after: 0.72},
+    {source_tool: 'ETABS 22', source_tool_profile: 'etabs', member_id: '911', section: 'W14X90', dcr_after: 0.89, story: 'L10', mode_number: 'M1'},
+    {source_tool: 'RFEM', source_tool_profile: 'rfem', member_id: '912', section: 'W14X76', dcr_after: 0.72, story: 'L11'},
     {source_tool: 'Revit', source_tool_profile: 'revit', member_id: 'MISSING-1', section: 'HSS8X8', dcr_after: 0.44},
-    {source_tool: 'SAP2000', source_tool_profile: 'sap2000', member_id: '913', section: 'W14X68', dcr_after: 0.75, receipt_path: 'sap/913.json'},
+    {source_tool: 'SAP2000', source_tool_profile: 'sap2000', member_id: '913', section: 'W14X68', dcr_after: 0.75, story: 'L12', mode: 'M3', receipt_path: 'sap/913.json'},
   ],
 };
 const model = buildCommercialToolCrosswalkModel({data, ingestPreview, memberId: '911', dcrTolerance: 0.03});
@@ -78,10 +78,22 @@ console.log(JSON.stringify({
     assert payload["model"]["counts"]["section_mismatch"] == 1
     assert payload["model"]["counts"]["dcr_mismatch"] == 1
     assert payload["model"]["counts"]["missing_viewer_member"] == 1
+    assert payload["model"]["traceabilityStatus"] == "missing_trace_dimensions"
+    assert payload["model"]["traceCoverage"] == {
+        "total": 4,
+        "member": 3,
+        "story": 3,
+        "mode": 2,
+        "full": 2,
+        "missingDimensions": ["member", "story", "mode"],
+        "contractPass": False,
+    }
     assert "ETABS/SAP2000 1" in payload["model"]["summary"]
     assert payload["selected"]["externalMemberId"] == "911"
     assert payload["selected"]["viewerMemberId"] == "911"
     assert payload["selected"]["status"] == "matched"
+    assert payload["selected"]["traceKey"] == "member:911|story:L10|mode:M1"
+    assert payload["selected"]["traceability"]["missingDimensions"] == []
     assert any(row["profile"] == "etabs" for row in payload["mapperPresets"])
     assert any(row["profile"] == "revit" for row in payload["mapperPresets"])
     assert payload["autoMapper"]["schema_version"] == "structure-viewer-commercial-tool-csv-mapper.v1"
@@ -89,9 +101,15 @@ console.log(JSON.stringify({
     assert payload["autoMapper"]["profile"] == "etabs"
     assert payload["autoMapper"]["detectedProfile"] == "etabs"
     assert any(row["field"] == "member_id" and "frame" in row["candidates"] for row in payload["autoMapper"]["rows"])
+    assert any(row["field"] == "mode" and "mode_number" in row["candidates"] for row in payload["autoMapper"]["rows"])
     assert payload["revitMapper"]["profile"] == "revit"
     assert any(row["field"] == "member_id" and "unique_id" in row["candidates"] for row in payload["revitMapper"]["rows"])
+    assert any(row["field"] == "mode" and "mode_id" in row["candidates"] for row in payload["revitMapper"]["rows"])
     assert payload["sectionMismatch"]["externalMemberId"] == "912"
+    assert payload["sectionMismatch"]["traceability"]["missingDimensions"] == ["mode"]
     assert payload["dcrMismatch"]["externalMemberId"] == "913"
+    assert payload["dcrMismatch"]["traceability"]["mode"]["label"] == "M3"
     assert payload["missing"]["externalMemberId"] == "MISSING-1"
+    assert payload["missing"]["traceability"]["missingDimensions"] == ["member", "story", "mode"]
     assert payload["pending"]["status"] == "missing"
+    assert payload["pending"]["traceabilityStatus"] == "missing"

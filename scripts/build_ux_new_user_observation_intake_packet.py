@@ -46,9 +46,18 @@ FIELD_SPECS = (
     },
     {
         "field": "workflow_scope",
-        "required_value": "observed workflow steps, including reviewer package/report export",
+        "required_value": "observed workflow scope covering the full five-step workflow",
         "check": "required_fields_present",
         "owner_note": "Scope should match the paid-pilot workflow promised to customers.",
+    },
+    {
+        "field": "workflow_steps",
+        "required_value": (
+            "all five steps observed and passed: Import, Model Health, Analysis Setup, "
+            "Run & Monitor, Compare & Report"
+        ),
+        "check": "all_required_workflow_steps_passed",
+        "owner_note": "Each required workflow step must have a human-observed pass/outcome signal.",
     },
     {
         "field": "observer",
@@ -112,6 +121,18 @@ DERIVED_CHECK_SPECS = (
         "check": "completion_minutes_elapsed_match_pass",
         "owner_note": "Declared completion_minutes must match computed elapsed minutes within the report tolerance.",
     },
+    {
+        "field": "workflow_step_coverage",
+        "required_value": "required workflow observed count == 5/5",
+        "check": "all_required_workflow_steps_observed",
+        "owner_note": "The observed task must cover Import through Compare & Report without skipped steps.",
+    },
+    {
+        "field": "workflow_step_placeholders",
+        "required_value": "no placeholder workflow step labels or outcomes",
+        "check": "workflow_step_placeholders_absent",
+        "owner_note": "Template workflow step placeholders must be replaced with real observed outcomes.",
+    },
 )
 
 
@@ -132,8 +153,8 @@ def _load_json(path: Path) -> dict[str, Any]:
 def _display_value(value: Any) -> str:
     if isinstance(value, bool):
         return "true" if value else "false"
-    if isinstance(value, list):
-        return ", ".join(str(item) for item in value)
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
     return str(value if value is not None else "")
 
 
@@ -152,10 +173,11 @@ def _field_status(*, field: str, check_name: str, observation_report: dict[str, 
     placeholder_fields = {str(item) for item in _as_list(summary.get("placeholder_fields"))}
     missing = field in missing_fields
     placeholder = field in placeholder_fields
+    workflow_source_missing = field.startswith("workflow_step_") and "workflow_steps" in missing_fields
     if check_name == "required_fields_present":
         check_pass = (not missing) and (not placeholder)
     else:
-        check_pass = bool(checks.get(check_name, False)) and not missing and not placeholder
+        check_pass = bool(checks.get(check_name, False)) and not missing and not placeholder and not workflow_source_missing
     return {
         "missing": missing,
         "placeholder": placeholder,
@@ -175,6 +197,14 @@ def _current_value(field: str, observation: dict[str, Any], summary: dict[str, A
         elapsed = summary.get("elapsed_minutes")
         tolerance = summary.get("timestamp_tolerance_minutes")
         return f"declared={declared}; elapsed={elapsed}; tolerance={tolerance}"
+    if field == "workflow_step_coverage":
+        return (
+            f"pass={summary.get('workflow_step_pass_count')}/"
+            f"{summary.get('required_workflow_step_count')}; "
+            f"missing={summary.get('missing_workflow_steps')}"
+        )
+    if field == "workflow_step_placeholders":
+        return summary.get("placeholder_workflow_steps")
     return observation.get(field)
 
 
@@ -242,6 +272,13 @@ def build_packet(
             "elapsed_minutes": summary.get("elapsed_minutes"),
             "max_completion_minutes": summary.get("max_completion_minutes", 30.0),
             "timestamp_tolerance_minutes": summary.get("timestamp_tolerance_minutes"),
+            "required_workflow_steps": summary.get("required_workflow_steps", []),
+            "workflow_step_count": summary.get("workflow_step_count", 0),
+            "required_workflow_step_count": summary.get("required_workflow_step_count", 0),
+            "workflow_step_pass_count": summary.get("workflow_step_pass_count", 0),
+            "missing_workflow_steps": summary.get("missing_workflow_steps", []),
+            "not_passed_workflow_steps": summary.get("not_passed_workflow_steps", []),
+            "placeholder_workflow_steps": summary.get("placeholder_workflow_steps", []),
         },
         "field_rows": field_rows,
         "current_blockers": blockers,

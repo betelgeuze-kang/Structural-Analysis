@@ -1,0 +1,178 @@
+{
+  "blocked_by": [
+    "checksum_missing",
+    "dataset_repository_url_missing",
+    "gui_task_runner_not_implemented",
+    "gui_workflow_coverage_missing",
+    "ifc_query_gui_task_execution_missing",
+    "per_file_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_manifest_missing"
+  ],
+  "blockers": [
+    "checksum_missing",
+    "dataset_repository_url_missing",
+    "gui_task_runner_not_implemented",
+    "gui_workflow_coverage_missing",
+    "ifc_query_gui_task_execution_missing",
+    "per_file_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_manifest_missing"
+  ],
+  "claim_boundary": "This receipt records extraction, query-answer, and GUI workflow readiness. It is not FEM numerical accuracy evidence, does not execute IFC tasks, does not prove UX observation, and cannot close Phase 3 or Developer Preview RC by itself.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": false,
+  "current_task_source_count": 0,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "expected_answer_count": 0,
+  "fem_numerical_accuracy_claim": false,
+  "generated_at": "2026-06-22T18:31:51.930814+00:00",
+  "gui_task_execution_count": 0,
+  "input_checksums": {
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:bde370b0efc49e87e704be4c190879c62b932c1416c93a6fe75095a1be185944"
+  },
+  "lanes": [
+    "ifc-query-and-gui"
+  ],
+  "missing_workflow_steps": [
+    "import",
+    "model_health",
+    "analysis_setup",
+    "run_monitor",
+    "compare_report"
+  ],
+  "owner_action": "Attach the IFC query/GUI dataset repository or task package, complete per-file license review and checksums, author expected query answers, implement the GUI task runner, and record execution receipts that cover the five-step workflow.",
+  "phase3_closure_claim": false,
+  "query_gui_task_claim": false,
+  "required_evidence": [
+    {
+      "blocker": "dataset_repository_url_missing",
+      "contract_pass": false,
+      "id": "dataset_repository",
+      "required": "Dataset repository URL or attached task-source package for the IFC query corpus.",
+      "status": "missing"
+    },
+    {
+      "blocker": "per_file_license_review_pending",
+      "contract_pass": false,
+      "id": "per_file_license_review",
+      "required": "Per-file license review for every IFC task source used by the GUI/query corpus.",
+      "status": "missing"
+    },
+    {
+      "blocker": "checksum_missing",
+      "contract_pass": false,
+      "id": "source_checksums",
+      "required": "SHA256 for every acquired IFC source and task manifest.",
+      "status": "missing"
+    },
+    {
+      "blocker": "query_task_manifest_missing",
+      "contract_pass": false,
+      "id": "query_task_manifest",
+      "required": "Machine-readable manifest of IFC files, query prompts, expected views, and GUI workflow tasks.",
+      "status": "missing"
+    },
+    {
+      "blocker": "query_expected_answers_missing",
+      "contract_pass": false,
+      "id": "expected_query_answers",
+      "required": "Expected query answers with provenance and tolerance/classification rules.",
+      "status": "missing"
+    },
+    {
+      "blocker": "gui_task_runner_not_implemented",
+      "contract_pass": false,
+      "id": "gui_task_runner",
+      "required": "Repeatable GUI task runner command or browser automation command.",
+      "status": "missing"
+    },
+    {
+      "blocker": "gui_workflow_coverage_missing",
+      "contract_pass": false,
+      "id": "workflow_coverage",
+      "required": "Task coverage for Import, Model Health, Analysis Setup, Run & Monitor, and Compare & Report.",
+      "status": "missing"
+    },
+    {
+      "blocker": "ifc_query_gui_task_execution_missing",
+      "contract_pass": false,
+      "id": "task_execution_receipt",
+      "required": "Per-task execution receipt with pass/fail, provenance, screenshots/logs, and artifact checksums.",
+      "status": "missing"
+    }
+  ],
+  "required_evidence_count": 8,
+  "required_evidence_pass_count": 0,
+  "required_task_source_count": 1,
+  "required_workflow_steps": [
+    {
+      "id": "import",
+      "label": "Import"
+    },
+    {
+      "id": "model_health",
+      "label": "Model Health"
+    },
+    {
+      "id": "analysis_setup",
+      "label": "Analysis Setup"
+    },
+    {
+      "id": "run_monitor",
+      "label": "Run & Monitor"
+    },
+    {
+      "id": "compare_report",
+      "label": "Compare & Report"
+    }
+  ],
+  "schema_version": "phase3-ifc-query-gui-readiness-receipt.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_id": "ifc_query_and_gui_public_corpus",
+  "status": "blocked",
+  "summary_line": "Phase 3 IFC query/GUI readiness: BLOCKED | task_sources=0/1 | workflow=0/5 | evidence=0/8",
+  "task_execution_receipt_template": {
+    "contract_pass": false,
+    "ifc_source_sha256": "OPERATOR_ATTACHED_IFC_SHA256",
+    "query_answer_checks": "OPERATOR_ATTACHED_EXPECTED_ANSWER_RESULTS",
+    "runner_command": "OPERATOR_RECORDED_GUI_OR_BROWSER_COMMAND",
+    "schema_version": "phase3-ifc-query-gui-task-execution-receipt.v1",
+    "source_id": "ifc_query_and_gui_public_corpus",
+    "task_id": "OPERATOR_ATTACHED_TASK_ID",
+    "task_manifest_sha256": "OPERATOR_ATTACHED_TASK_MANIFEST_SHA256",
+    "ui_artifacts": {
+      "logs": [],
+      "provenance_bundle": "OPERATOR_ATTACHED_PROVENANCE_BUNDLE",
+      "screenshots": []
+    },
+    "workflow_steps": [
+      {
+        "id": "import",
+        "label": "Import"
+      },
+      {
+        "id": "model_health",
+        "label": "Model Health"
+      },
+      {
+        "id": "analysis_setup",
+        "label": "Analysis Setup"
+      },
+      {
+        "id": "run_monitor",
+        "label": "Run & Monitor"
+      },
+      {
+        "id": "compare_report",
+        "label": "Compare & Report"
+      }
+    ]
+  },
+  "task_manifest_count": 0,
+  "workflow_step_count": 5,
+  "workflow_step_pass_count": 0
+}

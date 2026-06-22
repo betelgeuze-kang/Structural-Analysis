@@ -1,0 +1,139 @@
+{
+  "blocked_by": [
+    "license_review_pending",
+    "medium_model_pass_or_review_missing",
+    "normalization_not_implemented",
+    "opensees_medium_runner_command_missing",
+    "opensees_medium_scorecard_execution_missing",
+    "reference_outputs_missing",
+    "source_url_verification_pending"
+  ],
+  "blockers": [
+    "license_review_pending",
+    "medium_model_pass_or_review_missing",
+    "normalization_not_implemented",
+    "opensees_medium_runner_command_missing",
+    "opensees_medium_scorecard_execution_missing",
+    "reference_outputs_missing",
+    "source_url_verification_pending"
+  ],
+  "claim_boundary": "This receipt records the evidence contract for OpenSees medium scorecards. It preserves local topology/parser evidence as parser-only and does not prove source authority, license approval, reference outputs, normalization, scorecard execution, PASS/REVIEW decisions, Phase 3 closure, or DP RC readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": false,
+  "current_medium_model_scorecard_count": 0,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-22T18:31:51.930541+00:00",
+  "input_checksums": {
+    "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:e4ae1d205217a7eab994d1cfbf00579b55a386fbf7e2bec8cf6a1b7bdf608eda",
+    "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:bde370b0efc49e87e704be4c190879c62b932c1416c93a6fe75095a1be185944"
+  },
+  "lanes": [
+    "opensees-medium"
+  ],
+  "local_candidate_artifact_count": 2,
+  "local_parser_boundary": {
+    "beam_element_count": 166,
+    "canonical_candidate_case_ids": [
+      "SCBF16B",
+      "SCBF16B_shell_beam_mix"
+    ],
+    "claim_boundary": "Local checksum and topology/parser evidence is retained only as parser input evidence. It is not reference-output ingest, normalization, medium scorecard execution, or PASS/REVIEW benchmark evidence.",
+    "node_count": 426,
+    "shell_element_count": 5,
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+    "topology_contract_pass": true,
+    "topology_receipt_path": "implementation/phase1/opensees_topology_report.json"
+  },
+  "local_topology_contract_pass": true,
+  "medium_model_benchmark_pass_claim": false,
+  "owner_action": "Attach authoritative OpenSees medium source/license evidence, ingest reference outputs, normalize five selected medium models, run the medium scorecard, and record PASS or pre-approved REVIEW rows before promoting this RC gate.",
+  "pass_or_approved_review_count": 0,
+  "phase3_closure_claim": false,
+  "required_evidence": [
+    {
+      "blocker": "source_url_verification_pending",
+      "contract_pass": false,
+      "id": "authoritative_source",
+      "required": "Verified upstream source URL or DOI for each selected medium model.",
+      "status": "missing"
+    },
+    {
+      "blocker": "license_review_pending",
+      "contract_pass": false,
+      "id": "license_approval",
+      "required": "License review for local execution, redistribution boundary, and commercial-use boundary.",
+      "status": "missing"
+    },
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "id": "local_candidate_parser_boundary",
+      "required": "Local checksum/topology evidence recorded as parser-only, not benchmark pass evidence.",
+      "status": "parser_only_ready"
+    },
+    {
+      "blocker": "reference_outputs_missing",
+      "contract_pass": false,
+      "id": "reference_outputs",
+      "required": "Reference displacement/reaction/member/modal outputs or approved REVIEW baseline.",
+      "status": "missing"
+    },
+    {
+      "blocker": "normalization_not_implemented",
+      "contract_pass": false,
+      "id": "canonical_normalization",
+      "required": "Canonical model normalization with units, coordinates, and mapping coverage.",
+      "status": "missing"
+    },
+    {
+      "blocker": "opensees_medium_runner_command_missing",
+      "contract_pass": false,
+      "id": "runner_command",
+      "required": "Repeatable medium-model scorecard runner command with selected model inputs and outputs.",
+      "status": "missing"
+    },
+    {
+      "blocker": "opensees_medium_scorecard_execution_missing",
+      "contract_pass": false,
+      "id": "scorecard_execution",
+      "required": "OpenSees medium scorecard execution retaining residual, increment, and convergence history.",
+      "status": "missing"
+    },
+    {
+      "blocker": "medium_model_pass_or_review_missing",
+      "contract_pass": false,
+      "id": "pass_or_approved_review",
+      "required": "Per-case PASS or explicit pre-approved REVIEW decision for selected medium models.",
+      "status": "missing"
+    }
+  ],
+  "required_evidence_count": 8,
+  "required_evidence_pass_count": 1,
+  "required_medium_model_count": 5,
+  "schema_version": "phase3-medium-model-scorecard-readiness-receipt.v1",
+  "scorecard_receipt_template": {
+    "case_id": "OPERATOR_ATTACHED_CASE_ID",
+    "contract_pass": false,
+    "decision": "PASS|APPROVED_REVIEW",
+    "metrics": {
+      "convergence_history_retained": true,
+      "node_member_mapping_coverage": "OPERATOR_RECORDED_COVERAGE",
+      "residual_formula": "F_internal_minus_F_external"
+    },
+    "normalization_receipt": "OPERATOR_ATTACHED_NORMALIZATION_RECEIPT",
+    "reference_output_sha256": "OPERATOR_ATTACHED_REFERENCE_OUTPUT_SHA256",
+    "runner_command": "OPERATOR_RECORDED_COMMAND",
+    "schema_version": "phase3-medium-model-scorecard-receipt.v1",
+    "source_id": "opensees_scbf16b_medium_candidate",
+    "source_sha256": "OPERATOR_ATTACHED_SHA256"
+  },
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_id": "opensees_scbf16b_medium_candidate",
+  "status": "blocked",
+  "summary_line": "Phase 3 OpenSees medium scorecard readiness: BLOCKED | scorecards=0/5 | evidence=1/8"
+}

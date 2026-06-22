@@ -42,6 +42,10 @@ from build_phase4_commercial_comparison_import_template import (  # noqa: E402
     DEFAULT_OUT as DEFAULT_COMMERCIAL_COMPARISON_TEMPLATE_OUT,
     build_phase4_commercial_comparison_import_template,
 )
+from build_phase4_analytic_physical_fallback_scorecard import (  # noqa: E402
+    DEFAULT_OUT as DEFAULT_PHASE4_ANALYTIC_PHYSICAL_FALLBACK_OUT,
+    build_phase4_analytic_physical_fallback_scorecard,
+)
 from build_phase4_commercial_operator_reference_contract import (  # noqa: E402
     DEFAULT_OUT as DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_CONTRACT_OUT,
     build_phase4_commercial_operator_reference_contract,
@@ -83,6 +87,11 @@ DEFAULT_GIT_CLEAN_CLONE_REPRODUCTION_OUT = (
     PRODUCTIZATION / "phase3_benchmark_factory_seed_git_clean_clone_reproduction.json"
 )
 SCHEMA_VERSION = "phase3-benchmark-factory-seed-artifacts.v1"
+SEED_ANALYTIC_COMPONENT_LANES = (
+    "analytic-small",
+    "element-patch",
+    "nonlinear-material-mesh",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -171,6 +180,7 @@ def build_phase3_benchmark_factory_artifacts(
     ifc_import_health_execution_out: Path = DEFAULT_IFC_IMPORT_HEALTH_EXECUTION_OUT,
     opensees_source_license_out: Path = DEFAULT_OPENSEES_SOURCE_LICENSE_OUT,
     commercial_comparison_template_out: Path = DEFAULT_COMMERCIAL_COMPARISON_TEMPLATE_OUT,
+    phase4_analytic_physical_fallback_out: Path = DEFAULT_PHASE4_ANALYTIC_PHYSICAL_FALLBACK_OUT,
     commercial_operator_reference_contract_out: Path = DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_CONTRACT_OUT,
     commercial_operator_reference_ingest_validator_out: Path = (
         DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_INGEST_VALIDATOR_OUT
@@ -188,6 +198,10 @@ def build_phase3_benchmark_factory_artifacts(
         source_commit_sha=resolved_source_commit_sha,
     )
     commercial_comparison_template = build_phase4_commercial_comparison_import_template(
+        repo_root=repo_root,
+        source_commit_sha=resolved_source_commit_sha,
+    )
+    phase4_analytic_physical_fallback = build_phase4_analytic_physical_fallback_scorecard(
         repo_root=repo_root,
         source_commit_sha=resolved_source_commit_sha,
     )
@@ -235,15 +249,20 @@ def build_phase3_benchmark_factory_artifacts(
     )
     contract_pass = (
         scorecard["contract_pass"]
+        and scorecard["expected_output_contract_pass"]
         and package_cli["manifest"] == manifest
         and package_cli["scorecard"] == scorecard
         and package_cli["summary"].get("contract_pass") is True
+        and phase4_analytic_physical_fallback["contract_pass"] is True
         and all_cases_have_license
         and manifest["case_count"] == scorecard["case_count"]
         and "analytic-small" in manifest["lanes"]
         and "element-patch" in manifest["lanes"]
     )
-    analytic_component_quantity_gate_met = lane_case_counts.get("analytic-small", 0) >= 20
+    analytic_component_case_count = sum(
+        lane_case_counts.get(lane, 0) for lane in SEED_ANALYTIC_COMPONENT_LANES
+    )
+    analytic_component_quantity_gate_met = analytic_component_case_count >= 20
     summary = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -271,6 +290,15 @@ def build_phase3_benchmark_factory_artifacts(
         "pass_count": scorecard["pass_count"],
         "lanes": manifest["lanes"],
         "lane_case_counts": lane_case_counts,
+        "scorecard_expected_output_comparison_count": scorecard[
+            "expected_output_comparison_count"
+        ],
+        "scorecard_expected_output_comparison_pass_count": scorecard[
+            "expected_output_comparison_pass_count"
+        ],
+        "scorecard_expected_output_contract_pass": scorecard[
+            "expected_output_contract_pass"
+        ],
         "all_cases_have_license_checksum_truth_and_expected_outputs": all_cases_have_license,
         "scorecard_reproducible_from_manifest": manifest["case_count"] == scorecard["case_count"],
         "analytic_component_quantity_gate_met": analytic_component_quantity_gate_met,
@@ -280,9 +308,23 @@ def build_phase3_benchmark_factory_artifacts(
             "entry_point": "structural-analysis-benchmark = structural_analysis.benchmark.cli:main",
             "module_command": "python -m structural_analysis.benchmark.cli",
             "invocation_surfaces": ["python_api_factory", "package_cli"],
-            "scope": "generated analytic-small and element-patch seed only",
+            "scope": (
+                "generated analytic-small, element-patch, and nonlinear material-mesh "
+                "seed only"
+            ),
             "same_manifest_as_python_factory": package_cli["manifest"] == manifest,
             "same_scorecard_as_python_factory": package_cli["scorecard"] == scorecard,
+            "expected_output_contract_pass": bool(
+                package_cli["scorecard"].get("expected_output_contract_pass") is True
+            ),
+            "expected_output_comparison_count": package_cli["scorecard"].get(
+                "expected_output_comparison_count",
+                0,
+            ),
+            "expected_output_comparison_pass_count": package_cli["scorecard"].get(
+                "expected_output_comparison_pass_count",
+                0,
+            ),
             "factory_manifest_checksum": _stable_payload_checksum(manifest),
             "package_cli_manifest_checksum": _stable_payload_checksum(package_cli["manifest"]),
             "factory_scorecard_checksum": _stable_payload_checksum(scorecard),
@@ -293,7 +335,7 @@ def build_phase3_benchmark_factory_artifacts(
         "full_phase3_quantity_gates_met": False,
         "remaining_quantity_targets": {
             "analytic_component_cases_required": 20,
-            "analytic_component_cases_current": lane_case_counts.get("analytic-small", 0),
+            "analytic_component_cases_current": analytic_component_case_count,
             "medium_structural_models_required": 5,
             "medium_structural_models_current": 0,
             "large_structural_models_required": 2,
@@ -330,6 +372,9 @@ def build_phase3_benchmark_factory_artifacts(
             "opensees_source_license_receipt": str(opensees_source_license_out),
             "commercial_comparison_import_template": str(commercial_comparison_template_out),
             "commercial_operator_reference_contract": str(commercial_operator_reference_contract_out),
+            "phase4_analytic_physical_fallback_scorecard": str(
+                phase4_analytic_physical_fallback_out
+            ),
             "commercial_operator_reference_ingest_validator": str(
                 commercial_operator_reference_ingest_validator_out
             ),
@@ -337,11 +382,12 @@ def build_phase3_benchmark_factory_artifacts(
         "claim_boundary": (
             "This is a generated analytic-small benchmark factory seed. "
             "It proves manifest + checksum/license/truth/expected-output metadata "
-            "and a deterministic scorecard run for generated axial and axis-aligned "
-            "element patch cases only. "
-            "The analytic/component quantity gate is satisfied only inside this "
-            "generated axial family; it does not close OpenSees, "
-            "buildingSMART IFC, commercial-cross-solver, or large-model gates."
+            "and a deterministic scorecard run for generated axial, axis-aligned "
+            "element patch, and narrow nonlinear material-mesh axial-chain cases only. "
+            "The analytic/component quantity gate is satisfied only inside these "
+            "repo-generated seed families; it does not close OpenSees, buildingSMART "
+            "IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or "
+            "G1 solver-core gates."
         ),
     }
     reproducibility_bundle = {
@@ -365,6 +411,7 @@ def build_phase3_benchmark_factory_artifacts(
             "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py",
             "python3 scripts/build_phase3_opensees_source_license_receipt.py",
             "python3 scripts/build_phase4_commercial_comparison_import_template.py",
+            "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py",
             "python3 scripts/build_phase4_commercial_operator_reference_contract.py",
             "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
             "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
@@ -373,6 +420,7 @@ def build_phase3_benchmark_factory_artifacts(
             "python3 scripts/build_phase3_ifc_import_health_execution_receipt.py --check",
             "python3 scripts/build_phase3_opensees_source_license_receipt.py --check",
             "python3 scripts/build_phase4_commercial_comparison_import_template.py --check",
+            "python3 scripts/build_phase4_analytic_physical_fallback_scorecard.py --check",
             "python3 scripts/build_phase4_commercial_operator_reference_contract.py --check",
             "python3 scripts/build_phase4_commercial_operator_reference_ingest_validator.py --check",
             (
@@ -397,6 +445,11 @@ def build_phase3_benchmark_factory_artifacts(
                 "scripts/build_phase3_benchmark_acquisition_artifacts.py "
                 "scripts/build_phase3_opensees_source_license_receipt.py "
                 "scripts/build_phase4_commercial_comparison_import_template.py "
+                "scripts/build_phase3_ifc_query_gui_readiness_receipt.py "
+                "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py "
+                "scripts/build_phase3_large_model_runner_readiness_receipt.py "
+                "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py "
+                "scripts/build_phase4_analytic_physical_fallback_scorecard.py "
                 "scripts/build_phase4_commercial_operator_reference_contract.py "
                 "scripts/build_phase4_commercial_operator_reference_ingest_validator.py "
                 "scripts/build_phase3_benchmark_factory_artifacts.py "
@@ -417,8 +470,13 @@ def build_phase3_benchmark_factory_artifacts(
             "scripts/build_phase3_benchmark_factory_artifacts.py",
             "scripts/build_phase3_benchmark_acquisition_artifacts.py",
             "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
+            "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
+            "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+            "scripts/build_phase3_large_model_runner_readiness_receipt.py",
             "scripts/build_phase3_opensees_source_license_receipt.py",
             "scripts/build_phase4_commercial_comparison_import_template.py",
+            "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
+            "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
             "scripts/build_phase4_commercial_operator_reference_contract.py",
             "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
             "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
@@ -427,6 +485,7 @@ def build_phase3_benchmark_factory_artifacts(
             "tests/test_structural_analysis_benchmark_cli.py",
             "tests/test_build_phase3_benchmark_acquisition_artifacts.py",
             "tests/test_build_phase4_commercial_comparison_import_template.py",
+            "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
             "tests/test_build_phase4_commercial_operator_reference_contract.py",
             "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
             "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
@@ -453,6 +512,9 @@ def build_phase3_benchmark_factory_artifacts(
             "opensees_source_license_receipt": str(opensees_source_license_out),
             "commercial_comparison_import_template": str(commercial_comparison_template_out),
             "commercial_operator_reference_contract": str(commercial_operator_reference_contract_out),
+            "phase4_analytic_physical_fallback_scorecard": str(
+                phase4_analytic_physical_fallback_out
+            ),
             "commercial_operator_reference_ingest_validator": str(
                 commercial_operator_reference_ingest_validator_out
             ),
@@ -479,6 +541,9 @@ def build_phase3_benchmark_factory_artifacts(
             "commercial_operator_reference_contract": _stable_payload_checksum(
                 commercial_operator_reference_contract
             ),
+            "phase4_analytic_physical_fallback_scorecard": _stable_payload_checksum(
+                phase4_analytic_physical_fallback
+            ),
             "commercial_operator_reference_ingest_validator": _stable_payload_checksum(
                 commercial_operator_reference_ingest_validator
             ),
@@ -492,6 +557,13 @@ def build_phase3_benchmark_factory_artifacts(
             "pass_count": scorecard["pass_count"],
             "lanes": scorecard["lanes"],
             "lane_case_counts": lane_case_counts,
+            "expected_output_comparison_count": scorecard[
+                "expected_output_comparison_count"
+            ],
+            "expected_output_comparison_pass_count": scorecard[
+                "expected_output_comparison_pass_count"
+            ],
+            "expected_output_contract_pass": scorecard["expected_output_contract_pass"],
             "residual_formula": "F_internal_minus_F_external",
             "regularization_used": False,
             "fallback_used": False,
@@ -504,9 +576,10 @@ def build_phase3_benchmark_factory_artifacts(
         ],
         "claim_boundary": (
             "This bundle records the command replay contract and stable checksums for the generated "
-            "analytic-small and element-patch seed benchmark artifacts only. It does not prove an "
-            "executed clean checkout run, Developer Preview Release Candidate closure, OpenSees, "
-            "buildingSMART IFC, commercial-cross-solver, large-model, or full Phase 3 closure."
+            "analytic-small, element-patch, and nonlinear material-mesh seed benchmark artifacts only. "
+            "It does not prove an executed clean checkout run, Developer Preview Release Candidate "
+            "closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, or full "
+            "Phase 3 closure."
         ),
     }
     return {
@@ -517,6 +590,7 @@ def build_phase3_benchmark_factory_artifacts(
         "ifc_import_health_execution_receipt": ifc_import_health_execution_receipt,
         "opensees_source_license_receipt": opensees_source_license_receipt,
         "commercial_comparison_import_template": commercial_comparison_template,
+        "phase4_analytic_physical_fallback_scorecard": phase4_analytic_physical_fallback,
         "commercial_operator_reference_contract": commercial_operator_reference_contract,
         "commercial_operator_reference_ingest_validator": commercial_operator_reference_ingest_validator,
         "acquisition_plan": acquisition_plan,
@@ -550,6 +624,7 @@ def check_phase3_benchmark_factory_artifacts(
     ifc_import_health_execution_out: Path = DEFAULT_IFC_IMPORT_HEALTH_EXECUTION_OUT,
     opensees_source_license_out: Path = DEFAULT_OPENSEES_SOURCE_LICENSE_OUT,
     commercial_comparison_template_out: Path = DEFAULT_COMMERCIAL_COMPARISON_TEMPLATE_OUT,
+    phase4_analytic_physical_fallback_out: Path = DEFAULT_PHASE4_ANALYTIC_PHYSICAL_FALLBACK_OUT,
     commercial_operator_reference_contract_out: Path = DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_CONTRACT_OUT,
     commercial_operator_reference_ingest_validator_out: Path = (
         DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_INGEST_VALIDATOR_OUT
@@ -571,6 +646,7 @@ def check_phase3_benchmark_factory_artifacts(
         ifc_import_health_execution_out=ifc_import_health_execution_out,
         opensees_source_license_out=opensees_source_license_out,
         commercial_comparison_template_out=commercial_comparison_template_out,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback_out,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract_out,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator_out,
         source_commit_sha=source_commit_sha,
@@ -584,6 +660,7 @@ def check_phase3_benchmark_factory_artifacts(
         "ifc_import_health_execution_receipt": ifc_import_health_execution_out,
         "opensees_source_license_receipt": opensees_source_license_out,
         "commercial_comparison_import_template": commercial_comparison_template_out,
+        "phase4_analytic_physical_fallback_scorecard": phase4_analytic_physical_fallback_out,
         "commercial_operator_reference_contract": commercial_operator_reference_contract_out,
         "commercial_operator_reference_ingest_validator": commercial_operator_reference_ingest_validator_out,
         "scorecard": scorecard_out,
@@ -622,6 +699,7 @@ def write_phase3_benchmark_factory_artifacts(
     ifc_import_health_execution_out: Path = DEFAULT_IFC_IMPORT_HEALTH_EXECUTION_OUT,
     opensees_source_license_out: Path = DEFAULT_OPENSEES_SOURCE_LICENSE_OUT,
     commercial_comparison_template_out: Path = DEFAULT_COMMERCIAL_COMPARISON_TEMPLATE_OUT,
+    phase4_analytic_physical_fallback_out: Path = DEFAULT_PHASE4_ANALYTIC_PHYSICAL_FALLBACK_OUT,
     commercial_operator_reference_contract_out: Path = DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_CONTRACT_OUT,
     commercial_operator_reference_ingest_validator_out: Path = (
         DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_INGEST_VALIDATOR_OUT
@@ -643,6 +721,7 @@ def write_phase3_benchmark_factory_artifacts(
         ifc_import_health_execution_out=ifc_import_health_execution_out,
         opensees_source_license_out=opensees_source_license_out,
         commercial_comparison_template_out=commercial_comparison_template_out,
+        phase4_analytic_physical_fallback_out=phase4_analytic_physical_fallback_out,
         commercial_operator_reference_contract_out=commercial_operator_reference_contract_out,
         commercial_operator_reference_ingest_validator_out=commercial_operator_reference_ingest_validator_out,
         source_commit_sha=source_commit_sha,
@@ -656,6 +735,7 @@ def write_phase3_benchmark_factory_artifacts(
         "ifc_import_health_execution_receipt": ifc_import_health_execution_out,
         "opensees_source_license_receipt": opensees_source_license_out,
         "commercial_comparison_import_template": commercial_comparison_template_out,
+        "phase4_analytic_physical_fallback_scorecard": phase4_analytic_physical_fallback_out,
         "commercial_operator_reference_contract": commercial_operator_reference_contract_out,
         "commercial_operator_reference_ingest_validator": commercial_operator_reference_ingest_validator_out,
         "scorecard": scorecard_out,
@@ -704,6 +784,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_COMMERCIAL_COMPARISON_TEMPLATE_OUT,
     )
     parser.add_argument(
+        "--phase4-analytic-physical-fallback-out",
+        type=Path,
+        default=DEFAULT_PHASE4_ANALYTIC_PHYSICAL_FALLBACK_OUT,
+    )
+    parser.add_argument(
         "--commercial-operator-reference-contract-out",
         type=Path,
         default=DEFAULT_COMMERCIAL_OPERATOR_REFERENCE_CONTRACT_OUT,
@@ -735,6 +820,7 @@ def main(argv: list[str] | None = None) -> int:
             ifc_import_health_execution_out=args.ifc_import_health_execution_out,
             opensees_source_license_out=args.opensees_source_license_out,
             commercial_comparison_template_out=args.commercial_comparison_template_out,
+            phase4_analytic_physical_fallback_out=args.phase4_analytic_physical_fallback_out,
             commercial_operator_reference_contract_out=args.commercial_operator_reference_contract_out,
             commercial_operator_reference_ingest_validator_out=(
                 args.commercial_operator_reference_ingest_validator_out
@@ -757,6 +843,7 @@ def main(argv: list[str] | None = None) -> int:
         ifc_import_health_execution_out=args.ifc_import_health_execution_out,
         opensees_source_license_out=args.opensees_source_license_out,
         commercial_comparison_template_out=args.commercial_comparison_template_out,
+        phase4_analytic_physical_fallback_out=args.phase4_analytic_physical_fallback_out,
         commercial_operator_reference_contract_out=args.commercial_operator_reference_contract_out,
         commercial_operator_reference_ingest_validator_out=(
             args.commercial_operator_reference_ingest_validator_out

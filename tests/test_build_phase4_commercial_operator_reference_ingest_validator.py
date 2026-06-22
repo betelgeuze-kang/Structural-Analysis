@@ -171,7 +171,7 @@ def test_operator_reference_ingest_validator_accepts_complete_package_as_preflig
     assert payload["validation_result"]["checksum_declared_count"] == 5
     assert payload["remaining_blockers"] == [
         "commercial_cross_solver_execution_missing",
-        "gui_story_member_mode_trace_not_implemented",
+        "operator_comparison_trace_rows_missing",
         "phase4_two_solver_comparison_metrics_not_recorded",
     ]
 

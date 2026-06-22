@@ -33,7 +33,7 @@ def test_phase3_clean_checkout_reproduction_runs_isolated_seed_contract() -> Non
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["stable_artifact_checksums_match"] is True
     assert payload["generated_stable_artifact_checksums"] == payload["expected_stable_artifact_checksums"]
-    assert len(payload["command_results"]) == 22
+    assert len(payload["command_results"]) == 24
     assert all(row["return_code"] == 0 for row in payload["command_results"])
     assert "not a full git clean clone" in payload["claim_boundary"]
     assert "not Linux/Windows parity" in payload["claim_boundary"]

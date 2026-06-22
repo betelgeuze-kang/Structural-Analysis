@@ -18,6 +18,7 @@ VECTOR_SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
 VECTOR_MATRIX_BACKENDS = (VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND)
 VECTOR_SPARSE_STIFFNESS_STORAGE = "scipy_sparse_csr"
 SPARSE_BACKEND_USED = False
+SCALAR_CONFIG_BACKENDS = (MATRIX_BACKEND, VECTOR_MATRIX_BACKEND)
 
 
 class VectorEquilibriumProblem(Protocol):
@@ -309,17 +310,18 @@ def newton_raphson_vector(
                 matrix_backend=cfg.matrix_backend,
             )
         except (np.linalg.LinAlgError, ValueError, MatrixRankWarning):
-            if residual_gate_passed:
-                newton_increment_m = np.zeros_like(free_displacements_m)
-            else:
-                return _blocked_vector_solution(
-                    problem,
-                    cfg,
-                    free_displacements_m=free_displacements_m,
-                    history=history,
-                    line_search_history=line_search_history,
-                    detail="singular_tangent_stiffness",
-                )
+            return _blocked_vector_solution(
+                problem,
+                cfg,
+                free_displacements_m=free_displacements_m,
+                history=history,
+                line_search_history=line_search_history,
+                detail=(
+                    "singular_tangent_stiffness_at_residual_gate"
+                    if residual_gate_passed
+                    else "singular_tangent_stiffness"
+                ),
+            )
         residual_based_increment_abs = float(np.linalg.norm(newton_increment_m, ord=np.inf))
         increment_gate_passed = residual_based_increment_abs <= cfg.increment_tolerance
 
@@ -501,6 +503,15 @@ def newton_raphson_scalar(
 ) -> NewtonRaphsonSolution:
     """Solve R(u)=F_internal(u)-F_external with consistent tangent and line search."""
     cfg = config or NewtonRaphsonConfig()
+    if cfg.matrix_backend not in SCALAR_CONFIG_BACKENDS:
+        return _blocked_solution(
+            problem,
+            cfg,
+            displacement_m=float(problem.initial_displacement_m),
+            history=[],
+            line_search_history=[],
+            detail="unsupported_matrix_backend",
+        )
     displacement_m = float(problem.initial_displacement_m)
     history: list[dict[str, Any]] = []
     line_search_history: list[dict[str, Any]] = []
@@ -515,18 +526,18 @@ def newton_raphson_scalar(
         residual_gate_passed = relative_residual <= cfg.residual_tolerance
 
         if abs(tangent_kn_per_m) <= np.finfo(float).tiny:
-            if residual_gate_passed:
-                residual_based_increment_m = 0.0
-                residual_based_increment_abs = 0.0
-            else:
-                return _blocked_solution(
-                    problem,
-                    cfg,
-                    displacement_m=displacement_m,
-                    history=history,
-                    line_search_history=line_search_history,
-                    detail="singular_tangent_stiffness",
-                )
+            return _blocked_solution(
+                problem,
+                cfg,
+                displacement_m=displacement_m,
+                history=history,
+                line_search_history=line_search_history,
+                detail=(
+                    "singular_tangent_stiffness_at_residual_gate"
+                    if residual_gate_passed
+                    else "singular_tangent_stiffness"
+                ),
+            )
         else:
             residual_based_increment_m = -residual_kn / tangent_kn_per_m
             residual_based_increment_abs = abs(residual_based_increment_m)
@@ -695,7 +706,11 @@ def _blocked_solution(
             "relative_residual": _relative_residual(problem, residual_kn),
             "residual_formula": RESIDUAL_FORMULA,
             "globalization": GLOBALIZATION,
-            "matrix_backend": MATRIX_BACKEND,
+            "matrix_backend": (
+                cfg.matrix_backend
+                if detail == "unsupported_matrix_backend"
+                else MATRIX_BACKEND
+            ),
             "sparse_backend_used": SPARSE_BACKEND_USED,
             "residual_gate_passed": False,
             "increment_gate_passed": False,

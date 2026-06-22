@@ -263,12 +263,7 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
             convergence_history=[],
             unsupported_features=unsupported,
             warnings=warnings,
-            metrics={
-                "node_count": len(model.nodes),
-                "element_count": len(model.elements),
-                "load_count": len(model.loads),
-                "support_count": len(model.supports),
-            },
+            metrics=_model_health_metrics(model),
             developer_preview=analysis_config.developer_preview,
             claim_boundary_version=analysis_config.claim_boundary_version,
         )
@@ -291,10 +286,7 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         ],
         warnings=warnings,
         metrics={
-            "node_count": len(model.nodes),
-            "element_count": len(model.elements),
-            "load_count": len(model.loads),
-            "support_count": len(model.supports),
+            **_model_health_metrics(model),
             "unit_length": model.units.length,
             "unit_force": model.units.force,
             "up_axis": model.coordinate_system.up_axis,
@@ -302,6 +294,30 @@ def analyze(model: CanonicalModel, config: AnalysisConfig | None = None) -> Anal
         developer_preview=analysis_config.developer_preview,
         claim_boundary_version=analysis_config.claim_boundary_version,
     )
+
+
+def _model_health_metrics(model: CanonicalModel) -> dict[str, Any]:
+    metrics: dict[str, Any] = {
+        "node_count": len(model.nodes),
+        "element_count": len(model.elements),
+        "load_count": len(model.loads),
+        "support_count": len(model.supports),
+    }
+    metadata = model.metadata if isinstance(model.metadata, dict) else {}
+    for key in (
+        "record_count",
+        "parsed_record_count",
+        "entity_counts",
+        "structural_entity_count",
+        "material_entity_count",
+        "section_entity_count",
+        "load_related_entity_count",
+        "text_scan_only",
+        "adapter_scope",
+    ):
+        if key in metadata:
+            metrics[key] = metadata[key]
+    return metrics
 
 
 def validate(
@@ -327,20 +343,31 @@ def validate(
     if reference_payload:
         for field_name, expected in reference_payload.items():
             actual = result.metrics.get(field_name)
+            comparison_status = "pass" if actual == expected else "review"
             comparisons.append(
                 {
                     "field": field_name,
                     "expected": expected,
                     "actual": actual,
-                    "status": "pass" if actual == expected else "review",
+                    "status": comparison_status,
                 }
             )
     elif result.analysis_type != "model_health":
         warnings.append("No reference payload supplied for non-model-health analysis.")
 
-    contract_pass = result.status == "ready" and not unsupported_fields
+    reference_mismatches = [
+        str(row["field"]) for row in comparisons if row.get("status") != "pass"
+    ]
+    contract_pass = (
+        result.status == "ready"
+        and not unsupported_fields
+        and not reference_mismatches
+    )
     report_status = "pass" if contract_pass else "blocked"
     blocked_fields = unsupported_fields.copy()
+    blocked_fields.extend(
+        f"reference_mismatch:{field_name}" for field_name in reference_mismatches
+    )
     if result.status != "ready" and not blocked_fields:
         blocked_fields.append(result.analysis_type)
 

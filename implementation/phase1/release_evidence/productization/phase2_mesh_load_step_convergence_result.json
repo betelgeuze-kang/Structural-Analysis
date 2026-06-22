@@ -11,6 +11,7 @@
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
   "globalization": "backtracking_line_search",
+  "guarded_solver_usage_present": false,
   "load_partition_counts": [
     1,
     2,

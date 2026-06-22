@@ -1,14 +1,16 @@
 {
-  "claim_boundary": "This artifact validates the shape, permission signal, two-reference-solver presence, modeling convention declarations, and SHA256 coverage for an operator-attached commercial reference package. A passing validation is an ingest preflight only; it does not bundle operator data, grant legal approval, run comparisons, expose GUI story/member/mode traceability, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
+  "claim_boundary": "This artifact validates the shape, permission signal, two-reference-solver presence, modeling convention declarations, and SHA256 coverage for an operator-attached commercial reference package. A passing validation is an ingest preflight only; it does not bundle operator data, grant legal approval, run comparisons, execute GUI story/member/mode trace rows for operator data, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-21T22:00:05.508655+00:00",
+  "generated_at": "2026-06-22T19:21:50.944593+00:00",
   "input_checksums": {
-    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:a874758a3ec42764ce90786d778bb7d6666802ffb542d805183a343e45c9ba5c",
-    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:641eca8d8dd12e5be9754d5d10b515f66fd51fe7a464e8d96abb78ff3ba0f97f",
-    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:c83c8777fe8fd4a0c491a850d811fcdeac8309a84eb43fca5b6fbb13756878ad"
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473"
   },
   "operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
   "package_path": "",
@@ -21,7 +23,7 @@
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "blocked",
   "truth_class": "comparison_reference",
   "validation_result": {

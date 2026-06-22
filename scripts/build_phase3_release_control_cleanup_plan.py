@@ -25,6 +25,14 @@ DEFAULT_GIT_CLEAN_CLONE_RECEIPT = (
     PRODUCTIZATION / "phase3_benchmark_factory_seed_git_clean_clone_reproduction.json"
 )
 DEFAULT_OUT = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
+CLEANUP_CANDIDATE_SET_SOURCE = (
+    "phase3_benchmark_factory_seed_git_clean_clone_reproduction."
+    "release_control_cleanup_plan"
+)
+CLEANUP_CANDIDATE_SET_SCOPE = (
+    "Phase 3 seed git-clean-clone reproduction required-input set only; "
+    "it is not an exhaustive current-worktree dirty-path inventory."
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -194,6 +202,12 @@ def build_phase3_release_control_cleanup_plan(
         "git_clean_clone_receipt_path": str(git_clean_clone_receipt),
         "git_clean_clone_status": git_receipt.get("status"),
         "git_clean_clone_contract_pass": bool(git_receipt.get("contract_pass")),
+        "candidate_set_source": CLEANUP_CANDIDATE_SET_SOURCE,
+        "candidate_set_scope": CLEANUP_CANDIDATE_SET_SCOPE,
+        "current_worktree_diagnostics_included": False,
+        "current_worktree_diagnostic_source": (
+            "product_readiness_snapshot.state_consistency.worktree"
+        ),
         "candidate_release_control_commit_set_count": len(path_rows),
         "candidate_release_control_commit_set": candidate_release_control_commit_set,
         "track_or_add_required_paths": paths_by_state["track_or_add_required_paths"],
@@ -215,9 +229,11 @@ def build_phase3_release_control_cleanup_plan(
         ),
         "claim_boundary": (
             "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone "
-            "replay. It does not commit, push, release, promote Developer Preview readiness, "
-            "or close Phase 3. Dirty tracked paths require owner review before they are bundled "
-            "with the release-control evidence set."
+            "replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; "
+            "the product readiness snapshot carries the current-worktree diagnostic separately. "
+            "It does not commit, push, release, promote Developer Preview readiness, or close "
+            "Phase 3. Dirty tracked paths require owner review before they are bundled with the "
+            "release-control evidence set."
         ),
     }
 

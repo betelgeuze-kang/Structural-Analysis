@@ -163,6 +163,15 @@ def _selected_file(row: dict[str, Any]) -> dict[str, Any]:
             "required_warning_fragments": [
                 "IFC adapter is STEP text scan only",
             ],
+            "required_metadata_fields": [
+                "record_count",
+                "parsed_record_count",
+                "entity_counts",
+                "structural_entity_count",
+                "material_entity_count",
+                "section_entity_count",
+                "load_related_entity_count",
+            ],
             "required_blocked_fields": [
                 "ifc_geometry_not_canonicalized",
             ],

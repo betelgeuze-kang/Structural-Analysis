@@ -48,20 +48,41 @@ def test_benchmark_package_cli_writes_seed_manifest_scorecard_and_summary(
     stdout_summary = json.loads(completed.stdout)
 
     assert manifest["schema_version"] == "phase3-benchmark-factory-manifest.v1"
-    assert manifest["case_count"] == 26
-    assert manifest["lanes"] == ["analytic-small", "element-patch"]
+    assert manifest["case_count"] == 30
+    assert manifest["lanes"] == [
+        "analytic-small",
+        "element-patch",
+        "nonlinear-material-mesh",
+    ]
     assert scorecard["schema_version"] == "phase3-benchmark-factory-scorecard.v1"
     assert scorecard["contract_pass"] is True
-    assert scorecard["case_count"] == 26
-    assert scorecard["pass_count"] == 26
+    assert scorecard["case_count"] == 30
+    assert scorecard["pass_count"] == 30
+    expected_comparison_count = sum(
+        len(row["expected_outputs"]) for row in manifest["rows"]
+    )
+    assert scorecard["expected_output_comparison_count"] == expected_comparison_count
+    assert (
+        scorecard["expected_output_comparison_pass_count"]
+        == expected_comparison_count
+    )
+    assert scorecard["expected_output_contract_pass"] is True
+    assert all(row["expected_output_contract_pass"] is True for row in scorecard["rows"])
     assert summary == stdout_summary
     assert summary["schema_version"] == "phase3-benchmark-runner-cli-summary.v1"
     assert summary["runner"] == "structural-analysis-benchmark"
     assert summary["module_command"] == "python -m structural_analysis.benchmark.cli"
     assert summary["contract_pass"] is True
+    assert summary["expected_output_comparison_count"] == expected_comparison_count
+    assert (
+        summary["expected_output_comparison_pass_count"]
+        == expected_comparison_count
+    )
+    assert summary["expected_output_contract_pass"] is True
     assert summary["phase3_closure_claim"] is False
     assert summary["developer_preview_release_candidate_claim"] is False
     assert "does not close full Phase 3" in summary["claim_boundary"]
+    assert "G1 solver-core" in summary["claim_boundary"]
 
 
 def test_benchmark_entrypoint_is_declared_for_packaging() -> None:

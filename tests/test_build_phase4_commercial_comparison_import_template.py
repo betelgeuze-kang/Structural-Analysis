@@ -34,11 +34,34 @@ def test_commercial_comparison_import_template_authors_mapping_expectations_only
     assert payload["template_scope"]["operator_files_bundled"] is False
     assert payload["template_scope"]["commercial_results_are_absolute_truth"] is False
     assert payload["template_scope"]["requires_two_reference_solvers_for_phase4_closure"] is True
+    diagnostic_policy = payload["comparison_diagnostic_policy"]
+    assert diagnostic_policy["policy_id"] == "modeling_assumption_first"
+    assert diagnostic_policy["commercial_outputs_are_absolute_truth"] is False
+    assert diagnostic_policy["solver_correctness_claim_allowed"] is False
+    assert diagnostic_policy["required_result_field"] == "modeling_assumption_diagnostics"
+    assert diagnostic_policy["diagnostic_order"] == [
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance",
+    ]
 
     required = payload["required_result_fields"]
     for field in [
         "case_id",
         "modeling_convention_id",
+        "modeling_assumption_diagnostics",
         "engine_name",
         "engine_version",
         "input_checksum",
@@ -55,9 +78,17 @@ def test_commercial_comparison_import_template_authors_mapping_expectations_only
         "unsupported_features",
     ]:
         assert field in required
+    assert "modeling_assumption_diagnostic_status" in payload["csv_columns"]
+    assert "primary_modeling_assumption_delta" in payload["csv_columns"]
+    assert "modeling_assumption_delta_codes" in payload["csv_columns"]
     assert "node_mapping_coverage_ratio" in payload["csv_columns"]
     assert "unsupported_feature_codes" in payload["csv_columns"]
     assert payload["json_template"]["input_checksum"].startswith("sha256:")
+    assert payload["json_template"]["modeling_assumption_diagnostics"]["status"].startswith("missing|")
+    assert (
+        payload["json_template"]["modeling_assumption_diagnostics"]["diagnostic_order"]
+        == diagnostic_policy["diagnostic_order"]
+    )
     assert "operator_files_missing" in payload["remaining_blockers"]
     assert "two_reference_solver_comparison_not_available" in payload["remaining_blockers"]
     assert "does not attach operator files" in payload["claim_boundary"]

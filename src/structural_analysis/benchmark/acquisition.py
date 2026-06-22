@@ -63,7 +63,9 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "license_review_pending",
                 "reference_outputs_missing",
                 "normalization_not_implemented",
+                "opensees_medium_runner_command_missing",
                 "opensees_medium_scorecard_execution_missing",
+                "medium_model_pass_or_review_missing",
             ),
             claim_boundary=(
                 "OpenSees medium lane has local SCBF16B candidate artifacts and topology "
@@ -114,6 +116,24 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                         "solver accuracy, or Phase 3 quantity credit."
                     ),
                 },
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "phase3_medium_model_scorecard_readiness_receipt.json"
+                    ),
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "required_medium_model_count": 5,
+                    "current_medium_model_scorecard_count": 0,
+                    "pass_or_approved_review_count": 0,
+                    "local_candidate_artifact_count": 2,
+                    "claim_boundary": (
+                        "OpenSees medium scorecard readiness contract only; local "
+                        "checksum/topology evidence remains parser-only and is not "
+                        "reference-output ingest, normalization, scorecard execution, "
+                        "or PASS/REVIEW benchmark evidence."
+                    ),
+                },
             ),
             source_license_receipt_path=(
                 "implementation/phase1/release_evidence/productization/"
@@ -141,10 +161,31 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "reference_outputs_missing",
                 "large_model_runner_not_implemented",
                 "nightly_lane_not_configured",
+                "large_model_execution_receipt_missing",
+                "large_model_scorecard_or_review_missing",
             ),
             claim_boundary=(
                 "OpenSees mega-tall/large-model policy only; this is not a large-model "
                 "execution, memory, runtime, or accuracy receipt."
+            ),
+            existing_receipts=(
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "phase3_large_model_runner_readiness_receipt.json"
+                    ),
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "required_large_model_count": 2,
+                    "current_large_model_execution_receipt_count": 0,
+                    "crash_oom_free_execution_count": 0,
+                    "scorecard_or_review_count": 0,
+                    "claim_boundary": (
+                        "Large-model runner readiness contract only; no acquired source, "
+                        "license approval, checksum, reference output, normalized model, "
+                        "execution, crash/OOM-free result, or scorecard evidence."
+                    ),
+                },
             ),
         ),
         BenchmarkAcquisitionSource(
@@ -261,8 +302,11 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "dataset_repository_url_missing",
                 "per_file_license_review_pending",
                 "checksum_missing",
+                "query_task_manifest_missing",
                 "query_expected_answers_missing",
                 "gui_task_runner_not_implemented",
+                "gui_workflow_coverage_missing",
+                "ifc_query_gui_task_execution_missing",
             ),
             claim_boundary=(
                 "IFC query/GUI policy only; these tasks measure extraction and UX, "
@@ -271,6 +315,27 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
             source_license_receipt_path=(
                 "implementation/phase1/release_evidence/productization/"
                 "phase3_ifc_source_license_receipt.json"
+            ),
+            existing_receipts=(
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "phase3_ifc_query_gui_readiness_receipt.json"
+                    ),
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "required_task_source_count": 1,
+                    "current_task_source_count": 0,
+                    "task_manifest_count": 0,
+                    "expected_answer_count": 0,
+                    "gui_task_execution_count": 0,
+                    "workflow_step_pass_count": 0,
+                    "claim_boundary": (
+                        "IFC query/GUI readiness contract only; no dataset repository, "
+                        "per-file license review, checksums, expected answers, task runner, "
+                        "five-step workflow execution, or FEM numerical accuracy evidence."
+                    ),
+                },
             ),
         ),
         BenchmarkAcquisitionSource(
@@ -297,6 +362,11 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "operator_reference_ingest_validator_blocked",
                 "operator_reference_outputs_missing",
                 "two_reference_solver_comparison_not_available",
+                "operator_file_checksums_missing",
+                "modeling_convention_declarations_missing",
+                "modeling_assumption_diagnosis_execution_missing",
+                "operator_comparison_trace_rows_missing",
+                "commercial_cross_solver_execution_missing",
             ),
             claim_boundary=(
                 "Commercial cross-solver lane policy only; commercial results are comparison "
@@ -345,6 +415,24 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                     "claim_boundary": (
                         "Ingest preflight only; default artifact has no operator package and "
                         "does not run comparisons or close Phase 4."
+                    ),
+                },
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "phase4_commercial_cross_solver_readiness_receipt.json"
+                    ),
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "required_reference_solver_count": 2,
+                    "current_reference_solver_count": 0,
+                    "operator_package_attached": False,
+                    "operator_permission_attached": False,
+                    "operator_trace_rows_available": False,
+                    "claim_boundary": (
+                        "Commercial cross-solver readiness rollup only; no operator files, "
+                        "permission, checksums, commercial execution, two-reference comparison, "
+                        "or GUI story/member/mode trace rows."
                     ),
                 },
             ),
@@ -410,6 +498,27 @@ def build_phase3_acquisition_plan() -> dict[str, Any]:
         and row["expected_output_status"] == "ready"
         and row["normalization_status"] == "ready"
     ]
+    sample_acquisition_command = {
+        "status": "ready",
+        "contract_pass": True,
+        "command": "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --json",
+        "writes_default_artifact_command": (
+            "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
+        ),
+        "downloads_external_data": False,
+        "bundles_external_data": False,
+        "requires_network": False,
+        "scope": (
+            "Print or write the Phase 3 acquisition policy, source identities, "
+            "blockers, and local/operator action requirements for non-seed benchmark lanes."
+        ),
+        "remaining_corpus_readiness_blockers": blockers,
+        "claim_boundary": (
+            "This is a sample acquisition policy command surface only. It does not "
+            "download sources, approve licenses, attach checksums, ingest reference "
+            "outputs, execute IFC/OpenSees/commercial cases, or close Phase 3."
+        ),
+    }
     return {
         "schema_version": "phase3-benchmark-acquisition-plan.v1",
         "status": "blocked",
@@ -422,6 +531,7 @@ def build_phase3_acquisition_plan() -> dict[str, Any]:
         "local_candidate_source_count": sum(1 for row in rows if row["local_candidate_artifacts"]),
         "topology_receipt_source_count": sum(1 for row in rows if row["existing_receipts"]),
         "source_license_receipt_source_count": sum(1 for row in rows if row["source_license_receipt_path"]),
+        "sample_acquisition_command": sample_acquisition_command,
         "ifc_import_case_requirement": ifc_import_case_requirement,
         "all_non_seed_lanes_have_acquisition_policy": lanes
         == [

@@ -23,6 +23,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-clean-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
@@ -46,6 +67,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-clean-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
@@ -69,6 +111,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
@@ -92,6 +155,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
@@ -115,6 +199,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
@@ -138,6 +243,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
@@ -161,6 +287,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
@@ -184,6 +331,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
@@ -207,6 +375,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
@@ -230,6 +419,27 @@
       "selected_benchmark_lanes": [
         "buildingsmart-dirty-ifc"
       ],
+      "silent_import_loss_gate": {
+        "blockers": [
+          "source_file_not_acquired",
+          "source_sha256_missing",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "contract_pass": false,
+        "executed": false,
+        "required_accounting_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
+        "silent_import_loss_zero": false,
+        "status": "blocked",
+        "visible_entity_accounting": false
+      },
       "source_file_acquired": false,
       "source_sha256": "",
       "source_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
@@ -242,13 +452,13 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-21T22:00:05.510024+00:00",
+  "generated_at": "2026-06-22T19:21:50.946027+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:3ac0b18511deb83cfeaaa31ad9120ace6ef9c81b0f565e83aeb8378ee62ba748",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
-    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:7fc31a17e7d6af1a9331c4ef21b2a47aa877316fa570c24e91604285094a0167",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
     "src/structural_analysis/api/cli.py": "sha256:1b35c7aeaacfb435aee30b5d84979687d142cc33be6628b56cba7380689ae05b",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
@@ -257,8 +467,29 @@
   "quantity_credit_ready_count": 0,
   "reused_evidence": false,
   "schema_version": "phase3-ifc-import-health-execution-receipt.v1",
+  "silent_import_loss_gate": {
+    "blockers": [
+      "silent_import_loss_gate_not_executed",
+      "source_file_not_acquired",
+      "source_sha256_missing"
+    ],
+    "candidate_case_count": 10,
+    "case_gate_pass_count": 0,
+    "claim_boundary": "This gate proves zero silent IFC import loss only when every selected clean/dirty IFC case is acquired, checksummed, import-health executed, entity-accounted, and quantity-credit ready. Text-scan accounting is not solver-ready geometry evidence.",
+    "contract_pass": false,
+    "import_health_execution_count": 0,
+    "quantity_credit_ready_count": 0,
+    "required_case_count": 10,
+    "silent_import_loss_zero": false,
+    "source_checksum_attached_count": 0,
+    "source_file_acquired_count": 0,
+    "status": "blocked",
+    "visible_entity_accounting_case_count": 0
+  },
+  "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "source_file_acquired_count": 0,
-  "status": "blocked"
+  "status": "blocked",
+  "visible_entity_accounting_case_count": 0
 }

@@ -27,6 +27,7 @@ DEFAULT_OUT = PRODUCTIZATION / "phase4_commercial_operator_reference_contract.js
 REQUIRED_PACKAGE_FIELDS = [
     "case_id",
     "modeling_convention_id",
+    "modeling_assumption_diagnostic_order",
     "operator_name",
     "operator_contact_or_internal_ticket",
     "permission_scope",
@@ -54,6 +55,24 @@ REQUIRED_PACKAGE_FIELDS = [
     "warnings",
 ]
 
+MODELING_ASSUMPTION_DIAGNOSTIC_ORDER = [
+    "unit_system",
+    "local_axis_convention",
+    "rigid_offset_policy",
+    "end_release_policy",
+    "diaphragm_policy",
+    "mass_source_policy",
+    "self_weight_policy",
+    "material_modulus_convention",
+    "shell_formulation",
+    "mesh_density",
+    "damping_policy",
+    "p_delta_policy",
+    "eigen_solver",
+    "load_combinations",
+    "convergence_tolerance",
+]
+
 VALIDATION_RULES = [
     {
         "rule_id": "two_independent_reference_solvers_required",
@@ -74,6 +93,11 @@ VALIDATION_RULES = [
         "rule_id": "modeling_convention_must_be_declared",
         "severity": "blocking",
         "description": "Units, local axes, offsets, releases, mass, damping, P-Delta, eigensolver, load combinations, and convergence tolerance must be declared.",
+    },
+    {
+        "rule_id": "modeling_assumption_first_diagnosis_required",
+        "severity": "blocking",
+        "description": "Comparison deltas must be triaged against the declared modeling-assumption order before any solver-correctness hypothesis is recorded.",
     },
     {
         "rule_id": "unsupported_features_are_explicit",
@@ -127,6 +151,10 @@ def build_phase4_commercial_operator_reference_contract(
             [
                 Path("scripts/build_phase4_commercial_operator_reference_contract.py"),
                 Path("scripts/build_phase4_commercial_comparison_import_template.py"),
+                Path("src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"),
+                Path("src/structure-viewer/viewer-report-export.js"),
+                Path("tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py"),
+                Path("tests/test_structure_viewer_explainability_report_contract.py"),
                 Path("implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json"),
                 Path("implementation/phase1/report_commercial_solver_cross_validation.py"),
             ],
@@ -143,6 +171,30 @@ def build_phase4_commercial_operator_reference_contract(
             "implementation/phase1/release_evidence/productization/"
             "phase4_commercial_comparison_import_template.json"
         ),
+        "comparison_diagnostic_policy": {
+            "policy_id": "modeling_assumption_first",
+            "commercial_outputs_are_absolute_truth": False,
+            "solver_correctness_claim_allowed": False,
+            "diagnostic_order": MODELING_ASSUMPTION_DIAGNOSTIC_ORDER,
+            "required_trace": (
+                "Every material comparison delta must cite checked modeling assumptions "
+                "before it can be escalated as a solver-behavior hypothesis."
+            ),
+        },
+        "gui_traceability_contract": {
+            "status": "ready",
+            "contract_pass": True,
+            "schema_version": "structure-viewer-commercial-tool-crosswalk.v1",
+            "viewer_model": "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js",
+            "report_export": "src/structure-viewer/viewer-report-export.js",
+            "focused_tests": [
+                "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
+                "tests/test_structure_viewer_explainability_report_contract.py",
+            ],
+            "required_trace_dimensions": ["member", "story", "mode"],
+            "missing_trace_dimensions_are_blocking": True,
+            "operator_trace_rows_available": False,
+        },
         "required_reference_solver_count": 2,
         "current_reference_solver_count": 0,
         "required_package_fields": REQUIRED_PACKAGE_FIELDS,
@@ -169,6 +221,7 @@ def build_phase4_commercial_operator_reference_contract(
             "raw_input_files": [],
             "raw_result_files": [],
             "file_checksums": {},
+            "modeling_assumption_diagnostic_order": MODELING_ASSUMPTION_DIAGNOSTIC_ORDER,
             "modeling_convention": {
                 "unit_system": "DECLARED_BY_OPERATOR",
                 "local_axis_convention": "DECLARED_BY_OPERATOR",
@@ -197,15 +250,15 @@ def build_phase4_commercial_operator_reference_contract(
             "operator_file_checksums_missing",
             "two_reference_solver_comparison_not_available",
             "commercial_cross_solver_execution_missing",
-            "gui_story_member_mode_trace_not_implemented",
+            "operator_comparison_trace_rows_missing",
         ],
         "claim_boundary": (
             "This artifact defines the operator-attached commercial reference output "
             "package contract only. It does not include operator files, grant permission, "
             "record SHA256 checksums for real operator data, ingest commercial results, "
-            "compare two independent reference solvers, expose GUI story/member/mode "
-            "traceability, or close Phase 3, Phase 4, Phase 6, Developer Preview, or "
-            "commercial readiness."
+            "execute modeling-assumption diagnostics, compare two independent reference "
+            "solvers, execute GUI story/member/mode trace rows for operator data, or close Phase 3, "
+            "Phase 4, Phase 6, Developer Preview, or commercial readiness."
         ),
     }
 

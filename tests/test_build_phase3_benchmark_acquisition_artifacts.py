@@ -32,8 +32,22 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert payload["non_seed_source_count"] == 6
     assert payload["ready_source_count"] == 0
     assert payload["local_candidate_source_count"] == 1
-    assert payload["topology_receipt_source_count"] == 4
+    assert payload["topology_receipt_source_count"] == 6
     assert payload["source_license_receipt_source_count"] == 4
+    sample_command = payload["sample_acquisition_command"]
+    assert sample_command["status"] == "ready"
+    assert sample_command["contract_pass"] is True
+    assert sample_command["command"] == (
+        "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py --json"
+    )
+    assert sample_command["writes_default_artifact_command"] == (
+        "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py"
+    )
+    assert sample_command["downloads_external_data"] is False
+    assert sample_command["bundles_external_data"] is False
+    assert sample_command["requires_network"] is False
+    assert "license_review_pending" in sample_command["remaining_corpus_readiness_blockers"]
+    assert "does not download sources" in sample_command["claim_boundary"]
     assert payload["all_non_seed_lanes_have_acquisition_policy"] is True
     assert payload["all_non_seed_sources_have_license_checksum_and_expected_outputs"] is False
     assert payload["lanes"] == [
@@ -52,8 +66,19 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "operator_reference_outputs_missing" in payload["blockers"]
     assert "operator_reference_package_missing" in payload["blockers"]
     assert "operator_reference_ingest_validator_blocked" in payload["blockers"]
+    assert "operator_file_checksums_missing" in payload["blockers"]
+    assert "modeling_assumption_diagnosis_execution_missing" in payload["blockers"]
+    assert "operator_comparison_trace_rows_missing" in payload["blockers"]
+    assert "commercial_cross_solver_execution_missing" in payload["blockers"]
     assert "cross_solver_mapping_expectations_missing" not in payload["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in payload["blockers"]
+    assert "opensees_medium_runner_command_missing" in payload["blockers"]
+    assert "medium_model_pass_or_review_missing" in payload["blockers"]
+    assert "large_model_execution_receipt_missing" in payload["blockers"]
+    assert "large_model_scorecard_or_review_missing" in payload["blockers"]
+    assert "query_task_manifest_missing" in payload["blockers"]
+    assert "gui_workflow_coverage_missing" in payload["blockers"]
+    assert "ifc_query_gui_task_execution_missing" in payload["blockers"]
     assert "phase3_scorecard_runner_not_implemented" not in payload["blockers"]
     assert "close Phase 3" in payload["claim_boundary"]
 
@@ -90,13 +115,30 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert opensees_medium["existing_receipts"][0]["path"] == "implementation/phase1/opensees_topology_report.json"
     assert opensees_medium["existing_receipts"][0]["contract_pass"] is True
     assert "Topology parser evidence only" in opensees_medium["existing_receipts"][0]["claim_boundary"]
+    assert opensees_medium["existing_receipts"][1]["path"].endswith(
+        "phase3_medium_model_scorecard_readiness_receipt.json"
+    )
+    assert opensees_medium["existing_receipts"][1]["contract_pass"] is False
+    assert opensees_medium["existing_receipts"][1]["required_medium_model_count"] == 5
+    assert opensees_medium["existing_receipts"][1]["current_medium_model_scorecard_count"] == 0
+    assert opensees_medium["existing_receipts"][1]["pass_or_approved_review_count"] == 0
+    assert "parser-only" in opensees_medium["existing_receipts"][1]["claim_boundary"]
     assert opensees_medium["source_license_receipt_path"].endswith(
         "phase3_opensees_medium_source_license_receipt.json"
     )
-    assert rows_by_source["opensees_megatall_model_2_large"]["lanes"] == [
+    large_model = rows_by_source["opensees_megatall_model_2_large"]
+    assert large_model["lanes"] == [
         "opensees-megatall",
         "large-model-performance",
     ]
+    assert "large_model_execution_receipt_missing" in large_model["blockers"]
+    assert "large_model_scorecard_or_review_missing" in large_model["blockers"]
+    assert large_model["existing_receipts"][0]["path"].endswith(
+        "phase3_large_model_runner_readiness_receipt.json"
+    )
+    assert large_model["existing_receipts"][0]["contract_pass"] is False
+    assert large_model["existing_receipts"][0]["current_large_model_execution_receipt_count"] == 0
+    assert "Large-model runner readiness contract only" in large_model["existing_receipts"][0]["claim_boundary"]
     clean_ifc = rows_by_source["buildingsmart_clean_ifc_samples"]
     assert clean_ifc["source_url_or_doi"].startswith(
         "https://github.com/buildingSMART/Sample-Test-Files/tree/main/"
@@ -124,8 +166,18 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     ifc_query = rows_by_source["ifc_query_and_gui_public_corpus"]
     assert ifc_query["source_url_or_doi"] == "https://doi.org/10.48550/arXiv.2605.01698"
     assert "dataset_repository_url_missing" in ifc_query["blockers"]
+    assert "query_task_manifest_missing" in ifc_query["blockers"]
+    assert "gui_workflow_coverage_missing" in ifc_query["blockers"]
+    assert "ifc_query_gui_task_execution_missing" in ifc_query["blockers"]
     assert "source_url_verification_pending" not in ifc_query["blockers"]
     assert ifc_query["source_license_receipt_path"].endswith("phase3_ifc_source_license_receipt.json")
+    assert ifc_query["existing_receipts"][0]["path"].endswith(
+        "phase3_ifc_query_gui_readiness_receipt.json"
+    )
+    assert ifc_query["existing_receipts"][0]["contract_pass"] is False
+    assert ifc_query["existing_receipts"][0]["current_task_source_count"] == 0
+    assert ifc_query["existing_receipts"][0]["workflow_step_pass_count"] == 0
+    assert "IFC query/GUI readiness contract only" in ifc_query["existing_receipts"][0]["claim_boundary"]
     commercial = rows_by_source["commercial_cross_solver_operator_imports"]
     assert commercial["truth_class"] == "comparison_reference"
     assert commercial["expected_output_status"] == (
@@ -134,6 +186,10 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "operator_reference_package_missing" in commercial["blockers"]
     assert "operator_reference_ingest_validator_blocked" in commercial["blockers"]
     assert "operator_reference_outputs_missing" in commercial["blockers"]
+    assert "operator_file_checksums_missing" in commercial["blockers"]
+    assert "modeling_assumption_diagnosis_execution_missing" in commercial["blockers"]
+    assert "operator_comparison_trace_rows_missing" in commercial["blockers"]
+    assert "commercial_cross_solver_execution_missing" in commercial["blockers"]
     assert "cross_solver_mapping_expectations_missing" not in commercial["blockers"]
     assert commercial["existing_receipts"][0]["path"].endswith(
         "phase4_commercial_comparison_import_template.json"
@@ -150,12 +206,22 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     )
     assert commercial["existing_receipts"][2]["contract_pass"] is False
     assert "Operator package shape" in commercial["existing_receipts"][2]["validation_scope"]
+    assert commercial["existing_receipts"][3]["path"].endswith(
+        "phase4_commercial_cross_solver_readiness_receipt.json"
+    )
+    assert commercial["existing_receipts"][3]["contract_pass"] is False
+    assert commercial["existing_receipts"][3]["required_reference_solver_count"] == 2
+    assert commercial["existing_receipts"][3]["current_reference_solver_count"] == 0
+    assert commercial["existing_receipts"][3]["operator_trace_rows_available"] is False
+    assert "Commercial cross-solver readiness rollup only" in commercial["existing_receipts"][3]["claim_boundary"]
     for row in payload["rows"]:
         assert row["ready_for_phase3_quantity_credit"] is False
         assert row["redistribution_allowed"] is False
         assert row["commercial_use_allowed"] is False
         if row["source_id"] == "opensees_scbf16b_medium_candidate":
             assert row["checksum_status"] == "local_candidate_checksum_attached_source_url_unverified"
+            assert "opensees_medium_runner_command_missing" in row["blockers"]
+            assert "medium_model_pass_or_review_missing" in row["blockers"]
         else:
             assert row["checksum_status"].startswith("missing")
         if row["source_id"] == "buildingsmart_clean_ifc_samples":
@@ -166,6 +232,9 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
             assert row["expected_output_status"] == (
                 "authored_import_template_and_operator_contract_pending_reference_outputs"
             )
+        elif row["source_id"] == "ifc_query_and_gui_public_corpus":
+            assert row["expected_output_status"] == "missing_until_query_answers_authored"
+            assert "query_task_manifest_missing" in row["blockers"]
         else:
             assert row["expected_output_status"].startswith("missing")
         assert row["blockers"]

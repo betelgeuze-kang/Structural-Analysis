@@ -25,7 +25,14 @@ def _passing_observation() -> dict[str, object]:
         "participant_role": "new_user",
         "new_to_product": True,
         "sample_project_id": "sample_tower",
-        "workflow_scope": "open sample project, review evidence package, export report",
+        "workflow_scope": "Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report",
+        "workflow_steps": [
+            {"id": "import", "label": "Import", "outcome": "passed"},
+            {"id": "model_health", "label": "Model Health", "outcome": "passed"},
+            {"id": "analysis_setup", "label": "Analysis Setup", "outcome": "passed"},
+            {"id": "run_monitor", "label": "Run & Monitor", "outcome": "passed"},
+            {"id": "compare_report", "label": "Compare & Report", "outcome": "passed"},
+        ],
         "observer": "ux-research-owner",
         "started_at_utc": "2026-06-16T09:00:00+00:00",
         "completed_at_utc": "2026-06-16T09:24:00+00:00",
@@ -62,6 +69,10 @@ def test_ux_new_user_observation_blocks_when_missing(tmp_path: Path) -> None:
     assert payload["reason_code"] == "ERR_UX_NEW_USER_OBSERVATION_REQUIRED"
     assert "observation_file_missing" in payload["blockers"]
     assert "completion_minutes" in payload["summary"]["missing_fields"]
+    assert "workflow_steps" in payload["summary"]["missing_fields"]
+    assert "workflow_steps_missing" in payload["blockers"]
+    assert "required_workflow_steps_missing" in payload["blockers"]
+    assert "required_workflow_step_not_passed" in payload["blockers"]
     assert "completion_gt_30min" not in payload["blockers"]
 
 
@@ -81,6 +92,10 @@ def test_ux_new_user_observation_passes_with_human_record(tmp_path: Path) -> Non
     assert payload["summary"]["completion_minutes"] == 24.0
     assert payload["summary"]["elapsed_minutes"] == 24.0
     assert payload["summary"]["timestamp_tolerance_minutes"] == 1.0
+    assert payload["checks"]["all_required_workflow_steps_observed"] is True
+    assert payload["checks"]["all_required_workflow_steps_passed"] is True
+    assert payload["summary"]["workflow_step_pass_count"] == 5
+    assert payload["summary"]["missing_workflow_steps"] == []
 
 
 def test_ux_new_user_observation_accepts_z_suffix_timestamps(tmp_path: Path) -> None:
@@ -188,6 +203,39 @@ def test_ux_new_user_observation_rejects_template_copy(tmp_path: Path) -> None:
     assert payload["checks"]["template_only_absent"] is False
     assert payload["checks"]["template_note_absent"] is False
     assert "sample_project_id" in payload["summary"]["placeholder_fields"]
+    assert "workflow_step_placeholders_present" in payload["blockers"]
+
+
+def test_ux_new_user_observation_rejects_missing_workflow_step(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["workflow_steps"] = [
+        {"id": "import", "outcome": "passed"},
+        {"id": "model_health", "outcome": "passed"},
+        {"id": "analysis_setup", "outcome": "passed"},
+        {"id": "run_monitor", "outcome": "passed"},
+    ]
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "required_workflow_steps_missing" in payload["blockers"]
+    assert "required_workflow_step_not_passed" in payload["blockers"]
+    assert payload["summary"]["missing_workflow_steps"] == ["compare_report"]
+    assert payload["summary"]["workflow_step_pass_count"] == 4
+
+
+def test_ux_new_user_observation_rejects_failed_workflow_step(tmp_path: Path) -> None:
+    record = _passing_observation()
+    record["workflow_steps"][3]["outcome"] = "blocked"
+    observation = _write_json(tmp_path / "ux_observation.json", record)
+
+    payload = build_ux_new_user_observation_report.build_report(observation_path=observation)
+
+    assert payload["contract_pass"] is False
+    assert "required_workflow_step_not_passed" in payload["blockers"]
+    assert payload["summary"]["missing_workflow_steps"] == []
+    assert payload["summary"]["not_passed_workflow_steps"] == ["run_monitor"]
 
 
 def test_ux_new_user_observation_rejects_legacy_template_tokens(tmp_path: Path) -> None:

@@ -25,7 +25,14 @@ def _template() -> dict[str, object]:
         "participant_role": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user",
         "new_to_product": "OWNER_INPUT_REQUIRED: true",
         "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
-        "workflow_scope": "OWNER_INPUT_REQUIRED: open sample project and export reviewer report",
+        "workflow_scope": "OWNER_INPUT_REQUIRED: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report",
+        "workflow_steps": [
+            {"id": "import", "outcome": "OWNER_INPUT_REQUIRED: pass"},
+            {"id": "model_health", "outcome": "OWNER_INPUT_REQUIRED: pass"},
+            {"id": "analysis_setup", "outcome": "OWNER_INPUT_REQUIRED: pass"},
+            {"id": "run_monitor", "outcome": "OWNER_INPUT_REQUIRED: pass"},
+            {"id": "compare_report", "outcome": "OWNER_INPUT_REQUIRED: pass"},
+        ],
         "observer": "OWNER_INPUT_REQUIRED: UX research owner",
         "started_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z",
         "completed_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z",
@@ -45,7 +52,14 @@ def _observation() -> dict[str, object]:
         "participant_role": "new_user",
         "new_to_product": True,
         "sample_project_id": "sample_tower",
-        "workflow_scope": "open sample project and export reviewer report",
+        "workflow_scope": "Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report",
+        "workflow_steps": [
+            {"id": "import", "outcome": "passed"},
+            {"id": "model_health", "outcome": "passed"},
+            {"id": "analysis_setup", "outcome": "passed"},
+            {"id": "run_monitor", "outcome": "passed"},
+            {"id": "compare_report", "outcome": "passed"},
+        ],
         "observer": "ux-research-owner",
         "started_at_utc": "2026-06-16T09:00:00+00:00",
         "completed_at_utc": "2026-06-16T09:24:00+00:00",
@@ -73,6 +87,9 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
                 "timestamp_order_pass": False,
                 "elapsed_30min_pass": False,
                 "completion_minutes_elapsed_match_pass": False,
+                "all_required_workflow_steps_observed": False,
+                "all_required_workflow_steps_passed": False,
+                "workflow_step_placeholders_absent": False,
                 "blocker_count_zero_pass": False,
                 "approval_decision_pass": False,
             },
@@ -83,6 +100,7 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
                     "new_to_product",
                     "sample_project_id",
                     "workflow_scope",
+                    "workflow_steps",
                     "observer",
                     "started_at_utc",
                     "completed_at_utc",
@@ -113,6 +131,9 @@ def test_ux_observation_intake_packet_surfaces_missing_owner_fields(tmp_path: Pa
     assert rows["completion_minutes"]["report_check_pass"] is False
     assert rows["elapsed_minutes"]["report_check"] == "elapsed_30min_pass"
     assert rows["completion_minutes_elapsed_match"]["report_check_pass"] is False
+    assert rows["workflow_steps"]["report_check"] == "all_required_workflow_steps_passed"
+    assert rows["workflow_step_coverage"]["report_check"] == "all_required_workflow_steps_observed"
+    assert rows["workflow_step_placeholders"]["report_check_pass"] is False
     assert "observation_file_missing" in payload["current_blockers"]
     assert any("build_ux_new_user_observation_report.py" in command for command in payload["validation_commands"])
 
@@ -136,6 +157,9 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
                 "timestamp_order_pass": True,
                 "elapsed_30min_pass": True,
                 "completion_minutes_elapsed_match_pass": True,
+                "all_required_workflow_steps_observed": True,
+                "all_required_workflow_steps_passed": True,
+                "workflow_step_placeholders_absent": True,
                 "blocker_count_zero_pass": True,
                 "approval_decision_pass": True,
             },
@@ -148,6 +172,19 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
                 "started_at_utc": "2026-06-16T09:00:00+00:00",
                 "completed_at_utc": "2026-06-16T09:24:00+00:00",
                 "timestamp_tolerance_minutes": 1.0,
+                "required_workflow_steps": [
+                    {"id": "import", "label": "Import"},
+                    {"id": "model_health", "label": "Model Health"},
+                    {"id": "analysis_setup", "label": "Analysis Setup"},
+                    {"id": "run_monitor", "label": "Run & Monitor"},
+                    {"id": "compare_report", "label": "Compare & Report"},
+                ],
+                "workflow_step_count": 5,
+                "required_workflow_step_count": 5,
+                "workflow_step_pass_count": 5,
+                "missing_workflow_steps": [],
+                "not_passed_workflow_steps": [],
+                "placeholder_workflow_steps": [],
             },
         },
     )
@@ -160,8 +197,9 @@ def test_ux_observation_intake_packet_passes_closed_report(tmp_path: Path) -> No
 
     assert payload["contract_pass"] is True
     assert payload["reason_code"] == "PASS"
-    assert payload["summary"]["field_pass_count"] == 15
+    assert payload["summary"]["field_pass_count"] == 18
     assert payload["summary"]["elapsed_minutes"] == 24.0
+    assert payload["summary"]["workflow_step_pass_count"] == 5
     assert payload["current_blockers"] == []
 
 

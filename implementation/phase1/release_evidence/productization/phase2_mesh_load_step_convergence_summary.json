@@ -28,14 +28,15 @@
   "fallback_used": false,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-06-21T21:33:41.255525+00:00",
+  "generated_at": "2026-06-22T17:25:43.891876+00:00",
   "globalization": "backtracking_line_search",
+  "guarded_solver_usage_present": false,
   "input_checksums": {
-    "scripts/build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:349239e0adcfea958193433e436facaa3d8535793278cbb0b4e980c93490070d",
+    "scripts/build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:f53ed6b50e7ff549a0fcfca1dda800b1fb7e6a3d0e0b00c854cd499cf97fc281",
     "scripts/verify_quality_gate.py": "sha256:66126113aac6cf144f6a21e501bab13f87a49172e51af03f33769fcde55f3e2c",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb",
-    "tests/test_build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:4b8b609507f70a2f7506879d5a0a97ca0aab9222779e0146ba206658a51d2fb6"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6",
+    "tests/test_build_phase2_mesh_load_step_convergence_artifacts.py": "sha256:79b694239f0b6d0a5f60c13a01eedac9af498b25408c951248c6bd417cb798d4"
   },
   "load_partition_counts": [
     1,
@@ -52,7 +53,7 @@
   "regularization_used": false,
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-mesh-load-step-convergence-artifacts.v1",
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "ready",
   "tip_displacement_spread_m": 8.72635297355373e-14,
   "tip_displacement_tolerance_m": 1e-10,

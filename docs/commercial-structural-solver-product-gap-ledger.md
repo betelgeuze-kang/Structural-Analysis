@@ -57,6 +57,7 @@
 | `kds_detailing_support_matrix.json` | `ready`, clauses `23`, guarded rows `20/20` | KDS RC clause/detailing matrix와 자동 claim guard가 붙어 G5 local closure |
 | `korean_medium_large_ingest_receipt.json` | `sources=19 attached=10 metadata_only=9 mgt_header_ok=4` | 중대형 한국 corpus는 bridge 중심, 실제 공모 MGT는 아직 부족 |
 | `commercial_solver_cross_validation.json` | `pass_with_marginal_metrics`, 12/12 cases | 상용 export sample 비교는 통과하나 live solver replay는 아님 |
+| `phase4_analytic_physical_fallback_scorecard.json` | `ready`, generated seed fallback cases `30/30`, expected-output comparisons `88/88`, physical equilibrium `30/30`, commercial reference cases `0` | 상용툴 결과가 없는 generated seed case를 analytic expected-output과 physical residual/equilibrium으로 평가할 수 있음을 보강한다. operator output 첨부, 두 독립 reference solver 비교, GUI story/member/mode 추적성, Phase 4/G6/commercial closure는 아님 |
 | `commercial_gap_ledger_status.json` | `closed=16/20`, `partial=3`, `open=0`, `external_blocked=1` | G3 load/stage flow와 G10 governance/support closure, G9 ROCm/HIP 6900XT receipt 복구, G1/G7/G9 partial 경계를 반영 |
 | `optimization_productization_audit.json` | `status=ready`, accepted rows `20/20` guarded | 최적화 변경은 solver/cost/Pareto/review/code-guard evidence로 재현 가능 |
 | `ml_surrogate_checkpoint_manifest.json` | `status=ready`, validation/OOD/fallback pass | ML은 shadow+solver-fallback 모드로만 제품화 증거에 연결 |
@@ -314,6 +315,7 @@
 
 - strict independent gate는 EB receipt `0/4`, RH closure `0/3`로 blocked.
 - commercial export sample cross-validation은 12/12 pass, marginal accepted 1.
+- `phase4_analytic_physical_fallback_scorecard.json`은 commercial/operator output이 없는 generated seed case도 analytic expected-output comparison과 physical residual/equilibrium으로 평가 가능함을 기록한다(`30/30` pass, expected-output comparison `88/88`, physical equilibrium `30/30`). 이는 fallback evidence일 뿐이며 live MIDAS/SAP/ETABS/OpenSees replay, operator permission, 두 독립 reference solver 비교, GUI story/member/mode traceability를 대체하지 않는다.
 - local RH signed packets/HMAC-style closure artifacts may exist, but strict external/legal/independent closure remains not attached.
 
 남은 개선점:

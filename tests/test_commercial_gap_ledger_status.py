@@ -19,6 +19,19 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     payload = build_commercial_gap_ledger_status()
     assert payload["schema_version"] == "commercial-gap-ledger-status.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"]
+    assert payload["reused_evidence"] is True
+    assert "does_not_create_authoritative_closure_evidence" in payload["reuse_policy"]
+    assert payload["input_checksums"][
+        "docs/commercial-structural-solver-product-gap-ledger.md"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "docs/structural-analysis-ai-engine-gap-ledger.md"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/commercial_gap_ledger_status.py"
+    ].startswith("sha256:")
     assert payload["doc_requirements"]["missing_doc_ids"] == []
     assert payload["doc_requirements"]["missing_status_ids"] == []
     ids = {row["id"] for row in payload["rows"]}
@@ -28,6 +41,13 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     assert payload["summary"]["total_count"] >= 20
     assert payload["summary"]["nonclosed_claim_boundary_missing_count"] == 0
     assert payload["doc_requirements"]["nonclosed_claim_boundary_missing_ids"] == []
+    assert all(str(row["claim_boundary"]).strip() for row in payload["rows"])
+    assert "locally closed only" in next(row for row in payload["rows"] if row["id"] == "G2")[
+        "claim_boundary"
+    ]
+    assert "does not imply full commercial solver readiness" in next(
+        row for row in payload["rows"] if row["id"] == "AI-G2"
+    )["claim_boundary"]
     assert payload["full_gap_ledger_ready"] is False
     assert payload["status"] == "open"
 
@@ -102,6 +122,48 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert rows["G1"]["evidence"]["pdelta_continuation_first_failed_load_scale"] == 0.55
     assert rows["G1"]["evidence"]["full_load_nonlinear_newton_ready"] is False
+    g1_requirements = {
+        row["id"]: row for row in rows["G1"]["evidence"]["closure_requirements"]
+    }
+    assert g1_requirements["full_load_scale_1_0_reached"] == {
+        "id": "full_load_scale_1_0_reached",
+        "observed": 0.5,
+        "target": 1.0,
+        "passed": False,
+        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+    }
+    assert g1_requirements["full_line_mesh_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["full_frame_6dof_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["coupled_frame_surface_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["direct_residual_and_increment_terminal_gate_closed"][
+        "passed"
+    ] is True
+    assert g1_requirements["equilibrium_newton_terminal_increment_gate_closed"][
+        "passed"
+    ] is True
+    assert g1_requirements["state_updated_material_newton_breadth_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["fallback_and_regularization_free_full_path"][
+        "passed"
+    ] is False
+    g1_gap = rows["G1"]["evidence"]["closure_gap_summary"]
+    assert g1_gap["closure_claim_allowed"] is False
+    assert g1_gap["direct_residual_newton_closed"] is True
+    assert g1_gap["equilibrium_newton_closed"] is True
+    assert g1_gap["full_load_scale_reached"] == 0.5
+    assert g1_gap["full_load_target"] == 1.0
+    assert g1_gap["full_line_mesh_nonlinear_equilibrium"] is False
+    assert g1_gap["full_frame_6dof_nonlinear_equilibrium"] is False
+    assert g1_gap["coupled_frame_surface_nonlinear_equilibrium"] is False
+    assert g1_gap["material_newton_direct_residual_gate_passed"] is False
+    assert "sub-load receipts remain non-closing evidence" in g1_gap["claim_boundary"]
     g1_micro = rows["G1"]["evidence"]["pdelta_post_converged_micro_step_probe"]
     assert g1_micro["ready"] is True
     assert g1_micro["target_load_scale"] == 0.505
@@ -8422,6 +8484,46 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G6"]["locally_closable"] is False
     assert rows["G6"]["evidence"]["external_receipt_attached_count"] == 0
     assert rows["G6"]["evidence"]["residual_closed_count"] == 3
+    g6_requirements = {
+        row["id"]: row for row in rows["G6"]["evidence"]["external_closure_requirements"]
+    }
+    assert set(g6_requirements) == {
+        "eb_receipt_hardest_external_10case",
+        "eb_receipt_korean_public_structures",
+        "eb_receipt_peer_spd_hinge",
+        "eb_receipt_tpu_hffb",
+        "strict_residual_holdout_closure_count",
+    }
+    for requirement_id in (
+        "eb_receipt_hardest_external_10case",
+        "eb_receipt_korean_public_structures",
+        "eb_receipt_peer_spd_hinge",
+        "eb_receipt_tpu_hffb",
+    ):
+        assert g6_requirements[requirement_id]["required"] is True
+        assert g6_requirements[requirement_id]["receipt_attached"] is False
+        assert g6_requirements[requirement_id]["blocker"].startswith(
+            "external_receipt_or_closure_pending:"
+        )
+    assert g6_requirements["strict_residual_holdout_closure_count"] == {
+        "id": "strict_residual_holdout_closure_count",
+        "observed": 3,
+        "target": 3,
+        "passed": True,
+        "blocker_prefix": "residual_closure_pending:",
+    }
+    g6_gap = rows["G6"]["evidence"]["external_closure_gap_summary"]
+    assert g6_gap["external_receipt_attached_count"] == 0
+    assert g6_gap["external_expected_queue_count"] == 4
+    assert g6_gap["external_receipt_remaining_count"] == 4
+    assert g6_gap["residual_closed_count"] == 3
+    assert g6_gap["residual_expected_work_item_count"] == 3
+    assert g6_gap["residual_remaining_count"] == 0
+    assert g6_gap["metadata_only_refresh_closes_g6"] is False
+    assert g6_gap["local_signed_template_closes_g6"] is False
+    assert g6_gap["readiness_queue_closes_g6"] is False
+    assert g6_gap["closure_claim_allowed"] is False
+    assert "non-closing evidence" in g6_gap["claim_boundary"]
     assert "external_submission_receipts_pending" in rows["G6"]["blockers"]
     assert not any(
         str(blocker).startswith("residual_closure_pending:")
@@ -8436,6 +8538,56 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G7"]["evidence"]["operator_attached_ifc_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_artifact_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_mgt_header_ok_count"] == 0
+    g7_requirements = {
+        row["id"]: row for row in rows["G7"]["evidence"]["closure_requirements"]
+    }
+    assert g7_requirements["repo_benchmark_bridge_count_zero"] == {
+        "id": "repo_benchmark_bridge_count_zero",
+        "observed": 4,
+        "target": 0,
+        "passed": False,
+        "blocker": "repo_benchmark_bridge_mgt_present",
+    }
+    assert g7_requirements["metadata_only_count_zero"] == {
+        "id": "metadata_only_count_zero",
+        "observed": 9,
+        "target": 0,
+        "passed": False,
+        "blocker": "metadata_only_sources_present",
+    }
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "passed"
+    ] is False
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "observed"
+    ] == 0
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "target"
+    ] == 4
+    assert g7_requirements["operator_manifest_source_mapping_clear"][
+        "passed"
+    ] is False
+    assert g7_requirements["operator_manifest_source_mapping_clear"][
+        "observed"
+    ] == rows["G7"]["evidence"]["operator_action_queue_count"]
+    assert g7_requirements["operator_rights_boundary_clear"] == {
+        "id": "operator_rights_boundary_clear",
+        "observed": 5,
+        "target": 0,
+        "passed": False,
+        "blocker": "operator_rights_blocked_private_candidate_actions_present",
+    }
+    g7_gap = rows["G7"]["evidence"]["closure_gap_summary"]
+    assert g7_gap["closure_claim_allowed"] is False
+    assert g7_gap["repo_benchmark_bridge_count"] == 4
+    assert g7_gap["metadata_only_count"] == 9
+    assert g7_gap["operator_attached_real_mgt_header_ok_count"] == 0
+    assert g7_gap["operator_attached_real_mgt_header_ok_target"] == 4
+    assert g7_gap["source_mapping_blocked_action_count"] == rows["G7"]["evidence"][
+        "operator_action_queue_count"
+    ]
+    assert g7_gap["rights_blocked_private_candidate_action_count"] == 5
+    assert "repository bridge" in g7_gap["claim_boundary"]
     assert len(rows["G7"]["evidence"]["metadata_only_source_ids"]) == 9
     assert len(rows["G7"]["evidence"]["repo_benchmark_bridge_source_ids"]) == 4
     assert len(rows["G7"]["evidence"]["operator_attach_required_source_ids"]) >= 9
@@ -8795,6 +8947,11 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert "metadata_only_sources_present" in rows["G7"]["blockers"]
     assert "operator_attached_real_mgt_header_ok_below_target" in rows["G7"]["blockers"]
+    assert "operator_source_mapping_blocked_actions_present" in rows["G7"]["blockers"]
+    assert (
+        "operator_rights_blocked_private_candidate_actions_present"
+        in rows["G7"]["blockers"]
+    )
     assert rows["AI-G2"]["status"] == "closed"
     assert rows["AI-G2"]["evidence"]["production_ml_wired"] is True
     assert rows["AI-G2"]["evidence"]["checkpoint_validated"] is True
@@ -9964,6 +10121,10 @@ def test_report_commercial_gap_ledger_status_cli(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "commercial-gap-ledger-status.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"]
+    assert payload["reused_evidence"] is True
+    assert payload["input_checksums"]
     assert payload["summary"]["total_count"] == len(payload["rows"])
     assert payload["summary"]["total_count"] >= 20
 

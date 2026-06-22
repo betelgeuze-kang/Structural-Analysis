@@ -38,12 +38,14 @@ PATH_ROLE_SOURCE_INPUT_REPORT = "source_input_report"
 PATH_ROLE_GENERATED_PRODUCTIZATION_EVIDENCE = "generated_productization_evidence"
 PATH_ROLE_REPRODUCTION_BUILD_SCRIPT = "reproduction_build_script"
 PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE = "package_config_core_package"
+PATH_ROLE_VIEWER_GUI_TRACEABILITY_CONTRACT = "viewer_gui_traceability_contract"
 PATH_ROLE_FOCUSED_TEST = "focused_test"
 REQUIRED_PATH_ROLES = (
     PATH_ROLE_SOURCE_INPUT_REPORT,
     PATH_ROLE_GENERATED_PRODUCTIZATION_EVIDENCE,
     PATH_ROLE_REPRODUCTION_BUILD_SCRIPT,
     PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE,
+    PATH_ROLE_VIEWER_GUI_TRACEABILITY_CONTRACT,
     PATH_ROLE_FOCUSED_TEST,
 )
 
@@ -60,6 +62,8 @@ def _required_path_role(path: Path) -> str:
         return PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE
     if key == "src/structural_analysis" or key.startswith("src/structural_analysis/"):
         return PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE
+    if key.startswith("src/structure-viewer/") and key.endswith(".js"):
+        return PATH_ROLE_VIEWER_GUI_TRACEABILITY_CONTRACT
     productization_prefix = f"{PRODUCTIZATION.as_posix()}/"
     if key.startswith(productization_prefix):
         return PATH_ROLE_GENERATED_PRODUCTIZATION_EVIDENCE
@@ -411,6 +415,19 @@ def _run_git_clean_clone_replay(
                 ],
                 [
                     "python3",
+                    "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+                    "--source-commit-sha",
+                    replay_source_commit,
+                ],
+                [
+                    "python3",
+                    "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+                    "--check",
+                    "--source-commit-sha",
+                    replay_source_commit,
+                ],
+                [
+                    "python3",
                     "scripts/build_phase4_commercial_operator_reference_contract.py",
                     "--source-commit-sha",
                     replay_source_commit,
@@ -480,6 +497,7 @@ def _run_git_clean_clone_replay(
                     "tests/test_build_phase3_ifc_import_health_execution_receipt.py",
                     "tests/test_build_phase3_opensees_source_license_receipt.py",
                     "tests/test_build_phase4_commercial_comparison_import_template.py",
+                    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
                     "tests/test_build_phase4_commercial_operator_reference_contract.py",
                     "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
                 ],
@@ -496,8 +514,13 @@ def _run_git_clean_clone_replay(
                     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
                     "scripts/build_phase3_ifc_source_license_receipt.py",
                     "scripts/build_phase3_ifc_import_health_execution_receipt.py",
+                    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
+                    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+                    "scripts/build_phase3_large_model_runner_readiness_receipt.py",
                     "scripts/build_phase3_opensees_source_license_receipt.py",
                     "scripts/build_phase4_commercial_comparison_import_template.py",
+                    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
+                    "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
                     "scripts/build_phase4_commercial_operator_reference_contract.py",
                     "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
                     "scripts/phase3_benchmark_reproduction_contract.py",
@@ -511,6 +534,7 @@ def _run_git_clean_clone_replay(
                     "tests/test_build_phase3_ifc_import_health_execution_receipt.py",
                     "tests/test_build_phase3_opensees_source_license_receipt.py",
                     "tests/test_build_phase4_commercial_comparison_import_template.py",
+                    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
                     "tests/test_build_phase4_commercial_operator_reference_contract.py",
                     "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
                     "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py",
@@ -553,6 +577,9 @@ def _run_git_clean_clone_replay(
             ),
             "commercial_comparison_import_template": (
                 checkout_root / PRODUCTIZATION / "phase4_commercial_comparison_import_template.json"
+            ),
+            "phase4_analytic_physical_fallback_scorecard": (
+                checkout_root / PRODUCTIZATION / "phase4_analytic_physical_fallback_scorecard.json"
             ),
             "commercial_operator_reference_contract": (
                 checkout_root / PRODUCTIZATION / "phase4_commercial_operator_reference_contract.json"

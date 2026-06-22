@@ -1,0 +1,64 @@
+{
+  "blockers": [
+    "dataset_repository_url_missing",
+    "dirty_import_execution_missing",
+    "gui_task_runner_not_implemented",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
+    "per_file_license_review_pending",
+    "phase3_ifc_import_case_count_below_minimum",
+    "phase3_ifc_import_case_quantity_credit_missing",
+    "product_legal_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_file_checksums_missing",
+    "selected_file_checksums_missing",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "silent_import_loss_gate_not_implemented",
+    "source_file_not_acquired",
+    "source_sha256_missing"
+  ],
+  "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass.",
+  "clean_selected_file_count": 2,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "dirty_selected_file_count": 8,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_requirements": {
+    "clean_dirty_import_case_count": {
+      "contract_pass": true,
+      "current": 10,
+      "required": 10
+    },
+    "import_health_execution_ready": false,
+    "product_license_review_ready": false,
+    "selected_file_checksums_ready": false,
+    "silent_data_loss_negative_gate_executed": false,
+    "source_files_acquired": false
+  },
+  "generated_at": "2026-06-22T20:06:27.358818+00:00",
+  "import_health_contract_pass_count": 0,
+  "import_health_execution_count": 0,
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:ef0afe278dad49ef3405d98ff40514a77a01ecefd002ac1b86da98a1a141ac71",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:00d6349cb50dd720fdc88a5a50d4d8320c51311e22e37c63ff574fd1556a2f3d",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:16ab10a661c1f4c686184077a0525fe12c5ddd9a5c3dd9f13f22917769067b6c",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:d9789eb96b4c61bfbe8b8c8feccdc172b661d442fa9fba8c2e845dcd428a0c94",
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:6a3329f2050fb99a5db5a33cf59e66a6d839d493c75ef82f57e8e5aa39ba76cf"
+  },
+  "owner_action": "Acquire and checksum the selected clean/dirty IFC files after license review, execute import-health and silent-data-loss negative gates for every selected case, then rerun this status before promoting the RC final gate.",
+  "readiness_inputs": {
+    "clean_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "dirty_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "import_health_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"
+  },
+  "required_ifc_import_case_count": 10,
+  "reuse_policy": "phase6_silent_import_loss_status_aggregates_phase3_ifc_receipts",
+  "reused_evidence": true,
+  "schema_version": "phase6-silent-import-loss-status.v1",
+  "selected_import_case_count": 10,
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "status": "blocked",
+  "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=0/10"
+}

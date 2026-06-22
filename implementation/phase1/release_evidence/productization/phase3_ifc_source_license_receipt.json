@@ -19,12 +19,12 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-21T22:00:05.508827+00:00",
+  "generated_at": "2026-06-22T19:21:50.944835+00:00",
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:3ac0b18511deb83cfeaaa31ad9120ace6ef9c81b0f565e83aeb8378ee62ba748",
-    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:7fc31a17e7d6af1a9331c4ef21b2a47aa877316fa570c24e91604285094a0167",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:42ba0cb29d3e8222cc488c78d4838966f7ca5df56426a5998c20cdb35bba6c2a"
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:b85ac62227e7f118ae7db8439b505a9c867925fb81696567b3873b0a061765cf"
   },
   "phase3_closure_claim": false,
   "phase3_ifc_import_case_requirement": {
@@ -43,7 +43,7 @@
   "redistribution_allowed_source_count": 0,
   "reused_evidence": false,
   "schema_version": "phase3-ifc-source-license-receipt.v1",
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "source_count": 3,
   "source_url_verified_count": 3,
   "sources": [

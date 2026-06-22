@@ -203,11 +203,12 @@ ${memberRows.length ? memberRows.map((row) => `<tr><td>${escapeHtml(row.label)}<
 
 <h2>Commercial Tool Crosswalk</h2>
 <div class="muted">${escapeHtml(commercialCrosswalk?.summary || 'commercial tool crosswalk pending')}</div>
+<div class="muted">Traceability: ${escapeHtml(commercialCrosswalk?.traceabilityStatus || 'missing')} | member=${escapeHtml(commercialCrosswalk?.traceCoverage?.member ?? '--')}/${escapeHtml(commercialCrosswalk?.traceCoverage?.total ?? '--')} | story=${escapeHtml(commercialCrosswalk?.traceCoverage?.story ?? '--')}/${escapeHtml(commercialCrosswalk?.traceCoverage?.total ?? '--')} | mode=${escapeHtml(commercialCrosswalk?.traceCoverage?.mode ?? '--')}/${escapeHtml(commercialCrosswalk?.traceCoverage?.total ?? '--')}</div>
 <div class="muted">CSV mapper: ${escapeHtml(commercialMapper?.summary || '--')}</div>
 <table>
-<thead><tr><th>Status</th><th>External</th><th>Viewer</th><th>Section</th><th>DCR</th><th>Tool</th></tr></thead>
+<thead><tr><th>Status</th><th>External</th><th>Viewer</th><th>Story</th><th>Mode</th><th>Section</th><th>DCR</th><th>Tool</th><th>Trace Key</th></tr></thead>
 <tbody>
-${crosswalkRows.length ? crosswalkRows.map((row) => `<tr><td>${escapeHtml(row.status)}</td><td>${escapeHtml(row.externalMemberId)}</td><td>${escapeHtml(row.viewerMemberId)}</td><td>${escapeHtml(row.externalSection)} / ${escapeHtml(row.viewerSection)}</td><td>${escapeHtml(row.externalDcr)} / ${escapeHtml(row.viewerDcr)}</td><td>${escapeHtml(row.sourceTool)}</td></tr>`).join('') : '<tr><td colspan="6">No commercial tool crosswalk rows attached.</td></tr>'}
+${crosswalkRows.length ? crosswalkRows.map((row) => `<tr><td>${escapeHtml(row.status)}</td><td>${escapeHtml(row.externalMemberId)}</td><td>${escapeHtml(row.viewerMemberId)}</td><td>${escapeHtml(row.story || '--')}</td><td>${escapeHtml(row.mode || '--')}</td><td>${escapeHtml(row.externalSection)} / ${escapeHtml(row.viewerSection)}</td><td>${escapeHtml(row.externalDcr)} / ${escapeHtml(row.viewerDcr)}</td><td>${escapeHtml(row.sourceTool)}</td><td>${escapeHtml(row.traceKey || '--')}</td></tr>`).join('') : '<tr><td colspan="9">No commercial tool crosswalk rows attached.</td></tr>'}
 </tbody>
 </table>
 <table>

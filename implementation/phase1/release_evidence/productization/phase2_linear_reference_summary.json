@@ -43,9 +43,9 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-06-21T18:49:57.929539+00:00",
+  "generated_at": "2026-06-22T16:08:07.242679+00:00",
   "input_checksums": {
-    "src/structural_analysis/api/core.py": "sha256:fbcb483cbebaeb42a8db4f41a19fd3f9e4ed6eb1b4a4ab5b9be97101e8cca72d",
+    "src/structural_analysis/api/core.py": "sha256:ef477d1b05002353ae998b68270acc09109b93ee7d051dbc1d13d8e4b8c3f957",
     "src/structural_analysis/assembly/linear_static.py": "sha256:95d5e9c56a5f0d65cb7c1adef6e6f064596b09ce8b48f2bf2a908882d7885dc5",
     "src/structural_analysis/schemas/result.schema.json": "sha256:441e909d0f17936e80c03ec8a380ad8275d45fe0b7733e7afb4a28c8eafab98b",
     "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65"
@@ -63,7 +63,7 @@
   "residual_gate_passed": true,
   "rigid_body_blocked_without_regularization": true,
   "schema_version": "phase2-linear-reference-artifacts.v1",
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "sparse_backend_api_config_matrix_backend": "scipy_sparse_spsolve_cpu",
   "sparse_backend_api_config_solver": "phase2_linear_reference_sparse_api",
   "sparse_backend_api_path_verification_ready": true,

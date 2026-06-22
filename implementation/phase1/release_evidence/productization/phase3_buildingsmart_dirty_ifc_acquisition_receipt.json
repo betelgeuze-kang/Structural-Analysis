@@ -14,9 +14,9 @@
   "dirty_import_execution_count": 0,
   "engine_version": "1.0.0",
   "expected_negative_import_contract_count": 8,
-  "generated_at": "2026-06-21T22:00:05.509317+00:00",
+  "generated_at": "2026-06-22T19:21:50.945323+00:00",
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:3ac0b18511deb83cfeaaa31ad9120ace6ef9c81b0f565e83aeb8378ee62ba748",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
@@ -65,6 +65,15 @@
         "phase3_quantity_credit_claim": false,
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
         ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
@@ -130,6 +139,15 @@
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
         ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
         ],
@@ -193,6 +211,15 @@
         "phase3_quantity_credit_claim": false,
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
         ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
@@ -258,6 +285,15 @@
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
         ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
         ],
@@ -321,6 +357,15 @@
         "phase3_quantity_credit_claim": false,
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
         ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
@@ -386,6 +431,15 @@
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
         ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
         ],
@@ -449,6 +503,15 @@
         "phase3_quantity_credit_claim": false,
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
+        ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
         ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
@@ -514,6 +577,15 @@
         "required_blocked_fields": [
           "ifc_geometry_not_canonicalized"
         ],
+        "required_metadata_fields": [
+          "record_count",
+          "parsed_record_count",
+          "entity_counts",
+          "structural_entity_count",
+          "material_entity_count",
+          "section_entity_count",
+          "load_related_entity_count"
+        ],
         "required_warning_fragments": [
           "IFC adapter is STEP text scan only"
         ],
@@ -549,7 +621,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }

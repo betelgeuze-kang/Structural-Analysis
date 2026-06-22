@@ -20,7 +20,7 @@
     "general_newton_jacobian_assembly_not_closed"
   ],
   "case_id": "phase2_scalar_nonlinear_axial_cubic_spring",
-  "claim_boundary": "This proves a deterministic scalar nonlinear axial reference can be solved with explicit Newton-Raphson residual R=F_internal-F_external, consistent tangent stiffness, backtracking line-search globalization, and separate residual/increment convergence gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
+  "claim_boundary": "This proves a deterministic scalar nonlinear axial reference can be solved with explicit Newton-Raphson residual R=F_internal-F_external, consistent tangent stiffness, backtracking line-search globalization, and separate residual/increment convergence gates without regularization or fallback false PASS; unsupported scalar matrix backend requests and singular tangent/Jacobian zero-residual mechanisms remain blocked. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, or production GPU/HIP gates.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": true,
   "displacement_gate_passed": true,
@@ -35,12 +35,12 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-06-21T18:49:19.891593+00:00",
+  "generated_at": "2026-06-22T17:23:23.588602+00:00",
   "globalization": "backtracking_line_search",
   "increment_gate_passed": true,
   "input_checksums": {
     "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:a9293e754702b41cdf5efd02e824ad300e3b3c7d102ea7a0920611fa09c2aef9"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6"
   },
   "iteration_count": 7,
   "line_search_step_count": 6,
@@ -52,9 +52,44 @@
   "residual_formula": "F_internal_minus_F_external",
   "residual_gate_passed": true,
   "schema_version": "phase2-newton-globalization-artifacts.v1",
-  "source_commit_sha": "d33a7132976afce8a56aa4cc8e10d26b7285010b",
+  "singular_tangent_guard": {
+    "scalar": {
+      "contract_pass": false,
+      "detail": "singular_tangent_stiffness_at_residual_gate",
+      "fallback_used": false,
+      "regularization_used": false,
+      "status": "blocked",
+      "unsupported_feature_kinds": [
+        "newton_scalar_reference_blocked"
+      ]
+    },
+    "vector": {
+      "contract_pass": false,
+      "detail": "singular_tangent_stiffness_at_residual_gate",
+      "fallback_used": false,
+      "regularization_used": false,
+      "status": "blocked",
+      "unsupported_feature_kinds": [
+        "newton_vector_reference_blocked"
+      ]
+    }
+  },
+  "singular_tangent_guard_passed": true,
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "sparse_backend_used": false,
   "status": "ready",
   "tangent_gate_passed": true,
-  "truth_class": "analytic_truth"
+  "truth_class": "analytic_truth",
+  "unsupported_backend_guard": {
+    "configured_matrix_backend": "scipy_sparse_spsolve_cpu",
+    "contract_pass": false,
+    "detail": "unsupported_matrix_backend",
+    "fallback_used": false,
+    "regularization_used": false,
+    "status": "blocked",
+    "unsupported_feature_kinds": [
+      "newton_scalar_reference_blocked"
+    ]
+  },
+  "unsupported_backend_guard_passed": true
 }

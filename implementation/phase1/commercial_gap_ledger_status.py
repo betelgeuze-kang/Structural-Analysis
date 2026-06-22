@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
 
 
@@ -19,6 +19,12 @@ RELEASE = REPO_ROOT / "implementation/phase1/release"
 
 COMMERCIAL_DOC = DOCS / "commercial-structural-solver-product-gap-ledger.md"
 AI_DOC = DOCS / "structural-analysis-ai-engine-gap-ledger.md"
+
+SCRIPTS = REPO_ROOT / "scripts"
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+
+from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -1264,6 +1270,21 @@ def _row(
     next_gate: str = "",
     claim_boundary: str = "",
 ) -> dict[str, Any]:
+    evidence_payload = evidence or {}
+    row_claim_boundary = claim_boundary
+    if not row_claim_boundary and status == "closed":
+        next_gate_text = (
+            f" Broader promotion remains limited by next gate: {next_gate}."
+            if next_gate
+            else ""
+        )
+        row_claim_boundary = (
+            f"{gap_id} is locally closed only for the documented `{title}` row using "
+            "the attached evidence payload and zero row blockers. This row-level "
+            "closure does not imply full commercial solver readiness, external "
+            "approval, customer shadow completion, or closure of other G/AI-G rows."
+            f"{next_gate_text}"
+        )
     return {
         "id": gap_id,
         "title": title,
@@ -1272,9 +1293,9 @@ def _row(
         "closed": status == "closed",
         "locally_closable": locally_closable,
         "blockers": blockers,
-        "evidence": evidence or {},
+        "evidence": evidence_payload,
         "next_gate": next_gate,
-        "claim_boundary": claim_boundary,
+        "claim_boundary": row_claim_boundary,
     }
 
 
@@ -2656,6 +2677,156 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
                 ),
             ],
             evidence={
+                "closure_requirements": [
+                    {
+                        "id": "full_load_scale_1_0_reached",
+                        "observed": _get(
+                            full_frame_6dof,
+                            "deformed_state_pdelta_path",
+                            "load_scale_reached",
+                            default=0,
+                        ),
+                        "target": 1.0,
+                        "passed": _float_or_none(
+                            _get(
+                                full_frame_6dof,
+                                "deformed_state_pdelta_path",
+                                "load_scale_reached",
+                                default=0,
+                            )
+                        )
+                        == 1.0,
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                    {
+                        "id": "full_line_mesh_nonlinear_equilibrium_closed",
+                        "observed": bool(
+                            full_line_sparse.get("full_line_mesh_nonlinear_equilibrium")
+                        ),
+                        "target": True,
+                        "passed": bool(
+                            full_line_sparse.get("full_line_mesh_nonlinear_equilibrium")
+                        ),
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                    {
+                        "id": "full_frame_6dof_nonlinear_equilibrium_closed",
+                        "observed": bool(
+                            full_frame_6dof.get("full_frame_6dof_nonlinear_equilibrium")
+                        ),
+                        "target": True,
+                        "passed": bool(
+                            full_frame_6dof.get("full_frame_6dof_nonlinear_equilibrium")
+                        ),
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                    {
+                        "id": "coupled_frame_surface_nonlinear_equilibrium_closed",
+                        "observed": bool(
+                            coupled_frame_surface.get(
+                                "coupled_frame_surface_nonlinear_equilibrium"
+                            )
+                        ),
+                        "target": True,
+                        "passed": bool(
+                            coupled_frame_surface.get(
+                                "coupled_frame_surface_nonlinear_equilibrium"
+                            )
+                        ),
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                    {
+                        "id": "direct_residual_and_increment_terminal_gate_closed",
+                        "observed": direct_residual_newton_closed,
+                        "target": True,
+                        "passed": direct_residual_newton_closed,
+                        "blocker": "direct_residual_newton_not_closed",
+                    },
+                    {
+                        "id": "equilibrium_newton_terminal_increment_gate_closed",
+                        "observed": equilibrium_newton_closed,
+                        "target": True,
+                        "passed": equilibrium_newton_closed,
+                        "blocker": "equilibrium_newton_not_closed",
+                    },
+                    {
+                        "id": "state_updated_material_newton_breadth_closed",
+                        "observed": bool(
+                            g1_shell_material_budgeted_continuation.get(
+                                "direct_residual_gate_passed"
+                            )
+                        ),
+                        "target": True,
+                        "passed": bool(
+                            g1_shell_material_budgeted_continuation.get(
+                                "direct_residual_gate_passed"
+                            )
+                        ),
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                    {
+                        "id": "fallback_and_regularization_free_full_path",
+                        "observed": {
+                            "fell_back_to_linear_tangent": mesh.get(
+                                "fell_back_to_linear_tangent"
+                            ),
+                            "pdelta_status": pdelta_continuation.get("status"),
+                            "shell_material_budgeted_status": (
+                                g1_shell_material_budgeted_continuation.get("status")
+                            ),
+                        },
+                        "target": {
+                            "fell_back_to_linear_tangent": False,
+                            "pdelta_status": "ready",
+                            "shell_material_budgeted_status": "ready",
+                        },
+                        "passed": bool(
+                            mesh.get("fell_back_to_linear_tangent") is False
+                            and pdelta_continuation.get("status") == "ready"
+                            and g1_shell_material_budgeted_continuation.get("status")
+                            == "ready"
+                        ),
+                        "blocker": "full_mesh_nonlinear_equilibrium_not_closed",
+                    },
+                ],
+                "closure_gap_summary": {
+                    "full_3d_closed": full_3d_closed,
+                    "full_3d_partial": full_3d_partial,
+                    "direct_residual_newton_closed": direct_residual_newton_closed,
+                    "equilibrium_newton_closed": equilibrium_newton_closed,
+                    "full_line_mesh_nonlinear_equilibrium": full_line_sparse.get(
+                        "full_line_mesh_nonlinear_equilibrium"
+                    ),
+                    "full_frame_6dof_nonlinear_equilibrium": full_frame_6dof.get(
+                        "full_frame_6dof_nonlinear_equilibrium"
+                    ),
+                    "coupled_frame_surface_nonlinear_equilibrium": (
+                        coupled_frame_surface.get(
+                            "coupled_frame_surface_nonlinear_equilibrium"
+                        )
+                    ),
+                    "full_load_scale_reached": _get(
+                        full_frame_6dof,
+                        "deformed_state_pdelta_path",
+                        "load_scale_reached",
+                        default=0,
+                    ),
+                    "full_load_target": 1.0,
+                    "material_newton_direct_residual_gate_passed": (
+                        g1_shell_material_budgeted_continuation.get(
+                            "direct_residual_gate_passed"
+                        )
+                    ),
+                    "closure_claim_allowed": full_3d_closed,
+                    "claim_boundary": (
+                        "G1 closure requires full-load 1.0, full-mesh nonlinear "
+                        "line/frame/surface-coupled equilibrium, direct residual and "
+                        "increment gates, state-updated material Newton breadth, and a "
+                        "fallback/regularization-free full path. Component, terminal, "
+                        "diagnostic, or sub-load receipts remain non-closing evidence "
+                        "until all listed requirements pass together."
+                    ),
+                },
                 "native_status": native_3d.get("status"),
                 "solve_mode": native_3d.get("solve_mode"),
                 "nonlinear_equilibrium": mesh.get("nonlinear_equilibrium"),
@@ -4977,6 +5148,92 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
             status=_status(external_receipts >= 4 and residual_closed >= 3, external=True),
             blockers=[] if external_receipts >= 4 and residual_closed >= 3 else list(strict_gate.get("blockers") or []),
             evidence={
+                "external_closure_requirements": [
+                    {
+                        "id": "eb_receipt_hardest_external_10case",
+                        "receipt_attached": not any(
+                            str(blocker)
+                            == "external_receipt_or_closure_pending:hardest_external_10case"
+                            for blocker in strict_gate.get("blockers") or []
+                        ),
+                        "required": True,
+                        "blocker": "external_receipt_or_closure_pending:hardest_external_10case",
+                    },
+                    {
+                        "id": "eb_receipt_korean_public_structures",
+                        "receipt_attached": not any(
+                            str(blocker)
+                            == "external_receipt_or_closure_pending:korean_public_structures"
+                            for blocker in strict_gate.get("blockers") or []
+                        ),
+                        "required": True,
+                        "blocker": "external_receipt_or_closure_pending:korean_public_structures",
+                    },
+                    {
+                        "id": "eb_receipt_peer_spd_hinge",
+                        "receipt_attached": not any(
+                            str(blocker)
+                            == "external_receipt_or_closure_pending:peer_spd_hinge"
+                            for blocker in strict_gate.get("blockers") or []
+                        ),
+                        "required": True,
+                        "blocker": "external_receipt_or_closure_pending:peer_spd_hinge",
+                    },
+                    {
+                        "id": "eb_receipt_tpu_hffb",
+                        "receipt_attached": not any(
+                            str(blocker)
+                            == "external_receipt_or_closure_pending:tpu_hffb"
+                            for blocker in strict_gate.get("blockers") or []
+                        ),
+                        "required": True,
+                        "blocker": "external_receipt_or_closure_pending:tpu_hffb",
+                    },
+                    {
+                        "id": "strict_residual_holdout_closure_count",
+                        "observed": residual_closed,
+                        "target": int(
+                            strict_gate.get("residual_expected_work_item_count") or 3
+                        ),
+                        "passed": residual_closed
+                        >= int(
+                            strict_gate.get("residual_expected_work_item_count") or 3
+                        ),
+                        "blocker_prefix": "residual_closure_pending:",
+                    },
+                ],
+                "external_closure_gap_summary": {
+                    "external_receipt_attached_count": external_receipts,
+                    "external_expected_queue_count": strict_gate.get(
+                        "external_expected_queue_count"
+                    ),
+                    "external_receipt_remaining_count": max(
+                        int(strict_gate.get("external_expected_queue_count") or 4)
+                        - external_receipts,
+                        0,
+                    ),
+                    "residual_closed_count": residual_closed,
+                    "residual_expected_work_item_count": strict_gate.get(
+                        "residual_expected_work_item_count"
+                    ),
+                    "residual_remaining_count": max(
+                        int(strict_gate.get("residual_expected_work_item_count") or 3)
+                        - residual_closed,
+                        0,
+                    ),
+                    "metadata_only_refresh_closes_g6": False,
+                    "local_signed_template_closes_g6": False,
+                    "readiness_queue_closes_g6": False,
+                    "closure_claim_allowed": bool(
+                        external_receipts >= 4 and residual_closed >= 3
+                    ),
+                    "claim_boundary": (
+                        "G6 closure requires attached external benchmark receipts and "
+                        "strict residual holdout closure evidence. Metadata-only refreshes, "
+                        "local signed packets, dry-run packages, and readiness queues are "
+                        "non-closing evidence."
+                    ),
+                },
                 "external_receipt_attached_count": external_receipts,
                 "external_expected_queue_count": strict_gate.get("external_expected_queue_count"),
                 "residual_closed_count": residual_closed,
@@ -4994,13 +5251,158 @@ def _commercial_rows(productization_dir: Path | None = None) -> list[dict[str, A
             "G7",
             "Korean Medium/Large Real-Project Corpus",
             ledger="commercial_solver",
-            status=_status(bridge_count == 0 and metadata_only == 0 and real_mgt_ok >= 4, bool(per_source)),
+            status=_status(
+                bridge_count == 0
+                and metadata_only == 0
+                and real_mgt_ok
+                >= int(
+                    ingest_summary.get("operator_attached_real_mgt_header_ok_target")
+                    or 4
+                )
+                and int(
+                    korea_operator_attachment_queue.get(
+                        "source_mapping_blocked_action_count"
+                    )
+                    or 0
+                )
+                == 0
+                and int(
+                    korea_operator_attachment_queue.get(
+                        "rights_blocked_private_candidate_action_count"
+                    )
+                    or 0
+                )
+                == 0,
+                bool(per_source),
+            ),
             blockers=[
                 *(["repo_benchmark_bridge_mgt_present"] if bridge_count else []),
                 *(["metadata_only_sources_present"] if metadata_only else []),
                 *(["operator_attached_real_mgt_header_ok_below_target"] if real_mgt_ok < 4 else []),
+                *(
+                    ["operator_source_mapping_blocked_actions_present"]
+                    if int(
+                        korea_operator_attachment_queue.get(
+                            "source_mapping_blocked_action_count"
+                        )
+                        or 0
+                    )
+                    else []
+                ),
+                *(
+                    ["operator_rights_blocked_private_candidate_actions_present"]
+                    if int(
+                        korea_operator_attachment_queue.get(
+                            "rights_blocked_private_candidate_action_count"
+                        )
+                        or 0
+                    )
+                    else []
+                ),
             ],
             evidence={
+                "closure_requirements": [
+                    {
+                        "id": "repo_benchmark_bridge_count_zero",
+                        "observed": bridge_count,
+                        "target": 0,
+                        "passed": bridge_count == 0,
+                        "blocker": "repo_benchmark_bridge_mgt_present",
+                    },
+                    {
+                        "id": "metadata_only_count_zero",
+                        "observed": metadata_only,
+                        "target": 0,
+                        "passed": metadata_only == 0,
+                        "blocker": "metadata_only_sources_present",
+                    },
+                    {
+                        "id": "operator_attached_real_mgt_header_ok_minimum",
+                        "observed": real_mgt_ok,
+                        "target": int(
+                            ingest_summary.get(
+                                "operator_attached_real_mgt_header_ok_target"
+                            )
+                            or 4
+                        ),
+                        "passed": real_mgt_ok
+                        >= int(
+                            ingest_summary.get(
+                                "operator_attached_real_mgt_header_ok_target"
+                            )
+                            or 4
+                        ),
+                        "blocker": "operator_attached_real_mgt_header_ok_below_target",
+                    },
+                    {
+                        "id": "operator_manifest_source_mapping_clear",
+                        "observed": int(
+                            korea_operator_attachment_queue.get(
+                                "source_mapping_blocked_action_count"
+                            )
+                            or 0
+                        ),
+                        "target": 0,
+                        "passed": int(
+                            korea_operator_attachment_queue.get(
+                                "source_mapping_blocked_action_count"
+                            )
+                            or 0
+                        )
+                        == 0,
+                        "blocker": "operator_source_mapping_blocked_actions_present",
+                    },
+                    {
+                        "id": "operator_rights_boundary_clear",
+                        "observed": int(
+                            korea_operator_attachment_queue.get(
+                                "rights_blocked_private_candidate_action_count"
+                            )
+                            or 0
+                        ),
+                        "target": 0,
+                        "passed": int(
+                            korea_operator_attachment_queue.get(
+                                "rights_blocked_private_candidate_action_count"
+                            )
+                            or 0
+                        )
+                        == 0,
+                        "blocker": (
+                            "operator_rights_blocked_private_candidate_actions_present"
+                        ),
+                    },
+                ],
+                "closure_gap_summary": {
+                    "repo_benchmark_bridge_count": bridge_count,
+                    "metadata_only_count": metadata_only,
+                    "operator_attached_real_mgt_header_ok_count": real_mgt_ok,
+                    "operator_attached_real_mgt_header_ok_target": int(
+                        ingest_summary.get(
+                            "operator_attached_real_mgt_header_ok_target"
+                        )
+                        or 4
+                    ),
+                    "source_mapping_blocked_action_count": int(
+                        korea_operator_attachment_queue.get(
+                            "source_mapping_blocked_action_count"
+                        )
+                        or 0
+                    ),
+                    "rights_blocked_private_candidate_action_count": int(
+                        korea_operator_attachment_queue.get(
+                            "rights_blocked_private_candidate_action_count"
+                        )
+                        or 0
+                    ),
+                    "closure_claim_allowed": False,
+                    "claim_boundary": (
+                        "Only operator-attached, source-mapped, rights-cleared real "
+                        "MGT/IFC/PDF-derived project artifacts may count toward G7 closure; "
+                        "repository bridge, metadata-only, curated local, and unmatched "
+                        "candidate artifacts remain non-closing evidence."
+                    ),
+                },
                 "medium_large_source_count": ingest_summary.get("medium_large_source_count"),
                 "attached_count": ingest_summary.get("attached_count"),
                 "metadata_only_count": metadata_only,
@@ -6136,7 +6538,19 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        **release_evidence_metadata(
+            input_paths=[
+                Path("docs/commercial-structural-solver-product-gap-ledger.md"),
+                Path("docs/structural-analysis-ai-engine-gap-ledger.md"),
+                Path("implementation/phase1/commercial_gap_ledger_status.py"),
+            ],
+            reused_evidence=True,
+            reuse_policy=(
+                "summarizes_existing_gap_ledgers_and_productization_receipts; "
+                "does_not_create_authoritative_closure_evidence"
+            ),
+            repo_root=REPO_ROOT,
+        ),
         "status": "closed" if not blockers else "open",
         "commercial_solver_gap_ready": all(
             gap_id in by_id and by_id[gap_id]["status"] == "closed" for gap_id in expected_commercial

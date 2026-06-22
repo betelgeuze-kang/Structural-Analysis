@@ -231,6 +231,8 @@ def build_phase4_commercial_operator_reference_ingest_validator(
                 Path("scripts/build_phase4_commercial_operator_reference_ingest_validator.py"),
                 Path("scripts/build_phase4_commercial_operator_reference_contract.py"),
                 Path("scripts/build_phase4_commercial_comparison_import_template.py"),
+                Path("src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"),
+                Path("src/structure-viewer/viewer-report-export.js"),
             ],
             repo_root=repo_root,
         ),
@@ -249,7 +251,7 @@ def build_phase4_commercial_operator_reference_ingest_validator(
             if validation_result["blockers"]
             else [
                 "commercial_cross_solver_execution_missing",
-                "gui_story_member_mode_trace_not_implemented",
+                "operator_comparison_trace_rows_missing",
                 "phase4_two_solver_comparison_metrics_not_recorded",
             ]
         ),
@@ -258,8 +260,8 @@ def build_phase4_commercial_operator_reference_ingest_validator(
             "presence, modeling convention declarations, and SHA256 coverage for an "
             "operator-attached commercial reference package. A passing validation is an "
             "ingest preflight only; it does not bundle operator data, grant legal approval, "
-            "run comparisons, expose GUI story/member/mode traceability, or close Phase 3, "
-            "Phase 4, Phase 6, Developer Preview, or commercial readiness."
+            "run comparisons, execute GUI story/member/mode trace rows for operator data, "
+            "or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness."
         ),
     }
 

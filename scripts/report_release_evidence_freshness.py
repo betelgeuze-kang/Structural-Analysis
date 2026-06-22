@@ -94,6 +94,14 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_evidence_console_scope_status.py"),
     ),
+    (
+        "developer_preview_rc_status",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "developer_preview_rc_status.json"
+        ),
+        Path("scripts/build_developer_preview_rc_status.py"),
+    ),
 )
 
 
