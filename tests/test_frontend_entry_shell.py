@@ -89,6 +89,10 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert "function buildDeveloperPreviewSnapshot" in app_tsx
     assert "Open Benchmark Developer Preview" in app_tsx
     assert "Open Developer Preview readiness JSON" in app_tsx
+    assert "getRecord(resource.data, 'gap_ledger_closure_requirement_visibility')" in app_tsx
+    assert "Closure req" in app_tsx
+    assert "Failed req" in app_tsx
+    assert "visibility only; no G1/G6/G7 closure" in app_tsx
     assert "function buildCoreApiContractSnapshot" in app_tsx
     assert "Phase 1 Core API Contract" in app_tsx
     assert "Open Core API result JSON" in app_tsx

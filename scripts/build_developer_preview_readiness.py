@@ -196,8 +196,18 @@ def _scope_boundary_sync(repo_root: Path) -> dict[str, Any]:
         "consumes_scope_record": "getRecord(resource.data, 'scope')" in gui_text,
         "consumes_included_scope": "getArray(scope, 'included')" in gui_text,
         "consumes_excluded_scope": "getArray(scope, 'excluded')" in gui_text,
+        "consumes_closure_visibility_record": (
+            "getRecord(resource.data, 'gap_ledger_closure_requirement_visibility')"
+            in gui_text
+        ),
+        "consumes_failed_closure_requirement_ids": (
+            "getArray(closureVisibility, 'nonclosed_failed_closure_requirement_ids')"
+            in gui_text
+        ),
         "renders_scope_summary": "scope=${scopeSummary}" in gui_text,
         "renders_exclusion_summary": "excludes=${exclusionSummary}" in gui_text,
+        "renders_closure_requirement_summary": "closure requirements=${closureRequirementSummary}" in gui_text,
+        "renders_closure_visibility_boundary": "visibility only; no G1/G6/G7 closure" in gui_text,
         "future_commercial_boundary_present": all(
             any(anchor in gui_text for anchor in alternatives)
             for alternatives in FUTURE_COMMERCIAL_ANCHORS.values()
@@ -1047,16 +1057,25 @@ def _markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _strip_volatile(payload: Any) -> Any:
+def _strip_volatile(payload: Any, path: tuple[str, ...] = ()) -> Any:
     if isinstance(payload, dict):
         return {
-            key: _strip_volatile(value)
+            key: _strip_volatile(value, (*path, key))
             for key, value in payload.items()
             if key not in {"generated_at"}
+            and not (path == () and key == "source_commit_sha")
         }
     if isinstance(payload, list):
-        return [_strip_volatile(item) for item in payload]
+        return [_strip_volatile(item, path) for item in payload]
     return payload
+
+
+def _strip_volatile_markdown(text: str) -> str:
+    return "\n".join(
+        line
+        for line in text.splitlines()
+        if not line.startswith("- `source_commit_sha`:")
+    )
 
 
 def check_developer_preview_readiness(
@@ -1088,7 +1107,7 @@ def check_developer_preview_readiness(
     if not resolved_out_md.exists():
         return False, f"developer_preview_readiness_report_missing:{out_md_path.as_posix()}"
     existing_markdown = resolved_out_md.read_text(encoding="utf-8")
-    if existing_markdown != expected_markdown:
+    if _strip_volatile_markdown(existing_markdown) != _strip_volatile_markdown(expected_markdown):
         return False, "developer_preview_readiness_report_mismatch"
     return True, "developer_preview_readiness_consistent"
 

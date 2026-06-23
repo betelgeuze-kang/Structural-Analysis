@@ -899,6 +899,70 @@ def _gap_ledger_audit_split_summary(row_outcomes: list[Any]) -> dict[str, dict[s
     return summary
 
 
+def _developer_preview_closure_visibility_summary(
+    developer_preview: dict[str, Any],
+) -> dict[str, Any]:
+    visibility = _as_dict(developer_preview.get("gap_ledger_closure_requirement_visibility"))
+    return {
+        "source_status": str(visibility.get("source_status", "missing")),
+        "source_contract_pass": bool(visibility.get("source_contract_pass") is True),
+        "source_full_gap_ledger_ready": bool(
+            visibility.get("source_full_gap_ledger_ready") is True
+        ),
+        "closure_requirement_count": _as_int(
+            visibility.get("closure_requirement_count"), 0
+        ),
+        "closure_requirement_pass_count": _as_int(
+            visibility.get("closure_requirement_pass_count"), 0
+        ),
+        "closure_requirement_fail_count": _as_int(
+            visibility.get("closure_requirement_fail_count"), 0
+        ),
+        "nonclosed_rows_with_failed_closure_requirements_count": _as_int(
+            visibility.get("nonclosed_rows_with_failed_closure_requirements_count"), 0
+        ),
+        "nonclosed_failed_closure_requirement_ids": [
+            str(item)
+            for item in _as_list(visibility.get("nonclosed_failed_closure_requirement_ids"))
+            if str(item)
+        ],
+        "claim_boundary": str(visibility.get("claim_boundary", "")),
+    }
+
+
+def _developer_preview_scope_boundary_summary(
+    developer_preview: dict[str, Any],
+) -> dict[str, Any]:
+    sync = _as_dict(developer_preview.get("scope_boundary_sync"))
+    gui = _as_dict(sync.get("gui_surface"))
+    reports = _as_dict(_as_dict(sync.get("surface_groups")).get("reports"))
+    doc_surfaces = _as_dict(sync.get("doc_surfaces"))
+    return {
+        "status": str(sync.get("status", "missing")),
+        "contract_pass": bool(sync.get("contract_pass") is True),
+        "doc_surface_count": len(doc_surfaces),
+        "doc_surface_pass_count": sum(
+            1 for row in doc_surfaces.values() if _as_dict(row).get("contract_pass") is True
+        ),
+        "report_surface_count": _as_int(reports.get("surface_count"), 0),
+        "report_surface_pass_count": _as_int(reports.get("contract_pass_count"), 0),
+        "gui_contract_pass": bool(gui.get("contract_pass") is True),
+        "gui_consumes_scope_record": bool(gui.get("consumes_scope_record") is True),
+        "gui_consumes_closure_visibility_record": bool(
+            gui.get("consumes_closure_visibility_record") is True
+        ),
+        "gui_consumes_failed_closure_requirement_ids": bool(
+            gui.get("consumes_failed_closure_requirement_ids") is True
+        ),
+        "gui_renders_closure_requirement_summary": bool(
+            gui.get("renders_closure_requirement_summary") is True
+        ),
+        "gui_renders_closure_visibility_boundary": bool(
+            gui.get("renders_closure_visibility_boundary") is True
+        ),
+    }
+
+
 def _pyproject_project_metadata(
     repo_root: Path,
     path: Path,
@@ -1686,6 +1750,12 @@ def build_snapshot(
                     for key, value in _as_dict(developer_preview.get("categories")).items()
                 },
                 "freeze_policy": _as_dict(_as_dict(developer_preview.get("scope")).get("freeze_policy")),
+                "gap_ledger_closure_requirement_visibility": (
+                    _developer_preview_closure_visibility_summary(developer_preview)
+                ),
+                "scope_boundary_sync_summary": (
+                    _developer_preview_scope_boundary_summary(developer_preview)
+                ),
                 "claim_boundary": str(developer_preview.get("claim_boundary", "")),
                 "ready": bool(developer_preview.get("developer_preview_ready")),
             },

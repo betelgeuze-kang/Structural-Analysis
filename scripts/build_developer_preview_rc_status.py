@@ -1264,15 +1264,16 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
-def _strip_volatile(payload: Any) -> Any:
+def _strip_volatile(payload: Any, path: tuple[str, ...] = ()) -> Any:
     if isinstance(payload, dict):
         return {
-            key: _strip_volatile(value)
+            key: _strip_volatile(value, (*path, key))
             for key, value in payload.items()
             if key not in {"generated_at"}
+            and not (path == () and key == "source_commit_sha")
         }
     if isinstance(payload, list):
-        return [_strip_volatile(item) for item in payload]
+        return [_strip_volatile(item, path) for item in payload]
     return payload
 
 

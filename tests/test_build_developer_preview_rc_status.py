@@ -181,7 +181,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
 
-    assert payload["known_limitations"]["developer_preview_blocker_count"] == 61
+    assert payload["known_limitations"]["developer_preview_blocker_count"] == 76
     assert payload["known_limitations"]["dataset_license_blockers"] == []
     assert payload["known_limitations"]["dataset_license_external_corpus_blockers"] == [
         "phase3_external_corpus:authoritative_source_checksums_pending=4",
@@ -677,3 +677,30 @@ def test_developer_preview_rc_status_check_detects_json_drift(tmp_path: Path) ->
 
     assert ok is False
     assert message == "developer_preview_rc_status_mismatch"
+
+
+def test_developer_preview_rc_status_check_allows_source_commit_wrapper_drift(
+    tmp_path: Path,
+) -> None:
+    out = tmp_path / "developer_preview_rc_status.json"
+    out_md = tmp_path / "developer_preview_rc_status.md"
+    module.write_developer_preview_rc_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+        out_md_path=out_md,
+    )
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    payload["source_commit_sha"] = "previous-receipt-only-commit"
+    out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    ok, message = module.check_developer_preview_rc_status(
+        repo_root=REPO_ROOT,
+        out_path=out,
+        out_md_path=out_md,
+    )
+
+    assert ok is True
+    assert message == "developer_preview_rc_status_consistent"

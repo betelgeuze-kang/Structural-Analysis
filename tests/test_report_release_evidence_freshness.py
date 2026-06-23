@@ -126,6 +126,44 @@ def test_release_evidence_freshness_blocks_newer_producer(tmp_path: Path) -> Non
     assert "evidence::producer_newer_than_artifact" in payload["blockers"]
 
 
+def test_release_evidence_freshness_allows_receipt_only_input_commit_drift(
+    tmp_path: Path,
+) -> None:
+    receipt = (
+        tmp_path
+        / "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"
+    )
+    receipt.parent.mkdir(parents=True, exist_ok=True)
+    receipt.write_text("{}", encoding="utf-8")
+    producer = tmp_path / "scripts/build_evidence_console_scope_status.py"
+    producer.parent.mkdir(parents=True, exist_ok=True)
+    producer.write_text("print('producer')\n", encoding="utf-8")
+
+    original_rev_parse = freshness._git_rev_parse
+    original_diff_name_only = freshness._git_diff_name_only
+    freshness._git_rev_parse = lambda _repo_root, value: str(value)
+    freshness._git_diff_name_only = lambda _repo_root, _source, _current, _paths: [
+        "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json"
+    ]
+    try:
+        ok, exact, changed_paths = freshness._source_state_matches(
+            repo_root=tmp_path,
+            source_commit="previous",
+            current_commit="current",
+            producer_path=producer,
+            input_checksum={
+                "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:abc"
+            },
+        )
+    finally:
+        freshness._git_rev_parse = original_rev_parse
+        freshness._git_diff_name_only = original_diff_name_only
+
+    assert ok is True
+    assert exact is False
+    assert changed_paths == []
+
+
 def test_release_evidence_freshness_default_artifacts_include_real_project_and_customer_shadow(
     tmp_path: Path,
 ) -> None:

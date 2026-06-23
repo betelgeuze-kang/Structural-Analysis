@@ -246,8 +246,12 @@ def test_developer_preview_scope_boundary_sync_receipt_checks_docs_and_gui(
     app_text = (
         "function buildDeveloperPreviewSnapshot() { "
         "getRecord(resource.data, 'scope'); getArray(scope, 'included'); "
+        "getRecord(resource.data, 'gap_ledger_closure_requirement_visibility'); "
+        "getArray(closureVisibility, 'nonclosed_failed_closure_requirement_ids'); "
         "getArray(scope, 'excluded'); `scope=${scopeSummary}`; "
-        "`excludes=${exclusionSummary}`; customer shadow; license/legal approval; "
+        "`excludes=${exclusionSummary}`; "
+        "`closure requirements=${closureRequirementSummary}`; "
+        "visibility only; no G1/G6/G7 closure; customer shadow; license/legal approval; "
         "commercial SLA; 30-run CI streak; external approval receipts; }"
     )
     (tmp_path / "src").mkdir()
@@ -274,6 +278,10 @@ def test_developer_preview_scope_boundary_sync_receipt_checks_docs_and_gui(
     assert sync["doc_surfaces"]["README.md"]["excluded_scope_anchor_count"] == 5
     assert sync["gui_surface"]["consumes_included_scope"] is True
     assert sync["gui_surface"]["consumes_excluded_scope"] is True
+    assert sync["gui_surface"]["consumes_closure_visibility_record"] is True
+    assert sync["gui_surface"]["consumes_failed_closure_requirement_ids"] is True
+    assert sync["gui_surface"]["renders_closure_requirement_summary"] is True
+    assert sync["gui_surface"]["renders_closure_visibility_boundary"] is True
 
 
 def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
@@ -591,6 +599,23 @@ def test_check_detects_json_and_markdown_drift(tmp_path: Path) -> None:
     out_md = tmp_path / "developer_preview_readiness.md"
     out_md.write_text(build_developer_preview_readiness._markdown(payload), encoding="utf-8")
 
+    ok, message = build_developer_preview_readiness.check_developer_preview_readiness(
+        repo_root=tmp_path,
+        out_path=out,
+        out_md_path=out_md,
+        product_snapshot_path=product_snapshot,
+        dataset_license_manifest_path=manifest,
+    )
+    assert ok is True
+    assert message == "developer_preview_readiness_consistent"
+
+    source_drifted = dict(payload)
+    source_drifted["source_commit_sha"] = "previous-receipt-only-commit"
+    _write_json(out, source_drifted)
+    out_md.write_text(
+        build_developer_preview_readiness._markdown(source_drifted),
+        encoding="utf-8",
+    )
     ok, message = build_developer_preview_readiness.check_developer_preview_readiness(
         repo_root=tmp_path,
         out_path=out,

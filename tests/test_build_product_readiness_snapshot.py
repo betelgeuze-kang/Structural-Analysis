@@ -893,6 +893,31 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
             "gpu_hip": "performance_track_after_cpu_reference_parity",
             "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
         },
+        "gap_ledger_closure_requirement_visibility": {
+            "source_status": "missing",
+            "source_contract_pass": False,
+            "source_full_gap_ledger_ready": False,
+            "closure_requirement_count": 0,
+            "closure_requirement_pass_count": 0,
+            "closure_requirement_fail_count": 0,
+            "nonclosed_rows_with_failed_closure_requirements_count": 0,
+            "nonclosed_failed_closure_requirement_ids": [],
+            "claim_boundary": "",
+        },
+        "scope_boundary_sync_summary": {
+            "status": "missing",
+            "contract_pass": False,
+            "doc_surface_count": 0,
+            "doc_surface_pass_count": 0,
+            "report_surface_count": 0,
+            "report_surface_pass_count": 0,
+            "gui_contract_pass": False,
+            "gui_consumes_scope_record": False,
+            "gui_consumes_closure_visibility_record": False,
+            "gui_consumes_failed_closure_requirement_ids": False,
+            "gui_renders_closure_requirement_summary": False,
+            "gui_renders_closure_visibility_boundary": False,
+        },
         "claim_boundary": (
             "Fixture Developer Preview receipt; future Commercial Release blockers "
             "remain visible but do not block the preview."
@@ -1246,6 +1271,46 @@ def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercia
                 "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
             },
         },
+        "gap_ledger_closure_requirement_visibility": {
+            "source_status": "ready",
+            "source_contract_pass": True,
+            "source_full_gap_ledger_ready": False,
+            "closure_requirement_count": 18,
+            "closure_requirement_pass_count": 3,
+            "closure_requirement_fail_count": 15,
+            "nonclosed_rows_with_failed_closure_requirements_count": 3,
+            "nonclosed_failed_closure_requirement_ids": [
+                "G1:full_load_scale_1_0_reached",
+                "G6:eb_receipt_hardest_external_10case",
+                "G7:operator_manifest_source_mapping_clear",
+            ],
+            "claim_boundary": (
+                "This is a visibility summary only and does not add Developer "
+                "Preview blockers."
+            ),
+        },
+        "scope_boundary_sync": {
+            "status": "ready",
+            "contract_pass": True,
+            "doc_surfaces": {
+                "README.md": {"contract_pass": True},
+                "docs/commercialization-gap-current-state.md": {"contract_pass": True},
+            },
+            "surface_groups": {
+                "reports": {
+                    "surface_count": 1,
+                    "contract_pass_count": 1,
+                },
+            },
+            "gui_surface": {
+                "contract_pass": True,
+                "consumes_scope_record": True,
+                "consumes_closure_visibility_record": True,
+                "consumes_failed_closure_requirement_ids": True,
+                "renders_closure_requirement_summary": True,
+                "renders_closure_visibility_boundary": True,
+            },
+        },
         "claim_boundary": (
             "Developer Preview is not a commercial structural solver beta."
         ),
@@ -1267,6 +1332,38 @@ def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercia
         "future commercial": 2,
         "numerical": 1,
         "software product": 1,
+    }
+    assert component["gap_ledger_closure_requirement_visibility"] == {
+        "source_status": "ready",
+        "source_contract_pass": True,
+        "source_full_gap_ledger_ready": False,
+        "closure_requirement_count": 18,
+        "closure_requirement_pass_count": 3,
+        "closure_requirement_fail_count": 15,
+        "nonclosed_rows_with_failed_closure_requirements_count": 3,
+        "nonclosed_failed_closure_requirement_ids": [
+            "G1:full_load_scale_1_0_reached",
+            "G6:eb_receipt_hardest_external_10case",
+            "G7:operator_manifest_source_mapping_clear",
+        ],
+        "claim_boundary": (
+            "This is a visibility summary only and does not add Developer "
+            "Preview blockers."
+        ),
+    }
+    assert component["scope_boundary_sync_summary"] == {
+        "status": "ready",
+        "contract_pass": True,
+        "doc_surface_count": 2,
+        "doc_surface_pass_count": 2,
+        "report_surface_count": 1,
+        "report_surface_pass_count": 1,
+        "gui_contract_pass": True,
+        "gui_consumes_scope_record": True,
+        "gui_consumes_closure_visibility_record": True,
+        "gui_consumes_failed_closure_requirement_ids": True,
+        "gui_renders_closure_requirement_summary": True,
+        "gui_renders_closure_visibility_boundary": True,
     }
     assert component["ready"] is False
     assert "commercial structural solver beta" in component["claim_boundary"]

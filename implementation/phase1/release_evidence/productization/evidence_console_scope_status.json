@@ -137,15 +137,15 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-22T21:30:34.341094+00:00",
+  "generated_at": "2026-06-23T14:23:18.384514+00:00",
   "input_checksums": {
-    "README.md": "sha256:4712f3cda6f6023bae2888d206e1bb47e2d8eeb92f09d0d6b14e1f7385e42c16",
-    "docs/commercialization-gap-current-state.md": "sha256:f078fdb05e522dc982aca581467ee18f7393905ec5f37000e4ca6b97b56dc85c",
+    "README.md": "sha256:6b7e859bf9d23eec7d7dd6d555dc44e42bb89713c6418d936e52da48120b036a",
+    "docs/commercialization-gap-current-state.md": "sha256:72e636143ca78ac320f4fcb0d44280a5208be475847fe74e5227d042aa05494f",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:3b237cb94468ccc1a2029f41ce36f00b3e6e4f0ce786e8418943f08824362f7a",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
     "implementation/phase1/release_evidence/productization/p0_closure_status.json": "sha256:928a06def989a23ccc56a9a4198976d713ec541cf34a6b0881f61238944fc875",
-    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:81df8a6c0bb881dca198628ce2e7eb090e8439576b8b7fbfac96c2e0fb76502b",
+    "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json": "sha256:58779e25a4255b7adb7aac00743dc38247445bec3de4a00c474ea24be078ffda",
     "implementation/phase1/release_evidence/productization/p1_readiness_status.json": "sha256:429e4f7f682c9415b08592ce64909accb674d64efc020a49de58a0d3693f10c8"
   },
   "launch_ready": false,
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "df4ecf0d35122cae3201e41c61341704a856a90c",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [

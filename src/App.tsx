@@ -1407,6 +1407,19 @@ function buildDeveloperPreviewSnapshot(resource: ResourceState): Snapshot {
   const scope = getRecord(resource.data, 'scope')
   const includedScope = getArray(scope, 'included').map(asString).filter(Boolean)
   const excludedScope = getArray(scope, 'excluded').map(asString).filter(Boolean)
+  const closureVisibility = getRecord(resource.data, 'gap_ledger_closure_requirement_visibility')
+  const closureRequirementCount = firstNumber(closureVisibility.closure_requirement_count) ?? 0
+  const closureRequirementPassCount = firstNumber(closureVisibility.closure_requirement_pass_count) ?? 0
+  const closureRequirementFailCount = firstNumber(closureVisibility.closure_requirement_fail_count) ?? 0
+  const failedClosureIds = getArray(closureVisibility, 'nonclosed_failed_closure_requirement_ids')
+    .map(asString)
+    .filter(Boolean)
+  const closureRequirementSummary = closureRequirementCount
+    ? `${compactCount(closureRequirementPassCount)}/${compactCount(closureRequirementCount)}`
+    : '0/0'
+  const closureFailureSummary = failedClosureIds.length
+    ? `${failedClosureIds.slice(0, 2).join('; ')}${failedClosureIds.length > 2 ? '; ...' : ''}`
+    : 'no failed closure requirement ids reported'
   const scopeSummary = includedScope.length
     ? includedScope.slice(0, 2).join('; ')
     : 'public/open benchmark import and local GUI review'
@@ -1423,8 +1436,10 @@ function buildDeveloperPreviewSnapshot(resource: ResourceState): Snapshot {
       { label: 'Future commercial', value: compactCount(futureCount), note: 'visible, non-blocking for Developer Preview' },
       { label: 'Scope', value: compactCount(includedScope.length), note: scopeSummary },
       { label: 'Excluded', value: compactCount(excludedScope.length), note: exclusionSummary },
+      { label: 'Closure req', value: closureRequirementSummary, note: 'visibility only; no G1/G6/G7 closure' },
+      { label: 'Failed req', value: compactCount(closureRequirementFailCount), note: closureFailureSummary },
     ],
-    note: `Developer Preview blockers=${compactCount(blockerCount)}; scope=${scopeSummary}; excludes=${exclusionSummary}; customer shadow, license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain Commercial Release blockers.`,
+    note: `Developer Preview blockers=${compactCount(blockerCount)}; closure requirements=${closureRequirementSummary}, failed=${compactCount(closureRequirementFailCount)} visibility only; scope=${scopeSummary}; excludes=${exclusionSummary}; customer shadow, license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain Commercial Release blockers.`,
     sourceLabel: resource.source || 'developer_preview_readiness.json',
   }
 }

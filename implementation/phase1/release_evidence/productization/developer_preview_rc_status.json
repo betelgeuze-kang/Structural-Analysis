@@ -320,11 +320,11 @@
     "product_license",
     "external_approval_receipts"
   ],
-  "generated_at": "2026-06-22T21:54:55.450648+00:00",
+  "generated_at": "2026-06-23T14:24:03.667313+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2b4766aff8085175c3be2f1ece5baf87237780e296a84e392c8c9e139029e32c",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:9bbe0ed5524a7d6d2c22279cde8449ae1f3a45cc4c5dbb75c8e30c6c248921f2",
-    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:3254b1ac7d07c1ac2c44e70ab7a5588d4e05ccd90f34dd9ec08c09f34fa5bd8b",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:cc67275b6f65b1ba990807742bd3e590486f955a371bb8fde7385c48133d5603",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:381809dd351938ed13b93b2e3ee9969df97b38ffeeaa16d9cb1d37634177e7e5",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:25eda9fdc85f179329334b75144cb8af5f89ff6e996de25168d9224da527f605",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:4c678a7e7bf3bbeed429582b2f7ad565dedcd2ebf83c6d671f00f4ec957b7cad",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:3c66d5384fc30ce70ea0ff17517c0ac7eb0df3aecf58ef4b7cda44e3915a7f30",
@@ -821,7 +821,7 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 61,
+    "developer_preview_blocker_count": 75,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -1753,6 +1753,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "df4ecf0d35122cae3201e41c61341704a856a90c",
   "status": "blocked"
 }
