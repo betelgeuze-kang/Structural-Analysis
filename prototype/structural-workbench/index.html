@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Structural Analysis Workbench interactive GUI prototype" />
+  <title>Structural Analysis Workbench Prototype</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand-wrap">
+        <button class="icon-button menu-button" aria-label="메뉴 열기" data-action="toggle-sidebar">☰</button>
+        <div class="brand-mark">SA</div>
+        <div class="brand-title">구조해석 워크벤치 <span>/ Structural Analysis Workbench</span></div>
+      </div>
+      <div class="topbar-actions">
+        <button class="top-link">프로젝트 컨텍스트⌄</button>
+        <button class="icon-button" aria-label="도움말">?</button>
+        <button class="icon-button" aria-label="알림">♧</button>
+        <button class="avatar" aria-label="사용자 메뉴">SE</button>
+      </div>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav" aria-label="주 메뉴">
+        <button class="nav-item active" data-page="dashboard"><span>⌂</span><b>프로젝트 대시보드</b></button>
+        <button class="nav-item" data-page="import"><span>⇲</span><b>모델 가져오기</b></button>
+        <button class="nav-item" data-page="geometry"><span>◇</span><b>지오메트리/재료</b></button>
+        <button class="nav-item" data-page="loads"><span>⬡</span><b>하중/조합</b></button>
+        <button class="nav-item" data-page="run"><span>▷</span><b>해석 실행</b></button>
+        <button class="nav-item" data-page="ndtha"><span>♧</span><b>NDTHA</b></button>
+        <button class="nav-item" data-page="residual"><span>⬢</span><b>잔차 감사</b></button>
+        <button class="nav-item" data-page="compare"><span>▥</span><b>기준해 비교</b></button>
+        <button class="nav-item" data-page="members"><span>♙</span><b>부재력/층응답</b></button>
+        <button class="nav-item" data-page="provenance"><span>▤</span><b>행 provenance</b></button>
+        <button class="nav-item" data-page="review"><span>♧</span><b>검토자 워크플로</b></button>
+        <button class="nav-item" data-page="report"><span>▧</span><b>리포트/내보내기</b></button>
+      </nav>
+
+      <section class="project-summary">
+        <h3>프로젝트 요약</h3>
+        <div class="summary-row"><span>벤치마크 범위</span><b>52 / 52 <i>●</i></b></div>
+        <div class="summary-row"><span>잔차 Hard Pass</span><b>52 / 52 <i>●</i></b></div>
+        <div class="summary-row"><span>기준해 비교 PASS</span><b>49 / 52 <i>◉</i></b></div>
+        <div class="summary-row"><span>검토자 상태</span><b>P0 Closed <i>●</i></b></div>
+        <button class="secondary-button full">자세히 보기</button>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <section class="ribbon">
+        <div class="ribbon-actions">
+          <button class="ribbon-button" data-action="open-import"><span>↧</span>가져오기</button>
+          <button class="ribbon-button" data-action="validate"><span>◈</span>검증</button>
+          <button class="ribbon-button primary" data-action="run-analysis"><span>▶</span>해석 실행</button>
+          <button class="ribbon-button"><span>◫</span>재현 패키지⌄</button>
+          <button class="ribbon-button" data-action="download-report"><span>▤</span>리포트 생성</button>
+          <button class="ribbon-button"><span>▱</span>승인 검토</button>
+        </div>
+        <div class="ribbon-status">
+          <span class="pill green">✓ P0 Closed</span>
+          <span class="pill blue">✓ P1 Ready</span>
+          <span class="pill purple">Level 3</span>
+          <span class="pill green">GPU Strict PASS</span>
+          <label class="project-select">프로젝트
+            <select aria-label="프로젝트 선택">
+              <option>L3_Pilot_Project_A</option>
+              <option>OpenSees_Megatall_01</option>
+              <option>IFC_Benchmark_Set</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="main-grid">
+        <section class="model-panel panel">
+          <div class="panel-titlebar">
+            <div class="panel-title">모델 뷰</div>
+            <button class="icon-button subtle">×</button>
+          </div>
+          <div class="model-toolbar">
+            <button title="회전">⟳</button><button title="이동">✋</button><button class="active" title="선택">⌖</button>
+            <span class="separator"></span>
+            <button title="박스 선택">□</button><button title="확대">⌕</button><button title="보기 설정">⚙</button>
+            <span class="toolbar-spacer"></span>
+            <select id="result-mode" aria-label="결과 표시">
+              <option value="drift">응답: 층간변위비 (X)</option>
+              <option value="stress">응답: 부재 응력비</option>
+              <option value="mode">응답: 모드 형상</option>
+            </select>
+            <button title="스크린샷">▣</button>
+          </div>
+
+          <div class="viewer-stage" id="viewer-stage">
+            <svg class="building-svg" viewBox="0 0 920 590" role="img" aria-label="12층 구조 해석 모델과 응답 히트맵">
+              <defs>
+                <linearGradient id="floorHeat" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0c52d9" stop-opacity=".85"/>
+                  <stop offset=".35" stop-color="#21c4cc" stop-opacity=".75"/>
+                  <stop offset=".62" stop-color="#ffd746" stop-opacity=".82"/>
+                  <stop offset="1" stop-color="#ef3e34" stop-opacity=".9"/>
+                </linearGradient>
+                <linearGradient id="coldHeat" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#0736b3" stop-opacity=".9"/>
+                  <stop offset="1" stop-color="#16d5c5" stop-opacity=".55"/>
+                </linearGradient>
+                <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+                  <feDropShadow dx="0" dy="8" stdDeviation="9" flood-color="#304d65" flood-opacity=".22"/>
+                </filter>
+              </defs>
+
+              <g class="grid-lines" stroke="#b8c9d7" stroke-width="1" opacity=".72">
+                <path d="M115 510 L665 510 L805 435 L255 435 Z" fill="#f8fbfd"/>
+                <path d="M165 482 L715 482M210 457 L760 457M255 435 L805 435"/>
+                <path d="M190 510 L330 435M275 510 L415 435M360 510 L500 435M445 510 L585 435M530 510 L670 435M615 510 L755 435"/>
+              </g>
+
+              <g filter="url(#shadow)" transform="translate(12,-16)">
+                <g class="floor-labels" font-size="13" fill="#536b7d">
+                  <text x="73" y="474">B1F</text><text x="78" y="421">1F</text><text x="78" y="360">3F</text>
+                  <text x="78" y="290">6F</text><text x="78" y="213">9F</text><text x="70" y="133">12F</text><text x="75" y="76">지붕</text>
+                </g>
+                <g class="story-guides" stroke="#9db3c5" stroke-dasharray="3 5" opacity=".55">
+                  <path d="M110 468H756"/><path d="M110 415H756"/><path d="M110 355H756"/><path d="M110 285H756"/><path d="M110 208H756"/><path d="M110 128H756"/><path d="M110 71H756"/>
+                </g>
+
+                <g id="heat-floors" stroke="#426c86" stroke-width="1.2">
+                  <polygon points="205,438 575,438 718,370 348,370" fill="url(#coldHeat)"/>
+                  <polygon points="205,388 575,388 718,320 348,320" fill="url(#floorHeat)" opacity=".78"/>
+                  <polygon points="205,338 575,338 718,270 348,270" fill="url(#floorHeat)" opacity=".95"/>
+                  <polygon points="205,288 575,288 718,220 348,220" fill="url(#floorHeat)" opacity=".82"/>
+                  <polygon points="205,238 575,238 718,170 348,170" fill="url(#coldHeat)" opacity=".72"/>
+                  <polygon points="205,188 575,188 718,120 348,120" fill="url(#coldHeat)" opacity=".66"/>
+                  <polygon points="205,138 575,138 718,70 348,70" fill="url(#coldHeat)" opacity=".55"/>
+                </g>
+
+                <g class="slabs" fill="#c5d5de" opacity=".26" stroke="#6f8798" stroke-width="1">
+                  <polygon points="205,438 575,438 718,370 348,370"/><polygon points="205,388 575,388 718,320 348,320"/>
+                  <polygon points="205,338 575,338 718,270 348,270"/><polygon points="205,288 575,288 718,220 348,220"/>
+                  <polygon points="205,238 575,238 718,170 348,170"/><polygon points="205,188 575,188 718,120 348,120"/>
+                  <polygon points="205,138 575,138 718,70 348,70"/>
+                </g>
+
+                <g class="columns" stroke="#6c7682" stroke-width="5" stroke-linecap="round">
+                  <path d="M205 438V93"/><path d="M295 422V76"/><path d="M390 404V60"/><path d="M485 387V44"/><path d="M575 438V93"/>
+                  <path d="M348 370V25"/><path d="M440 353V9"/><path d="M528 337V-8"/><path d="M626 320V-23"/><path d="M718 370V26"/>
+                </g>
+                <g class="beams" stroke="#7f5f50" stroke-width="3.5" fill="none">
+                  <path d="M205 438H575L718 370H348Z"/><path d="M205 388H575L718 320H348Z"/>
+                  <path d="M205 338H575L718 270H348Z"/><path d="M205 288H575L718 220H348Z"/>
+                  <path d="M205 238H575L718 170H348Z"/><path d="M205 188H575L718 120H348Z"/>
+                  <path d="M205 138H575L718 70H348Z"/><path d="M205 93H575L718 26H348Z"/>
+                </g>
+                <g class="braces" stroke="#456477" stroke-width="2" opacity=".82">
+                  <path d="M205 438L295 338M295 438L205 338M485 388L575 288M575 388L485 288"/>
+                  <path d="M626 320L718 220M718 320L626 220M348 270L440 170M440 270L348 170"/>
+                </g>
+                <g class="core" fill="#8395a3" opacity=".62" stroke="#5f7484">
+                  <polygon points="520,435 590,420 590,88 520,104"/>
+                  <polygon points="590,420 640,396 640,65 590,88"/>
+                </g>
+              </g>
+
+              <g class="axes" transform="translate(72,500)" stroke-width="3">
+                <path d="M0 0L30 15" stroke="#ef3b35"/><path d="M0 0L0 -42" stroke="#185edb"/><path d="M0 0L34 -16" stroke="#1ca855"/>
+                <text x="34" y="20" fill="#ef3b35">X</text><text x="-8" y="-48" fill="#185edb">Z</text><text x="38" y="-18" fill="#1ca855">Y</text>
+              </g>
+            </svg>
+
+            <aside class="legend-card">
+              <h4>층간변위비 (rad)</h4>
+              <div class="legend-body"><div class="legend-bar"></div><div class="legend-labels"><span>2.00e-02</span><span>1.50e-02</span><span>1.00e-02</span><span>5.00e-03</span><span>0.00e+00</span></div></div>
+            </aside>
+
+            <div class="mini-charts">
+              <article class="mini-chart-card">
+                <h4>층간변위비 (X) - 스토리 드리프트</h4>
+                <svg viewBox="0 0 260 115" aria-label="층간변위비 차트"><path class="axis" d="M34 8V94H250"/><path class="grid" d="M34 28H250M34 49H250M34 70H250"/><path class="line dashed" d="M36 89C70 84 82 76 102 68S142 43 174 29S215 18 246 12"/><path class="line" d="M36 88C60 82 83 71 102 62S133 55 154 42S202 20 246 15"/><circle cx="154" cy="42" r="3"/></svg>
+              </article>
+              <article class="mini-chart-card">
+                <h4>밑면전단력 - 추이</h4>
+                <svg viewBox="0 0 260 115" aria-label="밑면전단력 차트"><path class="axis" d="M34 8V94H250"/><path class="grid" d="M34 28H250M34 49H250M34 70H250"/><path class="line dashed" d="M35 91C54 70 67 42 89 28S135 25 160 42S204 55 248 47"/><path class="line" d="M35 91C55 65 68 37 91 21S137 20 160 34S203 50 248 39"/></svg>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector panel">
+          <div class="tabs" role="tablist">
+            <button class="tab active" data-tab="case">케이스/상태</button>
+            <button class="tab" data-tab="model">모델 정보</button>
+            <button class="tab" data-tab="provenance">프로비넌스</button>
+            <button class="tab" data-tab="history">검토 이력</button>
+          </div>
+          <div class="tab-content active" id="tab-case">
+            <article class="info-card wide">
+              <h3>◉ 케이스 요약</h3>
+              <dl><div><dt>구조 계열</dt><dd>RC+Steel 하이브리드 건물</dd></div><div><dt>해석 솔버</dt><dd>SAW Solver v3.2 (GPU)</dd></div><div><dt>원전 계열</dt><dd>L3 Benchmark Family</dd></div><div><dt>벤치마크 유형</dt><dd>Commercial Building – High-Rise</dd></div></dl>
+            </article>
+            <div class="card-grid two">
+              <article class="info-card"><h3>◉ 해석 상태 <span class="mini-pill green">수렴</span></h3><dl><div><dt>수렴 상태</dt><dd>수렴 (Tol = 1.0e-5)</dd></div><div><dt>총 해석 시간</dt><dd>00:18:42</dd></div><div><dt>파티션 (MIP)</dt><dd>8 (GPU 8대)</dd></div><div><dt>자유도 (DOF)</dt><dd>3,246,912</dd></div><div><dt>GPU Residency</dt><dd class="green-text">98.4% (Strict PASS)</dd></div></dl></article>
+              <article class="info-card"><h3>◉ 잔차 감사</h3><dl><div><dt>Hard Pass (P0)</dt><dd class="green-text">52 / 52 ●</dd></div><div><dt>Recommended Pass (P1)</dt><dd class="green-text">52 / 52 ●</dd></div><div><dt>Fallback Rate</dt><dd>0.0%</dd></div><div><dt>Residual Source</dt><dd>NDTHA</dd></div></dl></article>
+            </div>
+            <div class="card-grid two">
+              <article class="info-card"><h3>◉ 기준해 비교 (요약)</h3><dl><div><dt>층간변위비 오차 (RMS)</dt><dd class="green-text">2.32% ●</dd></div><div><dt>밑면전단력 오차</dt><dd class="green-text">1.87% ●</dd></div><div><dt>최상층 변위 오차</dt><dd class="green-text">2.15% ●</dd></div><div><dt>부재력 오차 (P95)</dt><dd class="green-text">3.28% ●</dd></div></dl></article>
+              <article class="info-card review-card"><h3>◉ 검토자 결정</h3><div class="decision-group"><button class="decision pass active" data-decision="PASS">✓ PASS</button><button class="decision review" data-decision="REVIEW">◉ REVIEW</button><button class="decision fail" data-decision="FAIL">× FAIL</button></div><textarea id="review-comment" maxlength="1000">전반적으로 기준해와 잘 일치합니다. 일부 부재력 국부 오차 검토를 권고합니다.</textarea><div class="counter"><span id="comment-count">48</span> / 1000</div><div class="review-meta"><span>검토자</span><select><option>신유 토지서어 (Lead)</option><option>박정민 (Reviewer)</option></select></div><button class="primary-button full" data-action="save-review">검토 저장</button></article>
+            </div>
+            <div class="card-grid two bottom-cards">
+              <article class="info-card cli-card"><h3>재현 명령 (CLI)</h3><pre>saw run \
+  --project L3_Pilot_Project_A \
+  --case Case_52 \
+  --solver SAW3_GPU \
+  --np 8 \
+  --gpus 8 \
+  --reproduce reproduce.yml</pre><button class="secondary-button" data-action="copy-cli">복사</button></article>
+              <article class="info-card"><h3>리포트 / 내보내기</h3><div class="export-grid"><button data-export="pdf"><b>PDF</b><span>PDF 리포트</span></button><button data-export="html"><b>HTML</b><span>HTML 리포트</span></button><button data-export="json"><b>JSON</b><span>JSON (데이터)</span></button><button data-export="zip"><b>ZIP</b><span>Reproduce Bundle</span></button></div><p class="hint">리포트에는 프로비넌스, 잔차 감사, 기준해 비교, 검토 이력이 포함됩니다.</p></article>
+            </div>
+          </div>
+          <div class="tab-content" id="tab-model"><div class="empty-state"><b>모델 정보</b><span>노드 541,152 · 요소 1,218,539 · 자유도 3,246,912</span></div></div>
+          <div class="tab-content" id="tab-provenance"><div class="empty-state"><b>프로비넌스 체인</b><span>IFC → Canonical Model → NDTHA → Residual Audit → Review Package</span></div></div>
+          <div class="tab-content" id="tab-history"><div class="empty-state"><b>검토 이력</b><span>2025-05-20 14:32 · PASS · Lead Reviewer</span></div></div>
+        </aside>
+
+        <section class="log-panel panel">
+          <div class="log-tabs"><button>로그</button><button class="active">잔차</button><button>이슈 <span class="badge">3</span></button><button>재현 명령</button></div>
+          <div class="residual-progress"><div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div><b id="progress-label">Hard Pass 52 / 52 (100%)</b><span>권고 PASS 52 / 52</span><span>Fallback 0 (0.0%)</span></div>
+          <div class="table-wrap"><table><thead><tr><th>시간</th><th>이벤트</th><th>상세</th><th>잔차 (L2 Norm)</th><th>허용치</th><th>상태</th><th>소스</th></tr></thead><tbody id="log-body"><tr><td>14:12:05</td><td>모델 로드</td><td>모델 및 메타데이터 로드 완료</td><td>-</td><td>-</td><td>INFO</td><td>SAW Core</td></tr><tr><td>14:12:18</td><td>메시/DOF 구성</td><td>DOF: 3,246,912 / Elements: 1,218,539</td><td>-</td><td>-</td><td>INFO</td><td>SAW Core</td></tr><tr><td>14:12:34</td><td>하중 적용</td><td>하중 케이스: 36, 조합: 72</td><td>-</td><td>-</td><td>INFO</td><td>SAW Core</td></tr><tr><td>14:12:55</td><td>해석 시작</td><td>Nonlinear Time History Analysis</td><td>-</td><td>-</td><td>INFO</td><td>SAW Solver</td></tr><tr><td>14:31:18</td><td>수렴 완료</td><td>모든 스텝 수렴 완료</td><td>-</td><td>-</td><td class="success">SUCCESS</td><td>SAW Solver</td></tr><tr><td>14:31:23</td><td>잔차 계산</td><td>잔차 벡터 계산 완료</td><td>1.28e-06</td><td>1.0e-05</td><td class="success">PASS</td><td>NDTHA</td></tr><tr><td>14:31:37</td><td>잔차 감사</td><td>Hard Pass</td><td>-</td><td>-</td><td class="success">PASS</td><td>NDTHA</td></tr></tbody></table></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="import-modal" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header><div><b id="modal-title">모델 가져오기</b><span>IFC, MGT, OpenSees TCL, JSON</span></div><button class="icon-button" data-action="close-import">×</button></header>
+      <label class="drop-zone"><input type="file" id="file-input" accept=".ifc,.mgt,.tcl,.json,.csv"/><span class="drop-icon">↧</span><b>파일을 끌어놓거나 클릭해 선택</b><small>최대 2GB · 원본 checksum과 단위계가 자동 기록됩니다.</small></label>
+      <footer><button class="secondary-button" data-action="close-import">취소</button><button class="primary-button" data-action="confirm-import">가져오기</button></footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
