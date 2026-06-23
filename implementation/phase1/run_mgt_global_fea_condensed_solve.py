@@ -70,21 +70,44 @@ def run_mgt_global_fea_condensed_solve(
 
     static_runtime = static.get("runtime") if isinstance(static.get("runtime"), dict) else {}
     ndtha_runtime = ndtha.get("runtime") if isinstance(ndtha.get("runtime"), dict) else {}
+    static_backend = static_runtime.get("main_loop_backend") or static.get("backend")
+    ndtha_backend = ndtha_runtime.get("main_loop_backend") or ndtha.get("backend")
+    observed_backends = {
+        str(value)
+        for value in (static_backend, ndtha_backend)
+        if str(value)
+    }
+    hip_backend_ready = observed_backends == {"rocm_torch_hip_mainloop"}
     converged = bool(static.get("converged")) and bool(ndtha.get("converged_all_steps"))
+    if not hip_backend_ready:
+        blockers.append("rocm_hip_backend_unavailable_or_cpu_fallback")
     if not converged:
         blockers.append("condensed_solve_not_converged")
+    ready = bool(converged and hip_backend_ready)
 
     roundtrip = load_json(roundtrip_json)
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "status": "ready" if converged else "warn",
+        "status": "ready" if ready else "warn",
         "claim": (
             "MGT NPZ mesh condensed to story-level nonlinear frame and solved in-repo; "
             "not a full 3D global FEA licensed-engine replay."
         ),
-        "native_solve_status": "condensed_global_fea_wired" if converged else "condensed_solve_failed",
+        "native_solve_status": (
+            "condensed_global_fea_wired"
+            if ready
+            else "condensed_global_fea_backend_blocked"
+            if not hip_backend_ready
+            else "condensed_solve_failed"
+        ),
         "solve_mode": "mgt_npz_mesh_condensed_story",
+        "backend_policy": {
+            "required_backend": "rocm_torch_hip_mainloop",
+            "observed_backends": sorted(observed_backends),
+            "hip_backend_ready": hip_backend_ready,
+            "cpu_fallback_non_promoting": not hip_backend_ready,
+        },
         "roundtrip_json": str(roundtrip_json),
         "roundtrip_npz": str(roundtrip_npz),
         "mgt_sha256": str((roundtrip.get("source") or {}).get("sha256") or ""),
@@ -98,12 +121,12 @@ def run_mgt_global_fea_condensed_solve(
             "iterations": static.get("iterations"),
             "top_displacement_m": static.get("top_displacement_m"),
             "base_shear_kn": float(static.get("base_shear_kn") or 0.0),
-            "backend": static_runtime.get("main_loop_backend") or static.get("backend"),
+            "backend": static_backend,
         },
         "ndtha_solve": {
             "converged_all_steps": ndtha.get("converged_all_steps"),
             "max_drift_ratio_pct": ndtha.get("max_drift_ratio_pct"),
-            "backend": ndtha_runtime.get("main_loop_backend") or ndtha.get("backend"),
+            "backend": ndtha_backend,
         },
         "blockers": blockers,
     }

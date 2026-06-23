@@ -3,9 +3,9 @@
 - `status`: `blocked`
 - `developer_preview_ready`: `False`
 - `commercial_release_ready`: `False`
-- `blocker_count`: `75`
-- `future_commercial_blocker_count`: `23`
-- `source_commit_sha`: `df4ecf0d35122cae3201e41c61341704a856a90c`
+- `blocker_count`: `7`
+- `future_commercial_blocker_count`: `36`
+- `source_commit_sha`: `2469407690370e54afa5b0d92fc028f3ac56f542`
 - `reuse_policy`: `derived_readiness_judgment_from_product_snapshot_and_dataset_license_manifest; does_not_create_authoritative_closure_evidence`
 - `input_checksum_policy`: `product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata`
 
@@ -13,10 +13,10 @@
 
 | Category | Count | Developer Preview Blocking |
 |---|---:|---|
-| numerical | 33 | yes |
-| benchmark | 10 | yes |
-| software product | 32 | yes |
-| future commercial | 23 | no, future commercial only |
+| numerical | 4 | yes |
+| benchmark | 1 | yes |
+| software product | 2 | yes |
+| future commercial | 36 | no, future commercial only |
 
 ## Gap Ledger Closure Requirement Visibility
 
@@ -43,7 +43,7 @@ Failed requirement IDs:
 - `G7:operator_rights_boundary_clear`
 - `G7:repo_benchmark_bridge_count_zero`
 
-This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, or promote commercial readiness.
+This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, promote commercial readiness, or promote autonomous AI engine claims.
 
 ## Scope Boundary Summary
 
@@ -78,4 +78,4 @@ Future Commercial Release blockers: customer shadow, license approval, commercia
 
 ## Claim Boundary
 
-Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers but do not block Developer Preview. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.
+Developer Preview is an open benchmark workstation preview, not a commercial structural solver beta. Customer shadow, commercial license/legal approval, license-server operation, commercial SLA, 30-run CI streak, and external approval receipts remain visible as future Commercial Release blockers. Remote GitHub sync/push approval is a release-publication handoff and does not block the local Developer Preview evidence bar. AI/GNN/surrogate truth claims stay frozen until the deterministic reference solver, residual/Jacobian/Newton closure, and benchmark truth are fixed.

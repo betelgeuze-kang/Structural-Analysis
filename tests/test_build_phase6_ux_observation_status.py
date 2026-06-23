@@ -42,11 +42,47 @@ def test_phase6_ux_observation_status_blocks_without_human_and_execution_evidenc
     assert payload["phase5_workflow_gate"]["workflow_shell_step_pass_count"] == 5
     assert payload["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 0
     assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is False
+    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_environment_blocker"] is True
+    assert payload["phase5_workflow_gate"]["task_based_ux_browser_execution_blocker_reason_code"] == (
+        "listen_eperm_127_0_0_1"
+    )
     assert "human_new_user_observation_not_passed" in payload["blockers"]
     assert "human_observation_workflow_step_pass_count_below_required:0/5" in payload["blockers"]
     assert "phase5_workflow_execution_not_proven:0/5" in payload["blockers"]
     assert "task_based_ux_browser_execution_not_passed" in payload["blockers"]
+    assert (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        in payload["blockers"]
+    )
     assert "observation_report:observation_file_missing" in payload["blockers"]
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["schema_version"] == "phase6-ux-observation-blocker-groups.v1"
+    assert grouping["blocker_count"] == len(payload["blockers"])
+    assert grouping["unassigned_blockers"] == []
+    assert grouping["groups"]["human_observation_root"]["scope"] == "direct_rc_ux_gate"
+    assert "human_new_user_observation_not_passed" in grouping["groups"][
+        "human_observation_root"
+    ]["blockers"]
+    assert grouping["groups"]["intake_packet_handoff"]["scope"] == (
+        "owner_handoff_not_gate_closure"
+    )
+    assert "ux_observation_intake_packet_not_passed" in grouping["groups"][
+        "intake_packet_handoff"
+    ]["blockers"]
+    assert "observation_report:observation_file_missing" in grouping["groups"][
+        "human_observation_report_detail"
+    ]["blockers"]
+    assert (
+        "phase5_gui_workflow:workflow_execution_step_not_proven:import"
+        in grouping["groups"]["phase5_execution_detail"]["blockers"]
+    )
+    assert (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        in grouping["groups"]["environment_spillover"]["blockers"]
+    )
+    assert "phase5_gui_workflow:human_new_user_observation_not_passed" in grouping[
+        "groups"
+    ]["duplicate_source_detail"]["blockers"]
     assert "intake packet is only a handoff checklist" in payload["claim_boundary"]
     assert "automated browser/task tests do not replace" in payload["claim_boundary"]
 

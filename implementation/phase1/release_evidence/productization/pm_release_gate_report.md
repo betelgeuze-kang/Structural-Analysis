@@ -13,7 +13,7 @@
 - `full_gap_ledger_status`: `open`
 - `commercial_gap_status`: `open`
 - `commercial_solver_gap_ready`: `False`
-- `ai_engine_gap_ready`: `True`
+- `ai_engine_gap_ready`: `False`
 - `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |

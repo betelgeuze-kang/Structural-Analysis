@@ -89,7 +89,81 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
     assert payload["checkpoint"]["load_scale"] == 0.656
     assert payload["full_load_input_pass"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    assert payload["child_gate_evidence"]["ready"] is False
+    assert payload["child_gate_evidence"]["material_newton_breadth_passed"] is False
+    assert (
+        "child_material_newton_breadth_not_proven"
+        in payload["child_gate_evidence"]["blockers"]
+    )
     assert payload["child_exit_code"] is None
+
+
+def test_frontier_non_promoting_context_is_attached_without_promotion(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.656)
+    frontier_status = tmp_path / "mgt_g1_frontier_status.json"
+    frontier_status.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v1",
+                "status": "partial",
+                "contract_pass": False,
+                "latest_frontier_receipt": "followup398.json",
+                "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+                "direct_residual_gate_tolerance_n": 0.0005,
+                "frontier_chain": [{"receipt": "followup398.json"}],
+                "non_promoting_launch_receipts": [
+                    {
+                        "receipt": "followup390_launch.json",
+                        "status": "in_progress",
+                        "counted_in_frontier": False,
+                        "non_count_reason": (
+                            "completed child direct-residual receipt required"
+                        ),
+                    }
+                ],
+                "blockers": [
+                    "full_mesh_nonlinear_equilibrium_not_closed",
+                    "production_rocm_hip_residual_row_backend_not_closed",
+                ],
+                "claim_boundary": {
+                    "launch_only_receipts_do_not_claim_descent": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(frontier_status,),
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    context = payload["frontier_non_promoting_evidence"]
+    assert context["present"] is True
+    assert context["source_path"] == str(frontier_status)
+    assert context["evidence_role"] == "non_promoting_partial_frontier_context"
+    assert context["promotes_g1_closure"] is False
+    assert context["promotes_lane_status"] is False
+    assert context["frontier_chain_count"] == 1
+    assert context["non_promoting_launch_receipt_count"] == 1
+    assert context["latest_frontier_direct_residual_inf_n"] == 5.74426714604332
+    assert context["direct_residual_gate_tolerance_n"] == 0.0005
+    assert context["frontier_residual_above_tolerance"] is True
+    assert context["non_promoting_launch_receipts"][0]["counted_in_frontier"] is False
+    assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
 
 
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:

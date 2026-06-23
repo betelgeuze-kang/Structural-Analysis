@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "command_result": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "external-benchmark-refresh-lane: PASS | status=execution_complete_no_fail | completed=10/10 | blockers=0\n"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "receipt_path": "implementation/phase1/release_evidence/full_validation/external_benchmark_refresh.fresh_validation_receipt.json",
+  "schema_version": "fresh-validation-receipt-builder.v1"
+}

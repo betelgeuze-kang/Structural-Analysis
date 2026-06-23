@@ -1,111 +1,122 @@
 {
+  "blocker_grouping_metadata": {
+    "blocker_count": 17,
+    "grouping_policy": "Preserve every blocker while separating local replay, git clean-clone replay inputs, and owner Git handoff actions. This grouping does not run or imply git add, commit, push, reset, checkout, or cleanup.",
+    "groups": {
+      "dirty_tracked_required_inputs": {
+        "blocker_count": 13,
+        "blockers": [
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+          "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+        ],
+        "description": "Tracked required replay inputs that have uncommitted local changes.",
+        "scope": "human_git_review_required"
+      },
+      "git_clean_clone_root": {
+        "blocker_count": 1,
+        "blockers": [
+          "git_clean_clone_reproduction_not_passed"
+        ],
+        "description": "Aggregate blocker for replay from a real git clean clone.",
+        "scope": "git_clean_clone_replay_gate"
+      },
+      "local_clean_checkout_detail": {
+        "blocker_count": 0,
+        "blockers": [],
+        "description": "Detailed blockers from the local clean-checkout receipt.",
+        "scope": "local_replay_detail"
+      },
+      "local_clean_checkout_root": {
+        "blocker_count": 0,
+        "blockers": [],
+        "description": "Aggregate blocker for local worktree-copy replay.",
+        "scope": "local_replay_gate"
+      },
+      "release_control_commit_set": {
+        "blocker_count": 1,
+        "blockers": [
+          "release_control_commit_set_pending:14"
+        ],
+        "description": "Pending release-control commit-set size from the cleanup plan.",
+        "scope": "owner_git_action_handoff"
+      },
+      "release_control_human_handoff": {
+        "blocker_count": 1,
+        "blockers": [
+          "human_git_action_required_for_release_control_inputs"
+        ],
+        "description": "Owner Git review/action required before clean-clone replay can be promoted.",
+        "scope": "owner_git_action_handoff"
+      },
+      "untracked_required_inputs": {
+        "blocker_count": 1,
+        "blockers": [
+          "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+        ],
+        "description": "Required replay inputs that are not tracked in Git.",
+        "scope": "human_git_review_required"
+      }
+    },
+    "schema_version": "phase6-clean-checkout-blocker-groups.v1",
+    "unassigned_blocker_count": 0,
+    "unassigned_blockers": []
+  },
   "blockers": [
     "git_clean_clone_reproduction_not_passed",
     "human_git_action_required_for_release_control_inputs",
-    "release_control_commit_set_pending:45",
+    "release_control_commit_set_pending:14",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
     "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-    "required_path_has_uncommitted_changes:scripts/build_phase3_benchmark_acquisition_artifacts.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase3_benchmark_factory_artifacts.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase3_ifc_import_health_execution_receipt.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_comparison_import_template.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_operator_reference_contract.py",
-    "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
-    "required_path_has_uncommitted_changes:scripts/phase3_benchmark_reproduction_contract.py",
-    "required_path_has_uncommitted_changes:scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
-    "required_path_has_uncommitted_changes:scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
-    "required_path_has_uncommitted_changes:src/structural_analysis",
-    "required_path_has_uncommitted_changes:src/structure-viewer/viewer-commercial-tool-crosswalk-model.js",
-    "required_path_has_uncommitted_changes:src/structure-viewer/viewer-report-export.js",
-    "required_path_has_uncommitted_changes:tests/test_build_phase3_benchmark_acquisition_artifacts.py",
-    "required_path_has_uncommitted_changes:tests/test_build_phase3_benchmark_factory_artifacts.py",
-    "required_path_has_uncommitted_changes:tests/test_build_phase3_ifc_import_health_execution_receipt.py",
-    "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_comparison_import_template.py",
-    "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_operator_reference_contract.py",
-    "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
-    "required_path_has_uncommitted_changes:tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py",
-    "required_path_has_uncommitted_changes:tests/test_structural_analysis_benchmark_cli.py",
-    "required_path_has_uncommitted_changes:tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
-    "required_path_has_uncommitted_changes:tests/test_structure_viewer_explainability_report_contract.py",
-    "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
-    "required_path_not_tracked:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-    "required_path_not_tracked:scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
-    "required_path_not_tracked:scripts/build_phase3_large_model_runner_readiness_receipt.py",
-    "required_path_not_tracked:scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-    "required_path_not_tracked:scripts/build_phase4_analytic_physical_fallback_scorecard.py",
-    "required_path_not_tracked:scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
-    "required_path_not_tracked:tests/test_build_phase4_analytic_physical_fallback_scorecard.py"
+    "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
   ],
   "claim_boundary": "This receipt aggregates clean-checkout and git-clean-clone replay evidence for the RC benchmark regeneration gate. It does not run git add, commit, push, reset, checkout, or cleanup commands; it does not prove Linux/Windows parity, close full Phase 3, or promote Developer Preview RC readiness.",
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-22T20:22:09.377818+00:00",
+  "generated_at": "2026-06-23T17:56:07.112458+00:00",
   "git_clean_clone_gate": {
-    "blocker_count": 45,
+    "blocker_count": 14,
     "blocker_counts": {
-      "required_path_has_uncommitted_changes": 37,
-      "required_path_not_tracked": 8
+      "required_path_has_uncommitted_changes": 13,
+      "required_path_not_tracked": 1
     },
     "blockers": [
       "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
-      "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
-      "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-      "required_path_not_tracked:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+      "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
       "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-      "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-      "required_path_has_uncommitted_changes:scripts/build_phase3_benchmark_acquisition_artifacts.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase3_benchmark_factory_artifacts.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase3_ifc_import_health_execution_receipt.py",
-      "required_path_not_tracked:scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
-      "required_path_not_tracked:scripts/build_phase3_large_model_runner_readiness_receipt.py",
-      "required_path_not_tracked:scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-      "required_path_not_tracked:scripts/build_phase4_analytic_physical_fallback_scorecard.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_comparison_import_template.py",
-      "required_path_not_tracked:scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_operator_reference_contract.py",
-      "required_path_has_uncommitted_changes:scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
-      "required_path_has_uncommitted_changes:scripts/phase3_benchmark_reproduction_contract.py",
-      "required_path_has_uncommitted_changes:scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
-      "required_path_has_uncommitted_changes:scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
-      "required_path_has_uncommitted_changes:src/structural_analysis",
-      "required_path_has_uncommitted_changes:src/structure-viewer/viewer-commercial-tool-crosswalk-model.js",
-      "required_path_has_uncommitted_changes:src/structure-viewer/viewer-report-export.js",
-      "required_path_has_uncommitted_changes:tests/test_build_phase3_benchmark_acquisition_artifacts.py",
-      "required_path_has_uncommitted_changes:tests/test_build_phase3_benchmark_factory_artifacts.py",
-      "required_path_has_uncommitted_changes:tests/test_build_phase3_ifc_import_health_execution_receipt.py",
-      "required_path_not_tracked:tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
-      "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_comparison_import_template.py",
-      "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_operator_reference_contract.py",
-      "required_path_has_uncommitted_changes:tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
-      "required_path_has_uncommitted_changes:tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py",
-      "required_path_has_uncommitted_changes:tests/test_structural_analysis_benchmark_cli.py",
-      "required_path_has_uncommitted_changes:tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
-      "required_path_has_uncommitted_changes:tests/test_structure_viewer_explainability_report_contract.py"
+      "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
     ],
     "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
     "contract_pass": false,
@@ -115,11 +126,11 @@
     "status": "blocked"
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:4a2fba67e9f7c96e57dc5d0eb474749c9dc996953e8c0f51253d52b0a0d0c040",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:46c3794fa92fee6073f8e11ffdd35281ab805c7cd56cf0e38370472b186f51cf",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:1e5338b07fbd33fc1554276e7ca83b16e80c806c9848e592be036a0be29c8329",
-    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:d95bcaaf4b6ddfd978b205c9525e3e579a1f3be3c19827e77a470244357675da",
-    "scripts/build_phase6_clean_checkout_status.py": "sha256:08695595bd2675eecb54360e69fe00ba38a6248f1d7e8e6c3b8e4c9ad5bdcc6c"
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:006e42f030fe61e4f9878b2417413c68dbebe4a9388d899e90669b7d60a44813",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:75e42cbb9caa2e9541284f8308755ea7109dfd029097251170730ce52d0adbc1",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:6a5e6ddce8ff4e178e7981a04bef9081fa56d4e4eb24d0aa32779d6cd27e6649",
+    "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:638aa8f628d76d3edfdfc08357046b7388ef7b304de129a5e9a00a08b71ca162",
+    "scripts/build_phase6_clean_checkout_status.py": "sha256:45d563b95da9d5cd006abcc190203e3568187c8b50f7f2b11963c8ee44867c95"
   },
   "local_clean_checkout_gate": {
     "blockers": [],
@@ -137,8 +148,8 @@
     "reproducibility_bundle": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json"
   },
   "release_control_cleanup_gate": {
-    "candidate_release_control_commit_set_count": 45,
-    "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
+    "candidate_release_control_commit_set_count": 14,
+    "claim_boundary": "This receipt organizes local Git cleanup needed for Phase 3 seed git-clean-clone replay. Its candidate set is not an exhaustive current-worktree dirty-path inventory; the product readiness snapshot carries the current-worktree diagnostic separately. It does not commit, push, release, promote Developer Preview readiness, or close Phase 3. Dirty tracked paths require owner review before they are bundled with the release-control evidence set.",
     "codex_commit_or_push_performed": false,
     "contract_pass": false,
     "human_git_action_required": true,
@@ -150,19 +161,12 @@
       "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
     ],
     "path_role_counts": {
-      "focused_test": 11,
-      "generated_productization_evidence": 15,
-      "package_config_core_package": 1,
-      "reproduction_build_script": 15,
-      "source_input_report": 1,
-      "viewer_gui_traceability_contract": 2
+      "generated_productization_evidence": 13,
+      "source_input_report": 1
     },
     "receipt": "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json",
     "recommended_action_counts": {
-      "resolve_or_commit_dirty_tracked_input": 37,
-      "track_focused_regression_test": 1,
-      "track_generated_productization_evidence": 1,
-      "track_reproduction_builder_or_runner": 5,
+      "resolve_or_commit_dirty_tracked_input": 13,
       "track_source_input_or_report": 1
     },
     "status": "blocked"
@@ -170,7 +174,7 @@
   "reuse_policy": "phase6_clean_checkout_status_aggregates_phase3_replay_and_release_control_cleanup_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-clean-checkout-status.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "status": "blocked",
-  "summary_line": "Phase 6 clean checkout: BLOCKED | local=True | git_clone=False | cleanup_pending=45"
+  "summary_line": "Phase 6 clean checkout: BLOCKED | local=True | git_clone=False | cleanup_pending=14"
 }

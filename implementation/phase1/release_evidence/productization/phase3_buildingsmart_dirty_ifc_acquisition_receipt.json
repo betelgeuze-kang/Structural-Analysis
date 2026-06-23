@@ -14,10 +14,10 @@
   "dirty_import_execution_count": 0,
   "engine_version": "1.0.0",
   "expected_negative_import_contract_count": 8,
-  "generated_at": "2026-06-22T19:21:50.945323+00:00",
+  "generated_at": "2026-06-23T16:09:52.124748+00:00",
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:1194ff0fd1f968978fc9540a18c2b92435ab401df93c50c483a797e888df8a59",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
   "phase3_closure_claim": false,
@@ -621,7 +621,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }

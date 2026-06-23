@@ -25,6 +25,64 @@ PHASE3_IFC_DIRTY_ACQUISITION = PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_
 PHASE3_IFC_SOURCE_LICENSE = PRODUCTIZATION / "phase3_ifc_source_license_receipt.json"
 SCHEMA_VERSION = "phase6-silent-import-loss-status.v1"
 REQUIRED_IFC_IMPORT_CASE_COUNT = 10
+BLOCKER_GROUP_SCHEMA_VERSION = "phase6-silent-import-loss-blocker-groups.v1"
+BLOCKER_GROUPS = {
+    "source_acquisition": {
+        "display_name": "source/acquisition",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "source_file_not_acquired",
+            "phase3_ifc_import_case_count_below_minimum",
+            "phase3_ifc_import_case_quantity_credit_missing",
+        },
+    },
+    "checksum": {
+        "display_name": "checksum",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "source_sha256_missing",
+            "selected_file_checksums_missing",
+        },
+    },
+    "license_legal": {
+        "display_name": "license/legal",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "product_legal_license_review_pending",
+            "per_file_license_review_pending",
+        },
+    },
+    "import_execution": {
+        "display_name": "import execution",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "dirty_import_execution_missing",
+            "import_health_execution_missing",
+        },
+        "prefixes": (
+            "ifc_import_health_execution_count_below_required:",
+        ),
+    },
+    "silent_loss_gate": {
+        "display_name": "silent-loss gate",
+        "scope": "direct_silent_import_loss",
+        "blockers": {
+            "silent_data_loss_negative_gate_not_executed",
+            "silent_import_loss_gate_not_executed",
+            "silent_import_loss_gate_not_implemented",
+        },
+    },
+    "query_gui_spillover": {
+        "display_name": "query/gui spillover",
+        "scope": "spillover_not_direct_silent_import_loss",
+        "blockers": {
+            "dataset_repository_url_missing",
+            "gui_task_runner_not_implemented",
+            "query_expected_answers_missing",
+            "query_task_file_checksums_missing",
+        },
+    },
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -59,6 +117,41 @@ def _blockers(*payloads: dict[str, Any]) -> list[str]:
     for payload in payloads:
         blockers.extend(str(blocker) for blocker in payload.get("blockers", []) if str(blocker))
     return sorted(dict.fromkeys(blockers))
+
+
+def _blocker_matches_group(blocker: str, group: dict[str, Any]) -> bool:
+    if blocker in group.get("blockers", set()):
+        return True
+    return any(blocker.startswith(prefix) for prefix in group.get("prefixes", ()))
+
+
+def _blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    grouped_blockers: set[str] = set()
+    groups: dict[str, dict[str, Any]] = {}
+    for group_id, group in BLOCKER_GROUPS.items():
+        group_blockers = [
+            blocker for blocker in blockers if _blocker_matches_group(blocker, group)
+        ]
+        grouped_blockers.update(group_blockers)
+        groups[group_id] = {
+            "display_name": group["display_name"],
+            "scope": group["scope"],
+            "blocked": bool(group_blockers),
+            "blockers": group_blockers,
+        }
+    return {
+        "schema_version": BLOCKER_GROUP_SCHEMA_VERSION,
+        "claim_boundary": (
+            "Query/GUI spillover blockers are carried through for visibility from the "
+            "Phase 3 source-license receipt, but they are not direct silent-import-loss "
+            "closure blockers. The RC gate remains blocked until the direct source, "
+            "checksum, license, import execution, and silent-loss gate groups are clear."
+        ),
+        "groups": groups,
+        "unassigned_blockers": [
+            blocker for blocker in blockers if blocker not in grouped_blockers
+        ],
+    }
 
 
 def _selected_count(payload: dict[str, Any]) -> int:
@@ -157,10 +250,13 @@ def build_phase6_silent_import_loss_status(*, repo_root: Path = ROOT) -> dict[st
             "source_license_receipt": PHASE3_IFC_SOURCE_LICENSE.as_posix(),
         },
         "blockers": blockers,
+        "blocker_grouping_metadata": _blocker_grouping_metadata(blockers),
         "owner_action": (
-            "Acquire and checksum the selected clean/dirty IFC files after license review, "
-            "execute import-health and silent-data-loss negative gates for every selected "
-            "case, then rerun this status before promoting the RC final gate."
+            "Acquire the selected clean/dirty IFC files and record source/checksum evidence; "
+            "complete product/legal and per-file license review; regenerate the Phase 3 "
+            "import-health execution receipt by running import-health and silent-data-loss "
+            "negative gates for every selected case; regenerate and check this Phase 6 "
+            "silent-import-loss status; then refresh the RC final gate."
         ),
         "summary_line": (
             "Phase 6 silent import loss: "

@@ -330,6 +330,7 @@ def build_contract_artifacts(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": git_head(repo_root),
         "engine_version": ANALYSIS_ENGINE_VERSION,
+        "reused_evidence": False,
         "input_checksums": input_checksums(
             [
                 Path("src/structural_analysis/api/core.py"),

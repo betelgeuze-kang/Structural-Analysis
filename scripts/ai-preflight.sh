@@ -56,7 +56,7 @@ fi
 
 echo
 echo "[4] Worker wrappers"
-if bash -n scripts/ai-worker-cursor.sh scripts/ai-worker-opencode.sh scripts/ai-dangerous-command-check.sh scripts/ai-verify.sh; then
+if bash -n scripts/ai-worker-cursor.sh scripts/ai-worker-cursor-host-bridge.sh scripts/ai-worker-opencode.sh scripts/ai-dangerous-command-check.sh scripts/ai-verify.sh; then
   ok "worker shell syntax ok"
 else
   bad "worker shell syntax failed"
@@ -68,10 +68,24 @@ else
   bad "cursor worker model wiring missing"
 fi
 
-if grep -q -- '--file "$prompt_file"' scripts/ai-worker-opencode.sh; then
-  ok "opencode worker passes prompt by file"
+if test -x scripts/ai-worker-cursor-host-bridge.sh; then
+  ok "cursor host bridge wrapper present"
 else
-  bad "opencode worker does not appear to pass prompt by file"
+  bad "cursor host bridge wrapper missing"
+fi
+
+if grep -q -- 'OPENCODE_ASSIGNMENT_CURSOR_MODEL' scripts/ai-worker-opencode.sh \
+  && grep -q -- 'ai-worker-cursor.sh "$prompt_file"' scripts/ai-worker-opencode.sh; then
+  ok "opencode entrypoint routes assignments to cursor"
+else
+  bad "opencode entrypoint cursor routing missing"
+fi
+
+if grep -q -- 'gpt-5.4-mini' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py \
+  && grep -q -- 'xhigh' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py; then
+  ok "internal subagent fallback uses gpt-5.4-mini xhigh"
+else
+  bad "internal subagent fallback model wiring missing"
 fi
 
 if grep -q -- 'validate-ai-worker-output.mjs' scripts/ai-worker-cursor.sh \

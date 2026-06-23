@@ -32,6 +32,9 @@ TASK_BASED_UX_TEST = Path("tests/frontend/developer-preview-workflow.spec.ts")
 TASK_BASED_UX_BROWSER_EXECUTION_RECEIPT = (
     PRODUCTIZATION / "phase5_task_based_ux_browser_execution_receipt.json"
 )
+TASK_BASED_UX_ENVIRONMENT_BLOCKER = "task_based_ux_browser_execution_environment_blocked"
+PREVIEW_LOOPBACK_BIND_BLOCKER = "preview_server_loopback_bind_permission_blocked"
+PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
 EVIDENCE_CONSOLE_SCOPE_STATUS = PRODUCTIZATION / "evidence_console_scope_status.json"
 UX_OBSERVATION_REPORT = PRODUCTIZATION / "ux_new_user_observation_report.json"
 UX_OBSERVATION_INTAKE = PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
@@ -177,6 +180,64 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _preview_output_excerpt(browser_execution_receipt: dict[str, Any]) -> str:
+    commands = browser_execution_receipt.get("commands")
+    if not isinstance(commands, dict):
+        return ""
+    preview = commands.get("preview")
+    if not isinstance(preview, dict):
+        return ""
+    return str(preview.get("output_excerpt", ""))
+
+
+def _browser_execution_blocker_classification(
+    browser_execution_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    reason_code = str(browser_execution_receipt.get("blocker_reason_code") or "")
+    blocker = str(browser_execution_receipt.get("blocker") or "")
+    if (
+        blocker == PREVIEW_LOOPBACK_BIND_BLOCKER
+        or reason_code == PREVIEW_LOOPBACK_BIND_REASON_CODE
+    ):
+        return {
+            "blocker_category": "environment_loopback_bind_permission",
+            "blocker_reason_code": PREVIEW_LOOPBACK_BIND_REASON_CODE,
+            "environment_blocker": True,
+            "blocker_evidence": {
+                "syscall": "listen",
+                "code": "EPERM",
+                "address": "127.0.0.1",
+                "port": 4173,
+            },
+        }
+    normalized_output = _preview_output_excerpt(browser_execution_receipt).lower()
+    if "listen" in normalized_output and "eperm" in normalized_output and "127.0.0.1" in normalized_output:
+        return {
+            "blocker_category": "environment_loopback_bind_permission",
+            "blocker_reason_code": PREVIEW_LOOPBACK_BIND_REASON_CODE,
+            "environment_blocker": True,
+            "blocker_evidence": {
+                "syscall": "listen",
+                "code": "EPERM",
+                "address": "127.0.0.1",
+                "port": 4173,
+            },
+        }
+    return {
+        "blocker_category": str(
+            browser_execution_receipt.get("blocker_category")
+            or "browser_execution_failure"
+        ),
+        "blocker_reason_code": reason_code or "browser_execution_not_passed",
+        "environment_blocker": bool(browser_execution_receipt.get("environment_blocker") is True),
+        "blocker_evidence": (
+            browser_execution_receipt.get("blocker_evidence")
+            if isinstance(browser_execution_receipt.get("blocker_evidence"), dict)
+            else {}
+        ),
+    }
+
+
 def _workflow_step_ids(payload: dict[str, Any]) -> set[str]:
     rows = payload.get("required_workflow_steps")
     if not isinstance(rows, list):
@@ -220,6 +281,15 @@ def _task_based_ux_test_contract(
     )
     browser_execution_receipt_attached = bool(browser_execution_receipt)
     browser_execution_passed = bool(browser_execution_receipt.get("contract_pass") is True)
+    blocker_classification = _browser_execution_blocker_classification(browser_execution_receipt)
+    environment_execution_blocker = (
+        f"{TASK_BASED_UX_ENVIRONMENT_BLOCKER}:"
+        f"{blocker_classification['blocker_reason_code']}"
+        if browser_execution_receipt_attached
+        and not browser_execution_passed
+        and blocker_classification["environment_blocker"] is True
+        else None
+    )
     execution_blocker = (
         "task_based_ux_browser_execution_not_passed"
         if browser_execution_receipt_attached
@@ -241,7 +311,12 @@ def _task_based_ux_test_contract(
         "browser_execution_passed": browser_execution_passed,
         "browser_execution_blocker": browser_execution_receipt.get("blocker"),
         "browser_execution_failed_phase": browser_execution_receipt.get("failed_phase"),
+        "browser_execution_blocker_category": blocker_classification["blocker_category"],
+        "browser_execution_blocker_reason_code": blocker_classification["blocker_reason_code"],
+        "browser_execution_environment_blocker": blocker_classification["environment_blocker"],
+        "browser_execution_blocker_evidence": blocker_classification["blocker_evidence"],
         "execution_blocker": execution_blocker,
+        "execution_environment_blocker": environment_execution_blocker,
         "claim_boundary": (
             "The Playwright task smoke is a runnable test artifact. It does not prove "
             "the UX final gate until a browser execution receipt passes in an environment "
@@ -767,6 +842,8 @@ def build_phase5_gui_workflow_readiness_receipt(
         blockers.append("evidence_console_absorption_contract_not_ready")
     if task_based_ux_test["browser_execution_passed"] is not True:
         blockers.append(str(task_based_ux_test["execution_blocker"]))
+        if task_based_ux_test["execution_environment_blocker"]:
+            blockers.append(str(task_based_ux_test["execution_environment_blocker"]))
     if required_step_ids.difference(observation_step_ids):
         blockers.append("observation_required_workflow_steps_not_visible")
     if required_step_ids.difference(intake_step_ids):

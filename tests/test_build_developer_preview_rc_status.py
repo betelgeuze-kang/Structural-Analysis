@@ -63,6 +63,15 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["selected_medium_models_pass_or_approved_review"]["evidence"].endswith(
         "phase6_benchmark_scale_status.json"
     )
+    medium_gate_grouping = final_gates["selected_medium_models_pass_or_approved_review"][
+        "blocker_grouping_metadata"
+    ]
+    assert medium_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
+    assert medium_gate_grouping["blocker_count"] == len(medium_blockers)
+    assert medium_gate_grouping["unassigned_blockers"] == []
+    assert "medium_model_pass_or_review_below_required:0/5" in medium_gate_grouping[
+        "groups"
+    ]["medium_quantity_shortfall"]["blockers"]
     assert "topology/parser evidence does not count" in " ".join(
         final_gates["selected_medium_models_pass_or_approved_review"]["notes"]
     )
@@ -77,6 +86,15 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["large_models_crash_oom_free"]["evidence"].endswith(
         "phase6_benchmark_scale_status.json"
     )
+    large_gate_grouping = final_gates["large_models_crash_oom_free"][
+        "blocker_grouping_metadata"
+    ]
+    assert large_gate_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
+    assert large_gate_grouping["blocker_count"] == len(large_blockers)
+    assert large_gate_grouping["unassigned_blockers"] == []
+    assert "large_model_runner_not_implemented" in large_gate_grouping["groups"][
+        "large_runner_execution"
+    ]["blockers"]
     assert "Policy-only acquisition rows" in " ".join(
         final_gates["large_models_crash_oom_free"]["notes"]
     )
@@ -127,8 +145,27 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "human_observation_workflow_step_pass_count_below_required:0/5" in ux_gate_blockers
     assert "phase5_workflow_execution_not_proven:0/5" in ux_gate_blockers
     assert "task_based_ux_browser_execution_not_passed" in ux_gate_blockers
+    assert (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        in ux_gate_blockers
+    )
     assert "automated browser/task evidence does not replace" in " ".join(
         final_gates["new_user_core_workflow_observation_passed"]["notes"]
+    )
+    ux_gate_grouping = final_gates["new_user_core_workflow_observation_passed"][
+        "blocker_grouping_metadata"
+    ]
+    assert ux_gate_grouping["schema_version"] == "phase6-ux-observation-blocker-groups.v1"
+    assert ux_gate_grouping["groups"]["human_observation_root"]["scope"] == (
+        "direct_rc_ux_gate"
+    )
+    assert ux_gate_grouping["unassigned_blockers"] == []
+    assert "observation_report:observation_file_missing" in ux_gate_grouping["groups"][
+        "human_observation_report_detail"
+    ]["blockers"]
+    assert (
+        "phase5_gui_workflow:workflow_execution_step_not_proven:import"
+        in ux_gate_grouping["groups"]["phase5_execution_detail"]["blockers"]
     )
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["contract_pass"] is False
     assert final_gates["benchmark_results_clean_checkout_regenerated"]["evidence"] == (
@@ -144,9 +181,22 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert final_gates["residual_and_convergence_history_present"]["blockers"] == []
     assert final_gates["linux_windows_reproducibility_confirmed"]["blockers"] == [
         "linux_windows_parity_receipts_missing",
-        "platform_replay_receipt_missing:linux",
         "platform_replay_receipt_missing:windows",
     ]
+    parity_gate_grouping = final_gates["linux_windows_reproducibility_confirmed"][
+        "blocker_grouping_metadata"
+    ]
+    assert parity_gate_grouping["schema_version"] == (
+        "phase6-linux-windows-parity-blocker-groups.v1"
+    )
+    assert parity_gate_grouping["blocker_count"] == len(
+        final_gates["linux_windows_reproducibility_confirmed"]["blockers"]
+    )
+    assert parity_gate_grouping["unassigned_blockers"] == []
+    assert "platform_replay_receipt_missing:windows" in parity_gate_grouping["groups"][
+        "platform_receipt_presence"
+    ]["blockers"]
+    assert parity_gate_grouping["groups"]["git_clean_clone_spillover"]["blockers"] == []
     assert (
         "git_clean_clone_reproduction_not_passed"
         not in final_gates["linux_windows_reproducibility_confirmed"]["blockers"]
@@ -174,6 +224,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         blocker.startswith("required_path_has_uncommitted_changes:")
         for blocker in clean_checkout_blockers
     )
+    clean_gate_grouping = final_gates["benchmark_results_clean_checkout_regenerated"][
+        "blocker_grouping_metadata"
+    ]
+    assert clean_gate_grouping["schema_version"] == "phase6-clean-checkout-blocker-groups.v1"
+    assert clean_gate_grouping["unassigned_blockers"] == []
+    assert clean_gate_grouping["groups"]["dirty_tracked_required_inputs"]["blocker_count"] > 0
+    assert clean_gate_grouping["groups"]["untracked_required_inputs"]["blocker_count"] == 1
+    assert "human_git_action_required_for_release_control_inputs" in clean_gate_grouping[
+        "groups"
+    ]["release_control_human_handoff"]["blockers"]
     assert "tracked and committed" in " ".join(
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
@@ -181,7 +241,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
 
-    assert payload["known_limitations"]["developer_preview_blocker_count"] == 76
+    assert payload["known_limitations"]["developer_preview_blocker_count"] == 7
     assert payload["known_limitations"]["dataset_license_blockers"] == []
     assert payload["known_limitations"]["dataset_license_external_corpus_blockers"] == [
         "phase3_external_corpus:authoritative_source_checksums_pending=4",
@@ -222,6 +282,19 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert ux_handoff["phase5_workflow_gate"]["execution_workflow_step_pass_count"] == 0
     assert ux_handoff["phase5_workflow_gate"]["task_based_ux_browser_execution_passed"] is False
     assert "phase5_workflow_execution_not_proven:0/5" in ux_handoff["phase6_ux_status_blockers"]
+    assert (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        in ux_handoff["phase6_ux_status_blockers"]
+    )
+    assert ux_handoff["phase6_ux_blocker_grouping"]["schema_version"] == (
+        "phase6-ux-observation-blocker-groups.v1"
+    )
+    assert ux_handoff["phase6_ux_blocker_grouping"]["groups"][
+        "intake_packet_handoff"
+    ]["scope"] == "owner_handoff_not_gate_closure"
+    assert ux_handoff["phase6_ux_blocker_grouping"]["groups"][
+        "environment_spillover"
+    ]["scope"] == "local_environment_blocker"
     assert ux_handoff["intake_field_pass_count"] == 0
     assert ux_handoff["intake_field_count"] == 18
     assert ux_handoff["report_blockers"] == [
@@ -267,6 +340,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     )
     assert quantity_handoff["benchmark_scale_status"] == "blocked"
     assert quantity_handoff["benchmark_scale_contract_pass"] is False
+    assert quantity_handoff["benchmark_scale_blocker_grouping"]["schema_version"] == (
+        "phase6-benchmark-scale-blocker-groups.v1"
+    )
     assert quantity_handoff["targets"]["analytic_component"] == {
         "current": 30,
         "required": 20,
@@ -323,6 +399,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert medium_scorecard_handoff["benchmark_scale_status"] == "blocked"
     assert medium_scorecard_handoff["benchmark_scale_contract_pass"] is False
     assert medium_scorecard_handoff["benchmark_scale_gate"]["contract_pass"] is False
+    assert medium_scorecard_handoff["benchmark_scale_blocker_grouping"]["groups"][
+        "medium_scorecard_execution"
+    ]["scope"] == "medium_model_scorecard_execution"
     assert medium_scorecard_handoff["required_medium_model_count"] == 5
     assert medium_scorecard_handoff["current_medium_model_scorecard_count"] == 0
     assert medium_scorecard_handoff["pass_or_approved_review_count"] == 0
@@ -346,6 +425,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert large_runner_handoff["benchmark_scale_status"] == "blocked"
     assert large_runner_handoff["benchmark_scale_contract_pass"] is False
     assert large_runner_handoff["benchmark_scale_gate"]["contract_pass"] is False
+    assert large_runner_handoff["benchmark_scale_blocker_grouping"]["groups"][
+        "large_quantity_shortfall"
+    ]["scope"] == "large_model_quantity_gate"
     assert large_runner_handoff["required_large_model_count"] == 2
     assert large_runner_handoff["current_large_model_execution_receipt_count"] == 0
     assert large_runner_handoff["crash_oom_free_execution_count"] == 0
@@ -397,7 +479,19 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "ifc_import_health_execution_count_below_required:0/10" in ifc_handoff[
         "silent_import_loss_blockers"
     ]
-    assert "Acquire and checksum the selected clean/dirty IFC files" in ifc_handoff["owner_action"]
+    grouping = ifc_handoff["silent_import_loss_blocker_grouping"]
+    assert grouping["schema_version"] == "phase6-silent-import-loss-blocker-groups.v1"
+    assert grouping["groups"]["source_acquisition"]["scope"] == "direct_silent_import_loss"
+    assert grouping["groups"]["query_gui_spillover"]["scope"] == (
+        "spillover_not_direct_silent_import_loss"
+    )
+    assert "gui_task_runner_not_implemented" in grouping["groups"][
+        "query_gui_spillover"
+    ]["blockers"]
+    assert "Acquire the selected clean/dirty IFC files" in ifc_handoff["owner_action"]
+    assert "regenerate and check this Phase 6 silent-import-loss status" in ifc_handoff[
+        "owner_action"
+    ]
     assert "does not download or bundle IFC files" in ifc_handoff["claim_boundary"]
     ifc_query_handoff = payload["known_limitations"]["ifc_query_gui_handoff"]
     assert ifc_query_handoff["query_gui_readiness_receipt"].endswith(
@@ -451,7 +545,14 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert phase5_handoff["task_based_ux_test"]["browser_execution_status"] == "blocked"
     assert phase5_handoff["task_based_ux_test"]["browser_execution_passed"] is False
     assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker"] == (
-        "preview_server_failed_before_browser_execution"
+        "preview_server_loopback_bind_permission_blocked"
+    )
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_environment_blocker"] is True
+    assert phase5_handoff["task_based_ux_test"]["browser_execution_blocker_reason_code"] == (
+        "listen_eperm_127_0_0_1"
+    )
+    assert phase5_handoff["task_based_ux_test"]["execution_environment_blocker"] == (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
     )
     assert phase5_handoff["task_based_ux_browser_execution_receipt"]["failed_phase"] == (
         "preview_server_start"
@@ -472,6 +573,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "workflow_execution_step_not_proven:model_health" in phase5_handoff["blockers"]
     assert "task_based_ux_browser_execution_receipt_missing" not in phase5_handoff["blockers"]
     assert "task_based_ux_browser_execution_not_passed" in phase5_handoff["blockers"]
+    assert (
+        "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        in phase5_handoff["blockers"]
+    )
     assert "human_new_user_observation_not_passed" in phase5_handoff["blockers"]
     assert "Attach execution receipts" in phase5_handoff["owner_action"]
     assert "visible GUI workflow shell coverage" in phase5_handoff["claim_boundary"]
@@ -507,8 +612,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "phase3_benchmark_factory_seed_git_clean_clone_reproduction.json"
     )
     assert parity_handoff["required_platforms"] == ["linux", "windows"]
-    assert parity_handoff["current_platform_receipts"] == []
-    assert parity_handoff["missing_platform_receipts"] == ["linux", "windows"]
+    assert parity_handoff["current_platform_receipts"] == ["linux"]
+    assert parity_handoff["missing_platform_receipts"] == ["windows"]
     assert (
         parity_handoff["platform_receipt_schema"]
         == "phase6-linux-windows-platform-replay-receipt.v1"
@@ -525,7 +630,7 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert receipt_template["expected_scorecard"] == parity_handoff["expected_scorecard"]
     parity_contract = parity_handoff["parity_comparison_contract"]
     assert parity_contract["required_platform_receipt_count"] == 2
-    assert parity_contract["current_platform_receipt_count"] == 0
+    assert parity_contract["current_platform_receipt_count"] == 1
     assert parity_contract["required_platforms"] == ["linux", "windows"]
     assert parity_contract["local_dirty_inputs_allowed"] is False
     assert parity_contract["contract_pass"] is False
@@ -533,6 +638,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "scorecard" in parity_contract["checksum_keys"]
     assert "case_count" in parity_contract["scorecard_identity_fields"]
     assert "linux_windows_parity_receipts_missing" in parity_handoff["blocked_by"]
+    assert parity_handoff["parity_blocker_grouping"]["schema_version"] == (
+        "phase6-linux-windows-parity-blocker-groups.v1"
+    )
+    assert "git_clean_clone_reproduction_not_passed" in parity_handoff[
+        "parity_blocker_grouping"
+    ]["groups"]["git_clean_clone_spillover"]["blockers"]
+    assert parity_handoff["parity_gate_blocker_grouping"]["blocker_count"] == 2
+    assert parity_handoff["parity_gate_blocker_grouping"]["groups"][
+        "git_clean_clone_spillover"
+    ]["blockers"] == []
     assert any(
         "structural_analysis.benchmark.cli" in command
         for command in parity_handoff["required_commands"]
@@ -568,6 +683,12 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "git_clean_clone_reproduction_not_passed" in clean_handoff[
         "phase6_clean_checkout_blockers"
     ]
+    assert clean_handoff["phase6_clean_checkout_blocker_grouping"]["schema_version"] == (
+        "phase6-clean-checkout-blocker-groups.v1"
+    )
+    assert clean_handoff["phase6_clean_checkout_blocker_grouping"]["groups"][
+        "release_control_human_handoff"
+    ]["scope"] == "owner_git_action_handoff"
     assert clean_handoff["clean_checkout_receipt"].endswith(
         "phase3_benchmark_factory_seed_clean_checkout_reproduction.json"
     )
@@ -605,16 +726,12 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         for command in cleanup["next_verification_commands"]
     )
     assert "does not commit" in cleanup["claim_boundary"]
-    for required_builder in (
-        "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
-        "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
-        "scripts/build_phase3_large_model_runner_readiness_receipt.py",
-        "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
-    ):
-        assert f"required_path_not_tracked:{required_builder}" in git_clean_clone["blockers"]
-    assert any(
-        blocker.startswith("required_path_not_tracked:")
-        for blocker in git_clean_clone["blockers"]
+    assert git_clean_clone["blocker_count"] == 14
+    assert git_clean_clone["blocker_counts"]["required_path_not_tracked"] == 1
+    assert (
+        "required_path_not_tracked:"
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+        in git_clean_clone["blockers"]
     )
     assert any(
         "run_phase3_benchmark_factory_git_clean_clone_reproduction.py" in command
@@ -625,7 +742,10 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         "30_run_ci_streak",
         "customer_shadow",
         "product_license",
+        "license_server_operation",
+        "commercial_sla",
         "external_approval_receipts",
+        "remote_github_sync",
     ]
     assert "full Phase 3 corpus" in payload["claim_boundary"]
     assert "G1 full nonlinear full-mesh" in payload["claim_boundary"]

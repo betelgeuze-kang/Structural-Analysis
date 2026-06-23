@@ -1,4 +1,89 @@
 {
+  "blocker_grouping_metadata": {
+    "blocker_count": 27,
+    "grouping_policy": "Preserve every blocker while separating direct human-observation gate requirements from intake handoff, observation-report detail, and Phase 5/browser rehearsal spillover.",
+    "groups": {
+      "duplicate_source_detail": {
+        "blocker_count": 1,
+        "blockers": [
+          "phase5_gui_workflow:human_new_user_observation_not_passed"
+        ],
+        "description": "Source-detail blockers already represented by a direct RC UX gate blocker.",
+        "scope": "duplicate_source_detail"
+      },
+      "environment_spillover": {
+        "blocker_count": 2,
+        "blockers": [
+          "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
+          "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1"
+        ],
+        "description": "Local browser execution environment blockers that prevent rehearsal evidence but do not by themselves close or fail the human observation.",
+        "scope": "local_environment_blocker"
+      },
+      "human_observation_report_detail": {
+        "blocker_count": 11,
+        "blockers": [
+          "observation_report:approval_decision_not_accepted",
+          "observation_report:blocking_usability_issue_present",
+          "observation_report:completion_minutes_missing",
+          "observation_report:contract_signal_not_pass",
+          "observation_report:new_to_product_not_confirmed",
+          "observation_report:observation_file_missing",
+          "observation_report:participant_not_new_user",
+          "observation_report:required_fields_missing",
+          "observation_report:required_workflow_step_not_passed",
+          "observation_report:required_workflow_steps_missing",
+          "observation_report:workflow_steps_missing"
+        ],
+        "description": "Detailed validation failures from the human new-user observation report.",
+        "scope": "human_observation_receipt_detail"
+      },
+      "human_observation_root": {
+        "blocker_count": 3,
+        "blockers": [
+          "human_new_user_observation_not_passed",
+          "human_observation_required_workflow_steps_missing:5",
+          "human_observation_workflow_step_pass_count_below_required:0/5"
+        ],
+        "description": "Human new-user observation evidence required to close the RC UX final gate.",
+        "scope": "direct_rc_ux_gate"
+      },
+      "intake_packet_handoff": {
+        "blocker_count": 1,
+        "blockers": [
+          "ux_observation_intake_packet_not_passed"
+        ],
+        "description": "Owner intake checklist evidence that supports handoff but cannot replace the human observation record.",
+        "scope": "owner_handoff_not_gate_closure"
+      },
+      "phase5_execution_detail": {
+        "blocker_count": 5,
+        "blockers": [
+          "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
+          "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
+          "phase5_gui_workflow:workflow_execution_step_not_proven:import",
+          "phase5_gui_workflow:workflow_execution_step_not_proven:model_health",
+          "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor"
+        ],
+        "description": "Per-step GUI workflow execution blockers from the Phase 5 receipt.",
+        "scope": "phase5_execution_step_detail"
+      },
+      "phase5_execution_root": {
+        "blocker_count": 4,
+        "blockers": [
+          "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
+          "phase5_gui_workflow_readiness_not_passed",
+          "phase5_workflow_execution_not_proven:0/5",
+          "task_based_ux_browser_execution_not_passed"
+        ],
+        "description": "Aggregate GUI execution and browser-test pass/fail blockers for the five-step workflow.",
+        "scope": "phase5_execution_aggregate"
+      }
+    },
+    "schema_version": "phase6-ux-observation-blocker-groups.v1",
+    "unassigned_blocker_count": 0,
+    "unassigned_blockers": []
+  },
   "blockers": [
     "human_new_user_observation_not_passed",
     "human_observation_required_workflow_steps_missing:5",
@@ -15,6 +100,7 @@
     "observation_report:required_workflow_steps_missing",
     "observation_report:workflow_steps_missing",
     "phase5_gui_workflow:human_new_user_observation_not_passed",
+    "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
     "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
     "phase5_gui_workflow:workflow_execution_step_not_proven:analysis_setup",
     "phase5_gui_workflow:workflow_execution_step_not_proven:compare_report",
@@ -23,6 +109,7 @@
     "phase5_gui_workflow:workflow_execution_step_not_proven:run_monitor",
     "phase5_gui_workflow_readiness_not_passed",
     "phase5_workflow_execution_not_proven:0/5",
+    "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
     "task_based_ux_browser_execution_not_passed",
     "ux_observation_intake_packet_not_passed"
   ],
@@ -30,7 +117,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-22T20:18:01.880252+00:00",
+  "generated_at": "2026-06-23T17:53:40.460788+00:00",
   "human_observation_gate": {
     "blockers": [
       "observation_file_missing",
@@ -61,10 +148,10 @@
     "workflow_step_pass_count": 0
   },
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:e8d92502ecbc3f991bc1e5f9bb100086cd32d3779efec688fcd929837be7ae0b",
+    "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:17e35a1dd5fdbe4adf308dc21f3bef47a7a7903d6a3f203e64ebbb805ca24016",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
-    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:982c1d5ff4c9a9a4e0fda88738321411121aa96379f4436f7bf944e6002936c6",
-    "scripts/build_phase6_ux_observation_status.py": "sha256:23dc1061bafac39c68798da8ffb886d4846760606f5343364e5a1ce76ffc1261"
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:96be2826ed4e8ed482ac13754c3277adda069a70ae8f92bfc5a605a265912e43",
+    "scripts/build_phase6_ux_observation_status.py": "sha256:fc2f5ebd9dc7d74b7e3cf2f318397d54664830fc0ede8e2747dee8a16c5ec9ff"
   },
   "intake_packet_gate": {
     "blockers": [
@@ -91,6 +178,7 @@
   "phase5_workflow_gate": {
     "blockers": [
       "human_new_user_observation_not_passed",
+      "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
       "task_based_ux_browser_execution_not_passed",
       "workflow_execution_step_not_proven:analysis_setup",
       "workflow_execution_step_not_proven:compare_report",
@@ -111,6 +199,9 @@
     "required_workflow_step_count": 5,
     "status": "blocked",
     "task_based_ux_browser_execution_blocker": "task_based_ux_browser_execution_not_passed",
+    "task_based_ux_browser_execution_blocker_reason_code": "listen_eperm_127_0_0_1",
+    "task_based_ux_browser_execution_environment_blocker": true,
+    "task_based_ux_browser_execution_environment_detail": "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
     "task_based_ux_browser_execution_passed": false,
     "task_based_ux_browser_execution_status": "blocked",
     "workflow_shell_step_pass_count": 5
@@ -123,7 +214,7 @@
   "reuse_policy": "phase6_ux_observation_status_aggregates_human_observation_and_phase5_gui_receipts",
   "reused_evidence": true,
   "schema_version": "phase6-ux-observation-status.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "status": "blocked",
   "summary_line": "Phase 6 UX observation: BLOCKED | human=0/5 | execution=0/5 | browser=False"
 }

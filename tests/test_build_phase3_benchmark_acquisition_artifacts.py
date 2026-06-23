@@ -63,6 +63,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "checksum_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_count_below_minimum" not in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
+    assert "silent_import_loss_gate_not_executed" in payload["blockers"]
+    assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
     assert "operator_reference_outputs_missing" in payload["blockers"]
     assert "operator_reference_package_missing" in payload["blockers"]
     assert "operator_reference_ingest_validator_blocked" in payload["blockers"]
@@ -81,6 +83,7 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "ifc_query_gui_task_execution_missing" in payload["blockers"]
     assert "phase3_scorecard_runner_not_implemented" not in payload["blockers"]
     assert "close Phase 3" in payload["claim_boundary"]
+    assert "silent_import_loss_gate_not_implemented" not in json.dumps(payload, sort_keys=True)
 
     ifc_requirement = payload["ifc_import_case_requirement"]
     assert ifc_requirement["minimum_clean_dirty_import_case_count"] == 10
@@ -148,6 +151,8 @@ def test_phase3_benchmark_acquisition_plan_blocks_without_sources_or_licenses() 
     assert "source_url_verification_pending" not in clean_ifc["blockers"]
     assert "import_expected_outputs_missing" not in clean_ifc["blockers"]
     assert "import_health_execution_missing" in clean_ifc["blockers"]
+    assert "silent_import_loss_gate_not_executed" in clean_ifc["blockers"]
+    assert "silent_import_loss_gate_not_implemented" not in clean_ifc["blockers"]
     assert clean_ifc["existing_receipts"][0]["path"].endswith(
         "phase3_buildingsmart_ifc_acquisition_receipt.json"
     )

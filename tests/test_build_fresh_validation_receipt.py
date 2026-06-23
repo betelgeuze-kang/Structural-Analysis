@@ -76,7 +76,6 @@ def _install_fake_runner_scripts(repo_root: Path) -> None:
     script_names = [
         "run_solver_hip_e2e_contract.py",
         "run_mgt_residual_jacobian_consistency_probe.py",
-        "report_commercial_solver_cross_validation.py",
         "run_performance_profiling_gate.py",
         "run_general_fe_contact_benchmark_gate.py",
         "run_mgt_surface_membrane_tangent.py",
@@ -87,6 +86,7 @@ def _install_fake_runner_scripts(repo_root: Path) -> None:
         "run_productization_gate.py",
         "run_ndtha_residual_gate.py",
         "start_external_benchmark_task.py",
+        "run_external_benchmark_refresh_lane.py",
         "run_design_optimization_solver_loop_long.py",
     ]
     body = _fake_runner_script_body()
@@ -94,6 +94,9 @@ def _install_fake_runner_scripts(repo_root: Path) -> None:
         path = repo_root / "implementation" / "phase1" / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(body, encoding="utf-8")
+    wrapper_path = repo_root / "scripts" / "report_commercial_solver_cross_validation.py"
+    wrapper_path.parent.mkdir(parents=True, exist_ok=True)
+    wrapper_path.write_text(body, encoding="utf-8")
 
 
 def _init_git_repo(repo_root: Path, *, name: str, version: str) -> None:
@@ -203,6 +206,14 @@ def test_build_receipt_runs_real_command_and_writes_valid_receipt(tmp_path: Path
     assert receipt["summary"]["case_count"] == 1
     assert receipt["summary"]["passed_case_count"] == 1
     assert receipt["summary"]["duration_seconds"] >= 0.0
+    assert receipt["summary"]["readiness_group"] == "fresh_validation"
+    assert receipt["summary"]["developer_preview_category"] == "benchmark"
+    assert receipt["summary"]["blocker_group"] == "fresh_receipt_presence"
+    assert receipt["summary"]["lane_scope"] == "performance_track_after_cpu_reference_parity"
+    assert receipt["summary"]["claim_boundary_tag"] == (
+        "gpu_hip_after_cpu_reference_parity_non_promoting"
+    )
+    assert receipt["summary"]["promotes_g1_cpu_parity"] is False
     assert "Level 3" in receipt["claim_boundary"]
 
     validation = builder.validate_receipt_payload(receipt, json.loads(SCHEMA_PATH.read_text(encoding="utf-8")))
@@ -285,6 +296,32 @@ def test_build_receipt_blocks_arbitrary_command_for_runner(tmp_path: Path) -> No
     assert result["blockers"] == [
         "fresh_validation_command_not_allowed_for_runner:gpu_capable_rocm_hip_validation"
     ]
+
+
+def test_external_benchmark_refresh_allows_only_safe_refresh_runner() -> None:
+    blockers = builder._runner_command_blockers(
+        runner="benchmark_productization_validation",
+        validation_command=(
+            "python3 implementation/phase1/run_external_benchmark_refresh_lane.py "
+            "--execution-manifest implementation/phase1/release/external_benchmark_kickoff/"
+            "external_benchmark_execution_manifest.json "
+            "--updates-json implementation/phase1/release/external_benchmark_kickoff/"
+            "external_benchmark_execution_updates.json "
+            "--status-manifest-out implementation/phase1/release/external_benchmark_kickoff/"
+            "external_benchmark_execution_status_manifest.json"
+        ),
+    )
+    assert blockers == []
+    for raw_command in (
+        "python3 implementation/phase1/generate_external_benchmark_execution_status_manifest.py",
+        "python3 implementation/phase1/update_external_benchmark_execution_status.py",
+    ):
+        assert builder._runner_command_blockers(
+            runner="benchmark_productization_validation",
+            validation_command=raw_command,
+        ) == [
+            "fresh_validation_command_not_allowed_for_runner:benchmark_productization_validation"
+        ]
 
 
 def test_build_receipt_blocks_unregistered_runner(tmp_path: Path) -> None:
@@ -504,11 +541,10 @@ def test_build_receipt_uses_provided_case_counts_and_duration(tmp_path: Path) ->
     )
     assert completed.returncode == 0, completed.stderr
     receipt = json.loads((tmp_path / "receipt.json").read_text(encoding="utf-8"))
-    assert receipt["summary"] == {
-        "case_count": 12,
-        "passed_case_count": 10,
-        "duration_seconds": 42.5,
-    }
+    assert receipt["summary"]["case_count"] == 12
+    assert receipt["summary"]["passed_case_count"] == 10
+    assert receipt["summary"]["duration_seconds"] == 42.5
+    assert receipt["summary"]["lane_scope"] == "performance_track_after_cpu_reference_parity"
 
 
 def test_build_receipt_records_real_artifact_sha256(tmp_path: Path) -> None:

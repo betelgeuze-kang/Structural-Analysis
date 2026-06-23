@@ -69,6 +69,20 @@ def test_preflight_passes_when_configured_opencode_model_is_registered(tmp_path:
     assert payload["summary"]["opencode_configured_model_available"] is True
     assert payload["summary"]["opencode_assignment_routed_to_cursor"] is True
     assert payload["summary"]["opencode_assignment_cursor_model"] == "composer-2.5"
+    assert payload["summary"]["cursor_remote_api_host"] == "api2.cursor.sh"
+    assert payload["summary"]["cursor_host_bridge_ready"] is False
+    assert payload["summary"]["cursor_dns_permission_owner"] == "host_or_codex_session_configuration"
+    assert payload["summary"]["cursor_dns_permission_grantable_from_codex"] is False
+    assert payload["checks"]["cursor_dns_permission_grantable_from_codex"] is False
+    assert "start_host_bridge_from_network_enabled_host_terminal" in payload["summary"][
+        "cursor_dns_failure_fallbacks"
+    ]
+    assert payload["summary"]["cursor_failure_internal_subagent_fallback_agent_type"] == "worker"
+    assert payload["summary"]["cursor_failure_internal_subagent_fallback_model"] == "gpt-5.4-mini"
+    assert payload["summary"]["cursor_failure_internal_subagent_fallback_reasoning_effort"] == "xhigh"
+    assert payload["checks"]["internal_subagent_fallback_agent_type_configured"] is True
+    assert payload["checks"]["internal_subagent_fallback_model_configured"] is True
+    assert payload["checks"]["internal_subagent_fallback_reasoning_effort_configured"] is True
     assert payload["diagnostics"]["opencode_model_rows"] == [
         "opencode-go/minimax-m3",
         "opencode/big-pickle",
@@ -178,4 +192,28 @@ def test_preflight_uses_opencode_go_mirror_when_account_store_is_read_only(
     assert os.readlink(mirror_home / "opencode" / "auth.json") == str(source_home / "opencode" / "auth.json")
     assert os.readlink(mirror_home / "opencode" / "account.json") == str(
         source_home / "opencode" / "account.json"
+    )
+
+
+def test_preflight_reports_cursor_host_bridge_when_ready(tmp_path: Path, monkeypatch) -> None:
+    _seed_orchestration_files(tmp_path)
+    bin_dir = _seed_worker_clis(tmp_path, model_rows=["opencode-go/deepseek-v4-pro"])
+    bridge_dir = tmp_path / "cursor-bridge"
+    (bridge_dir / "jobs").mkdir(parents=True)
+    (bridge_dir / "done").mkdir()
+    _write(bridge_dir / "host-bridge.ready", "12345\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("PATH", _prepend_path(bin_dir))
+    monkeypatch.setenv("AI_WORKER_OPENCODE_XDG_DATA_HOME", str(tmp_path / "xdg"))
+    monkeypatch.setenv("AI_WORKER_CURSOR_HOST_BRIDGE_DIR", str(bridge_dir))
+
+    payload = build_preflight_module.build_report()
+
+    assert payload["contract_pass"] is True
+    assert payload["checks"]["cursor_host_bridge_ready"] is True
+    assert payload["summary"]["cursor_host_bridge_ready"] is True
+    assert payload["summary"]["cursor_host_bridge_dir"] == str(bridge_dir)
+    assert payload["diagnostics"]["cursor_host_bridge_ready_file"] == str(
+        bridge_dir / "host-bridge.ready"
     )

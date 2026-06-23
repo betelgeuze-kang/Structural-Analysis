@@ -61,6 +61,10 @@ def test_contract_artifacts_are_generated_from_core_api_path(tmp_path: Path) -> 
     assert cli_result == result
     assert cli_report == report
     assert summary["contract_pass"] is True
+    assert "source_commit_sha" in summary
+    assert summary["engine_version"]
+    assert summary["reused_evidence"] is False
+    assert summary["input_checksums"]
     assert summary["invocation_surfaces"] == ["python_api", "cli", "gui_json_consumption"]
     cli_contract = summary["cli_contract"]
     assert cli_contract["status"] == "ready"

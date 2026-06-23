@@ -77,6 +77,101 @@ def _blocker_counts(blockers: list[str]) -> dict[str, int]:
     return dict(sorted(counts.items()))
 
 
+def _clean_checkout_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    group_specs = [
+        (
+            "local_clean_checkout_root",
+            {
+                "scope": "local_replay_gate",
+                "description": "Aggregate blocker for local worktree-copy replay.",
+                "matches": ("local_clean_checkout_reproduction_not_passed",),
+            },
+        ),
+        (
+            "local_clean_checkout_detail",
+            {
+                "scope": "local_replay_detail",
+                "description": "Detailed blockers from the local clean-checkout receipt.",
+                "matches": ("local_clean_checkout:",),
+            },
+        ),
+        (
+            "git_clean_clone_root",
+            {
+                "scope": "git_clean_clone_replay_gate",
+                "description": "Aggregate blocker for replay from a real git clean clone.",
+                "matches": ("git_clean_clone_reproduction_not_passed",),
+            },
+        ),
+        (
+            "dirty_tracked_required_inputs",
+            {
+                "scope": "human_git_review_required",
+                "description": (
+                    "Tracked required replay inputs that have uncommitted local changes."
+                ),
+                "matches": ("required_path_has_uncommitted_changes:",),
+            },
+        ),
+        (
+            "untracked_required_inputs",
+            {
+                "scope": "human_git_review_required",
+                "description": "Required replay inputs that are not tracked in Git.",
+                "matches": ("required_path_not_tracked:",),
+            },
+        ),
+        (
+            "release_control_human_handoff",
+            {
+                "scope": "owner_git_action_handoff",
+                "description": (
+                    "Owner Git review/action required before clean-clone replay can be promoted."
+                ),
+                "matches": ("human_git_action_required_for_release_control_inputs",),
+            },
+        ),
+        (
+            "release_control_commit_set",
+            {
+                "scope": "owner_git_action_handoff",
+                "description": "Pending release-control commit-set size from the cleanup plan.",
+                "matches": ("release_control_commit_set_pending:",),
+            },
+        ),
+    ]
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    for group_name, spec in group_specs:
+        matches = tuple(str(match) for match in spec["matches"])
+        grouped = [
+            blocker
+            for blocker in blockers
+            if blocker not in classified
+            and any(blocker == match or blocker.startswith(match) for match in matches)
+        ]
+        classified.update(grouped)
+        groups[group_name] = {
+            "scope": spec["scope"],
+            "description": spec["description"],
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": "phase6-clean-checkout-blocker-groups.v1",
+        "grouping_policy": (
+            "Preserve every blocker while separating local replay, git clean-clone "
+            "replay inputs, and owner Git handoff actions. This grouping does not run "
+            "or imply git add, commit, push, reset, checkout, or cleanup."
+        ),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
 def build_phase6_clean_checkout_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     clean = _load_json(repo_root, PHASE3_CLEAN_CHECKOUT)
@@ -163,6 +258,7 @@ def build_phase6_clean_checkout_status(*, repo_root: Path = ROOT) -> dict[str, A
             "release_control_cleanup_plan": PHASE3_RELEASE_CONTROL_CLEANUP_PLAN.as_posix(),
         },
         "blockers": blockers,
+        "blocker_grouping_metadata": _clean_checkout_blocker_grouping_metadata(blockers),
         "owner_action": (
             "Review the release-control cleanup plan, track or commit required inputs "
             "after human review, rerun the git clean-clone reproduction receipt, and "

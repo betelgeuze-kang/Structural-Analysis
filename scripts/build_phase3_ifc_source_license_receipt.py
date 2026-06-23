@@ -82,7 +82,7 @@ def build_phase3_ifc_source_license_receipt(
             "redistribution_allowed": False,
             "commercial_use_allowed": False,
             "checksum_status": "missing_until_acquisition_script_fetches_selected_files",
-            "expected_output_status": "missing_until_import_health_expectations_authored",
+            "expected_output_status": "authored_import_health_contracts_pending_execution",
             "acquisition_receipt_path": (
                 "implementation/phase1/release_evidence/productization/"
                 "phase3_buildingsmart_ifc_acquisition_receipt.json"
@@ -91,13 +91,14 @@ def build_phase3_ifc_source_license_receipt(
             "claim_boundary": (
                 "Official buildingSMART PCERT sample source identity and declared license "
                 "URL are attached, but no source file checksums, product/legal approval, "
-                "executed import-health outputs, or Phase 3 quantity credit are claimed."
+                "executed import-health/silent-import-loss gate outputs, or Phase 3 "
+                "quantity credit are claimed."
             ),
             "blockers": [
                 "selected_file_checksums_missing",
                 "product_legal_license_review_pending",
                 "import_health_execution_missing",
-                "silent_import_loss_gate_not_implemented",
+                "silent_import_loss_gate_not_executed",
             ],
         },
         {

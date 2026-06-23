@@ -532,6 +532,95 @@ def _load_json_payload(path: Path) -> dict[str, Any]:
     return loaded if isinstance(loaded, dict) else {}
 
 
+def _frontier_non_promoting_evidence_context(
+    evidence_sources: tuple[Path, ...],
+) -> dict[str, Any]:
+    source_rows: list[dict[str, Any]] = []
+    selected_payload: dict[str, Any] = {}
+    selected_source: Path | None = None
+    for source in evidence_sources:
+        payload = _load_json_payload(source)
+        row = {
+            "path": str(source),
+            "present": bool(payload),
+            "has_frontier_chain": isinstance(payload.get("frontier_chain"), list),
+            "has_non_promoting_launch_receipts": isinstance(
+                payload.get("non_promoting_launch_receipts"), list
+            ),
+        }
+        source_rows.append(row)
+        if selected_payload:
+            continue
+        if row["has_frontier_chain"] or row["has_non_promoting_launch_receipts"]:
+            selected_payload = payload
+            selected_source = source
+
+    if not selected_payload:
+        return {
+            "schema_version": "g1-frontier-non-promoting-context.v1",
+            "present": False,
+            "source_path": None,
+            "source_candidates": source_rows,
+            "evidence_role": "missing_frontier_context",
+            "promotes_g1_closure": False,
+            "promotes_lane_status": False,
+            "non_promoting_launch_receipt_count": 0,
+            "frontier_chain_count": 0,
+            "claim_boundary": (
+                "No frontier/non-promoting status receipt was attached to this lane "
+                "report, so no launch-only evidence can promote G1 closure."
+            ),
+        }
+
+    frontier_chain = selected_payload.get("frontier_chain")
+    frontier_chain = frontier_chain if isinstance(frontier_chain, list) else []
+    non_promoting_launch_receipts = selected_payload.get("non_promoting_launch_receipts")
+    non_promoting_launch_receipts = (
+        non_promoting_launch_receipts
+        if isinstance(non_promoting_launch_receipts, list)
+        else []
+    )
+    latest_residual = _float_or_none(
+        selected_payload.get("latest_frontier_direct_residual_inf_n")
+    )
+    tolerance = _float_or_none(selected_payload.get("direct_residual_gate_tolerance_n"))
+    frontier_residual_above_tolerance = bool(
+        latest_residual is not None
+        and tolerance is not None
+        and latest_residual > tolerance
+    )
+    return {
+        "schema_version": "g1-frontier-non-promoting-context.v1",
+        "present": True,
+        "source_path": str(selected_source) if selected_source is not None else None,
+        "source_status": selected_payload.get("status"),
+        "source_contract_pass": bool(selected_payload.get("contract_pass") is True),
+        "source_candidates": source_rows,
+        "evidence_role": "non_promoting_partial_frontier_context",
+        "promotes_g1_closure": False,
+        "promotes_lane_status": False,
+        "frontier_chain_count": len(frontier_chain),
+        "latest_frontier_receipt": selected_payload.get("latest_frontier_receipt"),
+        "latest_frontier_direct_residual_inf_n": latest_residual,
+        "direct_residual_gate_tolerance_n": tolerance,
+        "frontier_residual_above_tolerance": frontier_residual_above_tolerance,
+        "non_promoting_launch_receipt_count": len(non_promoting_launch_receipts),
+        "non_promoting_launch_receipts": non_promoting_launch_receipts,
+        "source_blockers": (
+            selected_payload.get("blockers")
+            if isinstance(selected_payload.get("blockers"), list)
+            else []
+        ),
+        "source_claim_boundary": selected_payload.get("claim_boundary"),
+        "claim_boundary": (
+            "Frontier and launch-only receipts are attached as non-promoting "
+            "diagnostic context. They may explain why the lane is blocked, but "
+            "they do not close full-load, material Newton, consistent residual/"
+            "Jacobian Newton, production ROCm/HIP residency, or full G1."
+        ),
+    }
+
+
 def _hip_consistency_proof_assessment(
     *,
     proof_json: Path,
@@ -648,6 +737,9 @@ def build_lane_report(
         proof_json=hip_consistency_proof_json,
         lane_source_commit_sha=source_commit_sha,
     )
+    frontier_non_promoting_context = _frontier_non_promoting_evidence_context(
+        evidence_sources
+    )
     checksum_inputs = [
         *(
             path
@@ -671,6 +763,7 @@ def build_lane_report(
         "full_load_input_pass": full_load_input_pass,
         "load_path_provenance": load_path_provenance,
         "load_path_provenance_pass": load_path_provenance_pass,
+        "frontier_non_promoting_evidence": frontier_non_promoting_context,
         "dry_run": bool(dry_run),
         "command": command,
         "hip_consistency_proof": hip_consistency_proof,

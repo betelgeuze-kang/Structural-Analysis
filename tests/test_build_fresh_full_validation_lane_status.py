@@ -109,6 +109,19 @@ def test_fresh_full_validation_lane_status_blocks_missing_fresh_receipt(tmp_path
     assert payload["summary"]["lane_contract_pass_count"] == 1
     assert payload["summary"]["fresh_validation_receipt_present_count"] == 0
     assert "gpu_hip_solver::fresh_validation_receipt_missing" in payload["blockers"]
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["schema_version"] == "fresh-full-validation-blocker-groups.v1"
+    assert grouping["blocker_count"] == len(payload["blockers"])
+    assert grouping["unassigned_blockers"] == []
+    assert "gpu_hip_solver::fresh_validation_receipt_missing" in grouping["groups"][
+        "fresh_receipt_presence"
+    ]["blockers"]
+    lane_boundary = payload["lane_boundary_metadata"]
+    assert lane_boundary["schema_version"] == "fresh-full-validation-lane-boundaries.v1"
+    assert lane_boundary["lanes"]["gpu_hip_solver"]["scope"] == (
+        "performance_track_after_cpu_reference_parity"
+    )
+    assert "must not be used to replace CPU" in lane_boundary["gpu_hip_policy"]
 
 
 def test_fresh_full_validation_lane_status_passes_with_valid_fresh_receipt(tmp_path: Path) -> None:

@@ -42,6 +42,22 @@ def test_phase6_clean_checkout_status_blocks_on_git_clean_clone_cleanup() -> Non
     assert "git_clean_clone_reproduction_not_passed" in payload["blockers"]
     assert "human_git_action_required_for_release_control_inputs" in payload["blockers"]
     assert any(blocker.startswith("release_control_commit_set_pending:") for blocker in payload["blockers"])
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["schema_version"] == "phase6-clean-checkout-blocker-groups.v1"
+    assert grouping["blocker_count"] == len(payload["blockers"])
+    assert grouping["unassigned_blockers"] == []
+    assert "git_clean_clone_reproduction_not_passed" in grouping["groups"][
+        "git_clean_clone_root"
+    ]["blockers"]
+    assert grouping["groups"]["dirty_tracked_required_inputs"]["blocker_count"] > 0
+    assert grouping["groups"]["untracked_required_inputs"]["blocker_count"] > 0
+    assert "human_git_action_required_for_release_control_inputs" in grouping["groups"][
+        "release_control_human_handoff"
+    ]["blockers"]
+    assert any(
+        blocker.startswith("release_control_commit_set_pending:")
+        for blocker in grouping["groups"]["release_control_commit_set"]["blockers"]
+    )
     assert "does not run git add, commit, push" in payload["claim_boundary"]
     assert "does not prove Linux/Windows parity" in payload["claim_boundary"]
 

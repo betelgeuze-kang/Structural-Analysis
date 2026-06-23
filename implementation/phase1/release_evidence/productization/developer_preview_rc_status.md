@@ -59,7 +59,7 @@ Failed requirement IDs:
 - `G7:operator_rights_boundary_clear`
 - `G7:repo_benchmark_bridge_count_zero`
 
-This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, or promote commercial readiness.
+This is a visibility summary for existing gap-ledger closure requirements. It does not add Developer Preview blockers, close G1/G6/G7, create external receipts, promote commercial readiness, or promote autonomous AI engine claims.
 
 ## Blockers
 
@@ -72,4 +72,4 @@ This is a visibility summary for existing gap-ledger closure requirements. It do
 
 ## Claim Boundary
 
-This receipt aggregates Developer Preview RC deliverables and final gates from existing evidence only. It does not close Commercial Release, full Phase 3 corpus, G1 full nonlinear full-mesh/material Newton, Linux/Windows parity, external benchmark, customer shadow, license, SLA, or external approval gates.
+This receipt aggregates Developer Preview RC deliverables and final gates from existing evidence only. It does not close Commercial Release, full Phase 3 corpus, G1 full nonlinear full-mesh/material Newton, Linux/Windows parity, external benchmark, customer shadow, license, SLA, or external approval gates. Remote GitHub sync/push approval remains a release-publication handoff, while clean-checkout reproducibility is tracked separately.

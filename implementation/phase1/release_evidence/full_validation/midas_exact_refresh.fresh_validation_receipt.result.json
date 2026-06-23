@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "command_result": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "Wrote MIDAS exact roundtrip closure gate report: implementation/phase1/release_evidence/midas/midas_exact_roundtrip_closure_gate_report.json\n"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "receipt_path": "implementation/phase1/release_evidence/full_validation/midas_exact_refresh.fresh_validation_receipt.json",
+  "schema_version": "fresh-validation-receipt-builder.v1"
+}

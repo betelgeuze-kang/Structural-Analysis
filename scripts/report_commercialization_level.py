@@ -148,23 +148,23 @@ def _score_from_gates(
 
     ops_summary = p1_operational_queues.get("summary") if isinstance(p1_operational_queues.get("summary"), dict) else {}
     residual_count = int(
-        ops_summary.get(
+        commercial_gate.get(
             "residual_holdout_work_item_count",
-            commercial_gate.get("residual_holdout_work_item_count", 0),
+            ops_summary.get("residual_holdout_work_item_count", 0),
         )
         or 0
     )
     residual_open = int(
-        ops_summary.get(
+        commercial_gate.get(
             "residual_holdout_open_count",
-            commercial_gate.get("residual_holdout_open_count", residual_count),
+            ops_summary.get("residual_holdout_open_count", residual_count),
         )
         or 0
     )
     residual_pending = int(
-        ops_summary.get(
+        commercial_gate.get(
             "residual_holdout_closure_evidence_pending_count",
-            commercial_gate.get("residual_holdout_closure_evidence_pending_count", residual_open),
+            ops_summary.get("residual_holdout_closure_evidence_pending_count", residual_open),
         )
         or 0
     )
@@ -249,16 +249,16 @@ def build_report(
     external_pending = int(external_gate.get("submission_receipt_pending_count", 0) or 0)
     ops_summary = operational_payload.get("summary") if isinstance(operational_payload.get("summary"), dict) else {}
     residual_pending = int(
-        ops_summary.get(
+        commercial_gate.get(
             "residual_holdout_closure_evidence_pending_count",
-            commercial_gate.get("residual_holdout_closure_evidence_pending_count", 0),
+            ops_summary.get("residual_holdout_closure_evidence_pending_count", 0),
         )
         or 0
     )
     residual_open = int(
-        ops_summary.get(
+        commercial_gate.get(
             "residual_holdout_open_count",
-            commercial_gate.get("residual_holdout_open_count", 0),
+            ops_summary.get("residual_holdout_open_count", 0),
         )
         or 0
     )

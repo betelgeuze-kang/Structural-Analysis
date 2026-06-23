@@ -40,6 +40,8 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     assert "query_expected_answers_missing" in payload["blockers"]
     assert "phase3_ifc_import_case_count_below_minimum" not in payload["blockers"]
     assert "phase3_ifc_import_case_quantity_credit_missing" in payload["blockers"]
+    assert "silent_import_loss_gate_not_executed" in payload["blockers"]
+    assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
     assert "download or bundle" in payload["claim_boundary"]
     assert "close Phase 3" in payload["claim_boundary"]
 
@@ -66,6 +68,9 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     assert pcert["redistribution_allowed"] is False
     assert pcert["commercial_use_allowed"] is False
     assert pcert["ready_for_phase3_quantity_credit"] is False
+    assert pcert["expected_output_status"] == "authored_import_health_contracts_pending_execution"
+    assert "silent_import_loss_gate_not_executed" in pcert["blockers"]
+    assert "silent_import_loss_gate_not_implemented" not in pcert["blockers"]
     assert "Building-Structural.ifc" in pcert["candidate_files"]
     assert "Infra-Bridge.ifc" in pcert["candidate_files"]
 

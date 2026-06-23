@@ -57,6 +57,114 @@ def _blockers(payload: dict[str, Any]) -> list[str]:
     return [str(blocker) for blocker in payload.get("blockers", []) if str(blocker)]
 
 
+def _benchmark_scale_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    group_specs = [
+        (
+            "source_license_identity",
+            {
+                "scope": "source_acquisition_prerequisite",
+                "description": "Source authority, license, URL, and checksum prerequisites.",
+                "matches": (
+                    "license_review_pending",
+                    "source_url_verification_pending",
+                    "checksum_missing",
+                ),
+            },
+        ),
+        (
+            "reference_and_normalization",
+            {
+                "scope": "benchmark_model_preparation",
+                "description": "Reference output and canonical-normalization prerequisites.",
+                "matches": (
+                    "reference_outputs_missing",
+                    "normalization_not_implemented",
+                ),
+            },
+        ),
+        (
+            "medium_scorecard_execution",
+            {
+                "scope": "medium_model_scorecard_execution",
+                "description": "OpenSees medium runner and PASS/REVIEW scorecard evidence gaps.",
+                "matches": (
+                    "opensees_medium_runner_command_missing",
+                    "opensees_medium_scorecard_execution_missing",
+                    "medium_model_pass_or_review_missing",
+                ),
+            },
+        ),
+        (
+            "medium_quantity_shortfall",
+            {
+                "scope": "medium_model_quantity_gate",
+                "description": "Medium-model count and PASS/REVIEW quantity shortfalls.",
+                "matches": (
+                    "medium_structural_models_current_below_required:",
+                    "medium_model_pass_or_review_below_required:",
+                ),
+            },
+        ),
+        (
+            "large_runner_execution",
+            {
+                "scope": "large_model_execution_lane",
+                "description": "Large-model runner, nightly lane, execution receipt, and review gaps.",
+                "matches": (
+                    "large_model_runner_not_implemented",
+                    "nightly_lane_not_configured",
+                    "large_model_execution_receipt_missing",
+                    "large_model_scorecard_or_review_missing",
+                ),
+            },
+        ),
+        (
+            "large_quantity_shortfall",
+            {
+                "scope": "large_model_quantity_gate",
+                "description": "Large-model execution, crash/OOM-free, and scorecard/review count gaps.",
+                "matches": (
+                    "large_structural_models_current_below_required:",
+                    "large_model_execution_count_below_required:",
+                    "large_model_crash_oom_free_count_below_required:",
+                    "large_model_scorecard_or_review_count_below_required:",
+                ),
+            },
+        ),
+    ]
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    for group_name, spec in group_specs:
+        matches = tuple(str(match) for match in spec["matches"])
+        grouped = [
+            blocker
+            for blocker in blockers
+            if blocker not in classified
+            and any(blocker == match or blocker.startswith(match) for match in matches)
+        ]
+        classified.update(grouped)
+        groups[group_name] = {
+            "scope": spec["scope"],
+            "description": spec["description"],
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": "phase6-benchmark-scale-blocker-groups.v1",
+        "grouping_policy": (
+            "Preserve every blocker while separating source/license prerequisites, "
+            "reference/normalization preparation, medium scorecard execution, large "
+            "runner execution, and quantity shortfalls. This grouping does not acquire "
+            "sources, create benchmark evidence, or promote RC readiness."
+        ),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
 def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     medium = _load_json(repo_root, PHASE3_MEDIUM_MODEL_SCORECARD)
@@ -88,6 +196,9 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
     if medium_review < medium_required:
         medium_blockers.append(f"medium_model_pass_or_review_below_required:{medium_review}/{medium_required}")
     if large_execution < large_required:
+        large_blockers.append(
+            f"large_structural_models_current_below_required:{large_execution}/{large_required}"
+        )
         large_blockers.append(f"large_model_execution_count_below_required:{large_execution}/{large_required}")
     if large_crash_oom_free < large_required:
         large_blockers.append(
@@ -99,6 +210,7 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
         )
     medium_blockers = sorted(dict.fromkeys(medium_blockers))
     large_blockers = sorted(dict.fromkeys(large_blockers))
+    all_blockers = sorted(dict.fromkeys([*medium_blockers, *large_blockers]))
     contract_pass = bool(medium_pass and large_pass)
     return {
         "schema_version": SCHEMA_VERSION,
@@ -128,6 +240,9 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "local_topology_contract_pass": bool(medium.get("local_topology_contract_pass") is True),
             "required_evidence_pass_count": int(medium.get("required_evidence_pass_count", 0) or 0),
             "blockers": medium_blockers,
+            "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(
+                medium_blockers
+            ),
             "receipt": PHASE3_MEDIUM_MODEL_SCORECARD.as_posix(),
             "claim_boundary": str(medium.get("claim_boundary", "")),
         },
@@ -140,6 +255,9 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "scorecard_or_review_count": large_scorecard_or_review,
             "required_evidence_pass_count": int(large.get("required_evidence_pass_count", 0) or 0),
             "blockers": large_blockers,
+            "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(
+                large_blockers
+            ),
             "receipt": PHASE3_LARGE_MODEL_RUNNER.as_posix(),
             "claim_boundary": str(large.get("claim_boundary", "")),
         },
@@ -150,7 +268,8 @@ def build_phase6_benchmark_scale_status(*, repo_root: Path = ROOT) -> dict[str, 
             "benchmark_acquisition_plan": PHASE3_ACQUISITION_PLAN.as_posix(),
             "benchmark_seed_summary": PHASE3_FACTORY_SUMMARY.as_posix(),
         },
-        "blockers": sorted(dict.fromkeys([*medium_blockers, *large_blockers])),
+        "blockers": all_blockers,
+        "blocker_grouping_metadata": _benchmark_scale_blocker_grouping_metadata(all_blockers),
         "owner_action": (
             "Attach five medium-model scorecards with PASS or pre-approved REVIEW evidence, "
             "attach two licensed large-model crash/OOM-free execution receipts with scorecard "

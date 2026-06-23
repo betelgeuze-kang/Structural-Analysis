@@ -282,9 +282,65 @@
   "contract_pass": false,
   "dry_run": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
+  "frontier_non_promoting_evidence": {
+    "claim_boundary": "Frontier and launch-only receipts are attached as non-promoting diagnostic context. They may explain why the lane is blocked, but they do not close full-load, material Newton, consistent residual/Jacobian Newton, production ROCm/HIP residency, or full G1.",
+    "direct_residual_gate_tolerance_n": 0.0005,
+    "evidence_role": "non_promoting_partial_frontier_context",
+    "frontier_chain_count": 17,
+    "frontier_residual_above_tolerance": true,
+    "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+    "latest_frontier_receipt": "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+    "non_promoting_launch_receipt_count": 1,
+    "non_promoting_launch_receipts": [
+      {
+        "available": true,
+        "claim_boundary": "Launch receipt only. A completed child direct-residual receipt is required before claiming residual progress.",
+        "counted_in_frontier": false,
+        "non_count_reason": "completed child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+        "status": "in_progress"
+      }
+    ],
+    "present": true,
+    "promotes_g1_closure": false,
+    "promotes_lane_status": false,
+    "schema_version": "g1-frontier-non-promoting-context.v1",
+    "source_blockers": [
+      "direct_residual_gate_not_closed",
+      "full_mesh_nonlinear_equilibrium_not_closed",
+      "production_rocm_hip_residual_row_backend_not_closed",
+      "consistent_residual_jacobian_newton_not_closed"
+    ],
+    "source_candidates": [
+      {
+        "has_frontier_chain": false,
+        "has_non_promoting_launch_receipts": false,
+        "path": "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json",
+        "present": true
+      },
+      {
+        "has_frontier_chain": true,
+        "has_non_promoting_launch_receipts": true,
+        "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+        "present": true
+      }
+    ],
+    "source_claim_boundary": {
+      "cpu_diagnostic_only": true,
+      "direct_residual_newton_closed": false,
+      "equilibrium_newton_closed": false,
+      "full_mesh_nonlinear_equilibrium_closed": false,
+      "launch_only_receipts_do_not_claim_descent": true,
+      "official_rocm_hip_closure_required": true
+    },
+    "source_contract_pass": false,
+    "source_path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+    "source_status": "partial"
+  },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-22T15:51:08.752658+00:00",
+  "generated_at": "2026-06-23T18:26:51.926704+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -304,13 +360,13 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+    "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
     "status": "partial"
   },
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
-    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:066df1a620dea86ad5fb4cd596aeeebecea767d38a679f5a6f275671df31d6a9",
-    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:77670d94e08676762e38f5189ff8ae76ea04e455c774361f2df1fd6a19fa63da",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:f15e640b36d8b5ce71bd5616e8c7a7e1f522b7acbe40e742c0ddc389eede7857",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:1ab5e3a6a333e51cfba1994f6e644139c557e8eb50ce95fcb95dcce8e5a6c316",
     "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz": "sha256:83dca7fc4d3b0a79b8c4659f93cdc404ad3a0b30dbfe9d987f29f4d24fae67d2",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:d400fd848ae388b3829640a9c4af7c2f4de5c3cb532ef0afde76db282944e736"
   },
@@ -324,6 +380,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "status": "blocked"
 }

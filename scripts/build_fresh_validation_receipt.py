@@ -59,7 +59,7 @@ BUILDER_SCHEMA_VERSION = "fresh-validation-receipt-builder.v1"
 PYTHON_EXECUTABLE_NAMES = {"python", "python3"}
 RUNNER_COMMAND_PREFIXES: dict[str, tuple[tuple[str, ...], ...]] = {
     "torch_capable_benchmark_validation": (
-        ("python3", "implementation/phase1/report_commercial_solver_cross_validation.py"),
+        ("python3", "scripts/report_commercial_solver_cross_validation.py"),
     ),
     "gpu_capable_rocm_hip_validation": (
         ("python3", "implementation/phase1/run_solver_hip_e2e_contract.py"),
@@ -89,6 +89,7 @@ RUNNER_COMMAND_PREFIXES: dict[str, tuple[tuple[str, ...], ...]] = {
     ),
     "benchmark_productization_validation": (
         ("python3", "implementation/phase1/start_external_benchmark_task.py"),
+        ("python3", "implementation/phase1/run_external_benchmark_refresh_lane.py"),
     ),
     "design_optimization_validation": (
         ("python3", "implementation/phase1/run_design_optimization_solver_loop_long.py"),
@@ -264,6 +265,19 @@ def _build_summary(
     return payload
 
 
+def _lane_summary_metadata(*, lane_id: str, runner: str) -> dict[str, Any]:
+    if lane_id == "gpu_hip_solver" or runner == "gpu_capable_rocm_hip_validation":
+        return {
+            "readiness_group": "fresh_validation",
+            "developer_preview_category": "benchmark",
+            "blocker_group": "fresh_receipt_presence",
+            "lane_scope": "performance_track_after_cpu_reference_parity",
+            "claim_boundary_tag": "gpu_hip_after_cpu_reference_parity_non_promoting",
+            "promotes_g1_cpu_parity": False,
+        }
+    return {}
+
+
 def build_receipt(
     *,
     lane_id: str,
@@ -282,6 +296,13 @@ def build_receipt(
     if not source_commit:
         raise ReceiptBuildError("source_commit_sha_missing_git_head")
     engine = engine_version(repo_root)
+    summary = _build_summary(
+        case_count=case_count,
+        passed_case_count=passed_case_count,
+        duration_seconds=duration_seconds,
+        actual_duration=actual_duration,
+    )
+    summary.update(_lane_summary_metadata(lane_id=lane_id, runner=runner))
     return {
         "schema_version": SCHEMA_VERSION,
         "lane_id": lane_id,
@@ -295,12 +316,7 @@ def build_receipt(
         "reason_code": "PASS",
         "validation_command": validation_command,
         "receipt_artifacts": _build_artifact_entries(artifacts, repo_root=repo_root),
-        "summary": _build_summary(
-            case_count=case_count,
-            passed_case_count=passed_case_count,
-            duration_seconds=duration_seconds,
-            actual_duration=actual_duration,
-        ),
+        "summary": summary,
         "claim_boundary": claim_boundary,
     }
 

@@ -145,6 +145,10 @@ def _customer_shadow_rows(count: int = 3) -> list[dict]:
     ]
 
 
+def _g1_detail_blockers(payload: dict) -> list[str]:
+    return payload["components"]["g1"]["suppressed_detail_blockers"]
+
+
 def _paths(tmp_path: Path) -> SnapshotInputPaths:
     return SnapshotInputPaths(
         readme=Path("README.md"),
@@ -153,6 +157,7 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         gap_closure_status=Path("gap_closure_status.json"),
         commercial_gap_ledger_status=Path("commercial_gap_ledger_status.json"),
         gap_ledger_evidence_audit=Path("gap_ledger_evidence_audit.json"),
+        phase1_core_api_contract=Path("phase1_core_api_contract_summary.json"),
         developer_preview_readiness=Path("developer_preview_readiness.json"),
         developer_preview_rc_status=Path("developer_preview_rc_status.json"),
         fresh_full_validation=Path("fresh_full_validation_lane_status.json"),
@@ -202,7 +207,10 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         ),
         "status": "closed",
         "commercial_solver_gap_ready": True,
+        "ai_engine_guardrail_rows_ready": True,
         "ai_engine_gap_ready": True,
+        "autonomous_ai_engine_claim_ready": False,
+        "autonomous_ai_engine_claim_blockers": [],
         "full_gap_ledger_ready": True,
         "summary": {
             "total_count": 20,
@@ -274,6 +282,43 @@ def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
         "claim_boundary": (
             "Fixture audit verifies row evidence visibility only; it does not "
             "create commercial release readiness."
+        ),
+    })
+    _write_json(tmp_path / "phase1_core_api_contract_summary.json", {
+        "schema_version": "phase1-core-api-contract-artifacts.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "engine_version": "structural-analysis-workbench@test",
+        "input_checksums": {
+            "src/structural_analysis/api/core.py": "sha256:abc123",
+            "src/structural_analysis/api/cli.py": "sha256:def456",
+        },
+        "reused_evidence": False,
+        "contract_pass": True,
+        "status": "ready",
+        "claim_boundary_version": "developer-preview-core-api-v1",
+        "invocation_surfaces": ["python_api", "cli", "gui_json_consumption"],
+        "supported_preview_analysis_types": [
+            "model_health",
+            "linear_static_axial_truss",
+            "nonlinear_static_material_mesh_axial_chain",
+        ],
+        "schema_validation": {"contract_pass": True},
+        "cli_contract": {
+            "contract_pass": True,
+            "same_result_schema_as_python_api": True,
+            "same_validation_report_schema_as_python_api": True,
+        },
+        "reference_validation_contract": {
+            "contract_pass": True,
+            "python_api_blocks_reference_mismatch": True,
+            "cli_blocks_reference_mismatch": True,
+        },
+        "unsupported_feature_count": 0,
+        "developer_preview_blocked_field_count": 0,
+        "claim_boundary": (
+            "Fixture Phase 1 core API contract proves Python/CLI/GUI JSON "
+            "schema compatibility only; it does not close commercial solver gaps."
         ),
     })
     _write_json(tmp_path / "developer_preview_readiness.json", {
@@ -658,7 +703,7 @@ def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path)
         "source_commit_sha": commit,
         "reused_evidence": True,
         "contract_pass": True,
-        "limited_commercial_release_ready": False,
+        "limited_commercial_release_ready": True,
         "release_area_gate_ready": False,
         "full_release_gate_ready": False,
         "release_area_matrix": [{"ok": True} for _ in range(12)] + [{"ok": False} for _ in range(4)],
@@ -707,7 +752,8 @@ def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path)
     assert payload["evidence_fresh"] is False
     assert "stale_or_inconsistent:release_area_count_conflict" in payload["blockers"]
     assert "stale_or_inconsistent:open_blocker_count_conflict" in payload["blockers"]
-    assert "g1_full_mesh_full_load_not_closed" in payload["blockers"]
+    assert "g1::full_load_gate_not_closed" in payload["blockers"]
+    assert "g1_full_mesh_full_load_not_closed" in _g1_detail_blockers(payload)
     assert payload["paid_pilot_ready"] is False
 
 
@@ -780,6 +826,17 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["schema_valid"] is True
     assert payload["reused_evidence"] is False
     assert payload["evidence_fresh"] is True
+    assert {
+        "workstation_delivery_ready",
+        "assisted_service_pilot_ready",
+        "solver_product_pilot_ready",
+        "limited_commercial_ready",
+        "ga_enterprise_ready",
+        "stale_or_inconsistent",
+        "root_blockers",
+    } <= set(payload)
+    assert payload["workstation_delivery_ready"] is True
+    assert payload["stale_or_inconsistent"] is False
     assert payload["paid_pilot_ready"] is True
     assert payload["assisted_service_pilot_ready"] is True
     assert payload["solver_product_pilot_ready"] is True
@@ -798,7 +855,10 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["components"]["commercial_gap_ledger_status"] == {
         "status": "closed",
         "commercial_solver_gap_ready": True,
+        "ai_engine_guardrail_rows_ready": True,
         "ai_engine_gap_ready": True,
+        "autonomous_ai_engine_claim_ready": False,
+        "autonomous_ai_engine_claim_blockers": [],
         "full_gap_ledger_ready": True,
         "summary": {
             "total_count": 20,
@@ -897,6 +957,9 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
             "source_status": "missing",
             "source_contract_pass": False,
             "source_full_gap_ledger_ready": False,
+            "ai_engine_guardrail_rows_ready": False,
+            "autonomous_ai_engine_claim_ready": False,
+            "autonomous_ai_engine_claim_blockers": [],
             "closure_requirement_count": 0,
             "closure_requirement_pass_count": 0,
             "closure_requirement_fail_count": 0,
@@ -921,6 +984,31 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         "claim_boundary": (
             "Fixture Developer Preview receipt; future Commercial Release blockers "
             "remain visible but do not block the preview."
+        ),
+        "ready": True,
+    }
+    assert payload["components"]["phase1_core_api_contract"] == {
+        "status": "ready",
+        "contract_pass": True,
+        "claim_boundary_version": "developer-preview-core-api-v1",
+        "invocation_surfaces": ["python_api", "cli", "gui_json_consumption"],
+        "supported_preview_analysis_types": [
+            "model_health",
+            "linear_static_axial_truss",
+            "nonlinear_static_material_mesh_axial_chain",
+        ],
+        "schema_validation_pass": True,
+        "cli_contract_pass": True,
+        "cli_same_result_schema_as_python_api": True,
+        "cli_same_validation_report_schema_as_python_api": True,
+        "reference_validation_contract_pass": True,
+        "python_api_blocks_reference_mismatch": True,
+        "cli_blocks_reference_mismatch": True,
+        "unsupported_feature_count": 0,
+        "developer_preview_blocked_field_count": 0,
+        "claim_boundary": (
+            "Fixture Phase 1 core API contract proves Python/CLI/GUI JSON "
+            "schema compatibility only; it does not close commercial solver gaps."
         ),
         "ready": True,
     }
@@ -1337,6 +1425,9 @@ def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercia
         "source_status": "ready",
         "source_contract_pass": True,
         "source_full_gap_ledger_ready": False,
+        "ai_engine_guardrail_rows_ready": False,
+        "autonomous_ai_engine_claim_ready": False,
+        "autonomous_ai_engine_claim_blockers": [],
         "closure_requirement_count": 18,
         "closure_requirement_pass_count": 3,
         "closure_requirement_fail_count": 15,
@@ -1439,7 +1530,12 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
         "reused_evidence": True,
         "contract_pass": True,
         "full_g1_closure_ready": False,
-        "full_g1_closure_blockers": ["full_load_gate_not_closed"],
+        "full_g1_closure_blockers": [
+            "full_load_gate_not_closed",
+            "full_mesh_nonlinear_equilibrium_not_closed",
+            "material_newton_breadth_not_closed",
+            "production_rocm_hip_residency_not_closed",
+        ],
         "claim_boundary": "Terminal gate only; does not close full-mesh/full-load nonlinear equilibrium.",
         "blockers": [],
     })
@@ -1475,7 +1571,37 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
         "g1_full_load_hip_newton_lane_not_ready",
     ]
     assert payload["root_blockers"]["G1 solver"]["blocked"] is True
-    assert "g1_full_mesh_full_load_not_closed" in payload["root_blockers"]["G1 solver"]["blockers"]
+    assert "g1::full_load_gate_not_closed" in payload["root_blockers"]["G1 solver"]["blockers"]
+    assert "g1_full_mesh_full_load_not_closed" in _g1_detail_blockers(payload)
+    g1_component = payload["components"]["g1"]
+    grouping = g1_component["blocker_grouping_metadata"]
+    boundary = g1_component["closure_boundary_metadata"]
+    assert grouping["root_blocker_count"] == 4
+    assert grouping["suppressed_detail_blocker_count"] == len(
+        g1_component["suppressed_detail_blockers"]
+    )
+    assert grouping["grouping_promotes_status"] is False
+    assert grouping["detail_blockers_remain_visible"] is True
+    assert all(group["active"] is True for group in grouping["root_groups"])
+    assert (
+        grouping["detail_blocker_represented_by_root_group"][
+            "g1_full_load_lane::checkpoint_load_scale_below_required_full_load"
+        ]
+        == "g1::full_load_gate_not_closed"
+    )
+    assert (
+        grouping["detail_blocker_represented_by_root_group"][
+            "g1_full_mesh_full_load_not_closed"
+        ]
+        == "g1::full_mesh_nonlinear_equilibrium_not_closed"
+    )
+    assert boundary["metadata_promotes_status"] is False
+    assert boundary["gpu_hip_replaces_cpu_parity"] is False
+    assert boundary["cpu_parity_required_before_gpu_performance_promotion"] is True
+    assert boundary["current_gate_state"]["full_mesh_full_load_ready"] is False
+    assert boundary["current_gate_state"]["full_load_hip_newton_lane_ready"] is False
+    assert "full_load_1_0" in boundary["cpu_first_closure_scope"]
+    assert "device_residency" in boundary["gpu_hip_followup_scope"]
 
 
 def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
@@ -1536,6 +1662,70 @@ def test_snapshot_separates_assisted_service_blockers_from_solver_product_blocke
     assert "human_ux_observation_not_ready" not in solver["blockers"]
     assert solver["ready"] is True
     assert solver["blockers"] == []
+
+
+def test_snapshot_deduplicates_pm_release_ux_wrappers_when_human_ux_blocks(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    ux_payload = json.loads(
+        (tmp_path / "ux_new_user_observation_report.json").read_text(encoding="utf-8")
+    )
+    ux_payload["contract_pass"] = False
+    ux_payload["summary"] = {"completion_minutes": None, "max_completion_minutes": 30.0}
+    ux_payload["blockers"] = ["observation_file_missing", "completion_minutes_missing"]
+    _write_json(tmp_path / "ux_new_user_observation_report.json", ux_payload)
+    pm_payload = json.loads(
+        (tmp_path / "pm_release_gate_report.json").read_text(encoding="utf-8")
+    )
+    pm_payload["limited_commercial_release_ready"] = False
+    pm_payload["release_area_gate_ready"] = False
+    pm_payload["full_release_gate_ready"] = False
+    pm_payload["full_release_blockers"] = [
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+    ]
+    pm_payload["release_area_blockers"] = pm_payload["full_release_blockers"]
+    _write_json(tmp_path / "pm_release_gate_report.json", pm_payload)
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    assert "human_ux::observation_file_missing" in payload["blockers"]
+    assert "human_ux::completion_minutes_missing" not in payload["blockers"]
+    assert "pm_release::ux::human_new_user_observation_missing_or_failed" not in payload[
+        "blockers"
+    ]
+    assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" not in payload[
+        "blockers"
+    ]
+    assert (
+        "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+        in payload["blockers"]
+    )
+    pm_component = payload["components"]["pm_release"]
+    assert pm_component["suppressed_duplicate_blocker_count"] == 2
+    assert pm_component["suppressed_duplicate_blockers"] == [
+        "pm_release::ux::human_new_user_observation_missing_or_failed",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing",
+    ]
+    assert pm_component["duplicate_blocker_represented_by"] == {
+        "pm_release::ux::human_new_user_observation_missing_or_failed": "human_ux::*",
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing": "human_ux::*",
+    }
+    ux_component = payload["components"]["human_ux_observation"]
+    assert ux_component["top_level_blockers"] == ["human_ux::observation_file_missing"]
+    assert ux_component["suppressed_detail_blockers"] == [
+        "human_ux::completion_minutes_missing"
+    ]
+    assert ux_component["detail_blocker_represented_by"] == {
+        "human_ux::completion_minutes_missing": "human_ux::observation_file_missing"
+    }
 
 
 def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
@@ -2107,14 +2297,14 @@ def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path
         "source_commit_sha": commit,
         "reused_evidence": True,
         "contract_pass": True,
-        "limited_commercial_release_ready": True,
+        "limited_commercial_release_ready": False,
         "release_area_gate_ready": True,
         "full_release_gate_ready": True,
         "paid_pilot_candidate": True,
         "ga_enterprise_ready": True,
         "release_area_matrix": [{"ok": True} for _ in range(16)],
         "release_area_blockers": [],
-        "full_release_blockers": [],
+        "full_release_blockers": ["future_commercial_scope_not_ready"],
     })
     _write_json(tmp_path / "pm_release_blocker_action_register.json", {
         "schema_version": "pm-release-blocker-action-register.v1",
@@ -2438,14 +2628,14 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
         "source_commit_sha": commit,
         "reused_evidence": True,
         "contract_pass": True,
-        "limited_commercial_release_ready": True,
+        "limited_commercial_release_ready": False,
         "release_area_gate_ready": True,
         "full_release_gate_ready": True,
         "paid_pilot_candidate": True,
         "ga_enterprise_ready": True,
         "release_area_matrix": [{"ok": True} for _ in range(16)],
         "release_area_blockers": [],
-        "full_release_blockers": [],
+        "full_release_blockers": ["future_commercial_scope_not_ready"],
     })
     _write_json(tmp_path / "pm_release_blocker_action_register.json", {
         "schema_version": "pm-release-blocker-action-register.v1",
@@ -2562,6 +2752,8 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
     )
     assert "human_ux::observation_file_missing" in payload["blockers"]
     assert "license::license_status_not_active" in payload["blockers"]
+    assert "commercial_sla::production_support_commitment_missing" in payload["blockers"]
+    assert "license_server::operation_readiness_missing" in payload["blockers"]
     assert "external_benchmark::submission_receipts_pending=4" in payload["blockers"]
     assert payload["blocker_categories"]["software product"]["blocked"] is True
     assert "CI runner/streak" in payload["blocker_categories"]["software product"][
@@ -2589,6 +2781,12 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
     assert "license::license_status_not_active" in payload["blocker_categories"][
         "future commercial"
     ]["blockers"]
+    assert "commercial_sla::production_support_commitment_missing" in payload[
+        "blocker_categories"
+    ]["future commercial"]["blockers"]
+    assert "license_server::operation_readiness_missing" in payload[
+        "blocker_categories"
+    ]["future commercial"]["blockers"]
     assert payload["blocker_categories"]["numerical"]["blocked"] is False
 
 
@@ -2783,6 +2981,67 @@ def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
     assert (
         "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
         in payload["blockers"]
+    )
+    assert payload["paid_pilot_ready"] is False
+    assert payload["release_ready"] is False
+
+
+def test_snapshot_keeps_explicit_fresh_lane_blocker_without_duplicate_row_aggregates(
+    tmp_path: Path,
+) -> None:
+    commit = "abc123"
+    _write_ready_snapshot_inputs(tmp_path, commit=commit)
+    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
+        "schema_version": "fresh-full-validation-lane-status.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "source_commit_sha": commit,
+        "reused_evidence": True,
+        "contract_pass": False,
+        "summary": {
+            "lane_count": 8,
+            "fresh_validation_receipt_present_count": 7,
+            "fresh_validation_receipt_pass_count": 7,
+        },
+        "rows": [
+            *_fresh_validation_rows(count=7),
+            {
+                "lane_id": "gpu_hip_solver",
+                "pass": False,
+                "fresh_validation_receipt_fresh": False,
+                "fresh_validation_receipt_contract_pass": False,
+                "fresh_validation_receipt_present": False,
+                "fresh_validation_receipt_reused_evidence": False,
+            },
+        ],
+        "blockers": ["gpu_hip_solver::fresh_validation_receipt_missing"],
+    })
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        source_commit_sha=commit,
+    )
+
+    fresh_component = payload["components"]["fresh_full_validation"]
+    assert fresh_component["lane_count"] == 8
+    assert fresh_component["row_count"] == 8
+    assert fresh_component["row_pass_count"] == 7
+    assert fresh_component["row_fresh_receipt_count"] == 7
+    assert fresh_component["row_contract_pass_count"] == 7
+    assert fresh_component["ready"] is False
+    assert (
+        "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"
+        in payload["blockers"]
+    )
+    assert "fresh_full_validation::row_count_below_lane_count" not in payload["blockers"]
+    assert "fresh_full_validation::row_pass_count_below_lane_count" not in payload["blockers"]
+    assert (
+        "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
+        not in payload["blockers"]
+    )
+    assert (
+        "fresh_full_validation::row_contract_pass_count_below_lane_count"
+        not in payload["blockers"]
     )
     assert payload["paid_pilot_ready"] is False
     assert payload["release_ready"] is False
@@ -3043,13 +3302,14 @@ def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
     assert payload["components"]["g1"]["full_load_hip_newton_lane_status"] == "blocked"
     assert (
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
-    assert "g1_full_load_lane::full_load_input_not_pass" in payload["blockers"]
+    assert "g1_full_load_lane::full_load_input_not_pass" in _g1_detail_blockers(payload)
     assert (
         "g1_full_load_lane::observed_load_scale_below_required_full_load"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
+    assert "g1::full_load_gate_not_closed" in payload["blockers"]
     assert payload["paid_pilot_ready"] is False
 
 
@@ -3089,16 +3349,17 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
     )
     assert (
         "g1_full_load_lane::child_hip_residual_refresh_evidence_missing"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::current_tangent_residual_row_correction_child_hip_residual_refresh_not_ready"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
+    assert "g1::full_load_gate_not_closed" in payload["blockers"]
     assert payload["paid_pilot_ready"] is False
 
 
@@ -3158,15 +3419,15 @@ def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
     ] is False
     assert proof["ready"] is False
     assert proof["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
-    assert "g1_full_load_lane::hip_consistency_proof_gate_not_passed" in payload["blockers"]
-    assert "g1_full_load_lane::hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert "g1_full_load_lane::hip_consistency_proof_gate_not_passed" in _g1_detail_blockers(payload)
+    assert "g1_full_load_lane::hip_consistency_proof_has_blockers" in _g1_detail_blockers(payload)
     assert (
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3208,11 +3469,11 @@ def test_snapshot_blocks_g1_lane_when_hip_path_wired_but_gate_not_closed(
     assert proof_summary["ready"] is False
     assert (
         "g1_full_load_lane::hip_consistency_proof_gate_not_passed"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_has_blockers"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3250,11 +3511,11 @@ def test_snapshot_blocks_ready_g1_lane_when_hip_proof_no_cpu_contract_missing(
     assert proof_summary["production_hip_residual_jacobian_path"] is None
     assert (
         "g1_full_load_lane::hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3294,11 +3555,11 @@ def test_snapshot_blocks_ready_g1_lane_when_hip_proof_used_cpu_diagnostic(
     assert proof_summary["production_hip_residual_jacobian_path"] is False
     assert (
         "g1_full_load_lane::hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3339,7 +3600,7 @@ def test_snapshot_blocks_ready_g1_lane_with_stale_hip_consistency_proof_source(
     assert proof["source_commit_sha"] == "old-hip-proof-source"
     assert (
         "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3382,7 +3643,7 @@ def test_snapshot_blocks_ready_g1_lane_with_invalid_child_hip_refresh_schema(
     )
     assert (
         "g1_full_load_lane::child_hip_residual_refresh_evidence_schema_invalid"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert payload["paid_pilot_ready"] is False
 
@@ -3416,9 +3677,9 @@ def test_snapshot_blocks_ready_g1_lane_without_child_gate_evidence(
     g1_component = payload["components"]["g1"]
     assert g1_component["full_load_hip_newton_lane_ready"] is False
     assert g1_component["full_load_hip_newton_child_gate_ready"] is False
-    assert "g1_full_load_lane::child_gate_evidence_missing" in payload["blockers"]
-    assert "g1_full_load_lane::child_direct_residual_gate_not_proven" in payload["blockers"]
-    assert "g1_full_load_lane::child_relative_increment_gate_not_proven" in payload["blockers"]
+    assert "g1_full_load_lane::child_gate_evidence_missing" in _g1_detail_blockers(payload)
+    assert "g1_full_load_lane::child_direct_residual_gate_not_proven" in _g1_detail_blockers(payload)
+    assert "g1_full_load_lane::child_relative_increment_gate_not_proven" in _g1_detail_blockers(payload)
     assert payload["paid_pilot_ready"] is False
 
 
@@ -3453,7 +3714,7 @@ def test_snapshot_blocks_ready_g1_lane_with_invalid_child_gate_schema(
 
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
     assert payload["components"]["g1"]["full_load_hip_newton_child_gate_ready"] is False
-    assert "g1_full_load_lane::child_gate_evidence_schema_invalid" in payload["blockers"]
+    assert "g1_full_load_lane::child_gate_evidence_schema_invalid" in _g1_detail_blockers(payload)
     assert payload["paid_pilot_ready"] is False
 
 
@@ -3497,19 +3758,19 @@ def test_snapshot_surfaces_g1_child_contract_gate_conflict_blockers(
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
     assert (
         "g1_full_load_lane::child_material_newton_contract_gate_conflict"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::child_direct_residual_gate_not_proven"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::child_relative_increment_gate_not_proven"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     assert (
         "g1_full_load_lane::child_consistent_residual_jacobian_contract_gate_conflict"
-        in payload["blockers"]
+        in _g1_detail_blockers(payload)
     )
     child_gate = payload["components"]["g1"]["full_load_hip_newton_child_gate"]
     assert "child_material_newton_contract_gate_conflict" in child_gate["blockers"]
@@ -3611,7 +3872,7 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
         payload["components"]["g1"]["full_load_hip_newton_lane_reused_evidence"]
         is True
     )
-    assert "g1_full_load_lane::reused_evidence_not_false" in payload["blockers"]
+    assert "g1_full_load_lane::reused_evidence_not_false" in _g1_detail_blockers(payload)
     assert payload["paid_pilot_ready"] is False
 
 

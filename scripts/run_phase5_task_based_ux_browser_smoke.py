@@ -44,6 +44,8 @@ BASE_URL = "http://127.0.0.1:4173"
 BUILD_CMD = ["npm", "run", "build"]
 PREVIEW_CMD = ["npm", "run", "preview", "--", "--host", "127.0.0.1", "--port", "4173"]
 PLAYWRIGHT_CMD = ["npx", "playwright", "test", TASK_BASED_UX_TEST.as_posix()]
+PREVIEW_LOOPBACK_BIND_BLOCKER = "preview_server_loopback_bind_permission_blocked"
+PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
 INPUTS = (
     APP_SURFACE,
     WORKFLOW_PANEL,
@@ -69,6 +71,30 @@ def _clip_output(value: str, *, limit: int = 2400) -> str:
 
 def _completed_output(result: subprocess.CompletedProcess[str]) -> str:
     return _clip_output((result.stdout or "") + (result.stderr or ""))
+
+
+def _preview_start_blocker(output: str) -> dict[str, Any]:
+    normalized = output.lower()
+    if "listen" in normalized and "eperm" in normalized and "127.0.0.1" in normalized:
+        return {
+            "blocker": PREVIEW_LOOPBACK_BIND_BLOCKER,
+            "blocker_category": "environment_loopback_bind_permission",
+            "blocker_reason_code": PREVIEW_LOOPBACK_BIND_REASON_CODE,
+            "environment_blocker": True,
+            "blocker_evidence": {
+                "syscall": "listen",
+                "code": "EPERM",
+                "address": "127.0.0.1",
+                "port": 4173,
+            },
+        }
+    return {
+        "blocker": "preview_server_failed_before_browser_execution",
+        "blocker_category": "preview_server_start_failure",
+        "blocker_reason_code": "preview_server_start_failed",
+        "environment_blocker": False,
+        "blocker_evidence": {},
+    }
 
 
 def _base_payload(*, repo_root: Path = ROOT, source_commit_sha: str | None = None) -> dict[str, Any]:
@@ -99,6 +125,10 @@ def _blocked_payload(
     phase: str,
     blocker: str,
     commands: dict[str, Any],
+    blocker_category: str | None = None,
+    blocker_reason_code: str | None = None,
+    environment_blocker: bool = False,
+    blocker_evidence: dict[str, Any] | None = None,
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     payload = _base_payload(repo_root=repo_root, source_commit_sha=source_commit_sha)
@@ -108,6 +138,10 @@ def _blocked_payload(
             "contract_pass": False,
             "failed_phase": phase,
             "blocker": blocker,
+            "blocker_category": blocker_category,
+            "blocker_reason_code": blocker_reason_code,
+            "environment_blocker": environment_blocker,
+            "blocker_evidence": blocker_evidence or {},
             "commands": commands,
             "summary_line": (
                 "Phase 5 task-based UX browser execution: BLOCKED | "
@@ -187,6 +221,7 @@ def run_phase5_task_based_ux_browser_smoke(
     if preview.poll() is not None:
         if preview.stdout is not None:
             preview_output = preview.stdout.read()
+        preview_blocker = _preview_start_blocker(preview_output)
         commands["preview"] = {
             "argv": PREVIEW_CMD,
             "exit_code": preview.returncode,
@@ -196,7 +231,11 @@ def run_phase5_task_based_ux_browser_smoke(
             repo_root=repo_root,
             source_commit_sha=source_commit_sha,
             phase="preview_server_start",
-            blocker="preview_server_failed_before_browser_execution",
+            blocker=str(preview_blocker["blocker"]),
+            blocker_category=str(preview_blocker["blocker_category"]),
+            blocker_reason_code=str(preview_blocker["blocker_reason_code"]),
+            environment_blocker=bool(preview_blocker["environment_blocker"]),
+            blocker_evidence=preview_blocker["blocker_evidence"],
             commands=commands,
         )
 

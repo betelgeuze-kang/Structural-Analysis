@@ -23,6 +23,8 @@ UX_OBSERVATION = PRODUCTIZATION / "ux_new_user_observation_report.json"
 UX_OBSERVATION_INTAKE = PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
 PHASE5_GUI_WORKFLOW = PRODUCTIZATION / "phase5_gui_workflow_readiness_receipt.json"
 SCHEMA_VERSION = "phase6-ux-observation-status.v1"
+TASK_BASED_UX_ENVIRONMENT_BLOCKER = "task_based_ux_browser_execution_environment_blocked"
+PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -68,6 +70,159 @@ def _workflow_step_ids(rows: Any) -> set[str]:
     return {str(row.get("id")) for row in _as_list(rows) if isinstance(row, dict) and str(row.get("id", ""))}
 
 
+def _task_based_ux_environment_classification(
+    task_based_ux_test: dict[str, Any],
+    browser_execution_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    reason_code = str(
+        task_based_ux_test.get("browser_execution_blocker_reason_code")
+        or browser_execution_receipt.get("blocker_reason_code")
+        or ""
+    )
+    environment_blocker = bool(
+        task_based_ux_test.get("browser_execution_environment_blocker") is True
+        or browser_execution_receipt.get("environment_blocker") is True
+    )
+    commands = _as_dict(browser_execution_receipt.get("commands"))
+    preview = _as_dict(commands.get("preview"))
+    preview_output = str(preview.get("output_excerpt", "")).lower()
+    if (
+        reason_code == PREVIEW_LOOPBACK_BIND_REASON_CODE
+        or ("listen" in preview_output and "eperm" in preview_output and "127.0.0.1" in preview_output)
+    ):
+        reason_code = PREVIEW_LOOPBACK_BIND_REASON_CODE
+        environment_blocker = True
+    detail = (
+        f"{TASK_BASED_UX_ENVIRONMENT_BLOCKER}:{reason_code}"
+        if environment_blocker and reason_code
+        else ""
+    )
+    return {
+        "environment_blocker": environment_blocker,
+        "reason_code": reason_code,
+        "blocker": detail,
+    }
+
+
+def _phase6_ux_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    group_specs = [
+        (
+            "human_observation_root",
+            {
+                "scope": "direct_rc_ux_gate",
+                "description": (
+                    "Human new-user observation evidence required to close the RC UX final gate."
+                ),
+                "matches": (
+                    "human_new_user_observation_not_passed",
+                    "human_observation_",
+                ),
+            },
+        ),
+        (
+            "human_observation_report_detail",
+            {
+                "scope": "human_observation_receipt_detail",
+                "description": (
+                    "Detailed validation failures from the human new-user observation report."
+                ),
+                "matches": ("observation_report:",),
+            },
+        ),
+        (
+            "intake_packet_handoff",
+            {
+                "scope": "owner_handoff_not_gate_closure",
+                "description": (
+                    "Owner intake checklist evidence that supports handoff but cannot replace "
+                    "the human observation record."
+                ),
+                "matches": ("ux_observation_intake_packet_not_passed",),
+            },
+        ),
+        (
+            "phase5_execution_root",
+            {
+                "scope": "phase5_execution_aggregate",
+                "description": (
+                    "Aggregate GUI execution and browser-test pass/fail blockers for the "
+                    "five-step workflow."
+                ),
+                "matches": (
+                    "phase5_gui_workflow_readiness_not_passed",
+                    "phase5_workflow_execution_not_proven:",
+                    "task_based_ux_browser_execution_not_passed",
+                    "phase5_gui_workflow:task_based_ux_browser_execution_not_passed",
+                ),
+            },
+        ),
+        (
+            "phase5_execution_detail",
+            {
+                "scope": "phase5_execution_step_detail",
+                "description": (
+                    "Per-step GUI workflow execution blockers from the Phase 5 receipt."
+                ),
+                "matches": ("phase5_gui_workflow:workflow_execution_step_not_proven:",),
+            },
+        ),
+        (
+            "environment_spillover",
+            {
+                "scope": "local_environment_blocker",
+                "description": (
+                    "Local browser execution environment blockers that prevent rehearsal "
+                    "evidence but do not by themselves close or fail the human observation."
+                ),
+                "matches": (
+                    "task_based_ux_browser_execution_environment_blocked:",
+                    "phase5_gui_workflow:task_based_ux_browser_execution_environment_blocked:",
+                ),
+            },
+        ),
+        (
+            "duplicate_source_detail",
+            {
+                "scope": "duplicate_source_detail",
+                "description": (
+                    "Source-detail blockers already represented by a direct RC UX gate blocker."
+                ),
+                "matches": ("phase5_gui_workflow:human_new_user_observation_not_passed",),
+            },
+        ),
+    ]
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    for group_name, spec in group_specs:
+        matches = tuple(str(match) for match in spec["matches"])
+        grouped = [
+            blocker
+            for blocker in blockers
+            if blocker not in classified
+            and any(blocker == match or blocker.startswith(match) for match in matches)
+        ]
+        classified.update(grouped)
+        groups[group_name] = {
+            "scope": spec["scope"],
+            "description": spec["description"],
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": "phase6-ux-observation-blocker-groups.v1",
+        "grouping_policy": (
+            "Preserve every blocker while separating direct human-observation gate "
+            "requirements from intake handoff, observation-report detail, and "
+            "Phase 5/browser rehearsal spillover."
+        ),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
 def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     observation = _load_json(repo_root, UX_OBSERVATION)
@@ -92,7 +247,12 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
     observation_workflow_pass_count = int(observation_summary.get("workflow_step_pass_count", 0) or 0)
     intake_workflow_pass_count = int(intake_summary.get("workflow_step_pass_count", 0) or 0)
     task_based_ux_test = _as_dict(phase5.get("task_based_ux_test"))
+    browser_execution_receipt = _as_dict(phase5.get("task_based_ux_browser_execution_receipt"))
     browser_execution_passed = bool(task_based_ux_test.get("browser_execution_passed") is True)
+    browser_execution_environment = _task_based_ux_environment_classification(
+        task_based_ux_test,
+        browser_execution_receipt,
+    )
 
     missing_observation_steps = [
         str(step) for step in _as_list(observation_summary.get("missing_workflow_steps")) if str(step)
@@ -124,6 +284,8 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
         blockers.append("phase5_gui_workflow_readiness_not_passed")
     if not browser_execution_passed:
         blockers.append("task_based_ux_browser_execution_not_passed")
+        if browser_execution_environment["blocker"]:
+            blockers.append(str(browser_execution_environment["blocker"]))
 
     blockers.extend(f"observation_report:{blocker}" for blocker in _blockers(observation))
     blockers.extend(f"phase5_gui_workflow:{blocker}" for blocker in _blockers(phase5))
@@ -189,6 +351,15 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
             "task_based_ux_browser_execution_blocker": str(
                 task_based_ux_test.get("execution_blocker", "")
             ),
+            "task_based_ux_browser_execution_environment_blocker": bool(
+                browser_execution_environment["environment_blocker"]
+            ),
+            "task_based_ux_browser_execution_blocker_reason_code": str(
+                browser_execution_environment["reason_code"]
+            ),
+            "task_based_ux_browser_execution_environment_detail": str(
+                browser_execution_environment["blocker"]
+            ),
             "blockers": _blockers(phase5),
         },
         "readiness_inputs": {
@@ -197,6 +368,7 @@ def build_phase6_ux_observation_status(*, repo_root: Path = ROOT) -> dict[str, A
             "phase5_gui_workflow_readiness_receipt": PHASE5_GUI_WORKFLOW.as_posix(),
         },
         "blockers": blockers,
+        "blocker_grouping_metadata": _phase6_ux_blocker_grouping_metadata(blockers),
         "owner_action": (
             "Attach a passing human new-user observation for all five workflow steps, "
             "keep the intake packet in sync, attach GUI execution/browser evidence, "

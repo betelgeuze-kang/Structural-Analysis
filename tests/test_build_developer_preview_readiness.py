@@ -35,6 +35,12 @@ def test_developer_preview_excludes_future_commercial_blockers(tmp_path: Path) -
                 "license::license_status_not_active",
                 "ci_streak::pr_github_actions_30_consecutive_pass_evidence_missing",
                 "external_benchmark::submission_receipts_pending=4",
+                "pm_release::security::license_status_not_configured",
+                "pm_release::github_sync::github_sync_remote_sync_pending",
+                (
+                    "independent_product::Strict external and residual holdout evidence::"
+                    "external_receipt_or_closure_pending:tpu_hffb"
+                ),
             ],
         },
     )
@@ -87,9 +93,26 @@ def test_developer_preview_excludes_future_commercial_blockers(tmp_path: Path) -
         "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
         "gpu_hip": "performance_track_after_cpu_reference_parity",
     }
-    assert payload["future_commercial_blocker_count"] == 4
-    assert payload["categories"]["future commercial"]["blocker_count"] == 4
+    assert payload["future_commercial_blocker_count"] == 9
+    assert payload["categories"]["future commercial"]["blocker_count"] == 9
+    assert "pm_release::security::license_status_not_configured" in payload[
+        "future_commercial_blockers"
+    ]
+    assert "pm_release::github_sync::github_sync_remote_sync_pending" in payload[
+        "future_commercial_blockers"
+    ]
+    assert (
+        "independent_product::Strict external and residual holdout evidence::"
+        "external_receipt_or_closure_pending:tpu_hffb"
+    ) in payload["future_commercial_blockers"]
+    assert "commercial_sla::production_support_commitment_missing" in payload[
+        "future_commercial_blockers"
+    ]
+    assert "license_server::operation_readiness_missing" in payload[
+        "future_commercial_blockers"
+    ]
     assert "customer shadow" in payload["claim_boundary"].lower()
+    assert "license-server operation" in payload["claim_boundary"].lower()
 
 
 def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_path: Path) -> None:
@@ -154,6 +177,61 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
                         },
                     },
                 },
+                "fresh_full_validation": {
+                    "contract_pass": False,
+                    "ready": False,
+                    "blocker_grouping_metadata": {
+                        "schema_version": "fresh-full-validation-blocker-groups.v1",
+                        "groups": {
+                            "fresh_receipt_presence": {
+                                "scope": "fresh_validation_receipt_required",
+                                "blocker_count": 1,
+                                "blockers": [
+                                    "gpu_hip_solver::fresh_validation_receipt_missing"
+                                ],
+                            },
+                        },
+                    },
+                    "lane_boundary_metadata": {
+                        "schema_version": "fresh-full-validation-lane-boundaries.v1",
+                        "lanes": {
+                            "gpu_hip_solver": {
+                                "scope": "performance_track_after_cpu_reference_parity"
+                            },
+                        },
+                    },
+                },
+                "g1": {
+                    "contract_pass": True,
+                    "full_mesh_full_load_ready": False,
+                    "full_g1_closure_ready": False,
+                    "top_level_blockers": [
+                        "g1::full_load_gate_not_closed",
+                        "g1::full_mesh_nonlinear_equilibrium_not_closed",
+                        "g1::material_newton_breadth_not_closed",
+                        "g1::production_rocm_hip_residency_not_closed",
+                    ],
+                    "suppressed_detail_blockers": [
+                        "g1_full_mesh_full_load_not_closed",
+                        "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+                    ],
+                    "blocker_grouping_metadata": {
+                        "grouping_promotes_status": False,
+                        "detail_blockers_remain_visible": True,
+                        "root_blocker_count": 4,
+                        "suppressed_detail_blocker_count": 2,
+                        "unmatched_detail_blockers": [],
+                    },
+                    "closure_boundary_metadata": {
+                        "metadata_promotes_status": False,
+                        "gpu_hip_replaces_cpu_parity": False,
+                        "cpu_parity_required_before_gpu_performance_promotion": True,
+                        "claim_boundary": (
+                            "CPU full-load/full-mesh/material Newton closure is the "
+                            "numerical priority gate; GPU/HIP does not replace CPU parity."
+                        ),
+                    },
+                },
             },
         },
     )
@@ -179,7 +257,13 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
     assert payload["categories"]["numerical"]["blocker_count"] == 1
     assert payload["categories"]["benchmark"]["blocker_count"] == 2
     assert payload["categories"]["software product"]["blocker_count"] == 1
-    assert payload["categories"]["future commercial"]["blocker_count"] == 0
+    assert payload["categories"]["future commercial"]["blocker_count"] == 2
+    assert "commercial_sla::production_support_commitment_missing" in payload[
+        "future_commercial_blockers"
+    ]
+    assert "license_server::operation_readiness_missing" in payload[
+        "future_commercial_blockers"
+    ]
     release_sync = payload["root_blocker_evidence"]["product_snapshot_root_blockers"][
         "release freshness/sync"
     ]
@@ -188,6 +272,25 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
     assert cleanup_plan["status"] == "blocked"
     assert cleanup_plan["candidate_release_control_commit_set_count"] == 23
     assert cleanup_plan["human_git_action_required"] is True
+    fresh_boundary = payload["root_blocker_evidence"]["fresh_full_validation"]
+    assert fresh_boundary["blocker_grouping_metadata"]["schema_version"] == (
+        "fresh-full-validation-blocker-groups.v1"
+    )
+    assert fresh_boundary["lane_boundary_metadata"]["lanes"]["gpu_hip_solver"]["scope"] == (
+        "performance_track_after_cpu_reference_parity"
+    )
+    g1_boundary = payload["root_blocker_evidence"]["g1"]
+    assert g1_boundary["blocker_grouping_metadata"]["grouping_promotes_status"] is False
+    assert g1_boundary["blocker_grouping_metadata"]["detail_blockers_remain_visible"] is True
+    assert g1_boundary["blocker_grouping_metadata"]["unmatched_detail_blockers"] == []
+    assert g1_boundary["closure_boundary_metadata"]["metadata_promotes_status"] is False
+    assert g1_boundary["closure_boundary_metadata"]["gpu_hip_replaces_cpu_parity"] is False
+    assert (
+        g1_boundary["closure_boundary_metadata"][
+            "cpu_parity_required_before_gpu_performance_promotion"
+        ]
+        is True
+    )
     closure_visibility = payload["gap_ledger_closure_requirement_visibility"]
     assert closure_visibility["source_status"] == "ready"
     assert closure_visibility["source_contract_pass"] is True
@@ -452,6 +555,12 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
         "buildingsmart_clean_ifc_samples",
         "buildingsmart_dirty_ifc_samples",
     ]
+    assert "silent_import_loss_gate_not_executed" in buildingsmart["phase3_acquisition_policy"]["blockers"]
+    assert (
+        "silent_import_loss_gate_not_implemented"
+        not in buildingsmart["phase3_acquisition_policy"]["blockers"]
+    )
+    assert "silent_import_loss_gate_not_implemented" not in json.dumps(payload, sort_keys=True)
 
     ifc_query = sources["ifc-query-and-gui-public-corpus"]
     assert ifc_query["source_files"] == []
@@ -545,7 +654,7 @@ def test_markdown_report_lists_scope_and_nonblocking_future_commercial(tmp_path:
     markdown = build_developer_preview_readiness._markdown(payload)
 
     assert "# Open Benchmark Developer Preview Readiness" in markdown
-    assert "| future commercial | 1 | no, future commercial only |" in markdown
+    assert "| future commercial | 3 | no, future commercial only |" in markdown
     assert "IFC/MGT/neutral JSON import" in markdown
     assert "customer shadow evidence as a Developer Preview blocker" in markdown
     assert "commercial license/legal approval" in markdown

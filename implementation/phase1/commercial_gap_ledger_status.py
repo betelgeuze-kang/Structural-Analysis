@@ -6530,6 +6530,24 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
         if row["status"] != "closed"
         for blocker in row.get("blockers", [])
     ]
+    commercial_solver_gap_ready = all(
+        gap_id in by_id and by_id[gap_id]["status"] == "closed" for gap_id in expected_commercial
+    )
+    ai_engine_guardrail_rows_ready = all(
+        gap_id in by_id and by_id[gap_id]["status"] == "closed" for gap_id in expected_ai
+    )
+    # AI-G rows currently close only the guarded, engineer-in-loop AI-assist
+    # contracts. The autonomous AI engine/product claim remains explicitly
+    # blocked by the AI ledger conclusion until solver truth, surrogate
+    # promotion, runtime, and workflow gates are authoritative.
+    autonomous_ai_engine_claim_ready = False
+    autonomous_ai_engine_claim_blockers = [
+        "autonomous_ai_engine_claim::deterministic_reference_solver_not_closed",
+        "autonomous_ai_engine_claim::surrogate_truth_claim_frozen",
+        "autonomous_ai_engine_claim::production_decision_loop_not_closed",
+        "autonomous_ai_engine_claim::grounded_ai_workflow_not_closed",
+    ]
+    blockers.extend(autonomous_ai_engine_claim_blockers)
     blockers.extend([f"doc_gap_id_missing:{gap_id}" for gap_id in missing_doc_ids])
     blockers.extend([f"status_gap_id_missing:{gap_id}" for gap_id in missing_status_ids])
     blockers.extend(
@@ -6552,12 +6570,11 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
             repo_root=REPO_ROOT,
         ),
         "status": "closed" if not blockers else "open",
-        "commercial_solver_gap_ready": all(
-            gap_id in by_id and by_id[gap_id]["status"] == "closed" for gap_id in expected_commercial
-        ),
-        "ai_engine_gap_ready": all(
-            gap_id in by_id and by_id[gap_id]["status"] == "closed" for gap_id in expected_ai
-        ),
+        "commercial_solver_gap_ready": commercial_solver_gap_ready,
+        "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
+        "ai_engine_gap_ready": autonomous_ai_engine_claim_ready,
+        "autonomous_ai_engine_claim_ready": autonomous_ai_engine_claim_ready,
+        "autonomous_ai_engine_claim_blockers": autonomous_ai_engine_claim_blockers,
         "full_gap_ledger_ready": not blockers,
         "summary": {
             "total_count": len(rows),
@@ -6566,6 +6583,11 @@ def build_commercial_gap_ledger_status(productization_dir: Path | None = None) -
             "open_count": open_count,
             "external_blocked_count": external_count,
             "locally_closable_open_count": locally_closable_open_count,
+            "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
+            "autonomous_ai_engine_claim_ready": autonomous_ai_engine_claim_ready,
+            "autonomous_ai_engine_claim_blocker_count": len(
+                autonomous_ai_engine_claim_blockers
+            ),
             "nonclosed_claim_boundary_missing_count": len(nonclosed_claim_boundary_missing_ids),
             "missing_doc_id_count": len(missing_doc_ids),
             "missing_status_id_count": len(missing_status_ids),

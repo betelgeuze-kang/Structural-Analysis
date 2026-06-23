@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -137,6 +137,32 @@ WORKER_OUTPUT
   return commandPath;
 }
 
+function makeFlakyNetworkMockCursor(binDir, failCount) {
+  const commandPath = path.join(binDir, 'cursor-agent');
+  const statePath = path.join(binDir, 'cursor-agent-attempts');
+  fs.writeFileSync(
+    commandPath,
+    `#!/usr/bin/env bash
+state='${statePath}'
+attempt=0
+if [ -f "$state" ]; then
+  attempt="$(cat "$state")"
+fi
+attempt=$((attempt + 1))
+printf '%s\\n' "$attempt" > "$state"
+if [ "$attempt" -le ${failCount} ]; then
+  echo 'Error: [unavailable] getaddrinfo EAI_AGAIN api2.cursor.sh' >&2
+  exit 1
+fi
+cat <<'WORKER_OUTPUT'
+${validWorkerOutput}
+WORKER_OUTPUT
+`,
+    { mode: 0o755 },
+  );
+  return commandPath;
+}
+
 function wrapperFixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'ai-worker-wrapper-'));
   const binDir = path.join(dir, 'bin');
@@ -238,6 +264,97 @@ spawnBackedTest('cursor wrapper prints only validated summaries and removes vali
   assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.raw.md')).length, 0);
   assert.equal(fs.readdirSync(fixture.outDir).filter((name) => name.endsWith('.summary.md')).length, 1);
+});
+
+spawnBackedTest('cursor wrapper retries transient Cursor API DNS failures', () => {
+  const fixture = wrapperFixture();
+  makeFlakyNetworkMockCursor(fixture.binDir, 1);
+  const env = wrapperEnv(fixture);
+  env.AI_WORKER_CURSOR_RETRIES = '2';
+  env.AI_WORKER_CURSOR_RETRY_DELAY_SECONDS = '0';
+
+  const result = runWrapper(cursorWrapper, fixture, env);
+
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stderr, /transient network\/DNS failure on attempt 1/);
+  assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
+});
+
+spawnBackedTest('cursor wrapper explains persistent Cursor API DNS failures', () => {
+  const fixture = wrapperFixture();
+  makeFlakyNetworkMockCursor(fixture.binDir, 5);
+  const env = wrapperEnv(fixture);
+  env.AI_WORKER_CURSOR_RETRIES = '1';
+  env.AI_WORKER_CURSOR_RETRY_DELAY_SECONDS = '0';
+
+  const result = runWrapper(cursorWrapper, fixture, env);
+
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /failed after 2 attempt\(s\) due to network\/DNS access/);
+  assert.match(result.stderr, /api2\.cursor\.sh/);
+  assert.equal(result.stdout, '');
+});
+
+spawnBackedTest('cursor wrapper routes persistent DNS failures through host bridge when ready', () => {
+  const fixture = wrapperFixture();
+  makeFlakyNetworkMockCursor(fixture.binDir, 5);
+  const bridgeDir = path.join(fixture.dir, 'bridge');
+  const jobsDir = path.join(bridgeDir, 'jobs');
+  const doneDir = path.join(bridgeDir, 'done');
+  const outputFixture = path.join(fixture.dir, 'host-output.md');
+  fs.mkdirSync(jobsDir, { recursive: true });
+  fs.mkdirSync(doneDir);
+  fs.writeFileSync(path.join(bridgeDir, 'host-bridge.ready'), '12345\n');
+  fs.writeFileSync(outputFixture, validWorkerOutput);
+
+  const bridgeHelper = spawn(
+    'bash',
+    [
+      '-lc',
+      `set -euo pipefail
+for _ in $(seq 1 100); do
+  set -- "$JOBS_DIR"/*.job
+  if [ -d "$1" ]; then
+    job_dir="$1"
+    job_name="$(basename "$job_dir")"
+    raw_output="$(cat "$job_dir/raw_output")"
+    mkdir -p "$(dirname "$raw_output")" "$DONE_DIR/$job_name"
+    cp "$OUTPUT_FIXTURE" "$raw_output"
+    printf '0\\n' > "$DONE_DIR/$job_name/exit_code"
+    exit 0
+  fi
+  sleep 0.05
+done
+exit 124
+`,
+    ],
+    {
+      env: {
+        ...process.env,
+        JOBS_DIR: jobsDir,
+        DONE_DIR: doneDir,
+        OUTPUT_FIXTURE: outputFixture,
+      },
+      stdio: 'ignore',
+    },
+  );
+
+  const env = wrapperEnv(fixture);
+  env.AI_WORKER_CURSOR_RETRIES = '1';
+  env.AI_WORKER_CURSOR_RETRY_DELAY_SECONDS = '0';
+  env.AI_WORKER_CURSOR_HOST_BRIDGE_DIR = bridgeDir;
+  env.AI_WORKER_CURSOR_HOST_BRIDGE_TIMEOUT_SECONDS = '5';
+  env.AI_WORKER_CURSOR_HOST_BRIDGE_POLL_SECONDS = '1';
+
+  try {
+    const result = runWrapper(cursorWrapper, fixture, env);
+
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stderr, /routed to host bridge job/);
+    assert.match(result.stdout, /^## Changed files\n\n- scripts\/example.py/m);
+  } finally {
+    bridgeHelper.kill();
+  }
 });
 
 spawnBackedTest('opencode wrapper prints only validated summaries and removes valid raw output', () => {

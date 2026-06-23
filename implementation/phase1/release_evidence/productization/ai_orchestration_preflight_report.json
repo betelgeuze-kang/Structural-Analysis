@@ -1,7 +1,12 @@
 {
   "blockers": [],
   "checks": {
+    "cursor_dns_permission_grantable_from_codex": false,
+    "cursor_host_bridge_ready": false,
     "cursor_worker_cli_present": true,
+    "internal_subagent_fallback_agent_type_configured": true,
+    "internal_subagent_fallback_model_configured": true,
+    "internal_subagent_fallback_reasoning_effort_configured": true,
     "opencode_assignment_routed_to_cursor": true,
     "opencode_json_valid": true,
     "opencode_model_registry_query_pass": true,
@@ -12,9 +17,10 @@
     "worker_wrappers_executable": true,
     "worker_wrappers_present": true
   },
-  "claim_boundary": "This report verifies Cursor/OpenCode worker bridge readiness and local OpenCode model-registry availability when OpenCode assignment mode is enabled, plus the current routing of OpenCode-assigned slices to Cursor. It does not prove remote model credentials, successful inference, worker execution, or release readiness. Codex still owns goal tracking, diff review, verification, and final acceptance.",
+  "claim_boundary": "This report verifies Cursor/OpenCode worker bridge readiness and local OpenCode model-registry availability when OpenCode assignment mode is enabled, plus the current routing of OpenCode-assigned slices to Cursor and the configured internal Codex subagent fallback model for Cursor-unavailable implementation slices. Cursor API DNS/network permission is recorded as owned by the host or Codex session configuration, not something this repository can grant from inside a restricted terminal. It does not prove remote model credentials, successful inference, worker execution, subagent execution, or release readiness. Codex still owns goal tracking, diff review, verification, and final acceptance.",
   "contract_pass": true,
   "diagnostics": {
+    "cursor_host_bridge_ready_file": ".betelgeuze/cursor_worker_bridge/host-bridge.ready",
     "missing_files": [],
     "missing_wrappers": [],
     "opencode_json_output": "{\n    \"$schema\": \"https://opencode.ai/config.json\",\n    \"instructions\": [\n        \"AGENTS.md\"\n    ],\n    \"permission\": {\n        \"read\": {\n            \"*\": \"allow\",\n            \".env\": \"deny\",\n            \".env.*\": \"deny\",\n            \"*.env\": \"deny\",\n            \"*.env.*\": \"deny\",\n            \".env.example\": \"allow\",\n            \"*.env.example\": \"allow\"\n        },\n        \"external_directory\": \"deny\",\n        \"glob\": \"allow\",\n        \"grep\": \"allow\",\n        \"lsp\": \"allow\",\n        \"edit\": \"allow\",\n        \"bash\": \"allow\",\n        \"webfetch\": \"deny\",\n        \"websearch\": \"deny\",\n        \"task\": \"deny\",\n        \"todowrite\": \"allow\"\n    }\n}",
@@ -41,10 +47,24 @@
     "opencode_models_output": "opencode/big-pickle\nopencode/deepseek-v4-flash-free\nopencode/mimo-v2.5-free\nopencode/nemotron-3-ultra-free\nopencode/north-mini-code-free\nopencode-go/deepseek-v4-flash\nopencode-go/deepseek-v4-pro\nopencode-go/glm-5.1\nopencode-go/glm-5.2\nopencode-go/kimi-k2.6\nopencode-go/kimi-k2.7-code\nopencode-go/mimo-v2.5\nopencode-go/mimo-v2.5-pro\nopencode-go/minimax-m2.7\nopencode-go/minimax-m3\nopencode-go/qwen3.6-plus\nopencode-go/qwen3.7-max\nopencode-go/qwen3.7-plus",
     "wrapper_syntax_output": ""
   },
-  "generated_at": "2026-06-21T17:43:11.377811+00:00",
+  "generated_at": "2026-06-23T15:45:30.980109+00:00",
   "reason_code": "PASS",
   "schema_version": "ai-orchestration-preflight-report.v1",
   "summary": {
+    "cursor_dns_failure_fallbacks": [
+      "start_host_bridge_from_network_enabled_host_terminal",
+      "run_worker_wrapper_from_cursor_or_host_terminal_with_outbound_dns",
+      "start_a_codex_session_with_terminal_network_enabled",
+      "use_internal_codex_subagent_for_scoped_local_work"
+    ],
+    "cursor_dns_permission_grantable_from_codex": false,
+    "cursor_dns_permission_owner": "host_or_codex_session_configuration",
+    "cursor_failure_internal_subagent_fallback_agent_type": "worker",
+    "cursor_failure_internal_subagent_fallback_model": "gpt-5.4-mini",
+    "cursor_failure_internal_subagent_fallback_reasoning_effort": "xhigh",
+    "cursor_host_bridge_dir": ".betelgeuze/cursor_worker_bridge",
+    "cursor_host_bridge_ready": false,
+    "cursor_remote_api_host": "api2.cursor.sh",
     "cursor_worker_cli": "cursor-agent",
     "cursor_worker_cli_path": "/home/betelgeuze/.local/bin/cursor-agent",
     "opencode_assignment_cursor_model": "composer-2.5",
@@ -55,8 +75,8 @@
     "opencode_version": "1.17.7",
     "opencode_worker_cli": "opencode",
     "opencode_worker_cli_path": "/home/betelgeuze/.local/bin/opencode",
-    "opencode_xdg_data_home": "/home/betelgeuze/snap/code/247/.local/share",
+    "opencode_xdg_data_home": "/tmp/codex-opencode-go-xdg-data",
     "required_file_count": 10,
-    "wrapper_count": 5
+    "wrapper_count": 6
   }
 }

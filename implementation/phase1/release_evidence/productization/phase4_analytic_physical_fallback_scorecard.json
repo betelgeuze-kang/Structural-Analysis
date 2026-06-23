@@ -18,7 +18,7 @@
     "supports_gui_story_member_mode_traceability": false,
     "supports_two_reference_solver_comparison": false
   },
-  "generated_at": "2026-06-22T19:21:50.942272+00:00",
+  "generated_at": "2026-06-23T16:09:52.121614+00:00",
   "input_checksums": {
     "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "sha256:fa8d16def88ffb4da71236dfc3c8c86c1f30813b9328c4e76ceafea7b498f7fe",
     "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
@@ -681,7 +681,7 @@
     "element-patch",
     "nonlinear-material-mesh"
   ],
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "status": "ready",
   "truth_class": "analytic_physical_fallback",
   "two_reference_solver_comparison_available": false

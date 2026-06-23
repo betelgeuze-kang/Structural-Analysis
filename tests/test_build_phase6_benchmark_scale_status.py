@@ -39,6 +39,16 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert "medium_structural_models_current_below_required:0/5" in medium["blockers"]
     assert "medium_model_pass_or_review_below_required:0/5" in medium["blockers"]
     assert "opensees_medium_scorecard_execution_missing" in medium["blockers"]
+    medium_grouping = medium["blocker_grouping_metadata"]
+    assert medium_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
+    assert medium_grouping["blocker_count"] == len(medium["blockers"])
+    assert medium_grouping["unassigned_blockers"] == []
+    assert "opensees_medium_scorecard_execution_missing" in medium_grouping[
+        "groups"
+    ]["medium_scorecard_execution"]["blockers"]
+    assert "medium_structural_models_current_below_required:0/5" in medium_grouping[
+        "groups"
+    ]["medium_quantity_shortfall"]["blockers"]
     large = payload["large_gate"]
     assert large["status"] == "blocked"
     assert large["contract_pass"] is False
@@ -46,9 +56,27 @@ def test_phase6_benchmark_scale_status_blocks_without_medium_large_evidence() ->
     assert large["current_large_model_execution_receipt_count"] == 0
     assert large["crash_oom_free_execution_count"] == 0
     assert large["scorecard_or_review_count"] == 0
+    assert "large_structural_models_current_below_required:0/2" in large["blockers"]
     assert "large_model_execution_count_below_required:0/2" in large["blockers"]
     assert "large_model_crash_oom_free_count_below_required:0/2" in large["blockers"]
     assert "large_model_runner_not_implemented" in large["blockers"]
+    large_grouping = large["blocker_grouping_metadata"]
+    assert large_grouping["schema_version"] == "phase6-benchmark-scale-blocker-groups.v1"
+    assert large_grouping["blocker_count"] == len(large["blockers"])
+    assert large_grouping["unassigned_blockers"] == []
+    assert "large_model_runner_not_implemented" in large_grouping["groups"][
+        "large_runner_execution"
+    ]["blockers"]
+    assert "large_model_crash_oom_free_count_below_required:0/2" in large_grouping[
+        "groups"
+    ]["large_quantity_shortfall"]["blockers"]
+    assert "large_structural_models_current_below_required:0/2" in large_grouping[
+        "groups"
+    ]["large_quantity_shortfall"]["blockers"]
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["blocker_count"] == len(payload["blockers"])
+    assert grouping["unassigned_blockers"] == []
+    assert grouping["groups"]["source_license_identity"]["blocker_count"] == 3
     assert "parser-only topology evidence" in payload["claim_boundary"]
     assert "policy-only acquisition rows" in payload["claim_boundary"]
 

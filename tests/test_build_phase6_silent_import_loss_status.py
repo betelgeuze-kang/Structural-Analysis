@@ -51,7 +51,40 @@ def test_phase6_silent_import_loss_status_blocks_without_ifc_execution() -> None
     assert "selected_file_checksums_missing" in payload["blockers"]
     assert "product_legal_license_review_pending" in payload["blockers"]
     assert "silent_data_loss_negative_gate_not_executed" in payload["blockers"]
+    assert "silent_import_loss_gate_not_executed" in payload["blockers"]
+    assert "silent_import_loss_gate_not_implemented" not in payload["blockers"]
     assert "ifc_import_health_execution_count_below_required:0/10" in payload["blockers"]
+    grouping = payload["blocker_grouping_metadata"]
+    assert grouping["schema_version"] == "phase6-silent-import-loss-blocker-groups.v1"
+    assert grouping["unassigned_blockers"] == []
+    groups = grouping["groups"]
+    assert groups["source_acquisition"]["display_name"] == "source/acquisition"
+    assert groups["source_acquisition"]["scope"] == "direct_silent_import_loss"
+    assert "source_file_not_acquired" in groups["source_acquisition"]["blockers"]
+    assert "source_sha256_missing" in groups["checksum"]["blockers"]
+    assert "selected_file_checksums_missing" in groups["checksum"]["blockers"]
+    assert "product_legal_license_review_pending" in groups["license_legal"]["blockers"]
+    assert "import_health_execution_missing" in groups["import_execution"]["blockers"]
+    assert (
+        "ifc_import_health_execution_count_below_required:0/10"
+        in groups["import_execution"]["blockers"]
+    )
+    assert (
+        "silent_data_loss_negative_gate_not_executed"
+        in groups["silent_loss_gate"]["blockers"]
+    )
+    assert "silent_import_loss_gate_not_executed" in groups["silent_loss_gate"]["blockers"]
+    assert groups["query_gui_spillover"]["scope"] == "spillover_not_direct_silent_import_loss"
+    assert groups["query_gui_spillover"]["blockers"] == [
+        "dataset_repository_url_missing",
+        "gui_task_runner_not_implemented",
+        "query_expected_answers_missing",
+        "query_task_file_checksums_missing",
+    ]
+    assert "not direct silent-import-loss closure blockers" in grouping["claim_boundary"]
+    assert "regenerate the Phase 3 import-health execution receipt" in payload["owner_action"]
+    assert "regenerate and check this Phase 6 silent-import-loss status" in payload["owner_action"]
+    assert payload["owner_action"].endswith("then refresh the RC final gate.")
     assert "expected contracts" not in payload["claim_boundary"]
     assert "does not download or bundle IFC files" in payload["claim_boundary"]
 

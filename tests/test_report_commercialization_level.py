@@ -237,6 +237,57 @@ def test_report_commercialization_level_reads_residual_holdout_sidecar(tmp_path:
     assert payload["artifacts"]["residual_holdout_closure_updates"].endswith("rh-updates.json")
 
 
+def test_report_commercialization_level_prefers_signed_sidecar_over_stale_ops(
+    tmp_path: Path,
+) -> None:
+    rh_updates = _write_json(
+        tmp_path / "rh-updates.json",
+        {
+            "schema_version": "residual-holdout-closure-updates.v1",
+            "updates": {
+                "RH-001": {
+                    "status": "closed",
+                    "closure_evidence_path": "release_evidence/productization/RH-001.closure.json",
+                    "closure_evidence_status": "signed_attached",
+                },
+                "RH-002": {
+                    "status": "closed",
+                    "closure_evidence_path": "release_evidence/productization/RH-002.closure.json",
+                    "closure_evidence_status": "signed_attached",
+                },
+                "RH-003": {
+                    "status": "closed",
+                    "closure_evidence_path": "release_evidence/productization/RH-003.closure.json",
+                    "closure_evidence_status": "signed_attached",
+                },
+            },
+        },
+    )
+    stale_ops = _write_json(
+        tmp_path / "stale-ops.json",
+        {
+            "summary": {
+                "residual_holdout_work_item_count": 3,
+                "residual_holdout_open_count": 3,
+                "residual_holdout_closure_evidence_pending_count": 3,
+            }
+        },
+    )
+
+    payload = report_commercialization_level.build_report(
+        commercial_readiness=_commercial(tmp_path / "commercial.json"),
+        external_benchmark_submission_readiness=_external(tmp_path / "external.json"),
+        external_benchmark_submission_updates=tmp_path / "missing-eb-updates.json",
+        residual_holdout_closure_updates=rh_updates,
+        p1_benchmark_breadth_status=tmp_path / "missing-p1-breadth.json",
+        p1_operational_queues=stale_ops,
+    )
+
+    assert "residual_holdout_closure_evidence_closed" in payload["accelerators"]
+    assert "residual_holdout_closure_pending" not in payload["strict_evidence_blockers"]
+    assert all(not blocker.startswith("residual_holdout_closure_pending") for blocker in payload["blockers"])
+
+
 def test_report_commercialization_level_reads_external_submission_update_sidecar(tmp_path: Path) -> None:
     eb_updates = _external_updates(tmp_path / "eb-updates.json")
 

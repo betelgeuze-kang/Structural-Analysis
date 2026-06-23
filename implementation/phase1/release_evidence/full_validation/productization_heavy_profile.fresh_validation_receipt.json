@@ -1,0 +1,29 @@
+{
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-23T16:23:40.595635+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/nonlinear_ndtha_stress.corrected_state_recompute.json": "sha256:1cda3c6960cfb184c85ec8e7673a0c4a1753a78c838d9fdadaa39391a9d1138a",
+    "implementation/phase1/run_ndtha_residual_gate.py": "sha256:8d3bd2d9f5cc05715d7eb531d233f691d07e0667c0ee1094576f162bfe8f13d6"
+  },
+  "lane_id": "productization_heavy_profile",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "ndtha_residual_gate",
+      "path": "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json",
+      "sha256": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "heavy_productization_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "summary": {
+    "case_count": 3,
+    "duration_seconds": 0.978828,
+    "passed_case_count": 3
+  },
+  "validation_command": "python3 implementation/phase1/run_ndtha_residual_gate.py --ndtha-stress implementation/phase1/release_evidence/productization/nonlinear_ndtha_stress.corrected_state_recompute.json --max-residual-top-displacement-m 5.0 --max-residual-drift-ratio-pct 10.0 --recommended-residual-top-displacement-m 1.0 --recommended-residual-drift-ratio-pct 2.0 --max-fallback-rate 0.05 --strict-recommended-residual-hard-fail --require-corrected-state-recompute --out implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json"
+}

@@ -118,6 +118,12 @@ def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> N
     assert output.index("verify:viewer-visual-regression") < output.index(
         "scripts/check_github_actions_runner_policy.py"
     )
+    assert output.index("scripts/check_generated_worktree_clean.py --show-ok") < output.index(
+        "scripts/check_github_actions_runner_policy.py"
+    )
+    assert output.index("git diff --check") < output.index(
+        "scripts/check_github_actions_runner_policy.py"
+    )
     assert output.index("scripts/check_github_actions_runner_policy.py") < output.index(
         "scripts/check_github_actions_self_hosted_runner_status.py"
     )

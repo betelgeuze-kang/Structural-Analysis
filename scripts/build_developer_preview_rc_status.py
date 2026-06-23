@@ -52,6 +52,8 @@ UX_OBSERVATION = PRODUCTIZATION / "ux_new_user_observation_report.json"
 UX_OBSERVATION_INTAKE = PRODUCTIZATION / "ux_new_user_observation_intake_packet.json"
 
 SCHEMA_VERSION = "developer-preview-rc-status.v1"
+TASK_BASED_UX_ENVIRONMENT_BLOCKER = "task_based_ux_browser_execution_environment_blocked"
+PREVIEW_LOOPBACK_BIND_REASON_CODE = "listen_eperm_127_0_0_1"
 
 
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
@@ -100,8 +102,9 @@ def _row(
     evidence: str,
     blockers: list[str] | None = None,
     notes: list[str] | None = None,
+    blocker_grouping_metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    return {
+    row = {
         "item": item,
         "status": status,
         "contract_pass": bool(contract_pass),
@@ -109,6 +112,9 @@ def _row(
         "blockers": blockers or [],
         "notes": notes or [],
     }
+    if blocker_grouping_metadata:
+        row["blocker_grouping_metadata"] = blocker_grouping_metadata
+    return row
 
 
 def _pyproject_package_ready(repo_root: Path) -> bool:
@@ -170,6 +176,76 @@ def _blocker_counts(blockers: list[str]) -> dict[str, int]:
         key = str(blocker).split(":", 1)[0]
         counts[key] = counts.get(key, 0) + 1
     return dict(sorted(counts.items()))
+
+
+def _filter_blocker_grouping_metadata(
+    grouping: dict[str, Any],
+    blockers: list[str],
+) -> dict[str, Any]:
+    if not grouping:
+        return {}
+    blocker_set = set(blockers)
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    source_groups = grouping.get("groups")
+    source_groups = source_groups if isinstance(source_groups, dict) else {}
+    for group_name, group in source_groups.items():
+        if not isinstance(group, dict):
+            continue
+        grouped = [
+            str(blocker)
+            for blocker in group.get("blockers", [])
+            if str(blocker) in blocker_set
+        ]
+        classified.update(grouped)
+        groups[str(group_name)] = {
+            **group,
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": str(grouping.get("schema_version", "")),
+        "grouping_policy": str(grouping.get("grouping_policy", "")),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
+def _task_based_ux_environment_classification(
+    task_based_ux_test: dict[str, Any],
+    browser_execution_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    reason_code = str(
+        task_based_ux_test.get("browser_execution_blocker_reason_code")
+        or browser_execution_receipt.get("blocker_reason_code")
+        or ""
+    )
+    environment_blocker = bool(
+        task_based_ux_test.get("browser_execution_environment_blocker") is True
+        or browser_execution_receipt.get("environment_blocker") is True
+    )
+    commands = _as_dict(browser_execution_receipt.get("commands"))
+    preview = _as_dict(commands.get("preview"))
+    preview_output = str(preview.get("output_excerpt", "")).lower()
+    if (
+        reason_code == PREVIEW_LOOPBACK_BIND_REASON_CODE
+        or ("listen" in preview_output and "eperm" in preview_output and "127.0.0.1" in preview_output)
+    ):
+        reason_code = PREVIEW_LOOPBACK_BIND_REASON_CODE
+        environment_blocker = True
+    detail = (
+        f"{TASK_BASED_UX_ENVIRONMENT_BLOCKER}:{reason_code}"
+        if environment_blocker and reason_code
+        else ""
+    )
+    return {
+        "environment_blocker": environment_blocker,
+        "reason_code": reason_code,
+        "blocker": detail,
+    }
 
 
 def _gap_ledger_closure_requirement_visibility(
@@ -407,6 +483,11 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         if isinstance(benchmark_scale.get("medium_gate"), dict)
         else {}
     )
+    benchmark_medium_blocker_grouping = (
+        benchmark_medium_gate.get("blocker_grouping_metadata")
+        if isinstance(benchmark_medium_gate.get("blocker_grouping_metadata"), dict)
+        else {}
+    )
     benchmark_medium_blockers = [
         str(blocker) for blocker in benchmark_medium_gate.get("blockers", []) if str(blocker)
     ]
@@ -420,6 +501,11 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     benchmark_large_gate = (
         benchmark_scale.get("large_gate")
         if isinstance(benchmark_scale.get("large_gate"), dict)
+        else {}
+    )
+    benchmark_large_blocker_grouping = (
+        benchmark_large_gate.get("blocker_grouping_metadata")
+        if isinstance(benchmark_large_gate.get("blocker_grouping_metadata"), dict)
         else {}
     )
     benchmark_large_blockers = [
@@ -471,6 +557,47 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     phase6_clean_checkout_blockers = [
         str(blocker) for blocker in clean_checkout_status.get("blockers", []) if str(blocker)
     ]
+    phase6_clean_checkout_blocker_grouping = (
+        clean_checkout_status.get("blocker_grouping_metadata")
+        if isinstance(clean_checkout_status.get("blocker_grouping_metadata"), dict)
+        else {}
+    )
+    phase5_task_based_ux_test = _as_dict(phase5_gui_workflow.get("task_based_ux_test"))
+    phase5_task_based_ux_browser_execution_receipt = _as_dict(
+        phase5_gui_workflow.get("task_based_ux_browser_execution_receipt")
+    )
+    phase5_task_based_ux_environment = _task_based_ux_environment_classification(
+        phase5_task_based_ux_test,
+        phase5_task_based_ux_browser_execution_receipt,
+    )
+    if phase5_task_based_ux_environment["reason_code"]:
+        phase5_task_based_ux_test = {
+            **phase5_task_based_ux_test,
+            "browser_execution_environment_blocker": bool(
+                phase5_task_based_ux_environment["environment_blocker"]
+            ),
+            "browser_execution_blocker_reason_code": str(
+                phase5_task_based_ux_environment["reason_code"]
+            ),
+            "execution_environment_blocker": str(phase5_task_based_ux_environment["blocker"]),
+        }
+    phase5_gui_workflow_blockers = list(phase5_gui_workflow.get("blockers", []))
+    if (
+        phase5_task_based_ux_environment["blocker"]
+        and phase5_task_based_ux_environment["blocker"] not in phase5_gui_workflow_blockers
+    ):
+        phase5_gui_workflow_blockers.append(str(phase5_task_based_ux_environment["blocker"]))
+    ux_status_blockers = list(ux_observation_status.get("blockers", []))
+    if (
+        phase5_task_based_ux_environment["blocker"]
+        and phase5_task_based_ux_environment["blocker"] not in ux_status_blockers
+    ):
+        ux_status_blockers.append(str(phase5_task_based_ux_environment["blocker"]))
+    ux_status_blocker_grouping = (
+        ux_observation_status.get("blocker_grouping_metadata")
+        if isinstance(ux_observation_status.get("blocker_grouping_metadata"), dict)
+        else {}
+    )
     linux_windows_receipt_blockers = [
         str(blocker)
         for blocker in linux_windows_parity.get("blocked_by", [])
@@ -483,6 +610,15 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
     ]
     if not linux_windows_gate_blockers and linux_windows_parity.get("contract_pass") is not True:
         linux_windows_gate_blockers = ["linux_windows_parity_receipts_missing"]
+    linux_windows_blocker_grouping = (
+        linux_windows_parity.get("blocker_grouping_metadata")
+        if isinstance(linux_windows_parity.get("blocker_grouping_metadata"), dict)
+        else {}
+    )
+    linux_windows_gate_blocker_grouping = _filter_blocker_grouping_metadata(
+        linux_windows_blocker_grouping,
+        linux_windows_gate_blockers,
+    )
 
     final_gates = [
         _row(
@@ -511,6 +647,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                     ]
                 )
             ),
+            blocker_grouping_metadata=benchmark_medium_blocker_grouping,
             notes=[
                 "Requires passing or pre-approved REVIEW evidence for selected medium "
                 "OpenSees/reference models. Local topology/parser evidence does not "
@@ -537,6 +674,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                     ]
                 )
             ),
+            blocker_grouping_metadata=benchmark_large_blocker_grouping,
             notes=[
                 "Requires acquired large-model sources, runner/nightly lane evidence, "
                 "and crash/OOM-free execution receipts. Policy-only acquisition rows "
@@ -588,6 +726,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 f"{PHASE6_LINUX_WINDOWS_PARITY_STATUS}"
             ),
             blockers=linux_windows_gate_blockers,
+            blocker_grouping_metadata=linux_windows_gate_blocker_grouping,
             notes=[
                 "Requires independent Linux and Windows receipts that replay the "
                 "same seed benchmark commands and compare stable output checksums. "
@@ -601,7 +740,8 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             status="ready" if ux_ready else "blocked",
             contract_pass=ux_ready,
             evidence=f"{UX_OBSERVATION}; {UX_OBSERVATION_INTAKE}; {PHASE6_UX_OBSERVATION_STATUS}",
-            blockers=list(ux_observation_status.get("blockers", [])),
+            blockers=ux_status_blockers,
+            blocker_grouping_metadata=ux_status_blocker_grouping,
             notes=[
                 "This gate requires a passing human new-user observation report. "
                 "The intake packet is an owner handoff checklist only, automated "
@@ -618,6 +758,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 f"{PHASE3_RELEASE_CONTROL_CLEANUP_PLAN}; {PHASE6_CLEAN_CHECKOUT_STATUS}"
             ),
             blockers=phase6_clean_checkout_blockers or clean_checkout_blockers,
+            blocker_grouping_metadata=phase6_clean_checkout_blocker_grouping,
             notes=[
                 "Local isolated worktree-copy replay and git clean-clone replay are "
                 "separate evidence. This gate requires both to pass and cannot be "
@@ -643,7 +784,10 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
         "30_run_ci_streak",
         "customer_shadow",
         "product_license",
+        "license_server_operation",
+        "commercial_sla",
         "external_approval_receipts",
+        "remote_github_sync",
     ]
     rc_ready = bool(not deliverable_blockers and not final_gate_blockers)
     preview_gap_visibility = preview.get("gap_ledger_closure_requirement_visibility")
@@ -686,7 +830,8 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 if isinstance(ux_observation_status.get("phase5_workflow_gate"), dict)
                 else {}
             ),
-            "phase6_ux_status_blockers": list(ux_observation_status.get("blockers", [])),
+            "phase6_ux_status_blockers": ux_status_blockers,
+            "phase6_ux_blocker_grouping": ux_status_blocker_grouping,
             "owner_action": str(ux_observation.get("summary", {}).get("owner_action", "")),
             "report_blockers": list(ux_observation.get("blockers", [])),
             "required_workflow_steps": list(
@@ -769,6 +914,11 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "benchmark_scale_status_receipt": str(PHASE6_BENCHMARK_SCALE_STATUS),
             "benchmark_scale_status": str(benchmark_scale.get("status", "missing")),
             "benchmark_scale_contract_pass": bool(benchmark_scale.get("contract_pass") is True),
+            "benchmark_scale_blocker_grouping": (
+                benchmark_scale.get("blocker_grouping_metadata")
+                if isinstance(benchmark_scale.get("blocker_grouping_metadata"), dict)
+                else {}
+            ),
             "targets": {
                 "analytic_component": {
                     "current": analytic_current,
@@ -819,6 +969,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "benchmark_scale_status": str(benchmark_scale.get("status", "missing")),
             "benchmark_scale_contract_pass": bool(benchmark_scale.get("contract_pass") is True),
             "benchmark_scale_gate": benchmark_medium_gate,
+            "benchmark_scale_blocker_grouping": benchmark_medium_blocker_grouping,
             "required_medium_model_count": int(
                 medium_model_scorecard.get("required_medium_model_count", 5) or 5
             ),
@@ -858,6 +1009,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "benchmark_scale_status": str(benchmark_scale.get("status", "missing")),
             "benchmark_scale_contract_pass": bool(benchmark_scale.get("contract_pass") is True),
             "benchmark_scale_gate": benchmark_large_gate,
+            "benchmark_scale_blocker_grouping": benchmark_large_blocker_grouping,
             "required_large_model_count": int(large_model_runner.get("required_large_model_count", 2) or 2),
             "current_large_model_execution_receipt_count": int(
                 large_model_runner.get("current_large_model_execution_receipt_count", 0) or 0
@@ -923,6 +1075,11 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "clean_acquisition_blockers": list(ifc_clean_acquisition.get("blockers", [])),
             "dirty_acquisition_blockers": list(ifc_dirty_acquisition.get("blockers", [])),
             "silent_import_loss_blockers": list(silent_import_loss.get("blockers", [])),
+            "silent_import_loss_blocker_grouping": (
+                silent_import_loss.get("blocker_grouping_metadata")
+                if isinstance(silent_import_loss.get("blocker_grouping_metadata"), dict)
+                else {}
+            ),
             "owner_action": (
                 str(silent_import_loss.get("owner_action", ""))
                 or "Acquire the selected clean/dirty IFC files after license review, attach "
@@ -988,25 +1145,14 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 if isinstance(phase5_gui_workflow.get("handoff_surface"), dict)
                 else {}
             ),
-            "task_based_ux_test": (
-                phase5_gui_workflow.get("task_based_ux_test")
-                if isinstance(phase5_gui_workflow.get("task_based_ux_test"), dict)
-                else {}
-            ),
-            "task_based_ux_browser_execution_receipt": (
-                phase5_gui_workflow.get("task_based_ux_browser_execution_receipt")
-                if isinstance(
-                    phase5_gui_workflow.get("task_based_ux_browser_execution_receipt"),
-                    dict,
-                )
-                else {}
-            ),
+            "task_based_ux_test": phase5_task_based_ux_test,
+            "task_based_ux_browser_execution_receipt": phase5_task_based_ux_browser_execution_receipt,
             "route_case_run_state_model": (
                 phase5_gui_workflow.get("route_case_run_state_model")
                 if isinstance(phase5_gui_workflow.get("route_case_run_state_model"), dict)
                 else {}
             ),
-            "blockers": list(phase5_gui_workflow.get("blockers", [])),
+            "blockers": phase5_gui_workflow_blockers,
             "owner_action": str(phase5_gui_workflow.get("owner_action", "")),
             "claim_boundary": str(phase5_gui_workflow.get("claim_boundary", "")),
         },
@@ -1094,6 +1240,8 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "blocked_by": list(
                 linux_windows_parity.get("blocked_by", ["linux_windows_parity_receipts_missing"])
             ),
+            "parity_blocker_grouping": linux_windows_blocker_grouping,
+            "parity_gate_blocker_grouping": linux_windows_gate_blocker_grouping,
             "clean_clone_blockers_tracked_elsewhere": list(git_clean_clone_blockers[:8]),
             "owner_action": str(
                 linux_windows_parity.get(
@@ -1132,6 +1280,7 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
                 else {}
             ),
             "phase6_clean_checkout_blockers": list(clean_checkout_status.get("blockers", [])),
+            "phase6_clean_checkout_blocker_grouping": phase6_clean_checkout_blocker_grouping,
             "clean_checkout_receipt": str(PHASE3_CLEAN_CHECKOUT),
             "git_clean_clone_receipt": str(PHASE3_GIT_CLEAN_CLONE),
             "release_control_cleanup_plan": str(PHASE3_RELEASE_CONTROL_CLEANUP_PLAN),
@@ -1255,7 +1404,8 @@ def build_developer_preview_rc_status(*, repo_root: Path = ROOT) -> dict[str, An
             "from existing evidence only. It does not close Commercial Release, full "
             "Phase 3 corpus, G1 full nonlinear full-mesh/material Newton, Linux/Windows "
             "parity, external benchmark, customer shadow, license, SLA, or external "
-            "approval gates."
+            "approval gates. Remote GitHub sync/push approval remains a release-publication "
+            "handoff, while clean-checkout reproducibility is tracked separately."
         ),
     }
 

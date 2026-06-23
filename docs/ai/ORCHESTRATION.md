@@ -19,6 +19,7 @@
 Codex goal: 목표 추적, 설계, 리뷰, 최종 판단
 Cursor auto: scoped 구현, focused edit, test-fix loop, 현재 에디터 상태, 선택 영역, IDE affordance가 중요한 구현 slice 수행
 OpenCode worker entrypoint: 호환용 wrapper로 남겨 두되 현재 assignment는 Cursor `composer-2.5`로 즉시 라우팅
+Internal Codex subagent fallback: Cursor worker와 host bridge가 모두 불가할 때만 scoped 구현 worker로 사용하며 모델은 `gpt-5.4-mini`, reasoning effort는 `xhigh`
 ai-verify.sh: 오케스트레이션 smoke 검증
 Human owner: push, merge, deploy, release, billing, production mutation 승인
 ```
@@ -53,6 +54,16 @@ OpenCode worker가 필요하면 다음 형태로 실행한다. 현재 이 wrappe
 ```
 
 OpenCode assignment routing의 Cursor 모델은 기본 `composer-2.5`이며, 필요하면 `AI_WORKER_OPENCODE_ASSIGNMENT_CURSOR_MODEL`로 바꿀 수 있다. 이는 같은 scoped slice의 worker 선택만 바꾸는 것이며, Codex가 여전히 diff review와 최종 acceptance를 맡는다.
+
+Codex terminal sandbox에서 `api2.cursor.sh` DNS/network access가 막힌 경우에는 host terminal에서 다음 bridge를 한 번 켜 둔다.
+
+```bash
+./scripts/ai-worker-cursor-host-bridge.sh
+```
+
+이 bridge가 실행 중이면 `scripts/ai-worker-cursor.sh`가 Cursor API DNS 실패를 감지했을 때 `.betelgeuze/cursor_worker_bridge/` queue에 job을 넣고, host bridge가 같은 prompt file을 Cursor Agent로 실행한 뒤 결과 raw output을 돌려준다. Codex wrapper는 이후 기존과 같이 validator를 통과한 요약만 출력한다.
+
+Cursor worker와 host bridge가 모두 불가한 상태에서 Codex가 내부 서브에이전트로 구현 fallback을 해야 하면, 내부 subagent는 `agent_type=worker`, `model=gpt-5.4-mini`, `reasoning_effort=xhigh`로만 호출한다. 이 fallback은 Cursor를 대체하는 마지막 scoped implementation 경로이며, OpenCode assignment routing이나 Codex의 diff review, verification, final acceptance 책임을 바꾸지 않는다.
 
 둘 다 같은 목표 안에서 쓸 수 있지만, 동시에 여러 worker를 돌리지 않는다.
 

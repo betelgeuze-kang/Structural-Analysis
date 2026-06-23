@@ -32,17 +32,17 @@
   "developer_preview_blocked_field_count": 0,
   "engine_version": "1.0.0",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
-  "generated_at": "2026-06-22T17:16:54.656547+00:00",
+  "generated_at": "2026-06-23T14:46:41.270622+00:00",
   "input_checksums": {
     "src/structural_analysis/api/cli.py": "sha256:1b35c7aeaacfb435aee30b5d84979687d142cc33be6628b56cba7380689ae05b",
-    "src/structural_analysis/api/core.py": "sha256:dde81348c0215b16a759bf80ed97c43072c197d5e0126e705aa111c211659373",
+    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
     "src/structural_analysis/assembly/linear_static.py": "sha256:95d5e9c56a5f0d65cb7c1adef6e6f064596b09ce8b48f2bf2a908882d7885dc5",
     "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
     "src/structural_analysis/elements/axial.py": "sha256:11d6ca1a6fd5f2d30b0d932b523c9eb118eb0b9d48c0f1abf0502fb5d5fb3ffe",
     "src/structural_analysis/schemas/result.schema.json": "sha256:441e909d0f17936e80c03ec8a380ad8275d45fe0b7733e7afb4a28c8eafab98b",
     "src/structural_analysis/schemas/validation_report.schema.json": "sha256:a7f591f997b048a8436bfb82c9fadd5e71e3e0c9f6ca563d808901e0a73ffe1d",
     "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
-    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb"
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6"
   },
   "invocation_surfaces": [
     "python_api",
@@ -74,6 +74,7 @@
   },
   "report_status": "pass",
   "result_status": "ready",
+  "reused_evidence": false,
   "schema_validation": {
     "checks": {
       "cli_result": {
@@ -102,7 +103,7 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "status": "ready",
   "supported_preview_analysis_types": [
     "model_health",

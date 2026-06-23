@@ -209,7 +209,7 @@ def phase3_non_seed_acquisition_sources() -> list[BenchmarkAcquisitionSource]:
                 "license_review_pending",
                 "checksum_missing",
                 "import_health_execution_missing",
-                "silent_import_loss_gate_not_implemented",
+                "silent_import_loss_gate_not_executed",
             ),
             claim_boundary=(
                 "Clean IFC lane policy only; geometry/import truth is not solver accuracy truth "

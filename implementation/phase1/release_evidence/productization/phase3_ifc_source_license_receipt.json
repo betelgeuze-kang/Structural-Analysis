@@ -11,7 +11,7 @@
     "query_task_file_checksums_missing",
     "selected_file_checksums_missing",
     "silent_data_loss_negative_gate_not_executed",
-    "silent_import_loss_gate_not_implemented"
+    "silent_import_loss_gate_not_executed"
   ],
   "claim_boundary": "This receipt attaches source identity and upstream license URLs for selected IFC benchmark candidates. It does not download or bundle IFC files, approve redistribution/commercial use, attach file checksums, author expected outputs, or close Phase 3.",
   "claim_boundary_version": "developer-preview-core-api-v1",
@@ -19,12 +19,12 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "1.0.0",
-  "generated_at": "2026-06-22T19:21:50.944835+00:00",
+  "generated_at": "2026-06-23T16:09:52.124273+00:00",
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
     "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:b85ac62227e7f118ae7db8439b505a9c867925fb81696567b3873b0a061765cf"
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:1194ff0fd1f968978fc9540a18c2b92435ab401df93c50c483a797e888df8a59",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:77b7a381e438ca48ef3143a1002e585d67aef10717507c1a5568a3f52dfe7065"
   },
   "phase3_closure_claim": false,
   "phase3_ifc_import_case_requirement": {
@@ -43,7 +43,7 @@
   "redistribution_allowed_source_count": 0,
   "reused_evidence": false,
   "schema_version": "phase3-ifc-source-license-receipt.v1",
-  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
   "source_count": 3,
   "source_url_verified_count": 3,
   "sources": [
@@ -53,17 +53,17 @@
         "selected_file_checksums_missing",
         "product_legal_license_review_pending",
         "import_health_execution_missing",
-        "silent_import_loss_gate_not_implemented"
+        "silent_import_loss_gate_not_executed"
       ],
       "candidate_files": [
         "Building-Structural.ifc",
         "Infra-Bridge.ifc"
       ],
       "checksum_status": "missing_until_acquisition_script_fetches_selected_files",
-      "claim_boundary": "Official buildingSMART PCERT sample source identity and declared license URL are attached, but no source file checksums, product/legal approval, executed import-health outputs, or Phase 3 quantity credit are claimed.",
+      "claim_boundary": "Official buildingSMART PCERT sample source identity and declared license URL are attached, but no source file checksums, product/legal approval, executed import-health/silent-import-loss gate outputs, or Phase 3 quantity credit are claimed.",
       "commercial_use_allowed": false,
       "declared_license": "CC-BY-4.0",
-      "expected_output_status": "missing_until_import_health_expectations_authored",
+      "expected_output_status": "authored_import_health_contracts_pending_execution",
       "lanes": [
         "buildingsmart-clean-ifc"
       ],

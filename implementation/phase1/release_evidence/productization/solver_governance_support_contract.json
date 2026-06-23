@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-06-22T19:15:48.200930+00:00",
+  "generated_at": "2026-06-23T15:03:14.069901+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -99,7 +99,9 @@
       "blockers": [
         "repo_benchmark_bridge_mgt_present",
         "metadata_only_sources_present",
-        "operator_attached_real_mgt_header_ok_below_target"
+        "operator_attached_real_mgt_header_ok_below_target",
+        "operator_source_mapping_blocked_actions_present",
+        "operator_rights_blocked_private_candidate_actions_present"
       ]
     }
   ],

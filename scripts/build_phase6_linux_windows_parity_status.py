@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase6_linux_windows_parity_status.json"
 PHASE3_REPRO_BUNDLE = PRODUCTIZATION / "phase3_benchmark_factory_seed_reproducibility_bundle.json"
+PHASE3_CLEAN_CHECKOUT = PRODUCTIZATION / "phase3_benchmark_factory_seed_clean_checkout_reproduction.json"
 PHASE3_GIT_CLEAN_CLONE = PRODUCTIZATION / "phase3_benchmark_factory_seed_git_clean_clone_reproduction.json"
 LINUX_PLATFORM_RECEIPT = PRODUCTIZATION / "phase6_linux_platform_replay_receipt.json"
 WINDOWS_PLATFORM_RECEIPT = PRODUCTIZATION / "phase6_windows_platform_replay_receipt.json"
@@ -62,6 +63,20 @@ def _platform_receipts(repo_root: Path) -> dict[str, dict[str, Any]]:
     }
 
 
+def _phase3_expectations(repro_bundle: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    expected_scorecard = (
+        repro_bundle.get("expected_scorecard")
+        if isinstance(repro_bundle.get("expected_scorecard"), dict)
+        else {}
+    )
+    stable_artifact_checksums = (
+        repro_bundle.get("stable_artifact_checksums")
+        if isinstance(repro_bundle.get("stable_artifact_checksums"), dict)
+        else {}
+    )
+    return expected_scorecard, stable_artifact_checksums
+
+
 def _receipt_contract_pass(
     receipt: dict[str, Any],
     *,
@@ -81,20 +96,154 @@ def _receipt_contract_pass(
     )
 
 
+def _parity_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    group_specs = [
+        (
+            "platform_receipt_presence",
+            {
+                "scope": "direct_linux_windows_parity_gate",
+                "description": "Missing required Linux/Windows replay receipts.",
+                "matches": (
+                    "linux_windows_parity_receipts_missing",
+                    "platform_replay_receipt_missing:",
+                ),
+            },
+        ),
+        (
+            "platform_receipt_contract",
+            {
+                "scope": "direct_linux_windows_parity_gate",
+                "description": "Present platform replay receipts that do not satisfy the contract.",
+                "matches": ("platform_replay_receipt_not_passed:",),
+            },
+        ),
+        (
+            "git_clean_clone_spillover",
+            {
+                "scope": "tracked_elsewhere_clean_checkout_gate",
+                "description": (
+                    "Git clean-clone replay blocker tracked by the separate clean-checkout "
+                    "RC final gate."
+                ),
+                "matches": ("git_clean_clone_reproduction_not_passed",),
+            },
+        ),
+    ]
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    for group_name, spec in group_specs:
+        matches = tuple(str(match) for match in spec["matches"])
+        grouped = [
+            blocker
+            for blocker in blockers
+            if blocker not in classified
+            and any(blocker == match or blocker.startswith(match) for match in matches)
+        ]
+        classified.update(grouped)
+        groups[group_name] = {
+            "scope": spec["scope"],
+            "description": spec["description"],
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": "phase6-linux-windows-parity-blocker-groups.v1",
+        "grouping_policy": (
+            "Preserve every blocker while separating direct platform parity receipt "
+            "gaps from git clean-clone spillover that is tracked by the separate "
+            "clean-checkout RC gate."
+        ),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
+def build_phase6_linux_platform_replay_receipt(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    repo_root = repo_root.resolve()
+    repro_bundle = _load_json(repo_root, PHASE3_REPRO_BUNDLE)
+    clean_checkout = _load_json(repo_root, PHASE3_CLEAN_CHECKOUT)
+    expected_scorecard, stable_artifact_checksums = _phase3_expectations(repro_bundle)
+    expected_clean_checksums = (
+        clean_checkout.get("expected_stable_artifact_checksums")
+        if isinstance(clean_checkout.get("expected_stable_artifact_checksums"), dict)
+        else {}
+    )
+    generated_clean_checksums = (
+        clean_checkout.get("generated_stable_artifact_checksums")
+        if isinstance(clean_checkout.get("generated_stable_artifact_checksums"), dict)
+        else {}
+    )
+    source_commit_sha = str(repro_bundle.get("source_commit_sha", ""))
+    clean_source_commit_sha = str(clean_checkout.get("source_commit_sha", ""))
+    blockers = []
+    if clean_checkout.get("contract_pass") is not True:
+        blockers.append("phase3_clean_checkout_reproduction_not_passed")
+    if clean_checkout.get("clean_checkout_executed") is not True:
+        blockers.append("phase3_clean_checkout_replay_not_executed")
+    if clean_checkout.get("clean_checkout_execution_mode") != "isolated_minimal_worktree_copy":
+        blockers.append("phase3_clean_checkout_execution_mode_not_isolated_minimal_worktree_copy")
+    if clean_source_commit_sha != source_commit_sha:
+        blockers.append("phase3_clean_checkout_source_commit_mismatch")
+    if not expected_scorecard or not stable_artifact_checksums:
+        blockers.append("phase3_reproducibility_bundle_expectations_missing")
+    if expected_clean_checksums != stable_artifact_checksums:
+        blockers.append("phase3_clean_checkout_expected_checksum_mismatch")
+    if generated_clean_checksums != stable_artifact_checksums:
+        blockers.append("phase3_clean_checkout_generated_checksum_mismatch")
+    contract_pass = not blockers
+    return {
+        "schema_version": PLATFORM_RECEIPT_SCHEMA,
+        **release_evidence_metadata(
+            input_paths=[
+                PHASE3_REPRO_BUNDLE,
+                PHASE3_CLEAN_CHECKOUT,
+                Path("scripts/build_phase6_linux_windows_parity_status.py"),
+            ],
+            reused_evidence=True,
+            reuse_policy="phase6_linux_platform_replay_receipt_from_phase3_local_clean_checkout",
+            repo_root=repo_root,
+        ),
+        "platform": "linux",
+        "os_name": "Linux",
+        "os_version": "local_clean_checkout_replay_receipt",
+        "python_version": "recorded_by_phase3_clean_checkout_command_results",
+        "node_version": "not_required_for_phase3_seed_replay_contract",
+        "source_commit_sha": source_commit_sha,
+        "working_tree_clean": contract_pass,
+        "working_tree_clean_scope": "isolated_minimal_worktree_copy",
+        "local_dirty_inputs": [],
+        "local_dirty_inputs_scope": "isolated_replay_checkout",
+        "commands": list(clean_checkout.get("command_results", [])),
+        "stable_artifact_checksums": stable_artifact_checksums,
+        "expected_scorecard": expected_scorecard,
+        "source_clean_checkout_receipt": PHASE3_CLEAN_CHECKOUT.as_posix(),
+        "source_clean_checkout_status": str(clean_checkout.get("status", "missing")),
+        "source_clean_checkout_contract_pass": clean_checkout.get("contract_pass") is True,
+        "source_clean_checkout_execution_mode": str(
+            clean_checkout.get("clean_checkout_execution_mode", "")
+        ),
+        "source_git_clean_clone_receipt": PHASE3_GIT_CLEAN_CLONE.as_posix(),
+        "contract_pass": contract_pass,
+        "blockers": blockers,
+        "developer_preview_release_candidate_claim": False,
+        "claim_boundary": (
+            "This Linux platform receipt is derived only from the passing local isolated "
+            "clean-checkout Phase 3 seed replay. It is not a Windows receipt, not a "
+            "git-clean-clone pass, not Linux/Windows parity, and does not promote "
+            "Developer Preview RC readiness."
+        ),
+    }
+
+
 def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     repro_bundle = _load_json(repo_root, PHASE3_REPRO_BUNDLE)
+    clean_checkout = _load_json(repo_root, PHASE3_CLEAN_CHECKOUT)
     git_clean_clone = _load_json(repo_root, PHASE3_GIT_CLEAN_CLONE)
-    expected_scorecard = (
-        repro_bundle.get("expected_scorecard")
-        if isinstance(repro_bundle.get("expected_scorecard"), dict)
-        else {}
-    )
-    stable_artifact_checksums = (
-        repro_bundle.get("stable_artifact_checksums")
-        if isinstance(repro_bundle.get("stable_artifact_checksums"), dict)
-        else {}
-    )
+    expected_scorecard, stable_artifact_checksums = _phase3_expectations(repro_bundle)
     receipts = _platform_receipts(repo_root)
     receipt_paths = {
         "linux": LINUX_PLATFORM_RECEIPT.as_posix(),
@@ -159,6 +308,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
     )
     if git_clean_clone.get("contract_pass") is not True:
         blockers.append("git_clean_clone_reproduction_not_passed")
+    blockers = sorted(dict.fromkeys(blockers))
     contract_pass = bool(not blockers and parity_comparison_contract["contract_pass"])
     platform_receipt_template = {
         "schema_version": PLATFORM_RECEIPT_SCHEMA,
@@ -194,6 +344,7 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         **release_evidence_metadata(
             input_paths=[
                 PHASE3_REPRO_BUNDLE,
+                PHASE3_CLEAN_CHECKOUT,
                 PHASE3_GIT_CLEAN_CLONE,
                 LINUX_PLATFORM_RECEIPT,
                 WINDOWS_PLATFORM_RECEIPT,
@@ -216,9 +367,21 @@ def build_phase6_linux_windows_parity_status(*, repo_root: Path = ROOT) -> dict[
         "missing_platform_receipts": missing_platforms,
         "expected_stable_artifact_checksums": stable_artifact_checksums,
         "expected_scorecard": expected_scorecard,
+        "linux_local_replay_receipt_source": {
+            "receipt": PHASE3_CLEAN_CHECKOUT.as_posix(),
+            "status": str(clean_checkout.get("status", "missing")),
+            "contract_pass": clean_checkout.get("contract_pass") is True,
+            "execution_mode": str(clean_checkout.get("clean_checkout_execution_mode", "")),
+            "claim_boundary": (
+                "Linux local replay evidence is limited to the isolated minimal "
+                "worktree-copy clean-checkout receipt and does not satisfy Windows "
+                "parity or the git clean-clone gate."
+            ),
+        },
         "platform_receipt_template": platform_receipt_template,
         "parity_comparison_contract": parity_comparison_contract,
-        "blocked_by": sorted(dict.fromkeys(blockers)),
+        "blocked_by": blockers,
+        "blocker_grouping_metadata": _parity_blocker_grouping_metadata(blockers),
         "required_commands": [
             "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
             "python3 -m structural_analysis.benchmark.cli --manifest-out /tmp/phase3_seed_manifest.json --scorecard-out /tmp/phase3_seed_scorecard.json --summary-out /tmp/phase3_seed_runner_summary.json --fail-blocked",
@@ -267,6 +430,36 @@ def write_phase6_linux_windows_parity_status(
     return payload
 
 
+def write_phase6_linux_platform_replay_receipt(
+    *,
+    repo_root: Path = ROOT,
+    out_path: Path = LINUX_PLATFORM_RECEIPT,
+) -> dict[str, Any]:
+    payload = build_phase6_linux_platform_replay_receipt(repo_root=repo_root)
+    resolved = out_path if out_path.is_absolute() else repo_root / out_path
+    resolved.parent.mkdir(parents=True, exist_ok=True)
+    resolved.write_text(_json_text(payload), encoding="utf-8")
+    return payload
+
+
+def check_phase6_linux_platform_replay_receipt(
+    *,
+    repo_root: Path = ROOT,
+    out_path: Path = LINUX_PLATFORM_RECEIPT,
+) -> tuple[bool, str]:
+    expected = build_phase6_linux_platform_replay_receipt(repo_root=repo_root)
+    resolved = out_path if out_path.is_absolute() else repo_root / out_path
+    if not resolved.exists():
+        return False, f"phase6_linux_platform_replay_receipt_missing:{out_path.as_posix()}"
+    try:
+        existing = json.loads(resolved.read_text(encoding="utf-8"))
+    except Exception as exc:
+        return False, f"phase6_linux_platform_replay_receipt_unreadable:{exc.__class__.__name__}"
+    if _strip_volatile(existing) != _strip_volatile(expected):
+        return False, "phase6_linux_platform_replay_receipt_mismatch"
+    return True, "phase6_linux_platform_replay_receipt_consistent"
+
+
 def check_phase6_linux_windows_parity_status(
     *,
     repo_root: Path = ROOT,
@@ -296,9 +489,15 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     if args.check:
+        linux_ok, linux_message = check_phase6_linux_platform_replay_receipt()
+        if not linux_ok:
+            print(f"Phase 6 Linux platform replay receipt check: {linux_message}")
+            return 1
         ok, message = check_phase6_linux_windows_parity_status(out_path=args.out)
+        print(f"Phase 6 Linux platform replay receipt check: {linux_message}")
         print(f"Phase 6 Linux/Windows parity status check: {message}")
         return 0 if ok else 1
+    write_phase6_linux_platform_replay_receipt()
     payload = write_phase6_linux_windows_parity_status(out_path=args.out)
     if args.json:
         print(_json_text(payload), end="")

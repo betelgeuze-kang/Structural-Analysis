@@ -9,6 +9,7 @@ cd "$PROJECT_ROOT"
 echo "==> shell syntax"
 bash -n scripts/ai-dangerous-command-check.sh \
   scripts/ai-worker-cursor.sh \
+  scripts/ai-worker-cursor-host-bridge.sh \
   scripts/ai-worker-opencode.sh \
   scripts/ai-preflight.sh \
   scripts/ai-verify.sh
@@ -31,6 +32,7 @@ test -f docs/ai/goal/GOAL.md
 test -f opencode.json
 test -f scripts/validate-ai-worker-output.mjs
 test -x scripts/ai-worker-cursor.sh
+test -x scripts/ai-worker-cursor-host-bridge.sh
 test -x scripts/ai-worker-opencode.sh
 test -x scripts/ai-preflight.sh
 test -x scripts/ai-verify.sh

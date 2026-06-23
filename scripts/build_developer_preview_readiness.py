@@ -31,6 +31,7 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "developer_preview_readiness.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 DEFAULT_DATASET_LICENSE_MANIFEST = PRODUCTIZATION / "developer_preview_dataset_license_manifest.json"
+DEFAULT_PHASE1_CORE_API_CONTRACT = PRODUCTIZATION / "phase1_core_api_contract_summary.json"
 SCHEMA_VERSION = "developer-preview-readiness.v1"
 FOUR_CATEGORIES = ("numerical", "benchmark", "software product", "future commercial")
 PHASE3_BENCHMARK_LANES = (
@@ -118,6 +119,10 @@ FUTURE_COMMERCIAL_ANCHORS = {
     "ci_streak": ("30-run CI streak",),
     "external_approval_receipt": ("external approval receipt", "external approval receipts"),
 }
+FUTURE_COMMERCIAL_SCOPE_BLOCKERS = (
+    "commercial_sla::production_support_commitment_missing",
+    "license_server::operation_readiness_missing",
+)
 
 
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
@@ -252,6 +257,7 @@ def _gap_ledger_closure_requirement_visibility(
     product_snapshot: dict[str, Any],
 ) -> dict[str, Any]:
     components = _as_dict(product_snapshot.get("components"))
+    commercial_gap = _as_dict(components.get("commercial_gap_ledger_status"))
     audit = _as_dict(components.get("gap_ledger_evidence_audit"))
     split_summary = _as_dict(audit.get("ledger_split_summary"))
     ledgers: dict[str, dict[str, Any]] = {}
@@ -292,6 +298,17 @@ def _gap_ledger_closure_requirement_visibility(
         "source_status": str(audit.get("status", "missing")),
         "source_contract_pass": bool(audit.get("contract_pass") is True),
         "source_full_gap_ledger_ready": bool(audit.get("full_gap_ledger_ready") is True),
+        "ai_engine_guardrail_rows_ready": bool(
+            commercial_gap.get("ai_engine_guardrail_rows_ready") is True
+        ),
+        "autonomous_ai_engine_claim_ready": bool(
+            commercial_gap.get("autonomous_ai_engine_claim_ready") is True
+        ),
+        "autonomous_ai_engine_claim_blockers": [
+            str(item)
+            for item in _as_list(commercial_gap.get("autonomous_ai_engine_claim_blockers"))
+            if str(item)
+        ],
         "closure_requirement_count": total_requirement_count,
         "closure_requirement_pass_count": total_pass_count,
         "closure_requirement_fail_count": total_fail_count,
@@ -301,13 +318,31 @@ def _gap_ledger_closure_requirement_visibility(
         "claim_boundary": (
             "This is a visibility summary for existing gap-ledger closure requirements. "
             "It does not add Developer Preview blockers, close G1/G6/G7, create external "
-            "receipts, or promote commercial readiness."
+            "receipts, promote commercial readiness, or promote autonomous AI engine claims."
         ),
     }
 
 
 def _category_for_blocker(blocker: str) -> str:
     text = blocker.lower()
+    if (
+        text.startswith("customer_shadow::")
+        or text.startswith("license::")
+        or text.startswith("ci_streak::")
+        or text.startswith("self_hosted_runner::")
+        or text.startswith("external_benchmark::")
+        or text.startswith("pm_release::github_sync::")
+        or text.startswith("pm_release::security::license")
+        or "license_status_not_configured" in text
+        or "external_receipt" in text
+        or "external_submission" in text
+        or "approval_receipt" in text
+        or "commercial_sla" in text
+        or "license_server" in text
+        or "30_consecutive" in text
+        or "github_actions_30" in text
+    ):
+        return "future commercial"
     if (
         text.startswith("g1")
         or "::g1" in text
@@ -334,20 +369,6 @@ def _category_for_blocker(blocker: str) -> str:
         or "corpus" in text
     ):
         return "benchmark"
-    if (
-        text.startswith("customer_shadow::")
-        or text.startswith("license::")
-        or text.startswith("ci_streak::")
-        or text.startswith("self_hosted_runner::")
-        or text.startswith("external_benchmark::")
-        or "external_receipt" in text
-        or "approval_receipt" in text
-        or "commercial_sla" in text
-        or "license_server" in text
-        or "30_consecutive" in text
-        or "github_actions_30" in text
-    ):
-        return "future commercial"
     return "software product"
 
 
@@ -431,6 +452,7 @@ def _stable_payload_sha256(payload: Any) -> str:
 def _product_snapshot_readiness_input(payload: dict[str, Any]) -> dict[str, Any]:
     state_consistency = _as_dict(payload.get("state_consistency"))
     worktree = _as_dict(state_consistency.get("worktree"))
+    components = _as_dict(payload.get("components"))
     return {
         "schema_version": payload.get("schema_version"),
         "status": payload.get("status"),
@@ -439,6 +461,10 @@ def _product_snapshot_readiness_input(payload: dict[str, Any]) -> dict[str, Any]
         "release_ready": payload.get("release_ready"),
         "blockers": payload.get("blockers", []),
         "root_blockers": _as_dict(payload.get("root_blockers")),
+        "components": {
+            "fresh_full_validation": _as_dict(components.get("fresh_full_validation")),
+            "g1": _as_dict(components.get("g1")),
+        },
         "phase3_release_control_cleanup_plan": _as_dict(
             worktree.get("phase3_release_control_cleanup_plan")
         ),
@@ -451,9 +477,14 @@ def _developer_preview_input_checksums(
     product_snapshot_path: Path,
     product_snapshot: dict[str, Any],
     dataset_license_manifest_path: Path,
+    phase1_core_api_contract_path: Path,
 ) -> dict[str, str]:
     dataset_checksums = input_checksums(
         [dataset_license_manifest_path],
+        repo_root=repo_root,
+    )
+    phase1_checksums = input_checksums(
+        [phase1_core_api_contract_path],
         repo_root=repo_root,
     )
     product_checksum = (
@@ -467,6 +498,10 @@ def _developer_preview_input_checksums(
                 str(product_snapshot_path): product_checksum,
                 str(dataset_license_manifest_path): dataset_checksums.get(
                     str(dataset_license_manifest_path),
+                    "missing",
+                ),
+                str(phase1_core_api_contract_path): phase1_checksums.get(
+                    str(phase1_core_api_contract_path),
                     "missing",
                 ),
             }.items()
@@ -505,6 +540,7 @@ def build_developer_preview_readiness(
     repo_root: Path = ROOT,
     product_snapshot_path: Path = PRODUCT_READINESS_SNAPSHOT,
     dataset_license_manifest_path: Path = DEFAULT_DATASET_LICENSE_MANIFEST,
+    phase1_core_api_contract_path: Path = DEFAULT_PHASE1_CORE_API_CONTRACT,
     source_commit_sha: str | None = None,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
@@ -512,7 +548,11 @@ def build_developer_preview_readiness(
     if not product_snapshot:
         product_snapshot = build_snapshot(repo_root=repo_root, source_commit_sha=source_commit_sha)
     manifest = _dataset_license_manifest(repo_root, dataset_license_manifest_path)
-    blockers = [str(item) for item in product_snapshot.get("blockers", []) if str(item)]
+    phase1_core_api = _load_json(repo_root, phase1_core_api_contract_path)
+    blockers = [
+        *[str(item) for item in product_snapshot.get("blockers", []) if str(item)],
+        *FUTURE_COMMERCIAL_SCOPE_BLOCKERS,
+    ]
     if not _manifest_ready(manifest):
         blockers.extend(str(item) for item in manifest.get("blockers", []) if str(item))
         if not manifest.get("blockers"):
@@ -529,16 +569,21 @@ def build_developer_preview_readiness(
     developer_preview_ready = bool(schema_valid and evidence_fresh and not developer_blockers)
     product_state = _as_dict(product_snapshot.get("state_consistency"))
     product_worktree = _as_dict(product_state.get("worktree"))
+    product_components = _as_dict(product_snapshot.get("components"))
+    fresh_full_validation_component = _as_dict(
+        product_components.get("fresh_full_validation")
+    )
+    g1_component = _as_dict(product_components.get("g1"))
     scope_boundary_sync = _scope_boundary_sync(repo_root)
     closure_requirement_visibility = _gap_ledger_closure_requirement_visibility(
         product_snapshot
     )
-    input_paths = [product_snapshot_path, dataset_license_manifest_path]
     input_checksum_map = _developer_preview_input_checksums(
         repo_root=repo_root,
         product_snapshot_path=product_snapshot_path,
         product_snapshot=product_snapshot,
         dataset_license_manifest_path=dataset_license_manifest_path,
+        phase1_core_api_contract_path=phase1_core_api_contract_path,
     )
     return {
         "schema_version": SCHEMA_VERSION,
@@ -558,6 +603,11 @@ def build_developer_preview_readiness(
             "dataset_license_manifest": _input_artifact_summary(
                 path=dataset_license_manifest_path,
                 payload=manifest,
+                checksums=input_checksum_map,
+            ),
+            "phase1_core_api_contract": _input_artifact_summary(
+                path=phase1_core_api_contract_path,
+                payload=phase1_core_api,
                 checksums=input_checksum_map,
             ),
         },
@@ -590,20 +640,25 @@ def build_developer_preview_readiness(
             "phase3_release_control_cleanup_plan": _as_dict(
                 product_worktree.get("phase3_release_control_cleanup_plan")
             ),
+            "g1": g1_component,
+            "fresh_full_validation": fresh_full_validation_component,
         },
         "gap_ledger_closure_requirement_visibility": closure_requirement_visibility,
         "scope_boundary_sync": scope_boundary_sync,
         "claim_boundary": (
             "Developer Preview is an open benchmark workstation preview, not a commercial "
             "structural solver beta. Customer shadow, commercial license/legal approval, "
-            "commercial SLA, 30-run CI streak, and external approval receipts remain visible "
-            "as future Commercial Release blockers but do not block Developer Preview. "
+            "license-server operation, commercial SLA, 30-run CI streak, and external "
+            "approval receipts remain visible as future Commercial Release blockers. "
+            "Remote GitHub sync/push approval is a release-publication handoff and does "
+            "not block the local Developer Preview evidence bar. "
             "AI/GNN/surrogate truth claims stay frozen until the deterministic reference "
             "solver, residual/Jacobian/Newton closure, and benchmark truth are fixed."
         ),
         "artifacts": {
             "product_readiness_snapshot": str(product_snapshot_path),
             "dataset_license_manifest": str(dataset_license_manifest_path),
+            "phase1_core_api_contract": str(phase1_core_api_contract_path),
         },
     }
 

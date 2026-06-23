@@ -21,6 +21,11 @@ OPENCODE_GLM52_MODEL = "opencode-go/glm-5.2"
 DEFAULT_OPENCODE_ASSIGNMENT_CURSOR_MODEL = "composer-2.5"
 DEFAULT_OPENCODE_XDG_DATA_HOME = Path("/tmp/codex-opencode-xdg-data")
 DEFAULT_OPENCODE_GO_MIRROR_XDG_DATA_HOME = Path("/tmp/codex-opencode-go-xdg-data")
+INTERNAL_SUBAGENT_FALLBACK_AGENT_TYPE = "worker"
+INTERNAL_SUBAGENT_FALLBACK_MODEL = "gpt-5.4-mini"
+INTERNAL_SUBAGENT_FALLBACK_REASONING_EFFORT = "xhigh"
+CURSOR_REMOTE_API_HOST = "api2.cursor.sh"
+DEFAULT_CURSOR_HOST_BRIDGE_DIR = Path(".betelgeuze/cursor_worker_bridge")
 REQUIRED_FILES = [
     Path("AGENTS.md"),
     Path(".cursor/rules/project.mdc"),
@@ -36,6 +41,7 @@ REQUIRED_FILES = [
 WRAPPER_SCRIPTS = [
     Path("scripts/ai-dangerous-command-check.sh"),
     Path("scripts/ai-worker-cursor.sh"),
+    Path("scripts/ai-worker-cursor-host-bridge.sh"),
     Path("scripts/ai-worker-opencode.sh"),
     Path("scripts/ai-preflight.sh"),
     Path("scripts/ai-verify.sh"),
@@ -69,6 +75,18 @@ def _which(*names: str) -> tuple[str, str]:
         if found:
             return name, found
     return "", ""
+
+
+def _cursor_host_bridge_dir() -> Path:
+    return Path(os.environ.get("AI_WORKER_CURSOR_HOST_BRIDGE_DIR", str(DEFAULT_CURSOR_HOST_BRIDGE_DIR)))
+
+
+def _cursor_host_bridge_ready(path: Path) -> bool:
+    return (
+        (path / "host-bridge.ready").is_file()
+        and (path / "jobs").is_dir()
+        and (path / "done").is_dir()
+    )
 
 
 def _opencode_data_home_writable(path: Path) -> bool:
@@ -221,6 +239,8 @@ def build_report() -> dict[str, Any]:
     syntax_pass, syntax_output = _run(["bash", "-n", *[str(path) for path in WRAPPER_SCRIPTS]])
     json_pass, json_output = _run(["python3", "-m", "json.tool", "opencode.json"])
     cursor_name, cursor_path = _which("cursor-agent", "cursor")
+    cursor_host_bridge_dir = _cursor_host_bridge_dir()
+    cursor_host_bridge_ready = _cursor_host_bridge_ready(cursor_host_bridge_dir)
     opencode_name, opencode_path = _which("opencode")
     opencode_version = ""
     opencode_model = _configured_opencode_model()
@@ -242,10 +262,17 @@ def build_report() -> dict[str, Any]:
         "worker_shell_syntax_pass": syntax_pass,
         "opencode_json_valid": json_pass,
         "cursor_worker_cli_present": bool(cursor_path),
+        "cursor_host_bridge_ready": cursor_host_bridge_ready,
+        "cursor_dns_permission_grantable_from_codex": False,
         "opencode_worker_cli_present": bool(opencode_path),
         "opencode_model_registry_query_pass": bool(opencode_path and opencode_models_pass),
         "opencode_worker_configured_model_available": opencode_configured_model_available,
         "opencode_assignment_routed_to_cursor": opencode_assignment_routed_to_cursor,
+        "internal_subagent_fallback_agent_type_configured": INTERNAL_SUBAGENT_FALLBACK_AGENT_TYPE == "worker",
+        "internal_subagent_fallback_model_configured": INTERNAL_SUBAGENT_FALLBACK_MODEL == "gpt-5.4-mini",
+        "internal_subagent_fallback_reasoning_effort_configured": (
+            INTERNAL_SUBAGENT_FALLBACK_REASONING_EFFORT == "xhigh"
+        ),
     }
     blockers = [
         *(["required_orchestration_files_missing"] if not checks["required_files_present"] else []),
@@ -274,6 +301,21 @@ def build_report() -> dict[str, Any]:
             and not checks["opencode_worker_configured_model_available"]
             else []
         ),
+        *(
+            ["internal_subagent_fallback_agent_type_misconfigured"]
+            if not checks["internal_subagent_fallback_agent_type_configured"]
+            else []
+        ),
+        *(
+            ["internal_subagent_fallback_model_misconfigured"]
+            if not checks["internal_subagent_fallback_model_configured"]
+            else []
+        ),
+        *(
+            ["internal_subagent_fallback_reasoning_effort_misconfigured"]
+            if not checks["internal_subagent_fallback_reasoning_effort_configured"]
+            else []
+        ),
     ]
     return {
         "schema_version": "ai-orchestration-preflight-report.v1",
@@ -285,6 +327,17 @@ def build_report() -> dict[str, Any]:
         "summary": {
             "cursor_worker_cli": cursor_name or "missing",
             "cursor_worker_cli_path": cursor_path,
+            "cursor_remote_api_host": CURSOR_REMOTE_API_HOST,
+            "cursor_host_bridge_dir": str(cursor_host_bridge_dir),
+            "cursor_host_bridge_ready": cursor_host_bridge_ready,
+            "cursor_dns_permission_owner": "host_or_codex_session_configuration",
+            "cursor_dns_permission_grantable_from_codex": False,
+            "cursor_dns_failure_fallbacks": [
+                "start_host_bridge_from_network_enabled_host_terminal",
+                "run_worker_wrapper_from_cursor_or_host_terminal_with_outbound_dns",
+                "start_a_codex_session_with_terminal_network_enabled",
+                "use_internal_codex_subagent_for_scoped_local_work",
+            ],
             "opencode_worker_cli": opencode_name or "missing",
             "opencode_worker_cli_path": opencode_path,
             "opencode_version": opencode_version.strip(),
@@ -292,6 +345,11 @@ def build_report() -> dict[str, Any]:
             "opencode_configured_model_available": opencode_configured_model_available,
             "opencode_assignment_routed_to_cursor": opencode_assignment_routed_to_cursor,
             "opencode_assignment_cursor_model": _opencode_assignment_cursor_model(),
+            "cursor_failure_internal_subagent_fallback_agent_type": INTERNAL_SUBAGENT_FALLBACK_AGENT_TYPE,
+            "cursor_failure_internal_subagent_fallback_model": INTERNAL_SUBAGENT_FALLBACK_MODEL,
+            "cursor_failure_internal_subagent_fallback_reasoning_effort": (
+                INTERNAL_SUBAGENT_FALLBACK_REASONING_EFFORT
+            ),
             "opencode_xdg_data_home": opencode_xdg_data_home,
             "opencode_model_count": len(opencode_model_rows),
             "required_file_count": len(REQUIRED_FILES),
@@ -302,14 +360,19 @@ def build_report() -> dict[str, Any]:
             "missing_wrappers": missing_wrappers,
             "wrapper_syntax_output": syntax_output,
             "opencode_json_output": json_output,
+            "cursor_host_bridge_ready_file": str(cursor_host_bridge_dir / "host-bridge.ready"),
             "opencode_models_output": opencode_models_output,
             "opencode_model_rows": opencode_model_rows,
         },
         "claim_boundary": (
             "This report verifies Cursor/OpenCode worker bridge readiness and local OpenCode model-registry "
             "availability when OpenCode assignment mode is enabled, plus the current routing of OpenCode-assigned "
-            "slices to Cursor. It does not prove remote model credentials, successful inference, worker execution, "
-            "or release readiness. Codex still owns goal tracking, diff review, verification, and final acceptance."
+            "slices to Cursor and the configured internal Codex subagent fallback model for Cursor-unavailable "
+            "implementation slices. Cursor API DNS/network permission is recorded as owned by the host or Codex "
+            "session configuration, not something this repository can grant from inside a restricted terminal. "
+            "It does not prove remote model credentials, successful inference, worker execution, subagent "
+            "execution, or release readiness. Codex still owns goal tracking, diff review, verification, and "
+            "final acceptance."
         ),
     }
 
