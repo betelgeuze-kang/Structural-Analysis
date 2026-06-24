@@ -482,6 +482,82 @@ def _resolve_checkpoint(
     }
 
 
+def _checkpoint_resolution_gate(
+    *,
+    checkpoint_resolution: dict[str, Any],
+    checkpoint_meta: dict[str, Any],
+    required_load_scale: float,
+    full_load_tolerance: float,
+) -> tuple[dict[str, Any], list[str]]:
+    selection = checkpoint_resolution.get("selection")
+    selection = selection if isinstance(selection, dict) else {}
+    threshold = float(required_load_scale) - float(full_load_tolerance)
+    if checkpoint_resolution.get("mode") == "explicit":
+        selected_load = _float_or_none(checkpoint_meta.get("load_scale"))
+        full_load_candidate_count = int(
+            selected_load is not None and selected_load >= threshold
+        )
+        candidate_count = 1 if checkpoint_meta.get("path") else 0
+        loadable_count = 1 if selected_load is not None else 0
+        unloadable_count = candidate_count - loadable_count
+        highest_observed = selected_load
+        selected_checkpoint_load_scale = selected_load
+        selected_checkpoint_meets_full_load = bool(full_load_candidate_count)
+    else:
+        loadable_candidates = selection.get("loadable_candidates")
+        loadable_candidates = (
+            loadable_candidates if isinstance(loadable_candidates, list) else []
+        )
+        full_load_candidates: list[dict[str, Any]] = []
+        for candidate in loadable_candidates:
+            if not isinstance(candidate, dict):
+                continue
+            candidate_load = _float_or_none(candidate.get("load_scale"))
+            if candidate_load is None or candidate_load < threshold:
+                continue
+            full_load_candidates.append(candidate)
+        highest_observed = _float_or_none(selection.get("highest_observed_load_scale"))
+        selected = selection.get("selected_checkpoint")
+        selected = selected if isinstance(selected, dict) else {}
+        full_load_candidate_count = len(full_load_candidates)
+        candidate_count = selection.get("candidate_count")
+        loadable_count = selection.get("loadable_count")
+        unloadable_count = selection.get("unloadable_count")
+        selected_checkpoint_load_scale = _float_or_none(selected.get("load_scale"))
+        selected_checkpoint_meets_full_load = bool(
+            selected.get("meets_full_load") is True
+        )
+    blockers: list[str] = []
+    if full_load_candidate_count == 0:
+        blockers.append("checkpoint_resolution_no_full_load_candidate")
+    return {
+        "schema_version": "g1-checkpoint-resolution-gate.v1",
+        "mode": checkpoint_resolution.get("mode"),
+        "required_load_scale": float(required_load_scale),
+        "full_load_tolerance": float(full_load_tolerance),
+        "candidate_count": candidate_count,
+        "loadable_count": loadable_count,
+        "unloadable_count": unloadable_count,
+        "highest_observed_load_scale": highest_observed,
+        "full_load_candidate_count": full_load_candidate_count,
+        "selected_checkpoint_load_scale": selected_checkpoint_load_scale,
+        "selected_checkpoint_meets_full_load": selected_checkpoint_meets_full_load,
+        "highest_observed_gap_to_required_load_scale": (
+            float(required_load_scale) - highest_observed
+            if highest_observed is not None
+            else None
+        ),
+        "passed": bool(full_load_candidate_count),
+        "blockers": blockers,
+        "claim_boundary": (
+            "This gate proves only whether the scanned checkpoint evidence contains "
+            "a loadable checkpoint at the required full-load scale. It does not "
+            "prove residual, increment, material Newton, or production ROCm/HIP "
+            "closure."
+        ),
+    }, blockers
+
+
 def _direct_probe_command(
     *,
     checkpoint_npz: Path,
@@ -710,6 +786,17 @@ def build_lane_report(
     )
     if not full_load_input_pass and "checkpoint_load_scale_missing" not in blockers:
         blockers.append("checkpoint_load_scale_below_required_full_load")
+    checkpoint_resolution_gate, checkpoint_resolution_gate_blockers = (
+        _checkpoint_resolution_gate(
+            checkpoint_resolution=checkpoint_resolution,
+            checkpoint_meta=checkpoint_meta,
+            required_load_scale=float(required_load_scale),
+            full_load_tolerance=float(full_load_tolerance),
+        )
+    )
+    for blocker in checkpoint_resolution_gate_blockers:
+        if blocker not in blockers:
+            blockers.append(blocker)
     checkpoint_load_path_blockers = _load_path_provenance_blockers(
         checkpoint_meta=checkpoint_meta,
         required_load_scale=float(required_load_scale),
@@ -758,6 +845,7 @@ def build_lane_report(
         "reused_evidence": False,
         "checkpoint": checkpoint_meta,
         "checkpoint_resolution": checkpoint_resolution,
+        "checkpoint_resolution_gate": checkpoint_resolution_gate,
         "required_load_scale": float(required_load_scale),
         "full_load_tolerance": float(full_load_tolerance),
         "full_load_input_pass": full_load_input_pass,

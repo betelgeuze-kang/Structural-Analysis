@@ -1,0 +1,40 @@
+# Kiro Design Slice
+
+You are Kiro running as a design-only architect on model `opus-4.8`. Codex owns the active goal, acceptance criteria, verification planning, claim-boundary review, and final acceptance. Cursor `composer-2.5` may implement approved scoped local edits, but this slice is evidence generation and status refresh only.
+
+Do not edit files. Do not claim readiness closure. Do not produce a long design document.
+
+## Task
+
+Goal: Design the next bounded G1 shell-material CPU diagnostic continuation after followup427.
+
+Current blocker: G1 remains partial. Followup426 proved same target64/support4 no descent at the previous latest checkpoint. Followup427 changed to target128/support4 and reopened descent from `1.5789301142824925 N` to `1.482511519898516 N`, still about `2.97e3x` above the `5e-4 N` direct-residual gate. The latest target128/support4 child stopped at `max_promotions_exhausted`; no target128/support4 no-descent receipt exists at the latest checkpoint.
+
+Scope: Recommend whether Codex should continue target128/support4 current-tangent row correction from the followup427 compact checkpoint with one bounded child, or first run a different changed-operator diagnostic. Keep the result CPU-diagnostic only. Do not propose broad refactors, external submissions, readiness closure, or edits outside receipt/status/ledger refreshes.
+
+Candidate files:
+
+- `implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_compact_checkpoint.npz`
+- `scripts/run_mgt_shell_material_rowcorr_budget_controller.py`
+- `scripts/build_mgt_g1_shell_material_budgeted_continuation_status.py`
+- `docs/commercial-structural-solver-product-gap-ledger.md`
+- `docs/structural-analysis-ai-engine-gap-ledger.md`
+
+Verification criteria:
+
+- New receipt, if run, must include direct residual, compact checkpoint, promotion count, residual gate status, and claim boundary.
+- Status reporter must continue to mark G1 partial unless all full-load/full-mesh/material Newton/production ROCm-HIP gates are proven.
+- If target128/support4 improves, count it as the latest CPU-diagnostic frontier; if it does not, record it as non-promoting boundary evidence without replacing followup427.
+- Commercial and AI ledgers must describe the new evidence as CPU-diagnostic frontier or boundary evidence only.
+- Run focused reporter tests, orchestration preflight, readiness consistency checks, release freshness, `./scripts/ai-verify.sh`, and `git diff --check`.
+
+## Return Format
+
+Return only these sections:
+
+- Design summary
+- Implementation order
+- Candidate files
+- Verification plan
+- Risks and claim boundary
+- Cursor handoff prompt

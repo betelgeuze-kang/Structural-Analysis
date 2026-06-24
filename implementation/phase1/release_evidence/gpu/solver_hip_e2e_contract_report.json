@@ -1,12 +1,7 @@
 {
   "schema_version": "1.1",
   "run_id": "phase1-solver-hip-e2e-contract",
-  "generated_at": "2026-05-02T16:59:52.463932+00:00",
-  "source_boundary": {
-    "purpose": "Small checked-in GPU evidence consumed by CPU-required release publication runners.",
-    "canonical_generated_target": "implementation/phase1/solver_hip_e2e_contract_report.json",
-    "policy": "CPU-only GitHub runners must not regenerate GPU-only solver HIP e2e evidence. They materialize this reviewed source evidence, while true GPU refresh remains a separate GPU-capable validation task."
-  },
+  "generated_at": "2026-06-24T13:43:51.826206+00:00",
   "checks": {
     "strict_probe_pass": true,
     "nonlinear_frame_gpu_pass": true,
@@ -43,23 +38,23 @@
     "hazard_family_count": 20,
     "topology_family_count": 17,
     "load_path_family_count": 15,
-    "hip_kernel_invocation_count_total": 848
+    "hip_kernel_invocation_count_total": 883
   },
-  "summary_line": "Solver HIP e2e: PASS | gpu_loops=20/20 | production_kernel=20/20 | surrogate_free=20/20 | variants=20 | hazards=20 | topologies=17 | load_paths=15 | device_residency_min=1.00 | hip_kernels=848",
+  "summary_line": "Solver HIP e2e: PASS | gpu_loops=20/20 | production_kernel=20/20 | surrogate_free=20/20 | variants=20 | hazards=20 | topologies=17 | load_paths=15 | device_residency_min=1.00 | hip_kernels=883",
   "solver_rows": [
     {
       "solver": "nonlinear_frame_static_rc",
-      "elapsed_seconds": 1.4129402969992952,
+      "elapsed_seconds": 1.3346699709995846,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
-        "solver_path_kind": "production_hip_kernel",
+        "solver_path_kind": "production_hip_newton",
         "production_kernel_path": true,
         "force_jacobian_kernel_consistent": true,
         "surrogate_runtime_used": false,
         "simplified_runtime_used": false,
         "surrogate_runtime_markers": [],
-        "hip_kernel_invocation_count": 6,
+        "hip_kernel_invocation_count": 16,
         "cpu_backend": false,
         "cpu_required": false,
         "cpu_fallback_used": false,
@@ -79,7 +74,7 @@
     },
     {
       "solver": "nonlinear_frame_static_steel_slender",
-      "elapsed_seconds": 0.0010346379967813846,
+      "elapsed_seconds": 0.07113850699988689,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -109,17 +104,17 @@
     },
     {
       "solver": "nonlinear_frame_static_transfer_irregular",
-      "elapsed_seconds": 0.0008937829989008605,
+      "elapsed_seconds": 0.003823582000222814,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
-        "solver_path_kind": "production_hip_kernel",
+        "solver_path_kind": "production_hip_newton",
         "production_kernel_path": true,
         "force_jacobian_kernel_consistent": true,
         "surrogate_runtime_used": false,
         "simplified_runtime_used": false,
         "surrogate_runtime_markers": [],
-        "hip_kernel_invocation_count": 6,
+        "hip_kernel_invocation_count": 18,
         "cpu_backend": false,
         "cpu_required": false,
         "cpu_fallback_used": false,
@@ -139,7 +134,7 @@
     },
     {
       "solver": "nonlinear_frame_static_soft_story",
-      "elapsed_seconds": 0.0008739229997445364,
+      "elapsed_seconds": 0.0037765090000903,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -169,17 +164,17 @@
     },
     {
       "solver": "nonlinear_frame_static_podium_torsion",
-      "elapsed_seconds": 0.0008707119995960966,
+      "elapsed_seconds": 0.0048538870000811585,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
-        "solver_path_kind": "production_hip_kernel",
+        "solver_path_kind": "production_hip_newton",
         "production_kernel_path": true,
         "force_jacobian_kernel_consistent": true,
         "surrogate_runtime_used": false,
         "simplified_runtime_used": false,
         "surrogate_runtime_markers": [],
-        "hip_kernel_invocation_count": 6,
+        "hip_kernel_invocation_count": 19,
         "cpu_backend": false,
         "cpu_required": false,
         "cpu_fallback_used": false,
@@ -199,7 +194,7 @@
     },
     {
       "solver": "nonlinear_frame_static_diaphragm_transfer",
-      "elapsed_seconds": 0.0008998430021165404,
+      "elapsed_seconds": 0.004296723000152269,
       "backend": "rust_ffi_nonlinear_frame",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -229,7 +224,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_service",
-      "elapsed_seconds": 0.12075369699959992,
+      "elapsed_seconds": 0.12445975599985104,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -259,7 +254,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_pulse",
-      "elapsed_seconds": 0.09816258699720493,
+      "elapsed_seconds": 0.10665316799986613,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -289,7 +284,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_wind_burst",
-      "elapsed_seconds": 0.09786764700038475,
+      "elapsed_seconds": 0.10661778600024263,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -319,7 +314,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_aftershock",
-      "elapsed_seconds": 0.09810147399912239,
+      "elapsed_seconds": 0.10651366199999757,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -349,7 +344,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_bidirectional",
-      "elapsed_seconds": 0.09801051199974609,
+      "elapsed_seconds": 0.1065339730002961,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -379,7 +374,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_transition_wind",
-      "elapsed_seconds": 0.09799027000190108,
+      "elapsed_seconds": 0.1062317890000486,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -409,7 +404,7 @@
     },
     {
       "solver": "nonlinear_frame_ndtha_pounding_sequence",
-      "elapsed_seconds": 0.09793087899743114,
+      "elapsed_seconds": 0.1060106499999165,
       "backend": "rust_ffi_nonlinear_frame_ndtha",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -439,7 +434,7 @@
     },
     {
       "solver": "track_lf_timoshenko",
-      "elapsed_seconds": 0.0007960689981700853,
+      "elapsed_seconds": 0.0008180869999705465,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -469,7 +464,7 @@
     },
     {
       "solver": "track_lf_euler_fixed",
-      "elapsed_seconds": 0.0005290289991535246,
+      "elapsed_seconds": 0.0005580249999184161,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -499,7 +494,7 @@
     },
     {
       "solver": "track_lf_pasternak_transition",
-      "elapsed_seconds": 0.0006364830005622935,
+      "elapsed_seconds": 0.0006888000002618355,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -529,7 +524,7 @@
     },
     {
       "solver": "track_lf_ballasted_wave",
-      "elapsed_seconds": 0.0006413129995053168,
+      "elapsed_seconds": 0.0006889010001032148,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -559,7 +554,7 @@
     },
     {
       "solver": "track_lf_bridge_approach",
-      "elapsed_seconds": 0.0005068280006526038,
+      "elapsed_seconds": 0.0005489949999173405,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -589,7 +584,7 @@
     },
     {
       "solver": "track_lf_tunnel_transition",
-      "elapsed_seconds": 0.0006278029977693222,
+      "elapsed_seconds": 0.0007081319999997504,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",
@@ -619,7 +614,7 @@
     },
     {
       "solver": "track_lf_crosswind_viaduct",
-      "elapsed_seconds": 0.0005023890007578302,
+      "elapsed_seconds": 0.0005461850000756385,
       "backend": "rust_ffi_kernel",
       "runtime": {
         "main_loop_backend": "rocm_torch_hip_mainloop",

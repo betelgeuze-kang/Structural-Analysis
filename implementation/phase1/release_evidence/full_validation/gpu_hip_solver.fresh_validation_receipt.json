@@ -1,0 +1,35 @@
+{
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-24T13:43:52.310105+00:00",
+  "input_checksums": {
+    "implementation/phase1/run_solver_hip_e2e_contract.py": "sha256:c03f000546411d1db7c1d63afb9b9ac26f3e0757530370829e73ed48c023e9dc",
+    "implementation/phase1/zero_copy_real_probe_report_strict.json": "sha256:00befd00a5c44e17d02b5f89dd94d59983ac71208fa976e13326ce0170463884"
+  },
+  "lane_id": "gpu_hip_solver",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "solver_hip_e2e_contract_report",
+      "path": "implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json",
+      "sha256": "sha256:adf8958b1d5c3e93c955b773b670997f5f01880cbf9434df6824a1e8524c0d7e"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "gpu_capable_rocm_hip_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
+  "summary": {
+    "blocker_group": "fresh_receipt_presence",
+    "case_count": 20,
+    "claim_boundary_tag": "gpu_hip_after_cpu_reference_parity_non_promoting",
+    "developer_preview_category": "benchmark",
+    "duration_seconds": 3.618215,
+    "lane_scope": "performance_track_after_cpu_reference_parity",
+    "passed_case_count": 20,
+    "promotes_g1_cpu_parity": false,
+    "readiness_group": "fresh_validation"
+  },
+  "validation_command": "python3 implementation/phase1/run_solver_hip_e2e_contract.py --out implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json"
+}

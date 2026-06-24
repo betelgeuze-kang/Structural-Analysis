@@ -1,0 +1,18 @@
+# Local Codex/Betelgeuze runtime logs and worker transcripts.
+.betelgeuze/trace.jsonl
+.betelgeuze/trace_archive/
+.betelgeuze/worker_outputs/
+.betelgeuze/cursor_worker_bridge/
+trace.jsonl
+trace_archive/
+worker_outputs/
+cursor_worker_bridge/
+
+# Large generated evidence corpora. Search these explicitly when needed with
+# `rg --no-ignore ... implementation/phase1/release_evidence/productization`.
+implementation/phase1/release_evidence/productization/
+productization/
+
+# Generated dependencies and transient outputs.
+node_modules/
+tmp/

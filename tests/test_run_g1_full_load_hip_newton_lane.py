@@ -89,6 +89,16 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
     assert payload["checkpoint"]["load_scale"] == 0.656
     assert payload["full_load_input_pass"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    assert "checkpoint_resolution_no_full_load_candidate" in payload["blockers"]
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
+    assert checkpoint_resolution_gate["selected_checkpoint_load_scale"] == 0.656
+    assert (
+        checkpoint_resolution_gate["highest_observed_gap_to_required_load_scale"]
+        == 1.0 - 0.656
+    )
     assert payload["child_gate_evidence"]["ready"] is False
     assert payload["child_gate_evidence"]["material_newton_breadth_passed"] is False
     assert (
@@ -186,6 +196,11 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert payload["status"] == "ready_to_run"
     assert payload["contract_pass"] is False
     assert payload["full_load_input_pass"] is True
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is True
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 1
+    assert checkpoint_resolution_gate["selected_checkpoint_load_scale"] == 1.0
     assert "--matrix-free-global-krylov-require-hip-batch-replay" in command
     assert "--current-tangent-residual-row-require-hip-batch-replay" in command
     assert "--allow-state-dependent-shell-material-tangent-hip-replay" in command
@@ -2165,6 +2180,11 @@ def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
     assert resolution["selection"]["highest_observed_load_scale"] == 1.0
     assert resolution["selection"]["selected_checkpoint"]["path"] == str(full)
     assert resolution["selection"]["selection_reason"] == "full_load_candidate_selected"
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "auto_select"
+    assert checkpoint_resolution_gate["passed"] is True
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 1
+    assert checkpoint_resolution_gate["highest_observed_load_scale"] == 1.0
     assert Path(payload["checkpoint"]["path"]) == full
 
 
@@ -2232,6 +2252,7 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
     assert payload["status"] == "blocked"
     assert payload["full_load_input_pass"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    assert "checkpoint_resolution_no_full_load_candidate" in payload["blockers"]
     resolution = payload["checkpoint_resolution"]
     assert resolution["mode"] == "auto_select"
     assert resolution["selection"]["highest_observed_load_scale"] == 0.95
@@ -2243,6 +2264,15 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
         == "highest_sub_full_load_candidate_selected"
     )
     assert payload["checkpoint"]["load_scale"] == 0.95
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "auto_select"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
+    assert checkpoint_resolution_gate["highest_observed_load_scale"] == 0.95
+    assert (
+        checkpoint_resolution_gate["highest_observed_gap_to_required_load_scale"]
+        == 0.050000000000000044
+    )
 
 
 def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
@@ -2275,6 +2305,10 @@ def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
     assert resolution["requested_path"] == str(explicit)
     assert Path(payload["checkpoint"]["path"]) == explicit
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
 
 
 def test_auto_select_ignores_generic_npz_path_records(tmp_path: Path) -> None:

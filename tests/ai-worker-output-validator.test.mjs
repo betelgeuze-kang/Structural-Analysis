@@ -286,6 +286,7 @@ spawnBackedTest('cursor wrapper explains persistent Cursor API DNS failures', ()
   const env = wrapperEnv(fixture);
   env.AI_WORKER_CURSOR_RETRIES = '1';
   env.AI_WORKER_CURSOR_RETRY_DELAY_SECONDS = '0';
+  env.AI_WORKER_CURSOR_HOST_BRIDGE = 'disabled';
 
   const result = runWrapper(cursorWrapper, fixture, env);
 

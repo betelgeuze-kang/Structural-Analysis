@@ -1,0 +1,37 @@
+{
+  "claim_boundary": "This receipt verifies prompt-file based Kiro invocation targeting opus-4.8 with design-only/no-edit and no-readiness-closure prompt boundaries. It does not claim readiness closure, file edits, model credential validity, or headless design-output capture.",
+  "design_only_boundary_verified_in_prompt": true,
+  "equivalent_prompt_check_command": [
+    "scripts/ai-worker-kiro.sh",
+    "--check",
+    "docs/ai/dispatch/kiro_g1_followup436_shell_material_normal_rows_boundary_design_20260624T190229Z.md"
+  ],
+  "generated_at": "2026-06-24T19:02:51.827673+00:00",
+  "headless_stdout_capture": false,
+  "kiro_chat_command_available": true,
+  "kiro_chat_exit_status": 0,
+  "kiro_chat_launch_attempted": true,
+  "kiro_chat_launch_passed": true,
+  "kiro_chat_mode": "ask",
+  "kiro_cli_found": true,
+  "kiro_cli_path": "/usr/bin/kiro",
+  "kiro_model_target": "opus-4.8",
+  "model_target_source": "ai-worker-kiro.sh required_kiro_model",
+  "model_target_verified_in_prompt": true,
+  "output_capture_boundary": "The Kiro CLI launches a chat session, but this wrapper does not receive a machine-readable design brief on stdout. Treat this receipt as launch evidence only, not as proof that Kiro produced or Codex consumed a design.",
+  "prompt_file": "docs/ai/dispatch/kiro_g1_followup436_shell_material_normal_rows_boundary_design_20260624T190229Z.md",
+  "prompt_validation": {
+    "design_only_boundary_verified": true,
+    "model_line_verified": true,
+    "model_target_verified": true,
+    "readiness_closure_claim_forbidden": true,
+    "required_kiro_model": "opus-4.8"
+  },
+  "readiness_closure_claim_forbidden_in_prompt": true,
+  "schema_version": "kiro-design-worker-launch.v1",
+  "stderr_bytes": 0,
+  "stdout_bytes": 0,
+  "wrapper_prelaunch_check_passed": true,
+  "wrapper_validation_mode": "automatic_prelaunch_before_kiro_chat",
+  "wrapper_validation_passed": true
+}

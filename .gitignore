@@ -36,7 +36,9 @@ target/
 
 # Local Codex/Betelgeuze runtime logs
 .betelgeuze/trace.jsonl
+.betelgeuze/trace_archive/
 .betelgeuze/worker_outputs/
+.betelgeuze/cursor_worker_bridge/
 
 # Local screenshots
 Code_Generated_Image*.png

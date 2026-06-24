@@ -156,9 +156,9 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
                         "commercial_solver": {
                             "row_count": 10,
                             "nonclosed_row_count": 3,
-                            "closure_requirement_count": 18,
+                            "closure_requirement_count": 19,
                             "closure_requirement_pass_count": 3,
-                            "closure_requirement_fail_count": 15,
+                            "closure_requirement_fail_count": 16,
                             "nonclosed_rows_with_failed_closure_requirements_count": 3,
                             "nonclosed_failed_closure_requirement_ids": [
                                 "G1:full_load_scale_1_0_reached",
@@ -313,9 +313,9 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
     assert closure_visibility["source_status"] == "ready"
     assert closure_visibility["source_contract_pass"] is True
     assert closure_visibility["source_full_gap_ledger_ready"] is False
-    assert closure_visibility["closure_requirement_count"] == 18
+    assert closure_visibility["closure_requirement_count"] == 19
     assert closure_visibility["closure_requirement_pass_count"] == 3
-    assert closure_visibility["closure_requirement_fail_count"] == 15
+    assert closure_visibility["closure_requirement_fail_count"] == 16
     assert closure_visibility["nonclosed_rows_with_failed_closure_requirements_count"] == 3
     assert closure_visibility["nonclosed_failed_closure_requirement_ids"] == [
         "G1:full_load_scale_1_0_reached",
@@ -323,7 +323,7 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
         "G7:operator_manifest_source_mapping_clear",
     ]
     commercial_solver = closure_visibility["ledgers"]["commercial_solver"]
-    assert commercial_solver["closure_requirement_fail_count"] == 15
+    assert commercial_solver["closure_requirement_fail_count"] == 16
     assert "does not add Developer Preview blockers" in closure_visibility["claim_boundary"]
 
 
@@ -631,9 +631,9 @@ def test_markdown_report_lists_scope_and_nonblocking_future_commercial(tmp_path:
                         "commercial_solver": {
                             "row_count": 10,
                             "nonclosed_row_count": 3,
-                            "closure_requirement_count": 18,
+                            "closure_requirement_count": 19,
                             "closure_requirement_pass_count": 3,
-                            "closure_requirement_fail_count": 15,
+                            "closure_requirement_fail_count": 16,
                             "nonclosed_rows_with_failed_closure_requirements_count": 3,
                             "nonclosed_failed_closure_requirement_ids": [
                                 "G1:full_load_scale_1_0_reached",
@@ -678,8 +678,8 @@ def test_markdown_report_lists_scope_and_nonblocking_future_commercial(tmp_path:
     assert "commercial license/legal approval" in markdown
     assert "does_not_create_authoritative_closure_evidence" in markdown
     assert "## Gap Ledger Closure Requirement Visibility" in markdown
-    assert "`closure_requirements`: `3/18`" in markdown
-    assert "`failed_closure_requirements`: `15`" in markdown
+    assert "`closure_requirements`: `3/19`" in markdown
+    assert "`failed_closure_requirements`: `16`" in markdown
     assert "`G1:full_load_scale_1_0_reached`" in markdown
     assert "does not add Developer Preview blockers" in markdown
     assert (

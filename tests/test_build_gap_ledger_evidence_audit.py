@@ -44,15 +44,23 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert nonclosed["nonclosed_rows_with_evidence_count"] == 3
     assert nonclosed["nonclosed_missing_blocker_ids"] == []
     assert nonclosed["nonclosed_missing_claim_boundary_ids"] == []
+    source_paths = payload["source_receipt_path_coverage"]
+    assert source_paths["source_receipt_path_count"] == 112
+    assert source_paths["source_receipt_existing_path_count"] == 112
+    assert source_paths["source_receipt_missing_path_count"] == 0
+    assert source_paths["source_receipt_missing_row_ids"] == []
     assert payload["blockers"] == []
     outcomes = {row["id"]: row for row in payload["row_outcomes"]}
     assert outcomes["G1"]["closed"] is False
     assert outcomes["G1"]["claim_boundary_present"] is True
-    assert outcomes["G1"]["closure_requirement_count"] == 8
+    assert outcomes["G1"]["source_receipt_path_count"] == 21
+    assert outcomes["G1"]["source_receipt_missing_path_count"] == 0
+    assert outcomes["G1"]["closure_requirement_count"] == 9
     assert outcomes["G1"]["closure_requirement_pass_count"] == 2
-    assert outcomes["G1"]["closure_requirement_fail_count"] == 6
+    assert outcomes["G1"]["closure_requirement_fail_count"] == 7
     assert outcomes["G1"]["closure_requirement_failed_ids"] == [
         "full_load_scale_1_0_reached",
+        "strict_full_load_hip_newton_checkpoint_available",
         "full_line_mesh_nonlinear_equilibrium_closed",
         "full_frame_6dof_nonlinear_equilibrium_closed",
         "coupled_frame_surface_nonlinear_equilibrium_closed",
@@ -82,6 +90,8 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     assert outcomes["G2"]["evidence_present"] is True
     assert outcomes["G2"]["claim_boundary_present"] is True
     assert outcomes["G2"]["next_gate_present"] is True
+    assert outcomes["AI-G1"]["source_receipt_path_count"] == 8
+    assert outcomes["AI-G1"]["source_receipt_missing_path_count"] == 0
     assert "does not create authoritative evidence" in payload["claim_boundary"]
 
 
@@ -106,3 +116,51 @@ def test_gap_ledger_evidence_audit_check_detects_drift(tmp_path: Path) -> None:
 
     assert ok is False
     assert message == "gap_ledger_evidence_audit_mismatch"
+
+
+def test_gap_ledger_evidence_audit_blocks_missing_source_receipt_path(
+    tmp_path: Path,
+) -> None:
+    ledger = tmp_path / "commercial_gap_ledger_status.json"
+    ledger.write_text(
+        json.dumps(
+            {
+                "status": "open",
+                "full_gap_ledger_ready": False,
+                "rows": [
+                    {
+                        "id": "G1",
+                        "ledger": "commercial_solver",
+                        "status": "partial",
+                        "blockers": ["still_open"],
+                        "claim_boundary": "partial row boundary",
+                        "evidence": {
+                            "source_receipts": {
+                                "missing": "missing-source-receipt.json"
+                            }
+                        },
+                    }
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_gap_ledger_evidence_audit(
+        repo_root=tmp_path,
+        ledger_status_path=ledger,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["source_receipt_path_coverage"][
+        "source_receipt_missing_path_count"
+    ] == 1
+    assert payload["source_receipt_path_coverage"][
+        "source_receipt_missing_row_ids"
+    ] == ["G1"]
+    assert payload["blockers"] == ["source_receipt_path_missing:G1"]

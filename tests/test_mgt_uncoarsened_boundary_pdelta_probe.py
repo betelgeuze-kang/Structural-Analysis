@@ -10,6 +10,7 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "implementation" / "phase1"))
 
+import run_mgt_uncoarsened_boundary_pdelta_probe as pdelta_module  # noqa: E402
 from run_mgt_uncoarsened_boundary_pdelta_probe import (  # noqa: E402
     CHECKPOINT_SCHEMA_VERSION,
     _annotate_convergence_gates,
@@ -160,6 +161,83 @@ def test_uncoarsened_boundary_pdelta_seed_alpha_scan_keeps_increment_gate_strict
     assert row["relative_increment_gate_passed"] is False
     assert row["ready"] is False
     assert compact["ready"] is False
+
+
+def test_uncoarsened_boundary_pdelta_seed_alpha_scan_load_step_avoids_duplicate_tolerances(
+    monkeypatch,
+) -> None:
+    calls: list[dict[str, object]] = []
+
+    def fake_build_equilibrium_step_assembler(**_kwargs):
+        return object(), {"stubbed": True}
+
+    def fake_seed_alpha_scan(
+        *,
+        load_scale,
+        seed_u,
+        alpha_values,
+        residual_tolerance_n,
+        relative_increment_tolerance,
+        displacement_cap_m,
+        **kwargs,
+    ):
+        calls.append(
+            {
+                "load_scale": load_scale,
+                "alpha_values": alpha_values,
+                "residual_tolerance_n": residual_tolerance_n,
+                "relative_increment_tolerance": relative_increment_tolerance,
+                "displacement_cap_m": displacement_cap_m,
+                "kwargs": kwargs,
+            }
+        )
+        return (
+            {
+                "best_ready": True,
+                "best_residual_inf_n": 4.0e-4,
+                "best_fixed_point_relative_increment": 8.0e-5,
+                "best_max_translation_m": 0.25,
+            },
+            np.asarray(seed_u, dtype=np.float64),
+        )
+
+    monkeypatch.setattr(
+        pdelta_module,
+        "build_equilibrium_step_assembler",
+        fake_build_equilibrium_step_assembler,
+    )
+    monkeypatch.setattr(pdelta_module, "_seed_alpha_scan", fake_seed_alpha_scan)
+
+    row, _u = pdelta_module._run_load_step(
+        load_scale=0.65625,
+        seed_u=np.zeros(6, dtype=np.float64),
+        max_iterations=0,
+        relaxation_factor=0.5,
+        residual_tolerance_n=1.0e-3,
+        relative_increment_tolerance=2.0e-4,
+        displacement_cap_m=5.0,
+        seed_alpha_scan_values=(0.0, 0.5, 1.0),
+        node_xyz=np.zeros((1, 3), dtype=np.float64),
+        frame_elements=[],
+        elem_type_code=np.asarray([], dtype=np.int32),
+        elem_section_id=np.asarray([], dtype=np.int32),
+        elem_material_id=np.asarray([], dtype=np.int32),
+        conn_ptr=np.asarray([], dtype=np.int64),
+        conn_idx=np.asarray([], dtype=np.int64),
+        section_props={},
+        material_props={},
+        plate_thickness_props={},
+        spring_stiffness=None,
+        restrained=set(),
+        base_axial_forces={},
+        base_frame_gravity_scale=0.01,
+    )
+
+    assert row["ready"] is True
+    assert calls[0]["residual_tolerance_n"] == 1.0e-3
+    assert calls[0]["relative_increment_tolerance"] == 2.0e-4
+    assert "residual_tolerance_n" not in calls[0]["kwargs"]
+    assert "relative_increment_tolerance" not in calls[0]["kwargs"]
 
 
 def test_uncoarsened_boundary_pdelta_rejects_solver_only_residual_gate() -> None:

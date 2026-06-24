@@ -39,7 +39,7 @@
   "claim_boundary": "This report validates a human new-user observation record. Automated browser rehearsal evidence does not satisfy the PM UX release-area gate by itself.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-24T13:04:15.894278+00:00",
+  "generated_at": "2026-06-24T13:12:37.808122+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/ux_new_user_observation.json": "missing"
   },
@@ -84,7 +84,7 @@
   ],
   "reused_evidence": false,
   "schema_version": "ux-new-user-observation-report.v1",
-  "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
+  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
   "summary": {
     "approval_decision": "",
     "blocker_count": 1,

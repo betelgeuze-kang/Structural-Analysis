@@ -112,6 +112,80 @@ def _closure_requirement_summary(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _collect_source_receipt_paths(value: Any, *, field_path: str = "") -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{field_path}.{key}" if field_path else str(key)
+            if key == "source_receipts" or str(key).endswith("_source_receipts"):
+                rows.extend(_source_receipt_entries(child, field_path=child_path))
+            rows.extend(_collect_source_receipt_paths(child, field_path=child_path))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            rows.extend(
+                _collect_source_receipt_paths(
+                    child,
+                    field_path=f"{field_path}[{index}]",
+                )
+            )
+    return rows
+
+
+def _source_receipt_entries(value: Any, *, field_path: str) -> list[dict[str, str]]:
+    rows: list[dict[str, str]] = []
+    if isinstance(value, str):
+        return [{"field_path": field_path, "receipt_key": "", "path": value}]
+    if isinstance(value, list):
+        for index, child in enumerate(value):
+            if isinstance(child, str):
+                rows.append(
+                    {
+                        "field_path": field_path,
+                        "receipt_key": str(index),
+                        "path": child,
+                    }
+                )
+        return rows
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if isinstance(child, str):
+                rows.append(
+                    {
+                        "field_path": field_path,
+                        "receipt_key": str(key),
+                        "path": child,
+                    }
+                )
+            elif isinstance(child, list):
+                for index, item in enumerate(child):
+                    if isinstance(item, str):
+                        rows.append(
+                            {
+                                "field_path": field_path,
+                                "receipt_key": f"{key}[{index}]",
+                                "path": item,
+                            }
+                        )
+    return rows
+
+
+def _source_receipt_path_summary(
+    row: dict[str, Any], *, repo_root: Path
+) -> dict[str, Any]:
+    entries = _collect_source_receipt_paths(_as_dict(row.get("evidence")))
+    missing = []
+    for entry in entries:
+        receipt_path = Path(entry["path"])
+        resolved = receipt_path if receipt_path.is_absolute() else repo_root / receipt_path
+        if not resolved.exists():
+            missing.append(entry)
+    return {
+        "source_receipt_path_count": len(entries),
+        "source_receipt_missing_path_count": len(missing),
+        "source_receipt_missing_paths": missing,
+    }
+
+
 def build_gap_ledger_evidence_audit(
     *,
     repo_root: Path = ROOT,
@@ -132,6 +206,15 @@ def build_gap_ledger_evidence_audit(
     nonclosed_missing_blockers = [_row_id(row) for row in nonclosed_rows if not _as_list(row.get("blockers"))]
     nonclosed_missing_claim_boundary = [_row_id(row) for row in nonclosed_rows if not _has_claim_boundary(row)]
     nonclosed_missing_evidence = [_row_id(row) for row in nonclosed_rows if not _has_evidence(row)]
+    source_receipt_path_summaries = {
+        _row_id(row): _source_receipt_path_summary(row, repo_root=repo_root)
+        for row in rows
+    }
+    source_receipt_missing_rows = [
+        row_id
+        for row_id, summary in source_receipt_path_summaries.items()
+        if int(summary["source_receipt_missing_path_count"]) > 0
+    ]
 
     blockers = [
         *[f"closed_row_missing_evidence:{row_id}" for row_id in closed_missing_evidence],
@@ -143,8 +226,17 @@ def build_gap_ledger_evidence_audit(
         *[f"nonclosed_row_missing_blockers:{row_id}" for row_id in nonclosed_missing_blockers],
         *[f"nonclosed_row_missing_claim_boundary:{row_id}" for row_id in nonclosed_missing_claim_boundary],
         *[f"nonclosed_row_missing_evidence:{row_id}" for row_id in nonclosed_missing_evidence],
+        *[f"source_receipt_path_missing:{row_id}" for row_id in source_receipt_missing_rows],
     ]
     contract_pass = not blockers
+    total_source_receipt_path_count = sum(
+        int(summary["source_receipt_path_count"])
+        for summary in source_receipt_path_summaries.values()
+    )
+    total_source_receipt_missing_path_count = sum(
+        int(summary["source_receipt_missing_path_count"])
+        for summary in source_receipt_path_summaries.values()
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -188,6 +280,20 @@ def build_gap_ledger_evidence_audit(
             "nonclosed_missing_claim_boundary_ids": nonclosed_missing_claim_boundary,
             "nonclosed_missing_evidence_ids": nonclosed_missing_evidence,
         },
+        "source_receipt_path_coverage": {
+            "source_receipt_path_count": total_source_receipt_path_count,
+            "source_receipt_existing_path_count": (
+                total_source_receipt_path_count - total_source_receipt_missing_path_count
+            ),
+            "source_receipt_missing_path_count": total_source_receipt_missing_path_count,
+            "source_receipt_missing_row_ids": source_receipt_missing_rows,
+            "claim_boundary": (
+                "This checks only explicit source_receipts and *_source_receipts "
+                "paths that the ledger status advertises as evidence or guard "
+                "inputs. It does not require terminal closure-evidence paths that "
+                "are intentionally absent for partial or external-blocked rows."
+            ),
+        },
         "row_outcomes": [
             {
                 "id": _row_id(row),
@@ -199,6 +305,7 @@ def build_gap_ledger_evidence_audit(
                 "claim_boundary_present": _has_claim_boundary(row),
                 "next_gate_present": _has_next_gate(row),
                 "evidence_key_count": len(_as_dict(row.get("evidence"))),
+                **source_receipt_path_summaries[_row_id(row)],
                 **_closure_requirement_summary(row),
             }
             for row in rows

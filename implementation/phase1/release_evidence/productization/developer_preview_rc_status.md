@@ -38,8 +38,8 @@
 
 - `source_status`: `ready`
 - `source_full_gap_ledger_ready`: `False`
-- `closure_requirements`: `3/18`
-- `failed_closure_requirements`: `15`
+- `closure_requirements`: `3/19`
+- `failed_closure_requirements`: `16`
 - `nonclosed_rows_with_failed_closure_requirements`: `3`
 
 Failed requirement IDs:
@@ -49,6 +49,7 @@ Failed requirement IDs:
 - `G1:full_line_mesh_nonlinear_equilibrium_closed`
 - `G1:full_load_scale_1_0_reached`
 - `G1:state_updated_material_newton_breadth_closed`
+- `G1:strict_full_load_hip_newton_checkpoint_available`
 - `G6:eb_receipt_hardest_external_10case`
 - `G6:eb_receipt_korean_public_structures`
 - `G6:eb_receipt_peer_spd_hinge`

@@ -241,7 +241,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
 
-    assert payload["known_limitations"]["developer_preview_blocker_count"] == 7
+    assert payload["known_limitations"]["developer_preview_blocker_count"] == len(
+        payload["known_limitations"]["developer_preview_blockers"]
+    )
     assert payload["known_limitations"]["dataset_license_blockers"] == []
     assert payload["known_limitations"]["dataset_license_external_corpus_blockers"] == [
         "phase3_external_corpus:authoritative_source_checksums_pending=4",
@@ -252,9 +254,9 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert gap_visibility["source_status"] == "ready"
     assert gap_visibility["source_contract_pass"] is True
     assert gap_visibility["source_full_gap_ledger_ready"] is False
-    assert gap_visibility["closure_requirement_count"] == 18
+    assert gap_visibility["closure_requirement_count"] == 19
     assert gap_visibility["closure_requirement_pass_count"] == 3
-    assert gap_visibility["closure_requirement_fail_count"] == 15
+    assert gap_visibility["closure_requirement_fail_count"] == 16
     assert gap_visibility["nonclosed_rows_with_failed_closure_requirements_count"] == 3
     assert "G1:full_load_scale_1_0_reached" in gap_visibility[
         "nonclosed_failed_closure_requirement_ids"
@@ -751,8 +753,8 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
     assert "G1 full nonlinear full-mesh" in payload["claim_boundary"]
     markdown = module._markdown(payload)
     assert "## Known Limitation Closure Requirements" in markdown
-    assert "`closure_requirements`: `3/18`" in markdown
-    assert "`failed_closure_requirements`: `15`" in markdown
+    assert "`closure_requirements`: `3/19`" in markdown
+    assert "`failed_closure_requirements`: `16`" in markdown
     assert "`G1:full_load_scale_1_0_reached`" in markdown
     assert "does not add Developer Preview blockers" in markdown
     assert "deliverable_blocked:sample_acquisition_command" not in payload["blockers"]

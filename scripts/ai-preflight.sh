@@ -28,6 +28,7 @@ test -f AGENTS.md && ok "AGENTS.md present" || bad "AGENTS.md missing"
 test -f .codex/config.toml && ok ".codex/config.toml present" || note ".codex/config.toml missing"
 test -f docs/ai/ORCHESTRATION.md && ok "orchestration guide present" || bad "orchestration guide missing"
 test -f docs/ai/prompts/codex_goal_start.md && ok "Codex goal start prompt present" || bad "Codex goal start prompt missing"
+test -f docs/ai/prompts/kiro_design_slice.md && ok "Kiro design prompt template present" || bad "Kiro design prompt template missing"
 test -f docs/ai/prompts/cursor_worker_slice.md && ok "Cursor worker prompt template present" || bad "Cursor worker prompt template missing"
 test -f docs/ai/prompts/opencode_worker_slice.md && ok "OpenCode worker prompt template present" || bad "OpenCode worker prompt template missing"
 test -f opencode.json && ok "opencode.json present" || note "opencode.json missing"
@@ -46,7 +47,83 @@ else
 fi
 
 echo
-echo "[3] OpenCode CLI"
+echo "[3] Kiro CLI"
+if command -v kiro >/dev/null 2>&1; then
+  ok "kiro found: $(command -v kiro)"
+  if kiro chat --help >/dev/null 2>&1; then
+    ok "kiro chat command available"
+  else
+    note "kiro chat command unavailable"
+  fi
+  if test -x scripts/ai-worker-kiro.sh \
+    && grep -q -- 'required_kiro_model="opus-4.8"' scripts/ai-worker-kiro.sh \
+    && grep -q -- 'validate_kiro_prompt' scripts/ai-worker-kiro.sh; then
+    ok "Kiro worker wrapper present and has structured opus-4.8 prompt validation"
+  else
+    bad "Kiro worker wrapper missing structured opus-4.8 prompt validation"
+  fi
+  if grep -q -- 'wrapper_prelaunch_check_passed' scripts/ai-worker-kiro.sh \
+    && grep -q -- 'automatic_prelaunch_before_kiro_chat' scripts/ai-worker-kiro.sh; then
+    ok "Kiro worker wrapper records automatic opus-4.8 prelaunch validation"
+  else
+    bad "Kiro worker wrapper automatic opus-4.8 prelaunch validation missing"
+  fi
+  if grep -q -- 'wrapper_enforced_model_confirmation' scripts/ai-worker-kiro.sh \
+    && grep -q -- "Confirm the prompt's \${required_kiro_model} target" scripts/ai-worker-kiro.sh; then
+    ok "Kiro worker wrapper requires opus-4.8 confirmation in Kiro response"
+  else
+    bad "Kiro worker wrapper opus-4.8 confirmation requirement missing"
+  fi
+  if ./scripts/ai-worker-kiro.sh --check docs/ai/prompts/kiro_design_slice.md >/dev/null 2>&1; then
+    ok "Kiro design prompt template passes wrapper opus-4.8/no-edit/no-closure validation"
+  else
+    bad "Kiro design prompt template fails wrapper validation"
+  fi
+  if test -x scripts/ai-run-kiro-design.sh \
+    && grep -q -- 'ai-worker-kiro.sh --check "$prompt_file"' scripts/ai-run-kiro-design.sh \
+    && grep -q -- 'ai-worker-kiro.sh "$prompt_file"' scripts/ai-run-kiro-design.sh; then
+    ok "Kiro run wrapper automatically checks opus-4.8 prompt boundaries before launch"
+  else
+    bad "Kiro run wrapper automatic check-before-launch wiring missing"
+  fi
+  if grep -q -- 'headless_stdout_capture_wired' scripts/ai-worker-kiro.sh \
+    && grep -q -- 'design_output_path' scripts/ai-worker-kiro.sh \
+    && grep -q -- 'codex_consumable_design_output' scripts/ai-worker-kiro.sh; then
+    ok "Kiro wrapper captures stdout design output when the CLI emits it"
+  else
+    bad "Kiro stdout design output capture wiring missing"
+  fi
+else
+  note "kiro not found; Kiro design prompts can still be prepared but not invoked from this terminal"
+  if grep -q -- 'wrapper_prelaunch_check_passed' scripts/ai-worker-kiro.sh \
+    && grep -q -- 'automatic_prelaunch_before_kiro_chat' scripts/ai-worker-kiro.sh; then
+    ok "Kiro worker wrapper records automatic opus-4.8 prelaunch validation"
+  else
+    bad "Kiro worker wrapper automatic opus-4.8 prelaunch validation missing"
+  fi
+  if grep -q -- 'wrapper_enforced_model_confirmation' scripts/ai-worker-kiro.sh \
+    && grep -q -- "Confirm the prompt's \${required_kiro_model} target" scripts/ai-worker-kiro.sh; then
+    ok "Kiro worker wrapper requires opus-4.8 confirmation in Kiro response"
+  else
+    bad "Kiro worker wrapper opus-4.8 confirmation requirement missing"
+  fi
+  if test -x scripts/ai-worker-kiro.sh \
+    && ./scripts/ai-worker-kiro.sh --check docs/ai/prompts/kiro_design_slice.md >/dev/null 2>&1; then
+    ok "Kiro wrapper can still validate the opus-4.8 design prompt template without launching Kiro"
+  else
+    bad "Kiro wrapper prompt validation unavailable"
+  fi
+  if test -x scripts/ai-run-kiro-design.sh \
+    && grep -q -- 'ai-worker-kiro.sh --check "$prompt_file"' scripts/ai-run-kiro-design.sh \
+    && grep -q -- 'ai-worker-kiro.sh "$prompt_file"' scripts/ai-run-kiro-design.sh; then
+    ok "Kiro run wrapper automatically checks opus-4.8 prompt boundaries before launch"
+  else
+    bad "Kiro run wrapper automatic check-before-launch wiring missing"
+  fi
+fi
+
+echo
+echo "[4] OpenCode CLI"
 if command -v opencode >/dev/null 2>&1; then
   ok "opencode found: $(command -v opencode)"
   ok "opencode version: $(opencode --version)"
@@ -55,8 +132,8 @@ else
 fi
 
 echo
-echo "[4] Worker wrappers"
-if bash -n scripts/ai-worker-cursor.sh scripts/ai-worker-cursor-host-bridge.sh scripts/ai-worker-opencode.sh scripts/ai-dangerous-command-check.sh scripts/ai-verify.sh; then
+echo "[5] Worker wrappers"
+if bash -n scripts/ai-run-kiro-design.sh scripts/ai-worker-kiro.sh scripts/ai-worker-cursor.sh scripts/ai-worker-cursor-host-bridge.sh scripts/ai-worker-opencode.sh scripts/ai-dangerous-command-check.sh scripts/ai-verify.sh; then
   ok "worker shell syntax ok"
 else
   bad "worker shell syntax failed"
@@ -81,6 +158,15 @@ else
   bad "opencode entrypoint cursor routing missing"
 fi
 
+if grep -q -- 'opus-4.8' AGENTS.md docs/ai/ORCHESTRATION.md docs/ai/prompts/kiro_design_slice.md scripts/build_ai_orchestration_preflight_report.py \
+  && grep -q -- 'composer-2.5' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py \
+  && grep -q -- 'gpt-5.5' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py \
+  && grep -q -- 'xhigh' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py; then
+  ok "code-improvement pipeline configured as Kiro opus-4.8 -> Cursor composer-2.5 -> Codex gpt-5.5 xhigh"
+else
+  bad "code-improvement pipeline wiring missing"
+fi
+
 if grep -q -- 'gpt-5.4-mini' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py \
   && grep -q -- 'xhigh' AGENTS.md docs/ai/ORCHESTRATION.md scripts/build_ai_orchestration_preflight_report.py; then
   ok "internal subagent fallback uses gpt-5.4-mini xhigh"
@@ -96,7 +182,7 @@ else
 fi
 
 echo
-echo "[5] Local verify"
+echo "[6] Local verify"
 if ./scripts/ai-verify.sh >/dev/null 2>&1; then
   ok "ai-verify.sh passed"
 else
