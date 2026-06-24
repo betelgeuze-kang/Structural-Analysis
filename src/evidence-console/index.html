@@ -5,188 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Evidence Console (DEMO) — Structural Optimization Workbench</title>
 <meta name="description" content="Evidence Console prototype: case list, source/provenance inspector, reference-vs-engine comparison, residual audit, worst member/story, PASS/REVIEW/FAIL reviewer decision, and reproduce bundle export. DEMO prototype — not validated evidence." />
-<style>
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0;
-    color:#ecf2f6;
-    font-family:'IBM Plex Sans KR','Pretendard','Noto Sans KR',system-ui,sans-serif;
-    background:linear-gradient(180deg,#07111c 0%,#0b1621 44%,#111c29 100%);
-    min-height:100vh;
-  }
-
-  /* Header */
-  .ec-header{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    flex-wrap:wrap;
-    padding:16px 22px;
-    border-bottom:1px solid rgba(148,168,190,.18);
-    background:rgba(8,16,26,.7);
-  }
-  .ec-header h1{
-    margin:0;
-    font-size:18px;
-    letter-spacing:-.01em;
-    font-weight:700;
-  }
-  .ec-header .ec-eyebrow{
-    margin:0;
-    color:#96a8bb;
-    font-size:11px;
-    font-weight:700;
-    letter-spacing:.12em;
-    text-transform:uppercase;
-  }
-  .ec-demo-badge{
-    display:inline-flex;
-    align-items:center;
-    gap:7px;
-    padding:7px 14px;
-    border-radius:999px;
-    border:1px solid rgba(244,181,107,.5);
-    background:rgba(244,181,107,.16);
-    color:#ffe2bc;
-    font-size:12px;
-    font-weight:800;
-    letter-spacing:.16em;
-    text-transform:uppercase;
-  }
-  .ec-demo-badge::before{
-    content:'';
-    width:9px;height:9px;border-radius:50%;
-    background:#f4b56b;
-    box-shadow:0 0 10px rgba(244,181,107,.8);
-  }
-
-  /* Claim boundary banner */
-  .ec-claim-boundary{
-    margin:0;
-    padding:12px 22px;
-    background:rgba(244,181,107,.08);
-    border-bottom:1px solid rgba(244,181,107,.22);
-    color:#f3d6ad;
-    font-size:12.5px;
-    line-height:1.5;
-  }
-  .ec-claim-boundary strong{color:#ffe2bc}
-
-  /* Layout */
-  .ec-layout{
-    display:grid;
-    grid-template-columns:340px minmax(0,1fr);
-    gap:18px;
-    padding:18px 22px 36px;
-    align-items:start;
-  }
-  .ec-panel{
-    border:1px solid rgba(148,168,190,.18);
-    border-radius:16px;
-    background:linear-gradient(180deg,rgba(18,30,44,.92),rgba(12,22,33,.9));
-    padding:16px;
-  }
-  .ec-panel h2{
-    margin:0 0 12px;
-    font-size:13px;
-    letter-spacing:.04em;
-    text-transform:uppercase;
-    color:#96a8bb;
-  }
-
-  /* Case list */
-  .ec-case-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
-  .ec-case-btn{
-    width:100%;
-    text-align:left;
-    cursor:pointer;
-    padding:11px 12px;
-    border-radius:12px;
-    border:1px solid rgba(148,168,190,.16);
-    background:rgba(10,18,29,.56);
-    color:#ecf2f6;
-    font:inherit;
-    display:flex;
-    flex-direction:column;
-    gap:5px;
-  }
-  .ec-case-btn:hover{border-color:rgba(79,183,173,.4);background:rgba(13,24,37,.8)}
-  .ec-case-btn.is-active{border-color:rgba(79,183,173,.6);background:rgba(79,183,173,.12)}
-  .ec-case-btn .ec-case-name{font-weight:700;font-size:13.5px;line-height:1.3}
-  .ec-case-btn .ec-case-meta{color:#96a8bb;font-size:11px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-
-  /* Decision pill */
-  .ec-pill{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:3px 10px;border-radius:999px;
-    font-size:11px;font-weight:800;letter-spacing:.06em;
-    border:1px solid transparent;
-  }
-  .ec-pill--pass{background:rgba(99,199,161,.16);border-color:rgba(99,199,161,.5);color:#9ff0cf}
-  .ec-pill--review{background:rgba(230,169,93,.16);border-color:rgba(230,169,93,.5);color:#ffd9a3}
-  .ec-pill--fail{background:rgba(239,125,115,.16);border-color:rgba(239,125,115,.5);color:#ffb3ac}
-  .ec-pill--unavailable{background:rgba(148,168,190,.12);border-color:rgba(148,168,190,.36);color:#b6c4d4}
-
-  /* Detail */
-  .ec-detail-head{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:flex-start;margin-bottom:6px}
-  .ec-detail-head h2{margin:0;font-size:18px;text-transform:none;letter-spacing:-.01em;color:#ecf2f6}
-  .ec-detail-sub{color:#96a8bb;font-size:12.5px;margin:2px 0 0}
-
-  .ec-section{margin-top:18px;padding-top:16px;border-top:1px solid rgba(148,168,190,.12)}
-  .ec-section:first-of-type{border-top:none;padding-top:0;margin-top:14px}
-  .ec-section h3{
-    margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#7fd8d0;
-  }
-
-  .ec-kv{display:grid;grid-template-columns:170px minmax(0,1fr);gap:6px 14px;font-size:13px}
-  .ec-kv dt{color:#96a8bb}
-  .ec-kv dd{margin:0;color:#ecf2f6;word-break:break-word}
-
-  table.ec-table{width:100%;border-collapse:collapse;font-size:12.5px}
-  table.ec-table th,table.ec-table td{
-    text-align:left;padding:7px 8px;border-bottom:1px solid rgba(148,168,190,.14);
-  }
-  table.ec-table th{color:#96a8bb;font-weight:700;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
-  table.ec-table td.ec-num{text-align:right;font-variant-numeric:tabular-nums}
-  .ec-flag-ok{color:#9ff0cf;font-weight:700}
-  .ec-flag-out{color:#ffb3ac;font-weight:700}
-
-  /* Evidence unavailable */
-  .ec-unavailable{
-    display:flex;align-items:center;gap:9px;
-    padding:11px 13px;border-radius:12px;
-    border:1px dashed rgba(148,168,190,.4);
-    background:rgba(148,168,190,.06);
-    color:#b6c4d4;font-size:12.5px;
-  }
-  .ec-unavailable::before{content:'—';font-weight:800;color:#8aa0b5}
-
-  .ec-reviewer-note{margin:10px 0 0;color:#c3d2e0;font-size:12.5px;line-height:1.5}
-
-  .ec-actions{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .ec-btn{
-    cursor:pointer;font:inherit;font-weight:700;font-size:13px;
-    padding:10px 16px;border-radius:11px;
-    border:1px solid rgba(79,183,173,.45);
-    background:rgba(79,183,173,.14);color:#c9f3ee;
-  }
-  .ec-btn:hover{background:rgba(79,183,173,.24)}
-  .ec-action-hint{color:#96a8bb;font-size:11.5px}
-
-  .ec-empty{color:#96a8bb;font-size:13px;padding:24px 4px}
-</style>
+<link rel="stylesheet" href="./evidence-console.css" />
 </head>
 <body>
+  <a class="ec-skip-link" href="#ec-detail">Skip to evidence detail</a>
+
   <header class="ec-header">
     <div>
       <p class="ec-eyebrow">Structural Optimization Workbench</p>
       <h1>Evidence Console</h1>
     </div>
-    <span class="ec-demo-badge" data-ec-demo-badge>Demo prototype</span>
+    <span class="ec-demo-badge" data-ec-demo-badge role="img" aria-label="Demo prototype — not validated evidence">Demo prototype</span>
   </header>
 
-  <p class="ec-claim-boundary" data-ec-claim-boundary role="note">
+  <p class="ec-claim-boundary" data-ec-claim-boundary role="note" aria-label="Claim boundary">
     <strong>Claim boundary:</strong> This is a DEMO prototype of the Evidence Console surface.
     Sample cases are illustrative fixtures, not validated customer or benchmark evidence.
     Reviewer verdicts shown here are demo values and must not be treated as approval of any
@@ -195,17 +27,25 @@
   </p>
 
   <main class="ec-layout">
-    <section class="ec-panel" aria-label="Case list">
-      <h2>Case list</h2>
-      <ul class="ec-case-list" data-ec-case-list></ul>
-    </section>
+    <nav class="ec-panel" aria-labelledby="ec-case-list-title">
+      <h2 id="ec-case-list-title">Case list</h2>
+      <ul class="ec-case-list" data-ec-case-list aria-label="Evidence cases"></ul>
+    </nav>
 
-    <section class="ec-panel" aria-label="Case evidence detail">
+    <section
+      id="ec-detail"
+      class="ec-panel"
+      aria-labelledby="ec-detail-title"
+      tabindex="-1"
+    >
+      <h2 id="ec-detail-title" class="ec-visually-hidden">Case evidence detail</h2>
       <div data-ec-detail>
         <p class="ec-empty">Select a case to inspect its evidence.</p>
       </div>
     </section>
   </main>
+
+  <div class="ec-visually-hidden" role="status" aria-live="polite" data-ec-status></div>
 
   <script type="module" src="./evidence-console.js"></script>
 </body>

@@ -91,28 +91,69 @@ function decisionPill(rawDecision) {
 
 /* ---------- Case list ---------- */
 
+function decisionAnnouncement(rawDecision) {
+  const key = normalizeDecision(rawDecision);
+  return key ? DECISION_LABELS[key] : 'verdict unavailable';
+}
+
+/**
+ * Render the case list as a roving-tabindex group.
+ * - The active button is the only tab stop (tabindex 0); others are -1.
+ * - Arrow/Home/End keys move focus and select with automatic activation.
+ * - aria-current marks the active case for assistive technology.
+ */
 function renderCaseList(listEl, cases, activeId, onSelect) {
   listEl.replaceChildren();
   cases.forEach((caseItem) => {
-    const li = el('li');
+    const isActive = caseItem.id === activeId;
+    const li = el('li', { attrs: { role: 'none' } });
+    const displayName = hasValue(caseItem.name) ? caseItem.name : caseItem.id;
     const btn = el('button', {
-      className: `ec-case-btn${caseItem.id === activeId ? ' is-active' : ''}`,
-      attrs: { type: 'button', 'data-ec-case-id': caseItem.id },
+      className: `ec-case-btn${isActive ? ' is-active' : ''}`,
+      attrs: {
+        type: 'button',
+        'data-ec-case-id': caseItem.id,
+        tabindex: isActive ? '0' : '-1',
+        'aria-current': isActive ? 'true' : 'false',
+        'aria-label': `${displayName}. Reviewer decision: ${decisionAnnouncement(caseItem.reviewer_decision)}.`,
+      },
     });
 
-    btn.appendChild(el('span', {
-      className: 'ec-case-name',
-      text: hasValue(caseItem.name) ? caseItem.name : caseItem.id,
-    }));
+    btn.appendChild(el('span', { className: 'ec-case-name', text: displayName }));
 
-    const meta = el('span', { className: 'ec-case-meta' });
+    const meta = el('span', { className: 'ec-case-meta', attrs: { 'aria-hidden': 'true' } });
     meta.appendChild(decisionPill(caseItem.reviewer_decision));
     if (hasValue(caseItem.structure_family)) {
       meta.appendChild(el('span', { text: caseItem.structure_family }));
     }
     btn.appendChild(meta);
 
-    btn.addEventListener('click', () => onSelect(caseItem.id));
+    btn.addEventListener('click', () => onSelect(caseItem.id, { focusButton: false }));
+    btn.addEventListener('keydown', (event) => {
+      const index = cases.findIndex((c) => c.id === caseItem.id);
+      let targetIndex = null;
+      switch (event.key) {
+        case 'ArrowDown':
+        case 'ArrowRight':
+          targetIndex = (index + 1) % cases.length;
+          break;
+        case 'ArrowUp':
+        case 'ArrowLeft':
+          targetIndex = (index - 1 + cases.length) % cases.length;
+          break;
+        case 'Home':
+          targetIndex = 0;
+          break;
+        case 'End':
+          targetIndex = cases.length - 1;
+          break;
+        default:
+          return;
+      }
+      event.preventDefault();
+      onSelect(cases[targetIndex].id, { focusButton: true });
+    });
+
     li.appendChild(btn);
     listEl.appendChild(li);
   });
@@ -213,7 +254,9 @@ function renderComparison(caseItem) {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-  sec.appendChild(table);
+  const scroll = el('div', { className: 'ec-table-scroll', attrs: { role: 'region', 'aria-label': 'Reference vs engine comparison table', tabindex: '0' } });
+  scroll.appendChild(table);
+  sec.appendChild(scroll);
   return sec;
 }
 
@@ -252,7 +295,9 @@ function renderResidual(caseItem) {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-  sec.appendChild(table);
+  const scroll = el('div', { className: 'ec-table-scroll', attrs: { role: 'region', 'aria-label': 'Residual audit table', tabindex: '0' } });
+  scroll.appendChild(table);
+  sec.appendChild(scroll);
   return sec;
 }
 
@@ -359,6 +404,7 @@ function renderDetail(detailEl, caseItem, dataset) {
 async function init() {
   const listEl = document.querySelector('[data-ec-case-list]');
   const detailEl = document.querySelector('[data-ec-detail]');
+  const statusEl = document.querySelector('[data-ec-status]');
   if (!listEl || !detailEl) return;
 
   let dataset;
@@ -380,11 +426,21 @@ async function init() {
   }
 
   let activeId = cases[0].id;
-  const select = (id) => {
+  const select = (id, { focusButton = false } = {}) => {
     activeId = id;
     const caseItem = cases.find((c) => c.id === id) || null;
     renderCaseList(listEl, cases, activeId, select);
     renderDetail(detailEl, caseItem, dataset);
+
+    if (statusEl && caseItem) {
+      const name = hasValue(caseItem.name) ? caseItem.name : caseItem.id;
+      statusEl.textContent = `Showing evidence for ${name}. Reviewer decision: ${decisionAnnouncement(caseItem.reviewer_decision)}.`;
+    }
+
+    if (focusButton) {
+      const nextBtn = listEl.querySelector(`[data-ec-case-id="${CSS.escape(id)}"]`);
+      if (nextBtn) nextBtn.focus();
+    }
   };
   select(activeId);
 }
