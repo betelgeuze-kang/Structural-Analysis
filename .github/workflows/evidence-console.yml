@@ -1,0 +1,74 @@
+name: Evidence Console
+
+on:
+  push:
+    branches: ["main", "codex/**"]
+    paths:
+      - "src/evidence-console/**"
+      - "src/workbench/evidenceConsole/**"
+      - "tests/frontend/evidence-console-smoke.spec.ts"
+      - "scripts/verify-evidence-console-*.mjs"
+      - ".github/workflows/evidence-console.yml"
+  pull_request:
+    paths:
+      - "src/evidence-console/**"
+      - "src/workbench/evidenceConsole/**"
+      - "tests/frontend/evidence-console-smoke.spec.ts"
+      - "scripts/verify-evidence-console-*.mjs"
+      - ".github/workflows/evidence-console.yml"
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  dom-contract:
+    # Offline, dependency-free DOM/logic contract. Fast gate that needs no
+    # browser binaries or npm install.
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+
+      - name: Run DOM contract test
+        run: node ./scripts/verify-evidence-console-dom-contract.mjs
+
+  build-and-browser-smoke:
+    # Type-check + build, then run the Playwright browser smoke. The visual
+    # baseline test only runs when a baseline has already been seeded (see the
+    # "Evidence Console Screenshot Baseline" workflow); otherwise it is skipped
+    # so a missing baseline never blocks the PR.
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Run browser smoke
+        run: |
+          SNAP_DIR="tests/frontend/evidence-console-smoke.spec.ts-snapshots"
+          if [ -d "$SNAP_DIR" ]; then
+            echo "Screenshot baseline found; running full browser smoke (incl. visual baseline)."
+            npm run verify:evidence-console-browser-smoke
+          else
+            echo "::warning::No screenshot baseline found; skipping the visual baseline test. Run the 'Evidence Console Screenshot Baseline' workflow to seed it."
+            npm run verify:evidence-console-browser-smoke -- --grep-invert "visual baseline"
+          fi

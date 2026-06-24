@@ -1,0 +1,62 @@
+name: Evidence Console Screenshot Baseline
+
+# Manually seed (or refresh) the Playwright screenshot baseline for the
+# Evidence Console smoke spec. Run this once on a branch before relying on the
+# visual-baseline assertion in the Evidence Console CI workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_baseline:
+        description: "Commit the generated baseline back to the triggering branch"
+        type: boolean
+        default: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: write
+
+jobs:
+  baseline:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Generate screenshot baseline
+        run: npm run verify:evidence-console-browser-smoke -- --update-snapshots --grep "visual baseline"
+
+      - name: Upload baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-console-screenshot-baseline
+          path: tests/frontend/evidence-console-smoke.spec.ts-snapshots/
+          if-no-files-found: error
+
+      - name: Commit baseline to branch
+        if: ${{ inputs.commit_baseline }}
+        run: |
+          SNAP_DIR="tests/frontend/evidence-console-smoke.spec.ts-snapshots"
+          if [ -z "$(git status --porcelain "$SNAP_DIR")" ]; then
+            echo "Baseline unchanged; nothing to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$SNAP_DIR"
+          git commit -m "chore(evidence-console): seed Playwright screenshot baseline"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
