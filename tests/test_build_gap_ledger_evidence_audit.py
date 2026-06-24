@@ -47,6 +47,8 @@ def test_gap_ledger_evidence_audit_verifies_closed_and_nonclosed_rows() -> None:
     source_paths = payload["source_receipt_path_coverage"]
     assert source_paths["source_receipt_path_count"] == 112
     assert source_paths["source_receipt_existing_path_count"] == 112
+    assert source_paths["source_receipt_absent_row_count"] == 0
+    assert source_paths["source_receipt_absent_row_ids"] == []
     assert source_paths["source_receipt_missing_path_count"] == 0
     assert source_paths["source_receipt_missing_row_ids"] == []
     assert payload["blockers"] == []
@@ -164,3 +166,47 @@ def test_gap_ledger_evidence_audit_blocks_missing_source_receipt_path(
         "source_receipt_missing_row_ids"
     ] == ["G1"]
     assert payload["blockers"] == ["source_receipt_path_missing:G1"]
+
+
+def test_gap_ledger_evidence_audit_blocks_rows_without_source_receipts(
+    tmp_path: Path,
+) -> None:
+    ledger = tmp_path / "commercial_gap_ledger_status.json"
+    ledger.write_text(
+        json.dumps(
+            {
+                "status": "open",
+                "full_gap_ledger_ready": False,
+                "rows": [
+                    {
+                        "id": "G2",
+                        "ledger": "commercial_solver",
+                        "status": "closed",
+                        "blockers": [],
+                        "claim_boundary": "closed row boundary",
+                        "evidence": {"some_metric": True},
+                    }
+                ],
+            },
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_gap_ledger_evidence_audit(
+        repo_root=tmp_path,
+        ledger_status_path=ledger,
+    )
+
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert payload["source_receipt_path_coverage"][
+        "source_receipt_absent_row_count"
+    ] == 1
+    assert payload["source_receipt_path_coverage"][
+        "source_receipt_absent_row_ids"
+    ] == ["G2"]
+    assert payload["blockers"] == ["source_receipts_absent:G2"]

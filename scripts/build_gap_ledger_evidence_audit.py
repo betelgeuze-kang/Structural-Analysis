@@ -215,6 +215,11 @@ def build_gap_ledger_evidence_audit(
         for row_id, summary in source_receipt_path_summaries.items()
         if int(summary["source_receipt_missing_path_count"]) > 0
     ]
+    source_receipt_absent_rows = [
+        row_id
+        for row_id, summary in source_receipt_path_summaries.items()
+        if int(summary["source_receipt_path_count"]) == 0
+    ]
 
     blockers = [
         *[f"closed_row_missing_evidence:{row_id}" for row_id in closed_missing_evidence],
@@ -226,6 +231,7 @@ def build_gap_ledger_evidence_audit(
         *[f"nonclosed_row_missing_blockers:{row_id}" for row_id in nonclosed_missing_blockers],
         *[f"nonclosed_row_missing_claim_boundary:{row_id}" for row_id in nonclosed_missing_claim_boundary],
         *[f"nonclosed_row_missing_evidence:{row_id}" for row_id in nonclosed_missing_evidence],
+        *[f"source_receipts_absent:{row_id}" for row_id in source_receipt_absent_rows],
         *[f"source_receipt_path_missing:{row_id}" for row_id in source_receipt_missing_rows],
     ]
     contract_pass = not blockers
@@ -285,6 +291,8 @@ def build_gap_ledger_evidence_audit(
             "source_receipt_existing_path_count": (
                 total_source_receipt_path_count - total_source_receipt_missing_path_count
             ),
+            "source_receipt_absent_row_count": len(source_receipt_absent_rows),
+            "source_receipt_absent_row_ids": source_receipt_absent_rows,
             "source_receipt_missing_path_count": total_source_receipt_missing_path_count,
             "source_receipt_missing_row_ids": source_receipt_missing_rows,
             "claim_boundary": (
