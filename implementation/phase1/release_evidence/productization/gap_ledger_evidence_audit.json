@@ -15,11 +15,11 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "full_gap_ledger_ready": false,
-  "generated_at": "2026-06-23T15:25:55.646020+00:00",
+  "generated_at": "2026-06-24T13:04:07.261707+00:00",
   "input_checksums": {
     "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:041a4e2e758589e56d4f7ea94b5e7045660f0e2c604856ead38a737dd3781531",
     "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:da318aa5ceedecd341ca0dd4ec2ce6cfddeec3aac1b0db3d5d34d3479b16119b",
-    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:afbb9f5e664dc85d2a5f80e7e847db8f48a7e939c6542f58f85e04e5061a08f7",
+    "implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:75512b72a47343680bcb16464dca4b36db375adeefdf79348a3be8c9a2d4f503",
     "scripts/build_gap_ledger_evidence_audit.py": "sha256:f004366945cdb6cbe76a6353f876e788c7fe9dc48045d69503133b2b334d19d7"
   },
   "ledger_status": "open",
@@ -357,7 +357,7 @@
     }
   ],
   "schema_version": "gap-ledger-evidence-audit.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
   "status": "ready",
   "summary_line": "Gap ledger evidence audit: READY | closed_evidence=17/17 | nonclosed_boundaries=3/3"
 }

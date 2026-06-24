@@ -1,6 +1,7 @@
 {
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
+    "hip_consistency_proof_source_commit_sha_mismatch",
     "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers",
@@ -340,7 +341,7 @@
   },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-23T18:26:51.926704+00:00",
+  "generated_at": "2026-06-24T13:04:10.193578+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -380,6 +381,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
   "status": "blocked"
 }

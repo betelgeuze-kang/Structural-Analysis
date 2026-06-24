@@ -205,7 +205,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-23T18:27:06.346863+00:00",
+  "generated_at": "2026-06-24T13:06:36.453821+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -216,27 +216,27 @@
       "status": "ready"
     },
     "phase1_core_api_contract": {
-      "input_checksum": "sha256:fbac1865126c185fa9de771e153a6784047acf6e8d6c52c64757878ca8fb6d68",
+      "input_checksum": "sha256:8389c338e85db32b22a996b70e04cdcc03b6d992da05e4b24059ff05b6441bf7",
       "path": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
       "present": true,
       "schema_version": "phase1-core-api-contract-artifacts.v1",
-      "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+      "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:c5bb26ac076b7c80d91eec8581d882d3e5db94fed1e93b8878f1fb91c7b34a25",
+      "input_checksum": "sha256:b6e4294b792018f6d9b7709807416f2f8aa6f094dd3d203d80bcfc50526e4f99",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+      "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
       "status": "stale_or_inconsistent"
     }
   },
   "input_checksum_policy": "product_snapshot_readiness_semantic_subset_excludes_self_referential_developer_preview_metadata",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:fbac1865126c185fa9de771e153a6784047acf6e8d6c52c64757878ca8fb6d68",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:c5bb26ac076b7c80d91eec8581d882d3e5db94fed1e93b8878f1fb91c7b34a25"
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8389c338e85db32b22a996b70e04cdcc03b6d992da05e4b24059ff05b6441bf7",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b6e4294b792018f6d9b7709807416f2f8aa6f094dd3d203d80bcfc50526e4f99"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -387,6 +387,7 @@
           "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::production_rocm_hip_residency_not_closed",
+          "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::production_rocm_hip_residency_not_closed",
           "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::full_load_gate_not_closed",
           "g1_full_mesh_full_load_not_closed": "g1::full_mesh_nonlinear_equilibrium_not_closed"
@@ -417,11 +418,11 @@
           {
             "active": true,
             "closure_dimension": "gpu_hip_followup_performance_and_residency",
-            "represented_detail_blocker_count": 9,
+            "represented_detail_blocker_count": 10,
             "root_blocker": "g1::production_rocm_hip_residency_not_closed"
           }
         ],
-        "suppressed_detail_blocker_count": 21,
+        "suppressed_detail_blocker_count": 22,
         "unmatched_detail_blockers": []
       },
       "closure_boundary_metadata": {
@@ -470,6 +471,7 @@
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing": "g1::*",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing": "g1::*",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch": "g1::*",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready": "g1::*",
         "g1_full_load_lane::observed_load_scale_below_required_full_load": "g1::*",
         "g1_full_mesh_full_load_not_closed": "g1::*"
@@ -544,13 +546,70 @@
         "ready": false
       },
       "full_load_hip_newton_child_hip_residual_refresh_ready": false,
+      "full_load_hip_newton_frontier_non_promoting_evidence": {
+        "claim_boundary": "Frontier and launch-only receipts are attached as non-promoting diagnostic context. They may explain why the lane is blocked, but they do not close full-load, material Newton, consistent residual/Jacobian Newton, production ROCm/HIP residency, or full G1.",
+        "direct_residual_gate_tolerance_n": 0.0005,
+        "evidence_role": "non_promoting_partial_frontier_context",
+        "frontier_chain_count": 17,
+        "frontier_residual_above_tolerance": true,
+        "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+        "latest_frontier_receipt": "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json",
+        "non_promoting_launch_receipt_count": 1,
+        "non_promoting_launch_receipts": [
+          {
+            "available": true,
+            "claim_boundary": "Launch receipt only. A completed child direct-residual receipt is required before claiming residual progress.",
+            "counted_in_frontier": false,
+            "non_count_reason": "completed child direct-residual receipt required",
+            "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+            "receipt": "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+            "status": "in_progress"
+          }
+        ],
+        "present": true,
+        "promotes_g1_closure": false,
+        "promotes_lane_status": false,
+        "schema_version": "g1-frontier-non-promoting-context.v1",
+        "source_blockers": [
+          "direct_residual_gate_not_closed",
+          "full_mesh_nonlinear_equilibrium_not_closed",
+          "production_rocm_hip_residual_row_backend_not_closed",
+          "consistent_residual_jacobian_newton_not_closed"
+        ],
+        "source_candidates": [
+          {
+            "has_frontier_chain": false,
+            "has_non_promoting_launch_receipts": false,
+            "path": "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json",
+            "present": true
+          },
+          {
+            "has_frontier_chain": true,
+            "has_non_promoting_launch_receipts": true,
+            "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+            "present": true
+          }
+        ],
+        "source_claim_boundary": {
+          "cpu_diagnostic_only": true,
+          "direct_residual_newton_closed": false,
+          "equilibrium_newton_closed": false,
+          "full_mesh_nonlinear_equilibrium_closed": false,
+          "launch_only_receipts_do_not_claim_descent": true,
+          "official_rocm_hip_closure_required": true
+        },
+        "source_contract_pass": false,
+        "source_path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+        "source_status": "partial"
+      },
       "full_load_hip_newton_hip_consistency_proof": {
         "blockers": [
           "hip_consistency_proof_gate_not_passed",
           "hip_consistency_proof_has_blockers",
           "hip_consistency_proof_production_hip_path_not_proven",
           "hip_consistency_proof_runtime::dev_dri_missing",
-          "hip_consistency_proof_runtime::dev_kfd_missing"
+          "hip_consistency_proof_runtime::dev_kfd_missing",
+          "hip_consistency_proof_source_commit_sha_mismatch"
         ],
         "consistent_residual_jacobian_newton_gate_passed": false,
         "cpu_diagnostic_assembler_used": false,
@@ -582,7 +641,7 @@
       "full_load_hip_newton_lane_reused_evidence": false,
       "full_load_hip_newton_lane_status": "blocked",
       "full_mesh_full_load_ready": false,
-      "suppressed_detail_blocker_count": 21,
+      "suppressed_detail_blocker_count": 22,
       "suppressed_detail_blockers": [
         "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
         "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
@@ -602,6 +661,7 @@
         "g1_full_load_lane::hip_consistency_proof_production_hip_path_not_proven",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_dri_missing",
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing",
+        "g1_full_load_lane::hip_consistency_proof_source_commit_sha_mismatch",
         "g1_full_load_lane::matrix_free_global_krylov_child_hip_residual_refresh_not_ready",
         "g1_full_load_lane::observed_load_scale_below_required_full_load",
         "g1_full_mesh_full_load_not_closed"
@@ -926,6 +986,6 @@
       }
     }
   },
-  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_commit_sha": "6cc31b7322f2cc695825d14a63008dab9809151b",
   "status": "blocked"
 }

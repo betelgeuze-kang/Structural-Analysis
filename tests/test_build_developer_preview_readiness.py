@@ -231,6 +231,17 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
                             "numerical priority gate; GPU/HIP does not replace CPU parity."
                         ),
                     },
+                    "full_load_hip_newton_frontier_non_promoting_evidence": {
+                        "schema_version": "g1-frontier-non-promoting-context.v1",
+                        "present": True,
+                        "evidence_role": "non_promoting_partial_frontier_context",
+                        "promotes_g1_closure": False,
+                        "promotes_lane_status": False,
+                        "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+                        "direct_residual_gate_tolerance_n": 0.0005,
+                        "frontier_residual_above_tolerance": True,
+                        "non_promoting_launch_receipt_count": 1,
+                    },
                 },
             },
         },
@@ -291,6 +302,13 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
         ]
         is True
     )
+    g1_frontier_context = g1_boundary[
+        "full_load_hip_newton_frontier_non_promoting_evidence"
+    ]
+    assert g1_frontier_context["present"] is True
+    assert g1_frontier_context["promotes_g1_closure"] is False
+    assert g1_frontier_context["promotes_lane_status"] is False
+    assert g1_frontier_context["frontier_residual_above_tolerance"] is True
     closure_visibility = payload["gap_ledger_closure_requirement_visibility"]
     assert closure_visibility["source_status"] == "ready"
     assert closure_visibility["source_contract_pass"] is True

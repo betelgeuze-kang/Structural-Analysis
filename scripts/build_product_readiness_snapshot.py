@@ -2190,6 +2190,14 @@ def build_snapshot(
                 "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
                 "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
                 "full_load_hip_newton_lane_required_load_scale": g1_lane_required_load,
+                "full_load_hip_newton_frontier_non_promoting_evidence": (
+                    g1_full_load_lane.get("frontier_non_promoting_evidence")
+                    if isinstance(
+                        g1_full_load_lane.get("frontier_non_promoting_evidence"),
+                        dict,
+                    )
+                    else {}
+                ),
                 "full_load_hip_newton_child_hip_residual_refresh_ready": (
                     g1_lane_child_hip_refresh_ready
                 ),

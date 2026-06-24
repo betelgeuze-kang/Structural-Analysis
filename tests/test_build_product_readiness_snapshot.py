@@ -1549,6 +1549,17 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
     g1_lane["checkpoint"] = {"load_scale": 0.656}
     g1_lane["full_load_input_pass"] = False
     g1_lane["child_gate_evidence"] = _g1_child_gate_evidence(ready=False)
+    g1_lane["frontier_non_promoting_evidence"] = {
+        "schema_version": "g1-frontier-non-promoting-context.v1",
+        "present": True,
+        "evidence_role": "non_promoting_partial_frontier_context",
+        "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+        "direct_residual_gate_tolerance_n": 0.0005,
+        "frontier_residual_above_tolerance": True,
+        "non_promoting_launch_receipt_count": 1,
+        "promotes_g1_closure": False,
+        "promotes_lane_status": False,
+    }
     g1_lane["blockers"] = ["checkpoint_load_scale_below_required_full_load"]
     _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", g1_lane)
 
@@ -1602,6 +1613,14 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
     assert boundary["current_gate_state"]["full_load_hip_newton_lane_ready"] is False
     assert "full_load_1_0" in boundary["cpu_first_closure_scope"]
     assert "device_residency" in boundary["gpu_hip_followup_scope"]
+    frontier_context = g1_component[
+        "full_load_hip_newton_frontier_non_promoting_evidence"
+    ]
+    assert frontier_context["present"] is True
+    assert frontier_context["promotes_g1_closure"] is False
+    assert frontier_context["promotes_lane_status"] is False
+    assert frontier_context["frontier_residual_above_tolerance"] is True
+    assert frontier_context["non_promoting_launch_receipt_count"] == 1
 
 
 def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
