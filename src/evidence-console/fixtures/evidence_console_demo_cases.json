@@ -1,0 +1,121 @@
+{
+  "schema_version": "evidence-console-fixture.v1",
+  "dataset_kind": "demo_fixture",
+  "is_demo": true,
+  "generated_at": "2026-06-21T00:00:00+00:00",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "claim_boundary": "DEMO fixture only. These cases are illustrative sample data for the Evidence Console prototype surface. They are NOT validated customer or benchmark evidence and must not be treated as approval of analysis results, a launched product, or any PASS/REVIEW/FAIL verdict. Launch readiness remains blocked until validated customer completed-project shadow evidence is attached.",
+  "cases": [
+    {
+      "id": "demo-frame-001",
+      "name": "8F RC Moment Frame — lateral drift review",
+      "structure_family": "frame",
+      "load_combination": "1.2D + 1.0E + 1.0L",
+      "reviewer_decision": "REVIEW",
+      "reviewer_decision_note": "Engine drift within 4% of reference; flagged for engineer-in-loop confirmation.",
+      "provenance": {
+        "model_file": "demo/frame_8f_rc.midas.json",
+        "model_sha256": "sha256:1f0c2a9b7d4e5f6081a2b3c4d5e6f70819a2b3c4d5e6f70819a2b3c4d5e6f708",
+        "source_tool": "MIDAS Gen (interop import)",
+        "engine_version": "structural-optimization-workbench@1.0.0",
+        "analysis_kind": "nonlinear_static",
+        "generated_at": "2026-06-20T08:14:00+00:00"
+      },
+      "reference_vs_engine": [
+        { "quantity": "Roof drift ratio", "unit": "-", "reference": 0.0182, "engine": 0.0189, "tolerance_rel": 0.05 },
+        { "quantity": "Base shear", "unit": "kN", "reference": 4120.0, "engine": 4068.5, "tolerance_rel": 0.05 },
+        { "quantity": "Fundamental period T1", "unit": "s", "reference": 1.42, "engine": 1.45, "tolerance_rel": 0.05 }
+      ],
+      "residual_audit": [
+        { "metric": "Global equilibrium residual", "unit": "N", "value": 8.4e-05, "tolerance": 0.0001, "within_tolerance": true },
+        { "metric": "Reaction balance residual", "unit": "kN", "value": 0.012, "tolerance": 0.05, "within_tolerance": true }
+      ],
+      "worst": {
+        "member_id": "C-3F-B2",
+        "story": "3F",
+        "governing_check": "P-M-M interaction (KDS 41)",
+        "dcr": 0.94
+      }
+    },
+    {
+      "id": "demo-wallframe-002",
+      "name": "Wall-frame core — coupling beam shear",
+      "structure_family": "wall-frame",
+      "load_combination": "1.2D + 1.0E",
+      "reviewer_decision": "FAIL",
+      "reviewer_decision_note": "Coupling beam shear demand exceeds capacity; reference and engine agree on exceedance.",
+      "provenance": {
+        "model_file": "demo/wallframe_core.opensees.json",
+        "model_sha256": "sha256:9a8b7c6d5e4f30211f0e9d8c7b6a59483726150fae9d8c7b6a594837261504f3",
+        "source_tool": "OpenSees (interop import)",
+        "engine_version": "structural-optimization-workbench@1.0.0",
+        "analysis_kind": "nonlinear_static",
+        "generated_at": "2026-06-20T09:02:00+00:00"
+      },
+      "reference_vs_engine": [
+        { "quantity": "Coupling beam shear", "unit": "kN", "reference": 980.0, "engine": 994.0, "tolerance_rel": 0.05 },
+        { "quantity": "Wall axial demand", "unit": "kN", "reference": 15200.0, "engine": 15110.0, "tolerance_rel": 0.05 }
+      ],
+      "residual_audit": [
+        { "metric": "Global equilibrium residual", "unit": "N", "value": 9.6e-05, "tolerance": 0.0001, "within_tolerance": true }
+      ],
+      "worst": {
+        "member_id": "CB-5F-L1",
+        "story": "5F",
+        "governing_check": "Shear capacity (exceeded)",
+        "dcr": 1.18
+      }
+    },
+    {
+      "id": "demo-outrigger-003",
+      "name": "Outrigger megatall — belt truss demand",
+      "structure_family": "outrigger",
+      "load_combination": "1.2D + 1.0W",
+      "reviewer_decision": "PASS",
+      "reviewer_decision_note": "All audited quantities within tolerance for this demo sample.",
+      "provenance": {
+        "model_file": "demo/outrigger_606m.midas.json",
+        "model_sha256": "sha256:0d1e2f3a4b5c6d7e8f90112233445566778899aabbccddeeff00112233445566",
+        "source_tool": "MIDAS Gen (interop import)",
+        "engine_version": "structural-optimization-workbench@1.0.0",
+        "analysis_kind": "bounded_ndtha",
+        "generated_at": "2026-06-20T10:41:00+00:00"
+      },
+      "reference_vs_engine": [
+        { "quantity": "Belt truss axial", "unit": "kN", "reference": 28800.0, "engine": 28640.0, "tolerance_rel": 0.05 },
+        { "quantity": "Outrigger top drift", "unit": "-", "reference": 0.0091, "engine": 0.0093, "tolerance_rel": 0.05 }
+      ],
+      "residual_audit": [
+        { "metric": "Global equilibrium residual", "unit": "N", "value": 7.1e-05, "tolerance": 0.0001, "within_tolerance": true },
+        { "metric": "Energy balance residual", "unit": "-", "value": 0.0008, "tolerance": 0.001, "within_tolerance": true }
+      ],
+      "worst": {
+        "member_id": "BT-42F-D4",
+        "story": "42F",
+        "governing_check": "Axial-flexure interaction",
+        "dcr": 0.88
+      }
+    },
+    {
+      "id": "demo-truss-004",
+      "name": "Roof truss — provenance incomplete",
+      "structure_family": "truss",
+      "load_combination": "1.4D",
+      "reviewer_decision": null,
+      "reviewer_decision_note": "Source provenance and residual audit not attached for this sample; verdict withheld.",
+      "provenance": {
+        "model_file": "demo/roof_truss.partial.json",
+        "model_sha256": null,
+        "source_tool": null,
+        "engine_version": "structural-optimization-workbench@1.0.0",
+        "analysis_kind": "nonlinear_static",
+        "generated_at": null
+      },
+      "reference_vs_engine": [
+        { "quantity": "Top chord axial", "unit": "kN", "reference": 540.0, "engine": null, "tolerance_rel": 0.05 }
+      ],
+      "residual_audit": [],
+      "worst": null
+    }
+  ]
+}
