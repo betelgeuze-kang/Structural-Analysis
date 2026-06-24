@@ -17,6 +17,8 @@
     "verify:frontend-smoke": "node ./scripts/verify-frontend-smoke.mjs",
     "verify:viewer-manifest": "node ./scripts/verify-structure-viewer-project-manifest.mjs",
     "verify:frontend-browser-smoke": "node ./scripts/verify-frontend-browser-smoke.mjs",
+    "verify:evidence-console-dom-contract": "node ./scripts/verify-evidence-console-dom-contract.mjs",
+    "verify:evidence-console-browser-smoke": "node ./scripts/verify-evidence-console-browser-smoke.mjs",
     "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
