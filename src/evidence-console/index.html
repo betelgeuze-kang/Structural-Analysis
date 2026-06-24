@@ -32,17 +32,29 @@
       <ul class="ec-case-list" data-ec-case-list aria-label="Evidence cases"></ul>
     </nav>
 
-    <section
-      id="ec-detail"
-      class="ec-panel"
-      aria-labelledby="ec-detail-title"
-      tabindex="-1"
-    >
-      <h2 id="ec-detail-title" class="ec-visually-hidden">Case evidence detail</h2>
-      <div data-ec-detail>
-        <p class="ec-empty">Select a case to inspect its evidence.</p>
-      </div>
-    </section>
+    <div class="ec-right-column">
+      <section
+        class="ec-panel ec-readiness"
+        data-ec-readiness
+        data-ec-readiness-src="../../implementation/phase1/release_evidence/productization/evidence_console_scope_status.json"
+        aria-label="Launch readiness and claim boundary"
+        aria-live="polite"
+      >
+        <p class="ec-empty">Loading readiness evidence…</p>
+      </section>
+
+      <section
+        id="ec-detail"
+        class="ec-panel"
+        aria-labelledby="ec-detail-title"
+        tabindex="-1"
+      >
+        <h2 id="ec-detail-title" class="ec-visually-hidden">Case evidence detail</h2>
+        <div data-ec-detail>
+          <p class="ec-empty">Select a case to inspect its evidence.</p>
+        </div>
+      </section>
+    </div>
   </main>
 
   <div class="ec-visually-hidden" role="status" aria-live="polite" data-ec-status></div>

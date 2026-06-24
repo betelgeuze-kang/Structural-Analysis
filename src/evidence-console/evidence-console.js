@@ -8,6 +8,13 @@
 // - All DOM is built with createElement/textContent. innerHTML is never used,
 //   so untrusted fixture strings cannot inject markup.
 // - Any missing evidence field renders an explicit "evidence unavailable" state.
+//
+// Readiness integration (PR3):
+// - A read-only readiness adapter reads the Evidence Console scope-status
+//   artifact and surfaces blocked / stale / missing state, the source commit,
+//   and the claim boundary, without ever fabricating a ready/PASS state.
+
+import { DEFAULT_READINESS_SRC, fetchReadiness } from './readiness-adapter.js';
 
 const FIXTURE_URL = './fixtures/evidence_console_demo_cases.json';
 
@@ -399,12 +406,133 @@ function renderDetail(detailEl, caseItem, dataset) {
   detailEl.appendChild(renderActions(caseItem, dataset));
 }
 
+/* ---------- Readiness integration (read-only) ---------- */
+
+const GATE_PILL_CLASS = {
+  BLOCKED: 'ec-pill--fail',
+  READY: 'ec-pill--pass',
+  UNKNOWN: 'ec-pill--unavailable',
+};
+
+function gatePill(readiness) {
+  if (readiness.availability === 'missing') {
+    return el('span', {
+      className: 'ec-pill ec-pill--unavailable',
+      text: 'Readiness unavailable',
+      attrs: { 'data-ec-gate': 'missing' },
+    });
+  }
+  const cls = GATE_PILL_CLASS[readiness.gate] || 'ec-pill--unavailable';
+  return el('span', {
+    className: `ec-pill ${cls}`,
+    text: `Launch: ${readiness.gate}`,
+    attrs: { 'data-ec-gate': readiness.gate },
+  });
+}
+
+function freshnessPill(readiness) {
+  const map = {
+    fresh: { cls: 'ec-pill--pass', text: 'Evidence: fresh' },
+    stale: { cls: 'ec-pill--review', text: 'Evidence: stale' },
+    unknown: { cls: 'ec-pill--unavailable', text: 'Evidence: age unknown' },
+  };
+  const entry = map[readiness.freshness] || map.unknown;
+  return el('span', {
+    className: `ec-pill ${entry.cls}`,
+    text: entry.text,
+    attrs: { 'data-ec-freshness': readiness.freshness },
+  });
+}
+
+function renderReadiness(container, readiness) {
+  if (!container) return;
+  container.replaceChildren();
+
+  const panel = el('div', { className: 'ec-readiness-inner' });
+
+  const headRow = el('div', { className: 'ec-readiness-head' });
+  headRow.appendChild(el('h2', { className: 'ec-readiness-title', text: 'Launch readiness' }));
+  const pills = el('div', { className: 'ec-readiness-pills' });
+  pills.appendChild(gatePill(readiness));
+  pills.appendChild(freshnessPill(readiness));
+  headRow.appendChild(pills);
+  panel.appendChild(headRow);
+
+  if (readiness.availability === 'missing') {
+    panel.appendChild(unavailable(
+      `Readiness evidence unavailable${readiness.error ? ` (${readiness.error})` : ''}. ` +
+      'Launch state cannot be confirmed and must be treated as not ready.',
+    ));
+  } else {
+    const dl = el('dl', { className: 'ec-kv' });
+    kvRow(dl, 'Status', readiness.status);
+    kvRow(dl, 'Launch ready', readiness.launchReady === null ? null : String(readiness.launchReady));
+    // Source commit shown in monospace; full sha exposed via title.
+    if (hasValue(readiness.sourceCommitShort)) {
+      dl.appendChild(el('dt', { text: 'Source commit' }));
+      const dd = el('dd');
+      dd.appendChild(el('code', {
+        className: 'ec-commit',
+        text: readiness.sourceCommitShort,
+        attrs: { 'data-ec-source-commit': readiness.sourceCommit, title: readiness.sourceCommit || undefined },
+      }));
+      dl.appendChild(dd);
+    } else {
+      kvRow(dl, 'Source commit', null);
+    }
+    kvRow(dl, 'Generated at', readiness.generatedAt);
+    kvRow(dl, 'Summary', readiness.summaryLine);
+    panel.appendChild(dl);
+
+    if (readiness.freshness === 'stale' && hasValue(readiness.staleReason)) {
+      panel.appendChild(el('p', { className: 'ec-readiness-note', text: `Stale: ${readiness.staleReason}` }));
+    }
+
+    if (readiness.blockers.length) {
+      const bl = section('Blockers');
+      const ul = el('ul', { className: 'ec-blocker-list' });
+      readiness.blockers.forEach((b) => ul.appendChild(el('li', { text: b })));
+      bl.appendChild(ul);
+      if (hasValue(readiness.nextAction)) {
+        bl.appendChild(el('p', { className: 'ec-readiness-note', text: `Next action: ${readiness.nextAction}` }));
+      }
+      panel.appendChild(bl);
+    }
+  }
+
+  // Claim boundary panel, sourced from the evidence when available.
+  const cb = section('Claim boundary');
+  if (hasValue(readiness.claimBoundary)) {
+    cb.appendChild(el('p', { className: 'ec-claim-text', text: readiness.claimBoundary }));
+  } else {
+    cb.appendChild(el('p', {
+      className: 'ec-claim-text',
+      text: 'Claim boundary text could not be read from the readiness evidence. ' +
+        'This surface remains a DEMO prototype and is not validated evidence.',
+    }));
+  }
+  panel.appendChild(cb);
+
+  container.appendChild(panel);
+}
+
 /* ---------- Bootstrap ---------- */
 
 async function init() {
   const listEl = document.querySelector('[data-ec-case-list]');
   const detailEl = document.querySelector('[data-ec-detail]');
   const statusEl = document.querySelector('[data-ec-status]');
+  const readinessEl = document.querySelector('[data-ec-readiness]');
+
+  // Read-only readiness integration runs independently of the case fixture so
+  // that a missing readiness artifact never blocks the rest of the console.
+  if (readinessEl) {
+    const readinessSrc = readinessEl.getAttribute('data-ec-readiness-src') || DEFAULT_READINESS_SRC;
+    fetchReadiness(readinessSrc)
+      .then((readiness) => renderReadiness(readinessEl, readiness))
+      .catch(() => renderReadiness(readinessEl, { availability: 'missing', error: 'adapter error', blockers: [] }));
+  }
+
   if (!listEl || !detailEl) return;
 
   let dataset;
@@ -451,4 +579,4 @@ if (document.readyState === 'loading') {
   init();
 }
 
-export { normalizeDecision, hasValue, formatNumber, buildReproduceBundle };
+export { normalizeDecision, hasValue, formatNumber, buildReproduceBundle, renderReadiness };
