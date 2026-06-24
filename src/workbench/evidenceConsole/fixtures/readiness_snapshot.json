@@ -1,0 +1,17 @@
+{
+  "_comment": "DEMO mock readiness snapshot for the React Evidence Console in mock mode. Mirrors the real blocked launch gate; it is illustrative and is never a READY/PASS claim. Live mode reads the real read-only artifact instead.",
+  "schema_version": "evidence-console-scope-status.v1",
+  "status": "blocked",
+  "launch_ready": false,
+  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "generated_at": "2026-06-21T09:30:55.962962+00:00",
+  "summary_line": "Evidence Console scope: BLOCKED | features=7/7 | deferred_gui=5/5 | prerequisites=3/5",
+  "blockers": [
+    "launch_prerequisite_blocked:p1_benchmark_breadth_ready",
+    "launch_prerequisite_blocked:customer_shadow_completed_project_cases_ready"
+  ],
+  "claim_boundary": "DEMO mock snapshot. This surface is an Evidence Console prototype only. Launch readiness remains blocked until validated customer completed-project shadow evidence is attached; synthetic or demo cases must not close this gate.",
+  "summary": {
+    "next_action": "attach validated customer completed-project shadow evidence"
+  }
+}

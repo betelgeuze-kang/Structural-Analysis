@@ -5,6 +5,7 @@ import {
   type ResourceMap,
   type ResourceState,
 } from './workbench/resourceModel'
+import { EvidenceConsole } from './workbench/evidenceConsole'
 
 type StatusTone = 'ok' | 'warn' | 'missing'
 type ReviewSurfaceId = 'viewer' | 'drawing-review' | 'real-drawing-3d' | 'benchmark-review' | 'committee'
@@ -3243,6 +3244,7 @@ function buildCommitteeSelectionParams(
 
 function App() {
   const [activeSurfaceId, setActiveSurfaceId] = useState<ReviewSurfaceId>(reviewSurfaces[0].id)
+  const [activeView, setActiveView] = useState<'suite' | 'evidence-console'>('suite')
   const [resources, setResources] = useState<ResourceMap>(createInitialResources())
   const [authoringControls, setAuthoringControls] = useState<AuthoringControls>(createDefaultAuthoringControls)
   const [authoringSeeded, setAuthoringSeeded] = useState(false)
@@ -4123,6 +4125,31 @@ function App() {
     <main className="shell">
       <div className="shell__glow shell__glow--a" />
       <div className="shell__glow shell__glow--b" />
+      <nav className="shell__view-switch" aria-label="Workbench views">
+        <button
+          type="button"
+          className={`shell__view-btn${activeView === 'suite' ? ' is-active' : ''}`}
+          aria-pressed={activeView === 'suite'}
+          onClick={() => setActiveView('suite')}
+        >
+          Suite overview
+        </button>
+        <button
+          type="button"
+          className={`shell__view-btn${activeView === 'evidence-console' ? ' is-active' : ''}`}
+          aria-pressed={activeView === 'evidence-console'}
+          data-view="evidence-console"
+          onClick={() => setActiveView('evidence-console')}
+        >
+          Evidence Console
+        </button>
+      </nav>
+      {activeView === 'evidence-console' ? (
+        <section className="shell__evidence-console" aria-label="Evidence Console">
+          <EvidenceConsole />
+        </section>
+      ) : (
+        <>
       <section className="hero">
         <div className="hero__copy">
           <div className="hero__eyebrow-row">
@@ -5545,6 +5572,8 @@ function App() {
           ))}
         </div>
       </section>
+        </>
+      )}
     </main>
   )
 }
