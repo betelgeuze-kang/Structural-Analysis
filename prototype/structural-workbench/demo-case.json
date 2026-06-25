@@ -1,7 +1,7 @@
 {
   "schema_version": "workbench-demo.v1",
   "data_mode": "demo",
-  "claim_boundary": "UI demonstration only; no solver evidence attached. Values are illustrative and must not be read as analysis results, readiness, or any PASS verdict.",
+  "claim_boundary": "UI demonstration only; no solver evidence attached. Values are illustrative and must not be read as analysis results, readiness, or an automated reviewer verdict.",
   "project": {
     "id": "demo-highrise",
     "name": "High-Rise Demonstration"
