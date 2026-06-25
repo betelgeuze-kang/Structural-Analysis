@@ -83,7 +83,7 @@ fi
 
 echo
 echo "[5] Local verify"
-if ./scripts/ai-verify.sh >/dev/null 2>&1; then
+if bash scripts/ai-verify.sh >/dev/null 2>&1; then
   ok "ai-verify.sh passed"
 else
   bad "ai-verify.sh failed"
