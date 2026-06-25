@@ -99,7 +99,14 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         <>
           <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
           <CaseSummary caseV2={caseV2} />
-          <ModelViewport model={caseV2.model} selectedMemberId={state.selectedMemberId} />
+          <ModelViewport
+            model={caseV2.model}
+            selectedMemberId={state.selectedMemberId}
+            onMemberSelected={(id) => dispatch({ type: 'select_member', memberId: id })}
+            dataMode={state.dataMode}
+            sourcePath={caseV2.provenance.sourcePath}
+            sourceCommit={caseV2.provenance.sourceCommitSha}
+          />
           <ResidualAuditPanel residualHistory={caseV2.residualHistory} sourceLabel={sourceLabel} />
           <ReviewDecision dataMode={state.dataMode} />
           <ExportPanel caseV2={caseV2} dataMode={state.dataMode} runStatus={state.runStatus} selectedMemberId={state.selectedMemberId} />
