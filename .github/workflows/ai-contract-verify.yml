@@ -1,0 +1,70 @@
+name: AI Contract Verify
+
+# Lightweight AI-orchestration verification, separated from the heavy solver CI.
+# The repository/org variable STRUCTURAL_AI_RUNNER_LABELS may point this job to
+# a dedicated web runner. Without that variable it inherits the existing
+# frontend/heavy self-hosted labels and remains policy-compatible.
+
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - ".codex/**"
+      - ".betelgeuze/**"
+      - "docs/ai/**"
+      - "scripts/ai-*"
+      - "scripts/validate-ai-worker-output.mjs"
+      - "tests/ai-*"
+      - "opencode.json"
+      - "package.json"
+      - ".github/workflows/ai-contract-verify.yml"
+  push:
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "AGENTS.md"
+      - ".codex/**"
+      - ".betelgeuze/**"
+      - "docs/ai/**"
+      - "scripts/ai-*"
+      - "scripts/validate-ai-worker-output.mjs"
+      - "tests/ai-*"
+      - "opencode.json"
+      - "package.json"
+      - ".github/workflows/ai-contract-verify.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ai-contract-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  ai-contract:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+
+      - name: Verify AI orchestration contract
+        run: npm run ai:verify:contract -- --json-out "$RUNNER_TEMP/ai-verify-result.json"
+
+      - name: Upload AI verify receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-verify-result-${{ github.run_id }}
+          path: ${{ runner.temp }}/ai-verify-result.json
+          if-no-files-found: warn
+          retention-days: 14
