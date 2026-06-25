@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_VIEWERS = [
@@ -49,7 +51,15 @@ def test_release_singlefile_viewers_do_not_depend_on_remote_or_sidecar_assets() 
         "unpkg.com",
     ]
 
-    for viewer_path in RELEASE_VIEWERS:
+    # The single-file viewers are generated release artifacts under
+    # implementation/phase1/release/ (gitignored) and are absent on clean
+    # checkouts (CI). Validate every viewer that is present; skip only when none
+    # have been generated locally.
+    present_viewers = [path for path in RELEASE_VIEWERS if path.exists()]
+    if not present_viewers:
+        pytest.skip("generated single-file release viewers are absent (clean checkout)")
+
+    for viewer_path in present_viewers:
         text = viewer_path.read_text(encoding="utf-8")
         assert "window.__STRUCTURAL_SINGLEFILE__=true;" in text, viewer_path.name
         assert "inlined from src/structure-viewer/design-theme.css" in text, viewer_path.name
