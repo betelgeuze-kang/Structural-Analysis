@@ -179,7 +179,7 @@ function renderReviewDecision(container) {
   container.appendChild(createStateChip('UNAVAILABLE', { srLabel: 'Automated verdict' }))
   container.appendChild(el('p', {
     className: 'wb-note',
-    text: 'No automated verdict. Demo data with no solver evidence — a PASS/REVIEW/FAIL result is never inferred here.',
+    text: 'No automated reviewer result is inferred from demo data without solver evidence.',
   }))
 }
 

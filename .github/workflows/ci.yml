@@ -1,9 +1,36 @@
 name: CI
 
+# Heavy solver/repository quality gate. Frontend-only PRs are verified by
+# frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
+# Workflow-only edits are validated by workflow-contract-ci.yml.
+
 on:
   push:
-    branches: ["main", "codex/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "implementation/**"
+      - "scripts/**/*.py"
+      - "tests/**/*.py"
+      - "*.py"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - "requirements*.txt"
+      - ".betelgeuze/**"
+      - "docs/commercial-structural-solver-product-gap-ledger.md"
+      - "docs/structural-analysis-ai-engine-gap-ledger.md"
   pull_request:
+    paths:
+      - "implementation/**"
+      - "scripts/**/*.py"
+      - "tests/**/*.py"
+      - "*.py"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - "requirements*.txt"
+      - ".betelgeuze/**"
+      - "docs/commercial-structural-solver-product-gap-ledger.md"
+      - "docs/structural-analysis-ai-engine-gap-ledger.md"
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -24,7 +51,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20.19.0"
-          cache: "npm"
+          cache: npm
 
       - name: Install Python package
         run: python -m pip install -e .[dev]
