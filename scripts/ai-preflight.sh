@@ -83,10 +83,10 @@ fi
 
 echo
 echo "[5] Local verify"
-if ./scripts/ai-verify.sh >/dev/null 2>&1; then
-  ok "ai-verify.sh passed"
+if bash scripts/ai-verify.sh --contract >/dev/null 2>&1; then
+  ok "ai-verify.sh contract passed"
 else
-  bad "ai-verify.sh failed"
+  bad "ai-verify.sh contract failed"
 fi
 
 echo
