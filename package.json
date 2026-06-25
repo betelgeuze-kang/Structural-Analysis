@@ -27,8 +27,10 @@
     "verify:viewer-sample-workflow": "node ./scripts/verify-structure-viewer-sample-workflow.mjs --fail-blocked",
     "verify:viewer-visual-regression": "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked",
     "serve:viewer": "node ./scripts/serve-structure-viewer.mjs",
-    "ai:preflight": "./scripts/ai-preflight.sh",
-    "ai:verify": "./scripts/ai-verify.sh",
+    "ai:preflight": "bash scripts/ai-preflight.sh",
+    "ai:verify": "bash scripts/ai-verify.sh",
+    "ai:verify:contract": "bash scripts/ai-verify.sh --contract",
+    "ai:verify:full": "bash scripts/ai-verify.sh --full",
     "ai:validate-worker-output": "node ./scripts/validate-ai-worker-output.mjs"
   },
   "dependencies": {
