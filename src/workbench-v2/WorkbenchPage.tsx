@@ -12,6 +12,7 @@ import { ReferenceComparison } from './components/ReferenceComparison'
 import { ReviewDecision } from './components/ReviewDecision'
 import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
+import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 
 export interface WorkbenchPageProps {
   /** Initial data provider. Defaults to the offline demo provider. */
@@ -64,6 +65,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       onProviderModeChange={setProviderMode}
     >
       <EvidenceReaderPanel />
+      <BenchmarkBrowser />
       {loadState === 'loading' ? (
         <section className="wb2-panel"><p className="wb2-empty">Loading workbench data…</p></section>
       ) : !model ? (

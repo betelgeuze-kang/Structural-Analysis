@@ -126,3 +126,33 @@
 .wb2-evidence-blockers__count { margin: 0 0 4px; color: #ffb3ac; font-weight: 700; font-size: 12px; }
 .wb2-evidence-blockers ul { margin: 0; padding-left: 18px; font-size: 11.5px; color: #ffd9a3; display: flex; flex-direction: column; gap: 3px; }
 .wb2-evidence-blockers li { word-break: break-word; }
+
+
+/* Public benchmark case browser */
+.wb2-bench { grid-column: 1 / -1; }
+.wb2-bench-kind { color: var(--wb2-dim); font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.wb2-bench-disclaimer { margin: 6px 0 12px; font-size: 11.5px; color: var(--wb2-dim); line-height: 1.5; }
+.wb2-bench-filters { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.wb2-bench-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: var(--wb2-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+.wb2-bench-filters select, .wb2-bench-filters input { font: inherit; font-size: 13px; color: var(--wb2-text); background: rgba(10, 18, 29, 0.6); border: 1px solid var(--wb2-border); border-radius: 9px; padding: 7px 10px; }
+.wb2-bench-search { flex: 1 1 220px; }
+.wb2-bench-search input { width: 100%; }
+.wb2-bench-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.wb2-bench-card { border: 1px solid var(--wb2-border); border-radius: 12px; background: rgba(10, 18, 29, 0.5); padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.wb2-bench-card__head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.wb2-bench-card__head h3 { margin: 0; font-size: 13.5px; line-height: 1.3; }
+.wb2-bench-family { margin: 0; color: var(--wb2-dim); font-size: 12px; }
+.wb2-bench-truth { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; padding: 3px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+.wb2-bench-truth--analytic { color: #9ff0cf; background: rgba(99, 199, 161, 0.16); border-color: rgba(99, 199, 161, 0.5); }
+.wb2-bench-truth--independent_solver { color: #a9d4ff; background: rgba(99, 160, 230, 0.16); border-color: rgba(99, 160, 230, 0.5); }
+.wb2-bench-truth--commercial_reference { color: #d9c2ff; background: rgba(170, 130, 230, 0.16); border-color: rgba(170, 130, 230, 0.5); }
+.wb2-bench-truth--experimental { color: #ffd9a3; background: rgba(230, 169, 93, 0.16); border-color: rgba(230, 169, 93, 0.5); }
+.wb2-bench-truth--geometry_only { color: #c6d2df; background: rgba(148, 168, 190, 0.12); border-color: rgba(148, 168, 190, 0.45); border-style: dashed; }
+.wb2-bench-comparable { margin: 4px 0 0; font-size: 11.5px; font-weight: 700; }
+.wb2-bench-comparable.is-yes { color: #9ff0cf; }
+.wb2-bench-comparable.is-no { color: #b6c4d4; }
+.wb2-bench-run { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; }
+.wb2-bench-run__label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-bench-run__cmd { word-break: break-all; }
+.wb2-bench-report { font-size: 12px; color: #9ff0cf; text-decoration: none; margin-top: 2px; }
+.wb2-bench-report:hover { text-decoration: underline; }
