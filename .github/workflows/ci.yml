@@ -2,7 +2,7 @@ name: CI
 
 # Heavy solver/repository quality gate. Frontend-only PRs are verified by
 # frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
-# Workflow-only edits can be checked explicitly with workflow_dispatch.
+# Workflow-only edits are validated by workflow-contract-ci.yml.
 
 on:
   push:
@@ -13,6 +13,7 @@ on:
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
@@ -24,6 +25,7 @@ on:
       - "tests/**/*.py"
       - "*.py"
       - "pyproject.toml"
+      - "pytest.ini"
       - "requirements*.txt"
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
