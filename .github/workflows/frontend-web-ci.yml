@@ -1,11 +1,8 @@
 name: Frontend Web CI
 
-# Frontend-only verification path, intentionally separated from the heavy
-# self-hosted Python / GPU solver CI in .github/workflows/ci.yml.
-#
-# Goal (priority 1): every frontend PR can at least build + smoke-test without
-# depending on the heavy solver runner, so a cancelled/queued heavy job is never
-# the gate for frontend changes.
+# Frontend-only verification for the React workbench and static prototype.
+# The legacy structure-viewer browser smoke is routed to a separate workflow so
+# unrelated Workbench changes are not blocked by viewer-specific failures.
 
 on:
   pull_request:
@@ -13,17 +10,23 @@ on:
       - "prototype/**"
       - "src/**"
       - "tests/frontend/**"
+      - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
       - ".github/workflows/frontend-web-ci.yml"
   push:
-    branches: ["main", "codex/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**"]
     paths:
       - "prototype/**"
       - "src/**"
       - "tests/frontend/**"
+      - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
       - ".github/workflows/frontend-web-ci.yml"
 
 concurrency:
@@ -35,12 +38,7 @@ env:
 
 jobs:
   frontend:
-    # Runner policy (decision D1): defaults to the self-hosted label set to
-    # comply with the current "no GitHub-hosted runners" policy (option B).
-    # If billing/policy approves GitHub-hosted runners (option A), set the repo
-    # or org variable STRUCTURAL_FRONTEND_RUNNER_LABELS to '["ubuntu-latest"]'.
-    # No other change to this workflow is required to switch A <-> B.
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '["ubuntu-latest"]') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -55,7 +53,7 @@ jobs:
         run: npm ci
 
       - name: Build evidence bundle (read-only; non-blocking until single-commit)
-        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built (sources not at a single commit yet, or sensitive-data gate). Workbench will show evidence as unavailable; the strict gate is enforced at deploy."
+        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built; the Workbench will show evidence as unavailable."
 
       - name: Type-check and build
         run: npm run build
@@ -69,8 +67,8 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install chromium
 
-      - name: Minimal browser smoke
-        run: npm run verify:frontend-browser-smoke -- --mode minimal
-
       - name: Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke
+
+      - name: Workbench v2 E2E
+        run: npm run verify:workbench-v2-e2e
