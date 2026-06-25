@@ -20,6 +20,7 @@
     "verify:workbench-prototype-dom-contract": "node ./scripts/verify-workbench-prototype-dom-contract.mjs",
     "verify:workbench-prototype-browser-smoke": "node ./scripts/verify-workbench-prototype-browser-smoke.mjs",
     "build:benchmark-catalog": "node ./scripts/build-benchmark-catalog.mjs",
+    "verify:workbench-v2-e2e": "node ./scripts/verify-workbench-v2-e2e.mjs",
     "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",
