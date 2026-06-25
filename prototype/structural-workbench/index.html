@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Structural Workbench (DEMO)</title>
+<meta name="description" content="Structural Workbench demo prototype. UI demonstration only — no solver evidence attached, no PASS verdict." />
+<link rel="stylesheet" href="./styles/tokens.css" />
+<link rel="stylesheet" href="./styles/layout.css" />
+<link rel="stylesheet" href="./styles/components.css" />
+<link rel="stylesheet" href="./styles/responsive.css" />
+</head>
+<body>
+  <a class="wb-skip-link" href="#wb-main">Skip to workbench</a>
+
+  <div class="wb-root" data-wb-root>
+    <header class="wb-header">
+      <div class="wb-header__title">
+        <p class="wb-eyebrow">Structural Optimization Workbench</p>
+        <div class="wb-title-row">
+          <h1>Structural Workbench</h1>
+          <span class="wb-mode" data-wb-mode aria-live="polite"></span>
+        </div>
+      </div>
+    </header>
+
+    <p class="wb-claim" data-wb-claim role="note" aria-label="Claim boundary"></p>
+
+    <main id="wb-main" class="wb-main" tabindex="-1">
+      <section class="wb-panel" aria-labelledby="wb-project-title">
+        <h2 id="wb-project-title" class="wb-panel__title">Project</h2>
+        <div data-wb-project></div>
+      </section>
+
+      <section class="wb-panel" aria-labelledby="wb-status-title">
+        <h2 id="wb-status-title" class="wb-panel__title">Readiness status</h2>
+        <div data-wb-status></div>
+        <p class="wb-legend" aria-hidden="true">
+          State legend: DEMO · LIVE · STALE · BLOCKED · MISSING · UNAVAILABLE
+        </p>
+      </section>
+
+      <section class="wb-panel" aria-labelledby="wb-verdict-title">
+        <h2 id="wb-verdict-title" class="wb-panel__title">Review decision</h2>
+        <div data-wb-verdict></div>
+      </section>
+
+      <section class="wb-panel" aria-labelledby="wb-review-title">
+        <h2 id="wb-review-title" class="wb-panel__title">Reviewer inputs</h2>
+        <div class="wb-field">
+          <label for="wb-file">Attach model file (name shown only — not executed)</label>
+          <input id="wb-file" type="file" data-wb-file />
+          <p class="wb-field__out" data-wb-file-name>No file selected</p>
+        </div>
+        <div class="wb-field">
+          <label for="wb-comment">Reviewer note</label>
+          <textarea id="wb-comment" rows="3" data-wb-comment placeholder="Optional note…"></textarea>
+          <p class="wb-field__label" id="wb-comment-preview-label">Preview (rendered as plain text)</p>
+          <p class="wb-field__out" data-wb-comment-preview aria-labelledby="wb-comment-preview-label"></p>
+        </div>
+      </section>
+
+      <section class="wb-panel" aria-labelledby="wb-export-title">
+        <h2 id="wb-export-title" class="wb-panel__title">Export</h2>
+        <div class="wb-actions">
+          <button type="button" class="wb-btn" data-wb-export>Export demo bundle (JSON)</button>
+          <span class="wb-action-hint">DEMO bundle — inputs only, not a validated artifact.</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

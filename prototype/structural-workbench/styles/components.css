@@ -1,0 +1,123 @@
+/* Components: skip link, claim banner, panels, state chips, fields, buttons. */
+
+.wb-skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 50;
+  padding: 9px 14px;
+  border-radius: 10px;
+  background: var(--wb-bg-mid);
+  border: 1px solid var(--wb-live-bd);
+  color: #c9f3ee;
+  font-weight: 700;
+  text-decoration: none;
+  transition: top 140ms ease;
+}
+.wb-skip-link:focus { top: 12px; }
+
+:focus-visible { outline: 3px solid var(--wb-focus); outline-offset: 2px; border-radius: 8px; }
+
+.wb-claim {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: var(--wb-radius-sm);
+  background: var(--wb-demo-bg);
+  border: 1px solid var(--wb-demo-bd);
+  color: var(--wb-demo-fg);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.wb-panel {
+  border: 1px solid var(--wb-border);
+  border-radius: var(--wb-radius);
+  background: linear-gradient(180deg, var(--wb-surface), var(--wb-surface-2));
+  padding: var(--wb-pad);
+  min-width: 0;
+}
+.wb-panel__title { margin: 0 0 12px; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--wb-text-dim); }
+
+.wb-project-name { margin: 0; font-size: 18px; letter-spacing: -0.01em; }
+.wb-project-meta { margin: 4px 0 0; color: var(--wb-text-dim); font-size: 12.5px; }
+
+/* State chip — colour + label, never colour alone. */
+.wb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  border: 1px solid transparent;
+}
+.wb-chip::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: 0.9; }
+.wb-chip--is-demo { color: var(--wb-demo-fg); background: var(--wb-demo-bg); border-color: var(--wb-demo-bd); }
+.wb-chip--is-live { color: var(--wb-live-fg); background: var(--wb-live-bg); border-color: var(--wb-live-bd); }
+.wb-chip--is-stale { color: var(--wb-stale-fg); background: var(--wb-stale-bg); border-color: var(--wb-stale-bd); }
+.wb-chip--is-blocked { color: var(--wb-blocked-fg); background: var(--wb-blocked-bg); border-color: var(--wb-blocked-bd); }
+.wb-chip--is-missing { color: var(--wb-missing-fg); background: var(--wb-missing-bg); border-color: var(--wb-missing-bd); border-style: dashed; }
+.wb-chip--is-unavailable { color: var(--wb-unavailable-fg); background: var(--wb-unavailable-bg); border-color: var(--wb-unavailable-bd); }
+
+.wb-mode-badge { font-size: 12px; letter-spacing: 0.14em; padding: 5px 13px; }
+
+.wb-status-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wb-status-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--wb-border);
+  background: rgba(10, 18, 29, 0.5);
+}
+.wb-status-label { font-weight: 700; font-size: 13px; }
+.wb-status-raw { color: var(--wb-text-dim); font-family: var(--wb-mono); font-size: 11.5px; }
+.wb-legend { margin: 10px 0 0; color: var(--wb-text-dim); font-size: 11px; }
+
+.wb-note { margin: 10px 0 0; color: #c3d2e0; font-size: 12.5px; line-height: 1.5; }
+
+.wb-field { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.wb-field label, .wb-field__label { color: var(--wb-text-dim); font-size: 12px; font-weight: 700; }
+.wb-field input[type='file'], .wb-field textarea {
+  font: inherit;
+  color: var(--wb-text);
+  background: rgba(10, 18, 29, 0.6);
+  border: 1px solid var(--wb-border);
+  border-radius: 10px;
+  padding: 9px 11px;
+}
+.wb-field textarea { resize: vertical; min-height: 64px; }
+.wb-field__out {
+  margin: 0;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px dashed var(--wb-border);
+  background: rgba(148, 168, 190, 0.06);
+  color: #c3d2e0;
+  font-size: 12.5px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wb-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.wb-btn {
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: var(--wb-radius-sm);
+  border: 1px solid var(--wb-live-bd);
+  background: rgba(79, 183, 173, 0.14);
+  color: #c9f3ee;
+}
+.wb-btn:hover { background: rgba(79, 183, 173, 0.24); }
+.wb-action-hint { color: var(--wb-text-dim); font-size: 11.5px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wb-skip-link { transition: none; }
+}
