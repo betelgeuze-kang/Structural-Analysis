@@ -1,0 +1,67 @@
+name: Frontend Web CI
+
+# Frontend-only verification path, intentionally separated from the heavy
+# self-hosted Python / GPU solver CI in .github/workflows/ci.yml.
+#
+# Goal (priority 1): every frontend PR can at least build + smoke-test without
+# depending on the heavy solver runner, so a cancelled/queued heavy job is never
+# the gate for frontend changes.
+
+on:
+  pull_request:
+    paths:
+      - "prototype/**"
+      - "src/**"
+      - "tests/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-web-ci.yml"
+  push:
+    branches: ["main", "codex/**"]
+    paths:
+      - "prototype/**"
+      - "src/**"
+      - "tests/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-web-ci.yml"
+
+concurrency:
+  group: frontend-web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  frontend:
+    # Runner policy (decision D1): defaults to the self-hosted label set to
+    # comply with the current "no GitHub-hosted runners" policy (option B).
+    # If billing/policy approves GitHub-hosted runners (option A), set the repo
+    # or org variable STRUCTURAL_FRONTEND_RUNNER_LABELS to '["ubuntu-latest"]'.
+    # No other change to this workflow is required to switch A <-> B.
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Frontend build contract
+        run: npm run verify:frontend-contract
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Minimal browser smoke
+        run: npm run verify:frontend-browser-smoke -- --mode minimal
