@@ -1,0 +1,592 @@
+{
+  "schema_version": "benchmark-catalog.v1",
+  "catalog_kind": "candidate",
+  "generated_at": "2026-06-25T01:47:23.921Z",
+  "generated_by": "scripts/build-benchmark-catalog.mjs",
+  "disclaimer": "Candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses and most truth classes are UNVERIFIED (truth class is format-inferred unless marked verified). geometry_only cases must not be used for numerical-accuracy averaging.",
+  "accuracy_exclusion_rule": "geometry_only data is used only for import / topology / rendering / GUI performance / model health, never in numerical-accuracy averages.",
+  "cases": [
+    {
+      "id": "amaelkady_constructbrace_github_remote",
+      "title": "ConstructBrace OpenSees GitHub raw proxy",
+      "sourceUrl": "https://github.com/amaelkady/OpenSEES_Models_CBF",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "discontinuous_braced_frame_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
+      "localAvailability": "available",
+      "sourceFormat": "tcl",
+      "fileBytes": 3062,
+      "sizeClass": "small",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: tcl",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://github.com/amaelkady/OpenSEES_Models_CBF"
+      ]
+    },
+    {
+      "id": "amaelkady_scbf16cg_github_remote",
+      "title": "SCBF16CG OpenSees GitHub raw benchmark candidate",
+      "sourceUrl": "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "discontinuous_braced_frame_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:a0d8554dbf0c6f7b3e79ab4581c71b07cdfdd8a936bddfaa12dc6c54ce76d416",
+      "localAvailability": "available",
+      "sourceFormat": "tcl",
+      "fileBytes": 3062,
+      "sizeClass": "small",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: tcl",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files"
+      ]
+    },
+    {
+      "id": "gtc_public_bridge_bearing_c04_local",
+      "title": "GTC public bridge bearing C04 raw MIDAS model",
+      "sourceUrl": "https://gtc.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "bridge_skewed_support_span",
+      "analysisTypes": [],
+      "checksum": "sha256:a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "localAvailability": "available",
+      "sourceFormat": "mgt",
+      "fileBytes": 161948,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: mgt",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://gtc.midasuser.com/"
+      ]
+    },
+    {
+      "id": "gtc_public_bridge_section_a3_local",
+      "title": "GTC public curved bridge section A3 raw MIDAS model",
+      "sourceUrl": "https://gtc.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "curved_plan_bridge_torsion",
+      "analysisTypes": [],
+      "checksum": "sha256:dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "localAvailability": "available",
+      "sourceFormat": "mgt",
+      "fileBytes": 77481,
+      "sizeClass": "small",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: mgt",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://gtc.midasuser.com/"
+      ]
+    },
+    {
+      "id": "gtc_public_bridge_section_e1_03_local",
+      "title": "GTC public curved bridge section E1-03 raw MIDAS model",
+      "sourceUrl": "https://gtc.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "curved_plan_bridge_torsion",
+      "analysisTypes": [],
+      "checksum": "sha256:07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "localAvailability": "available",
+      "sourceFormat": "mgt",
+      "fileBytes": 143351,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: mgt",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://gtc.midasuser.com/"
+      ]
+    },
+    {
+      "id": "luxinzheng_megatall_tcl_model1_local",
+      "title": "OpenSees 606 m mega-tall building Model 1 TCL",
+      "sourceUrl": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "torsionally_eccentric_core_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:862ca6db9eb987509fb9a91f5c5efbf6e923631e6dc2ff2766ab70291c4bb19c",
+      "localAvailability": "available",
+      "sourceFormat": "tcl",
+      "fileBytes": 2850355,
+      "sizeClass": "large",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: tcl",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
+      ]
+    },
+    {
+      "id": "midas_fcm_bridge_archive_local",
+      "title": "MIDAS support FCM bridge archive geometry proxy",
+      "sourceUrl": "https://gtc.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "curved_plan_bridge_torsion",
+      "analysisTypes": [],
+      "checksum": "sha256:2422df2ffba472564b8f071850b4f9187cee58cc5ccfe1f3edddfa83c192130d",
+      "localAvailability": "available",
+      "sourceFormat": "mcb",
+      "fileBytes": 2067979,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: mcb",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://gtc.midasuser.com/"
+      ]
+    },
+    {
+      "id": "midas_multifamily_building_meb_local",
+      "title": "MIDAS multifamily building original native MEB",
+      "sourceUrl": "https://support.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "transfer_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:36b60663aca159c066c51f2c13bd0076ae4d05056e0a86e9e424a90f046ec07a",
+      "localAvailability": "available",
+      "sourceFormat": "meb",
+      "fileBytes": 1354364,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: meb",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://support.midasuser.com/"
+      ]
+    },
+    {
+      "id": "midas_neighborhood_facility_meb_local",
+      "title": "MIDAS neighborhood facility original native MEB",
+      "sourceUrl": "https://support.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "commercial_reference",
+      "structureFamily": "soft_story_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:cfd331cda8727c23afd0b1efba9c4b48a4c63247fda38e6cd635594efda3d7d9",
+      "localAvailability": "available",
+      "sourceFormat": "meb",
+      "fileBytes": 1896404,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: meb",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://support.midasuser.com/"
+      ]
+    },
+    {
+      "id": "nheri_soft_story_podium_remote",
+      "title": "DesignSafe OpenSees pilotis RC frame package",
+      "sourceUrl": "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "soft_story_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:20a1f433dde813304903fcf488b772dcb18c47f71ae8ef265fe5e158103db545",
+      "localAvailability": "available",
+      "sourceFormat": "tcl",
+      "fileBytes": 534400,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: tcl",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
+      ]
+    },
+    {
+      "id": "offset_core_megatall_torsion_bridged_local",
+      "title": "Offset-core megatall torsion bridged graph",
+      "sourceUrl": "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "torsionally_eccentric_core_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+      "localAvailability": "available",
+      "sourceFormat": "json_graph",
+      "fileBytes": 165134,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: json_graph",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "https://github.com/yexiang92/opstool"
+      ]
+    },
+    {
+      "id": "opstool_606m_megatall_model_local",
+      "title": "Opstool 606m megatall bridged model",
+      "sourceUrl": "https://github.com/utopiatek/opstool",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "outrigger_megatall_offset_core",
+      "analysisTypes": [],
+      "checksum": "sha256:587222ebb76cb5343b44ab13f40af6ce42b1d396498152281cb3edcda84ffcc1",
+      "localAvailability": "available",
+      "sourceFormat": "json_graph",
+      "fileBytes": 165134,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: json_graph",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://github.com/utopiatek/opstool"
+      ]
+    },
+    {
+      "id": "peer_transfer_podium_tower_remote",
+      "title": "PEER transfer podium tower benchmark candidate",
+      "sourceUrl": "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "transfer_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:2d8ba0cc836ab3f6f488d37c534f6dfd6d3a1133761a1ef3ed0572b74849e510",
+      "localAvailability": "available",
+      "sourceFormat": "report_pdf",
+      "fileBytes": 2918230,
+      "sizeClass": "large",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: report_pdf",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+        "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
+        "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
+      ]
+    },
+    {
+      "id": "reentrant_corner_tower_proxy_local",
+      "title": "Re-entrant corner local proxy from skewed column IFC",
+      "sourceUrl": "https://zenodo.org/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "reentrant_corner_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+      "localAvailability": "available",
+      "sourceFormat": "ifc",
+      "fileBytes": 1315735,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: ifc",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://zenodo.org/"
+      ]
+    },
+    {
+      "id": "scbf16b_shell_beam_mix_local",
+      "title": "SCBF16B shell-beam mixed OpenSees model",
+      "sourceUrl": "https://opensees.berkeley.edu/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "discontinuous_braced_frame_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+      "localAvailability": "available",
+      "sourceFormat": "tcl",
+      "fileBytes": 118474,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: tcl",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://opensees.berkeley.edu/"
+      ]
+    },
+    {
+      "id": "setback_tower_proxy_local",
+      "title": "Setback tower local proxy from twisted tapered IFC",
+      "sourceUrl": "https://zenodo.org/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "setback_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "localAvailability": "available",
+      "sourceFormat": "ifc",
+      "fileBytes": 38728810,
+      "sizeClass": "large",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: ifc",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://zenodo.org/"
+      ]
+    },
+    {
+      "id": "skewed_column_frame_remote",
+      "title": "Skewed-column frame candidate",
+      "sourceUrl": "https://www.buildingsmart.org/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "skewed_column_frame",
+      "analysisTypes": [],
+      "checksum": "sha256:824e4a363a042c565bdd52490e8728a92bb415a05ac6b82d11f1c083d7f98ec0",
+      "localAvailability": "available",
+      "sourceFormat": "ifc",
+      "fileBytes": 1315735,
+      "sizeClass": "medium",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: ifc",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://www.buildingsmart.org/"
+      ]
+    },
+    {
+      "id": "soft_story_podium_tower_proxy_local",
+      "title": "Soft-story podium tower local bridged graph from MIDAS neighborhood facility archive",
+      "sourceUrl": "https://support.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "soft_story_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:d650f6899d885a48dd4ac72480ce5caf01b58e2bd2a576b81944aaf61c80206a",
+      "localAvailability": "available",
+      "sourceFormat": "json_graph",
+      "fileBytes": 11738,
+      "sizeClass": "small",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: json_graph",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://support.midasuser.com/"
+      ]
+    },
+    {
+      "id": "tpu_interference_highrise_local",
+      "title": "TPU interference highrise response proxy",
+      "sourceUrl": "https://db.wind.arch.t-kougei.ac.jp/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "torsionally_eccentric_core_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:ab57db6f7b6bbc59051159d27b92b2f9a0a16981a3f59bbff746fc1f83719011",
+      "localAvailability": "available",
+      "sourceFormat": "csv_tables",
+      "fileBytes": 29958780,
+      "sizeClass": "large",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: csv_tables",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://db.wind.arch.t-kougei.ac.jp/"
+      ]
+    },
+    {
+      "id": "transfer_podium_tower_proxy_local",
+      "title": "Transfer podium tower local bridged graph from MIDAS multifamily building archive",
+      "sourceUrl": "https://support.midasuser.com/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "independent_solver",
+      "structureFamily": "transfer_podium_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:09c40b61837fdcd2b5157ebfbc604fe74111ab45b7fffd9727729432f96d4ef5",
+      "localAvailability": "available",
+      "sourceFormat": "json_graph",
+      "fileBytes": 11917,
+      "sizeClass": "small",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: json_graph",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://support.midasuser.com/"
+      ]
+    },
+    {
+      "id": "twisted_tapered_tower_remote",
+      "title": "Twisted tapered tower candidate",
+      "sourceUrl": "https://www.rhino3d.com/inside/revit/",
+      "sourceVersion": "unspecified",
+      "license": "unknown",
+      "truthClass": "geometry_only",
+      "structureFamily": "twisted_tapered_tower",
+      "analysisTypes": [],
+      "checksum": "sha256:05919eee0701b955d3d08501c4889c879d9c486e2389a6a1a5cdaad32a5d10ba",
+      "localAvailability": "available",
+      "sourceFormat": "ifc",
+      "fileBytes": 38728810,
+      "sizeClass": "large",
+      "truthClassVerified": false,
+      "truthClassBasis": "inferred from source format: ifc",
+      "licenseVerified": false,
+      "referenceResultsAvailable": false,
+      "allSourceUrls": [
+        "https://www.rhino3d.com/inside/revit/"
+      ]
+    },
+    {
+      "id": "peer_spd_rc_column_holdout_seed_01",
+      "title": "PEER Structural Performance Database",
+      "sourceUrl": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299",
+      "sourceVersion": "specimen 299",
+      "license": "unknown",
+      "truthClass": "experimental",
+      "structureFamily": "rc_column",
+      "analysisTypes": [
+        "cyclic_quasi_static"
+      ],
+      "localAvailability": "available",
+      "sourceFormat": "peer_spd_specimen_page",
+      "fileBytes": null,
+      "sizeClass": "small",
+      "truthClassVerified": true,
+      "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
+      "licenseVerified": false,
+      "referenceResultsAvailable": true,
+      "allSourceUrls": [
+        "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299"
+      ]
+    },
+    {
+      "id": "peer_spd_rc_column_rebar_sensitive_seed_01",
+      "title": "PEER Structural Performance Database",
+      "sourceUrl": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+      "sourceVersion": "specimen 121",
+      "license": "unknown",
+      "truthClass": "experimental",
+      "structureFamily": "rc_column",
+      "analysisTypes": [
+        "cyclic_quasi_static"
+      ],
+      "localAvailability": "available",
+      "sourceFormat": "peer_spd_specimen_page",
+      "fileBytes": null,
+      "sizeClass": "small",
+      "truthClassVerified": true,
+      "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
+      "licenseVerified": false,
+      "referenceResultsAvailable": true,
+      "allSourceUrls": [
+        "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121"
+      ]
+    },
+    {
+      "id": "peer_spd_rc_column_rectangular_seed_01",
+      "title": "PEER Structural Performance Database",
+      "sourceUrl": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+      "sourceVersion": "specimen 121",
+      "license": "unknown",
+      "truthClass": "experimental",
+      "structureFamily": "rc_column",
+      "analysisTypes": [
+        "cyclic_quasi_static"
+      ],
+      "localAvailability": "available",
+      "sourceFormat": "peer_spd_specimen_page",
+      "fileBytes": null,
+      "sizeClass": "small",
+      "truthClassVerified": true,
+      "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
+      "licenseVerified": false,
+      "referenceResultsAvailable": true,
+      "allSourceUrls": [
+        "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121"
+      ]
+    },
+    {
+      "id": "peer_spd_rc_column_rectangular_seed_02",
+      "title": "PEER Structural Performance Database",
+      "sourceUrl": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=29",
+      "sourceVersion": "specimen 29",
+      "license": "unknown",
+      "truthClass": "experimental",
+      "structureFamily": "rc_column",
+      "analysisTypes": [
+        "cyclic_quasi_static"
+      ],
+      "localAvailability": "available",
+      "sourceFormat": "peer_spd_specimen_page",
+      "fileBytes": null,
+      "sizeClass": "small",
+      "truthClassVerified": true,
+      "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
+      "licenseVerified": false,
+      "referenceResultsAvailable": true,
+      "allSourceUrls": [
+        "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=29"
+      ]
+    },
+    {
+      "id": "peer_spd_rc_column_spiral_seed_01",
+      "title": "PEER Structural Performance Database",
+      "sourceUrl": "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+      "sourceVersion": "specimen 276",
+      "license": "unknown",
+      "truthClass": "experimental",
+      "structureFamily": "rc_column",
+      "analysisTypes": [
+        "cyclic_quasi_static"
+      ],
+      "localAvailability": "available",
+      "sourceFormat": "peer_spd_specimen_page",
+      "fileBytes": null,
+      "sizeClass": "small",
+      "truthClassVerified": true,
+      "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
+      "licenseVerified": false,
+      "referenceResultsAvailable": true,
+      "allSourceUrls": [
+        "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276"
+      ]
+    }
+  ]
+}

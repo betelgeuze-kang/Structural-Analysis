@@ -60,8 +60,14 @@ jobs:
       - name: Frontend build contract
         run: npm run verify:frontend-contract
 
+      - name: Workbench prototype DOM contract
+        run: npm run verify:workbench-prototype-dom-contract
+
       - name: Install Playwright browser
         run: npx playwright install chromium
 
       - name: Minimal browser smoke
         run: npm run verify:frontend-browser-smoke -- --mode minimal
+
+      - name: Workbench prototype browser smoke
+        run: npm run verify:workbench-prototype-browser-smoke

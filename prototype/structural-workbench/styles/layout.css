@@ -1,0 +1,30 @@
+/* Layout: shell, header, panel grid. */
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  color: var(--wb-text);
+  font-family: var(--wb-font);
+  background: linear-gradient(180deg, var(--wb-bg-top) 0%, var(--wb-bg-mid) 44%, var(--wb-bg-bot) 100%);
+  min-height: 100vh;
+}
+
+.wb-root { display: flex; flex-direction: column; gap: var(--wb-gap); padding: 18px 22px 40px; }
+
+.wb-header { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; flex-wrap: wrap; }
+.wb-title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.wb-header h1 { margin: 2px 0 0; font-size: 22px; letter-spacing: -0.01em; }
+.wb-eyebrow { margin: 0; color: var(--wb-text-dim); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.wb-main {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--wb-gap);
+  align-items: start;
+}
+
+/* Status and project panels span across the top for prominence. */
+.wb-main > .wb-panel:nth-child(1) { grid-column: 1 / -1; }
+.wb-main > .wb-panel:nth-child(2) { grid-column: 1 / -1; }
