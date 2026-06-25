@@ -1,10 +1,18 @@
 {
-  "schema_version": "benchmark-catalog.v1",
+  "schema_version": "benchmark-catalog.v2",
   "catalog_kind": "candidate",
-  "generated_at": "2026-06-25T01:47:23.921Z",
+  "generated_at": "2026-06-25T04:44:48.312Z",
   "generated_by": "scripts/build-benchmark-catalog.mjs",
-  "disclaimer": "Candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses and most truth classes are UNVERIFIED (truth class is format-inferred unless marked verified). geometry_only cases must not be used for numerical-accuracy averaging.",
+  "disclaimer": "Candidate benchmark catalog built from collected open-data metadata. Checksums and URLs are read from source metadata; licenses, most truth classes, reference results, and runners are UNVERIFIED. A run command is only offered for cases with a registered runnerId. geometry_only cases must not be used for numerical-accuracy averaging.",
   "accuracy_exclusion_rule": "geometry_only data is used only for import / topology / rendering / GUI performance / model health, never in numerical-accuracy averages.",
+  "lifecycle_states": [
+    "DISCOVERED",
+    "ACQUIRED",
+    "NORMALIZED",
+    "REFERENCE_ATTACHED",
+    "RUNNABLE",
+    "VALIDATED"
+  ],
   "cases": [
     {
       "id": "amaelkady_constructbrace_github_remote",
@@ -20,13 +28,24 @@
       "sourceFormat": "tcl",
       "fileBytes": 3062,
       "sizeClass": "small",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: tcl",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://github.com/amaelkady/OpenSEES_Models_CBF"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://github.com/amaelkady/OpenSEES_Models_CBF",
+        "runnerId": null
+      }
     },
     {
       "id": "amaelkady_scbf16cg_github_remote",
@@ -42,13 +61,24 @@
       "sourceFormat": "tcl",
       "fileBytes": 3062,
       "sizeClass": "small",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: tcl",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://api.github.com/repos/amaelkady/OpenSEES_Models_CBF/contents/Models%20and%20Tcl%20Files",
+        "runnerId": null
+      }
     },
     {
       "id": "gtc_public_bridge_bearing_c04_local",
@@ -64,13 +94,24 @@
       "sourceFormat": "mgt",
       "fileBytes": 161948,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: mgt",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://gtc.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://gtc.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "gtc_public_bridge_section_a3_local",
@@ -86,13 +127,24 @@
       "sourceFormat": "mgt",
       "fileBytes": 77481,
       "sizeClass": "small",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: mgt",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://gtc.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://gtc.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "gtc_public_bridge_section_e1_03_local",
@@ -108,13 +160,24 @@
       "sourceFormat": "mgt",
       "fileBytes": 143351,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: mgt",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://gtc.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://gtc.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "luxinzheng_megatall_tcl_model1_local",
@@ -130,14 +193,25 @@
       "sourceFormat": "tcl",
       "fileBytes": 2850355,
       "sizeClass": "large",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: tcl",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
         "http://www.thu-civil.net/download/OpenSees-Mega-tall-Building.zip"
-      ]
+      ],
+      "firstValidationTarget": true,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "runnerId": null
+      }
     },
     {
       "id": "midas_fcm_bridge_archive_local",
@@ -153,13 +227,24 @@
       "sourceFormat": "mcb",
       "fileBytes": 2067979,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: mcb",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://gtc.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://gtc.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "midas_multifamily_building_meb_local",
@@ -175,13 +260,24 @@
       "sourceFormat": "meb",
       "fileBytes": 1354364,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: meb",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://support.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": true,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://support.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "midas_neighborhood_facility_meb_local",
@@ -197,13 +293,24 @@
       "sourceFormat": "meb",
       "fileBytes": 1896404,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: meb",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://support.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://support.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "nheri_soft_story_podium_remote",
@@ -219,14 +326,25 @@
       "sourceFormat": "tcl",
       "fileBytes": 534400,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: tcl",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
         "https://www.designsafe-ci.org/data/browser/public/designsafe.storage.published/published-data/PRJ-4831/Simulation--fly-ash-brick-and-aac-block-masonry-infilled-rc-frame-buildings-opensees-models-and-responses/data/Model--opensees-model-data/data/G+7%20Infilled%20Frame/Fly%20Ash%20Brick%20Infill/Pilotis"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://www.designsafe-ci.org/api/publications/v2/PRJ-4831",
+        "runnerId": null
+      }
     },
     {
       "id": "offset_core_megatall_torsion_bridged_local",
@@ -242,14 +360,25 @@
       "sourceFormat": "json_graph",
       "fileBytes": 165134,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: json_graph",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
         "https://github.com/yexiang92/opstool"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from http://www.luxinzheng.net/download/OpenSEES/Mega-tall_Building_Benchmark_OpenSees.htm",
+        "runnerId": null
+      }
     },
     {
       "id": "opstool_606m_megatall_model_local",
@@ -265,13 +394,24 @@
       "sourceFormat": "json_graph",
       "fileBytes": 165134,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: json_graph",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://github.com/utopiatek/opstool"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://github.com/utopiatek/opstool",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_transfer_podium_tower_remote",
@@ -287,15 +427,26 @@
       "sourceFormat": "report_pdf",
       "fileBytes": 2918230,
       "sizeClass": "large",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: report_pdf",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
         "https://peer.berkeley.edu/sites/default/files/final_tbi_report_10.9.2017_0.pdf",
         "https://peer.berkeley.edu/sites/default/files/webpeer-2011-05-tbi_task12.pdf"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://peer.berkeley.edu/research/building-systems/tall-buildings-initiative",
+        "runnerId": null
+      }
     },
     {
       "id": "reentrant_corner_tower_proxy_local",
@@ -311,13 +462,24 @@
       "sourceFormat": "ifc",
       "fileBytes": 1315735,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: ifc",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://zenodo.org/"
-      ]
+      ],
+      "firstValidationTarget": true,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://zenodo.org/",
+        "runnerId": null
+      }
     },
     {
       "id": "scbf16b_shell_beam_mix_local",
@@ -333,13 +495,24 @@
       "sourceFormat": "tcl",
       "fileBytes": 118474,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: tcl",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://opensees.berkeley.edu/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://opensees.berkeley.edu/",
+        "runnerId": null
+      }
     },
     {
       "id": "setback_tower_proxy_local",
@@ -355,13 +528,24 @@
       "sourceFormat": "ifc",
       "fileBytes": 38728810,
       "sizeClass": "large",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: ifc",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://zenodo.org/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://zenodo.org/",
+        "runnerId": null
+      }
     },
     {
       "id": "skewed_column_frame_remote",
@@ -377,13 +561,24 @@
       "sourceFormat": "ifc",
       "fileBytes": 1315735,
       "sizeClass": "medium",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: ifc",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://www.buildingsmart.org/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://www.buildingsmart.org/",
+        "runnerId": null
+      }
     },
     {
       "id": "soft_story_podium_tower_proxy_local",
@@ -399,13 +594,24 @@
       "sourceFormat": "json_graph",
       "fileBytes": 11738,
       "sizeClass": "small",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: json_graph",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://support.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://support.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "tpu_interference_highrise_local",
@@ -421,13 +627,24 @@
       "sourceFormat": "csv_tables",
       "fileBytes": 29958780,
       "sizeClass": "large",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: csv_tables",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://db.wind.arch.t-kougei.ac.jp/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://db.wind.arch.t-kougei.ac.jp/",
+        "runnerId": null
+      }
     },
     {
       "id": "transfer_podium_tower_proxy_local",
@@ -443,13 +660,24 @@
       "sourceFormat": "json_graph",
       "fileBytes": 11917,
       "sizeClass": "small",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: json_graph",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://support.midasuser.com/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://support.midasuser.com/",
+        "runnerId": null
+      }
     },
     {
       "id": "twisted_tapered_tower_remote",
@@ -465,13 +693,24 @@
       "sourceFormat": "ifc",
       "fileBytes": 38728810,
       "sizeClass": "large",
-      "truthClassVerified": false,
       "truthClassBasis": "inferred from source format: ifc",
-      "licenseVerified": false,
-      "referenceResultsAvailable": false,
       "allSourceUrls": [
         "https://www.rhino3d.com/inside/revit/"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": false,
+        "truthEvidencePath": null,
+        "referenceResultsAvailable": false,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# obtain manually from https://www.rhino3d.com/inside/revit/",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_spd_rc_column_holdout_seed_01",
@@ -488,13 +727,24 @@
       "sourceFormat": "peer_spd_specimen_page",
       "fileBytes": null,
       "sizeClass": "small",
-      "truthClassVerified": true,
       "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
-      "licenseVerified": false,
-      "referenceResultsAvailable": true,
       "allSourceUrls": [
         "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": true,
+        "truthEvidencePath": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/peer_spd_rc_column_holdout_seed_01.specimen_page.json",
+        "referenceResultsAvailable": true,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# PEER SPD specimen 299 from https://nisee.berkeley.edu/spd/servlet/display?format=html&id=299",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_spd_rc_column_rebar_sensitive_seed_01",
@@ -511,13 +761,24 @@
       "sourceFormat": "peer_spd_specimen_page",
       "fileBytes": null,
       "sizeClass": "small",
-      "truthClassVerified": true,
       "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
-      "licenseVerified": false,
-      "referenceResultsAvailable": true,
       "allSourceUrls": [
         "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": true,
+        "truthEvidencePath": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/peer_spd_rc_column_rebar_sensitive_seed_01.specimen_page.json",
+        "referenceResultsAvailable": true,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# PEER SPD specimen 121 from https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_spd_rc_column_rectangular_seed_01",
@@ -534,13 +795,24 @@
       "sourceFormat": "peer_spd_specimen_page",
       "fileBytes": null,
       "sizeClass": "small",
-      "truthClassVerified": true,
       "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
-      "licenseVerified": false,
-      "referenceResultsAvailable": true,
       "allSourceUrls": [
         "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121"
-      ]
+      ],
+      "firstValidationTarget": true,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": true,
+        "truthEvidencePath": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/peer_spd_rc_column_rectangular_seed_01.specimen_page.json",
+        "referenceResultsAvailable": true,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# PEER SPD specimen 121 from https://nisee.berkeley.edu/spd/servlet/display?format=html&id=121",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_spd_rc_column_rectangular_seed_02",
@@ -557,13 +829,24 @@
       "sourceFormat": "peer_spd_specimen_page",
       "fileBytes": null,
       "sizeClass": "small",
-      "truthClassVerified": true,
       "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
-      "licenseVerified": false,
-      "referenceResultsAvailable": true,
       "allSourceUrls": [
         "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=29"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": true,
+        "truthEvidencePath": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/peer_spd_rc_column_rectangular_seed_02.specimen_page.json",
+        "referenceResultsAvailable": true,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# PEER SPD specimen 29 from https://nisee.berkeley.edu/spd/servlet/display?format=html&id=29",
+        "runnerId": null
+      }
     },
     {
       "id": "peer_spd_rc_column_spiral_seed_01",
@@ -580,13 +863,24 @@
       "sourceFormat": "peer_spd_specimen_page",
       "fileBytes": null,
       "sizeClass": "small",
-      "truthClassVerified": true,
       "truthClassBasis": "PEER Structural Performance Database (experimental specimens)",
-      "licenseVerified": false,
-      "referenceResultsAvailable": true,
       "allSourceUrls": [
         "https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276"
-      ]
+      ],
+      "firstValidationTarget": false,
+      "verification": {
+        "licenseId": null,
+        "licenseUrl": null,
+        "licenseVerified": false,
+        "truthClassVerified": true,
+        "truthEvidencePath": "implementation/phase1/open_data/pbd_hinge/peer_spd_specimens/peer_spd_rc_column_spiral_seed_01.specimen_page.json",
+        "referenceResultsAvailable": true,
+        "referenceResultsPath": null,
+        "referenceSolver": null,
+        "referenceSolverVersion": null,
+        "acquisitionCommand": "# PEER SPD specimen 276 from https://nisee.berkeley.edu/spd/servlet/display?format=html&id=276",
+        "runnerId": null
+      }
     }
   ]
 }
