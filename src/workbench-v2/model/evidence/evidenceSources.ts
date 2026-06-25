@@ -1,36 +1,37 @@
-// Registry of read-only evidence sources surfaced by the workbench.
-// Paths are served as static files; the UI never writes to them.
+// The workbench reads evidence from a published, read-only bundle (built by
+// scripts/build-workbench-evidence-bundle.mjs) rather than fetching repository
+// internals directly. URLs resolve against import.meta.env.BASE_URL so the app
+// works under a GitHub Pages subpath.
 
-export interface EvidenceSourceDef {
+export interface EvidenceManifestArtifact {
   id: string
   label: string
+  /** Path of the copy, relative to the bundle directory. */
   path: string
+  /** Original read-only source path in the repository. */
+  source_path: string
+  sha256: string
+  read_only: boolean
 }
 
-export const EVIDENCE_SOURCES: EvidenceSourceDef[] = [
-  {
-    id: 'product_readiness',
-    label: 'Product readiness',
-    path: '/implementation/phase1/release_evidence/productization/product_readiness_snapshot.json',
-  },
-  {
-    id: 'p1_benchmark_breadth',
-    label: 'P1 benchmark breadth',
-    path: '/implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json',
-  },
-  {
-    id: 'fresh_full_validation',
-    label: 'Fresh full validation lane',
-    path: '/implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json',
-  },
-  {
-    id: 'evidence_console_scope',
-    label: 'Evidence Console scope',
-    path: '/implementation/phase1/release_evidence/productization/evidence_console_scope_status.json',
-  },
-  {
-    id: 'real_project_corpus',
-    label: 'Real project corpus (measured)',
-    path: '/implementation/phase1/real_project_corpus_measured_status.json',
-  },
-]
+export interface EvidenceManifest {
+  schema_version: string
+  generated_at: string
+  source_commit_sha: string
+  artifacts: EvidenceManifestArtifact[]
+}
+
+export const EVIDENCE_BUNDLE_DIR = 'evidence'
+export const EVIDENCE_MANIFEST_FILE = 'manifest.json'
+
+function withBase(baseUrl: string): string {
+  return baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+}
+
+export function evidenceManifestUrl(baseUrl: string): string {
+  return `${withBase(baseUrl)}${EVIDENCE_BUNDLE_DIR}/${EVIDENCE_MANIFEST_FILE}`
+}
+
+export function evidenceArtifactUrl(baseUrl: string, artifactPath: string): string {
+  return `${withBase(baseUrl)}${EVIDENCE_BUNDLE_DIR}/${artifactPath}`
+}

@@ -1,8 +1,9 @@
-// Public benchmark case schema + comparability rules.
+// Public benchmark case schema + verification lifecycle + comparability rules.
 //
-// The honesty rule is encoded here: geometry_only data is never accuracy-
-// comparable, and a case is only accuracy-comparable when it has a non-geometry
-// truth class, reference results, and is locally available.
+// Honesty rules encoded here:
+// - geometry_only is never accuracy-comparable;
+// - a run command is offered ONLY for cases with a registered runnerId;
+// - the lifecycle reflects what is actually verified, not what we hope.
 
 import catalogRaw from './benchmarkCatalog.json'
 
@@ -15,6 +16,28 @@ export type TruthClass =
 
 export type LocalAvailability = 'available' | 'external' | 'missing'
 export type SizeClass = 'small' | 'medium' | 'large' | 'unknown'
+
+export type LifecycleStatus =
+  | 'DISCOVERED'
+  | 'ACQUIRED'
+  | 'NORMALIZED'
+  | 'REFERENCE_ATTACHED'
+  | 'RUNNABLE'
+  | 'VALIDATED'
+
+export interface BenchmarkVerification {
+  licenseId: string | null
+  licenseUrl: string | null
+  licenseVerified: boolean
+  truthClassVerified: boolean
+  truthEvidencePath: string | null
+  referenceResultsAvailable: boolean
+  referenceResultsPath: string | null
+  referenceSolver: string | null
+  referenceSolverVersion: string | null
+  acquisitionCommand: string | null
+  runnerId: string | null
+}
 
 export interface BenchmarkCase {
   id: string
@@ -29,14 +52,12 @@ export interface BenchmarkCase {
   elementCount?: number
   checksum?: string
   localAvailability: LocalAvailability
-  // honesty annotations (extensions to the base schema)
   sourceFormat?: string | null
   fileBytes?: number | null
   sizeClass?: SizeClass
-  truthClassVerified?: boolean
   truthClassBasis?: string
-  licenseVerified?: boolean
-  referenceResultsAvailable?: boolean
+  firstValidationTarget: boolean
+  verification: BenchmarkVerification
   allSourceUrls?: string[]
 }
 
@@ -57,39 +78,60 @@ const TRUTH_CLASSES: TruthClass[] = [
   'geometry_only',
 ]
 
-function asTruthClass(value: unknown): TruthClass {
-  return TRUTH_CLASSES.includes(value as TruthClass) ? (value as TruthClass) : 'geometry_only'
+function str(v: unknown): string | null {
+  return typeof v === 'string' && v.trim() !== '' ? v : null
+}
+function bool(v: unknown): boolean {
+  return v === true
+}
+function asTruthClass(v: unknown): TruthClass {
+  return TRUTH_CLASSES.includes(v as TruthClass) ? (v as TruthClass) : 'geometry_only'
+}
+function asAvailability(v: unknown): LocalAvailability {
+  return v === 'available' || v === 'external' || v === 'missing' ? v : 'missing'
 }
 
-function asAvailability(value: unknown): LocalAvailability {
-  return value === 'available' || value === 'external' || value === 'missing' ? value : 'missing'
+function normalizeVerification(v: unknown): BenchmarkVerification {
+  const r = (v && typeof v === 'object' ? v : {}) as Record<string, unknown>
+  return {
+    licenseId: str(r.licenseId),
+    licenseUrl: str(r.licenseUrl),
+    licenseVerified: bool(r.licenseVerified),
+    truthClassVerified: bool(r.truthClassVerified),
+    truthEvidencePath: str(r.truthEvidencePath),
+    referenceResultsAvailable: bool(r.referenceResultsAvailable),
+    referenceResultsPath: str(r.referenceResultsPath),
+    referenceSolver: str(r.referenceSolver),
+    referenceSolverVersion: str(r.referenceSolverVersion),
+    acquisitionCommand: str(r.acquisitionCommand),
+    runnerId: str(r.runnerId),
+  }
 }
 
 function normalizeCase(raw: unknown): BenchmarkCase | null {
   if (!raw || typeof raw !== 'object') return null
   const r = raw as Record<string, unknown>
-  const id = typeof r.id === 'string' && r.id.trim() ? r.id : null
+  const id = str(r.id)
   if (!id) return null
   return {
     id,
-    title: typeof r.title === 'string' ? r.title : id,
-    sourceUrl: typeof r.sourceUrl === 'string' ? r.sourceUrl : '',
-    sourceVersion: typeof r.sourceVersion === 'string' ? r.sourceVersion : 'unspecified',
-    license: typeof r.license === 'string' ? r.license : 'unknown',
+    title: str(r.title) ?? id,
+    sourceUrl: str(r.sourceUrl) ?? '',
+    sourceVersion: str(r.sourceVersion) ?? 'unspecified',
+    license: str(r.license) ?? 'unknown',
     truthClass: asTruthClass(r.truthClass),
-    structureFamily: typeof r.structureFamily === 'string' ? r.structureFamily : 'unspecified',
+    structureFamily: str(r.structureFamily) ?? 'unspecified',
     analysisTypes: Array.isArray(r.analysisTypes) ? r.analysisTypes.filter((x): x is string => typeof x === 'string') : [],
-    checksum: typeof r.checksum === 'string' ? r.checksum : undefined,
+    checksum: str(r.checksum) ?? undefined,
     localAvailability: asAvailability(r.localAvailability),
-    sourceFormat: typeof r.sourceFormat === 'string' ? r.sourceFormat : null,
+    sourceFormat: str(r.sourceFormat),
     fileBytes: typeof r.fileBytes === 'number' ? r.fileBytes : null,
     sizeClass: (['small', 'medium', 'large', 'unknown'] as SizeClass[]).includes(r.sizeClass as SizeClass)
       ? (r.sizeClass as SizeClass)
       : 'unknown',
-    truthClassVerified: r.truthClassVerified === true,
-    truthClassBasis: typeof r.truthClassBasis === 'string' ? r.truthClassBasis : undefined,
-    licenseVerified: r.licenseVerified === true,
-    referenceResultsAvailable: r.referenceResultsAvailable === true,
+    truthClassBasis: str(r.truthClassBasis) ?? undefined,
+    firstValidationTarget: bool(r.firstValidationTarget),
+    verification: normalizeVerification(r.verification),
     allSourceUrls: Array.isArray(r.allSourceUrls) ? r.allSourceUrls.filter((x): x is string => typeof x === 'string') : [],
   }
 }
@@ -100,11 +142,11 @@ export function normalizeCatalog(raw: unknown): BenchmarkCatalog {
     ? r.cases.map((c) => normalizeCase(c)).filter((c): c is BenchmarkCase => c != null)
     : []
   return {
-    schemaVersion: typeof r.schema_version === 'string' ? r.schema_version : 'unknown',
-    catalogKind: typeof r.catalog_kind === 'string' ? r.catalog_kind : 'candidate',
-    disclaimer: typeof r.disclaimer === 'string' ? r.disclaimer : '',
-    accuracyExclusionRule: typeof r.accuracy_exclusion_rule === 'string' ? r.accuracy_exclusion_rule : '',
-    generatedAt: typeof r.generated_at === 'string' ? r.generated_at : null,
+    schemaVersion: str(r.schema_version) ?? 'unknown',
+    catalogKind: str(r.catalog_kind) ?? 'candidate',
+    disclaimer: str(r.disclaimer) ?? '',
+    accuracyExclusionRule: str(r.accuracy_exclusion_rule) ?? '',
+    generatedAt: str(r.generated_at),
     cases,
   }
 }
@@ -113,22 +155,40 @@ export function getBenchmarkCatalog(): BenchmarkCatalog {
   return normalizeCatalog(catalogRaw as unknown)
 }
 
-/** A case is accuracy-comparable only with a non-geometry truth class, reference
- * results, and local availability. geometry_only is always excluded. */
+/** Lifecycle status from what is actually verified. */
+export function deriveLifecycle(c: BenchmarkCase): LifecycleStatus {
+  const v = c.verification
+  if (v.licenseVerified && v.truthClassVerified && v.referenceResultsAvailable && v.runnerId) return 'VALIDATED'
+  if (v.runnerId) return 'RUNNABLE'
+  if (v.referenceResultsAvailable) return 'REFERENCE_ATTACHED'
+  if (c.localAvailability === 'available') return c.sourceFormat ? 'NORMALIZED' : 'ACQUIRED'
+  return 'DISCOVERED'
+}
+
+/** geometry_only is never accuracy-comparable. */
 export function isAccuracyComparable(c: BenchmarkCase): boolean {
-  return c.truthClass !== 'geometry_only' && c.referenceResultsAvailable === true && c.localAvailability === 'available'
+  return c.truthClass !== 'geometry_only' && c.verification.referenceResultsAvailable && c.localAvailability === 'available'
 }
 
 export function comparabilityReason(c: BenchmarkCase): string {
   if (c.truthClass === 'geometry_only') return 'geometry_only — import/topology/rendering only; excluded from accuracy averaging'
   if (c.localAvailability !== 'available') return `not locally available (${c.localAvailability})`
-  if (!c.referenceResultsAvailable) return 'no reference results attached yet'
-  if (!c.truthClassVerified) return 'comparable, but truth class is unverified (format-inferred)'
+  if (!c.verification.referenceResultsAvailable) return 'no reference results attached yet'
+  if (!c.verification.truthClassVerified) return 'comparable, but truth class is unverified'
   return 'accuracy-comparable'
 }
 
-/** Example run command (guidance only). */
-export function buildRunCommand(c: BenchmarkCase): string {
+export interface RunCommandResult {
+  runnable: boolean
+  command?: string
+  reason?: string
+}
+
+/** A run command is offered ONLY when a runner is registered for the case. */
+export function benchmarkRunCommand(c: BenchmarkCase): RunCommandResult {
+  if (!c.verification.runnerId) {
+    return { runnable: false, reason: 'No benchmark runner registered' }
+  }
   const fmt = c.sourceFormat ? ` --source-format ${c.sourceFormat}` : ''
-  return `python scripts/run_benchmark_case.py --case ${c.id}${fmt}`
+  return { runnable: true, command: `run-benchmark --runner ${c.verification.runnerId} --case ${c.id}${fmt}` }
 }

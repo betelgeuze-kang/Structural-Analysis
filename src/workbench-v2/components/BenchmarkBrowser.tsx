@@ -1,10 +1,12 @@
 import { useMemo, useState, type ReactElement } from 'react'
 import {
-  buildRunCommand,
+  benchmarkRunCommand,
   comparabilityReason,
+  deriveLifecycle,
   getBenchmarkCatalog,
   isAccuracyComparable,
   type BenchmarkCase,
+  type LifecycleStatus,
   type TruthClass,
 } from '../model/benchmark/benchmarkSchema'
 
@@ -17,33 +19,53 @@ const TRUTH_FILTERS: (TruthClass | 'all')[] = [
   'geometry_only',
 ]
 
+const LIFECYCLE_FILTERS: (LifecycleStatus | 'all' | 'first-targets')[] = [
+  'all',
+  'first-targets',
+  'DISCOVERED',
+  'ACQUIRED',
+  'NORMALIZED',
+  'REFERENCE_ATTACHED',
+  'RUNNABLE',
+  'VALIDATED',
+]
+
+function yn(v: boolean): string {
+  return v ? 'verified' : 'unverified'
+}
+
 function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
   const comparable = isAccuracyComparable(c)
+  const lifecycle = deriveLifecycle(c)
+  const run = benchmarkRunCommand(c)
+  const v = c.verification
   return (
-    <article className="wb2-bench-card" data-bench-id={c.id} data-truth={c.truthClass}>
+    <article className="wb2-bench-card" data-bench-id={c.id} data-truth={c.truthClass} data-lifecycle={lifecycle}>
       <header className="wb2-bench-card__head">
         <h3>{c.title}</h3>
-        <span className={`wb2-bench-truth wb2-bench-truth--${c.truthClass}`}>{c.truthClass}</span>
+        <div className="wb2-bench-chips">
+          <span className={`wb2-bench-life wb2-bench-life--${lifecycle.toLowerCase()}`}>{lifecycle}</span>
+          <span className={`wb2-bench-truth wb2-bench-truth--${c.truthClass}`}>{c.truthClass}</span>
+          {c.firstValidationTarget ? <span className="wb2-bench-target" title="First validation target">★ target</span> : null}
+        </div>
       </header>
       <p className="wb2-bench-family">{c.structureFamily}</p>
 
       <dl className="wb2-evidence-kv">
         <dt>Source</dt>
-        <dd>
-          {c.sourceUrl ? (
-            <a href={c.sourceUrl} target="_blank" rel="noreferrer">{c.sourceUrl}</a>
-          ) : (
-            'unknown'
-          )}
-        </dd>
+        <dd>{c.sourceUrl ? <a href={c.sourceUrl} target="_blank" rel="noreferrer">{c.sourceUrl}</a> : 'unknown'}</dd>
         <dt>License</dt>
-        <dd>{c.license}{c.licenseVerified ? '' : ' (unverified)'}</dd>
+        <dd>{c.license} ({yn(v.licenseVerified)}){v.licenseUrl ? <> · <a href={v.licenseUrl} target="_blank" rel="noreferrer">license</a></> : null}</dd>
+        <dt>Truth class</dt>
+        <dd>{c.truthClass} ({yn(v.truthClassVerified)}){v.truthEvidencePath ? <> · <code className="wb2-mono" title={v.truthEvidencePath}>evidence</code></> : null}</dd>
+        <dt>Reference</dt>
+        <dd>{v.referenceResultsAvailable ? `available${v.referenceSolver ? ` · ${v.referenceSolver}` : ''}` : 'not attached'}</dd>
         <dt>Checksum</dt>
         <dd>{c.checksum ? <code className="wb2-mono" title={c.checksum}>{c.checksum.slice(0, 20)}…</code> : 'unavailable'}</dd>
         <dt>Availability</dt>
-        <dd>{c.localAvailability}</dd>
-        <dt>Size (by file)</dt>
-        <dd>{c.sizeClass ?? 'unknown'}</dd>
+        <dd>{c.localAvailability} · {c.sizeClass ?? 'unknown'} (by file)</dd>
+        <dt>Runner</dt>
+        <dd>{v.runnerId ?? 'none registered'}</dd>
       </dl>
 
       <p className={`wb2-bench-comparable${comparable ? ' is-yes' : ' is-no'}`}>
@@ -51,8 +73,14 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
       </p>
 
       <div className="wb2-bench-run">
-        <span className="wb2-bench-run__label">Example run command</span>
-        <code className="wb2-mono wb2-bench-run__cmd">{buildRunCommand(c)}</code>
+        {run.runnable ? (
+          <>
+            <span className="wb2-bench-run__label">Run command</span>
+            <code className="wb2-mono wb2-bench-run__cmd">{run.command}</code>
+          </>
+        ) : (
+          <p className="wb2-bench-run__blocked" data-run-blocked>⛔ {run.reason}.{v.acquisitionCommand ? ` Acquire first: ${v.acquisitionCommand}` : ''}</p>
+        )}
       </div>
 
       {c.sourceUrl ? (
@@ -66,6 +94,7 @@ export function BenchmarkBrowser(): ReactElement {
   const catalog = useMemo(() => getBenchmarkCatalog(), [])
   const [truth, setTruth] = useState<TruthClass | 'all'>('all')
   const [size, setSize] = useState<string>('all')
+  const [lifecycle, setLifecycle] = useState<LifecycleStatus | 'all' | 'first-targets'>('all')
   const [query, setQuery] = useState<string>('')
 
   const filtered = useMemo(() => {
@@ -73,38 +102,44 @@ export function BenchmarkBrowser(): ReactElement {
     return catalog.cases.filter((c) => {
       if (truth !== 'all' && c.truthClass !== truth) return false
       if (size !== 'all' && (c.sizeClass ?? 'unknown') !== size) return false
+      if (lifecycle === 'first-targets' && !c.firstValidationTarget) return false
+      if (lifecycle !== 'all' && lifecycle !== 'first-targets' && deriveLifecycle(c) !== lifecycle) return false
       if (q && !`${c.title} ${c.structureFamily} ${c.sourceUrl} ${c.license}`.toLowerCase().includes(q)) return false
       return true
     })
-  }, [catalog, truth, size, query])
+  }, [catalog, truth, size, lifecycle, query])
 
   const comparableCount = catalog.cases.filter((c) => isAccuracyComparable(c)).length
+  const validatedCount = catalog.cases.filter((c) => deriveLifecycle(c) === 'VALIDATED').length
+  const runnableCount = catalog.cases.filter((c) => c.verification.runnerId).length
 
   return (
     <section className="wb2-panel wb2-bench" aria-labelledby="wb2-bench-title">
       <h2 id="wb2-bench-title" className="wb2-panel__title">Public benchmark case browser</h2>
 
       <p className="wb2-note">
-        {catalog.cases.length} candidate case(s) · {comparableCount} accuracy-comparable.{' '}
-        <span className="wb2-bench-kind">catalog: {catalog.catalogKind}</span>
+        {catalog.cases.length} candidate(s) · {comparableCount} accuracy-comparable · {validatedCount} validated ·{' '}
+        {runnableCount} runnable. <span className="wb2-bench-kind">catalog: {catalog.catalogKind} ({catalog.schemaVersion})</span>
       </p>
       {catalog.disclaimer ? <p className="wb2-bench-disclaimer">{catalog.disclaimer}</p> : null}
 
       <div className="wb2-bench-filters" role="group" aria-label="Benchmark filters">
         <label>
+          <span>Lifecycle</span>
+          <select value={lifecycle} onChange={(e) => setLifecycle(e.target.value as LifecycleStatus | 'all' | 'first-targets')}>
+            {LIFECYCLE_FILTERS.map((l) => (<option key={l} value={l}>{l}</option>))}
+          </select>
+        </label>
+        <label>
           <span>Truth class</span>
           <select value={truth} onChange={(e) => setTruth(e.target.value as TruthClass | 'all')}>
-            {TRUTH_FILTERS.map((t) => (
-              <option key={t} value={t}>{t}</option>
-            ))}
+            {TRUTH_FILTERS.map((t) => (<option key={t} value={t}>{t}</option>))}
           </select>
         </label>
         <label>
           <span>Size (by file)</span>
           <select value={size} onChange={(e) => setSize(e.target.value)}>
-            {['all', 'small', 'medium', 'large', 'unknown'].map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
+            {['all', 'small', 'medium', 'large', 'unknown'].map((s) => (<option key={s} value={s}>{s}</option>))}
           </select>
         </label>
         <label className="wb2-bench-search">
@@ -115,9 +150,7 @@ export function BenchmarkBrowser(): ReactElement {
 
       {filtered.length ? (
         <div className="wb2-bench-grid">
-          {filtered.map((c) => (
-            <CaseCard key={c.id} c={c} />
-          ))}
+          {filtered.map((c) => (<CaseCard key={c.id} c={c} />))}
         </div>
       ) : (
         <p className="wb2-empty">No cases match the current filters.</p>

@@ -6,11 +6,19 @@ import {
   type GateState,
   type ReadinessFacts,
 } from '../model/evidence/readinessInterpreter'
-import { EVIDENCE_SOURCES, type EvidenceSourceDef } from '../model/evidence/evidenceSources'
+import {
+  evidenceArtifactUrl,
+  evidenceManifestUrl,
+  type EvidenceManifest,
+} from '../model/evidence/evidenceSources'
 import { StateChip, type ChipState } from './StateChip'
 
 interface SourceResult {
-  def: EvidenceSourceDef
+  id: string
+  label: string
+  sourcePath: string
+  bundlePath: string
+  sha256: string
   facts: ReadinessFacts
 }
 
@@ -22,20 +30,24 @@ const GATE_TO_CHIP: Record<GateState, ChipState> = {
 }
 
 function SourceCard({ result }: { result: SourceResult }): ReactElement {
-  const { def, facts } = result
+  const { facts } = result
   return (
-    <article className="wb2-evidence-card" data-evidence-id={def.id} data-gate={facts.gateState}>
+    <article className="wb2-evidence-card" data-evidence-id={result.id} data-gate={facts.gateState}>
       <header className="wb2-evidence-card__head">
-        <h3>{def.label}</h3>
+        <h3>{result.label}</h3>
         <div className="wb2-evidence-card__chips">
-          <StateChip state={GATE_TO_CHIP[facts.gateState]} srLabel={def.label} />
+          <StateChip state={GATE_TO_CHIP[facts.gateState]} srLabel={result.label} />
           {facts.freshness === 'stale' ? <StateChip state="STALE" srLabel="Freshness" /> : null}
         </div>
       </header>
 
       <dl className="wb2-evidence-kv">
         <dt>Source path</dt>
-        <dd><code className="wb2-mono" data-evidence-source>{def.path}</code></dd>
+        <dd><code className="wb2-mono" data-evidence-source>{result.sourcePath}</code></dd>
+        <dt>Bundle copy</dt>
+        <dd><code className="wb2-mono">{result.bundlePath}</code></dd>
+        <dt>Checksum</dt>
+        <dd><code className="wb2-mono" title={result.sha256}>{result.sha256.slice(0, 20)}…</code></dd>
         <dt>Source commit</dt>
         <dd>
           {facts.sourceCommitShort ? (
@@ -80,28 +92,55 @@ function SourceCard({ result }: { result: SourceResult }): ReactElement {
 
 export function EvidenceReaderPanel(): ReactElement {
   const [results, setResults] = useState<SourceResult[] | null>(null)
+  const [bundleError, setBundleError] = useState<string | null>(null)
+  const [bundleCommit, setBundleCommit] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    Promise.all(
-      EVIDENCE_SOURCES.map(async (def) => {
-        const envelope = await loadEvidence(def.path)
-        return { def, facts: interpretReadiness(envelope) }
-      }),
-    ).then((loaded) => {
-      if (!cancelled) setResults(loaded)
-    })
+    const base = import.meta.env.BASE_URL ?? '/'
+    void (async () => {
+      const manifestEnv = await loadEvidence<EvidenceManifest>(evidenceManifestUrl(base))
+      if (manifestEnv.state !== 'ready' || !manifestEnv.data || !Array.isArray(manifestEnv.data.artifacts)) {
+        if (!cancelled) {
+          setBundleError(manifestEnv.error ?? 'manifest unavailable')
+          setResults([])
+        }
+        return
+      }
+      const manifest = manifestEnv.data
+      const loaded = await Promise.all(
+        manifest.artifacts.map(async (a) => {
+          const env = await loadEvidence(evidenceArtifactUrl(base, a.path))
+          return {
+            id: a.id,
+            label: a.label,
+            sourcePath: a.source_path,
+            bundlePath: a.path,
+            sha256: a.sha256,
+            facts: interpretReadiness(env),
+          }
+        }),
+      )
+      if (!cancelled) {
+        setBundleCommit(manifest.source_commit_sha)
+        setResults(loaded)
+      }
+    })()
     return () => {
       cancelled = true
     }
   }, [])
 
-  const productReadiness = results?.find((r) => r.def.id === 'product_readiness')?.facts ?? null
+  const productReadiness = results?.find((r) => r.id === 'product_readiness')?.facts ?? null
   const commit = results ? detectCommitMismatch(results.map((r) => r.facts)) : { mismatch: false, commits: [] }
 
   return (
     <section className="wb2-panel wb2-evidence" aria-labelledby="wb2-evidence-title">
       <h2 id="wb2-evidence-title" className="wb2-panel__title">Read-only evidence</h2>
+
+      {bundleCommit ? (
+        <p className="wb2-provenance" data-bundle-commit={bundleCommit}>Bundle snapshot commit: {bundleCommit.slice(0, 8)}</p>
+      ) : null}
 
       {productReadiness ? (
         <p className="wb2-evidence-release" data-release-ready={String(productReadiness.releaseReady)}>
@@ -118,12 +157,18 @@ export function EvidenceReaderPanel(): ReactElement {
         </p>
       ) : null}
 
-      {!results ? (
+      {results === null ? (
         <p className="wb2-empty">Loading evidence…</p>
+      ) : bundleError ? (
+        <p className="wb2-unavailable" data-wb2-unavailable data-bundle-missing>
+          Evidence bundle not published ({bundleError}). Build it with{' '}
+          <code className="wb2-mono">npm run build:evidence-bundle</code> once all sources share one commit. Nothing
+          is inferred while it is missing.
+        </p>
       ) : (
         <div className="wb2-evidence-grid">
           {results.map((result) => (
-            <SourceCard key={result.def.id} result={result} />
+            <SourceCard key={result.id} result={result} />
           ))}
         </div>
       )}

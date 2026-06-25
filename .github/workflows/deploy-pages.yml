@@ -1,0 +1,69 @@
+name: Deploy Workbench (GitHub Pages)
+
+# Builds the workbench (with the read-only evidence bundle and the structure
+# viewer) and deploys to GitHub Pages under the repository subpath.
+#
+# Runner policy: GitHub Pages deployment generally requires GitHub-hosted
+# runners. This is gated by the same decision as Frontend Web CI — set
+# STRUCTURAL_FRONTEND_RUNNER_LABELS=["ubuntu-latest"] (and enable Pages) before
+# this can publish. Until then it can be run manually for build verification.
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  # GitHub Pages serves at /<repo>/ — adjust if using a custom domain.
+  VITE_BASE_PATH: "/Structural-Analysis/"
+
+jobs:
+  build:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build read-only evidence bundle (non-blocking until single-commit)
+        run: npm run build:evidence-bundle --if-present || echo "::warning::Evidence bundle not built; workbench will show evidence as unavailable."
+
+      - name: Build
+        run: npm run build
+
+      - name: Bundle the structure viewer for the iframe bridge
+        run: |
+          mkdir -p dist/src/structure-viewer
+          cp -r src/structure-viewer/. dist/src/structure-viewer/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

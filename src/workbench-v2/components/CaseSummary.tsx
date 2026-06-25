@@ -1,34 +1,34 @@
 import type { ReactElement } from 'react'
-import type { WorkbenchModel } from '../model/caseSchema'
-import { StateChip, mapCheckState } from './StateChip'
+import type { WorkbenchCaseV2 } from '../model/caseSchema'
 
-export function CaseSummary({ model }: { model: WorkbenchModel }): ReactElement {
-  const meta = [model.case.label, model.case.structureFamily, model.case.loadCombination].filter(
-    (v): v is string => typeof v === 'string' && v.trim() !== '',
-  )
+function shortSha(s: string): string {
+  const v = s.startsWith('sha256:') ? s.slice(7) : s
+  return v.length > 12 ? `${v.slice(0, 12)}…` : v
+}
 
-  const statusRows = [
-    { label: 'Solver connection', value: model.status.solverConnected, raw: String(model.status.solverConnected) },
-    { label: 'P0 gate', value: model.status.p0, raw: model.status.p0 ?? '—' },
-    { label: 'P1 gate', value: model.status.p1, raw: model.status.p1 ?? '—' },
-    { label: 'GPU / HIP', value: model.status.gpu, raw: model.status.gpu ?? '—' },
-  ]
-
+export function CaseSummary({ caseV2 }: { caseV2: WorkbenchCaseV2 }): ReactElement {
+  const p = caseV2.provenance
+  const m = caseV2.model
   return (
     <section className="wb2-panel" aria-labelledby="wb2-summary-title">
-      <h2 id="wb2-summary-title" className="wb2-panel__title">Case summary</h2>
-      <h3 className="wb2-project-name">{model.project.name ?? 'Untitled project'}</h3>
-      <p className="wb2-project-meta">{meta.length ? meta.join(' · ') : 'No case metadata'}</p>
+      <h2 id="wb2-summary-title" className="wb2-panel__title">Case &amp; provenance</h2>
 
-      <ul className="wb2-status-list" aria-label="Readiness status">
-        {statusRows.map((row) => (
-          <li key={row.label} className="wb2-status-row">
-            <span className="wb2-status-label">{row.label}</span>
-            <span className="wb2-status-raw">{row.raw}</span>
-            <StateChip state={mapCheckState(row.value)} srLabel={row.label} />
-          </li>
-        ))}
-      </ul>
+      <dl className="wb2-kv">
+        <dt>Source path</dt><dd><code className="wb2-mono">{p.sourcePath}</code></dd>
+        <dt>Source checksum</dt><dd><code className="wb2-mono" title={p.sourceSha256}>{shortSha(p.sourceSha256)}</code></dd>
+        <dt>Source commit</dt><dd><code className="wb2-mono" title={p.sourceCommitSha}>{p.sourceCommitSha.slice(0, 12)}</code></dd>
+        <dt>Engine</dt><dd>{p.engineVersion}</dd>
+        <dt>Generated at</dt><dd>{p.generatedAt}</dd>
+      </dl>
+
+      <h3 className="wb2-subhead">Model health</h3>
+      <dl className="wb2-kv">
+        <dt>Unit system</dt><dd>{m.unitSystem}</dd>
+        <dt>Coordinate system</dt><dd>{m.coordinateSystem}</dd>
+        <dt>Nodes</dt><dd>{m.nodeCount.toLocaleString()}</dd>
+        <dt>Elements</dt><dd>{m.elementCount.toLocaleString()}</dd>
+        <dt>DOF</dt><dd>{m.dofCount.toLocaleString()}</dd>
+      </dl>
     </section>
   )
 }
