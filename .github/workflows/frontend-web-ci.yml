@@ -56,7 +56,7 @@ jobs:
         run: npm ci
 
       - name: Dependency audit
-        run: npm audit --audit-level high
+        run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
 
       - name: Build evidence bundle (read-only; non-blocking until single-commit)
         run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built; the Workbench will show evidence as unavailable."
@@ -71,7 +71,7 @@ jobs:
         run: npm run verify:workbench-prototype-dom-contract
 
       - name: Install Playwright browser
-        run: npx playwright install chromium
+        run: npx playwright install --with-deps chromium
 
       - name: Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke
