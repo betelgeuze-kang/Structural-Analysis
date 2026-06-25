@@ -1,0 +1,53 @@
+name: Viewer Browser CI
+
+# Structure-viewer specific browser smoke, separated from generic Workbench CI.
+
+on:
+  pull_request:
+    paths:
+      - "src/structure-viewer/**"
+      - "tests/frontend/structure-viewer-smoke.spec.ts"
+      - "scripts/verify-frontend-browser-smoke.mjs"
+      - "scripts/structure-viewer-*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/viewer-browser-ci.yml"
+  push:
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "src/structure-viewer/**"
+      - "tests/frontend/structure-viewer-smoke.spec.ts"
+      - "scripts/verify-frontend-browser-smoke.mjs"
+      - "scripts/structure-viewer-*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/viewer-browser-ci.yml"
+
+concurrency:
+  group: viewer-browser-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  viewer-smoke:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
+
+      - name: Minimal structure-viewer browser smoke
+        run: npm run verify:frontend-browser-smoke -- --mode minimal
