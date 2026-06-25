@@ -1,6 +1,7 @@
 name: Viewer Browser CI
 
-# Structure-viewer specific browser smoke, separated from generic Workbench CI.
+# Structure-viewer-specific verification, separated from generic Workbench CI.
+# Workflow YAML itself is checked by workflow-contract-ci.yml.
 
 on:
   pull_request:
@@ -9,9 +10,13 @@ on:
       - "tests/frontend/structure-viewer-smoke.spec.ts"
       - "scripts/verify-frontend-browser-smoke.mjs"
       - "scripts/structure-viewer-*.mjs"
+      - "scripts/verify-structure-viewer-project-manifest.mjs"
+      - "scripts/verify_structure_viewer_contracts.py"
+      - "tests/test_structure_viewer_*.py"
+      - "tests/test_viewer_shared_selection_contract.py"
+      - "tests/test_generate_selfcontained_viewer.py"
       - "package.json"
       - "package-lock.json"
-      - ".github/workflows/viewer-browser-ci.yml"
   push:
     branches: ["main", "codex/**", "web/**", "feat/**"]
     paths:
@@ -19,9 +24,14 @@ on:
       - "tests/frontend/structure-viewer-smoke.spec.ts"
       - "scripts/verify-frontend-browser-smoke.mjs"
       - "scripts/structure-viewer-*.mjs"
+      - "scripts/verify-structure-viewer-project-manifest.mjs"
+      - "scripts/verify_structure_viewer_contracts.py"
+      - "tests/test_structure_viewer_*.py"
+      - "tests/test_viewer_shared_selection_contract.py"
+      - "tests/test_generate_selfcontained_viewer.py"
       - "package.json"
       - "package-lock.json"
-      - ".github/workflows/viewer-browser-ci.yml"
+  workflow_dispatch:
 
 concurrency:
   group: viewer-browser-ci-${{ github.ref }}
@@ -43,8 +53,22 @@ jobs:
           node-version: "20.19.0"
           cache: npm
 
-      - name: Install dependencies
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Node dependencies
         run: npm ci
+
+      - name: Install Python package
+        run: python -m pip install -e .[dev]
+
+      - name: Verify viewer manifest
+        run: npm run verify:viewer-manifest
+
+      - name: Verify viewer contracts
+        run: python scripts/verify_structure_viewer_contracts.py
 
       - name: Install Playwright browser
         run: npx playwright install chromium
