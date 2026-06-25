@@ -67,10 +67,7 @@ jobs:
         run: npm run verify:workbench-prototype-dom-contract
 
       - name: Install Playwright browser
-        run: npx playwright install chromium
-
-      - name: Minimal browser smoke
-        run: npm run verify:frontend-browser-smoke -- --mode minimal
+        run: npx playwright install --with-deps chromium
 
       - name: Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke

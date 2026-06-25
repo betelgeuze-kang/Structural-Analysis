@@ -3,7 +3,23 @@ name: CI
 on:
   push:
     branches: ["main", "codex/**"]
+    paths-ignore:
+      - "src/**"
+      - "prototype/**"
+      - "tests/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-web-ci.yml"
+      - ".github/workflows/deploy-pages.yml"
   pull_request:
+    paths-ignore:
+      - "src/**"
+      - "prototype/**"
+      - "tests/frontend/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/frontend-web-ci.yml"
+      - ".github/workflows/deploy-pages.yml"
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
