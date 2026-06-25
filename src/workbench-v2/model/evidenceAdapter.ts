@@ -1,46 +1,47 @@
-// Data provider layer for Workbench v2.
-//
-// The provider is the only place that knows where data comes from. UI
-// components receive a normalized model + provenance, never a path or fetch.
-// demo and live providers are interchangeable behind one interface.
+// Data provider layer for Workbench v2 (Case Contract v2).
+// The provider is the only place that knows where data comes from; it validates
+// against the v2 contract before handing a case to the UI.
 
-import demoCaseRaw from '../../../prototype/structural-workbench/demo-case.json'
-import { normalizeModel, type WorkbenchModel } from './caseSchema'
+import demoCaseRaw from './fixtures/demo-case.v2.json'
+import { validateWorkbenchCaseV2, type CaseValidation, type WorkbenchCaseV2 } from './caseSchema'
 
 export type ProviderMode = 'demo' | 'live'
 
 export interface WorkbenchLoadResult {
-  status: 'ready' | 'missing' | 'error'
-  model: WorkbenchModel | null
-  /** Provenance: where the model came from. For display only. */
+  status: 'ready' | 'invalid' | 'missing' | 'error'
+  caseV2: WorkbenchCaseV2 | null
+  validation: CaseValidation | null
   sourcePath: string
   loadedAt: string
   error: string | null
-}
-
-export interface WorkbenchDataProvider {
-  readonly mode: ProviderMode
-  /** Human-readable provenance label for the source. */
-  readonly sourceLabel: string
-  load(): Promise<WorkbenchLoadResult>
 }
 
 function nowIso(): string {
   return new Date().toISOString()
 }
 
-/** Offline provider backed by the bundled prototype demo fixture. */
+function toResult(validation: CaseValidation, sourcePath: string): WorkbenchLoadResult {
+  if (validation.ok && validation.value) {
+    return { status: 'ready', caseV2: validation.value, validation, sourcePath, loadedAt: nowIso(), error: null }
+  }
+  return { status: 'invalid', caseV2: null, validation, sourcePath, loadedAt: nowIso(), error: validation.errors.join('; ') }
+}
+
+export interface WorkbenchDataProvider {
+  readonly mode: ProviderMode
+  readonly sourceLabel: string
+  load(): Promise<WorkbenchLoadResult>
+}
+
 export class DemoWorkbenchProvider implements WorkbenchDataProvider {
   readonly mode: ProviderMode = 'demo'
-  readonly sourceLabel = 'demo:structural-workbench/demo-case.json'
+  readonly sourceLabel = 'demo:workbench-v2/fixtures/demo-case.v2.json'
 
   async load(): Promise<WorkbenchLoadResult> {
-    const model = normalizeModel(demoCaseRaw as unknown)
-    return { status: 'ready', model, sourcePath: this.sourceLabel, loadedAt: nowIso(), error: null }
+    return toResult(validateWorkbenchCaseV2(demoCaseRaw as unknown), this.sourceLabel)
   }
 }
 
-/** Live provider that reads a model from a runtime URL (read-only). */
 export class LiveWorkbenchProvider implements WorkbenchDataProvider {
   readonly mode: ProviderMode = 'live'
   readonly sourceLabel: string
@@ -57,18 +58,11 @@ export class LiveWorkbenchProvider implements WorkbenchDataProvider {
     try {
       const response = await this.fetchImpl(this.url, { cache: 'no-store' })
       if (!response.ok) {
-        return { status: 'missing', model: null, sourcePath: this.sourceLabel, loadedAt: nowIso(), error: `HTTP ${response.status}` }
+        return { status: 'missing', caseV2: null, validation: null, sourcePath: this.sourceLabel, loadedAt: nowIso(), error: `HTTP ${response.status}` }
       }
-      const model = normalizeModel(await response.json())
-      return { status: 'ready', model, sourcePath: this.sourceLabel, loadedAt: nowIso(), error: null }
+      return toResult(validateWorkbenchCaseV2(await response.json()), this.sourceLabel)
     } catch (error) {
-      return {
-        status: 'error',
-        model: null,
-        sourcePath: this.sourceLabel,
-        loadedAt: nowIso(),
-        error: String((error as Error)?.message ?? error),
-      }
+      return { status: 'error', caseV2: null, validation: null, sourcePath: this.sourceLabel, loadedAt: nowIso(), error: String((error as Error)?.message ?? error) }
     }
   }
 }
