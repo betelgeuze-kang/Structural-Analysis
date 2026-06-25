@@ -1,5 +1,15 @@
 ## Summary
 
+## CI lane
+
+Pick the lane this PR belongs to (they are verified by different workflows):
+
+- [ ] **Frontend / web** (`prototype/**`, `src/**`, `tests/frontend/**`, `package*.json`) → gated by **Frontend Web CI** (`frontend-web-ci.yml`: build + DOM contract + Playwright). A queued/cancelled **heavy** solver job is NOT the merge gate for this lane.
+- [ ] **Heavy / solver** (Python, GPU/HIP, large benchmarks, full validation) → gated by **CI** (`ci.yml`, self-hosted).
+- [ ] Both lanes touched (call out which checks must pass).
+
+> Frontend-only PRs should be judged by Frontend Web CI (or the manual fallback in `docs/ai/checklists/frontend-web-pr-review.md`), not by the heavy solver CI.
+
 ## Active Codex Goal
 
 - Goal:
