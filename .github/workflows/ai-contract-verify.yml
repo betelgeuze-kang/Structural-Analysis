@@ -1,0 +1,73 @@
+name: AI Contract Verify
+
+# Lightweight AI-orchestration verification, separated from the heavy solver CI.
+# Public repositories default to GitHub-hosted Ubuntu; a repository/org variable
+# can still override the label set for a dedicated runner.
+
+on:
+  pull_request:
+    paths:
+      - "AGENTS.md"
+      - ".codex/**"
+      - ".betelgeuze/**"
+      - "docs/ai/**"
+      - "scripts/ai-*"
+      - "scripts/validate-ai-worker-output.mjs"
+      - "tests/ai-*"
+      - "opencode.json"
+      - "package.json"
+      - ".github/workflows/ai-contract-verify.yml"
+  push:
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "AGENTS.md"
+      - ".codex/**"
+      - ".betelgeuze/**"
+      - "docs/ai/**"
+      - "scripts/ai-*"
+      - "scripts/validate-ai-worker-output.mjs"
+      - "tests/ai-*"
+      - "opencode.json"
+      - "package.json"
+      - ".github/workflows/ai-contract-verify.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ai-contract-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  ai-contract:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Verify AI orchestration contract
+        run: npm run ai:verify:contract -- --json-out "$RUNNER_TEMP/ai-verify-result.json"
+
+      - name: Upload AI verify receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-verify-result-${{ github.run_id }}
+          path: ${{ runner.temp }}/ai-verify-result.json
+          if-no-files-found: warn
+          retention-days: 14

@@ -27,6 +27,9 @@ build/
 test-results/
 *.tsbuildinfo
 
+# Generated, read-only evidence bundle (built by scripts/build-workbench-evidence-bundle.mjs)
+/public/evidence/
+
 # Rust
 target/
 

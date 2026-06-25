@@ -1,33 +1,66 @@
 name: CI
 
+# Heavy solver/repository quality gate. Frontend-only PRs are verified by
+# frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
+# Workflow-only edits are validated by workflow-contract-ci.yml.
+
 on:
   push:
-    branches: ["main", "codex/**"]
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "implementation/**"
+      - "scripts/**/*.py"
+      - "tests/**/*.py"
+      - "*.py"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - "requirements*.txt"
+      - ".betelgeuze/**"
+      - "docs/commercial-structural-solver-product-gap-ledger.md"
+      - "docs/structural-analysis-ai-engine-gap-ledger.md"
   pull_request:
+    paths:
+      - "implementation/**"
+      - "scripts/**/*.py"
+      - "tests/**/*.py"
+      - "*.py"
+      - "pyproject.toml"
+      - "pytest.ini"
+      - "requirements*.txt"
+      - ".betelgeuze/**"
+      - "docs/commercial-structural-solver-product-gap-ledger.md"
+      - "docs/structural-analysis-ai-engine-gap-ledger.md"
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   verify:
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["ubuntu-latest"]') }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: "20.19.0"
-          cache: "npm"
+          cache: npm
 
       - name: Install Python package
         run: python -m pip install -e .[dev]
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium
 
       - name: PR quality gate
         run: python scripts/verify_quality_gate.py --mode pr

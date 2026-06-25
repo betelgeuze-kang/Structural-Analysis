@@ -1,0 +1,80 @@
+name: Frontend Web CI
+
+# Frontend-only verification for the React workbench and static prototype.
+# The legacy structure-viewer browser smoke is routed to a separate workflow so
+# unrelated Workbench changes are not blocked by viewer-specific failures.
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "prototype/**"
+      - "src/**"
+      - "tests/frontend/**"
+      - "scripts/*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
+      - ".github/workflows/frontend-web-ci.yml"
+  push:
+    branches: ["main", "codex/**", "web/**", "feat/**"]
+    paths:
+      - "index.html"
+      - "prototype/**"
+      - "src/**"
+      - "tests/frontend/**"
+      - "scripts/*.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
+      - ".github/workflows/frontend-web-ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-web-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  frontend:
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '["ubuntu-latest"]') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dependency audit
+        run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
+
+      - name: Build evidence bundle (read-only; non-blocking until single-commit)
+        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built; the Workbench will show evidence as unavailable."
+
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Frontend build contract
+        run: npm run verify:frontend-contract
+
+      - name: Workbench prototype DOM contract
+        run: npm run verify:workbench-prototype-dom-contract
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Workbench prototype browser smoke
+        run: npm run verify:workbench-prototype-browser-smoke
+
+      - name: Workbench v2 E2E
+        run: npm run verify:workbench-v2-e2e

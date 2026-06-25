@@ -1,0 +1,24 @@
+{
+  "schema_version": "workbench-demo.v1",
+  "data_mode": "demo",
+  "claim_boundary": "UI demonstration only; no solver evidence attached. Values are illustrative and must not be read as analysis results, readiness, or an automated reviewer verdict.",
+  "project": {
+    "id": "demo-highrise",
+    "name": "High-Rise Demonstration"
+  },
+  "status": {
+    "solver_connected": false,
+    "p0": "NOT_EVALUATED",
+    "p1": "NOT_EVALUATED",
+    "gpu": "NOT_CONNECTED"
+  },
+  "case": {
+    "id": "demo-case-001",
+    "label": "Lateral system — demo",
+    "structure_family": "outrigger",
+    "load_combination": "1.2D + 1.0W"
+  },
+  "residual_history": [],
+  "reference_comparison": [],
+  "members": []
+}
