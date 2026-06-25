@@ -54,6 +54,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build evidence bundle (read-only; non-blocking until single-commit)
+        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle not built (sources not at a single commit yet, or sensitive-data gate). Workbench will show evidence as unavailable; the strict gate is enforced at deploy."
+
       - name: Type-check and build
         run: npm run build
 
