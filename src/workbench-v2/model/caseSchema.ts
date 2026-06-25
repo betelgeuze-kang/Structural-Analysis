@@ -76,6 +76,10 @@ function fin(v: unknown): number | null {
   return typeof v === 'number' && Number.isFinite(v) ? v : null
 }
 
+function toRunStatus(v: unknown): CaseAnalysis['status'] {
+  return v === 'idle' || v === 'validating' || v === 'running' || v === 'converged' || v === 'failed' ? v : undefined
+}
+
 function normalizeResidualHistory(v: unknown): ResidualStep[] {
   if (!Array.isArray(v)) return []
   return v
@@ -154,7 +158,7 @@ export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
           residualTolerance: fin(analysis!.residualTolerance) ?? 0,
           finalNormalizedResidual: fin(analysis!.finalNormalizedResidual) ?? 0,
           finalRelativeIncrement: fin(analysis!.finalRelativeIncrement) ?? 0,
-          status: (str(analysis!.status) as CaseAnalysis['status']) ?? undefined,
+          status: toRunStatus(analysis!.status),
         }
       : undefined,
     residualHistory: normalizeResidualHistory(raw.residualHistory),
