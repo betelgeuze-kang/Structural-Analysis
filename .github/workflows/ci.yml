@@ -2,6 +2,7 @@ name: CI
 
 # Heavy solver/repository quality gate. Frontend-only PRs are verified by
 # frontend-web-ci.yml, and structure-viewer browser changes by viewer-browser-ci.yml.
+# Workflow-only edits can be checked explicitly with workflow_dispatch.
 
 on:
   push:
@@ -16,7 +17,6 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
-      - ".github/workflows/ci.yml"
   pull_request:
     paths:
       - "implementation/**"
@@ -28,7 +28,7 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
-      - ".github/workflows/ci.yml"
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
