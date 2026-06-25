@@ -1,12 +1,10 @@
-// Workbench v2 UI state model + reducer.
+// Workbench v2 UI state model + reducer (Case Contract v2).
 //
-// Notes on the design principles:
-// - viewer selection and inspector selection are unified into a single
-//   `selectedMemberId` so the 3D view and the inspector never disagree.
-// - the reducer holds only UI-facing state; data loading lives in the
-//   provider/adapter, not here and not in App.tsx.
+// The temporary "residualHistory.length > 0 ? converged : idle" rule is gone.
+// Run status now derives from analysis.converged, and convergence that is not
+// present is reported as UNAVAILABLE (convergenceAvailable=false), never guessed.
 
-import type { WorkbenchModel } from './caseSchema'
+import type { WorkbenchCaseV2 } from './caseSchema'
 
 export type DataMode = 'demo' | 'live' | 'stale' | 'unavailable'
 
@@ -14,66 +12,50 @@ export type RunStatus = 'idle' | 'validating' | 'running' | 'converged' | 'faile
 
 export interface WorkbenchState {
   dataMode: DataMode
-  projectId: string | null
   caseId: string | null
   runStatus: RunStatus
-  residualHistory: number[]
+  convergenceAvailable: boolean
   selectedMemberId: string | null
   warnings: string[]
 }
 
 export const initialWorkbenchState: WorkbenchState = {
   dataMode: 'unavailable',
-  projectId: null,
   caseId: null,
   runStatus: 'idle',
-  residualHistory: [],
+  convergenceAvailable: false,
   selectedMemberId: null,
   warnings: [],
 }
 
-export function toDataMode(raw: string | null | undefined): DataMode {
-  switch (String(raw ?? '').toLowerCase()) {
-    case 'demo':
-      return 'demo'
-    case 'live':
-      return 'live'
-    case 'stale':
-      return 'stale'
-    default:
-      return 'unavailable'
-  }
+/** Derive run status from analysis. Never infers convergence from residual length. */
+export function deriveRunStatus(caseV2: WorkbenchCaseV2, convergenceAvailable: boolean): RunStatus {
+  if (!convergenceAvailable || !caseV2.analysis) return 'idle'
+  if (caseV2.analysis.converged) return 'converged'
+  return caseV2.analysis.status ?? 'failed'
 }
 
 export type WorkbenchAction =
-  | { type: 'model_loaded'; model: WorkbenchModel; warnings?: string[] }
-  | { type: 'load_failed'; error: string }
+  | { type: 'case_loaded'; dataMode: DataMode; caseV2: WorkbenchCaseV2; convergenceAvailable: boolean; warnings: string[] }
+  | { type: 'load_failed'; errors: string[] }
   | { type: 'select_member'; memberId: string | null }
-  | { type: 'set_run_status'; status: RunStatus }
   | { type: 'reset' }
 
 export function workbenchReducer(state: WorkbenchState, action: WorkbenchAction): WorkbenchState {
   switch (action.type) {
-    case 'model_loaded': {
-      const { model } = action
+    case 'case_loaded':
       return {
         ...state,
-        dataMode: toDataMode(model.dataModeRaw),
-        projectId: model.project.id,
-        caseId: model.case.id,
-        residualHistory: model.residualHistory,
-        // converged only when there is real residual history; demo stays idle.
-        runStatus: model.residualHistory.length > 0 ? 'converged' : 'idle',
-        selectedMemberId: model.members[0]?.id ?? null,
-        warnings: action.warnings ?? [],
+        dataMode: action.dataMode,
+        caseId: action.caseV2.provenance.sourcePath,
+        runStatus: deriveRunStatus(action.caseV2, action.convergenceAvailable),
+        convergenceAvailable: action.convergenceAvailable,
+        warnings: action.warnings,
       }
-    }
     case 'load_failed':
-      return { ...initialWorkbenchState, dataMode: 'unavailable', runStatus: 'failed', warnings: [action.error] }
+      return { ...initialWorkbenchState, dataMode: 'unavailable', runStatus: 'idle', warnings: action.errors }
     case 'select_member':
       return { ...state, selectedMemberId: action.memberId }
-    case 'set_run_status':
-      return { ...state, runStatus: action.status }
     case 'reset':
       return initialWorkbenchState
     default:

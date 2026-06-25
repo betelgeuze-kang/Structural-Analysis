@@ -1,117 +1,164 @@
-// Typed schema + safe normalization for the Workbench v2 case model.
-// Mirrors the static prototype fixture (workbench-demo.v1) but is provider-fed;
-// no UI component reads raw JSON or a file path directly.
+// Workbench Case Contract v2.
+//
+// Carries real analysis results + provenance. Validation policy:
+// - UNKNOWN FIELDS ARE ALLOWED (forward-compatible): unrecognized keys are kept
+//   and ignored, never an error.
+// - HARD BLOCK (case rejected) when: schemaVersion is wrong, the source checksum
+//   is missing, or the unit system is missing — we will not show analysis values
+//   without units or provenance.
+// - SOFT (convergence unavailable) when analysis.converged is absent: the case
+//   still loads, but convergence is reported as UNAVAILABLE, never inferred.
 
-export interface WorkbenchProject {
-  id: string | null
-  name: string | null
+export type UnitSystem = 'SI'
+export type CoordinateSystem = 'global_xyz'
+
+export interface CaseProvenance {
+  sourcePath: string
+  sourceSha256: string
+  sourceCommitSha: string
+  engineVersion: string
+  generatedAt: string
 }
 
-export interface WorkbenchCase {
-  id: string | null
-  label: string | null
-  structureFamily: string | null
-  loadCombination: string | null
+export interface CaseModel {
+  unitSystem: UnitSystem
+  coordinateSystem: CoordinateSystem
+  nodeCount: number
+  elementCount: number
+  dofCount: number
 }
 
-export interface WorkbenchStatus {
-  solverConnected: boolean | null
-  p0: string | null
-  p1: string | null
-  gpu: string | null
+export interface CaseAnalysis {
+  type: string
+  solver: string
+  converged: boolean
+  loadScale: number
+  iterationCount: number
+  residualTolerance: number
+  finalNormalizedResidual: number
+  finalRelativeIncrement: number
+  /** Optional explicit run status when not converged (e.g. 'failed'). */
+  status?: 'idle' | 'validating' | 'running' | 'converged' | 'failed'
 }
 
-export interface ReferenceRow {
-  quantity: string | null
-  unit: string | null
-  reference: number | null
-  engine: number | null
+export interface ResidualStep {
+  iteration: number
+  residual: number
+  relativeIncrement: number
+  alpha: number
 }
 
-export interface MemberRef {
-  id: string
-  label: string | null
+export interface WorkbenchCaseV2 {
+  schemaVersion: 'workbench-case.v2'
+  provenance: CaseProvenance
+  model: CaseModel
+  analysis?: CaseAnalysis
+  residualHistory: ResidualStep[]
+  /** Forward-compatible: unknown top-level fields are preserved here. */
+  [extra: string]: unknown
 }
 
-export interface WorkbenchModel {
-  schemaVersion: string | null
-  dataModeRaw: string | null
-  claimBoundary: string | null
-  project: WorkbenchProject
-  case: WorkbenchCase
-  status: WorkbenchStatus
-  residualHistory: number[]
-  referenceComparison: ReferenceRow[]
-  members: MemberRef[]
+export interface CaseValidation {
+  ok: boolean
+  value: WorkbenchCaseV2 | null
+  errors: string[]
+  warnings: string[]
+  convergenceAvailable: boolean
 }
 
-function str(value: unknown): string | null {
-  return typeof value === 'string' && value.trim() !== '' ? value : null
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object' && !Array.isArray(v)
+}
+function str(v: unknown): string | null {
+  return typeof v === 'string' && v.trim() !== '' ? v : null
+}
+function fin(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null
 }
 
-function num(value: unknown): number | null {
-  return typeof value === 'number' && !Number.isNaN(value) ? value : null
+function normalizeResidualHistory(v: unknown): ResidualStep[] {
+  if (!Array.isArray(v)) return []
+  return v
+    .map((row) => {
+      if (!isRecord(row)) return null
+      const iteration = fin(row.iteration)
+      const residual = fin(row.residual)
+      if (iteration == null || residual == null) return null
+      return {
+        iteration,
+        residual,
+        relativeIncrement: fin(row.relativeIncrement) ?? 0,
+        alpha: fin(row.alpha) ?? 1,
+      }
+    })
+    .filter((r): r is ResidualStep => r != null)
 }
 
-function boolOrNull(value: unknown): boolean | null {
-  return typeof value === 'boolean' ? value : null
-}
+/**
+ * Validate a raw object as a WorkbenchCaseV2. Unknown fields are allowed and
+ * preserved. Returns block errors, soft warnings, and a convergenceAvailable
+ * flag for the reducer/UI.
+ */
+export function validateWorkbenchCaseV2(raw: unknown): CaseValidation {
+  const errors: string[] = []
+  const warnings: string[] = []
 
-function asRecord(value: unknown): Record<string, unknown> {
-  return value && typeof value === 'object' && !Array.isArray(value) ? (value as Record<string, unknown>) : {}
-}
-
-export function normalizeModel(raw: unknown): WorkbenchModel {
-  const r = asRecord(raw)
-  const project = asRecord(r.project)
-  const kase = asRecord(r.case)
-  const status = asRecord(r.status)
-
-  const residualHistory = Array.isArray(r.residual_history)
-    ? r.residual_history.map((v) => num(v)).filter((v): v is number => v != null)
-    : []
-
-  const referenceComparison = Array.isArray(r.reference_comparison)
-    ? r.reference_comparison.map((row) => {
-        const rr = asRecord(row)
-        return {
-          quantity: str(rr.quantity),
-          unit: str(rr.unit),
-          reference: num(rr.reference),
-          engine: num(rr.engine),
-        }
-      })
-    : []
-
-  const members = Array.isArray(r.members)
-    ? r.members
-        .map((m) => {
-          const mr = asRecord(m)
-          const id = str(mr.id)
-          return id ? { id, label: str(mr.label) } : null
-        })
-        .filter((m): m is MemberRef => m != null)
-    : []
-
-  return {
-    schemaVersion: str(r.schema_version),
-    dataModeRaw: str(r.data_mode),
-    claimBoundary: str(r.claim_boundary),
-    project: { id: str(project.id), name: str(project.name) },
-    case: {
-      id: str(kase.id),
-      label: str(kase.label),
-      structureFamily: str(kase.structure_family),
-      loadCombination: str(kase.load_combination),
-    },
-    status: {
-      solverConnected: boolOrNull(status.solver_connected),
-      p0: str(status.p0),
-      p1: str(status.p1),
-      gpu: str(status.gpu),
-    },
-    residualHistory,
-    referenceComparison,
-    members,
+  if (!isRecord(raw)) {
+    return { ok: false, value: null, errors: ['case is not an object'], warnings, convergenceAvailable: false }
   }
+
+  if (raw.schemaVersion !== 'workbench-case.v2') {
+    errors.push(`unexpected schemaVersion: ${String(raw.schemaVersion)} (expected workbench-case.v2)`)
+  }
+
+  const prov = isRecord(raw.provenance) ? raw.provenance : {}
+  if (!str(prov.sourceSha256)) errors.push('provenance.sourceSha256 is missing (source checksum required)')
+
+  const model = isRecord(raw.model) ? raw.model : {}
+  if (!str(model.unitSystem)) errors.push('model.unitSystem is missing (units required)')
+
+  const analysis = isRecord(raw.analysis) ? raw.analysis : null
+  const convergenceAvailable = analysis != null && typeof analysis.converged === 'boolean'
+  if (!convergenceAvailable) warnings.push('analysis.converged is missing — convergence is UNAVAILABLE, not inferred')
+
+  if (errors.length > 0) {
+    return { ok: false, value: null, errors, warnings, convergenceAvailable }
+  }
+
+  // Build a typed value; unknown fields on `raw` are retained via the index
+  // signature, satisfying the "unknown fields allowed" policy.
+  const value = {
+    ...raw,
+    schemaVersion: 'workbench-case.v2',
+    provenance: {
+      sourcePath: str(prov.sourcePath) ?? 'unknown',
+      sourceSha256: str(prov.sourceSha256) as string,
+      sourceCommitSha: str(prov.sourceCommitSha) ?? 'unknown',
+      engineVersion: str(prov.engineVersion) ?? 'unknown',
+      generatedAt: str(prov.generatedAt) ?? 'unknown',
+    },
+    model: {
+      unitSystem: 'SI' as UnitSystem,
+      coordinateSystem: (str(model.coordinateSystem) ?? 'global_xyz') as CoordinateSystem,
+      nodeCount: fin(model.nodeCount) ?? 0,
+      elementCount: fin(model.elementCount) ?? 0,
+      dofCount: fin(model.dofCount) ?? 0,
+    },
+    analysis: convergenceAvailable
+      ? {
+          type: str(analysis!.type) ?? 'unknown',
+          solver: str(analysis!.solver) ?? 'unknown',
+          converged: analysis!.converged as boolean,
+          loadScale: fin(analysis!.loadScale) ?? 1,
+          iterationCount: fin(analysis!.iterationCount) ?? 0,
+          residualTolerance: fin(analysis!.residualTolerance) ?? 0,
+          finalNormalizedResidual: fin(analysis!.finalNormalizedResidual) ?? 0,
+          finalRelativeIncrement: fin(analysis!.finalRelativeIncrement) ?? 0,
+          status: (str(analysis!.status) as CaseAnalysis['status']) ?? undefined,
+        }
+      : undefined,
+    residualHistory: normalizeResidualHistory(raw.residualHistory),
+  } as WorkbenchCaseV2
+
+  return { ok: true, value, errors, warnings, convergenceAvailable }
 }

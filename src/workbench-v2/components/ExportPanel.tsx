@@ -1,26 +1,25 @@
 import type { ReactElement } from 'react'
-import type { WorkbenchModel } from '../model/caseSchema'
-import type { DataMode } from '../model/workbenchState'
+import type { WorkbenchCaseV2 } from '../model/caseSchema'
+import type { DataMode, RunStatus } from '../model/workbenchState'
 
 interface ExportPanelProps {
-  model: WorkbenchModel
+  caseV2: WorkbenchCaseV2
   dataMode: DataMode
-  sourceLabel: string
+  runStatus: RunStatus
   selectedMemberId: string | null
 }
 
-export function ExportPanel({ model, dataMode, sourceLabel, selectedMemberId }: ExportPanelProps): ReactElement {
+export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId }: ExportPanelProps): ReactElement {
   function exportBundle(): void {
     const bundle = {
       schema_version: 'workbench-v2-export.v1',
       data_mode: dataMode,
       is_demo: dataMode === 'demo',
-      claim_boundary: model.claimBoundary,
-      source: sourceLabel,
       exported_at: new Date().toISOString(),
-      project: model.project,
-      case: model.case,
-      status: model.status,
+      run_status: runStatus,
+      provenance: caseV2.provenance,
+      model: caseV2.model,
+      analysis: caseV2.analysis ?? null,
       selected_member_id: selectedMemberId,
     }
     const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
@@ -42,7 +41,7 @@ export function ExportPanel({ model, dataMode, sourceLabel, selectedMemberId }: 
           Export bundle (JSON)
         </button>
         <span className="wb2-action-hint">
-          {dataMode === 'demo' ? 'DEMO bundle' : 'Bundle'} — inputs only, not a validated artifact.
+          {dataMode === 'demo' ? 'DEMO bundle' : 'Bundle'} — includes provenance + checksum; not a validated artifact.
         </span>
       </div>
     </section>
