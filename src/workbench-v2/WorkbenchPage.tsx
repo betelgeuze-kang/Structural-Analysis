@@ -7,6 +7,7 @@ import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
 import { WorkbenchNav } from './components/WorkbenchNav'
 import { AnalysisRibbon } from './components/AnalysisRibbon'
+import { RunMonitor } from './components/RunMonitor'
 import { CaseSelector } from './components/CaseSelector'
 import { CaseSummary } from './components/CaseSummary'
 import { ResultSummaryCard } from './components/ResultSummaryCard'
@@ -16,6 +17,9 @@ import { ReviewDecision } from './components/ReviewDecision'
 import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
+import type { ComparisonRow } from './components/ExportPanel'
+import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
+import { buildViewerUrl } from './model/viewerBridge'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
@@ -37,6 +41,34 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [loadState, setLoadState] = useState<LoadState>('loading')
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
+  const [compareIds, setCompareIds] = useState<string[]>([])
+
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
+
+  function toggleCompare(id: string): void {
+    setCompareIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
+
+  // Resolve selected benchmark ids to honest comparison rows for the export.
+  const comparisonRows: ComparisonRow[] = useMemo(() => {
+    if (!compareIds.length) return []
+    const byId = new Map(getBenchmarkCatalog().cases.map((c) => [c.id, c]))
+    return compareIds
+      .map((id) => byId.get(id))
+      .filter((c): c is NonNullable<typeof c> => c != null)
+      .map((c) => ({
+        id: c.id,
+        title: c.title,
+        truthClass: c.truthClass,
+        comparable: isAccuracyComparable(c),
+        referenceSolver: c.verification.referenceSolver,
+      }))
+  }, [compareIds])
+
+  const viewerDeepLink = useMemo(
+    () => buildViewerUrl(`${baseUrl}src/structure-viewer/index.html`, { memberId: state.selectedMemberId }),
+    [baseUrl, state.selectedMemberId],
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -132,6 +164,19 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         )}
       </div>
 
+      <div id="wb2-sec-run" className="wb2-section">
+        {caseV2 ? (
+          <RunMonitor
+            runStatus={state.runStatus}
+            analysis={caseV2.analysis}
+            residualHistory={caseV2.residualHistory}
+            convergenceAvailable={state.convergenceAvailable}
+          />
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Run Monitor</h2><p className="wb2-unavailable" data-wb2-unavailable>No run attached.</p></section>
+        )}
+      </div>
+
       <div id="wb2-sec-results" className="wb2-section">
         {caseV2 ? (
           <>
@@ -162,7 +207,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         <EvidenceReaderPanel />
       </div>
       <div id="wb2-sec-benchmarks" className="wb2-section">
-        <BenchmarkBrowser />
+        <BenchmarkBrowser selectedCompareIds={compareIds} onToggleCompare={toggleCompare} />
       </div>
 
       {/* Decision: Review + Export */}
@@ -177,6 +222,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             runStatus={state.runStatus}
             selectedMemberId={state.selectedMemberId}
             convergenceAvailable={state.convergenceAvailable}
+            blockers={warnings}
+            comparisonRows={comparisonRows}
+            viewerDeepLink={viewerDeepLink}
+            baseUrl={baseUrl}
           />
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Export</h2><p className="wb2-unavailable" data-wb2-unavailable>Nothing to export until a valid case is loaded.</p></section>
