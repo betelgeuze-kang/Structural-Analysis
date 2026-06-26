@@ -121,6 +121,48 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
   })
 })
 
+test.describe('Workbench v2 — commercial layout, review draft, benchmarks', () => {
+  test('left navigation lists the commercial sections in order', async ({ page }) => {
+    await open(page)
+    await expect(page.locator('[data-wb2-nav]')).toBeVisible()
+    for (const id of ['wb2-sec-project', 'wb2-sec-model', 'wb2-sec-analysis', 'wb2-sec-results', 'wb2-sec-evidence', 'wb2-sec-benchmarks', 'wb2-sec-review', 'wb2-sec-export']) {
+      await expect(page.locator(`[data-wb2-nav-link="${id}"]`)).toBeVisible()
+    }
+  })
+
+  test('Compare section is an honest placeholder, never synthesized', async ({ page }) => {
+    await open(page)
+    const compare = page.locator('#wb2-sec-compare')
+    await expect(compare.locator('[data-wb2-unavailable]')).toBeVisible()
+  })
+
+  test('reviewer draft persists locally and never becomes an automated verdict', async ({ page }) => {
+    await open(page)
+    // Automated verdict stays UNAVAILABLE.
+    await expect(page.locator('[data-state="UNAVAILABLE"]').first()).toBeVisible()
+    const draft = page.locator('[data-wb2-review-draft]')
+    await expect(draft).toBeVisible()
+    await draft.locator('[data-wb2-decision="review"]').click()
+    await draft.locator('[data-wb2-review-reviewer]').fill('QA')
+    await expect(draft.locator('[data-wb2-review-state="review"]')).toBeVisible()
+    // Reload: the draft is restored from localStorage for the same source commit.
+    await page.reload({ waitUntil: 'load' })
+    await page.locator('[data-wb2-root]').waitFor({ state: 'visible' })
+    await expect(page.locator('[data-wb2-review-reviewer]')).toHaveValue('QA')
+    await expect(page.locator('[data-wb2-review-state="review"]')).toBeVisible()
+  })
+
+  test('benchmark cards expose copy buttons and a geometry-only exclusion', async ({ page }) => {
+    await open(page)
+    await expect(page.locator('[data-wb2-copy]').first()).toBeVisible()
+    await expect(page.locator('[data-geometry-excluded-count]')).toBeVisible()
+    const geo = page.locator('[data-bench-id][data-geometry-only="true"]')
+    if (await geo.count()) {
+      await expect(geo.first().locator('[data-geometry-excluded]')).toBeVisible()
+    }
+  })
+})
+
 test.describe('Workbench v2 — viewer, mobile, a11y', () => {
   test('embeds the structure viewer iframe with a deep-linkable src', async ({ page }) => {
     await open(page)
