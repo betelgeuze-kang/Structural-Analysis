@@ -7,6 +7,7 @@ The README image is captured from the actual `src/structure-viewer/index.html?pr
 
 ## Documents
 
+- [Workbench v2 usage guide](docs/workbench-v2.md)
 - [Frontend build reproducibility](docs/frontend-build-reproducibility.md)
 - [Viewer source/export contract](docs/viewer-contract.md)
 - [Structure viewer product workspace](docs/structure-viewer-product-workspace.md)
