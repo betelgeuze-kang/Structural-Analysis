@@ -255,4 +255,17 @@ test.describe('Workbench v2 — viewer, mobile, a11y', () => {
     const active = await page.evaluate(() => document.activeElement?.className ?? '')
     expect(active).toContain('wb2-skip-link')
   })
+
+  test('locale toggle switches shell and nav labels to Korean', async ({ page }) => {
+    await open(page)
+    await expect(page.locator('[data-wb2-locale]')).toBeVisible()
+    await page.locator('[data-locale="ko"]').click()
+    await expect(page.locator('[data-wb2-root]')).toHaveAttribute('data-locale', 'ko')
+    // Korean nav labels should appear.
+    await expect(page.locator('[data-wb2-nav]')).toContainText(/프로젝트/)
+    await expect(page.locator('[data-wb2-nav]')).toContainText(/결과/)
+    // Switch back.
+    await page.locator('[data-locale="en"]').click()
+    await expect(page.locator('[data-wb2-nav]')).toContainText(/Project/)
+  })
 })
