@@ -3,6 +3,7 @@ import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
 import type { WorkbenchCaseV2 } from './model/caseSchema'
 import { defaultDemoCaseId, type DemoCaseId } from './model/demoCases'
+import { loadLocale, saveLocale, type Locale } from './model/i18n'
 import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
 import { WorkbenchNav } from './components/WorkbenchNav'
@@ -31,6 +32,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
+  const [locale, setLocale] = useState<Locale>(loadLocale)
   const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
   const liveCaseUrl = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}evidence/workbench-case.json`
   const provider = useMemo(
@@ -126,7 +128,9 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       sourceLabel={sourceLabel}
       claimBoundary={claimBoundary}
       onProviderModeChange={setProviderMode}
-      nav={<WorkbenchNav />}
+      locale={locale}
+      onLocaleChange={(l) => { setLocale(l); saveLocale(l) }}
+      nav={<WorkbenchNav locale={locale} />}
     >
       {/* Primary flow: Model -> Analysis -> Results -> Compare */}
       <div id="wb2-sec-project" className="wb2-section">

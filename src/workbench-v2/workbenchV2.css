@@ -319,3 +319,9 @@
 @media (forced-colors: active) {
   .wb2-nav-link.is-active { border-color: Highlight; }
 }
+
+/* Locale toggle (PR bundle-and-i18n) */
+.wb2-header-controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.wb2-locale-toggle { display: flex; gap: 4px; }
+.wb2-locale-btn { cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 999px; border: 1px solid rgba(148, 168, 190, 0.28); background: rgba(10, 18, 29, 0.6); color: #c3d2e0; }
+.wb2-locale-btn.is-active { border-color: rgba(79, 183, 173, 0.6); background: rgba(79, 183, 173, 0.16); color: #c9f3ee; }
