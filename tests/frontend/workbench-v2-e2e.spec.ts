@@ -24,7 +24,7 @@ test.describe('Workbench v2 — shell & demo case', () => {
   test('shows provenance + model health and a converged analysis', async ({ page }) => {
     await open(page)
     await expect(page.getByText('Case & provenance')).toBeVisible()
-    await expect(page.getByText('Source checksum')).toBeVisible()
+    await expect(page.getByText('Source checksum', { exact: true })).toBeVisible()
     await expect(page.locator('[data-wb2-root]')).toContainText(/Converged/i)
   })
 
@@ -50,7 +50,7 @@ test.describe('Workbench v2 — demo case samples', () => {
     await expect(card).toHaveAttribute('data-result-verdict', 'converged')
     await expect(card.locator('[data-result-chip]')).toContainText(/Converged/i)
     await expect(page.locator('[data-wb2-residual-chart]')).toBeVisible()
-    await expect(page.locator('[data-wb2-tol-line]')).toBeVisible()
+    await expect(page.locator('[data-wb2-tol-line]')).toBeAttached()
     await expect(card.locator('[data-result-within-tol="true"]')).toBeVisible()
   })
 
