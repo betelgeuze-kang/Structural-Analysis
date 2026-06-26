@@ -395,7 +395,12 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
     assert ".advanced-holdout-row__fields" in index_css
     assert ".button:disabled" in index_css
 
-    assert tsconfig["include"] == ["src/App.tsx", "src/main.tsx", "src/vite-env.d.ts"]
+    assert tsconfig["include"] == [
+        "src/App.tsx",
+        "src/main.tsx",
+        "src/vite-env.d.ts",
+        "src/workbench-v2",
+    ]
 
 
 def test_frontend_entry_shell_adds_authoring_server_ops_and_family_track_surfaces() -> None:
