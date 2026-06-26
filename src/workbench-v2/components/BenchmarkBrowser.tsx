@@ -35,7 +35,15 @@ function yn(v: boolean): string {
   return v ? 'verified' : 'unverified'
 }
 
-function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
+function CaseCard({
+  c,
+  selected,
+  onToggleCompare,
+}: {
+  c: BenchmarkCase
+  selected?: boolean
+  onToggleCompare?: (id: string) => void
+}): ReactElement {
   const comparable = isAccuracyComparable(c)
   const lifecycle = deriveLifecycle(c)
   const run = benchmarkRunCommand(c)
@@ -106,6 +114,18 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
         )}
       </div>
 
+      {onToggleCompare ? (
+        <label className="wb2-bench-compare">
+          <input
+            type="checkbox"
+            checked={!!selected}
+            data-bench-compare={c.id}
+            onChange={() => onToggleCompare(c.id)}
+          />
+          <span>Add to comparison{!comparable ? ' (not accuracy-comparable)' : ''}</span>
+        </label>
+      ) : null}
+
       {c.sourceUrl ? (
         <a className="wb2-bench-report" href={c.sourceUrl} target="_blank" rel="noreferrer">Open source / report ↗</a>
       ) : null}
@@ -113,12 +133,18 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
   )
 }
 
-export function BenchmarkBrowser(): ReactElement {
+export interface BenchmarkBrowserProps {
+  selectedCompareIds?: string[]
+  onToggleCompare?: (id: string) => void
+}
+
+export function BenchmarkBrowser({ selectedCompareIds, onToggleCompare }: BenchmarkBrowserProps = {}): ReactElement {
   const catalog = useMemo(() => getBenchmarkCatalog(), [])
   const [truth, setTruth] = useState<TruthClass | 'all'>('all')
   const [size, setSize] = useState<string>('all')
   const [lifecycle, setLifecycle] = useState<LifecycleStatus | 'all' | 'first-targets'>('all')
   const [query, setQuery] = useState<string>('')
+  const selectedSet = useMemo(() => new Set(selectedCompareIds ?? []), [selectedCompareIds])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -175,7 +201,9 @@ export function BenchmarkBrowser(): ReactElement {
 
       {filtered.length ? (
         <div className="wb2-bench-grid">
-          {filtered.map((c) => (<CaseCard key={c.id} c={c} />))}
+          {filtered.map((c) => (
+            <CaseCard key={c.id} c={c} selected={selectedSet.has(c.id)} onToggleCompare={onToggleCompare} />
+          ))}
         </div>
       ) : (
         <p className="wb2-empty">No cases match the current filters.</p>
