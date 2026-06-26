@@ -281,3 +281,13 @@
 .wb2-member-focus__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
 .wb2-member-focus__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 @media (max-width: 640px) { .wb2-member-focus__actions { flex-direction: column; align-items: stretch; } }
+
+
+
+/* Run Monitor (PR workbench-polish) */
+.wb2-run-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.wb2-run-status-label { font-size: 13px; font-weight: 700; color: #c9f3ee; }
+.wb2-run-progress { height: 10px; border-radius: 999px; background: rgba(148, 168, 190, 0.14); border: 1px solid var(--wb2-border); overflow: hidden; }
+.wb2-run-progress__bar { height: 100%; background: linear-gradient(90deg, #4fb7ad, #7fd8d0); border-radius: 999px; transition: width 200ms ease; }
+.wb2-run-progress__caption { margin: 6px 0 12px; font-size: 12px; color: var(--wb2-dim); }
+@media (prefers-reduced-motion: reduce) { .wb2-run-progress__bar { transition: none; } }

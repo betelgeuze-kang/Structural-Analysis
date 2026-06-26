@@ -7,6 +7,7 @@ import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
 import { WorkbenchNav } from './components/WorkbenchNav'
 import { AnalysisRibbon } from './components/AnalysisRibbon'
+import { RunMonitor } from './components/RunMonitor'
 import { CaseSelector } from './components/CaseSelector'
 import { CaseSummary } from './components/CaseSummary'
 import { ResultSummaryCard } from './components/ResultSummaryCard'
@@ -160,6 +161,19 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
           <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
         ) : (
           <section className="wb2-panel"><h2 className="wb2-panel__title">Analysis</h2><p className="wb2-unavailable" data-wb2-unavailable>No analysis attached.</p></section>
+        )}
+      </div>
+
+      <div id="wb2-sec-run" className="wb2-section">
+        {caseV2 ? (
+          <RunMonitor
+            runStatus={state.runStatus}
+            analysis={caseV2.analysis}
+            residualHistory={caseV2.residualHistory}
+            convergenceAvailable={state.convergenceAvailable}
+          />
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Run Monitor</h2><p className="wb2-unavailable" data-wb2-unavailable>No run attached.</p></section>
         )}
       </div>
 

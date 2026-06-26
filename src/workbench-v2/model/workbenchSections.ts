@@ -17,6 +17,7 @@ export const workbenchSections: WorkbenchSectionDef[] = [
   { id: 'wb2-sec-project', label: 'Project', group: 'model' },
   { id: 'wb2-sec-model', label: 'Model Health', group: 'model' },
   { id: 'wb2-sec-analysis', label: 'Analysis', group: 'model' },
+  { id: 'wb2-sec-run', label: 'Run Monitor', group: 'model' },
   { id: 'wb2-sec-results', label: 'Results', group: 'model' },
   { id: 'wb2-sec-compare', label: 'Compare', group: 'model' },
   { id: 'wb2-sec-evidence', label: 'Evidence', group: 'verification' },
