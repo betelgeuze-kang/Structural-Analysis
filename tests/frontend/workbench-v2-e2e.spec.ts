@@ -34,6 +34,46 @@ test.describe('Workbench v2 — shell & demo case', () => {
   })
 })
 
+test.describe('Workbench v2 — demo case samples', () => {
+  test('demo case selector offers converged, failed, and unavailable samples', async ({ page }) => {
+    await open(page)
+    await expect(page.locator('[data-wb2-case-selector]')).toBeVisible()
+    await expect(page.locator('[data-wb2-case="converged"]')).toBeVisible()
+    await expect(page.locator('[data-wb2-case="failed"]')).toBeVisible()
+    await expect(page.locator('[data-wb2-case="unavailable"]')).toBeVisible()
+  })
+
+  test('converged sample shows a converged verdict, residual chart, and within-tolerance', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-case="converged"]').click()
+    const card = page.locator('[data-result-verdict]')
+    await expect(card).toHaveAttribute('data-result-verdict', 'converged')
+    await expect(card.locator('[data-result-chip]')).toContainText(/Converged/i)
+    await expect(page.locator('[data-wb2-residual-chart]')).toBeVisible()
+    await expect(page.locator('[data-wb2-tol-line]')).toBeVisible()
+    await expect(card.locator('[data-result-within-tol="true"]')).toBeVisible()
+  })
+
+  test('failed sample shows a non-converged verdict above tolerance — not inferred as passing', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-case="failed"]').click()
+    const card = page.locator('[data-result-verdict]')
+    await expect(card).toHaveAttribute('data-result-verdict', 'failed')
+    await expect(card.locator('[data-result-chip]')).toContainText(/Did not converge/i)
+    await expect(card.locator('[data-result-within-tol="false"]')).toBeVisible()
+  })
+
+  test('unavailable sample reports convergence UNAVAILABLE with no chart and no inferred status', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-case="unavailable"]').click()
+    const card = page.locator('[data-result-verdict]')
+    await expect(card).toHaveAttribute('data-result-verdict', 'unavailable')
+    await expect(card.locator('[data-result-chip]')).toContainText(/unavailable/i)
+    // No fabricated residual trace for a case without analysis.
+    await expect(page.locator('[data-wb2-residual-chart]')).toHaveCount(0)
+  })
+})
+
 test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
   test('demo/live provider toggle is present', async ({ page }) => {
     await open(page)

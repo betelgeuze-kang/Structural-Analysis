@@ -7,9 +7,10 @@ interface ExportPanelProps {
   dataMode: DataMode
   runStatus: RunStatus
   selectedMemberId: string | null
+  convergenceAvailable: boolean
 }
 
-export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId }: ExportPanelProps): ReactElement {
+export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId, convergenceAvailable }: ExportPanelProps): ReactElement {
   function exportBundle(): void {
     const bundle = {
       schema_version: 'workbench-v2-export.v1',
@@ -17,10 +18,19 @@ export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId }: E
       is_demo: dataMode === 'demo',
       exported_at: new Date().toISOString(),
       run_status: runStatus,
+      convergence_available: convergenceAvailable,
+      // Surface the source checksum + commit at the top level so the export is
+      // self-describing without digging into provenance.
+      source_path: caseV2.provenance.sourcePath,
+      source_sha256: caseV2.provenance.sourceSha256,
+      source_commit_sha: caseV2.provenance.sourceCommitSha,
       provenance: caseV2.provenance,
       model: caseV2.model,
       analysis: caseV2.analysis ?? null,
+      residual_history: caseV2.residualHistory,
       selected_member_id: selectedMemberId,
+      claim_boundary:
+        'Workbench v2 export. Values reflect the attached case only and are not a validated verdict.',
     }
     const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)

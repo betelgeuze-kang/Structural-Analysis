@@ -2,10 +2,13 @@ import { useEffect, useMemo, useReducer, useState, type ReactElement } from 'rea
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
 import type { WorkbenchCaseV2 } from './model/caseSchema'
+import { defaultDemoCaseId, type DemoCaseId } from './model/demoCases'
 import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
 import { AnalysisRibbon } from './components/AnalysisRibbon'
+import { CaseSelector } from './components/CaseSelector'
 import { CaseSummary } from './components/CaseSummary'
+import { ResultSummaryCard } from './components/ResultSummaryCard'
 import { ModelViewport } from './components/ModelViewport'
 import { ResidualAuditPanel } from './components/ResidualAuditPanel'
 import { ReviewDecision } from './components/ReviewDecision'
@@ -21,7 +24,11 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
 export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
-  const provider = useMemo(() => createWorkbenchProvider(providerMode), [providerMode])
+  const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
+  const provider = useMemo(
+    () => createWorkbenchProvider(providerMode, { demoCaseId }),
+    [providerMode, demoCaseId],
+  )
 
   const [state, dispatch] = useReducer(workbenchReducer, initialWorkbenchState)
   const [caseV2, setCaseV2] = useState<WorkbenchCaseV2 | null>(null)
@@ -86,6 +93,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       <EvidenceReaderPanel />
       <BenchmarkBrowser />
 
+      {providerMode === 'demo' ? (
+        <CaseSelector selectedId={demoCaseId} onSelect={setDemoCaseId} />
+      ) : null}
+
       {loadState === 'loading' ? (
         <section className="wb2-panel"><p className="wb2-empty">Loading case…</p></section>
       ) : !caseV2 ? (
@@ -98,6 +109,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       ) : (
         <>
           <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
+          <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />
           <CaseSummary caseV2={caseV2} />
           <ModelViewport
             model={caseV2.model}
@@ -107,9 +119,19 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             sourcePath={caseV2.provenance.sourcePath}
             sourceCommit={caseV2.provenance.sourceCommitSha}
           />
-          <ResidualAuditPanel residualHistory={caseV2.residualHistory} sourceLabel={sourceLabel} />
+          <ResidualAuditPanel
+            residualHistory={caseV2.residualHistory}
+            sourceLabel={sourceLabel}
+            residualTolerance={caseV2.analysis?.residualTolerance}
+          />
           <ReviewDecision dataMode={state.dataMode} />
-          <ExportPanel caseV2={caseV2} dataMode={state.dataMode} runStatus={state.runStatus} selectedMemberId={state.selectedMemberId} />
+          <ExportPanel
+            caseV2={caseV2}
+            dataMode={state.dataMode}
+            runStatus={state.runStatus}
+            selectedMemberId={state.selectedMemberId}
+            convergenceAvailable={state.convergenceAvailable}
+          />
         </>
       )}
 
