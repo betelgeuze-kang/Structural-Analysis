@@ -50,6 +50,7 @@ export function workbenchReducer(state: WorkbenchState, action: WorkbenchAction)
         caseId: action.caseV2.provenance.sourcePath,
         runStatus: deriveRunStatus(action.caseV2, action.convergenceAvailable),
         convergenceAvailable: action.convergenceAvailable,
+        selectedMemberId: null,
         warnings: action.warnings,
       }
     case 'load_failed':

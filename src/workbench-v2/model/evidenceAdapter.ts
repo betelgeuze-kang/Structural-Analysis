@@ -2,8 +2,8 @@
 // The provider is the only place that knows where data comes from; it validates
 // against the v2 contract before handing a case to the UI.
 
-import demoCaseRaw from './fixtures/demo-case.v2.json'
 import { validateWorkbenchCaseV2, type CaseValidation, type WorkbenchCaseV2 } from './caseSchema'
+import { getDemoCase, defaultDemoCaseId, type DemoCaseId } from './demoCases'
 
 export type ProviderMode = 'demo' | 'live'
 
@@ -35,10 +35,17 @@ export interface WorkbenchDataProvider {
 
 export class DemoWorkbenchProvider implements WorkbenchDataProvider {
   readonly mode: ProviderMode = 'demo'
-  readonly sourceLabel = 'demo:workbench-v2/fixtures/demo-case.v2.json'
+  readonly sourceLabel: string
+  readonly demoCaseId: DemoCaseId
+
+  constructor(demoCaseId: DemoCaseId = defaultDemoCaseId) {
+    this.demoCaseId = demoCaseId
+    this.sourceLabel = `demo:${demoCaseId}`
+  }
 
   async load(): Promise<WorkbenchLoadResult> {
-    return toResult(validateWorkbenchCaseV2(demoCaseRaw as unknown), this.sourceLabel)
+    const entry = getDemoCase(this.demoCaseId)
+    return toResult(validateWorkbenchCaseV2(entry.raw), `demo:${entry.id}:${entry.label}`)
   }
 }
 
@@ -70,8 +77,9 @@ export class LiveWorkbenchProvider implements WorkbenchDataProvider {
 export interface ProviderOptions {
   url?: string
   fetchImpl?: typeof fetch
+  demoCaseId?: DemoCaseId
 }
 
 export function createWorkbenchProvider(mode: ProviderMode, options: ProviderOptions = {}): WorkbenchDataProvider {
-  return mode === 'live' ? new LiveWorkbenchProvider(options) : new DemoWorkbenchProvider()
+  return mode === 'live' ? new LiveWorkbenchProvider(options) : new DemoWorkbenchProvider(options.demoCaseId)
 }
