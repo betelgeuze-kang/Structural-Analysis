@@ -1,42 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --color-primary: #1a8f8a;
-  --si-accent: #2eb8b0;
-  --si-viewport-bg: #060b12;
-  --color-ink-dark: #08121d;
-  --color-surface-dark: #111c29;
-  --color-surface-dark-soft: #152435;
-  --color-surface-dark-strong: #0d1824;
-  --color-line-dark: #2b3d50;
-  --color-text-dark: #ecf2f6;
-  --color-muted-dark: #96a8bb;
-  --color-ink-light: #1c2430;
-  --color-surface-light: #fffaf2;
-  --color-surface-light-soft: #f7efe3;
-  --color-surface-light-strong: #fffdf8;
-  --color-line-light: #d8cfbf;
-  --color-text-light: #1c2430;
-  --color-muted-light: #5c6678;
-  --color-accent-cool: #4fb7ad;
-  --color-accent-warm: #f4b56b;
-  --color-accent-warm-ink: #8f4a19;
-  --color-success: #2f7d5a;
-  --color-warning: #96580e;
-  --color-danger: #a1492e;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 28px;
+  /* Brand: single engineering blue (replaces teal). */
+  --color-primary: #2f6feb;
+  --si-accent: #3b82f6;
+  --color-primary-weak: #16243a;
+  /* 3D viewport stays dark. */
+  --si-viewport-bg: #0a0f15;
+  /* Neutral slate dark surfaces (de-tinted from teal/blue-green). */
+  --color-ink-dark: #0b0f14;
+  --color-surface-dark: #151b22;
+  --color-surface-dark-soft: #1c232c;
+  --color-surface-dark-strong: #10151b;
+  --color-line-dark: #2a323c;
+  --color-text-dark: #e8edf2;
+  --color-muted-dark: #9aa5b1;
+  /* Clean neutral light surfaces (replaces warm cream). */
+  --color-ink-light: #0f1722;
+  --color-surface-light: #ffffff;
+  --color-surface-light-soft: #f3f5f8;
+  --color-surface-light-strong: #ffffff;
+  --color-line-light: #d9dee5;
+  --color-text-light: #0f1722;
+  --color-muted-light: #5b6571;
+  --color-accent-cool: #2f6feb;
+  --color-accent-warm: #d99a3c;
+  --color-accent-warm-ink: #7a4a12;
+  /* Semantic status, dashboard-toned. */
+  --color-success: #1f7a4d;
+  --color-warning: #9a6700;
+  --color-danger: #b3261e;
+  /* Tightened radii for an instrument feel. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
   --radius-pill: 999px;
-  --shadow-dark: 0 28px 70px rgba(0, 0, 0, 0.3);
-  --shadow-light: 0 26px 60px rgba(28, 36, 48, 0.14);
+  /* Subtle elevation only. */
+  --shadow-dark: 0 1px 2px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.28);
+  --shadow-light: 0 1px 2px rgba(15, 23, 34, 0.1), 0 2px 8px rgba(15, 23, 34, 0.06);
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
   color-scheme: dark;
-  font-family: 'IBM Plex Sans KR', 'Pretendard', 'Noto Sans KR', sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(46, 184, 176, 0.12), transparent 28%),
-    radial-gradient(circle at right 18%, rgba(230, 169, 93, 0.10), transparent 24%),
-    linear-gradient(180deg, #050a10 0%, var(--color-surface-dark-strong) 38%, #111c29 100%);
+  font-family: 'Inter', 'IBM Plex Sans KR', 'Pretendard', 'Noto Sans KR', sans-serif;
+  background: linear-gradient(180deg, #0d1117 0%, #0f141b 100%);
   color: var(--color-text-dark);
 }
 
@@ -72,6 +78,7 @@ select {
   min-height: 100vh;
   padding: 32px 24px 40px;
   overflow: hidden;
+  border-top: 3px solid var(--color-primary);
 }
 
 .shell::before,
@@ -92,33 +99,11 @@ select {
 }
 
 .shell::after {
-  background:
-    radial-gradient(circle at top center, rgba(255, 253, 248, 0.08), transparent 38%),
-    radial-gradient(circle at bottom right, rgba(79, 183, 173, 0.06), transparent 30%);
+  background: none;
 }
 
 .shell__glow {
-  position: fixed;
-  border-radius: 999px;
-  filter: blur(80px);
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.shell__glow--a {
-  top: -40px;
-  left: -60px;
-  width: 280px;
-  height: 280px;
-  background: rgba(248, 180, 64, 0.18);
-}
-
-.shell__glow--b {
-  right: -40px;
-  top: 120px;
-  width: 360px;
-  height: 360px;
-  background: rgba(63, 173, 168, 0.18);
+  display: none;
 }
 
 .hero,
@@ -139,13 +124,10 @@ select {
 .hero__copy,
 .panel,
 .hero__status {
-  border: 1px solid rgba(46, 184, 176, 0.2);
-  background:
-    radial-gradient(circle at top right, rgba(46, 184, 176, 0.14), transparent 32%),
-    linear-gradient(180deg, rgba(12, 22, 34, 0.97), rgba(8, 16, 26, 0.95));
-  border-radius: var(--radius-xl);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32);
-  backdrop-filter: blur(18px);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dark);
 }
 
 .hero__copy {
@@ -168,7 +150,7 @@ select {
 .eyebrow,
 .panel__kicker {
   margin: 0 0 12px;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -178,29 +160,30 @@ select {
 .hero__suite-pill {
   display: inline-flex;
   align-items: center;
-  min-height: 34px;
-  padding: 0 14px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(244, 181, 107, 0.3);
-  background: rgba(244, 181, 107, 0.12);
-  color: #ffd9aa;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-soft);
+  color: var(--color-muted-dark);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .hero h1,
 .panel h2 {
   margin: 0;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
-  letter-spacing: -0.05em;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
+  letter-spacing: -0.01em;
 }
 
 .hero h1 {
-  max-width: 10ch;
-  font-size: clamp(2.7rem, 7vw, 4.8rem);
-  line-height: 0.96;
+  max-width: 40ch;
+  font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+  line-height: 1.2;
+  font-weight: 600;
 }
 
 .hero__lede,
@@ -231,15 +214,15 @@ select {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(79, 183, 173, 0.22);
-  background: rgba(79, 183, 173, 0.08);
-  color: #d9fdf7;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
-  font-size: 0.76rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-soft);
+  color: var(--color-muted-dark);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
 }
 
 .hero__overview-grid {
@@ -251,21 +234,20 @@ select {
 
 .hero__overview-card {
   position: relative;
-  padding: 18px;
-  border-radius: 22px;
-  border: 1px solid rgba(43, 61, 80, 0.82);
-  background:
-    linear-gradient(180deg, rgba(11, 23, 34, 0.9), rgba(14, 24, 37, 0.82)),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0));
+  padding: 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-soft);
 }
 
 .hero__overview-card strong,
 .hero__status-block strong {
   display: block;
   margin-top: 10px;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
-  font-size: 1.14rem;
-  letter-spacing: -0.03em;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
 }
 
 .hero__overview-card p,
@@ -279,7 +261,7 @@ select {
 .hero__status-label {
   margin: 0;
   color: var(--si-accent, var(--color-accent-cool));
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -293,10 +275,10 @@ select {
 }
 
 .hero__status-block {
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(43, 61, 80, 0.74);
-  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-soft);
 }
 
 .hero__surface-summary {
@@ -312,21 +294,25 @@ select {
 
 .metric-list div {
   display: grid;
-  grid-template-columns: 72px 1fr;
+  grid-template-columns: 96px 1fr;
   gap: 10px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(43, 61, 80, 0.62);
-  background: rgba(255, 255, 255, 0.03);
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-soft);
 }
 
 .metric-list dt {
   color: var(--color-muted-dark);
+  font-size: 0.8rem;
 }
 
 .metric-list dd {
   margin: 0;
   color: var(--color-text-dark);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
   word-break: break-word;
 }
 
@@ -334,38 +320,40 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 0 18px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(146, 168, 190, 0.22);
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-line-dark);
+  font-weight: 500;
   text-decoration: none;
   transition:
-    transform 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease,
-    box-shadow 160ms ease;
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .button:hover {
-  transform: translateY(-1px);
-  border-color: rgba(244, 181, 107, 0.44);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.16);
+  border-color: var(--color-primary);
 }
 
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 .button--primary {
-  background: linear-gradient(135deg, var(--color-accent-cool) 0%, var(--color-accent-warm) 100%);
-  color: var(--color-ink-dark);
-  font-weight: 700;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.button--primary:hover {
+  background: #2257c4;
+  border-color: #2257c4;
 }
 
 .button--ghost {
-  background: rgba(255, 255, 255, 0.05);
+  background: transparent;
 }
 
 .workspace {
@@ -424,7 +412,7 @@ select {
   border-radius: 22px;
   border: 1px solid rgba(43, 61, 80, 0.62);
   background:
-    radial-gradient(circle at top right, rgba(79, 183, 173, 0.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(47, 111, 235, 0.12), transparent 34%),
     linear-gradient(180deg, rgba(20, 32, 48, 0.94), rgba(15, 24, 37, 0.96));
   color: inherit;
   cursor: pointer;
@@ -454,7 +442,7 @@ select {
 
 .surface-card--active {
   background:
-    radial-gradient(circle at top right, rgba(79, 183, 173, 0.18), transparent 36%),
+    radial-gradient(circle at top right, rgba(47, 111, 235, 0.18), transparent 36%),
     linear-gradient(180deg, rgba(20, 34, 49, 0.98), rgba(14, 24, 37, 0.98));
 }
 
@@ -468,7 +456,7 @@ select {
 .surface-card__mode {
   margin: 8px 0 0;
   color: #d7e6f2;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.86rem;
   letter-spacing: 0.04em;
 }
@@ -487,8 +475,8 @@ select {
   min-height: 30px;
   padding: 0 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(79, 183, 173, 0.18);
-  background: rgba(79, 183, 173, 0.08);
+  border: 1px solid rgba(47, 111, 235, 0.18);
+  background: rgba(47, 111, 235, 0.08);
   color: #cceee8;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
@@ -506,7 +494,7 @@ select {
   padding: 0 12px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.73rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -515,7 +503,7 @@ select {
 
 .status-pill--ok {
   background: rgba(47, 125, 90, 0.16);
-  border-color: rgba(79, 183, 173, 0.28);
+  border-color: rgba(47, 111, 235, 0.28);
   color: #d5fff8;
 }
 
@@ -671,7 +659,7 @@ select {
 
 .authoring-card__title {
   margin: 0;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 1.02rem;
 }
 
@@ -776,7 +764,7 @@ select {
 }
 
 .authoring-family-row__title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.98rem;
 }
 
@@ -813,7 +801,7 @@ select {
   gap: 10px;
   padding: 0 12px;
   color: #8ad6c9;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.74rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -852,7 +840,7 @@ select {
 .authoring-coverage-cell__title {
   margin: 0;
   color: #cbd5e1;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -932,7 +920,7 @@ select {
 .route-summary__label {
   margin: 0;
   color: #8ad6c9;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.76rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -961,7 +949,7 @@ select {
   display: block;
   margin-top: 10px;
   color: var(--color-text-light);
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 1rem;
 }
 
@@ -974,7 +962,7 @@ select {
 .route-summary__card-label {
   margin: 0;
   color: var(--color-accent-warm-ink);
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -1002,7 +990,7 @@ select {
   border-radius: 22px;
   border: 1px solid rgba(216, 207, 191, 0.82);
   background:
-    radial-gradient(circle at top right, rgba(79, 183, 173, 0.12), transparent 32%),
+    radial-gradient(circle at top right, rgba(47, 111, 235, 0.12), transparent 32%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(247, 239, 227, 0.94));
   color: var(--color-text-light);
   text-decoration: none;
@@ -1027,7 +1015,7 @@ select {
 
 .route-step__index,
 .route-step__badge {
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   text-transform: uppercase;
 }
 
@@ -1087,7 +1075,7 @@ select {
 .advanced-holdout-card__title,
 .advanced-holdout-row__title {
   margin: 0;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
 }
 
 .advanced-holdout-card__title {
@@ -1185,7 +1173,7 @@ select {
 
 .review-board-row__title {
   margin: 0;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.98rem;
 }
 
@@ -1319,7 +1307,7 @@ select {
   border-radius: 22px;
   border: 1px solid rgba(216, 207, 191, 0.82);
   background:
-    radial-gradient(circle at top right, rgba(79, 183, 173, 0.1), transparent 30%),
+    radial-gradient(circle at top right, rgba(47, 111, 235, 0.1), transparent 30%),
     linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(247, 239, 227, 0.94));
   color: var(--color-text-light);
   text-decoration: none;
@@ -1357,7 +1345,7 @@ select {
 
 .legacy-pill small {
   color: var(--color-primary);
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1512,7 +1500,7 @@ select {
 .developer-preview-workflow__route-copy strong {
   display: block;
   margin-top: 4px;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 1rem;
   letter-spacing: 0;
 }
@@ -1537,9 +1525,9 @@ select {
   align-items: center;
   margin: 0 0 14px;
   padding: 12px;
-  border: 1px solid rgba(79, 183, 173, 0.2);
+  border: 1px solid rgba(47, 111, 235, 0.2);
   border-radius: 8px;
-  background: rgba(79, 183, 173, 0.06);
+  background: rgba(47, 111, 235, 0.06);
 }
 
 .developer-preview-workflow__selection-state strong {
@@ -1557,7 +1545,7 @@ select {
 }
 
 .developer-preview-workflow__selection-channels span {
-  border: 1px solid rgba(79, 183, 173, 0.24);
+  border: 1px solid rgba(47, 111, 235, 0.24);
   border-radius: 999px;
   color: #b7d8d7;
   font-size: 0.74rem;
@@ -1681,7 +1669,7 @@ select {
   border: 1px solid rgba(244, 181, 107, 0.32);
   border-radius: 6px;
   color: #ffd9aa;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 0.78rem;
 }
 
@@ -1695,7 +1683,7 @@ select {
 
 .developer-preview-workflow__step h3 {
   margin: 4px 0 0;
-  font-family: 'Space Grotesk', 'IBM Plex Sans KR', sans-serif;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
   font-size: 1rem;
   letter-spacing: 0;
 }
@@ -1710,9 +1698,9 @@ select {
 .developer-preview-workflow__signals span {
   max-width: 100%;
   padding: 4px 7px;
-  border: 1px solid rgba(79, 183, 173, 0.18);
+  border: 1px solid rgba(47, 111, 235, 0.18);
   border-radius: 6px;
-  background: rgba(79, 183, 173, 0.08);
+  background: rgba(47, 111, 235, 0.08);
   color: #b7d8d7;
   font-size: 0.72rem;
   line-height: 1.3;
