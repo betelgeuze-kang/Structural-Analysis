@@ -31,9 +31,11 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
+  const liveCaseUrl = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}evidence/workbench-case.json`
   const provider = useMemo(
-    () => createWorkbenchProvider(providerMode, { demoCaseId }),
-    [providerMode, demoCaseId],
+    () => createWorkbenchProvider(providerMode, { demoCaseId, url: liveCaseUrl }),
+    [providerMode, demoCaseId, liveCaseUrl],
   )
 
   const [state, dispatch] = useReducer(workbenchReducer, initialWorkbenchState)
@@ -43,8 +45,6 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const [compareIds, setCompareIds] = useState<string[]>([])
-
-  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
 
   function toggleCompare(id: string): void {
     setCompareIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -117,7 +117,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const claimBoundary =
     state.dataMode === 'demo'
       ? 'Demo case. Values are illustrative; the review decision is never inferred.'
-      : null
+      : 'Live case loaded from the published evidence path. Provenance and checksums describe the source only; the review decision and release readiness are never inferred.'
 
   return (
     <WorkbenchShell
