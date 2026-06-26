@@ -235,3 +235,18 @@
   .wb2-nav { flex-direction: row; flex-wrap: wrap; gap: 10px 16px; }
   .wb2-nav-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
 }
+
+
+
+/* Review draft editor (PR commercial-ux) */
+.wb2-review-auto { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.wb2-review-auto__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-review-draft { margin-top: 14px; border-top: 1px solid var(--wb2-border); padding-top: 12px; }
+.wb2-review-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.wb2-review-field__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-review-decisions { display: flex; gap: 8px; flex-wrap: wrap; }
+.wb2-review-decision { cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(148, 168, 190, 0.28); background: rgba(10, 18, 29, 0.6); color: #c3d2e0; }
+.wb2-review-decision.is-active { border-color: rgba(79, 183, 173, 0.6); background: rgba(79, 183, 173, 0.16); color: #c9f3ee; }
+.wb2-review-input, .wb2-review-textarea { font: inherit; font-size: 13px; color: var(--wb2-text); background: rgba(10, 18, 29, 0.6); border: 1px solid var(--wb2-border); border-radius: 9px; padding: 8px 10px; }
+.wb2-review-textarea { resize: vertical; min-height: 56px; }
+.wb2-review-meta { margin: 4px 0 6px; color: var(--wb2-dim); font-size: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }

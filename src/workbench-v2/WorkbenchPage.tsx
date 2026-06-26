@@ -167,7 +167,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
 
       {/* Decision: Review + Export */}
       <div id="wb2-sec-review" className="wb2-section">
-        <ReviewDecision dataMode={state.dataMode} />
+        <ReviewDecision dataMode={state.dataMode} sourceCommitSha={caseV2?.provenance.sourceCommitSha ?? null} />
       </div>
       <div id="wb2-sec-export" className="wb2-section">
         {caseV2 ? (

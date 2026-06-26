@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { WorkbenchCaseV2 } from '../model/caseSchema'
 import type { DataMode, RunStatus } from '../model/workbenchState'
+import { loadDraft } from '../model/reviewDraft'
 
 interface ExportPanelProps {
   caseV2: WorkbenchCaseV2
@@ -12,6 +13,7 @@ interface ExportPanelProps {
 
 export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId, convergenceAvailable }: ExportPanelProps): ReactElement {
   function exportBundle(): void {
+    const reviewerDraft = loadDraft(caseV2.provenance.sourceCommitSha)
     const bundle = {
       schema_version: 'workbench-v2-export.v1',
       data_mode: dataMode,
@@ -29,8 +31,11 @@ export function ExportPanel({ caseV2, dataMode, runStatus, selectedMemberId, con
       analysis: caseV2.analysis ?? null,
       residual_history: caseV2.residualHistory,
       selected_member_id: selectedMemberId,
+      // Human reviewer draft (not an automated verdict). Always present so the
+      // export is explicit about whether a person reviewed this snapshot.
+      reviewer_draft: reviewerDraft,
       claim_boundary:
-        'Workbench v2 export. Values reflect the attached case only and are not a validated verdict.',
+        'Workbench v2 export. Values reflect the attached case only and are not a validated verdict. reviewer_draft is a human note, not an automated result.',
     }
     const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
