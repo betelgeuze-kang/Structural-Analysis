@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-midas-exact-roundtrip-closure-gate",
-  "generated_at": "2026-04-11T13:03:10.567466+00:00",
+  "generated_at": "2026-06-23T16:20:29.413890+00:00",
   "contract_pass": true,
   "reason_code": "PASS",
   "reason": "MIDAS exact roundtrip closure is satisfied for the current evidence set",

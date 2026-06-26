@@ -1,0 +1,41 @@
+{
+  "case_id": "phase2_analytic_axial_bar",
+  "claim_boundary": "This verifies that the canonical axial linear_static preview uses R(u)=F_internal(u)-F_external with tangent dR/du equal to the assembled dense stiffness matrix, checked by finite-difference perturbations over free DOFs. It does not close general nonlinear Newton/Jacobian gates, frame/shell/material coupling, sparse production backends, or G1.",
+  "contract_pass": true,
+  "equilibrium_free_residual_inf_norm": 0.0,
+  "equilibrium_residual_gate_passed": true,
+  "fallback_used": false,
+  "finite_difference_epsilon": 1e-08,
+  "finite_difference_free_dof_count": 1,
+  "finite_difference_gate_passed": true,
+  "finite_difference_max_column_inf_norm_error": 3.1741365091875196e-07,
+  "finite_difference_rows": [
+    {
+      "column_inf_norm_error": 3.1741365091875196e-07,
+      "finite_difference_epsilon": 1e-08,
+      "free_dof_index": 3,
+      "pass": true
+    }
+  ],
+  "finite_difference_tolerance": 1e-06,
+  "free_dof_count": 1,
+  "free_dof_indices": [
+    3
+  ],
+  "g1_closure_claim": false,
+  "nonlinear_newton_closure_claim": false,
+  "regularization_used": false,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-linear-tangent-jacobian.v1",
+  "sparse_backend_used": false,
+  "status": "ready",
+  "stiffness_order": 6,
+  "stiffness_storage": "dense_numpy",
+  "tangent_equals_stiffness_gate_passed": true,
+  "tangent_equals_stiffness_inf_norm_error": 0.0,
+  "tangent_free_block_gate_passed": true,
+  "tangent_free_block_inf_norm_error": 0.0,
+  "tangent_jacobian_definition": "dR_du_equals_assembled_dense_stiffness",
+  "truth_class": "analytic_truth"
+}

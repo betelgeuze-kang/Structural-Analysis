@@ -1,0 +1,75 @@
+{
+  "base_url": "http://127.0.0.1:4173",
+  "blocked_workflow_steps": [
+    "import",
+    "model_health",
+    "analysis_setup",
+    "run_monitor",
+    "compare_report"
+  ],
+  "blocker": "preview_server_loopback_bind_permission_blocked",
+  "blocker_category": "environment_loopback_bind_permission",
+  "blocker_evidence": {
+    "address": "127.0.0.1",
+    "code": "EPERM",
+    "port": 4173,
+    "syscall": "listen"
+  },
+  "blocker_reason_code": "listen_eperm_127_0_0_1",
+  "browser_execution_passed": false,
+  "claim_boundary": "This receipt records an actual local attempt to run the Phase 5 task-based Playwright browser smoke. It proves browser execution only when the Playwright command exits 0 against a served app.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commands": {
+    "build": {
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-CMNzzxcX.css                            30.62 kB │ gzip:  5.72 kB\ndist/assets/index-CKuiw8XN.js                            283.22 kB │ gzip: 76.73 kB\n\n✓ built in 117ms\n"
+    },
+    "preview": {
+      "argv": [
+        "npm",
+        "run",
+        "preview",
+        "--",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "4173"
+      ],
+      "exit_code": 1,
+      "output_excerpt": "\n> structural-optimization-workbench@1.0.0 preview\n> vite preview --host 127.0.0.1 --port 4173\n\nerror when starting preview server:\nError: listen EPERM: operation not permitted 127.0.0.1:4173\n    at Server.setupListenHandle [as _listen2] (node:net:1886:21)\n    at listenInCluster (node:net:1965:12)\n    at doListen (node:net:2139:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:83:21) {\n  code: 'EPERM',\n  errno: -1,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 4173\n}\n"
+    }
+  },
+  "contract_pass": false,
+  "engine_version": "1.0.0",
+  "environment_blocker": true,
+  "executed_workflow_steps": [],
+  "failed_phase": "preview_server_start",
+  "generated_at": "2026-06-23T15:52:14.057211+00:00",
+  "input_checksums": {
+    "package.json": "sha256:ea041fe994a1088c476c8c1ecd459af578b19d19d40aca6307c6dd4471b31275",
+    "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:1dfdcffb5e47b96c817a52651daeae10b6994cf2d711e9b7f6654dafbf6c1ab9",
+    "src/App.tsx": "sha256:a7dbc97ef43c67e16df81332abda9e0988308f7e4936be8e829189839af5457d",
+    "src/workbench/DeveloperPreviewWorkflowPanel.tsx": "sha256:95bec3c0caaff2f23cdae2c4679eaac1a1a730b87a0fc53cafda320879b10c83",
+    "src/workbench/developerPreviewWorkflow.ts": "sha256:ce80e7fecdf8b7479fd19d78fa16501a318a98da35f068c09b9a1a5894831f96",
+    "src/workbench/developerPreviewWorkflow.worker.ts": "sha256:bb8a425a4c4239e8a21b1db459f058699390fd5cf8922e2a16259a05939de065",
+    "src/workbench/developerPreviewWorkflowState.ts": "sha256:99ad24d06f523d8c7b9586b48ea39b15ccbd6be9189a2dab6451df43a67bf17f",
+    "tests/frontend/developer-preview-workflow.spec.ts": "sha256:94f92ea6cfb5f2a529ebe915d7014f42a814f5dc78408e107f65154776bd9401"
+  },
+  "required_workflow_steps": [
+    "import",
+    "model_health",
+    "analysis_setup",
+    "run_monitor",
+    "compare_report"
+  ],
+  "schema_version": "phase5-task-based-ux-browser-execution.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "blocked",
+  "summary_line": "Phase 5 task-based UX browser execution: BLOCKED | phase=preview_server_start | blocker=preview_server_loopback_bind_permission_blocked",
+  "test_path": "tests/frontend/developer-preview-workflow.spec.ts"
+}

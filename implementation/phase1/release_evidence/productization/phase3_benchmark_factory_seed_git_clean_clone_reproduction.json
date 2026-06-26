@@ -1,0 +1,906 @@
+{
+  "blockers": [
+    "required_path_not_tracked:implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "required_path_has_uncommitted_changes:implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+  ],
+  "bundle_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+  "bundle_status": "present",
+  "claim_boundary": "This receipt is the authoritative Phase 3 seed git-clean-clone reproduction gate. When blocked, it proves the exact tracked/dirty-input reason a real clone cannot yet replay the seed benchmark artifacts from Git HEAD. When passing, it proves only a local git clone replay of generated analytic-small and element-patch seed artifacts. It is not Linux/Windows parity and does not prove Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, and is not full Phase 3 closure.",
+  "clone_checkout_path": "",
+  "command_results": [],
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "dirty_required_inputs": [
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+  ],
+  "expected_stable_artifact_checksums": {
+    "acquisition_plan": "sha256:810160cefeeeb1003c77195464c7922189f78b769dbcdd8e3cda71376e12e6f5",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:376fccdf1ceff69992c607f03db7432acf6da911940d2dc9487ee3d9373613c3",
+    "buildingsmart_ifc_acquisition_receipt": "sha256:0ea82738bbb0a226d89359f844f8d48c938504f73ee1e434d2840c1e644a351d",
+    "commercial_comparison_import_template": "sha256:ba291e7caf10e35a0984e071f347b3338a635f23909eed1df91b60bf55ac19de",
+    "commercial_operator_reference_contract": "sha256:d4b61ec4d9dfd02dad87e30f20c1d91ec1835d37ff61b6bcd14eba7e836b1bb9",
+    "commercial_operator_reference_ingest_validator": "sha256:a722879f5b1a04f83927752bae59bae0d3365c9c10bdd51b364a89c8746fb3df",
+    "ifc_import_health_execution_receipt": "sha256:719d381a33e90aaa9be7cdf2b3b15112963d0fc054463b8883089a2ee50de79d",
+    "ifc_source_license_receipt": "sha256:4efdc9baac2979b9db52d5ca19b4c8e39441b8e30bb168e60b0f01d9ade467ca",
+    "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "opensees_source_license_receipt": "sha256:67631ca950fef02a1de761a520ab4c3925514e6c3a4b0b72702961e860c9dfe6",
+    "phase4_analytic_physical_fallback_scorecard": "sha256:2ab12f6306ea4675b7e9e1399240941d9639077d265e37fb1d982dbc37f89acf",
+    "scorecard": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "summary": "sha256:fa35f887fb92dc26f2569a8a87d26505f56b0bfcda01171c73e0b9a86d38dacf"
+  },
+  "generated_at": "2026-06-23T15:13:51.528369+00:00",
+  "generated_stable_artifact_checksums": {},
+  "git_clean_clone_executed": false,
+  "git_clean_clone_execution_mode": "not_executed",
+  "git_clean_clone_preflight_pass": false,
+  "git_clean_clone_retained": false,
+  "input_checksums": {
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+    "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:50f8ae957a4f85f70cf6b59878c074cfb0775afe502ffc0ec2d501c96cf8cdd5",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:37efd478c0185e7f53d5d0752a74513e998e60663364e166f035dd806af4996e",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:5b45c28c969d4709a3b22f18db26fd261c784b24d996718fd15c823935371442",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "sha256:93acdfaf75567ba7154fc739d423bd8a9a1883eeaf7c103e8dc1afbae033e470",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "sha256:fb612e88bc196e0c323190da8a0d29f409286ff1c8748257e47ef5eceee0cf65",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:bb40495c2c238e68d1e3e48a48bdca7268396274541dc1ab3fa19079d0a2bc1d",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:f7f5c77ad60a40e60e00ad44a6eab44bb5b4dc37cd207086b4f68f74ee0f0bdc",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:e1c1352f10ecebb364adcbd59c3c7810f56c7312a5927036d39dd258c74e1a49",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:0794c18b128934b071b850520b0bf889d4af326aa88e3b0de5c8593a2025586c",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:a828738d864d2fed3ffb468fee4a9eb378bcd2227dc93ac23a6b55ac9c5f426c",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:9fce7814176185a9f50dab3df415132bff307738c0f2d6998736443426e3b96f",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json": "sha256:30cf01b10a1c1e09bb6f1a7fc6aa949267823a6cd59b6df4c7a619d790af5c31",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:16894c84bf1e9188b21c8ce3381febc0043bd8c7e76bc6732253a83747f9c631",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:6b80da9af8624eb49d612912680897616557d543e2aea1746cb4c26ca702ad24",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:3895c3f742a772eaa2a1c11782e644b50d247812d198a96c9db56e38f0eba1d7",
+    "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
+    "package.json": "sha256:ea041fe994a1088c476c8c1ecd459af578b19d19d40aca6307c6dd4471b31275",
+    "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
+    "pytest.ini": "sha256:b251283b2e87d8a8b757118132b72474ed6830eaedef788e86306577f802ef70",
+    "scripts/build_phase3_benchmark_acquisition_artifacts.py": "sha256:fb9eb8acfa53f410eec7959f767a328bee5705888066aa568dd2e2b21430c69b",
+    "scripts/build_phase3_benchmark_factory_artifacts.py": "sha256:dc9454578d730c6b24eaa8905a3d54a2d02491b59cd63cab6c4eecec6deea9aa",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:26dd5f0c966de200428b095d64882890a7597706b038cea473170b458f0eb48a",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "sha256:b6c47721aa4d13ad865c2d6232f64d8e5907f749623492f6a6925927ccf75d99",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:f233fdfacd8404a1a9af150ca842e71676ac315eb6a25c6f5d5075b16035cbb3",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "sha256:6a83ed03152c4a7a7390d53ac5018f83468e54211ec325dfa1e348e8bdbed170",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:e4ae1d205217a7eab994d1cfbf00579b55a386fbf7e2bec8cf6a1b7bdf608eda",
+    "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
+    "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "sha256:fa8d16def88ffb4da71236dfc3c8c86c1f30813b9328c4e76ceafea7b498f7fe",
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "sha256:500bbc5fe5a32797e47d6887e42b08f18213907f6ae07e2cadbf77cdb8f910db",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+    "scripts/phase3_benchmark_reproduction_contract.py": "sha256:8fc82a3e7b73bd3376d15aee5eb447f9b9d6edb4d0c28cd8850ee5bc82c314db",
+    "scripts/release_evidence_metadata.py": "sha256:dcbc7e57cbd00dce4e4044d873af9d2c665def1e85b5140ac101055a04f2260c",
+    "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:12738f46eebbf5bc954ee7a5c1f25322e043bfabf1fc53b6d141293c4b06a542",
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:023aeabb0c2b5217f740d673a5cb0483caa299d1ba2f122411636300f77d8a5c",
+    "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
+    "src/structural_analysis": "dir-sha256:654416e21d1513f2c66088a9c3b440b478875813c8d719ee4ec73bb55129eeef",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473",
+    "tests/test_build_phase3_benchmark_acquisition_artifacts.py": "sha256:e501c8cbbd3ed5a1c67e3208e5743270e69516ae416c6612f990229abc6aed7c",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py": "sha256:ed1837ca616cd9d9b52073e32becb47d354fee32f397715447f2835792592041",
+    "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:a0a13abbfbf2a65b3e0c2e7be711870a39ec78779af292ab296cd992b2e3decc",
+    "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:7ba6c10b82dcb5d1499ac9e2012dda12670e036676a54863fadc3066f74e5909",
+    "tests/test_build_phase3_ifc_import_health_execution_receipt.py": "sha256:6daa50edec2d0b11abdcec374fb700e9a6c0d529d0e68b22dbd53b1217f0cdba",
+    "tests/test_build_phase3_ifc_source_license_receipt.py": "sha256:bf30293ebb47f129f174c6a2a1d2c7f9e99a78d3a1247618b70a3b1c8eabf143",
+    "tests/test_build_phase3_opensees_source_license_receipt.py": "sha256:5d4e5012e79ed3ff9b3d9c15de0b43f512eb278e0a10925b472cb7ed1d671cfe",
+    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py": "sha256:c009cba7a88c34576f0ba46632b67d9d8e96d0bf572b23dfe189c7fe4b284f6d",
+    "tests/test_build_phase4_commercial_comparison_import_template.py": "sha256:0df6104047e571e55baa21a832deef486d60f1b3ab6bc03e6f91d6cf568be002",
+    "tests/test_build_phase4_commercial_operator_reference_contract.py": "sha256:4dc75aa4140e2a5b0bf9a29bfefc64002c6e818e2ca096fc76c7e3d7e52528b4",
+    "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:038359450481ec84a1d714eb8b1546c21d0958b620c430bfc6299ab17dbc39fc",
+    "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:877f87c1a757802c7928b4ee0fdff482e44bdbcd60504c0dfaf40880f9a1ce20",
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:db8da2d5e49d19824bffb9390fa48695b2d1b0a618c0663bd8495667e43b136b",
+    "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "sha256:01baf1908f4460e1249574459aefb2014168b4aabd82abc1055963fc7cfea3d9",
+    "tests/test_structure_viewer_explainability_report_contract.py": "sha256:8eb32cc892762d1962852f86aa6311ffd0136b298e6951c2375750971f6f6d3a"
+  },
+  "phase3_closure_claim": false,
+  "preflight_action_summary": {
+    "can_replay_from_git_head_without_local_worktree": false,
+    "next_action": "track_or_commit_required_inputs_then_rerun",
+    "required_commit_or_add_path_count": 1,
+    "required_commit_or_add_path_roles": [
+      {
+        "path": "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+        "role": "source_input_report"
+      }
+    ],
+    "required_commit_or_add_paths": [
+      "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+    ],
+    "required_commit_or_add_role_counts": {
+      "source_input_report": 1
+    },
+    "required_dirty_tracked_path_count": 13,
+    "required_dirty_tracked_path_roles": [
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+        "role": "generated_productization_evidence"
+      },
+      {
+        "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+        "role": "generated_productization_evidence"
+      }
+    ],
+    "required_dirty_tracked_paths": [
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+    ],
+    "required_dirty_tracked_role_counts": {
+      "generated_productization_evidence": 13
+    }
+  },
+  "release_control_cleanup_plan": {
+    "blocker_summary_by_role": {
+      "focused_test": {
+        "blocker_count": 0,
+        "dirty_paths": [],
+        "untracked_or_missing_paths": []
+      },
+      "generated_productization_evidence": {
+        "blocker_count": 13,
+        "dirty_paths": [
+          "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+          "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+          "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+          "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+          "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+          "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+          "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+          "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+          "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+        ],
+        "untracked_or_missing_paths": []
+      },
+      "package_config_core_package": {
+        "blocker_count": 0,
+        "dirty_paths": [],
+        "untracked_or_missing_paths": []
+      },
+      "reproduction_build_script": {
+        "blocker_count": 0,
+        "dirty_paths": [],
+        "untracked_or_missing_paths": []
+      },
+      "source_input_report": {
+        "blocker_count": 1,
+        "dirty_paths": [],
+        "untracked_or_missing_paths": [
+          "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+        ]
+      },
+      "viewer_gui_traceability_contract": {
+        "blocker_count": 0,
+        "dirty_paths": [],
+        "untracked_or_missing_paths": []
+      }
+    },
+    "candidate_release_control_commit_set": [
+      "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+    ],
+    "candidate_release_control_commit_set_count": 14,
+    "claim_boundary": "This plan identifies local Git cleanup needed before the Phase 3 seed artifacts can replay from a real Git HEAD clone. Codex did not commit, push, release, or promote readiness. The gate remains blocked until every required input is tracked and clean in Git.",
+    "codex_commit_or_push_performed": false,
+    "git_clean_clone_gate_can_pass_after_cleanup": false,
+    "human_git_action_required": true,
+    "next_verification_commands": [
+      "python3 scripts/build_phase3_benchmark_factory_artifacts.py --check",
+      "python3 scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py --check",
+      "python3 scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py --check"
+    ],
+    "resolve_or_commit_dirty_tracked_paths": [
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+      "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+      "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+    ],
+    "status": "blocked",
+    "track_or_add_required_paths": [
+      "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+    ]
+  },
+  "replay_source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "required_git_clean_clone_inputs": [
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "implementation/phase1/opensees_topology_report.json",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json",
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+    "implementation/phase1/report_commercial_solver_cross_validation.py",
+    "package.json",
+    "pyproject.toml",
+    "pytest.ini",
+    "scripts/build_phase3_benchmark_acquisition_artifacts.py",
+    "scripts/build_phase3_benchmark_factory_artifacts.py",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py",
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
+    "scripts/build_phase3_ifc_source_license_receipt.py",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+    "scripts/build_phase3_opensees_source_license_receipt.py",
+    "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+    "scripts/build_phase4_commercial_comparison_import_template.py",
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
+    "scripts/build_phase4_commercial_operator_reference_contract.py",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
+    "scripts/phase3_benchmark_reproduction_contract.py",
+    "scripts/release_evidence_metadata.py",
+    "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
+    "setup.cfg",
+    "src/structural_analysis",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js",
+    "src/structure-viewer/viewer-report-export.js",
+    "tests/test_build_phase3_benchmark_acquisition_artifacts.py",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py",
+    "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
+    "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py",
+    "tests/test_build_phase3_ifc_import_health_execution_receipt.py",
+    "tests/test_build_phase3_ifc_source_license_receipt.py",
+    "tests/test_build_phase3_opensees_source_license_receipt.py",
+    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
+    "tests/test_build_phase4_commercial_comparison_import_template.py",
+    "tests/test_build_phase4_commercial_operator_reference_contract.py",
+    "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
+    "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py",
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
+    "tests/test_structural_analysis_benchmark_cli.py",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
+    "tests/test_structure_viewer_explainability_report_contract.py"
+  ],
+  "required_input_git_status": {
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": {
+      "path_role": "source_input_report",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": {
+      "path_role": "source_input_report",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/opensees_topology_report.json": {
+      "path_role": "source_input_report",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": {
+      "path_role": "source_input_report",
+      "status_short": [],
+      "tracked": false
+    },
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": {
+      "path_role": "generated_productization_evidence",
+      "status_short": [
+        " M implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+      ],
+      "tracked": true
+    },
+    "implementation/phase1/report_commercial_solver_cross_validation.py": {
+      "path_role": "source_input_report",
+      "status_short": [],
+      "tracked": true
+    },
+    "package.json": {
+      "path_role": "package_config_core_package",
+      "status_short": [],
+      "tracked": true
+    },
+    "pyproject.toml": {
+      "path_role": "package_config_core_package",
+      "status_short": [],
+      "tracked": true
+    },
+    "pytest.ini": {
+      "path_role": "package_config_core_package",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_benchmark_acquisition_artifacts.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_benchmark_factory_artifacts.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_ifc_source_license_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase3_opensees_source_license_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase4_analytic_physical_fallback_scorecard.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase4_commercial_comparison_import_template.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase4_commercial_operator_reference_contract.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/phase3_benchmark_reproduction_contract.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/release_evidence_metadata.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": {
+      "path_role": "reproduction_build_script",
+      "status_short": [],
+      "tracked": true
+    },
+    "setup.cfg": {
+      "path_role": "package_config_core_package",
+      "status_short": [],
+      "tracked": true
+    },
+    "src/structural_analysis": {
+      "path_role": "package_config_core_package",
+      "status_short": [],
+      "tracked": true
+    },
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": {
+      "path_role": "viewer_gui_traceability_contract",
+      "status_short": [],
+      "tracked": true
+    },
+    "src/structure-viewer/viewer-report-export.js": {
+      "path_role": "viewer_gui_traceability_contract",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_benchmark_acquisition_artifacts.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_benchmark_factory_artifacts.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_ifc_import_health_execution_receipt.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_ifc_source_license_receipt.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase3_opensees_source_license_receipt.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase4_commercial_comparison_import_template.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase4_commercial_operator_reference_contract.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_structural_analysis_benchmark_cli.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    },
+    "tests/test_structure_viewer_explainability_report_contract.py": {
+      "path_role": "focused_test",
+      "status_short": [],
+      "tracked": true
+    }
+  },
+  "required_input_path_roles": {
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "source_input_report",
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "source_input_report",
+    "implementation/phase1/opensees_topology_report.json": "source_input_report",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "source_input_report",
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "generated_productization_evidence",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "generated_productization_evidence",
+    "implementation/phase1/report_commercial_solver_cross_validation.py": "source_input_report",
+    "package.json": "package_config_core_package",
+    "pyproject.toml": "package_config_core_package",
+    "pytest.ini": "package_config_core_package",
+    "scripts/build_phase3_benchmark_acquisition_artifacts.py": "reproduction_build_script",
+    "scripts/build_phase3_benchmark_factory_artifacts.py": "reproduction_build_script",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "reproduction_build_script",
+    "scripts/build_phase3_opensees_source_license_receipt.py": "reproduction_build_script",
+    "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "reproduction_build_script",
+    "scripts/build_phase4_commercial_comparison_import_template.py": "reproduction_build_script",
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "reproduction_build_script",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "reproduction_build_script",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "reproduction_build_script",
+    "scripts/phase3_benchmark_reproduction_contract.py": "reproduction_build_script",
+    "scripts/release_evidence_metadata.py": "reproduction_build_script",
+    "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": "reproduction_build_script",
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "reproduction_build_script",
+    "setup.cfg": "package_config_core_package",
+    "src/structural_analysis": "package_config_core_package",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "viewer_gui_traceability_contract",
+    "src/structure-viewer/viewer-report-export.js": "viewer_gui_traceability_contract",
+    "tests/test_build_phase3_benchmark_acquisition_artifacts.py": "focused_test",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py": "focused_test",
+    "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "focused_test",
+    "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": "focused_test",
+    "tests/test_build_phase3_ifc_import_health_execution_receipt.py": "focused_test",
+    "tests/test_build_phase3_ifc_source_license_receipt.py": "focused_test",
+    "tests/test_build_phase3_opensees_source_license_receipt.py": "focused_test",
+    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py": "focused_test",
+    "tests/test_build_phase4_commercial_comparison_import_template.py": "focused_test",
+    "tests/test_build_phase4_commercial_operator_reference_contract.py": "focused_test",
+    "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py": "focused_test",
+    "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py": "focused_test",
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "focused_test",
+    "tests/test_structural_analysis_benchmark_cli.py": "focused_test",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "focused_test",
+    "tests/test_structure_viewer_explainability_report_contract.py": "focused_test"
+  },
+  "required_path_blocker_summary_by_role": {
+    "focused_test": {
+      "blocker_count": 0,
+      "dirty_paths": [],
+      "untracked_or_missing_paths": []
+    },
+    "generated_productization_evidence": {
+      "blocker_count": 13,
+      "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+        "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+        "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+        "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+        "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json"
+      ],
+      "untracked_or_missing_paths": []
+    },
+    "package_config_core_package": {
+      "blocker_count": 0,
+      "dirty_paths": [],
+      "untracked_or_missing_paths": []
+    },
+    "reproduction_build_script": {
+      "blocker_count": 0,
+      "dirty_paths": [],
+      "untracked_or_missing_paths": []
+    },
+    "source_input_report": {
+      "blocker_count": 1,
+      "dirty_paths": [],
+      "untracked_or_missing_paths": [
+        "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+      ]
+    },
+    "viewer_gui_traceability_contract": {
+      "blocker_count": 0,
+      "dirty_paths": [],
+      "untracked_or_missing_paths": []
+    }
+  },
+  "schema_version": "phase3-benchmark-factory-git-clean-clone-reproduction.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_repo_path": "/home/betelgeuze/건축구조분석",
+  "stable_artifact_checksums_match": false,
+  "status": "blocked",
+  "tracked_required_inputs": [
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "implementation/phase1/opensees_topology_report.json",
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+    "implementation/phase1/report_commercial_solver_cross_validation.py",
+    "package.json",
+    "pyproject.toml",
+    "pytest.ini",
+    "scripts/build_phase3_benchmark_acquisition_artifacts.py",
+    "scripts/build_phase3_benchmark_factory_artifacts.py",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py",
+    "scripts/build_phase3_ifc_query_gui_readiness_receipt.py",
+    "scripts/build_phase3_ifc_source_license_receipt.py",
+    "scripts/build_phase3_large_model_runner_readiness_receipt.py",
+    "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
+    "scripts/build_phase3_opensees_source_license_receipt.py",
+    "scripts/build_phase4_analytic_physical_fallback_scorecard.py",
+    "scripts/build_phase4_commercial_comparison_import_template.py",
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py",
+    "scripts/build_phase4_commercial_operator_reference_contract.py",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
+    "scripts/phase3_benchmark_reproduction_contract.py",
+    "scripts/release_evidence_metadata.py",
+    "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py",
+    "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
+    "setup.cfg",
+    "src/structural_analysis",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js",
+    "src/structure-viewer/viewer-report-export.js",
+    "tests/test_build_phase3_benchmark_acquisition_artifacts.py",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py",
+    "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py",
+    "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py",
+    "tests/test_build_phase3_ifc_import_health_execution_receipt.py",
+    "tests/test_build_phase3_ifc_source_license_receipt.py",
+    "tests/test_build_phase3_opensees_source_license_receipt.py",
+    "tests/test_build_phase4_analytic_physical_fallback_scorecard.py",
+    "tests/test_build_phase4_commercial_comparison_import_template.py",
+    "tests/test_build_phase4_commercial_operator_reference_contract.py",
+    "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py",
+    "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py",
+    "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py",
+    "tests/test_structural_analysis_benchmark_cli.py",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
+    "tests/test_structure_viewer_explainability_report_contract.py"
+  ],
+  "untracked_or_missing_required_inputs": [
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
+  ]
+}

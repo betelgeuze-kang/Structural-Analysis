@@ -1,0 +1,45 @@
+{
+  "api_config_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "api_config_solver": "phase2_linear_reference_sparse_api",
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "consistent_tangent_jacobian_newton_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "mesh_load_step_convergence_suite_not_closed",
+    "sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed"
+  ],
+  "canonical_api_sparse_route_used": true,
+  "case_id": "phase2_analytic_axial_bar",
+  "claim_boundary": "This verifies a deterministic scipy CSR assembly and scipy.sparse.linalg.spsolve CPU backend for the canonical axial linear_static preview, with dense-vs-sparse displacement/reaction/residual equivalence on the analytic single-bar reference. It does not close general frame/shell/material coupling, full-mesh/full-load nonlinear equilibrium, production sparse matrix backends, ROCm/HIP parity, or G1.",
+  "contract_pass": true,
+  "dense_energy_balance_error": 0.0,
+  "dense_matrix_backend": "numpy_linalg_solve_dense",
+  "dense_relative_residual": 0.0,
+  "dense_sparse_backend_used": false,
+  "dense_stiffness_storage": "dense_numpy",
+  "displacement_inf_norm_error": 0.0,
+  "equivalence_gate_passed": true,
+  "fallback_used": false,
+  "g1_closure_claim": false,
+  "reaction_inf_norm_error": 0.0,
+  "regularization_used": false,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_inf_norm_error": 0.0,
+  "schema_version": "phase2-linear-sparse-backend-seed.v1",
+  "sparse_backend_used": true,
+  "sparse_energy_balance_error": 0.0,
+  "sparse_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "sparse_mechanism_blocked_without_regularization": true,
+  "sparse_mechanism_unsupported_kinds": [
+    "linear_static_singular_stiffness"
+  ],
+  "sparse_relative_residual": 0.0,
+  "sparse_rigid_body_blocked_without_regularization": true,
+  "sparse_rigid_body_unsupported_kinds": [
+    "linear_static_singular_stiffness"
+  ],
+  "sparse_stiffness_storage": "scipy_sparse_csr",
+  "status": "ready",
+  "truth_class": "analytic_truth"
+}

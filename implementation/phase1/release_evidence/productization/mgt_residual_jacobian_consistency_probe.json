@@ -1,7 +1,7 @@
 {
   "schema_version": "mgt-residual-jacobian-consistency-probe.v1",
-  "generated_at": "2026-06-21T07:04:00.778548+00:00",
-  "source_commit_sha": "0b1397bff7f4f8b354a1dd62a4134069923f6746",
+  "generated_at": "2026-06-22T16:12:12.953438+00:00",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "reused_evidence": false,
   "status": "partial",
@@ -10,7 +10,7 @@
   "consistent_residual_jacobian_newton_gate_passed": false,
   "rocm_hip_required": false,
   "rocm_hip_runtime_preflight": {
-    "checked_at": "2026-06-21T07:04:00.778548+00:00",
+    "checked_at": "2026-06-22T16:12:12.953438+00:00",
     "hip_available": false,
     "hip_required": false,
     "unavailable_reason": "not_required_for_legacy_cpu_diagnostic"
@@ -7724,9 +7724,9 @@
     }
   },
   "runtime_metrics": {
-    "setup_and_reference_seconds": 15.935551751004823,
-    "base_assembly_seconds": 11.585982577998948,
-    "total_seconds": 37.790957682002045
+    "setup_and_reference_seconds": 16.075423305000186,
+    "base_assembly_seconds": 11.589511786999992,
+    "total_seconds": 37.98653741099997
   },
   "claim_boundary": "Full-model diagnostic comparing assembled tangent K*d against finite-difference physical residual action dR/du*d. This is not a nonlinear equilibrium closure. The production ROCm/HIP residual-Jacobian proof remains false unless explicitly reported by the consistent_residual_jacobian_newton_* fields.",
   "blockers": [

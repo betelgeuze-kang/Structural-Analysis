@@ -457,8 +457,10 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
                     "cursor_worker_cli": "cursor-agent",
                     "opencode_worker_cli": "opencode",
                     "opencode_version": "1.17.7",
-                    "opencode_configured_model": "opencode-go/minimax-m3",
+                    "opencode_configured_model": "opencode-go/deepseek-v4-pro",
                     "opencode_configured_model_available": True,
+                    "opencode_assignment_routed_to_cursor": True,
+                    "opencode_assignment_cursor_model": "composer-2.5",
                 },
             },
         ),
@@ -833,9 +835,11 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     assert (
         payload["implementation_orchestration"]["summary"]["opencode_configured_model"]
-        == "opencode-go/minimax-m3"
+        == "opencode-go/deepseek-v4-pro"
     )
     assert payload["implementation_orchestration"]["summary"]["opencode_configured_model_available"] is True
+    assert payload["implementation_orchestration"]["summary"]["opencode_assignment_routed_to_cursor"] is True
+    assert payload["implementation_orchestration"]["summary"]["opencode_assignment_cursor_model"] == "composer-2.5"
     assert payload["gap_ledger_status"]["full_gap_ledger_status"] == "open"
     assert payload["gap_ledger_status"]["commercial_gap_status"] == "open"
     assert payload["gap_ledger_status"]["commercial_solver_gap_ready"] is False

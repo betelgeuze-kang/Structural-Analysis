@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-23T16:20:29.486297+00:00",
+  "input_checksums": {
+    "implementation/phase1/midas_interoperability_gate_report.json": "sha256:bda3e63af56bb0097cce32db2d1581d77f01ec37c9b7a2cb3e182de85f690714",
+    "implementation/phase1/midas_native_roundtrip_gate_report.json": "sha256:e8b9d0aed4c80aa531ff51a451dcd3f5053f0447ac3f7fe67035b412f50c4a2f",
+    "implementation/phase1/open_data/midas/midas_native_corpus_manifest.json": "sha256:9abc57b3a158376414e0fc22c7e191f5a371e37bf16c77acdb005c03266f3789",
+    "implementation/phase1/release/midas_native_roundtrip/midas_native_writeback_diff_receipts_report.json": "sha256:e8bae96dbc05c57ff72ae46c73ab2fe2c05b1c013edfab6419a225d825e5319f",
+    "implementation/phase1/run_midas_exact_roundtrip_closure_gate.py": "sha256:86db8effcca4438f73b1651885a7b8104fe6023db4f0531c559bc56e97e5d4a5"
+  },
+  "lane_id": "midas_exact_refresh",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "midas_exact_roundtrip_closure_gate",
+      "path": "implementation/phase1/release_evidence/midas/midas_exact_roundtrip_closure_gate_report.json",
+      "sha256": "sha256:be1e47421e1b7f60b70d0b682a62c378616814b57a148a612872507c7ffaf740"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "midas_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "summary": {
+    "case_count": 33,
+    "duration_seconds": 0.970088,
+    "passed_case_count": 33
+  },
+  "validation_command": "python3 implementation/phase1/run_midas_exact_roundtrip_closure_gate.py --out implementation/phase1/release_evidence/midas/midas_exact_roundtrip_closure_gate_report.json"
+}

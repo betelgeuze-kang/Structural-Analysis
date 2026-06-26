@@ -54,7 +54,7 @@
       "status": "ready"
     }
   ],
-  "generated_at": "2026-06-21T09:25:09.511238+00:00",
+  "generated_at": "2026-06-22T16:11:10.961192+00:00",
   "input_checksums": {
     "implementation/phase1/open_data_external_artifacts_manifest.json": "sha256:b8144a8e22fb7d91cb846113ce56e834b2505853697795db24e3c9d9dc344d14",
     "implementation/phase1/peer_tbi_benchmark_metric_records.json": "sha256:1684f9871aea7651232875e3d5abbe8ef97308814846af36ef41a362c15905b6",
@@ -71,6 +71,6 @@
   "reuse_policy": "status_rebuilt_from_existing_p0_open_data_parser_peer_and_row_provenance_receipts",
   "reused_evidence": true,
   "schema_version": "p1-readiness-status.v1",
-  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "status": "ready"
 }

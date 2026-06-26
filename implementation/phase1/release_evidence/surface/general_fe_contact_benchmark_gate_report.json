@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-general-fe-contact-benchmark-gate",
-  "generated_at": "2026-04-12T09:17:54.060139+00:00",
+  "generated_at": "2026-06-23T16:39:45.916255+00:00",
   "inputs": {
     "structural_contact_validation_report": "implementation/phase1/structural_contact_validation_report.json",
     "structural_contact_gate_report": "implementation/phase1/structural_contact_gate_report.json",
@@ -9,12 +9,12 @@
     "ssi_boundary_report": "implementation/phase1/ssi_boundary_gate_report.json",
     "substructuring_interface_report": "implementation/phase1/substructuring_interface_report.json",
     "soil_tunnel_ssi_report": "implementation/phase1/soil_tunnel_ssi_report.json",
-    "out": "implementation/phase1/general_fe_contact_benchmark_gate_report.json",
+    "out": "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
     "input_sha256": {
       "structural_contact_validation_report": "8ddc1ff52301ce17555e13c23e8ee07838662c2c720594a1093d34f07bcbbbd0",
       "structural_contact_gate_report": "98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
       "foundation_soil_link_gate_report": "bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
-      "ssi_boundary_report": "92bab8ccac2cf33f69e6aacc4deab88819820050e6fa17465c425f139b8997bd",
+      "ssi_boundary_report": "b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
       "substructuring_interface_report": "33c2e204ab58bf080fd00f2576893fabe88157c18ccb989c5a6cb569b5575fd3",
       "soil_tunnel_ssi_report": "b1abbc822d8e5628afaf9bc8578b84615cd79f3a1768eca0683feb1c8b7d74ca"
     }

@@ -1,17 +1,17 @@
 {
   "schema_version": "ai-engine-productization-contracts.v1",
-  "generated_at": "2026-06-18T15:01:37.002051+00:00",
+  "generated_at": "2026-06-23T14:58:45.432710+00:00",
   "status": "production_ai_ready",
   "contracts_ready": true,
   "production_ai_ready": true,
   "blockers": [],
   "artifacts": {
-    "ai_model_registry": "implementation/phase1/release_evidence/productization/ai_model_registry.json",
-    "ai_physics_guard_contract": "implementation/phase1/release_evidence/productization/ai_physics_guard_contract.json",
-    "ai_inference_runtime_receipt": "implementation/phase1/release_evidence/productization/ai_inference_runtime_receipt.json",
-    "ai_safety_governance_contract": "implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json",
-    "ai_decision_trace_contract": "implementation/phase1/release_evidence/productization/ai_decision_trace_contract.json",
-    "ai_review_queue_contract": "implementation/phase1/release_evidence/productization/ai_review_queue_contract.json"
+    "ai_model_registry": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_model_registry.json",
+    "ai_physics_guard_contract": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_physics_guard_contract.json",
+    "ai_inference_runtime_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_inference_runtime_receipt.json",
+    "ai_safety_governance_contract": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_safety_governance_contract.json",
+    "ai_decision_trace_contract": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_decision_trace_contract.json",
+    "ai_review_queue_contract": "/home/betelgeuze/건축구조분석/implementation/phase1/release_evidence/productization/ai_review_queue_contract.json"
   },
   "summary": {
     "model_registry_status": "production_model_ready",

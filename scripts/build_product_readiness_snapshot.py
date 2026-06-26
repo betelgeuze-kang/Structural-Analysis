@@ -24,6 +24,10 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "product_readiness_snapshot.json"
 SCHEMA_VERSION = "product-readiness-snapshot.v1"
+PM_RELEASE_UX_DUPLICATE_WRAPPERS = {
+    "ux::human_new_user_observation_missing_or_failed",
+    "ux::human_new_user_30min_sample_evidence_missing",
+}
 
 
 def _load_runner_policy_checker():
@@ -48,6 +52,11 @@ class SnapshotInputPaths:
     current_state: Path = Path("docs/commercialization-gap-current-state.md")
     pm_report: Path = PRODUCTIZATION / "pm_release_gate_report.json"
     gap_closure_status: Path = PRODUCTIZATION / "gap_closure_status.json"
+    commercial_gap_ledger_status: Path = PRODUCTIZATION / "commercial_gap_ledger_status.json"
+    gap_ledger_evidence_audit: Path = PRODUCTIZATION / "gap_ledger_evidence_audit.json"
+    phase1_core_api_contract: Path = PRODUCTIZATION / "phase1_core_api_contract_summary.json"
+    developer_preview_readiness: Path = PRODUCTIZATION / "developer_preview_readiness.json"
+    developer_preview_rc_status: Path = PRODUCTIZATION / "developer_preview_rc_status.json"
     fresh_full_validation: Path = PRODUCTIZATION / "fresh_full_validation_lane_status.json"
     g1_terminal_gate: Path = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
     g1_full_load_hip_newton_lane: Path = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
@@ -58,12 +67,14 @@ class SnapshotInputPaths:
     github_actions_ci_streak: Path = PRODUCTIZATION / "github_actions_ci_streak_evidence.json"
     ux_new_user_observation: Path = PRODUCTIZATION / "ux_new_user_observation_report.json"
     license_status_closure: Path = PRODUCTIZATION / "license_status_closure_report.json"
+    paid_pilot_scope_guard: Path = PRODUCTIZATION / "paid_pilot_scope_guard_report.json"
     external_benchmark_submission_readiness: Path = (
         Path("implementation/phase1/release/external_benchmark_submission_readiness.json")
     )
     external_benchmark_submission_updates: Path = (
         PRODUCTIZATION / "external_benchmark_submission_updates.json"
     )
+    phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
     self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
     pyproject_toml: Path = Path("pyproject.toml")
@@ -187,6 +198,11 @@ def _receipt_commit_allowed_paths(
         "current_state",
         "pm_report",
         "gap_closure_status",
+        "commercial_gap_ledger_status",
+        "gap_ledger_evidence_audit",
+        "phase1_core_api_contract",
+        "developer_preview_readiness",
+        "developer_preview_rc_status",
         "fresh_full_validation",
         "g1_terminal_gate",
         "g1_full_load_hip_newton_lane",
@@ -197,8 +213,10 @@ def _receipt_commit_allowed_paths(
         "github_actions_ci_streak",
         "ux_new_user_observation",
         "license_status_closure",
+        "paid_pilot_scope_guard",
         "external_benchmark_submission_readiness",
         "external_benchmark_submission_updates",
+        "phase3_release_control_cleanup_plan",
         "self_hosted_runner_status",
     }
     return {
@@ -352,6 +370,16 @@ def _metadata_rows(
     for name, payload in artifacts.items():
         source_commit = payload.get("source_commit_sha")
         generated_at = payload.get("generated_at")
+        input_checksum = _first_present(
+            payload,
+            (
+                "input_checksum",
+                "input_checksums",
+                "input_sha256",
+                "input_artifact_checksum",
+                "source_checksum",
+            ),
+        )
         source_state_fresh, source_state_kind, changed_paths = _source_state_freshness(
             repo_root=repo_root,
             source_commit=source_commit,
@@ -364,6 +392,7 @@ def _metadata_rows(
             "generated_at": generated_at,
             "source_commit_sha": source_commit,
             "reused_evidence": payload.get("reused_evidence"),
+            "input_checksum_present": _truthy_presence(input_checksum),
             "source_commit_matches_head": bool(_commit_matches(source_commit, current_commit)),
             "source_state_fresh": source_state_fresh,
             "source_state_kind": source_state_kind,
@@ -372,6 +401,23 @@ def _metadata_rows(
         }
         rows.append(row)
     return rows
+
+
+def _first_present(payload: dict[str, Any], keys: tuple[str, ...]) -> Any:
+    for key in keys:
+        if key in payload:
+            return payload.get(key)
+    return None
+
+
+def _truthy_presence(value: Any) -> bool:
+    if value is None or value is False:
+        return False
+    if isinstance(value, str):
+        return bool(value.strip())
+    if isinstance(value, (list, tuple, set, dict)):
+        return bool(value)
+    return True
 
 
 def _schema_version_blockers(artifacts: dict[str, dict[str, Any]]) -> list[str]:
@@ -589,6 +635,553 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     }
 
 
+def _g1_blocker_grouping_metadata(
+    *,
+    top_level_blockers: list[str],
+    suppressed_detail_blockers: list[str],
+) -> dict[str, Any]:
+    root_groups = [
+        {
+            "root_blocker": "g1::full_load_gate_not_closed",
+            "closure_dimension": "cpu_full_load_1_0_residual_increment_gate",
+            "representative_detail_prefixes": (
+                "g1_full_load_lane::checkpoint_load_scale_below_required_full_load",
+                "g1_full_load_lane::child_full_load_closure_not_proven",
+                "g1_full_load_lane::child_observed_load_scale_below_required_full_load",
+                "g1_full_load_lane::full_load_input_not_pass",
+                "g1_full_load_lane::observed_load_scale_below_required_full_load",
+            ),
+        },
+        {
+            "root_blocker": "g1::full_mesh_nonlinear_equilibrium_not_closed",
+            "closure_dimension": "cpu_full_mesh_full_building_nonlinear_equilibrium",
+            "representative_detail_prefixes": (
+                "g1_full_mesh_full_load_not_closed",
+                "g1_full_load_lane::child_direct_residual_gate_not_proven",
+                "g1_full_load_lane::child_relative_increment_gate_not_proven",
+                "g1_full_load_lane::child_direct_residual_newton_ready_not_proven",
+            ),
+        },
+        {
+            "root_blocker": "g1::material_newton_breadth_not_closed",
+            "closure_dimension": "cpu_material_newton_consistent_residual_jacobian",
+            "representative_detail_prefixes": (
+                "g1_full_load_lane::child_consistent_residual_jacobian_newton_not_proven",
+                "g1_full_load_lane::child_material_newton_breadth_not_proven",
+                "g1_full_load_lane::child_fallback_zero_not_proven",
+            ),
+        },
+        {
+            "root_blocker": "g1::production_rocm_hip_residency_not_closed",
+            "closure_dimension": "gpu_hip_followup_performance_and_residency",
+            "representative_detail_prefixes": (
+                "g1_full_load_lane::child_global_krylov_component_missing",
+                "g1_full_load_lane::child_current_tangent_residual_row_component_missing",
+                "g1_full_load_lane::hip_consistency_proof",
+                "g1_full_load_lane::matrix_free_global_krylov",
+                "g1_full_load_lane::current_tangent_residual_row_correction",
+            ),
+        },
+    ]
+    active_root_blockers = set(top_level_blockers)
+    detail_by_root: dict[str, list[str]] = {group["root_blocker"]: [] for group in root_groups}
+    unmatched_details: list[str] = []
+    for detail in suppressed_detail_blockers:
+        matched_root = ""
+        for group in root_groups:
+            prefixes = tuple(group["representative_detail_prefixes"])
+            if any(detail.startswith(prefix) for prefix in prefixes):
+                matched_root = str(group["root_blocker"])
+                detail_by_root[matched_root].append(detail)
+                break
+        if not matched_root:
+            unmatched_details.append(detail)
+    return {
+        "grouping_policy": (
+            "G1 receipt/lane blockers are grouped under claim-dimension root blockers "
+            "to avoid duplicate root status rows. Suppressed details remain visible, "
+            "counted, and non-promoting."
+        ),
+        "root_blocker_count": len(top_level_blockers),
+        "suppressed_detail_blocker_count": len(suppressed_detail_blockers),
+        "detail_blockers_remain_visible": True,
+        "grouping_promotes_status": False,
+        "detail_blocker_represented_by_root_group": {
+            detail: root
+            for root, details in detail_by_root.items()
+            for detail in details
+        },
+        "unmatched_detail_blockers": unmatched_details,
+        "root_groups": [
+            {
+                "root_blocker": group["root_blocker"],
+                "active": group["root_blocker"] in active_root_blockers,
+                "closure_dimension": group["closure_dimension"],
+                "represented_detail_blocker_count": len(
+                    detail_by_root[str(group["root_blocker"])]
+                ),
+            }
+            for group in root_groups
+        ],
+    }
+
+
+def _g1_closure_boundary_metadata(
+    *,
+    g1_full_mesh_ready: bool,
+    g1_full_load_lane_ready: bool,
+    g1_lane_child_gate_ready: bool,
+    g1_lane_hip_consistency_proof: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "cpu_first_closure_scope": [
+            "full_load_1_0",
+            "full_mesh_full_building_nonlinear_equilibrium",
+            "direct_residual_and_relative_increment_gates",
+            "state_updated_material_newton_breadth",
+            "consistent_residual_jacobian_newton",
+            "fallback_zero_or_fully_traced_degraded_state",
+        ],
+        "gpu_hip_followup_scope": [
+            "production_rocm_hip_residual_jacobian_path",
+            "device_residency",
+            "performance_scale",
+            "cpu_gpu_parity_after_cpu_solver_gates",
+        ],
+        "claim_boundary": (
+            "CPU full-load/full-mesh/material Newton closure is the numerical "
+            "priority gate. GPU/HIP evidence is required for production residency, "
+            "performance, and parity, but it does not replace CPU parity or close "
+            "full G1 while the CPU numerical gates remain open."
+        ),
+        "gpu_hip_replaces_cpu_parity": False,
+        "cpu_parity_required_before_gpu_performance_promotion": True,
+        "metadata_promotes_status": False,
+        "current_gate_state": {
+            "full_mesh_full_load_ready": g1_full_mesh_ready,
+            "full_load_hip_newton_lane_ready": g1_full_load_lane_ready,
+            "child_cpu_gate_ready": g1_lane_child_gate_ready,
+            "hip_consistency_proof_ready": bool(
+                g1_lane_hip_consistency_proof.get("ready")
+            ),
+        },
+    }
+
+
+def _workstation_delivery_summary(workstation: dict[str, Any]) -> dict[str, Any]:
+    gates = [row for row in _as_list(workstation.get("gates")) if isinstance(row, dict)]
+    passed_gate_count = sum(1 for row in gates if row.get("ok") is True)
+    delivery_package = next(
+        (
+            row
+            for row in gates
+            if str(row.get("label", "")).lower() == "delivery package manifest"
+        ),
+        {},
+    )
+    required_sections = _as_dict(delivery_package.get("required_sections"))
+    claim_boundary = _as_dict(workstation.get("claim_boundary"))
+    forbidden = [str(item).lower() for item in _as_list(claim_boundary.get("forbidden"))]
+    allowed = str(claim_boundary.get("allowed", "")).lower()
+    acceptance_package_ready = bool(
+        delivery_package.get("ok") is True
+        and required_sections.get("ACCEPTANCE_PACKET.md") is True
+        and delivery_package.get("manifest_acceptance_reference_pass") is True
+    )
+    engineer_review_boundary_ready = bool(
+        "engineer review" in allowed
+        and any("structural engineer replacement" in item for item in forbidden)
+        and any("full autonomous replacement" in item for item in forbidden)
+    )
+    return {
+        "gate_count": len(gates),
+        "passed_gate_count": passed_gate_count,
+        "all_gates_passed": bool(gates and passed_gate_count == len(gates)),
+        "workstation_delivery_8_of_8": bool(len(gates) >= 8 and passed_gate_count >= 8),
+        "acceptance_package_ready": acceptance_package_ready,
+        "engineer_review_boundary_ready": engineer_review_boundary_ready,
+        "claim_boundary": claim_boundary,
+    }
+
+
+def _root_blocker_stream(blocker: str) -> str:
+    text = blocker.lower()
+    if (
+        text.startswith("stale_or_inconsistent:")
+        or text.startswith("pm_release::github_sync::")
+        or "github_sync" in text
+        or "source_commit" in text
+        or "input_checksum" in text
+    ):
+        return "release freshness/sync"
+    if (
+        text.startswith("ci_streak::")
+        or text.startswith("self_hosted_runner::")
+        or text.startswith("runner_policy::")
+        or "basic_ci" in text
+        or "ci_30" in text
+        or "runner" in text
+    ):
+        return "CI runner/streak"
+    if text.startswith("human_ux::") or "::ux::" in text:
+        return "human UX"
+    if text.startswith("license::") or "::security::license" in text:
+        return "license/legal"
+    if text.startswith("license_server::") or text.startswith("commercial_sla::"):
+        return "license/legal"
+    if text.startswith("customer_shadow::"):
+        return "customer shadow"
+    if text.startswith("external_benchmark::") or "external_receipt" in text or "external_submission" in text:
+        return "external benchmark"
+    if text.startswith("fresh_full_validation::"):
+        return "fresh validation"
+    if text.startswith("g1") or "::g1" in text or "residual_holdout" in text:
+        return "G1 solver"
+    return "release freshness/sync"
+
+
+def _root_blockers(blockers: list[str]) -> dict[str, dict[str, Any]]:
+    streams = (
+        "release freshness/sync",
+        "CI runner/streak",
+        "human UX",
+        "license/legal",
+        "customer shadow",
+        "external benchmark",
+        "fresh validation",
+        "G1 solver",
+    )
+    grouped: dict[str, list[str]] = {stream: [] for stream in streams}
+    for blocker in blockers:
+        grouped.setdefault(_root_blocker_stream(blocker), []).append(blocker)
+    return {
+        stream: {
+            "blocked": bool(items),
+            "blocker_count": len(items),
+            "blockers": items,
+        }
+        for stream, items in grouped.items()
+    }
+
+
+PHASE0_BLOCKER_CATEGORY_BY_STREAM = {
+    "G1 solver": "numerical",
+    "external benchmark": "benchmark",
+    "fresh validation": "benchmark",
+    "release freshness/sync": "software product",
+    "CI runner/streak": "software product",
+    "human UX": "software product",
+    "customer shadow": "future commercial",
+    "license/legal": "future commercial",
+}
+
+
+PHASE0_BLOCKER_CATEGORY_DESCRIPTIONS = {
+    "numerical": (
+        "Solver math and deterministic equilibrium evidence: full mesh/load, residual, "
+        "increment, Jacobian/material Newton, fallback-zero, and CPU/HIP parity."
+    ),
+    "benchmark": (
+        "Reference corpus and validation evidence: external benchmark receipts, fresh "
+        "validation receipts, and benchmark scorecard coverage."
+    ),
+    "software product": (
+        "Developer Preview productization evidence: release freshness/sync, CI/runner "
+        "streaks, generated artifact consistency, and human UX workflow observation."
+    ),
+    "future commercial": (
+        "Commercial Release evidence kept outside the Developer Preview blocker bar: "
+        "customer shadow projects, product/legal license approvals, license server/SLA "
+        "style obligations, and related commercial accountability."
+    ),
+}
+
+
+def _phase0_blocker_categories(
+    root_blockers: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    categories = {
+        category: {
+            "blocked": False,
+            "blocker_count": 0,
+            "root_streams": [],
+            "blockers": [],
+            "description": PHASE0_BLOCKER_CATEGORY_DESCRIPTIONS[category],
+        }
+        for category in (
+            "numerical",
+            "benchmark",
+            "software product",
+            "future commercial",
+        )
+    }
+    uncategorized: list[str] = []
+    for stream, summary in root_blockers.items():
+        category = PHASE0_BLOCKER_CATEGORY_BY_STREAM.get(stream)
+        blockers = _as_list(summary.get("blockers")) if isinstance(summary, dict) else []
+        if category is None:
+            uncategorized.extend(blockers)
+            continue
+        row = categories[category]
+        if blockers:
+            row["blocked"] = True
+            row["root_streams"].append(stream)
+            row["blocker_count"] += len(blockers)
+            row["blockers"].extend(blockers)
+    if uncategorized:
+        row = categories["software product"]
+        row["blocked"] = True
+        row["root_streams"].append("uncategorized")
+        row["blocker_count"] += len(uncategorized)
+        row["blockers"].extend(uncategorized)
+    for row in categories.values():
+        row["root_streams"] = sorted(dict.fromkeys(row["root_streams"]))
+        row["blockers"] = sorted(dict.fromkeys(str(item) for item in row["blockers"]))
+    return categories
+
+
+def _gap_ledger_split_summary(rows: list[Any]) -> dict[str, dict[str, Any]]:
+    summary: dict[str, dict[str, Any]] = {}
+    for ledger_name in ("commercial_solver", "ai_engine"):
+        ledger_rows = [
+            row
+            for row in rows
+            if isinstance(row, dict) and str(row.get("ledger", "")) == ledger_name
+        ]
+        status_counts: dict[str, int] = {}
+        nonclosed_ids: list[str] = []
+        locally_closable_nonclosed_ids: list[str] = []
+        for row in ledger_rows:
+            status = str(row.get("status", ""))
+            status_counts[status] = status_counts.get(status, 0) + 1
+            closed = bool(row.get("closed") is True or status == "closed")
+            row_id = str(row.get("id", ""))
+            if not closed and row_id:
+                nonclosed_ids.append(row_id)
+                if row.get("locally_closable") is True:
+                    locally_closable_nonclosed_ids.append(row_id)
+        summary[ledger_name] = {
+            "row_count": len(ledger_rows),
+            "status_counts": dict(sorted(status_counts.items())),
+            "nonclosed_row_ids": sorted(nonclosed_ids),
+            "locally_closable_nonclosed_row_ids": sorted(locally_closable_nonclosed_ids),
+        }
+    return summary
+
+
+def _gap_ledger_audit_split_summary(row_outcomes: list[Any]) -> dict[str, dict[str, Any]]:
+    summary: dict[str, dict[str, Any]] = {}
+    for ledger_name in ("commercial_solver", "ai_engine"):
+        rows = [
+            row
+            for row in row_outcomes
+            if isinstance(row, dict) and str(row.get("ledger", "")) == ledger_name
+        ]
+        nonclosed_rows = [row for row in rows if row.get("closed") is not True]
+        missing_evidence_ids = sorted(
+            str(row.get("id", "")) for row in rows if row.get("evidence_present") is not True
+        )
+        missing_claim_boundary_ids = sorted(
+            str(row.get("id", ""))
+            for row in rows
+            if row.get("claim_boundary_present") is not True
+        )
+        nonclosed_missing_blocker_ids = sorted(
+            str(row.get("id", ""))
+            for row in nonclosed_rows
+            if _as_int(row.get("blocker_count"), 0) <= 0
+        )
+        closure_requirement_count = sum(
+            _as_int(row.get("closure_requirement_count"), 0) for row in rows
+        )
+        closure_requirement_pass_count = sum(
+            _as_int(row.get("closure_requirement_pass_count"), 0) for row in rows
+        )
+        closure_requirement_fail_count = sum(
+            _as_int(row.get("closure_requirement_fail_count"), 0) for row in rows
+        )
+        nonclosed_rows_with_failed_closure_requirements = [
+            row
+            for row in nonclosed_rows
+            if _as_int(row.get("closure_requirement_fail_count"), 0) > 0
+        ]
+        nonclosed_failed_closure_requirement_ids = sorted(
+            f"{str(row.get('id', ''))}:{str(requirement_id)}"
+            for row in nonclosed_rows_with_failed_closure_requirements
+            for requirement_id in _as_list(row.get("closure_requirement_failed_ids"))
+            if str(row.get("id", "")) and str(requirement_id)
+        )
+        summary[ledger_name] = {
+            "row_count": len(rows),
+            "closed_row_count": sum(1 for row in rows if row.get("closed") is True),
+            "nonclosed_row_count": len(nonclosed_rows),
+            "evidence_present_count": len(rows) - len(missing_evidence_ids),
+            "claim_boundary_present_count": len(rows) - len(missing_claim_boundary_ids),
+            "nonclosed_rows_with_blockers_count": (
+                len(nonclosed_rows) - len(nonclosed_missing_blocker_ids)
+            ),
+            "closure_requirement_count": closure_requirement_count,
+            "closure_requirement_pass_count": closure_requirement_pass_count,
+            "closure_requirement_fail_count": closure_requirement_fail_count,
+            "nonclosed_rows_with_failed_closure_requirements_count": len(
+                nonclosed_rows_with_failed_closure_requirements
+            ),
+            "missing_evidence_ids": [item for item in missing_evidence_ids if item],
+            "missing_claim_boundary_ids": [
+                item for item in missing_claim_boundary_ids if item
+            ],
+            "nonclosed_missing_blocker_ids": [
+                item for item in nonclosed_missing_blocker_ids if item
+            ],
+            "nonclosed_failed_closure_requirement_ids": (
+                nonclosed_failed_closure_requirement_ids
+            ),
+        }
+    return summary
+
+
+def _developer_preview_closure_visibility_summary(
+    developer_preview: dict[str, Any],
+) -> dict[str, Any]:
+    visibility = _as_dict(developer_preview.get("gap_ledger_closure_requirement_visibility"))
+    return {
+        "source_status": str(visibility.get("source_status", "missing")),
+        "source_contract_pass": bool(visibility.get("source_contract_pass") is True),
+        "source_full_gap_ledger_ready": bool(
+            visibility.get("source_full_gap_ledger_ready") is True
+        ),
+        "ai_engine_guardrail_rows_ready": bool(
+            visibility.get("ai_engine_guardrail_rows_ready") is True
+        ),
+        "autonomous_ai_engine_claim_ready": bool(
+            visibility.get("autonomous_ai_engine_claim_ready") is True
+        ),
+        "autonomous_ai_engine_claim_blockers": [
+            str(item)
+            for item in _as_list(visibility.get("autonomous_ai_engine_claim_blockers"))
+            if str(item)
+        ],
+        "closure_requirement_count": _as_int(
+            visibility.get("closure_requirement_count"), 0
+        ),
+        "closure_requirement_pass_count": _as_int(
+            visibility.get("closure_requirement_pass_count"), 0
+        ),
+        "closure_requirement_fail_count": _as_int(
+            visibility.get("closure_requirement_fail_count"), 0
+        ),
+        "nonclosed_rows_with_failed_closure_requirements_count": _as_int(
+            visibility.get("nonclosed_rows_with_failed_closure_requirements_count"), 0
+        ),
+        "nonclosed_failed_closure_requirement_ids": [
+            str(item)
+            for item in _as_list(visibility.get("nonclosed_failed_closure_requirement_ids"))
+            if str(item)
+        ],
+        "claim_boundary": str(visibility.get("claim_boundary", "")),
+    }
+
+
+def _developer_preview_scope_boundary_summary(
+    developer_preview: dict[str, Any],
+) -> dict[str, Any]:
+    sync = _as_dict(developer_preview.get("scope_boundary_sync"))
+    gui = _as_dict(sync.get("gui_surface"))
+    reports = _as_dict(_as_dict(sync.get("surface_groups")).get("reports"))
+    doc_surfaces = _as_dict(sync.get("doc_surfaces"))
+    return {
+        "status": str(sync.get("status", "missing")),
+        "contract_pass": bool(sync.get("contract_pass") is True),
+        "doc_surface_count": len(doc_surfaces),
+        "doc_surface_pass_count": sum(
+            1 for row in doc_surfaces.values() if _as_dict(row).get("contract_pass") is True
+        ),
+        "report_surface_count": _as_int(reports.get("surface_count"), 0),
+        "report_surface_pass_count": _as_int(reports.get("contract_pass_count"), 0),
+        "gui_contract_pass": bool(gui.get("contract_pass") is True),
+        "gui_consumes_scope_record": bool(gui.get("consumes_scope_record") is True),
+        "gui_consumes_closure_visibility_record": bool(
+            gui.get("consumes_closure_visibility_record") is True
+        ),
+        "gui_consumes_failed_closure_requirement_ids": bool(
+            gui.get("consumes_failed_closure_requirement_ids") is True
+        ),
+        "gui_renders_closure_requirement_summary": bool(
+            gui.get("renders_closure_requirement_summary") is True
+        ),
+        "gui_renders_closure_visibility_boundary": bool(
+            gui.get("renders_closure_visibility_boundary") is True
+        ),
+    }
+
+
+def _deduplicate_pm_release_blockers(
+    pm_blockers: list[str],
+    *,
+    ux_human_ready: bool,
+    ux_blockers: list[str],
+) -> list[str]:
+    if ux_human_ready or not ux_blockers:
+        return pm_blockers
+    return [item for item in pm_blockers if item not in PM_RELEASE_UX_DUPLICATE_WRAPPERS]
+
+
+def _suppressed_pm_release_duplicate_blockers(
+    pm_blockers: list[str],
+    *,
+    ux_human_ready: bool,
+    ux_blockers: list[str],
+) -> list[str]:
+    if ux_human_ready or not ux_blockers:
+        return []
+    return [item for item in pm_blockers if item in PM_RELEASE_UX_DUPLICATE_WRAPPERS]
+
+
+def _representative_human_ux_blockers(ux_blockers: list[str]) -> tuple[list[str], list[str]]:
+    if "observation_file_missing" not in ux_blockers:
+        return ux_blockers, []
+    detail_blockers = [item for item in ux_blockers if item != "observation_file_missing"]
+    return ["observation_file_missing"], detail_blockers
+
+
+def _phase1_core_api_summary(phase1_core_api: dict[str, Any]) -> dict[str, Any]:
+    cli_contract = _as_dict(phase1_core_api.get("cli_contract"))
+    reference_contract = _as_dict(phase1_core_api.get("reference_validation_contract"))
+    schema_validation = _as_dict(phase1_core_api.get("schema_validation"))
+    return {
+        "status": str(phase1_core_api.get("status", "missing")),
+        "contract_pass": bool(phase1_core_api.get("contract_pass")),
+        "claim_boundary_version": str(phase1_core_api.get("claim_boundary_version", "")),
+        "invocation_surfaces": _as_list(phase1_core_api.get("invocation_surfaces")),
+        "supported_preview_analysis_types": _as_list(
+            phase1_core_api.get("supported_preview_analysis_types")
+        ),
+        "schema_validation_pass": bool(schema_validation.get("contract_pass")),
+        "cli_contract_pass": bool(cli_contract.get("contract_pass")),
+        "cli_same_result_schema_as_python_api": bool(
+            cli_contract.get("same_result_schema_as_python_api")
+        ),
+        "cli_same_validation_report_schema_as_python_api": bool(
+            cli_contract.get("same_validation_report_schema_as_python_api")
+        ),
+        "reference_validation_contract_pass": bool(reference_contract.get("contract_pass")),
+        "python_api_blocks_reference_mismatch": bool(
+            reference_contract.get("python_api_blocks_reference_mismatch")
+        ),
+        "cli_blocks_reference_mismatch": bool(
+            reference_contract.get("cli_blocks_reference_mismatch")
+        ),
+        "unsupported_feature_count": _as_int(
+            phase1_core_api.get("unsupported_feature_count"), 0
+        ),
+        "developer_preview_blocked_field_count": _as_int(
+            phase1_core_api.get("developer_preview_blocked_field_count"), 0
+        ),
+        "claim_boundary": str(phase1_core_api.get("claim_boundary", "")),
+        "ready": bool(phase1_core_api.get("contract_pass")),
+    }
+
+
 def _pyproject_project_metadata(
     repo_root: Path,
     path: Path,
@@ -706,6 +1299,11 @@ def build_snapshot(
     current_state = _read_text(repo_root, paths.current_state, blockers)
     pm_report = _load_json(repo_root, paths.pm_report, blockers)
     gap_closure = _load_json(repo_root, paths.gap_closure_status, blockers)
+    commercial_gap_ledger_status = _load_json(repo_root, paths.commercial_gap_ledger_status, blockers)
+    gap_ledger_evidence_audit = _load_json(repo_root, paths.gap_ledger_evidence_audit, blockers)
+    phase1_core_api = _load_json(repo_root, paths.phase1_core_api_contract, blockers)
+    developer_preview = _load_json(repo_root, paths.developer_preview_readiness, blockers)
+    developer_preview_rc = _load_json(repo_root, paths.developer_preview_rc_status, blockers)
     fresh = _load_json(repo_root, paths.fresh_full_validation, blockers)
     g1 = _load_json(repo_root, paths.g1_terminal_gate, blockers)
     g1_full_load_lane = _load_json(repo_root, paths.g1_full_load_hip_newton_lane, blockers)
@@ -716,6 +1314,7 @@ def build_snapshot(
     ci_streak = _load_json(repo_root, paths.github_actions_ci_streak, blockers)
     ux_new_user = _load_json(repo_root, paths.ux_new_user_observation, blockers)
     license_status = _load_json(repo_root, paths.license_status_closure, blockers)
+    scope_guard = _load_json(repo_root, paths.paid_pilot_scope_guard, blockers)
     external_benchmark_readiness = _load_json(
         repo_root,
         paths.external_benchmark_submission_readiness,
@@ -726,12 +1325,33 @@ def build_snapshot(
         paths.external_benchmark_submission_updates,
         blockers,
     )
+    phase3_release_control_cleanup_plan = _load_json(
+        repo_root,
+        paths.phase3_release_control_cleanup_plan,
+        blockers,
+    )
     self_hosted_runner_status = _load_json(repo_root, paths.self_hosted_runner_status, blockers)
     runner_policy = check_runner_policy(
         workflow_dir=_resolve(repo_root, paths.github_workflows)
     )
 
     release_area_green, release_area_total = _release_area_counts_from_pm(pm_report)
+    gap_ledger_rows = _as_list(commercial_gap_ledger_status.get("rows"))
+    gap_ledger_split_summary = _gap_ledger_split_summary(gap_ledger_rows)
+    gap_ledger_audit_split_summary = _gap_ledger_audit_split_summary(
+        _as_list(gap_ledger_evidence_audit.get("row_outcomes"))
+    )
+    ai_engine_split = _as_dict(gap_ledger_split_summary.get("ai_engine"))
+    ai_engine_status_counts = _as_dict(ai_engine_split.get("status_counts"))
+    ai_engine_guardrail_rows_ready = bool(
+        commercial_gap_ledger_status.get("ai_engine_guardrail_rows_ready") is True
+        or (
+            "ai_engine_guardrail_rows_ready" not in commercial_gap_ledger_status
+            and _as_int(ai_engine_split.get("row_count"), 0) > 0
+            and _as_int(ai_engine_status_counts.get("closed"), 0)
+            == _as_int(ai_engine_split.get("row_count"), 0)
+        )
+    )
     readme_release_area = _doc_release_area_count(readme)
     current_state_release_area = _doc_release_area_count(current_state)
     release_area_sources = {
@@ -773,6 +1393,11 @@ def build_snapshot(
     metadata_artifacts = {
         "pm_release_gate_report": pm_report,
         "gap_closure_status": gap_closure,
+        "commercial_gap_ledger_status": commercial_gap_ledger_status,
+        "gap_ledger_evidence_audit": gap_ledger_evidence_audit,
+        "phase1_core_api_contract": phase1_core_api,
+        "developer_preview_readiness": developer_preview,
+        "developer_preview_rc_status": developer_preview_rc,
         "fresh_full_validation_lane_status": fresh,
         "mgt_g1_direct_residual_terminal_gate_report": g1,
         "g1_full_load_hip_newton_lane_report": g1_full_load_lane,
@@ -782,6 +1407,7 @@ def build_snapshot(
         "github_actions_ci_streak_evidence": ci_streak,
         "ux_new_user_observation_report": ux_new_user,
         "license_status_closure_report": license_status,
+        "paid_pilot_scope_guard_report": scope_guard,
         "external_benchmark_submission_readiness": external_benchmark_readiness,
         "external_benchmark_submission_updates": external_benchmark_updates,
     }
@@ -801,11 +1427,28 @@ def build_snapshot(
         current_commit=current_commit,
         allowed_receipt_paths=allowed_receipt_paths,
     )
+    enforce_input_checksums = source_commit_sha is None
     for row in metadata_rows:
         if not row["metadata_complete"]:
             blockers.append(f"stale_or_inconsistent:metadata_incomplete:{row['artifact']}")
         elif not row["source_state_fresh"]:
             blockers.append(f"stale_or_inconsistent:source_commit_mismatch:{row['artifact']}")
+        if enforce_input_checksums and not row["input_checksum_present"]:
+            blockers.append(f"stale_or_inconsistent:input_checksum_missing:{row['artifact']}")
+
+    ux_summary = _as_dict(ux_new_user.get("summary"))
+    ux_completion = ux_summary.get("completion_minutes")
+    ux_max_minutes = ux_summary.get("max_completion_minutes", 30.0)
+    ux_blockers = _as_list(ux_new_user.get("blockers"))
+    ux_human_ready = bool(
+        _contract_pass(ux_new_user)
+        and ux_completion is not None
+        and _as_float(ux_completion, default=999999.0) <= _as_float(ux_max_minutes, default=30.0)
+        and not ux_blockers
+    )
+    ux_top_level_blockers, ux_suppressed_detail_blockers = _representative_human_ux_blockers(
+        ux_blockers
+    )
 
     pm_release_ready = bool(
         pm_report.get("limited_commercial_release_ready")
@@ -814,9 +1457,20 @@ def build_snapshot(
     )
     pm_full_blockers = [str(item) for item in _as_list(pm_report.get("full_release_blockers"))]
     release_area_blockers = [str(item) for item in _as_list(pm_report.get("release_area_blockers"))]
+    original_pm_blockers = pm_full_blockers or release_area_blockers
+    suppressed_pm_release_duplicate_blockers = _suppressed_pm_release_duplicate_blockers(
+        original_pm_blockers,
+        ux_human_ready=ux_human_ready,
+        ux_blockers=ux_blockers,
+    )
     if not pm_release_ready:
-        blockers.extend(f"pm_release::{item}" for item in (pm_full_blockers or release_area_blockers))
-        if not (pm_full_blockers or release_area_blockers):
+        pm_blockers = _deduplicate_pm_release_blockers(
+            original_pm_blockers,
+            ux_human_ready=ux_human_ready,
+            ux_blockers=ux_blockers,
+        )
+        blockers.extend(f"pm_release::{item}" for item in pm_blockers)
+        if not original_pm_blockers:
             blockers.append("pm_release:not_ready_without_explicit_blockers")
 
     fresh_summary = _as_dict(fresh.get("summary"))
@@ -830,6 +1484,11 @@ def build_snapshot(
     )
     fresh_row_contract_count = sum(
         1 for row in fresh_rows if row.get("fresh_validation_receipt_contract_pass") is True
+    )
+    fresh_blockers = [str(item) for item in _as_list(fresh.get("blockers"))]
+    fresh_lane_ids = {str(row.get("lane_id")) for row in fresh_rows if row.get("lane_id")}
+    fresh_has_explicit_lane_blockers = any(
+        item.split("::", 1)[0] in fresh_lane_ids for item in fresh_blockers
     )
     fresh_rows_ready = bool(
         len(fresh_rows) >= lane_count
@@ -845,16 +1504,28 @@ def build_snapshot(
         and fresh_rows_ready
     )
     if not fresh_ready:
-        blockers.extend(f"fresh_full_validation::{item}" for item in _as_list(fresh.get("blockers")))
+        blockers.extend(f"fresh_full_validation::{item}" for item in fresh_blockers)
         if len(fresh_rows) < lane_count:
             blockers.append("fresh_full_validation::row_count_below_lane_count")
-        if fresh_rows and fresh_row_pass_count < lane_count:
+        if (
+            fresh_rows
+            and fresh_row_pass_count < lane_count
+            and not fresh_has_explicit_lane_blockers
+        ):
             blockers.append("fresh_full_validation::row_pass_count_below_lane_count")
-        if fresh_rows and fresh_row_fresh_count < lane_count:
+        if (
+            fresh_rows
+            and fresh_row_fresh_count < lane_count
+            and not fresh_has_explicit_lane_blockers
+        ):
             blockers.append("fresh_full_validation::row_fresh_receipt_count_below_lane_count")
-        if fresh_rows and fresh_row_contract_count < lane_count:
+        if (
+            fresh_rows
+            and fresh_row_contract_count < lane_count
+            and not fresh_has_explicit_lane_blockers
+        ):
             blockers.append("fresh_full_validation::row_contract_pass_count_below_lane_count")
-        if not _as_list(fresh.get("blockers")):
+        if not fresh_blockers:
             blockers.append("fresh_full_validation:not_ready")
 
     customer_summary = _as_dict(customer.get("summary"))
@@ -896,19 +1567,9 @@ def build_snapshot(
         if not ci_blockers:
             blockers.append("ci_streak:not_ready")
 
-    ux_summary = _as_dict(ux_new_user.get("summary"))
-    ux_completion = ux_summary.get("completion_minutes")
-    ux_max_minutes = ux_summary.get("max_completion_minutes", 30.0)
-    ux_human_ready = bool(
-        _contract_pass(ux_new_user)
-        and ux_completion is not None
-        and _as_float(ux_completion, default=999999.0) <= _as_float(ux_max_minutes, default=30.0)
-        and not _as_list(ux_new_user.get("blockers"))
-    )
     if not ux_human_ready:
-        ux_blockers = _as_list(ux_new_user.get("blockers"))
-        blockers.extend(f"human_ux::{item}" for item in ux_blockers)
-        if not ux_blockers:
+        blockers.extend(f"human_ux::{item}" for item in ux_top_level_blockers)
+        if not ux_top_level_blockers:
             blockers.append("human_ux:not_ready")
 
     license_ready = bool(
@@ -920,6 +1581,32 @@ def build_snapshot(
         blockers.extend(f"license::{item}" for item in license_blockers)
         if not license_blockers:
             blockers.append("license:not_ready")
+    commercial_future_scope_ready = bool(
+        (
+            pm_report.get("limited_commercial_ready")
+            or pm_report.get("limited_commercial_release_ready")
+        )
+        and pm_report.get("ga_enterprise_ready")
+    )
+    if not commercial_future_scope_ready:
+        blockers.extend(
+            (
+                "commercial_sla::production_support_commitment_missing",
+                "license_server::operation_readiness_missing",
+            )
+        )
+
+    scope_guard_checks = _as_dict(scope_guard.get("checks"))
+    supported_scope_guard_ready = bool(
+        _contract_pass(scope_guard)
+        and not _as_list(scope_guard.get("blockers"))
+        and all(value is True for value in scope_guard_checks.values())
+    )
+    if not supported_scope_guard_ready:
+        scope_blockers = _as_list(scope_guard.get("blockers"))
+        blockers.extend(f"assisted_service_scope::{item}" for item in scope_blockers)
+        if not scope_blockers:
+            blockers.append("assisted_service_scope:not_ready")
 
     external_benchmark_receipts = _external_benchmark_receipt_counts(
         readiness=external_benchmark_readiness,
@@ -957,11 +1644,13 @@ def build_snapshot(
             and "full-load" in g1_claim_boundary.lower()
             and not _as_list(g1.get("blockers"))
         )
+    g1_root_blockers = [
+        f"g1::{item}" for item in _as_list(g1.get("full_g1_closure_blockers"))
+    ]
+    g1_suppressed_detail_blockers: list[str] = []
     if not g1_full_mesh_ready:
-        blockers.append("g1_full_mesh_full_load_not_closed")
-        blockers.extend(
-            f"g1::{item}" for item in _as_list(g1.get("full_g1_closure_blockers"))
-        )
+        g1_suppressed_detail_blockers.append("g1_full_mesh_full_load_not_closed")
+        blockers.extend(g1_root_blockers)
     g1_lane_checkpoint = _as_dict(g1_full_load_lane.get("checkpoint"))
     g1_lane_observed_load = _as_float(g1_lane_checkpoint.get("load_scale"), default=-1.0)
     g1_lane_required_load = _as_float(g1_full_load_lane.get("required_load_scale"), default=1.0)
@@ -993,33 +1682,47 @@ def build_snapshot(
     )
     if not g1_full_load_lane_ready:
         lane_blockers = _as_list(g1_full_load_lane.get("blockers"))
-        blockers.extend(f"g1_full_load_lane::{item}" for item in lane_blockers)
-        blockers.extend(
+        g1_suppressed_detail_blockers.extend(
+            f"g1_full_load_lane::{item}" for item in lane_blockers
+        )
+        g1_suppressed_detail_blockers.extend(
             f"g1_full_load_lane::{item}"
             for item in _as_list(g1_lane_child_hip_refresh.get("blockers"))
         )
-        blockers.extend(
+        g1_suppressed_detail_blockers.extend(
             f"g1_full_load_lane::{item}"
             for item in _as_list(g1_lane_child_gate.get("blockers"))
         )
-        blockers.extend(
+        g1_suppressed_detail_blockers.extend(
             f"g1_full_load_lane::{item}"
             for item in _as_list(g1_lane_hip_consistency_proof.get("blockers"))
         )
         if not g1_lane_reused_ok:
-            blockers.append("g1_full_load_lane::reused_evidence_not_false")
+            g1_suppressed_detail_blockers.append("g1_full_load_lane::reused_evidence_not_false")
         if not g1_lane_full_load_input_pass:
-            blockers.append("g1_full_load_lane::full_load_input_not_pass")
+            g1_suppressed_detail_blockers.append("g1_full_load_lane::full_load_input_not_pass")
         if not g1_lane_load_scale_pass:
-            blockers.append("g1_full_load_lane::observed_load_scale_below_required_full_load")
+            g1_suppressed_detail_blockers.append(
+                "g1_full_load_lane::observed_load_scale_below_required_full_load"
+            )
         if not lane_blockers:
-            blockers.append("g1_full_load_lane:not_ready")
+            g1_suppressed_detail_blockers.append("g1_full_load_lane:not_ready")
+    g1_suppressed_detail_blockers = sorted(dict.fromkeys(g1_suppressed_detail_blockers))
+    if not g1_root_blockers and (not g1_full_mesh_ready or not g1_full_load_lane_ready):
+        blockers.append("g1::full_load_gate_not_closed")
 
     workstation_delivery_ready = bool(
         _contract_pass(workstation) and not _as_list(workstation.get("blockers"))
     )
+    workstation_summary = _workstation_delivery_summary(workstation)
     if not workstation_delivery_ready:
         blockers.extend(f"workstation_delivery::{item}" for item in _as_list(workstation.get("blockers")))
+    if not workstation_summary["workstation_delivery_8_of_8"]:
+        blockers.append("workstation_delivery::workstation_delivery_8_of_8_not_ready")
+    if not workstation_summary["acceptance_package_ready"]:
+        blockers.append("workstation_delivery::acceptance_package_not_ready")
+    if not workstation_summary["engineer_review_boundary_ready"]:
+        blockers.append("workstation_delivery::engineer_review_claim_boundary_not_ready")
     independent_product_ready = bool(
         (independent.get("independent_commercial_product_ready") or _contract_pass(independent))
         and not _as_list(independent.get("blockers"))
@@ -1055,7 +1758,66 @@ def build_snapshot(
 
     blockers = sorted(dict.fromkeys(str(item) for item in blockers if str(item)))
     stale_or_inconsistent = any(item.startswith("stale_or_inconsistent:") for item in blockers)
-    evidence_fresh = bool(schema_valid and not stale_or_inconsistent)
+    snapshot_source_state_consistent = bool(schema_valid and not stale_or_inconsistent)
+    evidence_fresh = snapshot_source_state_consistent
+    github_sync_clean = not any(
+        str(item).startswith("pm_release::github_sync::") for item in blockers
+    )
+    full_quality_ready = bool(pm_release_ready)
+    assisted_service_pilot_ready = bool(
+        schema_valid
+        and evidence_fresh
+        and workstation_delivery_ready
+        and workstation_summary["workstation_delivery_8_of_8"]
+        and supported_scope_guard_ready
+        and full_quality_ready
+        and github_sync_clean
+        and ux_human_ready
+        and license_ready
+        and workstation_summary["acceptance_package_ready"]
+        and workstation_summary["engineer_review_boundary_ready"]
+    )
+    assisted_service_pilot_blockers = [
+        label
+        for label, ready in (
+            ("schema_invalid", schema_valid),
+            ("snapshot_source_state_not_consistent", snapshot_source_state_consistent),
+            ("workstation_delivery_not_ready", workstation_delivery_ready),
+            ("workstation_delivery_8_of_8_not_ready", workstation_summary["workstation_delivery_8_of_8"]),
+            ("supported_scope_guard_not_ready", supported_scope_guard_ready),
+            ("full_quality_not_ready", full_quality_ready),
+            ("github_sync_not_clean", github_sync_clean),
+            ("human_ux_observation_not_ready", ux_human_ready),
+            ("license_approval_not_ready", license_ready),
+            ("acceptance_package_not_ready", workstation_summary["acceptance_package_ready"]),
+            ("engineer_review_boundary_not_ready", workstation_summary["engineer_review_boundary_ready"]),
+        )
+        if not ready
+    ]
+    solver_product_pilot_ready = bool(
+        schema_valid
+        and evidence_fresh
+        and independent_product_ready
+        and g1_full_mesh_ready
+        and g1_full_load_lane_ready
+        and external_benchmark_ready
+        and customer_ready
+        and fresh_ready
+    )
+    solver_product_blockers = [
+        label
+        for label, ready in (
+            ("schema_invalid", schema_valid),
+            ("snapshot_source_state_not_consistent", snapshot_source_state_consistent),
+            ("independent_product_not_ready", independent_product_ready),
+            ("g1_full_mesh_full_load_not_ready", g1_full_mesh_ready),
+            ("g1_full_load_hip_newton_lane_not_ready", g1_full_load_lane_ready),
+            ("external_benchmark_4_of_4_not_ready", external_benchmark_ready),
+            ("customer_shadow_3_of_3_not_ready", customer_ready),
+            ("fresh_validation_8_of_8_not_ready", fresh_ready),
+        )
+        if not ready
+    ]
     paid_pilot_ready = bool(
         schema_valid
         and evidence_fresh
@@ -1073,9 +1835,85 @@ def build_snapshot(
         and runner_policy_ready
         and self_hosted_runner_ready
     )
-    ga_enterprise_ready = bool(paid_pilot_ready and independent_product_ready and pm_report.get("ga_enterprise_ready"))
+    limited_commercial_ready = bool(
+        assisted_service_pilot_ready
+        and solver_product_pilot_ready
+        and (
+            pm_report.get("limited_commercial_ready")
+            or pm_report.get("limited_commercial_release_ready")
+        )
+    )
+    ga_enterprise_ready = bool(
+        limited_commercial_ready
+        and independent_product_ready
+        and pm_report.get("ga_enterprise_ready")
+    )
     release_ready = bool(paid_pilot_ready and not blockers)
     status = "ready" if release_ready else ("stale_or_inconsistent" if stale_or_inconsistent else "blocked")
+    root_blockers = _root_blockers(blockers)
+    blocker_categories = _phase0_blocker_categories(root_blockers)
+    phase3_cleanup_handoff = _as_dict(
+        phase3_release_control_cleanup_plan.get("human_handoff")
+    )
+    github_sync_blockers = [
+        item for item in blockers if str(item).startswith("pm_release::github_sync::")
+    ]
+    release_control_cleanup_component = {
+        "local_worktree_dirty": worktree_dirty,
+        "dirty_path_count": len(worktree_non_receipt_dirty_paths),
+        "non_receipt_dirty_path_count": len(worktree_non_receipt_dirty_paths),
+        "remote_github_sync_clean": github_sync_clean,
+        "remote_github_sync_blocker_count": len(github_sync_blockers),
+        "remote_github_sync_blockers": github_sync_blockers,
+        "cleanup_plan_status": phase3_release_control_cleanup_plan.get("status", "missing"),
+        "cleanup_plan_contract_pass": bool(phase3_release_control_cleanup_plan.get("contract_pass")),
+        "cleanup_plan_candidate_set_source": phase3_release_control_cleanup_plan.get(
+            "candidate_set_source", ""
+        ),
+        "cleanup_plan_candidate_set_scope": phase3_release_control_cleanup_plan.get(
+            "candidate_set_scope", ""
+        ),
+        "cleanup_plan_current_worktree_diagnostics_included": bool(
+            phase3_release_control_cleanup_plan.get("current_worktree_diagnostics_included")
+        ),
+        "cleanup_plan_current_worktree_diagnostic_source": (
+            phase3_release_control_cleanup_plan.get("current_worktree_diagnostic_source", "")
+        ),
+        "cleanup_plan_candidate_path_count": phase3_release_control_cleanup_plan.get(
+            "candidate_release_control_commit_set_count",
+            0,
+        ),
+        "cleanup_plan_track_or_add_required_path_count": len(
+            _as_list(phase3_release_control_cleanup_plan.get("track_or_add_required_paths"))
+        ),
+        "cleanup_plan_resolve_or_commit_dirty_tracked_path_count": len(
+            _as_list(phase3_release_control_cleanup_plan.get("resolve_or_commit_dirty_tracked_paths"))
+        ),
+        "cleanup_plan_path_role_counts": phase3_release_control_cleanup_plan.get("path_role_counts", {}),
+        "cleanup_plan_recommended_action_counts": phase3_release_control_cleanup_plan.get(
+            "recommended_action_counts",
+            {},
+        ),
+        "human_git_action_required": bool(
+            phase3_release_control_cleanup_plan.get("human_git_action_required")
+        ),
+        "codex_commit_or_push_performed": bool(
+            phase3_release_control_cleanup_plan.get("codex_commit_or_push_performed")
+        ),
+        "human_handoff_status": phase3_cleanup_handoff.get("status", ""),
+        "human_handoff_next_action": phase3_cleanup_handoff.get("next_action", ""),
+        "human_handoff_suggested_command_count": len(
+            _as_list(phase3_cleanup_handoff.get("suggested_local_command_args"))
+        ),
+        "human_handoff_push_or_release_command_included": bool(
+            phase3_cleanup_handoff.get("push_or_release_command_included")
+        ),
+        "claim_boundary": (
+            "Local release-control cleanup and remote GitHub sync are separate blockers. "
+            "Suggested local git commands are human handoff only; Codex has not committed, "
+            "pushed, released, or mutated remote refs."
+        ),
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1085,7 +1923,12 @@ def build_snapshot(
         "reused_evidence": False,
         "schema_valid": schema_valid,
         "evidence_fresh": evidence_fresh,
+        "snapshot_source_state_consistent": snapshot_source_state_consistent,
+        "stale_or_inconsistent": stale_or_inconsistent,
         "workstation_delivery_ready": workstation_delivery_ready,
+        "assisted_service_pilot_ready": assisted_service_pilot_ready,
+        "solver_product_pilot_ready": solver_product_pilot_ready,
+        "limited_commercial_ready": limited_commercial_ready,
         "paid_pilot_ready": paid_pilot_ready,
         "independent_product_ready": independent_product_ready,
         "ga_enterprise_ready": ga_enterprise_ready,
@@ -1094,7 +1937,21 @@ def build_snapshot(
         "reason_code": "PASS" if release_ready else status.upper(),
         "blocker_count": len(blockers),
         "blockers": blockers,
+        "root_blockers": root_blockers,
+        "blocker_categories": blocker_categories,
         "claim_boundary": {
+            "assisted_service_pilot": (
+                "assisted_service_pilot_ready is the engineer-review workstation service track. "
+                "It requires workstation delivery 8/8, supported-scope guard, full quality, clean "
+                "GitHub sync, real human UX observation, product/legal license approval, acceptance "
+                "package, and explicit proxy/fallback/engineer-review boundaries. It does not relax "
+                "solver_product gates."
+            ),
+            "solver_product": (
+                "solver_product_pilot_ready keeps the independent solver-product bar: G1 full "
+                "mesh/load 1.0 with residual+increment/material Newton/Jacobian/fallback-zero and "
+                "production HIP evidence, EB 4/4, customer shadow 3/3, and fresh validation 8/8."
+            ),
             "paid_pilot": (
                 "paid_pilot_ready requires a clean canonical snapshot, full PM release-area gate, "
                 "tracked CI streaks, human new-user observation, product/legal license closure, EB "
@@ -1103,9 +1960,19 @@ def build_snapshot(
             ),
             "contract_pass_vs_release_ready": (
                 "Upstream contract_pass fields are component contract results. They are not treated as "
-                "release_ready when release-area, evidence freshness, customer, fresh-validation, or G1 "
-                "blockers remain."
+                "release_ready when release-area, snapshot source-state consistency, customer, "
+                "fresh-validation, or G1 blockers remain."
             ),
+            "gap_ledger_evidence_audit": str(gap_ledger_evidence_audit.get("claim_boundary", "")),
+            "commercial_gap_ledger_status": (
+                "This component summarizes current G1-G10 and AI-G1-AI-G10 ledger row status. "
+                "Open, partial, external-blocked, or autonomous-AI-claim blocked rows remain "
+                "blockers and are not converted into release readiness by this snapshot. "
+                "AI guardrail row closure is separate from autonomous AI engine claim closure."
+            ),
+            "phase1_core_api_contract": str(phase1_core_api.get("claim_boundary", "")),
+            "developer_preview_readiness": str(developer_preview.get("claim_boundary", "")),
+            "developer_preview_rc": str(developer_preview_rc.get("claim_boundary", "")),
             "g1": g1_claim_boundary,
             "fresh_full_validation": str(fresh.get("claim_boundary", "")),
             "customer_shadow": str(customer.get("claim_boundary", "")),
@@ -1121,6 +1988,100 @@ def build_snapshot(
                 "release_area_total_count": release_area_total,
                 "release_area_blocker_count": len(release_area_blockers),
                 "full_release_blocker_count": len(pm_full_blockers),
+                "suppressed_duplicate_blocker_count": len(
+                    suppressed_pm_release_duplicate_blockers
+                ),
+                "suppressed_duplicate_blockers": [
+                    f"pm_release::{item}"
+                    for item in suppressed_pm_release_duplicate_blockers
+                ],
+                "duplicate_blocker_represented_by": {
+                    f"pm_release::{item}": "human_ux::*"
+                    for item in suppressed_pm_release_duplicate_blockers
+                },
+            },
+            "commercial_gap_ledger_status": {
+                "status": str(commercial_gap_ledger_status.get("status", "missing")),
+                "commercial_solver_gap_ready": bool(
+                    commercial_gap_ledger_status.get("commercial_solver_gap_ready")
+                ),
+                "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
+                "ai_engine_gap_ready": bool(commercial_gap_ledger_status.get("ai_engine_gap_ready")),
+                "autonomous_ai_engine_claim_ready": bool(
+                    commercial_gap_ledger_status.get("autonomous_ai_engine_claim_ready")
+                ),
+                "autonomous_ai_engine_claim_blockers": _as_list(
+                    commercial_gap_ledger_status.get("autonomous_ai_engine_claim_blockers")
+                ),
+                "full_gap_ledger_ready": bool(
+                    commercial_gap_ledger_status.get("full_gap_ledger_ready")
+                ),
+                "summary": _as_dict(commercial_gap_ledger_status.get("summary")),
+                "ledger_split_summary": gap_ledger_split_summary,
+                "blocker_count": len(_as_list(commercial_gap_ledger_status.get("blockers"))),
+                "blockers": _as_list(commercial_gap_ledger_status.get("blockers")),
+                "next_locally_closable_gaps": _as_list(
+                    commercial_gap_ledger_status.get("next_locally_closable_gaps")
+                ),
+                "ready": bool(commercial_gap_ledger_status.get("full_gap_ledger_ready")),
+            },
+            "gap_ledger_evidence_audit": {
+                "status": str(gap_ledger_evidence_audit.get("status", "missing")),
+                "contract_pass": bool(gap_ledger_evidence_audit.get("contract_pass")),
+                "ledger_status": str(gap_ledger_evidence_audit.get("ledger_status", "")),
+                "full_gap_ledger_ready": bool(
+                    gap_ledger_evidence_audit.get("full_gap_ledger_ready")
+                ),
+                "row_count": _as_int(gap_ledger_evidence_audit.get("row_count"), 0),
+                "closed_row_count": _as_int(
+                    gap_ledger_evidence_audit.get("closed_row_count"), 0
+                ),
+                "nonclosed_row_count": _as_int(
+                    gap_ledger_evidence_audit.get("nonclosed_row_count"), 0
+                ),
+                "ledger_split_summary": gap_ledger_audit_split_summary,
+                "blocker_count": len(_as_list(gap_ledger_evidence_audit.get("blockers"))),
+                "blockers": _as_list(gap_ledger_evidence_audit.get("blockers")),
+                "claim_boundary": str(gap_ledger_evidence_audit.get("claim_boundary", "")),
+                "ready": bool(gap_ledger_evidence_audit.get("contract_pass")),
+            },
+            "phase1_core_api_contract": _phase1_core_api_summary(phase1_core_api),
+            "developer_preview_readiness": {
+                "status": str(developer_preview.get("status", "missing")),
+                "developer_preview_ready": bool(developer_preview.get("developer_preview_ready")),
+                "blocker_count": _as_int(developer_preview.get("blocker_count"), 0),
+                "future_commercial_blocker_count": _as_int(
+                    developer_preview.get("future_commercial_blocker_count"), 0
+                ),
+                "category_counts": {
+                    key: _as_int(_as_dict(value).get("blocker_count"), 0)
+                    for key, value in _as_dict(developer_preview.get("categories")).items()
+                },
+                "freeze_policy": _as_dict(_as_dict(developer_preview.get("scope")).get("freeze_policy")),
+                "gap_ledger_closure_requirement_visibility": (
+                    _developer_preview_closure_visibility_summary(developer_preview)
+                ),
+                "scope_boundary_sync_summary": (
+                    _developer_preview_scope_boundary_summary(developer_preview)
+                ),
+                "claim_boundary": str(developer_preview.get("claim_boundary", "")),
+                "ready": bool(developer_preview.get("developer_preview_ready")),
+            },
+            "developer_preview_rc": {
+                "status": str(developer_preview_rc.get("status", "missing")),
+                "contract_pass": bool(developer_preview_rc.get("contract_pass")),
+                "deliverable_count": _as_int(developer_preview_rc.get("deliverable_count"), 0),
+                "deliverable_pass_count": _as_int(
+                    developer_preview_rc.get("deliverable_pass_count"), 0
+                ),
+                "final_gate_count": _as_int(developer_preview_rc.get("final_gate_count"), 0),
+                "final_gate_pass_count": _as_int(
+                    developer_preview_rc.get("final_gate_pass_count"), 0
+                ),
+                "blocker_count": len(_as_list(developer_preview_rc.get("blockers"))),
+                "blockers": _as_list(developer_preview_rc.get("blockers")),
+                "claim_boundary": str(developer_preview_rc.get("claim_boundary", "")),
+                "ready": bool(developer_preview_rc.get("contract_pass")),
             },
             "fresh_full_validation": {
                 "contract_pass": bool(fresh.get("contract_pass")),
@@ -1132,6 +2093,16 @@ def build_snapshot(
                 "row_fresh_receipt_count": fresh_row_fresh_count,
                 "row_contract_pass_count": fresh_row_contract_count,
                 "ready": fresh_ready,
+                "blocker_grouping_metadata": (
+                    fresh.get("blocker_grouping_metadata")
+                    if isinstance(fresh.get("blocker_grouping_metadata"), dict)
+                    else {}
+                ),
+                "lane_boundary_metadata": (
+                    fresh.get("lane_boundary_metadata")
+                    if isinstance(fresh.get("lane_boundary_metadata"), dict)
+                    else {}
+                ),
             },
             "customer_shadow": {
                 "contract_pass": bool(customer.get("contract_pass")),
@@ -1157,12 +2128,32 @@ def build_snapshot(
                 "contract_pass": bool(ux_new_user.get("contract_pass")),
                 "completion_minutes": ux_completion,
                 "max_completion_minutes": ux_max_minutes,
+                "blocker_count": len(ux_blockers),
+                "blockers": ux_blockers,
+                "top_level_blockers": [
+                    f"human_ux::{item}" for item in ux_top_level_blockers
+                ],
+                "suppressed_detail_blocker_count": len(ux_suppressed_detail_blockers),
+                "suppressed_detail_blockers": [
+                    f"human_ux::{item}" for item in ux_suppressed_detail_blockers
+                ],
+                "detail_blocker_represented_by": {
+                    f"human_ux::{item}": "human_ux::observation_file_missing"
+                    for item in ux_suppressed_detail_blockers
+                },
+                "checks": _as_dict(ux_new_user.get("checks")),
+                "summary": ux_summary,
                 "ready": ux_human_ready,
             },
             "license_status": {
                 "contract_pass": bool(license_status.get("contract_pass")),
                 "status": str(_as_dict(license_status.get("summary")).get("status", "")),
                 "ready": license_ready,
+            },
+            "paid_pilot_scope_guard": {
+                "contract_pass": bool(scope_guard.get("contract_pass")),
+                "ready": supported_scope_guard_ready,
+                "checks": scope_guard_checks,
             },
             "external_benchmark_receipts": {
                 "contract_pass": bool(external_benchmark_readiness.get("contract_pass")),
@@ -1175,6 +2166,22 @@ def build_snapshot(
                 "contract_pass": bool(g1.get("contract_pass")),
                 "full_mesh_full_load_ready": g1_full_mesh_ready,
                 "full_g1_closure_ready": bool(g1.get("full_g1_closure_ready")),
+                "top_level_blockers": g1_root_blockers,
+                "suppressed_detail_blocker_count": len(g1_suppressed_detail_blockers),
+                "suppressed_detail_blockers": g1_suppressed_detail_blockers,
+                "detail_blocker_represented_by": {
+                    item: "g1::*" for item in g1_suppressed_detail_blockers
+                },
+                "blocker_grouping_metadata": _g1_blocker_grouping_metadata(
+                    top_level_blockers=g1_root_blockers,
+                    suppressed_detail_blockers=g1_suppressed_detail_blockers,
+                ),
+                "closure_boundary_metadata": _g1_closure_boundary_metadata(
+                    g1_full_mesh_ready=g1_full_mesh_ready,
+                    g1_full_load_lane_ready=g1_full_load_lane_ready,
+                    g1_lane_child_gate_ready=g1_lane_child_gate_ready,
+                    g1_lane_hip_consistency_proof=g1_lane_hip_consistency_proof,
+                ),
                 "full_load_hip_newton_lane_ready": g1_full_load_lane_ready,
                 "full_load_hip_newton_lane_status": str(
                     g1_full_load_lane.get("status", "")
@@ -1183,6 +2190,14 @@ def build_snapshot(
                 "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
                 "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
                 "full_load_hip_newton_lane_required_load_scale": g1_lane_required_load,
+                "full_load_hip_newton_frontier_non_promoting_evidence": (
+                    g1_full_load_lane.get("frontier_non_promoting_evidence")
+                    if isinstance(
+                        g1_full_load_lane.get("frontier_non_promoting_evidence"),
+                        dict,
+                    )
+                    else {}
+                ),
                 "full_load_hip_newton_child_hip_residual_refresh_ready": (
                     g1_lane_child_hip_refresh_ready
                 ),
@@ -1216,6 +2231,36 @@ def build_snapshot(
                 ),
                 "ready": self_hosted_runner_ready,
             },
+            "assisted_service_pilot": {
+                "ready": assisted_service_pilot_ready,
+                "blocker_count": len(assisted_service_pilot_blockers),
+                "blockers": assisted_service_pilot_blockers,
+                "snapshot_source_state_consistent": snapshot_source_state_consistent,
+                "workstation_delivery_8_of_8": workstation_summary["workstation_delivery_8_of_8"],
+                "supported_scope_guard_ready": supported_scope_guard_ready,
+                "full_quality_ready": full_quality_ready,
+                "github_sync_clean": github_sync_clean,
+                "human_ux_observation_ready": ux_human_ready,
+                "license_approval_ready": license_ready,
+                "acceptance_package_ready": workstation_summary["acceptance_package_ready"],
+                "engineer_review_boundary_ready": workstation_summary[
+                    "engineer_review_boundary_ready"
+                ],
+                "claim_boundary": workstation_summary["claim_boundary"],
+            },
+            "solver_product": {
+                "ready": solver_product_pilot_ready,
+                "blocker_count": len(solver_product_blockers),
+                "blockers": solver_product_blockers,
+                "snapshot_source_state_consistent": snapshot_source_state_consistent,
+                "independent_product_ready": independent_product_ready,
+                "g1_full_mesh_full_load_ready": g1_full_mesh_ready,
+                "g1_full_load_hip_newton_lane_ready": g1_full_load_lane_ready,
+                "external_benchmark_4_of_4_ready": external_benchmark_ready,
+                "customer_shadow_3_of_3_ready": customer_ready,
+                "fresh_validation_8_of_8_ready": fresh_ready,
+            },
+            "release_control_cleanup": release_control_cleanup_component,
         },
         "state_consistency": {
             "release_area_counts": release_area_sources,
@@ -1227,6 +2272,63 @@ def build_snapshot(
                 "status_rows": worktree_status_rows,
                 "dirty_paths": worktree_dirty_paths,
                 "non_receipt_dirty_paths": worktree_non_receipt_dirty_paths,
+                "phase3_release_control_cleanup_plan": {
+                    "path": str(paths.phase3_release_control_cleanup_plan),
+                    "status": phase3_release_control_cleanup_plan.get("status", "missing"),
+                    "contract_pass": bool(phase3_release_control_cleanup_plan.get("contract_pass")),
+                    "candidate_set_source": phase3_release_control_cleanup_plan.get(
+                        "candidate_set_source", ""
+                    ),
+                    "candidate_set_scope": phase3_release_control_cleanup_plan.get(
+                        "candidate_set_scope", ""
+                    ),
+                    "current_worktree_diagnostics_included": bool(
+                        phase3_release_control_cleanup_plan.get(
+                            "current_worktree_diagnostics_included"
+                        )
+                    ),
+                    "current_worktree_diagnostic_source": phase3_release_control_cleanup_plan.get(
+                        "current_worktree_diagnostic_source", ""
+                    ),
+                    "candidate_release_control_commit_set_count": phase3_release_control_cleanup_plan.get(
+                        "candidate_release_control_commit_set_count",
+                        0,
+                    ),
+                    "path_role_counts": phase3_release_control_cleanup_plan.get("path_role_counts", {}),
+                    "recommended_action_counts": phase3_release_control_cleanup_plan.get(
+                        "recommended_action_counts",
+                        {},
+                    ),
+                    "track_or_add_required_path_count": len(
+                        _as_list(
+                            phase3_release_control_cleanup_plan.get(
+                                "track_or_add_required_paths"
+                            )
+                        )
+                    ),
+                    "resolve_or_commit_dirty_tracked_path_count": len(
+                        _as_list(
+                            phase3_release_control_cleanup_plan.get(
+                                "resolve_or_commit_dirty_tracked_paths"
+                            )
+                        )
+                    ),
+                    "human_git_action_required": bool(
+                        phase3_release_control_cleanup_plan.get("human_git_action_required")
+                    ),
+                    "codex_commit_or_push_performed": bool(
+                        phase3_release_control_cleanup_plan.get("codex_commit_or_push_performed")
+                    ),
+                    "human_handoff_status": phase3_cleanup_handoff.get("status", ""),
+                    "human_handoff_next_action": phase3_cleanup_handoff.get("next_action", ""),
+                    "human_handoff_suggested_command_count": len(
+                        _as_list(phase3_cleanup_handoff.get("suggested_local_command_args"))
+                    ),
+                    "human_handoff_push_or_release_command_included": bool(
+                        phase3_cleanup_handoff.get("push_or_release_command_included")
+                    ),
+                    "claim_boundary": phase3_release_control_cleanup_plan.get("claim_boundary", ""),
+                },
             },
         },
         "artifacts": {

@@ -2,19 +2,19 @@
   "blockers": [],
   "claim_boundary": "This audit proves docs/templates JSON files are handoff-only templates and are rejected by release-evidence validators. It does not create owner evidence or replace external signoff.",
   "contract_pass": true,
-  "generated_at": "2026-06-16T21:37:07.175241+00:00",
+  "generated_at": "2026-06-21T15:06:44.776494+00:00",
   "mode": "template_safety_audit",
   "reason_code": "PASS",
   "schema_version": "template-evidence-safety-report.v1",
   "summary": {
     "missing_known_templates": [],
-    "template_count": 5,
-    "template_pass_count": 5,
+    "template_count": 7,
+    "template_pass_count": 7,
     "unprobed_templates": [],
-    "validator_probe_count": 5,
-    "validator_probe_pass_count": 5
+    "validator_probe_count": 7,
+    "validator_probe_pass_count": 7
   },
-  "summary_line": "Template evidence safety: PASS | templates=5 | validator_probes=5 | blockers=0",
+  "summary_line": "Template evidence safety: PASS | templates=7 | validator_probes=7 | blockers=0",
   "template_dir": "docs/templates",
   "template_rows": [
     {
@@ -33,9 +33,35 @@
     {
       "blockers": [],
       "contract_pass": true,
+      "name": "customer_shadow_evidence.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/customer_shadow_evidence.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
       "name": "family_validation_manual_signoff.template.json",
       "pass_signal_paths": [],
       "path": "docs/templates/family_validation_manual_signoff.template.json",
+      "placeholder_markers": [
+        "OWNER_INPUT_REQUIRED",
+        "TEMPLATE ONLY"
+      ],
+      "template_only": true,
+      "validator_probe_mapped": true
+    },
+    {
+      "blockers": [],
+      "contract_pass": true,
+      "name": "fresh_validation_receipt.template.json",
+      "pass_signal_paths": [],
+      "path": "docs/templates/fresh_validation_receipt.template.json",
       "placeholder_markers": [
         "OWNER_INPUT_REQUIRED",
         "TEMPLATE ONLY"
@@ -89,6 +115,53 @@
     }
   ],
   "validator_probes": [
+    {
+      "contract_pass": true,
+      "expected_blockers_present": [
+        "placeholder_marker_present"
+      ],
+      "label": "customer_shadow_evidence_template_probe",
+      "observed_blockers": [
+        "placeholder_marker_present",
+        "reference_output_checksum_not_sha256",
+        "our_engine_commit_not_commit_sha",
+        "delta_metrics_missing_numeric_value",
+        "residual_metrics_missing_numeric_value",
+        "delta_metrics_required_numeric_key_missing:max_relative_error_pct",
+        "residual_metrics_required_numeric_key_missing:normalized_equilibrium_residual"
+      ],
+      "state": "template_rejected_as_customer_shadow_evidence",
+      "template_path": "docs/templates/customer_shadow_evidence.template.json",
+      "validator_contract_pass": false
+    },
+    {
+      "contract_pass": true,
+      "expected_blockers_present": [
+        "fixed_value_mismatch:contract_pass",
+        "fixed_value_mismatch:reason_code",
+        "placeholder_marker_present"
+      ],
+      "label": "fresh_validation_receipt_template_probe",
+      "observed_blockers": [
+        "fixed_value_mismatch:contract_pass",
+        "fixed_value_mismatch:reason_code",
+        "generated_at_not_iso_datetime",
+        "input_checksums.OWNER_INPUT_REQUIRED_INPUT_PATH:not_sha256",
+        "placeholder_marker_present",
+        "receipt_artifacts[0].sha256:not_sha256",
+        "schema_violation:<root>:Additional properties are not allowed ('note', 'template_only' were unexpected)",
+        "schema_violation:contract_pass:True was expected",
+        "schema_violation:input_checksums/OWNER_INPUT_REQUIRED_INPUT_PATH:'sha256:OWNER_INPUT_REQUIRED_INPUT_DIGEST' does not match '^sha256:[0-9a-fA-F]{64}$'",
+        "schema_violation:lane_id:'OWNER_INPUT_REQUIRED_LANE_ID' does not match '^[a-z0-9_]+$'",
+        "schema_violation:reason_code:'PASS' was expected",
+        "schema_violation:receipt_artifacts/0/sha256:'sha256:OWNER_INPUT_REQUIRED_ARTIFACT_DIGEST' does not match '^sha256:[0-9a-fA-F]{64}$'",
+        "schema_violation:source_commit_sha:'OWNER_INPUT_REQUIRED_SOURCE_COMMIT_SHA' does not match '^[0-9a-fA-F]{7,40}$'",
+        "source_commit_sha_not_commit_sha"
+      ],
+      "state": "template_rejected_as_fresh_validation_evidence",
+      "template_path": "docs/templates/fresh_validation_receipt.template.json",
+      "validator_contract_pass": false
+    },
     {
       "contract_pass": true,
       "expected_blockers_present": [

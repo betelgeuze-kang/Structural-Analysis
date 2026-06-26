@@ -1,0 +1,26 @@
+{
+  "schema_version": "external-benchmark-refresh-lane.v1",
+  "generated_at": "2026-06-23T16:51:28.172909+00:00",
+  "contract_pass": true,
+  "reason_code": "PASS_EXTERNAL_BENCHMARK_REFRESH_LANE",
+  "blockers": [],
+  "summary": {
+    "status_mode": "execution_complete_no_fail",
+    "release_surface_status_mode": "execution_complete_no_fail",
+    "executable_task_count": 10,
+    "completed_task_count": 10,
+    "planned_task_count": 0,
+    "in_progress_task_count": 0,
+    "failed_task_count": 0,
+    "kpi_receipt_task_count": 10,
+    "case_bundle_zip_task_count": 10,
+    "completion_ratio": 1.0
+  },
+  "artifacts": {
+    "execution_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_manifest.json",
+    "updates_json": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_updates.json",
+    "status_manifest": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.json",
+    "status_manifest_md": "implementation/phase1/release/external_benchmark_kickoff/external_benchmark_execution_status_manifest.md"
+  },
+  "claim_boundary": "This local refresh verifies the checked-in external benchmark execution status manifest still reports execution_complete_no_fail from existing completed updates. It does not re-run, submit, or externally approve benchmark cases."
+}

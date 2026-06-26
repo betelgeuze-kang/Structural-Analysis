@@ -1173,6 +1173,56 @@ let integratedReviewNavigatorProjectId='';
 let integratedReviewNavigatorActiveSectionKey='stage';
 let activeComparisonHighlightMemberIds=new Set(),activeComparisonHighlightToneByMemberId=new Map(),activeComparisonHighlightFilter='changed';
 let renderMode='contour',showDeformed=false,deformScale=100,isAnimating=false,animTime=0;
+
+const MIN_VIEWPORT_RENDER_WIDTH=320;
+const MIN_VIEWPORT_RENDER_HEIGHT=340;
+function getViewportRenderSize(vp){
+  const rect=vp?.getBoundingClientRect?.();
+  const parentRect=vp?.parentElement?.getBoundingClientRect?.();
+  const fallbackWidth=Math.max(MIN_VIEWPORT_RENDER_WIDTH,(document.documentElement?.clientWidth||window.innerWidth||0)-20);
+  const fallbackHeight=Math.max(
+    MIN_VIEWPORT_RENDER_HEIGHT,
+    Math.min(780,Math.round((window.innerHeight||MIN_VIEWPORT_RENDER_HEIGHT)*0.52))
+  );
+  const clientWidth=Math.floor(vp?.clientWidth||0);
+  const rectWidth=Math.floor(rect?.width||0);
+  const parentWidth=Math.floor(parentRect?.width||0);
+  const clientHeight=Math.floor(vp?.clientHeight||0);
+  const rectHeight=Math.floor(rect?.height||0);
+  const parentHeight=Math.floor(parentRect?.height||0);
+  const width=clientWidth>10
+    ?clientWidth
+    :rectWidth>10
+      ?rectWidth
+      :parentWidth>10
+        ?Math.max(MIN_VIEWPORT_RENDER_WIDTH,parentWidth)
+        :fallbackWidth;
+  const height=clientHeight>10
+    ?clientHeight
+    :rectHeight>10
+      ?rectHeight
+      :parentHeight>10
+        ?Math.max(MIN_VIEWPORT_RENDER_HEIGHT,parentHeight)
+        :fallbackHeight;
+  return{width,height,aspect:width/height};
+}
+function syncViewportRendererSize(vp){
+  if(!vp||!camera||!renderer)return getViewportRenderSize(vp);
+  const size=getViewportRenderSize(vp);
+  camera.aspect=size.aspect;
+  camera.updateProjectionMatrix();
+  if(orthographicCamera){
+    const viewSize=(orthographicCamera.top-orthographicCamera.bottom)||120;
+    orthographicCamera.left=-viewSize*size.aspect/2;
+    orthographicCamera.right=viewSize*size.aspect/2;
+    orthographicCamera.top=viewSize/2;
+    orthographicCamera.bottom=-viewSize/2;
+    orthographicCamera.updateProjectionMatrix();
+  }
+  renderer.setSize(size.width,size.height);
+  visualScene?.onResize?.(size.width,size.height);
+  return size;
+}
 let modelData=null,modelSourceMeta=null,frameCount=0,lastFpsTime=Date.now();
 let lastAnalysisCockpitModel=null,lastPanelZoneEvidenceModel=null,analysisTimelineStepOverride=null,analysisTimelinePlaybackTimer=null;
 let analysisStageOverlayState={loadArrowCount:0,supportMarkerCount:0,status:'pending',source:'--',loadCase:'--',direction:'+X',supportLimit:0};
@@ -6229,18 +6279,19 @@ function init(){
   scene.background=new THREE.Color(0x060b12);
   scene.fog=new THREE.FogExp2(0x060b12,.0025);
 
-  camera=new THREE.PerspectiveCamera(50,vp.clientWidth/vp.clientHeight,.1,2000);
+  const viewportSize=getViewportRenderSize(vp);
+  camera=new THREE.PerspectiveCamera(50,viewportSize.aspect,.1,2000);
   camera.position.set(80,60,80);
 
   // Orthographic camera for drawing-mode parallel projection
   const viewSize=120;
-  const aspect=vp.clientWidth/vp.clientHeight;
+  const aspect=viewportSize.aspect;
   orthographicCamera=new THREE.OrthographicCamera(-viewSize*aspect/2,viewSize*aspect/2,viewSize/2,-viewSize/2,.1,2000);
   orthographicCamera.position.copy(camera.position);
   orthographicCamera.lookAt(controls?.target||new THREE.Vector3(24,14,14));
 
   renderer=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true,powerPreference:"high-performance"});
-  renderer.setSize(vp.clientWidth,vp.clientHeight);
+  renderer.setSize(viewportSize.width,viewportSize.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
   renderer.shadowMap.enabled=true;
   renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -6249,6 +6300,7 @@ function init(){
   renderer.localClippingEnabled=true;
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   vp.appendChild(renderer.domElement);
+  requestAnimationFrame(()=>onResize());
 
   controls=new OrbitControls(camera,renderer.domElement);
   controls.enableDamping=true;controls.dampingFactor=.08;
@@ -20952,19 +21004,7 @@ function animate(){
 }
 function onResize(){
   const vp=document.getElementById('viewport');
-  const aspect=vp.clientWidth/vp.clientHeight;
-  camera.aspect=aspect;
-  camera.updateProjectionMatrix();
-  if(orthographicCamera){
-    const viewSize=(orthographicCamera.top-orthographicCamera.bottom)||120;
-    orthographicCamera.left=-viewSize*aspect/2;
-    orthographicCamera.right=viewSize*aspect/2;
-    orthographicCamera.top=viewSize/2;
-    orthographicCamera.bottom=-viewSize/2;
-    orthographicCamera.updateProjectionMatrix();
-  }
-  renderer.setSize(vp.clientWidth,vp.clientHeight);
-  visualScene?.onResize?.(vp.clientWidth,vp.clientHeight);
+  syncViewportRendererSize(vp);
   const isDrawingMode=document.body.dataset.viewerWorkflow==='drawings';
   if(!isDrawingMode){
     positionViewportSelectionFocusBadge();

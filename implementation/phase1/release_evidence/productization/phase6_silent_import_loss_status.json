@@ -1,0 +1,128 @@
+{
+  "blocker_grouping_metadata": {
+    "claim_boundary": "Query/GUI spillover blockers are carried through for visibility from the Phase 3 source-license receipt, but they are not direct silent-import-loss closure blockers. The RC gate remains blocked until the direct source, checksum, license, import execution, and silent-loss gate groups are clear.",
+    "groups": {
+      "checksum": {
+        "blocked": true,
+        "blockers": [
+          "selected_file_checksums_missing",
+          "source_sha256_missing"
+        ],
+        "display_name": "checksum",
+        "scope": "direct_silent_import_loss"
+      },
+      "import_execution": {
+        "blocked": true,
+        "blockers": [
+          "dirty_import_execution_missing",
+          "ifc_import_health_execution_count_below_required:0/10",
+          "import_health_execution_missing"
+        ],
+        "display_name": "import execution",
+        "scope": "direct_silent_import_loss"
+      },
+      "license_legal": {
+        "blocked": true,
+        "blockers": [
+          "per_file_license_review_pending",
+          "product_legal_license_review_pending"
+        ],
+        "display_name": "license/legal",
+        "scope": "direct_silent_import_loss"
+      },
+      "query_gui_spillover": {
+        "blocked": true,
+        "blockers": [
+          "dataset_repository_url_missing",
+          "gui_task_runner_not_implemented",
+          "query_expected_answers_missing",
+          "query_task_file_checksums_missing"
+        ],
+        "display_name": "query/gui spillover",
+        "scope": "spillover_not_direct_silent_import_loss"
+      },
+      "silent_loss_gate": {
+        "blocked": true,
+        "blockers": [
+          "silent_data_loss_negative_gate_not_executed",
+          "silent_import_loss_gate_not_executed"
+        ],
+        "display_name": "silent-loss gate",
+        "scope": "direct_silent_import_loss"
+      },
+      "source_acquisition": {
+        "blocked": true,
+        "blockers": [
+          "phase3_ifc_import_case_count_below_minimum",
+          "phase3_ifc_import_case_quantity_credit_missing",
+          "source_file_not_acquired"
+        ],
+        "display_name": "source/acquisition",
+        "scope": "direct_silent_import_loss"
+      }
+    },
+    "schema_version": "phase6-silent-import-loss-blocker-groups.v1",
+    "unassigned_blockers": []
+  },
+  "blockers": [
+    "dataset_repository_url_missing",
+    "dirty_import_execution_missing",
+    "gui_task_runner_not_implemented",
+    "ifc_import_health_execution_count_below_required:0/10",
+    "import_health_execution_missing",
+    "per_file_license_review_pending",
+    "phase3_ifc_import_case_count_below_minimum",
+    "phase3_ifc_import_case_quantity_credit_missing",
+    "product_legal_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_file_checksums_missing",
+    "selected_file_checksums_missing",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed",
+    "source_file_not_acquired",
+    "source_sha256_missing"
+  ],
+  "claim_boundary": "This receipt aggregates the current Phase 3 IFC source/license and import-health receipts for the RC silent-import-loss final gate. It does not download or bundle IFC files, approve product redistribution, prove import execution, or prove zero silent import loss until acquired/checksummed sources, license review, import-health execution, and silent-data-loss negative gates all pass.",
+  "clean_selected_file_count": 2,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "dirty_selected_file_count": 8,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "evidence_requirements": {
+    "clean_dirty_import_case_count": {
+      "contract_pass": true,
+      "current": 10,
+      "required": 10
+    },
+    "import_health_execution_ready": false,
+    "product_license_review_ready": false,
+    "selected_file_checksums_ready": false,
+    "silent_data_loss_negative_gate_executed": false,
+    "source_files_acquired": false
+  },
+  "generated_at": "2026-06-23T17:45:39.808473+00:00",
+  "import_health_contract_pass_count": 0,
+  "import_health_execution_count": 0,
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:d34b05b062697ee8a8529a27e1db79c3b234d2e9c438759ea21f33a78114e6cb",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:05222a749b7b1b4029edbe9bfd0ba021b64a8d1c97d392d727048a8b4525438d",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:a4bb2e0547e7813186fdbe89f4b5f200914c04bfeacbcf3e9585839ce3351029",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2042c6975db855fa770542168484a6b8abd4f3a779f92de94354a820d2ea16a1",
+    "scripts/build_phase6_silent_import_loss_status.py": "sha256:3ebbb9e81660bc3a39e3e2a7e5d676ad72d0fb889c786ebf5412d87f3712d3ab"
+  },
+  "owner_action": "Acquire the selected clean/dirty IFC files and record source/checksum evidence; complete product/legal and per-file license review; regenerate the Phase 3 import-health execution receipt by running import-health and silent-data-loss negative gates for every selected case; regenerate and check this Phase 6 silent-import-loss status; then refresh the RC final gate.",
+  "readiness_inputs": {
+    "clean_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "dirty_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "import_health_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json"
+  },
+  "required_ifc_import_case_count": 10,
+  "reuse_policy": "phase6_silent_import_loss_status_aggregates_phase3_ifc_receipts",
+  "reused_evidence": true,
+  "schema_version": "phase6-silent-import-loss-status.v1",
+  "selected_import_case_count": 10,
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "blocked",
+  "summary_line": "Phase 6 silent import loss: BLOCKED | selected=10/10 | executed=0/10"
+}

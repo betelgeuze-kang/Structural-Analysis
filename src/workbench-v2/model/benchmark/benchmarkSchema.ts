@@ -178,11 +178,9 @@ export function comparabilityReason(c: BenchmarkCase): string {
   return 'accuracy-comparable'
 }
 
-export interface RunCommandResult {
-  runnable: boolean
-  command?: string
-  reason?: string
-}
+export type RunCommandResult =
+  | { runnable: true; command: string; reason?: undefined }
+  | { runnable: false; reason: string; command?: undefined }
 
 /** A run command is offered ONLY when a runner is registered for the case. */
 export function benchmarkRunCommand(c: BenchmarkCase): RunCommandResult {

@@ -1,0 +1,32 @@
+{
+  "claim_boundary": "Receipt attests that the named lane produced real, freshly-run evidence (reused_evidence=false) and that the runner's own contract checks passed (contract_pass=true, reason_code=PASS). It does not authorize Level 3 promotion, release publication, or any external claim. Promotion, claim-boundary review, and release decisions remain with the human owner.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-23T16:32:08.725136+00:00",
+  "input_checksums": {
+    "implementation/phase1/commercial_benchmark_cases.from_csv.json": "sha256:0a0952473d52eccc69e573c8e725adab0024bc4ffed24787bba82b135dcab367",
+    "implementation/phase1/commercial_hf_export_sample.csv": "sha256:4d685cd857c08a29d235f2f3e17e1b1741bb7af5e4e4cc87189b3c59fa051f57",
+    "implementation/phase1/commercial_lf_export_sample.csv": "sha256:0caa2123027ab2eb696bd1b1b65c8a0841c93778ed49c44f31cc4ad8d55b9dc6",
+    "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
+    "scripts/report_commercial_solver_cross_validation.py": "sha256:a6874d18ad126fcc09fc6c4927fc69e60df9c2fd8bf1bbb7526aa1c0fd90697a"
+  },
+  "lane_id": "commercial_benchmark_torch",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "commercial_cross_validation_report",
+      "path": "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
+      "sha256": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "torch_capable_benchmark_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "summary": {
+    "case_count": 12,
+    "duration_seconds": 0.040982,
+    "passed_case_count": 12
+  },
+  "validation_command": "python3 scripts/report_commercial_solver_cross_validation.py --cases-json implementation/phase1/commercial_benchmark_cases.from_csv.json --output-json implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json"
+}

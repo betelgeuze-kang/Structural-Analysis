@@ -9,8 +9,8 @@
     "OWNER_INPUT_REQUIRED_INPUT_PATH": "sha256:OWNER_INPUT_REQUIRED_INPUT_DIGEST"
   },
   "reused_evidence": false,
-  "contract_pass": true,
-  "reason_code": "PASS",
+  "contract_pass": false,
+  "reason_code": "TEMPLATE_ONLY_OWNER_INPUT_REQUIRED",
   "validation_command": "OWNER_INPUT_REQUIRED_VALIDATION_COMMAND",
   "receipt_artifacts": [
     {
@@ -24,5 +24,7 @@
     "passed_case_count": 0,
     "duration_seconds": 0.0
   },
-  "claim_boundary": "OWNER_INPUT_REQUIRED_CLAIM_BOUNDARY_DESCRIPTION"
+  "claim_boundary": "OWNER_INPUT_REQUIRED_CLAIM_BOUNDARY_DESCRIPTION",
+  "template_only": true,
+  "note": "Template only. Do not use as fresh validation evidence until populated by a newly executed validation lane."
 }

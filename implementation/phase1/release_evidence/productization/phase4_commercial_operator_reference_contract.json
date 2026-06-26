@@ -1,0 +1,207 @@
+{
+  "claim_boundary": "This artifact defines the operator-attached commercial reference output package contract only. It does not include operator files, grant permission, record SHA256 checksums for real operator data, ingest commercial results, execute modeling-assumption diagnostics, compare two independent reference solvers, execute GUI story/member/mode trace rows for operator data, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparison_diagnostic_policy": {
+    "commercial_outputs_are_absolute_truth": false,
+    "diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "policy_id": "modeling_assumption_first",
+    "required_trace": "Every material comparison delta must cite checked modeling assumptions before it can be escalated as a solver-behavior hypothesis.",
+    "solver_correctness_claim_allowed": false
+  },
+  "contract_pass": false,
+  "current_reference_solver_count": 0,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-23T16:09:52.123646+00:00",
+  "gui_traceability_contract": {
+    "contract_pass": true,
+    "focused_tests": [
+      "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
+      "tests/test_structure_viewer_explainability_report_contract.py"
+    ],
+    "missing_trace_dimensions_are_blocking": true,
+    "operator_trace_rows_available": false,
+    "report_export": "src/structure-viewer/viewer-report-export.js",
+    "required_trace_dimensions": [
+      "member",
+      "story",
+      "mode"
+    ],
+    "schema_version": "structure-viewer-commercial-tool-crosswalk.v1",
+    "status": "ready",
+    "viewer_model": "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"
+  },
+  "import_template": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:50f8ae957a4f85f70cf6b59878c074cfb0775afe502ffc0ec2d501c96cf8cdd5",
+    "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473",
+    "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "sha256:01baf1908f4460e1249574459aefb2014168b4aabd82abc1055963fc7cfea3d9",
+    "tests/test_structure_viewer_explainability_report_contract.py": "sha256:8eb32cc892762d1962852f86aa6311ffd0136b298e6951c2375750971f6f6d3a"
+  },
+  "operator_reference_package_template": {
+    "case_id": "OPERATOR_CASE_ID",
+    "file_checksums": {},
+    "modeling_assumption_diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "modeling_convention": {
+      "convergence_tolerance": "DECLARED_BY_OPERATOR",
+      "damping_policy": "DECLARED_BY_OPERATOR",
+      "diaphragm_policy": "DECLARED_BY_OPERATOR",
+      "eigen_solver": "DECLARED_BY_OPERATOR",
+      "end_release_policy": "DECLARED_BY_OPERATOR",
+      "load_combinations": [],
+      "local_axis_convention": "DECLARED_BY_OPERATOR",
+      "mass_source_policy": "DECLARED_BY_OPERATOR",
+      "material_modulus_convention": "DECLARED_BY_OPERATOR",
+      "mesh_density": "DECLARED_BY_OPERATOR",
+      "p_delta_policy": "DECLARED_BY_OPERATOR",
+      "rigid_offset_policy": "DECLARED_BY_OPERATOR",
+      "self_weight_policy": "DECLARED_BY_OPERATOR",
+      "shell_formulation": "DECLARED_BY_OPERATOR",
+      "unit_system": "DECLARED_BY_OPERATOR"
+    },
+    "modeling_convention_id": "CONVENTION_ID",
+    "permission_scope": {
+      "approval_receipt": "OPERATOR_PERMISSION_RECEIPT_PATH",
+      "comparison_use_allowed": false,
+      "redistribution_allowed": false
+    },
+    "raw_input_files": [],
+    "raw_result_files": [],
+    "reference_solvers": [
+      {
+        "engine_name": "REFERENCE_SOLVER_A",
+        "engine_version": "ENGINE_VERSION",
+        "normalized_result_file": "operator_refs/CASE/solver_a.normalized.json"
+      },
+      {
+        "engine_name": "REFERENCE_SOLVER_B",
+        "engine_version": "ENGINE_VERSION",
+        "normalized_result_file": "operator_refs/CASE/solver_b.normalized.json"
+      }
+    ],
+    "unsupported_features": [],
+    "warnings": []
+  },
+  "phase3_closure_claim": false,
+  "phase4_closure_claim": false,
+  "remaining_blockers": [
+    "operator_reference_package_missing",
+    "operator_files_missing",
+    "license_or_customer_permission_missing",
+    "operator_file_checksums_missing",
+    "two_reference_solver_comparison_not_available",
+    "commercial_cross_solver_execution_missing",
+    "operator_comparison_trace_rows_missing"
+  ],
+  "required_package_fields": [
+    "case_id",
+    "modeling_convention_id",
+    "modeling_assumption_diagnostic_order",
+    "operator_name",
+    "operator_contact_or_internal_ticket",
+    "permission_scope",
+    "reference_solvers",
+    "raw_input_files",
+    "raw_result_files",
+    "normalized_result_file",
+    "file_checksums",
+    "unit_system",
+    "local_axis_convention",
+    "rigid_offset_policy",
+    "end_release_policy",
+    "diaphragm_policy",
+    "mass_source_policy",
+    "self_weight_policy",
+    "material_modulus_convention",
+    "shell_formulation",
+    "mesh_density",
+    "damping_policy",
+    "p_delta_policy",
+    "eigen_solver",
+    "load_combinations",
+    "convergence_tolerance",
+    "unsupported_features",
+    "warnings"
+  ],
+  "required_reference_solver_count": 2,
+  "schema_version": "phase4-commercial-operator-reference-contract.v1",
+  "selected_benchmark_lanes": [
+    "commercial-cross-solver"
+  ],
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "blocked",
+  "truth_class": "comparison_reference",
+  "validation_rules": [
+    {
+      "description": "Phase 4 closure needs at least two independent commercial/reference solver outputs for the same model.",
+      "rule_id": "two_independent_reference_solvers_required",
+      "severity": "blocking"
+    },
+    {
+      "description": "Operator or customer permission must explicitly allow local comparison use before any output is ingested.",
+      "rule_id": "operator_permission_must_be_attached",
+      "severity": "blocking"
+    },
+    {
+      "description": "Every raw input, raw result, and normalized result file must carry a SHA256 checksum.",
+      "rule_id": "all_raw_files_need_sha256",
+      "severity": "blocking"
+    },
+    {
+      "description": "Units, local axes, offsets, releases, mass, damping, P-Delta, eigensolver, load combinations, and convergence tolerance must be declared.",
+      "rule_id": "modeling_convention_must_be_declared",
+      "severity": "blocking"
+    },
+    {
+      "description": "Comparison deltas must be triaged against the declared modeling-assumption order before any solver-correctness hypothesis is recorded.",
+      "rule_id": "modeling_assumption_first_diagnosis_required",
+      "severity": "blocking"
+    },
+    {
+      "description": "Unsupported features and warnings must be listed explicitly; silent drops block comparison credit.",
+      "rule_id": "unsupported_features_are_explicit",
+      "severity": "blocking"
+    },
+    {
+      "description": "Commercial outputs are comparison references used to diagnose modeling assumptions, not proof that either solver is correct.",
+      "rule_id": "commercial_outputs_are_not_absolute_truth",
+      "severity": "claim_boundary"
+    }
+  ]
+}

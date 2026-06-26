@@ -1,0 +1,59 @@
+{
+  "analysis_type": "nonlinear_static_material_mesh_newton_seed",
+  "artifacts": {
+    "axial_chain_result": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_axial_chain_result.json",
+    "related_material_newton_breadth_summary": "implementation/phase1/release_evidence/productization/phase2_material_newton_breadth_summary.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json"
+  },
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "general_mesh_load_step_nonlinear_convergence_suite_not_closed",
+    "general_sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "broad_material_newton_breadth_not_closed"
+  ],
+  "claim_boundary": "This records one tiny 1D axial mesh where scalar material laws are assembled into global residual/Jacobian and solved with Newton residual/increment gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, broad material Newton breadth, or GPU/HIP parity.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "element_count": 2,
+  "engine_version": "1.0.0",
+  "final_tip_displacement_spread_m": 1.1102230246251565e-16,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-22T16:08:07.789347+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "scripts/build_phase2_material_mesh_newton_artifacts.py": "sha256:9f5619c056e7f0b9ecf89d918869e65a7d0bfbaeab7bac62d013330a6488349d",
+    "scripts/verify_quality_gate.py": "sha256:66126113aac6cf144f6a21e501bab13f87a49172e51af03f33769fcde55f3e2c",
+    "src/structural_analysis/assembly/__init__.py": "sha256:ccb7e9b1de89661f8fdecee0e68c659478d36a4374c2a8a45b13cf9a1aad31f8",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
+    "src/structural_analysis/solvers/nonlinear/__init__.py": "sha256:00ca9b4fddc088aafb6a536e0f6190172772e25af8f7ad5faefdb5c2a65567f5",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb",
+    "tests/test_build_phase2_material_mesh_newton_artifacts.py": "sha256:6cbf762c49d5596aafa5298b6b27b40793d65c4d2170cd3347dbf8261970cc17"
+  },
+  "load_step_gate_passed": true,
+  "material_newton_closure_claim": false,
+  "matrix_backend": "numpy_linalg_solve_dense",
+  "mesh_refinement_element_counts": [
+    1,
+    2,
+    4
+  ],
+  "mesh_refinement_tip_displacement_spread_m": 0.0,
+  "model_kind": "scalar_nonlinear_axial_cubic_spring",
+  "narrow_mesh_refinement_gate_passed": true,
+  "narrow_sparse_backend_equivalence_gate_passed": true,
+  "node_count": 3,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-material-mesh-newton-artifacts.v1",
+  "series_force_gate_passed": true,
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "sparse_backend_equivalence_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "sparse_backend_used": false,
+  "status": "ready",
+  "tangent_gate_passed": true,
+  "tip_displacement_m": 0.7860054779422102,
+  "truth_class": "assembled_mesh_truth"
+}

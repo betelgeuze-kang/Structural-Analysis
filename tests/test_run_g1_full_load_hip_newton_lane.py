@@ -89,7 +89,91 @@ def test_sub_full_load_checkpoint_blocks_before_execution(tmp_path: Path) -> Non
     assert payload["checkpoint"]["load_scale"] == 0.656
     assert payload["full_load_input_pass"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    assert "checkpoint_resolution_no_full_load_candidate" in payload["blockers"]
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
+    assert checkpoint_resolution_gate["selected_checkpoint_load_scale"] == 0.656
+    assert (
+        checkpoint_resolution_gate["highest_observed_gap_to_required_load_scale"]
+        == 1.0 - 0.656
+    )
+    assert payload["child_gate_evidence"]["ready"] is False
+    assert payload["child_gate_evidence"]["material_newton_breadth_passed"] is False
+    assert (
+        "child_material_newton_breadth_not_proven"
+        in payload["child_gate_evidence"]["blockers"]
+    )
     assert payload["child_exit_code"] is None
+
+
+def test_frontier_non_promoting_context_is_attached_without_promotion(
+    tmp_path: Path,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=0.656)
+    frontier_status = tmp_path / "mgt_g1_frontier_status.json"
+    frontier_status.write_text(
+        json.dumps(
+            {
+                "schema_version": "mgt-g1-shell-material-budgeted-continuation-status.v1",
+                "status": "partial",
+                "contract_pass": False,
+                "latest_frontier_receipt": "followup398.json",
+                "latest_frontier_direct_residual_inf_n": 5.74426714604332,
+                "direct_residual_gate_tolerance_n": 0.0005,
+                "frontier_chain": [{"receipt": "followup398.json"}],
+                "non_promoting_launch_receipts": [
+                    {
+                        "receipt": "followup390_launch.json",
+                        "status": "in_progress",
+                        "counted_in_frontier": False,
+                        "non_count_reason": (
+                            "completed child direct-residual receipt required"
+                        ),
+                    }
+                ],
+                "blockers": [
+                    "full_mesh_nonlinear_equilibrium_not_closed",
+                    "production_rocm_hip_residual_row_backend_not_closed",
+                ],
+                "claim_boundary": {
+                    "launch_only_receipts_do_not_claim_descent": True,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    proof = tmp_path / "hip-proof.json"
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=tmp_path / "child.json",
+        dry_run=False,
+        evidence_sources=(frontier_status,),
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    context = payload["frontier_non_promoting_evidence"]
+    assert context["present"] is True
+    assert context["source_path"] == str(frontier_status)
+    assert context["evidence_role"] == "non_promoting_partial_frontier_context"
+    assert context["promotes_g1_closure"] is False
+    assert context["promotes_lane_status"] is False
+    assert context["frontier_chain_count"] == 1
+    assert context["non_promoting_launch_receipt_count"] == 1
+    assert context["latest_frontier_direct_residual_inf_n"] == 5.74426714604332
+    assert context["direct_residual_gate_tolerance_n"] == 0.0005
+    assert context["frontier_residual_above_tolerance"] is True
+    assert context["non_promoting_launch_receipts"][0]["counted_in_frontier"] is False
+    assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
 
 
 def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Path) -> None:
@@ -112,6 +196,11 @@ def test_full_load_dry_run_builds_hip_required_direct_probe_command(tmp_path: Pa
     assert payload["status"] == "ready_to_run"
     assert payload["contract_pass"] is False
     assert payload["full_load_input_pass"] is True
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is True
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 1
+    assert checkpoint_resolution_gate["selected_checkpoint_load_scale"] == 1.0
     assert "--matrix-free-global-krylov-require-hip-batch-replay" in command
     assert "--current-tangent-residual-row-require-hip-batch-replay" in command
     assert "--allow-state-dependent-shell-material-tangent-hip-replay" in command
@@ -285,6 +374,51 @@ def test_partial_hip_consistency_proof_blocks_lane_promotion(
     assert payload["contract_pass"] is False
     assert "hip_consistency_proof_gate_not_passed" in payload["blockers"]
     assert "hip_consistency_proof_has_blockers" in payload["blockers"]
+    assert payload["child_exit_code"] is None
+    assert not child.exists()
+
+
+def test_cpu_diagnostic_hip_consistency_proof_blocks_lane_promotion(
+    tmp_path: Path,
+    monkeypatch: Any,
+) -> None:
+    checkpoint = _checkpoint(tmp_path / "state.npz", load_scale=1.0)
+    child = tmp_path / "child.json"
+    proof = tmp_path / "hip-proof.json"
+
+    class Result:
+        returncode = 0
+
+    def fake_run(command: list[str], *, check: bool) -> Result:
+        raise AssertionError("child probe must not run with CPU diagnostic HIP proof")
+
+    monkeypatch.setattr(run_g1_full_load_hip_newton_lane.subprocess, "run", fake_run)
+    _write_hip_consistency_proof(
+        proof,
+        source_commit_sha=run_g1_full_load_hip_newton_lane._git_head(),
+        gate_passed=True,
+        cpu_diagnostic_assembler_used=True,
+        production_hip_residual_jacobian_path=False,
+    )
+
+    payload, exit_code = run_g1_full_load_hip_newton_lane.build_lane_report(
+        checkpoint_npz=checkpoint,
+        output_json=child,
+        dry_run=False,
+        hip_consistency_proof_json=proof,
+    )
+
+    assert exit_code == 1
+    assert payload["status"] == "blocked"
+    assert payload["contract_pass"] is False
+    assert (
+        "hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
+        in payload["blockers"]
+    )
+    assert (
+        "hip_consistency_proof_production_hip_path_not_proven"
+        in payload["blockers"]
+    )
     assert payload["child_exit_code"] is None
     assert not child.exists()
 
@@ -2046,6 +2180,11 @@ def test_auto_select_picks_full_load_candidate(tmp_path: Path) -> None:
     assert resolution["selection"]["highest_observed_load_scale"] == 1.0
     assert resolution["selection"]["selected_checkpoint"]["path"] == str(full)
     assert resolution["selection"]["selection_reason"] == "full_load_candidate_selected"
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "auto_select"
+    assert checkpoint_resolution_gate["passed"] is True
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 1
+    assert checkpoint_resolution_gate["highest_observed_load_scale"] == 1.0
     assert Path(payload["checkpoint"]["path"]) == full
 
 
@@ -2113,6 +2252,7 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
     assert payload["status"] == "blocked"
     assert payload["full_load_input_pass"] is False
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    assert "checkpoint_resolution_no_full_load_candidate" in payload["blockers"]
     resolution = payload["checkpoint_resolution"]
     assert resolution["mode"] == "auto_select"
     assert resolution["selection"]["highest_observed_load_scale"] == 0.95
@@ -2124,6 +2264,15 @@ def test_auto_select_picks_highest_sub_full_load_candidate(tmp_path: Path) -> No
         == "highest_sub_full_load_candidate_selected"
     )
     assert payload["checkpoint"]["load_scale"] == 0.95
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "auto_select"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
+    assert checkpoint_resolution_gate["highest_observed_load_scale"] == 0.95
+    assert (
+        checkpoint_resolution_gate["highest_observed_gap_to_required_load_scale"]
+        == 0.050000000000000044
+    )
 
 
 def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
@@ -2156,6 +2305,10 @@ def test_explicit_checkpoint_overrides_auto_selection(tmp_path: Path) -> None:
     assert resolution["requested_path"] == str(explicit)
     assert Path(payload["checkpoint"]["path"]) == explicit
     assert "checkpoint_load_scale_below_required_full_load" in payload["blockers"]
+    checkpoint_resolution_gate = payload["checkpoint_resolution_gate"]
+    assert checkpoint_resolution_gate["mode"] == "explicit"
+    assert checkpoint_resolution_gate["passed"] is False
+    assert checkpoint_resolution_gate["full_load_candidate_count"] == 0
 
 
 def test_auto_select_ignores_generic_npz_path_records(tmp_path: Path) -> None:

@@ -59,11 +59,23 @@ function resolveRepoPath(relativePath = '') {
   }
 }
 
-function addPathCheck(checks, errors, label, relativePath, { required = true } = {}) {
+function isGeneratedReleasePath(value) {
+  // implementation/phase1/release/ is gitignored generated release output (see
+  // .gitignore). These artifacts are absent on clean checkouts (CI) by design.
+  // Note: this intentionally does not match the committed release_evidence/ tree.
+  return normalizeText(value).includes('implementation/phase1/release/')
+}
+
+function addPathCheck(checks, errors, warnings, label, relativePath, { required = true } = {}) {
   const result = resolveRepoPath(relativePath)
   checks.push({ label, ...result })
   if (required && !result.skipped && !result.exists) {
-    errors.push(`${label} missing: ${relativePath}`)
+    if (isGeneratedReleasePath(relativePath)) {
+      result.optional = true
+      warnings.push(`${label} missing (generated release artifact): ${relativePath}`)
+    } else {
+      errors.push(`${label} missing: ${relativePath}`)
+    }
   }
 }
 
@@ -101,7 +113,7 @@ function extractInteractiveComparisonCounts(payload = {}) {
   return { baseline, optimized }
 }
 
-function addArtifactCountCheck(checks, errors, label, drawing = {}) {
+function addArtifactCountCheck(checks, errors, warnings, label, drawing = {}) {
   const summary = drawing.optimization_summary && typeof drawing.optimization_summary === 'object'
     ? drawing.optimization_summary
     : {}
@@ -119,7 +131,15 @@ function addArtifactCountCheck(checks, errors, label, drawing = {}) {
     ok: false,
   }
   if (!resolved.exists) {
-    errors.push(`${label} artifact count source missing: ${sourcePath}`)
+    // Generated release artifacts are intentionally gitignored and absent on clean
+    // checkouts (CI). Treat their absence as a warning, but still validate counts
+    // whenever the artifact is present locally.
+    if (isGeneratedReleasePath(sourcePath)) {
+      check.optional = true
+      warnings.push(`${label} artifact count source missing (generated release artifact): ${sourcePath}`)
+    } else {
+      errors.push(`${label} artifact count source missing: ${sourcePath}`)
+    }
     checks.push(check)
     return
   }
@@ -175,24 +195,24 @@ function buildReport(args = parseArgs()) {
         errors.push(`${label} has no viewer_preset or artifact path`)
       }
 
-      addPathCheck(pathChecks, errors, `${label} drawing artifact`, drawing.artifact_path, {
+      addPathCheck(pathChecks, errors, warnings, `${label} drawing artifact`, drawing.artifact_path, {
         required: Boolean(drawing.artifact_path && !drawing.viewer_preset),
       })
       if (drawing.provenance?.source_path) {
-        addPathCheck(pathChecks, errors, `${label} provenance source`, drawing.provenance.source_path)
+        addPathCheck(pathChecks, errors, warnings, `${label} provenance source`, drawing.provenance.source_path)
       } else {
         warnings.push(`${label} has no provenance source_path`)
       }
       if (drawing.provenance?.report_path) {
-        addPathCheck(pathChecks, errors, `${label} provenance report`, drawing.provenance.report_path)
+        addPathCheck(pathChecks, errors, warnings, `${label} provenance report`, drawing.provenance.report_path)
       }
-      addArtifactCountCheck(artifactCountChecks, errors, label, drawing)
+      addArtifactCountCheck(artifactCountChecks, errors, warnings, label, drawing)
 
       for (const variant of drawing.variants) {
         if (!variant.variant) errors.push(`${label} variant missing name`)
         if (!variant.viewer_preset && !variant.artifact_path) errors.push(`${label}/${variant.variant} has no preset or artifact`)
         if (variant.artifact_path) {
-          addPathCheck(pathChecks, errors, `${label}/${variant.variant} artifact`, variant.artifact_path, {
+          addPathCheck(pathChecks, errors, warnings, `${label}/${variant.variant} artifact`, variant.artifact_path, {
             required: !variant.viewer_preset,
           })
         }

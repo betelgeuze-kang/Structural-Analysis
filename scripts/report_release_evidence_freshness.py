@@ -94,6 +94,14 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_evidence_console_scope_status.py"),
     ),
+    (
+        "developer_preview_rc_status",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "developer_preview_rc_status.json"
+        ),
+        Path("scripts/build_developer_preview_rc_status.py"),
+    ),
 )
 
 
@@ -254,6 +262,11 @@ def _input_checksum_paths(repo_root: Path, input_checksum: Any) -> list[Path]:
     return paths
 
 
+def _receipt_commit_allowed_path(path: str) -> bool:
+    normalized = str(path or "").replace("\\", "/").lstrip("./")
+    return normalized.startswith("implementation/phase1/release_evidence/productization/")
+
+
 def _source_state_matches(
     *,
     repo_root: Path,
@@ -270,7 +283,10 @@ def _source_state_matches(
         return False, False, []
     paths = [producer_path, *_input_checksum_paths(repo_root, input_checksum)]
     changed_paths = _git_diff_name_only(repo_root, source, current, paths)
-    return not changed_paths, False, changed_paths
+    non_receipt_paths = [
+        path for path in changed_paths if not _receipt_commit_allowed_path(path)
+    ]
+    return not non_receipt_paths, False, non_receipt_paths
 
 
 def _dependency_mtime_check(

@@ -1,0 +1,34 @@
+{
+  "claim_boundary": "Receipt attests that the surface_material_contact lane freshly ran the general FE contact benchmark matrix command and that its own checked-in structural contact, foundation/soil, interface-transfer, SSI, soil-tunnel, support-search, and node-to-surface proxy checks passed. It does not claim that every surface/material/contact sub-artifact was regenerated, does not prove arbitrary full FE contact parity, and does not authorize Level 3 promotion, release publication, or external claims.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-23T16:39:45.996812+00:00",
+  "input_checksums": {
+    "implementation/phase1/foundation_soil_link_gate_report.json": "sha256:bb9ff119024ecfb6b4acbc5bcad9ee6ac692073796288fc551e35feedef513c0",
+    "implementation/phase1/run_general_fe_contact_benchmark_gate.py": "sha256:131edf0e5b86afc92e7648c96f01ea7a7336baea95560ee38cd56a4321b71d39",
+    "implementation/phase1/soil_tunnel_ssi_report.json": "sha256:b1abbc822d8e5628afaf9bc8578b84615cd79f3a1768eca0683feb1c8b7d74ca",
+    "implementation/phase1/ssi_boundary_gate_report.json": "sha256:b2fa4163270480a6dc52dde3829fa07a03da21b690246075af217d3011b0efb6",
+    "implementation/phase1/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+    "implementation/phase1/structural_contact_validation_report.json": "sha256:8ddc1ff52301ce17555e13c23e8ee07838662c2c720594a1093d34f07bcbbbd0",
+    "implementation/phase1/substructuring_interface_report.json": "sha256:33c2e204ab58bf080fd00f2576893fabe88157c18ccb989c5a6cb569b5575fd3"
+  },
+  "lane_id": "surface_material_contact",
+  "reason_code": "PASS",
+  "receipt_artifacts": [
+    {
+      "kind": "general_fe_contact_benchmark_gate_report",
+      "path": "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+      "sha256": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59"
+    }
+  ],
+  "reused_evidence": false,
+  "runner": "heavy_surface_material_contact_validation",
+  "schema_version": "fresh-validation-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "summary": {
+    "case_count": 10,
+    "duration_seconds": 0.981544,
+    "passed_case_count": 10
+  },
+  "validation_command": "python3 implementation/phase1/run_general_fe_contact_benchmark_gate.py --out implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json"
+}

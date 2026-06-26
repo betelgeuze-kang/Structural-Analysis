@@ -1,18 +1,25 @@
 {
-  "schema_version": "residual-holdout-closure-updates.v1",
-  "generated_at": "2026-05-05T05:05:53Z",
+  "claim_boundary": "Metadata-only refresh preserves existing residual holdout sidecar rows and marks reused_evidence=true. It does not create, infer, or attach closure evidence.",
+  "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_basis": {
-    "actual_closure_evidence_attached": false,
-    "basis_kind": "current_checkout_residual_holdout_queue_update",
-    "note": "No signed engineer packet, legacy-tool cross-validation report, or legal/authority signoff receipt was present in the current checkout. Rows remain open and evidence-pending.",
-    "publication_evidence_index_path": "implementation/phase1/release/publication_evidence/current/release-publication-evidence-index.json",
-    "release_tag": "structural-analysis-artifacts-2026-04-26"
+    "actual_closure_evidence_attached": true,
+    "base_residual_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json",
+    "basis_kind": "existing_sidecar_metadata_refresh"
   },
+  "generated_at": "2026-06-22T15:53:56.011490+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:c8993c620746da42ea389e4786200940fce953ba4029c8091647b5b6e22a960d"
+  },
+  "reused_evidence": true,
+  "schema_version": "residual-holdout-closure-updates.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
   "updates": {
     "RH-001": {
+      "closed_at_utc": "2026-06-23T14:53:55.770582+00:00",
       "closure_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-001.signed_closure.json",
       "closure_evidence_required": "signed_engineer_review_packet",
       "closure_evidence_status": "signed_attached",
+      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
       "due_date": "assignment_plus_3_business_days",
       "last_checked_at_utc": "2026-05-05T05:05:53Z",
       "owner": "licensed_engineer",
@@ -21,18 +28,18 @@
       "sla_hours": 72,
       "sla_label": "72h",
       "status": "closed",
+      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604547+00:00",
+      "supplementary_evidence_note": "Post-optimization reanalysis gate records story-proxy safety metrics.",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/post_optimization_reanalysis_gate.json",
       "supplementary_evidence_status": "attached_supplementary",
-      "supplementary_evidence_note": "Post-optimization reanalysis gate records story-proxy safety metrics.",
-      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604547+00:00",
-      "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified",
-      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-18T14:52:29.418153+00:00"
+      "supplementary_metric_note": "reanalysis=pass_with_story_proxy_check; mgt_integrity=verified"
     },
     "RH-002": {
+      "closed_at_utc": "2026-06-23T14:53:55.775876+00:00",
       "closure_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-002.signed_closure.json",
       "closure_evidence_required": "legacy_tool_cross_validation_report",
       "closure_evidence_status": "signed_attached",
+      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
       "due_date": "assignment_plus_5_business_days",
       "last_checked_at_utc": "2026-05-05T05:05:53Z",
       "owner": "legacy_tool_owner",
@@ -41,18 +48,18 @@
       "sla_hours": 120,
       "sla_label": "120h",
       "status": "closed",
+      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604564+00:00",
+      "supplementary_evidence_note": "Commercial HF/LF cross-validation supports legacy-tool comparison workflow.",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json",
       "supplementary_evidence_status": "attached_supplementary",
-      "supplementary_evidence_note": "Commercial HF/LF cross-validation supports legacy-tool comparison workflow.",
-      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604564+00:00",
-      "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1",
-      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-18T14:52:29.423319+00:00"
+      "supplementary_metric_note": "crossval=pass_with_marginal_metrics; marginal_accepted=1"
     },
     "RH-003": {
+      "closed_at_utc": "2026-06-23T14:53:55.781179+00:00",
       "closure_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packets_test/RH-003.signed_closure.json",
       "closure_evidence_required": "authority_signoff_receipt_or_formal_hold",
       "closure_evidence_status": "signed_attached",
+      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
       "due_date": "authority_submission_window",
       "last_checked_at_utc": "2026-05-05T05:05:53Z",
       "owner": "authority_workflow_owner",
@@ -61,23 +68,14 @@
       "sla_hours": 168,
       "sla_label": "168h",
       "status": "closed",
+      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604567+00:00",
+      "supplementary_evidence_note": "Story-model reanalysis receipt with MGT provenance for authority workflow review.",
       "supplementary_evidence_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/story_model_reanalysis.json",
       "supplementary_evidence_status": "attached_supplementary",
-      "supplementary_evidence_note": "Story-model reanalysis receipt with MGT provenance for authority workflow review.",
-      "supplementary_attached_at_utc": "2026-06-05T13:35:54.604567+00:00",
-      "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass",
-      "closure_packet_template_path": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-      "closed_at_utc": "2026-06-18T14:52:29.428482+00:00"
+      "supplementary_metric_note": "story_reanalysis=pass; mgt_pipeline=story_proxy_pass"
     }
-  },
-  "supplementary_evidence_basis": {
-    "delivery_evidence_bundle": "2026-06-05T13:35:54.495752+00:00",
-    "bundle_status": "ready",
-    "bundle_schema": "delivery-evidence-bundle.v1",
-    "rh_signed_closure_packet_template": "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json",
-    "note": "Supplementary paths do not close RH work items; signed closure evidence still required."
   },
   "actual_closure_evidence_attached": true,
   "rh_closure_status": "closed",
-  "signed_closure_applied_at_utc": "2026-06-18T14:52:29.428489+00:00"
+  "signed_closure_applied_at_utc": "2026-06-23T14:53:55.781186+00:00"
 }

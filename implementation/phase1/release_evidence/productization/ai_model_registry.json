@@ -1,12 +1,12 @@
 {
   "schema_version": "ai-model-registry.v1",
-  "generated_at": "2026-06-18T15:01:37.002051+00:00",
+  "generated_at": "2026-06-23T14:58:45.432710+00:00",
   "status": "production_model_ready",
   "production_model_ready": true,
   "checkpoint_path": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/checkpoint.pt",
   "checkpoint_ready": true,
   "checkpoint_validated": true,
-  "checkpoint_sha256": "af51d1c7aaad28efb623f81827ec8d21d70aff0e5034254d0f1904226eb9c9e7",
+  "checkpoint_sha256": "c53d3207cc2dbbbe41f9fd8ac941a164e4f25bc7efcdf9a743be2c435dcec86f",
   "registry_states": [
     "candidate",
     "shadow",
@@ -18,7 +18,7 @@
       "model_id": "bounded-linear-response-shadow-v1",
       "state": "production",
       "mode": "shadow_with_solver_fallback",
-      "checkpoint_sha256": "af51d1c7aaad28efb623f81827ec8d21d70aff0e5034254d0f1904226eb9c9e7",
+      "checkpoint_sha256": "c53d3207cc2dbbbe41f9fd8ac941a164e4f25bc7efcdf9a743be2c435dcec86f",
       "dataset_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/dataset_card.json",
       "model_card": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/model_card.json",
       "validation_receipt": "/home/betelgeuze/건축구조분석/implementation/phase1/release/ml_surrogate/validation_receipt.json",

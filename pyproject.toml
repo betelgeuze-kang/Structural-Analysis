@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=68", "wheel", "tomli; python_version < '3.11'"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,8 +24,16 @@ dev = [
   "ruff>=0.5",
 ]
 
-[tool.setuptools]
-py-modules = []
+[project.scripts]
+structural-analysis = "structural_analysis.api.cli:main"
+structural-analysis-benchmark = "structural_analysis.benchmark.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["structural_analysis*"]
+
+[tool.setuptools.package-data]
+structural_analysis = ["schemas/*.json"]
 
 [tool.ruff]
 extend-exclude = [

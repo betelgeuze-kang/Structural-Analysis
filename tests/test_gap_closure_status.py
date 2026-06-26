@@ -27,6 +27,28 @@ def test_report_gap_closure_status() -> None:
     assert "does not create external receipts" in payload["claim_boundary"]
     assert "drawing_comparison_p1_p3" in payload["sections"]
     assert payload["sections"]["drawing_comparison_p1_p3"]["status"] == "complete"
+    assert payload["sections"]["ai_freeze_boundary"]["status"] == "ready"
+    assert payload["sections"]["ai_freeze_boundary"]["contract_pass"] is True
+    assert payload["sections"]["ai_freeze_boundary"]["autonomous_ai_engine_claim"] is False
+    assert payload["sections"]["ai_freeze_boundary"]["surrogate_truth_claim_frozen"] is True
+    assert payload["sections"]["ai_freeze_boundary"]["ai_training_frozen"] is True
+    assert payload["sections"]["ai_freeze_boundary"]["shadow_solver_gated_only"] is True
+    assert payload["sections"]["ai_freeze_boundary"]["production_pareto_policy_claim"] is False
+    assert "does not prove autonomous structural-design AI" in payload["sections"]["ai_freeze_boundary"][
+        "claim_boundary"
+    ]
+    assert payload["artifacts"]["ai_freeze_boundary_status"].endswith("ai_freeze_boundary_status.json")
+    audit = payload["sections"]["gap_ledger_evidence_audit"]
+    assert audit["status"] == "ready"
+    assert audit["contract_pass"] is True
+    assert audit["row_count"] == 20
+    assert audit["closed_row_count"] == 17
+    assert audit["nonclosed_row_count"] == 3
+    assert audit["closed_evidence_coverage"]["closed_rows_with_evidence_count"] == 17
+    assert audit["closed_evidence_coverage"]["closed_missing_claim_boundary_ids"] == []
+    assert audit["nonclosed_visibility"]["nonclosed_rows_with_claim_boundary_count"] == 3
+    assert "does not create authoritative evidence" in audit["claim_boundary"]
+    assert payload["artifacts"]["gap_ledger_evidence_audit"].endswith("gap_ledger_evidence_audit.json")
     assert payload["delivery_status"] in {"ready", "review_required", "missing"}
     assert payload["authority_holdout_status"] in {"open", "closed"}
     assert payload["full_gap_ledger_status"] == "open"

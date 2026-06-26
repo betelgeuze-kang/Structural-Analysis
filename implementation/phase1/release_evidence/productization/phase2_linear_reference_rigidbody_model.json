@@ -1,0 +1,95 @@
+{
+  "coordinate_system": {
+    "axis_order": [
+      "X",
+      "Y",
+      "Z"
+    ],
+    "up_axis": "Z"
+  },
+  "elements": [
+    {
+      "id": "E1",
+      "material": "M1",
+      "nodes": [
+        "N1",
+        "N2"
+      ],
+      "section": "S1",
+      "type": "truss"
+    }
+  ],
+  "loads": [
+    {
+      "components": [
+        100.0,
+        0.0,
+        0.0
+      ],
+      "id": "P1",
+      "node": "N2"
+    }
+  ],
+  "materials": [
+    {
+      "elastic_modulus": 200000.0,
+      "id": "M1",
+      "type": "elastic"
+    }
+  ],
+  "metadata": {
+    "case_id": "phase2_axial_bar_rigid_body_translation_guard",
+    "claim_boundary": "rigid_body_mode_must_block_not_regularize_or_pass",
+    "truth_class": "negative_rigid_body_guard"
+  },
+  "nodes": [
+    {
+      "coordinates": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "id": "N1"
+    },
+    {
+      "coordinates": [
+        2.0,
+        0.0,
+        0.0
+      ],
+      "id": "N2"
+    }
+  ],
+  "schema_version": "structural-analysis-canonical-model.v1",
+  "sections": [
+    {
+      "area": 0.01,
+      "id": "S1",
+      "type": "bar"
+    }
+  ],
+  "supports": [
+    {
+      "dofs": [
+        "UY",
+        "UZ"
+      ],
+      "id": "SUP1",
+      "node": "N1"
+    },
+    {
+      "dofs": [
+        "UY",
+        "UZ"
+      ],
+      "id": "SUP2",
+      "node": "N2"
+    }
+  ],
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "unsupported_features": [],
+  "warnings": []
+}

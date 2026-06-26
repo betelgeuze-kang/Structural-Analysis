@@ -393,5 +393,56 @@ def test_local_metadata_only_refresh_preserves_run_history_timestamp(tmp_path: P
     assert payload["summary"]["nightly_local_required_trigger_present"] is True
 
 
+def test_local_metadata_only_refresh_claim_boundary_is_idempotent(tmp_path: Path) -> None:
+    workflow_dir = tmp_path / ".github" / "workflows"
+    workflow_dir.mkdir(parents=True)
+    (workflow_dir / "ci.yml").write_text("name: CI\non:\n  pull_request:\n", encoding="utf-8")
+    (workflow_dir / "nightly.yml").write_text(
+        "name: Nightly Full Quality\non: [schedule, workflow_dispatch]\n",
+        encoding="utf-8",
+    )
+    existing = tmp_path / "github_actions_ci_streak_evidence.json"
+    existing.write_text(
+        json_dumps(
+            {
+                "schema_version": "github-actions-ci-streak-evidence.v1",
+                "generated_at": "2026-06-16T19:55:48+00:00",
+                "threshold": 30,
+                "contract_pass": False,
+                "claim_boundary": (
+                    "GitHub Actions run history only. "
+                    f"{build_github_actions_ci_streak_evidence.LOCAL_METADATA_CLAIM_BOUNDARY} "
+                    f"{build_github_actions_ci_streak_evidence.LOCAL_METADATA_CLAIM_BOUNDARY}"
+                ),
+                "workflow_discovery": {"query_error": ""},
+                "lanes": {
+                    "pr": {"workflow": "CI", "consecutive_pass_count": 0, "threshold_pass": False},
+                    "nightly": {
+                        "workflow": "Nightly Full Quality",
+                        "consecutive_pass_count": 0,
+                        "threshold_pass": False,
+                    },
+                },
+                "summary": {},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    first = build_github_actions_ci_streak_evidence.refresh_local_workflow_metadata(
+        existing_evidence_path=existing,
+        local_workflow_dir=workflow_dir,
+    )
+    existing.write_text(json_dumps(first), encoding="utf-8")
+    second = build_github_actions_ci_streak_evidence.refresh_local_workflow_metadata(
+        existing_evidence_path=existing,
+        local_workflow_dir=workflow_dir,
+    )
+
+    boundary = second["claim_boundary"]
+    local_boundary = build_github_actions_ci_streak_evidence.LOCAL_METADATA_CLAIM_BOUNDARY
+    assert boundary.count(local_boundary) == 1
+
+
 def json_dumps(payload: object) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True)

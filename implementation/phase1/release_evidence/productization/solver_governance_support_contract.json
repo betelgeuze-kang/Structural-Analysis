@@ -1,6 +1,6 @@
 {
   "schema_version": "solver-governance-support-contract.v1",
-  "generated_at": "2026-06-18T15:00:15.245854+00:00",
+  "generated_at": "2026-06-23T15:03:14.069901+00:00",
   "status": "ready",
   "governance_support_ready": true,
   "bundle_status": "ready",
@@ -89,11 +89,7 @@
         "external_receipt_or_closure_pending:korean_public_structures",
         "external_receipt_or_closure_pending:peer_spd_hinge",
         "external_receipt_or_closure_pending:tpu_hffb",
-        "external_submission_receipts_pending",
-        "residual_closure_pending:RH-001",
-        "residual_closure_pending:RH-002",
-        "residual_closure_pending:RH-003",
-        "residual_holdout_closure_pending"
+        "external_submission_receipts_pending"
       ]
     },
     {
@@ -103,7 +99,9 @@
       "blockers": [
         "repo_benchmark_bridge_mgt_present",
         "metadata_only_sources_present",
-        "operator_attached_real_mgt_header_ok_below_target"
+        "operator_attached_real_mgt_header_ok_below_target",
+        "operator_source_mapping_blocked_actions_present",
+        "operator_rights_blocked_private_candidate_actions_present"
       ]
     }
   ],

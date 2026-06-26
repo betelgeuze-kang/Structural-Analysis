@@ -298,14 +298,19 @@ def _seed_alpha_scan(
     displacement_cap_m: float,
     **kwargs: Any,
 ) -> tuple[dict[str, Any], np.ndarray]:
+    iteration_kwargs = dict(kwargs)
+    iteration_kwargs.pop("residual_tolerance_n", None)
+    iteration_kwargs.pop("relative_increment_tolerance", None)
     started = time.perf_counter()
     base_row, fixed_point_u = _iteration_row(
         iteration=0,
         load_scale=load_scale,
         previous_u=seed_u,
         relaxation_factor=1.0,
+        residual_tolerance_n=residual_tolerance_n,
+        relative_increment_tolerance=relative_increment_tolerance,
         displacement_cap_m=displacement_cap_m,
-        **kwargs,
+        **iteration_kwargs,
     )
     _annotate_convergence_gates(
         base_row,
@@ -322,8 +327,10 @@ def _seed_alpha_scan(
             load_scale=load_scale,
             previous_u=candidate_u,
             relaxation_factor=0.0,
+            residual_tolerance_n=residual_tolerance_n,
+            relative_increment_tolerance=relative_increment_tolerance,
             displacement_cap_m=displacement_cap_m,
-            **kwargs,
+            **iteration_kwargs,
         )
         _annotate_convergence_gates(
             candidate_row,
@@ -670,6 +677,9 @@ def _run_load_step(
     rows: list[dict[str, Any]] = []
     seed_alpha_scan: dict[str, Any] | None = None
     if seed_alpha_scan_values:
+        seed_scan_kwargs = dict(kwargs)
+        seed_scan_kwargs.pop("residual_tolerance_n", None)
+        seed_scan_kwargs.pop("relative_increment_tolerance", None)
         seed_alpha_scan, scanned_u = _seed_alpha_scan(
             load_scale=load_scale,
             seed_u=u,
@@ -677,7 +687,7 @@ def _run_load_step(
             residual_tolerance_n=residual_tolerance_n,
             relative_increment_tolerance=relative_increment_tolerance,
             displacement_cap_m=displacement_cap_m,
-            **kwargs,
+            **seed_scan_kwargs,
         )
         u = np.asarray(scanned_u, dtype=np.float64)
         if bool(seed_alpha_scan.get("best_ready")) or int(max_iterations) <= 0:

@@ -8,12 +8,20 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import sys
 from typing import Any
 from urllib.parse import urlparse
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "license-status-closure-report.v1"
 ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/license_status_closure_report.json")
 DEFAULT_TEMPLATE = Path("docs/templates/license_status.template.json")
@@ -47,7 +55,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=Path(__file__).resolve().parent.parent,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -244,12 +252,17 @@ def build_report(
     placeholder_values_absent_pass = not any(
         blocker.endswith("_placeholder") or blocker == "license_status_template_only" for blocker in blockers
     )
+    checksum_inputs = [license_status_path, template_path]
+    resolved_evidence_path = str(evidence_ref_resolution.get("resolved_path", "") or "")
+    if resolved_evidence_path:
+        checksum_inputs.append(Path(resolved_evidence_path))
 
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc().isoformat(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(checksum_inputs, repo_root=repo_root),
         "reused_evidence": False,
         "license_status_path": str(license_status_path),
         "contract_pass": not blockers,

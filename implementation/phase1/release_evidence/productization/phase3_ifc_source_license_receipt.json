@@ -1,0 +1,142 @@
+{
+  "blockers": [
+    "dataset_repository_url_missing",
+    "dirty_import_execution_missing",
+    "gui_task_runner_not_implemented",
+    "import_health_execution_missing",
+    "per_file_license_review_pending",
+    "phase3_ifc_import_case_quantity_credit_missing",
+    "product_legal_license_review_pending",
+    "query_expected_answers_missing",
+    "query_task_file_checksums_missing",
+    "selected_file_checksums_missing",
+    "silent_data_loss_negative_gate_not_executed",
+    "silent_import_loss_gate_not_executed"
+  ],
+  "claim_boundary": "This receipt attaches source identity and upstream license URLs for selected IFC benchmark candidates. It does not download or bundle IFC files, approve redistribution/commercial use, attach file checksums, author expected outputs, or close Phase 3.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_use_allowed_source_count": 0,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-23T16:09:52.124273+00:00",
+  "input_checksums": {
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:812de49775e5e2bbef5c7ce56937afcb507bb6f352a1ead65b595a6917178ecf",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:1194ff0fd1f968978fc9540a18c2b92435ab401df93c50c483a797e888df8a59",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:77b7a381e438ca48ef3143a1002e585d67aef10717507c1a5568a3f52dfe7065"
+  },
+  "phase3_closure_claim": false,
+  "phase3_ifc_import_case_requirement": {
+    "blocker": "phase3_ifc_import_case_quantity_credit_missing",
+    "claim_boundary": "The Phase 3 roadmap requires at least 10 clean/dirty IFC import cases. Current source-license evidence identifies two clean PCERT contracts and eight dirty/import-hardening community contracts; none have source checksums, product legal approval, import-health execution, or quantity credit.",
+    "import_health_execution_receipt_path": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "minimum_clean_dirty_import_case_count": 10,
+    "quantity_credit_ready_count": 0,
+    "remaining_import_contract_count": 0,
+    "selected_clean_import_contract_count": 2,
+    "selected_dirty_import_contract_count": 8,
+    "selected_total_import_contract_count": 10,
+    "status": "blocked"
+  },
+  "ready_source_count": 0,
+  "redistribution_allowed_source_count": 0,
+  "reused_evidence": false,
+  "schema_version": "phase3-ifc-source-license-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_count": 3,
+  "source_url_verified_count": 3,
+  "sources": [
+    {
+      "acquisition_receipt_path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+      "blockers": [
+        "selected_file_checksums_missing",
+        "product_legal_license_review_pending",
+        "import_health_execution_missing",
+        "silent_import_loss_gate_not_executed"
+      ],
+      "candidate_files": [
+        "Building-Structural.ifc",
+        "Infra-Bridge.ifc"
+      ],
+      "checksum_status": "missing_until_acquisition_script_fetches_selected_files",
+      "claim_boundary": "Official buildingSMART PCERT sample source identity and declared license URL are attached, but no source file checksums, product/legal approval, executed import-health/silent-import-loss gate outputs, or Phase 3 quantity credit are claimed.",
+      "commercial_use_allowed": false,
+      "declared_license": "CC-BY-4.0",
+      "expected_output_status": "authored_import_health_contracts_pending_execution",
+      "lanes": [
+        "buildingsmart-clean-ifc"
+      ],
+      "license_review_status": "declared_upstream_license_seen_product_legal_review_pending",
+      "license_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/LICENSE",
+      "ready_for_phase3_quantity_credit": false,
+      "redistribution_allowed": false,
+      "source_id": "buildingsmart_pcert_sample_scene",
+      "source_path_url": "https://github.com/buildingSMART/Sample-Test-Files/tree/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene",
+      "source_url": "https://github.com/buildingSMART/Sample-Test-Files",
+      "source_url_verified": true
+    },
+    {
+      "acquisition_receipt_path": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+      "blockers": [
+        "selected_file_checksums_missing",
+        "per_file_license_review_pending",
+        "dirty_import_execution_missing",
+        "silent_data_loss_negative_gate_not_executed"
+      ],
+      "candidate_files": [
+        "Duplex_A_20110907.ifc",
+        "Duplex_Electrical_20121207.ifc",
+        "Duplex_MEP_20110907.ifc",
+        "Clinic_Architectural.ifc",
+        "Clinic_Electrical.ifc",
+        "Clinic_HVAC.ifc",
+        "Clinic_Plumbing.ifc",
+        "Clinic_Structural.ifc"
+      ],
+      "checksum_status": "missing_until_dirty_file_acquisition",
+      "claim_boundary": "Community sample source identity and declared license URL are attached with eight selected dirty/import-hardening IFC contracts. Per-file license review, checksums, import-health execution, and quantity credit remain blocked.",
+      "commercial_use_allowed": false,
+      "declared_license": "CC-BY-4.0",
+      "expected_output_status": "authored_negative_import_contracts_pending_execution",
+      "lanes": [
+        "buildingsmart-dirty-ifc"
+      ],
+      "license_review_status": "declared_upstream_license_seen_per_file_review_pending",
+      "license_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/LICENSE",
+      "ready_for_phase3_quantity_credit": false,
+      "redistribution_allowed": false,
+      "source_id": "buildingsmart_community_dirty_samples",
+      "source_path_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
+      "source_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
+      "source_url_verified": true
+    },
+    {
+      "blockers": [
+        "dataset_repository_url_missing",
+        "per_file_license_review_pending",
+        "query_task_file_checksums_missing",
+        "query_expected_answers_missing",
+        "gui_task_runner_not_implemented"
+      ],
+      "candidate_files": [],
+      "checksum_status": "missing_until_dataset_repository_and_files_are_attached",
+      "claim_boundary": "The arXiv paper is attached only as source identity for ifc-bench v2 query-task planning. It is not a dataset repository receipt, per-file license review, file checksum manifest, or GUI task expected-answer receipt.",
+      "commercial_use_allowed": false,
+      "declared_license": "paper_license_visible_dataset_license_unverified",
+      "expected_output_status": "missing_until_query_answers_authored",
+      "lanes": [
+        "ifc-query-and-gui"
+      ],
+      "license_review_status": "dataset_repository_and_per_file_license_missing",
+      "license_url": "https://arxiv.org/abs/2605.01698",
+      "ready_for_phase3_quantity_credit": false,
+      "redistribution_allowed": false,
+      "source_doi": "https://doi.org/10.48550/arXiv.2605.01698",
+      "source_id": "ifc_bench_v2_arxiv_query_tasks",
+      "source_url": "https://arxiv.org/abs/2605.01698",
+      "source_url_verified": true
+    }
+  ],
+  "status": "blocked"
+}

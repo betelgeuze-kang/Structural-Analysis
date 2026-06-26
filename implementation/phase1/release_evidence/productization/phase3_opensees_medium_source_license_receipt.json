@@ -1,0 +1,129 @@
+{
+  "authoritative_acquisition": {
+    "blockers": [
+      "authoritative_source_url_missing",
+      "upstream_license_text_missing",
+      "authoritative_download_or_acquisition_script_blocked_source_url_missing"
+    ],
+    "claim_boundary": "No authoritative upstream source URL or license text is attached, so this receipt deliberately does not author a download command for OpenSees medium.",
+    "download_command": [],
+    "source_url_verified": false,
+    "status": "blocked_source_url_and_license_missing"
+  },
+  "blockers": [
+    "authoritative_source_url_missing",
+    "upstream_license_text_missing",
+    "redistribution_rights_unverified",
+    "commercial_use_rights_unverified",
+    "authoritative_download_or_acquisition_script_blocked_source_url_missing",
+    "reference_outputs_missing",
+    "normalization_not_implemented",
+    "opensees_medium_scorecard_execution_missing"
+  ],
+  "claim_boundary": "This receipt separates local OpenSees medium candidate checksum/topology evidence from source and license approval. It keeps source URL verification, license review, redistribution, commercial use, reference outputs, normalization, and scorecard execution for OpenSees medium blocked. It does not close OpenSees medium, Developer Preview RC, or Phase 3.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_use_allowed": false,
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-23T16:09:52.091100+00:00",
+  "input_checksums": {
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "sha256:309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+    "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "sha256:ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+    "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
+    "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
+    "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:1f7e307b69037e4587b9cdf776762e4d4d2cafc6e97e41c795ba74e34c5014e1",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:77b7a381e438ca48ef3143a1002e585d67aef10717507c1a5568a3f52dfe7065"
+  },
+  "lanes": [
+    "opensees-medium"
+  ],
+  "license_evidence": {
+    "claim_boundary": "No authoritative upstream license text is attached to this receipt. Local files and checksums cannot be treated as redistribution approval.",
+    "license_text_path": "",
+    "review_owner": "",
+    "review_status": "missing",
+    "spdx": ""
+  },
+  "license_review_status": "blocked_no_authoritative_license_source_attached",
+  "local_candidate_artifacts": [
+    {
+      "case_id": "SCBF16B",
+      "family_id": "sac_scbf16b",
+      "format": "tcl",
+      "origin": "global_authority",
+      "parser_contract_ready": true,
+      "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+      "sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+      "size_bytes": 118066
+    },
+    {
+      "case_id": "SCBF16B_shell_beam_mix",
+      "family_id": "sac_scbf16b_shell_beam_mix",
+      "format": "tcl",
+      "origin": "global_authority",
+      "parser_contract_ready": true,
+      "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+      "sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+      "size_bytes": 118474
+    }
+  ],
+  "local_candidate_checksum_attached": true,
+  "local_candidate_verification": {
+    "checksum_verification_rows": [
+      {
+        "case_id": "SCBF16B",
+        "expected_sha256": "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80",
+        "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+        "verification_command": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import hashlib; import sys; actual = hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(); raise SystemExit(0 if actual == sys.argv[2] else 1)",
+          "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl",
+          "309234fd42a58369a6d41198290527c6a86fee7da38c38a2fcbf625318720b80"
+        ]
+      },
+      {
+        "case_id": "SCBF16B_shell_beam_mix",
+        "expected_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc",
+        "path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+        "verification_command": [
+          "python3",
+          "-c",
+          "from pathlib import Path; import hashlib; import sys; actual = hashlib.sha256(Path(sys.argv[1]).read_bytes()).hexdigest(); raise SystemExit(0 if actual == sys.argv[2] else 1)",
+          "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+          "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc"
+        ]
+      }
+    ],
+    "claim_boundary": "These commands verify only committed/local candidate checksums and topology receipt consistency. They do not prove upstream source authority, license permission, reference outputs, normalization, or OpenSees medium scorecard execution.",
+    "contract_pass": true,
+    "status": "ready_for_local_parser_work_only",
+    "topology_verification_command": [
+      "python3",
+      "scripts/build_phase3_opensees_source_license_receipt.py",
+      "--check"
+    ]
+  },
+  "phase3_closure_claim": false,
+  "redistribution_allowed": false,
+  "schema_version": "phase3-opensees-medium-source-license-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "source_id": "opensees_scbf16b_medium_candidate",
+  "source_url_candidates": [],
+  "source_url_verified": false,
+  "status": "blocked",
+  "topology_receipt": {
+    "beam_element_count": 166,
+    "claim_boundary": "Topology receipt proves local parser/topology checks only. It does not prove source URL authority, license permission, reference outputs, normalization, solver accuracy, or Phase 3 quantity credit.",
+    "contract_pass": true,
+    "node_count": 426,
+    "path": "implementation/phase1/opensees_topology_report.json",
+    "real_topology_pass": true,
+    "shell_beam_mix_pass": true,
+    "shell_element_count": 5,
+    "source_is_opensees_text": true,
+    "source_path": "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl",
+    "source_sha256": "ceb64448b2a04afd19f57a6652aac4859760c511fd3bb447c41991f7c415bcdc"
+  }
+}

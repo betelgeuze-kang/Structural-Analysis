@@ -1,0 +1,711 @@
+{
+  "claim_boundary": "This records one tiny 1D axial mesh where scalar material laws are assembled into global residual/Jacobian and solved with Newton residual/increment gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, broad material Newton breadth, or GPU/HIP parity.",
+  "contract_pass": true,
+  "element_count": 2,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "globalization": "backtracking_line_search",
+  "material_newton_closure_claim": false,
+  "mesh_result": {
+    "assembly": {
+      "displacements_m": [
+        0.0,
+        0.3930027389711051,
+        0.7860054779422102
+      ],
+      "element_forces_kn": [
+        {
+          "element_id": "e1",
+          "elongation_m": 0.3930027389711051,
+          "internal_force_kn": 99.99999999999997,
+          "length_m": 1.0,
+          "node_i": 0,
+          "node_j": 1,
+          "tangent_kn_per_m": 563.3534585163718
+        },
+        {
+          "element_id": "e2",
+          "elongation_m": 0.3930027389711051,
+          "internal_force_kn": 99.99999999999997,
+          "length_m": 1.0,
+          "node_i": 1,
+          "node_j": 2,
+          "tangent_kn_per_m": 563.3534585163718
+        }
+      ],
+      "external_forces_kn": [
+        0.0,
+        0.0,
+        100.0
+      ],
+      "free_node_indices": [
+        1,
+        2
+      ],
+      "internal_forces_kn": [
+        -99.99999999999997,
+        0.0,
+        99.99999999999997
+      ],
+      "jacobian_kn_per_m": [
+        [
+          1126.7069170327436,
+          -563.3534585163718
+        ],
+        [
+          -563.3534585163718,
+          563.3534585163718
+        ]
+      ],
+      "reactions_kn": [
+        -99.99999999999997,
+        0.0,
+        0.0
+      ],
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_kn": [
+        0.0,
+        -2.842170943040401e-14
+      ]
+    },
+    "case_id": "phase2_material_mesh_newton_axial_chain_cubic_spring",
+    "claim_boundary": "This records one tiny 1D axial mesh where scalar material laws are assembled into global residual/Jacobian and solved with Newton residual/increment gates without regularization or fallback false PASS. It does not close G1 full-mesh/full-load nonlinear equilibrium, general frame/shell/material coupling, sparse production matrix backends, broad material Newton breadth, or GPU/HIP parity.",
+    "contract_pass": true,
+    "convergence_history": [
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.0,
+          0.0
+        ],
+        "increment_abs_m": 1.0,
+        "increment_gate_passed": false,
+        "iteration": 0,
+        "line_search_alpha": 0.5,
+        "line_search_attempt_count": 2,
+        "newton_increment_m": [
+          1.0,
+          2.0
+        ],
+        "relative_residual": 1.0,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0,
+          -100.0
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.5,
+          1.0
+        ],
+        "increment_abs_m": 0.17647058823529416,
+        "increment_gate_passed": false,
+        "iteration": 1,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -0.08823529411764706,
+          -0.1764705882352941
+        ],
+        "relative_residual": 0.75,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0,
+          75.0
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.4117647058823529,
+          0.8235294117647058
+        ],
+        "increment_abs_m": 0.03611677758084464,
+        "increment_gate_passed": false,
+        "iteration": 2,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -0.018058388790422344,
+          -0.03611677758084469
+        ],
+        "relative_residual": 0.10991247710156714,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0,
+          10.991247710156713
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.3937063170919306,
+          0.7874126341838612
+        ],
+        "increment_abs_m": 0.0014050878617880569,
+        "increment_gate_passed": false,
+        "iteration": 3,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -0.0007025439308940558,
+          -0.0014050878617881115
+        ],
+        "relative_residual": 0.003969471511987166,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0,
+          0.3969471511987166
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.3930037731610366,
+          0.7860075463220731
+        ],
+        "increment_abs_m": 2.0683753860772924e-06,
+        "increment_gate_passed": false,
+        "iteration": 4,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -1.0341876930606496e-06,
+          -2.068375386121299e-06
+        ],
+        "relative_residual": 5.826157356523254e-06,
+        "residual_gate_passed": false,
+        "residual_kn": [
+          0.0,
+          0.0005826157356523254
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.39300273897334354,
+          0.7860054779466871
+        ],
+        "increment_abs_m": 4.476863324498481e-12,
+        "increment_gate_passed": false,
+        "iteration": 5,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 1,
+        "newton_increment_m": [
+          -2.2384071401945666e-12,
+          -4.476814280389133e-12
+        ],
+        "relative_residual": 1.261014404008165e-11,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          0.0,
+          1.261014404008165e-09
+        ]
+      },
+      {
+        "accepted": true,
+        "free_displacements_m": [
+          0.3930027389711051,
+          0.7860054779422102
+        ],
+        "increment_abs_m": 1.0090187253045163e-16,
+        "increment_gate_passed": true,
+        "iteration": 6,
+        "line_search_alpha": 1.0,
+        "line_search_attempt_count": 0,
+        "newton_increment_m": [
+          5.0450936265225813e-17,
+          1.0090187253045163e-16
+        ],
+        "relative_residual": 2.842170943040401e-16,
+        "residual_gate_passed": true,
+        "residual_kn": [
+          0.0,
+          -2.842170943040401e-14
+        ]
+      }
+    ],
+    "fallback_used": false,
+    "full_mesh_closure_claim": false,
+    "g1_closure_claim": false,
+    "globalization": "backtracking_line_search",
+    "line_search_history": [
+      {
+        "attempt_count": 2,
+        "attempts": [
+          {
+            "accepted": false,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              1.0,
+              2.0
+            ],
+            "trial_relative_residual": 10.0,
+            "trial_residual_kn": [
+              0.0,
+              1000.0
+            ]
+          },
+          {
+            "accepted": true,
+            "alpha": 0.5,
+            "trial_free_displacements_m": [
+              0.5,
+              1.0
+            ],
+            "trial_relative_residual": 0.75,
+            "trial_residual_kn": [
+              0.0,
+              75.0
+            ]
+          }
+        ],
+        "iteration": 0,
+        "newton_increment_m": [
+          1.0,
+          2.0
+        ],
+        "selected_alpha": 0.5,
+        "starting_free_displacements_m": [
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.4117647058823529,
+              0.8235294117647058
+            ],
+            "trial_relative_residual": 0.10991247710156714,
+            "trial_residual_kn": [
+              0.0,
+              10.991247710156713
+            ]
+          }
+        ],
+        "iteration": 1,
+        "newton_increment_m": [
+          -0.08823529411764706,
+          -0.1764705882352941
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.5,
+          1.0
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.3937063170919306,
+              0.7874126341838612
+            ],
+            "trial_relative_residual": 0.003969471511987166,
+            "trial_residual_kn": [
+              0.0,
+              0.3969471511987166
+            ]
+          }
+        ],
+        "iteration": 2,
+        "newton_increment_m": [
+          -0.018058388790422344,
+          -0.03611677758084469
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.4117647058823529,
+          0.8235294117647058
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.3930037731610366,
+              0.7860075463220731
+            ],
+            "trial_relative_residual": 5.826157356523254e-06,
+            "trial_residual_kn": [
+              0.0,
+              0.0005826157356523254
+            ]
+          }
+        ],
+        "iteration": 3,
+        "newton_increment_m": [
+          -0.0007025439308940558,
+          -0.0014050878617881115
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.3937063170919306,
+          0.7874126341838612
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.39300273897334354,
+              0.7860054779466871
+            ],
+            "trial_relative_residual": 1.261014404008165e-11,
+            "trial_residual_kn": [
+              0.0,
+              1.261014404008165e-09
+            ]
+          }
+        ],
+        "iteration": 4,
+        "newton_increment_m": [
+          -1.0341876930606496e-06,
+          -2.068375386121299e-06
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.3930037731610366,
+          0.7860075463220731
+        ]
+      },
+      {
+        "attempt_count": 1,
+        "attempts": [
+          {
+            "accepted": true,
+            "alpha": 1.0,
+            "trial_free_displacements_m": [
+              0.3930027389711051,
+              0.7860054779422102
+            ],
+            "trial_relative_residual": 2.842170943040401e-16,
+            "trial_residual_kn": [
+              0.0,
+              -2.842170943040401e-14
+            ]
+          }
+        ],
+        "iteration": 5,
+        "newton_increment_m": [
+          -2.2384071401945666e-12,
+          -4.476814280389133e-12
+        ],
+        "selected_alpha": 1.0,
+        "starting_free_displacements_m": [
+          0.39300273897334354,
+          0.7860054779466871
+        ]
+      }
+    ],
+    "material_newton_closure_claim": false,
+    "matrix_backend": "numpy_linalg_solve_dense",
+    "metrics": {
+      "case_id": "phase2_material_mesh_newton_axial_chain_cubic_spring",
+      "contract_pass": true,
+      "fallback_used": false,
+      "final_increment_abs_m": 1.0090187253045163e-16,
+      "free_displacements_m": [
+        0.3930027389711051,
+        0.7860054779422102
+      ],
+      "globalization": "backtracking_line_search",
+      "increment_gate_passed": true,
+      "increment_tolerance": 1e-12,
+      "iteration_count": 7,
+      "line_search_step_count": 6,
+      "line_search_used": true,
+      "matrix_backend": "numpy_linalg_solve_dense",
+      "regularization_used": false,
+      "relative_residual": 2.842170943040401e-16,
+      "residual_formula": "F_internal_minus_F_external",
+      "residual_gate_passed": true,
+      "residual_kn": [
+        0.0,
+        -2.842170943040401e-14
+      ],
+      "residual_tolerance": 1e-10,
+      "sparse_backend_used": false,
+      "stiffness_storage": "numpy_dense_ndarray",
+      "tangent_definition": "dF_internal_du_consistent"
+    },
+    "model_kind": "scalar_nonlinear_axial_cubic_spring",
+    "problem": {
+      "case_id": "phase2_material_mesh_newton_axial_chain_cubic_spring",
+      "claim_boundary": "Deterministic 1D axial chain mesh assembly only. Not a full frame, shell, sparse production, or GPU/HIP solver.",
+      "element_count": 2,
+      "elements": [
+        {
+          "element_id": "e1",
+          "length_m": 1.0,
+          "node_i": 0,
+          "node_j": 1
+        },
+        {
+          "element_id": "e2",
+          "length_m": 1.0,
+          "node_i": 1,
+          "node_j": 2
+        }
+      ],
+      "external_forces_kn": [
+        {
+          "force_kn": 100.0,
+          "node_index": 2
+        }
+      ],
+      "fixed_nodes": [
+        0
+      ],
+      "material_law": {
+        "cubic_stiffness_kn_per_m3": 1000.0,
+        "linear_stiffness_kn_per_m": 100.0,
+        "model_kind": "scalar_nonlinear_axial_cubic_spring"
+      },
+      "model_kind": "scalar_nonlinear_axial_cubic_spring",
+      "node_count": 3,
+      "residual_contract": "F_internal_minus_F_external",
+      "truth_class": "assembled_mesh_truth",
+      "units": {
+        "force": "kN",
+        "length": "m"
+      }
+    },
+    "regularization_used": false,
+    "residual_contract": "F_internal_minus_F_external",
+    "residual_formula": "F_internal_minus_F_external",
+    "schema_version": "phase2-material-mesh-newton-axial-chain-result.v1",
+    "sparse_backend_used": false,
+    "status": "ready",
+    "tangent_definition": "dF_internal_du_consistent",
+    "truth_class": "assembled_mesh_truth",
+    "unsupported_features": [],
+    "verification": {
+      "assembled_jacobian_finite_difference_check": {
+        "analytic_jacobian_kn_per_m": [
+          [
+            1126.7069170327436,
+            -563.3534585163718
+          ],
+          [
+            -563.3534585163718,
+            563.3534585163718
+          ]
+        ],
+        "finite_difference_epsilon": 1e-07,
+        "finite_difference_jacobian_kn_per_m": [
+          [
+            1126.7069169207389,
+            -563.3534581761523
+          ],
+          [
+            -563.3534584603694,
+            563.3534581761523
+          ]
+        ],
+        "free_dof_count": 2,
+        "max_abs_error": 3.402194579393836e-07,
+        "pass": true
+      },
+      "mesh_load_step_consistency": {
+        "final_tip_displacement_spread_m": 1.1102230246251565e-16,
+        "full_load_partition": {
+          "final_tip_displacement_m": 0.7860054779422102,
+          "step_factors": [
+            1.0
+          ],
+          "steps": [
+            {
+              "contract_pass": true,
+              "fallback_used": false,
+              "increment_gate_passed": true,
+              "iteration_count": 7,
+              "load_factor": 1.0,
+              "regularization_used": false,
+              "residual_gate_passed": true,
+              "status": "ready",
+              "step_index": 1,
+              "tip_displacement_m": 0.7860054779422102
+            }
+          ]
+        },
+        "load_step_gate_passed": true,
+        "ramped_partition": {
+          "final_tip_displacement_m": 0.7860054779422103,
+          "step_factors": [
+            0.5,
+            1.0
+          ],
+          "steps": [
+            {
+              "contract_pass": true,
+              "fallback_used": false,
+              "increment_gate_passed": true,
+              "iteration_count": 6,
+              "load_factor": 0.5,
+              "regularization_used": false,
+              "residual_gate_passed": true,
+              "status": "ready",
+              "step_index": 1,
+              "tip_displacement_m": 0.5602862934644257
+            },
+            {
+              "contract_pass": true,
+              "fallback_used": false,
+              "increment_gate_passed": true,
+              "iteration_count": 6,
+              "load_factor": 1.0,
+              "regularization_used": false,
+              "residual_gate_passed": true,
+              "status": "ready",
+              "step_index": 2,
+              "tip_displacement_m": 0.7860054779422103
+            }
+          ]
+        }
+      },
+      "mesh_refinement_suite": {
+        "claim_boundary": "Length-aware 1D strain-cubic axial bar mesh refinement only. This does not close general frame/shell/material mesh convergence.",
+        "element_counts": [
+          1,
+          2,
+          4
+        ],
+        "model_kind": "strain_nonlinear_axial_cubic_bar",
+        "narrow_mesh_refinement_gate_passed": true,
+        "rows": [
+          {
+            "case_id": "phase2_material_mesh_refinement_strain_cubic_1_element",
+            "contract_pass": true,
+            "element_count": 1,
+            "fallback_used": false,
+            "final_increment_abs_m": 8.72226672633729e-14,
+            "increment_gate_passed": true,
+            "iteration_count": 6,
+            "node_count": 2,
+            "regularization_used": false,
+            "residual_gate_passed": true,
+            "residual_norm_kn": 0.0,
+            "series_force_gate_passed": true,
+            "series_force_spread_kn": 0.0,
+            "status": "ready",
+            "tangent_gate_passed": true,
+            "tip_displacement_m": 0.6525934062074191,
+            "total_length_m": 2.0
+          },
+          {
+            "case_id": "phase2_material_mesh_refinement_strain_cubic_2_element",
+            "contract_pass": true,
+            "element_count": 2,
+            "fallback_used": false,
+            "final_increment_abs_m": 8.72226672633729e-14,
+            "increment_gate_passed": true,
+            "iteration_count": 6,
+            "node_count": 3,
+            "regularization_used": false,
+            "residual_gate_passed": true,
+            "residual_norm_kn": 0.0,
+            "series_force_gate_passed": true,
+            "series_force_spread_kn": 0.0,
+            "status": "ready",
+            "tangent_gate_passed": true,
+            "tip_displacement_m": 0.6525934062074191,
+            "total_length_m": 2.0
+          },
+          {
+            "case_id": "phase2_material_mesh_refinement_strain_cubic_4_element",
+            "contract_pass": true,
+            "element_count": 4,
+            "fallback_used": false,
+            "final_increment_abs_m": 8.722266726337286e-14,
+            "increment_gate_passed": true,
+            "iteration_count": 6,
+            "node_count": 5,
+            "regularization_used": false,
+            "residual_gate_passed": true,
+            "residual_norm_kn": 0.0,
+            "series_force_gate_passed": true,
+            "series_force_spread_kn": 5.684341886080802e-14,
+            "status": "ready",
+            "tangent_gate_passed": true,
+            "tip_displacement_m": 0.6525934062074191,
+            "total_length_m": 2.0
+          }
+        ],
+        "tip_displacement_spread_m": 0.0,
+        "tip_displacements_m": [
+          0.6525934062074191,
+          0.6525934062074191,
+          0.6525934062074191
+        ],
+        "tolerance_m": 1e-10
+      },
+      "series_force_equilibrium_check": {
+        "element_count": 2,
+        "element_internal_forces_kn": [
+          99.99999999999997,
+          99.99999999999997
+        ],
+        "force_spread_kn": 0.0,
+        "pass": true
+      },
+      "series_force_gate_passed": true,
+      "sparse_backend_equivalence": {
+        "claim_boundary": "Scoped scipy sparse vector Newton solve on the tiny 1D material mesh seed only. This does not close production sparse assembly for general frame/shell/material systems.",
+        "dense_backend": "numpy_linalg_solve_dense",
+        "dense_contract_pass": true,
+        "dense_free_displacements_m": [
+          0.3930027389711051,
+          0.7860054779422102
+        ],
+        "dense_status": "ready",
+        "fallback_used": false,
+        "max_displacement_delta_m": 0.0,
+        "max_residual_delta_kn": 0.0,
+        "narrow_sparse_backend_equivalence_gate_passed": true,
+        "regularization_used": false,
+        "sparse_backend": "scipy_sparse_spsolve_cpu",
+        "sparse_backend_used": true,
+        "sparse_contract_pass": true,
+        "sparse_free_displacements_m": [
+          0.3930027389711051,
+          0.7860054779422102
+        ],
+        "sparse_status": "ready",
+        "sparse_stiffness_storage": "scipy_sparse_csr"
+      },
+      "tangent_gate_passed": true,
+      "tip_displacement_m": 0.7860054779422102,
+      "tip_node_index": 2
+    },
+    "warnings": []
+  },
+  "model_kind": "scalar_nonlinear_axial_cubic_spring",
+  "node_count": 3,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-material-mesh-newton-axial-chain.v1",
+  "solver_config": {
+    "increment_tolerance": 1e-12,
+    "max_iterations": 25,
+    "residual_tolerance": 1e-10
+  },
+  "status": "ready",
+  "truth_class": "assembled_mesh_truth"
+}

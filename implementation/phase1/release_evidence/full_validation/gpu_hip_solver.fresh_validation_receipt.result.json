@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "command_result": {
+    "returncode": 0,
+    "stderr_tail": "{\"event\": \"solver_hip_e2e.start\", \"inputs\": {\"min_device_residency_ratio\": 0.99, \"out\": \"implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json\", \"strict_probe\": \"implementation/phase1/zero_copy_real_probe_report_strict.json\"}}\n{\"contract_pass\": true, \"event\": \"solver_hip_e2e.completed\", \"reason_code\": \"PASS\"}\n",
+    "stdout_tail": "Wrote solver hip e2e contract report: implementation/phase1/release_evidence/gpu/solver_hip_e2e_contract_report.json\n"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "receipt_path": "implementation/phase1/release_evidence/full_validation/gpu_hip_solver.fresh_validation_receipt.json",
+  "schema_version": "fresh-validation-receipt-builder.v1"
+}

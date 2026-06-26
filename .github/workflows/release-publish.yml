@@ -185,6 +185,10 @@ jobs:
             --artifact-root "$RELEASE_ROOT" \
             --out "$RELEASE_UPLOAD_PLAN"
 
+      - name: Strict release quality gate
+        run: |
+          python scripts/verify_quality_gate.py --mode release
+
       - name: Publish manifest-listed release assets
         run: |
           replace_flag=""

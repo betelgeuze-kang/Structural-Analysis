@@ -1,10 +1,10 @@
 # UX New-User Observation Intake Packet
 
-- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8`
+- `summary_line`: `UX new-user observation intake: BLOCKED | fields=0/18 | blockers=11`
 - `contract_pass`: `False`
 - `observation_path`: `implementation/phase1/release_evidence/productization/ux_new_user_observation.json`
 - `template_path`: `docs/templates/ux_new_user_observation.template.json`
-- `owner_action`: Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
+- `owner_action`: Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.
 
 | Field | Current | Template | Required | Report Check |
 |---|---|---|---|---|
@@ -12,7 +12,8 @@
 | `participant_role` | `` | `OWNER_INPUT_REQUIRED: new_user \| first_time_user \| pilot_user` | new_user \| first_time_user \| pilot_user | `participant_role_new_user_pass` = `False` |
 | `new_to_product` | `` | `OWNER_INPUT_REQUIRED: true` | true | `new_to_product_pass` = `False` |
 | `sample_project_id` | `` | `OWNER_INPUT_REQUIRED: sample project identifier` | sample project identifier used in the observed workflow | `required_fields_present` = `False` |
-| `workflow_scope` | `` | `OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report` | observed workflow steps, including reviewer package/report export | `required_fields_present` = `False` |
+| `workflow_scope` | `` | `OWNER_INPUT_REQUIRED: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report` | observed workflow scope covering the full five-step workflow | `required_fields_present` = `False` |
+| `workflow_steps` | `` | `[{"id": "import", "label": "Import", "outcome": "OWNER_INPUT_REQUIRED: pass"}, {"id": "model_health", "label": "Model Health", "outcome": "OWNER_INPUT_REQUIRED: pass"}, {"id": "analysis_setup", "label": "Analysis Setup", "outcome": "OWNER_INPUT_REQUIRED: pass"}, {"id": "run_monitor", "label": "Run & Monitor", "outcome": "OWNER_INPUT_REQUIRED: pass"}, {"id": "compare_report", "label": "Compare & Report", "outcome": "OWNER_INPUT_REQUIRED: pass"}]` | all five steps observed and passed: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report | `all_required_workflow_steps_passed` = `False` |
 | `observer` | `` | `OWNER_INPUT_REQUIRED: UX research owner or human observer` | human observer or UX research owner | `required_fields_present` = `False` |
 | `started_at_utc` | `` | `OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z` | timezone-aware ISO-8601 observation start timestamp | `started_at_utc_valid` = `False` |
 | `completed_at_utc` | `` | `OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z` | timezone-aware ISO-8601 observation completion timestamp | `completed_at_utc_valid` = `False` |
@@ -23,6 +24,8 @@
 | `timestamp_order` | `` | `derived from observation timestamps` | completed_at_utc >= started_at_utc | `timestamp_order_pass` = `False` |
 | `elapsed_minutes` | `` | `derived from observation timestamps` | <= 30.0 from completed_at_utc - started_at_utc | `elapsed_30min_pass` = `False` |
 | `completion_minutes_elapsed_match` | `declared=None; elapsed=None; tolerance=1.0` | `derived from observation timestamps` | completion_minutes equals elapsed_minutes within tolerance | `completion_minutes_elapsed_match_pass` = `False` |
+| `workflow_step_coverage` | `pass=0/5; missing=['import', 'model_health', 'analysis_setup', 'run_monitor', 'compare_report']` | `derived from observation timestamps` | required workflow observed count == 5/5 | `all_required_workflow_steps_observed` = `False` |
+| `workflow_step_placeholders` | `[]` | `derived from observation timestamps` | no placeholder workflow step labels or outcomes | `workflow_step_placeholders_absent` = `False` |
 
 ## Validation Commands
 

@@ -1,0 +1,73 @@
+{
+  "analysis_type": "linear_static_axial_patch_rigidbody_seed",
+  "claim_boundary": "This artifact automates a narrow 1D axial constant-strain patch test and rigid-body translation nullspace check. It does not close general frame/shell patch tests, full-mesh/full-load nonlinear equilibrium, production sparse/GPU backends, or G1.",
+  "contract_pass": true,
+  "fallback_used": false,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "patch_rigidbody_closure_claim": false,
+  "patch_test": {
+    "case_id": "phase2_axial_constant_strain_patch_and_rigidbody_seed",
+    "displacement_m": [
+      0.0,
+      0.000125,
+      0.00025
+    ],
+    "element_count": 2,
+    "element_force_inf_norm_error_kn": 0.0,
+    "element_forces_kn": [
+      315.0,
+      315.0
+    ],
+    "element_strains": [
+      0.000125,
+      0.000125
+    ],
+    "expected_element_force_kn": 315.0,
+    "external_forces_kn": [
+      -315.0,
+      0.0,
+      315.0
+    ],
+    "external_work_kn_m": 0.07875,
+    "fallback_used": false,
+    "internal_forces_kn": [
+      -315.0,
+      -1.3114509478384662e-14,
+      315.0
+    ],
+    "max_interior_residual_kn": 1.3114509478384662e-14,
+    "max_total_residual_kn": 1.3114509478384662e-14,
+    "node_coordinates_m": [
+      0.0,
+      1.0,
+      2.0
+    ],
+    "pass": true,
+    "prescribed_strain": 0.000125,
+    "regularization_used": false,
+    "residual_formula": "F_internal_minus_F_external",
+    "residual_kn": [
+      0.0,
+      -1.3114509478384662e-14,
+      0.0
+    ],
+    "stiffness_symmetry_error": 0.0,
+    "stiffness_work_balance_error_kn_m": 0.0,
+    "stiffness_work_kn_m": 0.07875,
+    "strain_spread": 0.0,
+    "truth_class": "analytic_component_patch_truth"
+  },
+  "regularization_used": false,
+  "rigid_body_test": {
+    "dense_stiffness_times_translation_inf_norm_kn": 0.0,
+    "element_force_inf_norm_kn": 0.0,
+    "element_strain_inf_norm": 0.0,
+    "pass": true,
+    "rigid_translation_m": 0.375,
+    "sparse_stiffness_times_translation_inf_norm_kn": 0.0,
+    "stiffness_storage": "dense_numpy_and_scipy_sparse_csr"
+  },
+  "schema_version": "phase2-patch-rigidbody-result.v1",
+  "status": "ready"
+}

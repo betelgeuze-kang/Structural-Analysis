@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Structural Analysis Result",
+  "type": "object",
+  "required": [
+    "status",
+    "analysis_type",
+    "solver",
+    "engine_version",
+    "input_checksum",
+    "tolerance",
+    "convergence_history",
+    "developer_preview",
+    "claim_boundary_version"
+  ],
+  "properties": {
+    "status": {"enum": ["ready", "blocked", "degraded"]},
+    "analysis_type": {"type": "string"},
+    "solver": {"type": "string"},
+    "engine_version": {"type": "string"},
+    "input_checksum": {"type": "string"},
+    "tolerance": {"type": "number"},
+    "convergence_history": {"type": "array"},
+    "unsupported_features": {"type": "array"},
+    "warnings": {"type": "array"},
+    "developer_preview": {"const": true},
+    "claim_boundary_version": {"const": "developer-preview-core-api-v1"}
+  }
+}

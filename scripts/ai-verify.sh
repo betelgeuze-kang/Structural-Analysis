@@ -104,7 +104,10 @@ add_warning() {
 
 check_shell_syntax() {
   bash -n scripts/ai-dangerous-command-check.sh \
+    scripts/ai-run-kiro-design.sh \
+    scripts/ai-worker-kiro.sh \
     scripts/ai-worker-cursor.sh \
+    scripts/ai-worker-cursor-host-bridge.sh \
     scripts/ai-worker-opencode.sh \
     scripts/ai-preflight.sh \
     scripts/ai-verify.sh
@@ -122,6 +125,7 @@ check_required_files() {
     AGENTS.md
     docs/ai/ORCHESTRATION.md
     docs/ai/prompts/codex_goal_start.md
+    docs/ai/prompts/kiro_design_slice.md
     docs/ai/prompts/cursor_worker_slice.md
     docs/ai/prompts/opencode_worker_slice.md
     docs/ai/checklists/ai-agent-security.md
@@ -130,7 +134,10 @@ check_required_files() {
     docs/ai/goal/GOAL.md
     opencode.json
     scripts/validate-ai-worker-output.mjs
+    scripts/ai-run-kiro-design.sh
+    scripts/ai-worker-kiro.sh
     scripts/ai-worker-cursor.sh
+    scripts/ai-worker-cursor-host-bridge.sh
     scripts/ai-worker-opencode.sh
     scripts/ai-preflight.sh
     scripts/ai-verify.sh
@@ -169,7 +176,7 @@ check_worker_output_validator() {
 }
 
 check_package_scripts() {
-  node -e "const p=require('./package.json'); for (const s of ['ai:preflight','ai:verify','ai:verify:contract','ai:verify:full','ai:validate-worker-output']) { if (!p.scripts || !p.scripts[s]) throw new Error('missing script '+s); }"
+  node -e "const p=require('./package.json'); for (const s of ['ai:kiro-design','ai:preflight','ai:verify','ai:verify:contract','ai:verify:full','ai:validate-worker-output']) { if (!p.scripts || !p.scripts[s]) throw new Error('missing script '+s); }"
 }
 
 run_check shell_syntax contract "shell syntax" check_shell_syntax

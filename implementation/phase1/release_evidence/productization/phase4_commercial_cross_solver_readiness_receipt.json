@@ -1,0 +1,254 @@
+{
+  "blocked_by": [
+    "commercial_cross_solver_execution_missing",
+    "license_or_customer_permission_missing",
+    "modeling_assumption_diagnosis_execution_missing",
+    "modeling_convention_declarations_missing",
+    "operator_comparison_trace_rows_missing",
+    "operator_file_checksums_missing",
+    "operator_files_missing",
+    "operator_reference_ingest_validator_blocked",
+    "operator_reference_package_missing",
+    "two_reference_solver_comparison_not_available"
+  ],
+  "blockers": [
+    "commercial_cross_solver_execution_missing",
+    "license_or_customer_permission_missing",
+    "modeling_assumption_diagnosis_execution_missing",
+    "modeling_convention_declarations_missing",
+    "operator_comparison_trace_rows_missing",
+    "operator_file_checksums_missing",
+    "operator_files_missing",
+    "operator_reference_ingest_validator_blocked",
+    "operator_reference_package_missing",
+    "two_reference_solver_comparison_not_available"
+  ],
+  "claim_boundary": "This receipt summarizes commercial cross-solver readiness only. It does not include operator files, grant customer permission, record real operator checksums, ingest commercial outputs, run comparisons, prove solver correctness, or close Phase 4, Phase 3, or Developer Preview RC.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_outputs_are_absolute_truth": false,
+  "contract_pass": false,
+  "current_reference_solver_count": 0,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-22T18:36:47.892395+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:3892320c34bb3850390197ac1a18c69b3b9e58610e4a8c60fb61136a52f337d3",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:4c0af3d40ec58753245596fd13414c7fa8415c5e027efa7f7f0c2e876d159911",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:f6da13049680614dfbb0c56b98feff34068d62884a15e6560473df2826a1ae68",
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_cross_solver_readiness_receipt.py": "sha256:500bbc5fe5a32797e47d6887e42b08f18213907f6ae07e2cadbf77cdb8f910db",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473"
+  },
+  "lanes": [
+    "commercial-cross-solver"
+  ],
+  "operator_checksum_count": 0,
+  "operator_package_attached": false,
+  "operator_package_template": {
+    "case_id": "OPERATOR_CASE_ID",
+    "file_checksums": {},
+    "modeling_assumption_diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "modeling_convention": {
+      "convergence_tolerance": "DECLARED_BY_OPERATOR",
+      "damping_policy": "DECLARED_BY_OPERATOR",
+      "diaphragm_policy": "DECLARED_BY_OPERATOR",
+      "eigen_solver": "DECLARED_BY_OPERATOR",
+      "end_release_policy": "DECLARED_BY_OPERATOR",
+      "load_combinations": [],
+      "local_axis_convention": "DECLARED_BY_OPERATOR",
+      "mass_source_policy": "DECLARED_BY_OPERATOR",
+      "material_modulus_convention": "DECLARED_BY_OPERATOR",
+      "mesh_density": "DECLARED_BY_OPERATOR",
+      "p_delta_policy": "DECLARED_BY_OPERATOR",
+      "rigid_offset_policy": "DECLARED_BY_OPERATOR",
+      "self_weight_policy": "DECLARED_BY_OPERATOR",
+      "shell_formulation": "DECLARED_BY_OPERATOR",
+      "unit_system": "DECLARED_BY_OPERATOR"
+    },
+    "modeling_convention_id": "CONVENTION_ID",
+    "permission_scope": {
+      "approval_receipt": "OPERATOR_PERMISSION_RECEIPT_PATH",
+      "comparison_use_allowed": false,
+      "redistribution_allowed": false
+    },
+    "raw_input_files": [],
+    "raw_result_files": [],
+    "reference_solvers": [
+      {
+        "engine_name": "REFERENCE_SOLVER_A",
+        "engine_version": "ENGINE_VERSION",
+        "normalized_result_file": "operator_refs/CASE/solver_a.normalized.json"
+      },
+      {
+        "engine_name": "REFERENCE_SOLVER_B",
+        "engine_version": "ENGINE_VERSION",
+        "normalized_result_file": "operator_refs/CASE/solver_b.normalized.json"
+      }
+    ],
+    "unsupported_features": [],
+    "warnings": []
+  },
+  "operator_permission_attached": false,
+  "operator_trace_rows_available": false,
+  "owner_action": "Attach an operator-approved comparison package with two independent reference solver outputs, permission scope, raw and normalized file checksums, modeling convention declarations, ingest validation, modeling-assumption-first diagnostics, and GUI story/member/mode trace rows.",
+  "phase3_closure_claim": false,
+  "phase4_closure_claim": false,
+  "readiness_inputs": {
+    "import_template": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "ingest_validator": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+    "operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json"
+  },
+  "required_evidence": [
+    {
+      "blocker": "",
+      "contract_pass": true,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+      "id": "import_template",
+      "status": "ready"
+    },
+    {
+      "blocker": "operator_reference_package_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "operator_package",
+      "status": "missing"
+    },
+    {
+      "blocker": "license_or_customer_permission_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "permission_scope",
+      "status": "missing"
+    },
+    {
+      "blocker": "operator_file_checksums_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+      "id": "operator_file_checksums",
+      "status": "missing"
+    },
+    {
+      "blocker": "two_reference_solver_comparison_not_available",
+      "contract_pass": false,
+      "current": 0,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "two_reference_solvers",
+      "required": 2,
+      "status": "blocked"
+    },
+    {
+      "blocker": "modeling_convention_declarations_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "modeling_conventions",
+      "required_fields": [
+        "case_id",
+        "modeling_convention_id",
+        "modeling_assumption_diagnostic_order",
+        "operator_name",
+        "operator_contact_or_internal_ticket",
+        "permission_scope",
+        "reference_solvers",
+        "raw_input_files",
+        "raw_result_files",
+        "normalized_result_file",
+        "file_checksums",
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance",
+        "unsupported_features",
+        "warnings"
+      ],
+      "status": "missing_operator_declarations"
+    },
+    {
+      "blocker": "modeling_assumption_diagnosis_execution_missing",
+      "contract_pass": false,
+      "diagnostic_order": [
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance"
+      ],
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "modeling_assumption_first_diagnosis",
+      "status": "policy_ready_execution_missing"
+    },
+    {
+      "blocker": "operator_reference_ingest_validator_blocked",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+      "id": "operator_ingest_validation",
+      "status": "blocked"
+    },
+    {
+      "blocker": "operator_comparison_trace_rows_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "gui_operator_traceability",
+      "required_trace_dimensions": [
+        "member",
+        "story",
+        "mode"
+      ],
+      "status": "schema_ready_operator_rows_missing"
+    },
+    {
+      "blocker": "commercial_cross_solver_execution_missing",
+      "contract_pass": false,
+      "evidence": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+      "id": "commercial_execution",
+      "status": "missing"
+    }
+  ],
+  "required_evidence_count": 10,
+  "required_evidence_pass_count": 1,
+  "required_reference_solver_count": 2,
+  "schema_version": "phase4-commercial-cross-solver-readiness-receipt.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "source_id": "commercial_cross_solver_operator_imports",
+  "status": "blocked",
+  "summary_line": "Phase 4 commercial cross-solver readiness: BLOCKED | reference_solvers=0/2 | evidence=1/10"
+}

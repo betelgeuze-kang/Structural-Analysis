@@ -125,6 +125,7 @@ const commercialCrosswalk = buildCommercialToolCrosswalkModel({
       section: 'SRC-900',
       dcr_after: 0.93,
       story: 'L33',
+      mode_number: 'M1',
     }],
   },
 });
@@ -206,6 +207,7 @@ console.log(JSON.stringify({
   reportHasReviewTask: report.html.includes('Review Task') && report.html.includes('approved') && report.html.includes('receipt checked'),
   reportHasSolverReceipt: report.html.includes('Solver Receipt') && report.html.includes('solver receipt verified') && report.html.includes('MIDAS Gen'),
   reportHasCommercialCrosswalk: report.html.includes('Commercial Tool Crosswalk') && report.html.includes('ETABS 22') && report.html.includes('matched 1/1'),
+  reportHasCommercialTraceability: report.html.includes('Traceability: ready') && report.html.includes('member:911|story:L33|mode:M1'),
   reportHasCommercialMapper: report.html.includes('CSV mapper: ETABS/SAP2000 mapper') && report.html.includes('frame / frame_id / object_id'),
   reportHasImportSummary: report.html.includes('Import / Lineage Summary') && report.html.includes('mergeable'),
   reportHasLineageDrilldown: report.html.includes('Lineage Drilldown') && report.html.includes('Source model') && report.html.includes('Report package'),
@@ -254,6 +256,7 @@ console.log(JSON.stringify({
     assert payload["reportHasReviewTask"] is True
     assert payload["reportHasSolverReceipt"] is True
     assert payload["reportHasCommercialCrosswalk"] is True
+    assert payload["reportHasCommercialTraceability"] is True
     assert payload["reportHasCommercialMapper"] is True
     assert payload["reportHasImportSummary"] is True
     assert payload["reportHasLineageDrilldown"] is True

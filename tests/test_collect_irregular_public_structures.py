@@ -9,6 +9,8 @@ import socketserver
 import threading
 import zipfile
 
+import pytest
+
 collector_module = importlib.import_module("implementation.phase1.open_data.irregular.collect_irregular_public_structures")
 collect_irregular_public_structures = collector_module.collect_irregular_public_structures
 
@@ -24,10 +26,30 @@ class _ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 
 def _serve_directory(directory: Path) -> tuple[_ThreadingTCPServer, str]:
     handler = partial(http.server.SimpleHTTPRequestHandler, directory=str(directory))
-    server = _ThreadingTCPServer(("127.0.0.1", 0), handler)
+    try:
+        server = _ThreadingTCPServer(("127.0.0.1", 0), handler)
+    except PermissionError as exc:
+        pytest.skip(f"loopback socket unavailable in this sandbox: {type(exc).__name__}: {exc}")
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server, f"http://127.0.0.1:{server.server_address[1]}"
+
+
+def test_serve_directory_marks_loopback_permission_denial_as_environment_skip(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def _deny_loopback_bind(*_: object, **__: object) -> None:
+        raise PermissionError("operation not permitted")
+
+    monkeypatch.setattr(
+        __import__(__name__, fromlist=["_ThreadingTCPServer"]),
+        "_ThreadingTCPServer",
+        _deny_loopback_bind,
+    )
+
+    with pytest.raises(pytest.skip.Exception, match="loopback socket unavailable in this sandbox"):
+        _serve_directory(tmp_path)
 
 
 def test_collect_irregular_public_structures_mixed_local_formats(tmp_path: Path) -> None:

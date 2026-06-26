@@ -33,7 +33,7 @@ def main() -> int:
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     print(f"mgt-condensed-solve: {payload.get('native_solve_status')} -> {args.output_json}")
-    return 0 if payload.get("native_solve_status") == "condensed_global_fea_wired" else 1
+    return 0 if payload.get("status") == "ready" and not payload.get("blockers") else 1
 
 
 if __name__ == "__main__":

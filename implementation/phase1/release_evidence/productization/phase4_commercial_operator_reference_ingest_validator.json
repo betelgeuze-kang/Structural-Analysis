@@ -1,0 +1,45 @@
+{
+  "claim_boundary": "This artifact validates the shape, permission signal, two-reference-solver presence, modeling convention declarations, and SHA256 coverage for an operator-attached commercial reference package. A passing validation is an ingest preflight only; it does not bundle operator data, grant legal approval, run comparisons, execute GUI story/member/mode trace rows for operator data, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-23T16:09:52.124027+00:00",
+  "input_checksums": {
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
+    "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+    "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
+    "src/structure-viewer/viewer-report-export.js": "sha256:023d1e05065a8fcc42de376c028f192f94fb7208151436a1fecb4b86441a3473"
+  },
+  "operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+  "package_path": "",
+  "phase3_closure_claim": false,
+  "phase4_closure_claim": false,
+  "remaining_blockers": [
+    "operator_reference_package_missing"
+  ],
+  "schema_version": "phase4-commercial-operator-reference-ingest-validator.v1",
+  "selected_benchmark_lanes": [
+    "commercial-cross-solver"
+  ],
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "blocked",
+  "truth_class": "comparison_reference",
+  "validation_result": {
+    "blockers": [
+      "operator_reference_package_missing"
+    ],
+    "case_id": "",
+    "checked_file_count": 0,
+    "checksum_declared_count": 0,
+    "contract_pass": false,
+    "distinct_reference_solver_count": 0,
+    "distinct_reference_solvers": [],
+    "modeling_convention_id": "",
+    "reference_solver_count": 0,
+    "status": "blocked",
+    "verify_file_hashes": true,
+    "warnings": []
+  }
+}

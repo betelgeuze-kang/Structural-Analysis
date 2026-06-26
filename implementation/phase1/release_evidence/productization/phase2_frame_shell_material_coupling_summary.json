@@ -1,0 +1,43 @@
+{
+  "analysis_type": "nonlinear_static_frame_shell_material_coupling_seed",
+  "artifacts": {
+    "related_material_mesh_newton_summary": "implementation/phase1/release_evidence/productization/phase2_material_mesh_newton_summary.json",
+    "result": "implementation/phase1/release_evidence/productization/phase2_frame_shell_material_coupling_result.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_frame_shell_material_coupling_summary.json"
+  },
+  "blockers_remaining": [
+    "general_frame_shell_material_coupling_not_closed",
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "general_mesh_load_step_nonlinear_convergence_suite_not_closed",
+    "production_rocm_hip_parity_not_closed",
+    "design_code_adequacy_not_closed"
+  ],
+  "claim_boundary": "This is a two-free-DOF deterministic seed that assembles a frame axial component, a shell diaphragm shear component, and an off-diagonal material coupling tangent into one residual/Jacobian system. It does not close general frame-shell finite elements, production full-mesh/full-load G1, or design-code adequacy.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "dense_matrix_backend": "numpy_linalg_solve_dense",
+  "dense_sparse_equivalence_gate_passed": true,
+  "engine_version": "1.0.0",
+  "fallback_used": false,
+  "finite_difference_jacobian_gate_passed": true,
+  "frame_shell_material_coupling_closure_claim": false,
+  "full_mesh_closure_claim": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-22T16:08:08.503094+00:00",
+  "globalization": "backtracking_line_search",
+  "input_checksums": {
+    "scripts/build_phase2_frame_shell_material_coupling_artifacts.py": "sha256:2b2a99c6040ea14aa2acdce44e7d1271424baae6e49a6b784dc8b2a87820ced7",
+    "src/structural_analysis/assembly/__init__.py": "sha256:ccb7e9b1de89661f8fdecee0e68c659478d36a4374c2a8a45b13cf9a1aad31f8",
+    "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:361f7664cf24b517888123d014d1141687c6273f5b4d9c2fee23123b459c61eb",
+    "tests/test_build_phase2_frame_shell_material_coupling_artifacts.py": "sha256:e1b6ac0851ddbe649acafcca56d3039c24e5064c7ce4e7e5cecb3a14fd8838b1"
+  },
+  "off_diagonal_coupling_visible": true,
+  "regularization_used": false,
+  "residual_formula": "F_internal_minus_F_external",
+  "schema_version": "phase2-frame-shell-material-coupling-artifacts.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "sparse_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "status": "ready",
+  "truth_class": "assembled_coupling_truth"
+}

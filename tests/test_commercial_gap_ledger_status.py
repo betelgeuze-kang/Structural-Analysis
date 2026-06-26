@@ -19,6 +19,19 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     payload = build_commercial_gap_ledger_status()
     assert payload["schema_version"] == "commercial-gap-ledger-status.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"]
+    assert payload["reused_evidence"] is True
+    assert "does_not_create_authoritative_closure_evidence" in payload["reuse_policy"]
+    assert payload["input_checksums"][
+        "docs/commercial-structural-solver-product-gap-ledger.md"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "docs/structural-analysis-ai-engine-gap-ledger.md"
+    ].startswith("sha256:")
+    assert payload["input_checksums"][
+        "implementation/phase1/commercial_gap_ledger_status.py"
+    ].startswith("sha256:")
     assert payload["doc_requirements"]["missing_doc_ids"] == []
     assert payload["doc_requirements"]["missing_status_ids"] == []
     ids = {row["id"] for row in payload["rows"]}
@@ -26,8 +39,21 @@ def test_commercial_gap_ledger_status_covers_all_documented_gaps() -> None:
     assert {f"AI-G{idx}" for idx in range(1, 11)} <= ids
     assert payload["summary"]["total_count"] == len(payload["rows"])
     assert payload["summary"]["total_count"] >= 20
+    assert payload["summary"]["locally_closable_nonclosed_count"] == (
+        payload["summary"]["locally_closable_open_count"]
+    )
+    assert payload["summary"]["locally_closable_nonclosed_row_ids"] == (
+        payload["next_locally_closable_gaps"]
+    )
     assert payload["summary"]["nonclosed_claim_boundary_missing_count"] == 0
     assert payload["doc_requirements"]["nonclosed_claim_boundary_missing_ids"] == []
+    assert all(str(row["claim_boundary"]).strip() for row in payload["rows"])
+    assert "locally closed only" in next(row for row in payload["rows"] if row["id"] == "G2")[
+        "claim_boundary"
+    ]
+    assert "does not imply full commercial solver readiness" in next(
+        row for row in payload["rows"] if row["id"] == "AI-G2"
+    )["claim_boundary"]
     assert payload["full_gap_ledger_ready"] is False
     assert payload["status"] == "open"
 
@@ -57,12 +83,57 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     payload = build_commercial_gap_ledger_status()
     rows = {row["id"]: row for row in payload["rows"]}
     assert rows["G1"]["status"] in {"open", "partial"}
+    assert "full_load_gate_not_closed" in rows["G1"]["blockers"]
     assert "full_mesh_nonlinear_equilibrium_not_closed" in rows["G1"]["blockers"]
+    assert "material_newton_breadth_not_closed" in rows["G1"]["blockers"]
+    assert "production_rocm_hip_residency_not_closed" in rows["G1"]["blockers"]
     assert "direct_residual_newton_not_closed" not in rows["G1"]["blockers"]
     assert "equilibrium_newton_not_closed" not in rows["G1"]["blockers"]
     assert "G1 remains partial" in rows["G1"]["claim_boundary"]
     assert "does not close full-mesh full-load 3D nonlinear equilibrium" in rows["G1"]["claim_boundary"]
     assert "without fallback" in rows["G1"]["claim_boundary"]
+    assert rows["G1"]["evidence"]["source_receipts"] == {
+        "mgt_pdelta_continuation_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_pdelta_continuation_probe.json"
+        ),
+        "mgt_uncoarsened_boundary_pdelta_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_uncoarsened_boundary_pdelta_probe.json"
+        ),
+        "mgt_uncoarsened_boundary_pdelta_checkpoint_continuation": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_uncoarsened_boundary_pdelta_checkpoint_continuation.json"
+        ),
+        "mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.json"
+        ),
+        "mgt_direct_residual_newton_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_direct_residual_newton_probe.json"
+        ),
+        "mgt_g1_direct_residual_terminal_gate_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_direct_residual_terminal_gate_report.json"
+        ),
+        "mgt_g1_followup387_shell_material_budgeted_continuation_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
+        ),
+        "g1_full_load_hip_newton_lane_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_full_load_hip_newton_lane_report.json"
+        ),
+        "mgt_residual_jacobian_consistency_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_residual_jacobian_consistency_probe.json"
+        ),
+        "mgt_rocm_sparse_solver_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_rocm_sparse_solver_probe.json"
+        ),
+    }
     assert rows["G1"]["evidence"]["nonlinear_equilibrium"] is False
     assert rows["G1"]["evidence"]["partial_connected_component_mesh"] is True
     assert rows["G1"]["evidence"]["full_line_mesh_sparse_elastic_equilibrium_ready"] is True
@@ -102,6 +173,209 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert rows["G1"]["evidence"]["pdelta_continuation_first_failed_load_scale"] == 0.55
     assert rows["G1"]["evidence"]["full_load_nonlinear_newton_ready"] is False
+    g1_requirements = {
+        row["id"]: row for row in rows["G1"]["evidence"]["closure_requirements"]
+    }
+    assert g1_requirements["full_load_scale_1_0_reached"] == {
+        "id": "full_load_scale_1_0_reached",
+        "observed": 0.5,
+        "target": 1.0,
+        "passed": False,
+        "blocker": "full_load_gate_not_closed",
+    }
+    assert g1_requirements["strict_full_load_hip_newton_checkpoint_available"] == {
+        "id": "strict_full_load_hip_newton_checkpoint_available",
+        "observed": {
+            "full_load_candidate_count": 0,
+            "highest_observed_load_scale": 0.656,
+            "loadable_count": 42,
+            "candidate_count": 50,
+        },
+        "target": {
+            "full_load_candidate_count": ">=1",
+            "required_load_scale": 1.0,
+        },
+        "passed": False,
+        "blocker": "full_load_gate_not_closed",
+    }
+    assert g1_requirements["full_line_mesh_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["full_frame_6dof_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["coupled_frame_surface_nonlinear_equilibrium_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["direct_residual_and_increment_terminal_gate_closed"][
+        "passed"
+    ] is True
+    assert g1_requirements["equilibrium_newton_terminal_increment_gate_closed"][
+        "passed"
+    ] is True
+    assert g1_requirements["state_updated_material_newton_breadth_closed"][
+        "passed"
+    ] is False
+    assert g1_requirements["fallback_and_regularization_free_full_path"][
+        "passed"
+    ] is False
+    g1_blocker_terminal_requirements = {
+        row["blocker"]: row
+        for row in rows["G1"]["evidence"]["blocker_terminal_requirements"]
+    }
+    assert sorted(g1_blocker_terminal_requirements) == [
+        "full_load_gate_not_closed",
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "material_newton_breadth_not_closed",
+        "production_rocm_hip_residency_not_closed",
+    ]
+    assert all(
+        row["terminal_requirement_satisfied"] is False
+        for row in g1_blocker_terminal_requirements.values()
+    )
+    full_load_terminal = g1_blocker_terminal_requirements[
+        "full_load_gate_not_closed"
+    ]
+    assert full_load_terminal["terminal_evidence_target"] == {
+        "load_scale_reached": 1.0,
+        "full_load_candidate_count": ">=1",
+        "child_full_load_closure_passed": True,
+        "child_relative_increment_gate_passed": True,
+    }
+    assert full_load_terminal["observed"]["load_scale_reached"] == 0.5
+    assert full_load_terminal["observed"]["full_load_candidate_count"] == 0
+    assert "full_load_checkpoint_candidate_missing" in full_load_terminal[
+        "non_closing_reasons"
+    ]
+    mesh_terminal = g1_blocker_terminal_requirements[
+        "full_mesh_nonlinear_equilibrium_not_closed"
+    ]
+    assert mesh_terminal["observed"]["pdelta_status"] == "partial"
+    assert mesh_terminal["observed"]["shell_material_budgeted_status"] == "partial"
+    assert "pdelta_continuation_not_ready" in mesh_terminal[
+        "non_closing_reasons"
+    ]
+    material_terminal = g1_blocker_terminal_requirements[
+        "material_newton_breadth_not_closed"
+    ]
+    assert material_terminal["observed"]["direct_residual_gate_passed"] is False
+    assert "direct_residual_gate_not_closed" in material_terminal[
+        "non_closing_reasons"
+    ]
+    hip_terminal = g1_blocker_terminal_requirements[
+        "production_rocm_hip_residency_not_closed"
+    ]
+    assert hip_terminal["observed"]["production_hip_residual_jacobian_path"] is False
+    assert hip_terminal["observed"]["runtime_blockers"] == [
+        "dev_kfd_missing",
+        "dev_dri_missing",
+    ]
+    assert "hip_runtime_blockers_present" in hip_terminal[
+        "non_closing_reasons"
+    ]
+    g1_gap = rows["G1"]["evidence"]["closure_gap_summary"]
+    assert g1_gap["closure_claim_allowed"] is False
+    assert g1_gap["direct_residual_newton_closed"] is True
+    assert g1_gap["equilibrium_newton_closed"] is True
+    assert g1_gap["direct_residual_terminal_gate_status"] == "ready"
+    assert g1_gap["direct_residual_terminal_gate_contract_pass"] is True
+    assert g1_gap["shell_material_budgeted_lane_status"] == "partial"
+    assert (
+        g1_gap["shell_material_budgeted_lane_direct_residual_gate_passed"]
+        is False
+    )
+    assert g1_gap["full_load_scale_reached"] == 0.5
+    assert g1_gap["full_load_target"] == 1.0
+    assert g1_gap["full_load_gate_closed"] is False
+    assert g1_gap["full_line_mesh_nonlinear_equilibrium"] is False
+    assert g1_gap["full_frame_6dof_nonlinear_equilibrium"] is False
+    assert g1_gap["coupled_frame_surface_nonlinear_equilibrium"] is False
+    assert g1_gap["material_newton_direct_residual_gate_passed"] is False
+    assert g1_gap["material_newton_breadth_closed"] is False
+    assert g1_gap["production_rocm_hip_residency_closed"] is False
+    assert g1_gap["full_load_hip_newton_lane_status"] == "blocked"
+    strict_checkpoint_gate = g1_gap["full_load_hip_newton_checkpoint_resolution_gate"]
+    assert strict_checkpoint_gate["passed"] is False
+    assert strict_checkpoint_gate["full_load_candidate_count"] == 0
+    assert strict_checkpoint_gate["highest_observed_load_scale"] == 0.656
+    assert strict_checkpoint_gate["highest_observed_gap_to_required_load_scale"] == 0.344
+    assert "checkpoint_resolution_no_full_load_candidate" in strict_checkpoint_gate["blockers"]
+    assert "sub-load receipts remain non-closing evidence" in g1_gap["claim_boundary"]
+    terminal_gate_scope = rows["G1"]["evidence"]["direct_residual_terminal_gate_scope"]
+    assert terminal_gate_scope["receipt"] == (
+        "mgt_g1_direct_residual_terminal_gate_report.json"
+    )
+    assert terminal_gate_scope["status"] == "ready"
+    assert terminal_gate_scope["contract_pass"] is True
+    assert terminal_gate_scope["direct_residual_newton_gate_ready"] is True
+    assert terminal_gate_scope["direct_residual_terminal_gate_ready"] is True
+    assert (
+        terminal_gate_scope["measurements"]["direct_replay_final_residual_inf_n"]
+        == 1.787703126865381e-06
+    )
+    assert terminal_gate_scope["measurements"]["terminal_load_scale"] == 0.656
+    assert terminal_gate_scope["full_g1_closure_ready"] is False
+    assert terminal_gate_scope["full_g1_closure_blockers"] == [
+        "full_load_gate_not_closed",
+        "full_mesh_nonlinear_equilibrium_not_closed",
+        "material_newton_breadth_not_closed",
+        "production_rocm_hip_residency_not_closed",
+    ]
+    assert "does not close full-mesh/full-load" in terminal_gate_scope[
+        "claim_boundary"
+    ]
+    shell_lane_scope = rows["G1"]["evidence"]["shell_material_budgeted_lane_scope"]
+    assert shell_lane_scope["receipt"] == (
+        "mgt_g1_followup387_shell_material_budgeted_continuation_status.json"
+    )
+    assert shell_lane_scope["status"] == "partial"
+    assert shell_lane_scope["contract_pass"] is False
+    assert shell_lane_scope["direct_residual_gate_passed"] is False
+    assert (
+        shell_lane_scope["latest_frontier_direct_residual_inf_n"]
+        == 1.3092276661494922
+    )
+    assert shell_lane_scope["duplicate_alias_receipt_count"] == 1
+    assert shell_lane_scope["row_target_mode_exhausted_at_latest_checkpoint"] is True
+    assert (
+        shell_lane_scope[
+            "largest_rows_operator_strategy_exhausted_at_latest_checkpoint"
+        ]
+        is True
+    )
+    assert shell_lane_scope["hip_residual_row_backend_contract_pass"] is False
+    assert (
+        shell_lane_scope[
+            "hip_residual_row_backend_latest_final_direct_residual_inf_n"
+        ]
+        == 0.03346553206631597
+    )
+    assert shell_lane_scope["hip_residual_row_backend_receipt_count"] == 4
+    assert (
+        shell_lane_scope[
+            "consistent_residual_jacobian_newton_contract_pass"
+        ]
+        is False
+    )
+    assert (
+        shell_lane_scope[
+            "consistent_residual_jacobian_newton_receipt_count"
+        ]
+        == 8
+    )
+    assert (
+        shell_lane_scope[
+            "consistent_residual_jacobian_newton_restart_ready"
+        ]
+        is False
+    )
+    assert shell_lane_scope["same_operator_no_descent_receipt_count"] == 26
+    assert shell_lane_scope["counter_evidence_receipt_count"] == 2
+    assert "direct_residual_gate_not_closed" in shell_lane_scope["blockers"]
+    assert shell_lane_scope["claim_boundary"]["cpu_diagnostic_only"] is True
+    assert "must not override the separate terminal direct-residual gate receipt" in (
+        shell_lane_scope["commercial_claim_boundary"]
+    )
     g1_micro = rows["G1"]["evidence"]["pdelta_post_converged_micro_step_probe"]
     assert g1_micro["ready"] is True
     assert g1_micro["target_load_scale"] == 0.505
@@ -324,13 +598,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert rows["G1"]["evidence"]["direct_residual_newton_status"] == "partial"
     assert rows["G1"]["evidence"]["direct_residual_newton_ready"] is False
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_status"] == "ready"
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_ready"] is True
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_status"] == "partial"
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_ready"] is False
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_blockers"] == [
+        "component_only_diagnostic_not_consistency_closure"
+    ]
     assert (
         rows["G1"]["evidence"]["residual_jacobian_consistency_base_residual_inf_n"]
         > 1.0
     )
-    assert rows["G1"]["evidence"]["residual_jacobian_consistency_direction_rows"]
+    assert rows["G1"]["evidence"]["residual_jacobian_consistency_direction_rows"] == []
     component_breakdown = rows["G1"]["evidence"][
         "residual_jacobian_consistency_component_breakdown"
     ]
@@ -349,11 +626,16 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     ]
     assert hotspot_rows
     assert hotspot_rows[0]["dominant_component"] == "shell_membrane"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_focused_regdirect_checkpoint_component_status"
+    ] == "partial"
+    assert rows["G1"]["evidence"][
+        "residual_jacobian_focused_regdirect_checkpoint_component_only"
+    ] is True
     scale_sweep = rows["G1"]["evidence"][
         "residual_jacobian_consistency_state_scale_sweep"
     ]
-    assert scale_sweep[0]["state_scale"] == 0.0
-    assert scale_sweep[0]["residual_inf_n"] < scale_sweep[-1]["residual_inf_n"]
+    assert scale_sweep == []
     assert rows["G1"]["evidence"]["equilibrium_newton_state_scale_status"] == "partial"
     assert (
         rows["G1"]["evidence"]["equilibrium_newton_state_scale_final_residual_inf_n"]
@@ -3481,7 +3763,8 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         g1_shell_material_budgeted[
             "g1_shell_material_budgeted_latest_frontier_receipt"
         ]
-        == "mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4.json"
+        == "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/"
+        "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8.json"
     )
     assert (
         g1_shell_material_budgeted[
@@ -3493,13 +3776,13 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         g1_shell_material_budgeted[
             "g1_shell_material_budgeted_latest_frontier_direct_residual_inf_n"
         ]
-        == 5.74426714604332
+        == 1.3092276661494922
     )
     assert (
         g1_shell_material_budgeted[
             "g1_shell_material_budgeted_residual_gap_ratio_to_tolerance"
         ]
-        > 11000.0
+        == 2618.455332298984
     )
     assert (
         g1_shell_material_budgeted[
@@ -3509,6 +3792,294 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert "direct_residual_gate_not_closed" in g1_shell_material_budgeted[
         "g1_shell_material_budgeted_blockers"
+    ]
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_pending_launch_only_receipts"
+        ]
+        == []
+    )
+    same_operator_no_descent = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_same_operator_no_descent_receipts"
+    ]
+    assert len(same_operator_no_descent) == 26
+    assert (
+        "mgt_shell_material_rowcorr_budget_controller_followup448_fd_residual_weighted_support8_cpu_continuation.json"
+        in same_operator_no_descent
+    )
+    assert (
+        "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/"
+        "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8.json"
+        in same_operator_no_descent
+    )
+    counter_evidence = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_counter_evidence"
+    ]
+    assert len(counter_evidence) == 2
+    assert counter_evidence[-1]["result"] == "counter_evidence"
+    assert counter_evidence[-1]["direct_residual_inf_n"] == 4.192255248745177
+    duplicate_alias_receipts = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_duplicate_alias_receipts"
+    ]
+    assert len(duplicate_alias_receipts) == 1
+    duplicate_alias = duplicate_alias_receipts[0]
+    assert duplicate_alias["receipt"] == (
+        "mgt_shell_material_rowcorr_budget_controller_followup436_shell_normal_support8_cpu_continuation.json"
+    )
+    assert duplicate_alias["duplicate_of_receipt"] == (
+        "mgt_shell_material_rowcorr_budget_controller_followup436_normal_rows_support8_cpu_continuation.json"
+    )
+    assert duplicate_alias["counted_in_frontier"] is False
+    assert duplicate_alias["counted_in_row_target_exhaustion"] is False
+    assert duplicate_alias["claim_boundary"]["duplicate_alias_only"] is True
+    assert duplicate_alias["claim_boundary"]["does_not_claim_g1_closure"] is True
+    row_target_exhaustion = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_row_target_mode_exhaustion"
+    ]
+    assert (
+        row_target_exhaustion[
+            "all_configured_modes_exhausted_at_latest_checkpoint"
+        ]
+        is True
+    )
+    assert row_target_exhaustion["missing_modes"] == []
+    assert "residual_shell_normal_rows" in row_target_exhaustion[
+        "configured_modes"
+    ]
+    assert (
+        row_target_exhaustion["receipt_by_mode"]["residual_shell_normal_rows"]
+        == "mgt_shell_material_rowcorr_budget_controller_followup436_normal_rows_support8_cpu_continuation.json"
+    )
+    assert "does not close G1" in row_target_exhaustion["claim_boundary"]
+    largest_rows_strategy_exhaustion = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_largest_rows_operator_strategy_exhaustion"
+    ]
+    assert (
+        largest_rows_strategy_exhaustion[
+            "all_configured_strategies_exhausted_at_latest_checkpoint"
+        ]
+        is True
+    )
+    assert largest_rows_strategy_exhaustion["missing_strategy_ids"] == []
+    assert "finite_difference_residual_weighted_target128_support8" in (
+        largest_rows_strategy_exhaustion["exhausted_strategy_ids"]
+    )
+    assert (
+        largest_rows_strategy_exhaustion["receipt_by_strategy_id"][
+            "finite_difference_residual_weighted_target128_support8"
+        ]
+        == "mgt_shell_material_rowcorr_budget_controller_followup448_fd_residual_weighted_support8_cpu_continuation.json"
+    )
+    assert "does not close G1" in largest_rows_strategy_exhaustion[
+        "claim_boundary"
+    ]
+    hip_residual_row_backend = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_hip_residual_row_backend"
+    ]
+    assert hip_residual_row_backend["contract_pass"] is False
+    assert (
+        hip_residual_row_backend["latest_receipt"]
+        == "mgt_direct_residual_hip_largest_rows_followup73_74_saturation_summary.json"
+    )
+    assert (
+        hip_residual_row_backend["latest_final_direct_residual_inf_n"]
+        == 0.03346553206631597
+    )
+    assert hip_residual_row_backend["latest_residual_gate_n"] == 0.001
+    assert hip_residual_row_backend["latest_residual_gap_ratio_to_gate"] == (
+        33.46553206631597
+    )
+    assert len(hip_residual_row_backend["receipts"]) == 4
+    assert hip_residual_row_backend["receipts"][-1][
+        "production_residency_claimed"
+    ] is False
+    assert hip_residual_row_backend["receipts"][-1]["blocking_reasons"] == [
+        "residual_gate_not_closed",
+        "production_in_process_rocm_hip_residency_not_claimed",
+    ]
+    assert "do not close G1" in hip_residual_row_backend["claim_boundary"]
+    consistent_residual_jacobian = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_newton"
+    ]
+    assert consistent_residual_jacobian["contract_pass"] is False
+    assert (
+        consistent_residual_jacobian["latest_receipt"]
+        == "mgt_cached_residual_jvp_top96_multi_ridge_followup354_361_after_total_scaled_component_fd_hip_latest_only_controller_summary.json"
+    )
+    assert consistent_residual_jacobian["latest_status"] == "partial"
+    assert (
+        consistent_residual_jacobian[
+            "latest_remaining_residual_margin_to_gate_n"
+        ]
+        == 0.032136466982157
+    )
+    assert (
+        consistent_residual_jacobian["latest_checkpoint"]
+        == "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+    )
+    assert consistent_residual_jacobian["latest_checkpoint_exists"] is False
+    assert (
+        consistent_residual_jacobian["controller_start_checkpoint"]
+        == "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup353_frontier_component_total_scaled_fd_hip_final_checkpoint.npz"
+    )
+    assert consistent_residual_jacobian["controller_start_checkpoint_exists"] is False
+    assert consistent_residual_jacobian["latest_checkpoint_retained_by_summary"] is True
+    assert consistent_residual_jacobian["latest_checkpoint_promoted_by_summary"] is True
+    assert consistent_residual_jacobian["advertised_retained_checkpoint_missing"] is True
+    assert consistent_residual_jacobian["missing_controller_replay_artifact_count"] == 10
+    assert consistent_residual_jacobian["missing_controller_replay_artifacts"][0] == {
+        "role": "controller_start_checkpoint",
+        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup353_frontier_component_total_scaled_fd_hip_final_checkpoint.npz",
+    }
+    assert consistent_residual_jacobian["missing_controller_replay_artifacts"][1] == {
+        "role": "retained_latest_checkpoint",
+        "path": "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz",
+    }
+    assert consistent_residual_jacobian["restart_ready"] is False
+    assert consistent_residual_jacobian["restart_blockers"] == [
+        "latest_checkpoint_missing",
+        "advertised_retained_checkpoint_missing",
+        "controller_start_checkpoint_missing",
+        "controller_replay_artifacts_missing",
+    ]
+    assert len(consistent_residual_jacobian["receipts"]) == 8
+    assert consistent_residual_jacobian["receipts"][-1]["restart_ready"] is False
+    assert "claim_boundary_disclaims_closure" in (
+        consistent_residual_jacobian["receipts"][-1]["blocking_reasons"]
+    )
+    assert "diagnostic evidence" in consistent_residual_jacobian[
+        "claim_boundary"
+    ]
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_contract_pass"
+        ]
+        is False
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_receipt"
+        ]
+        == "mgt_cached_residual_jvp_top96_multi_ridge_followup354_361_after_total_scaled_component_fd_hip_latest_only_controller_summary.json"
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_remaining_residual_margin_to_gate_n"
+        ]
+        == 0.032136466982157
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_checkpoint"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_checkpoint_exists"
+        ]
+        is False
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_controller_start_checkpoint"
+        ]
+        == "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup353_frontier_component_total_scaled_fd_hip_final_checkpoint.npz"
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_controller_start_checkpoint_exists"
+        ]
+        is False
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_checkpoint_retained_by_summary"
+        ]
+        is True
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_latest_checkpoint_promoted_by_summary"
+        ]
+        is True
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_advertised_retained_checkpoint_missing"
+        ]
+        is True
+    )
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_missing_controller_replay_artifact_count"
+        ]
+        == 10
+    )
+    assert g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_missing_controller_replay_artifacts"
+    ][0] == {
+        "role": "controller_start_checkpoint",
+        "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup353_frontier_component_total_scaled_fd_hip_final_checkpoint.npz",
+    }
+    assert (
+        g1_shell_material_budgeted[
+            "g1_shell_material_budgeted_consistent_residual_jacobian_restart_ready"
+        ]
+        is False
+    )
+    assert g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_restart_blockers"
+    ] == [
+        "latest_checkpoint_missing",
+        "advertised_retained_checkpoint_missing",
+        "controller_start_checkpoint_missing",
+        "controller_replay_artifacts_missing",
+    ]
+    regeneration_feasibility = g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_regeneration_feasibility"
+    ]
+    assert (
+        regeneration_feasibility["schema_version"]
+        == "g1-cached-residual-jvp-regeneration-feasibility.v1"
+    )
+    assert regeneration_feasibility["controller_script_exists"] is True
+    assert regeneration_feasibility["start_checkpoint"] == (
+        "implementation/phase1/release_evidence/productization/mgt_direct_residual_attached_policy_followup353_frontier_component_total_scaled_fd_hip_final_checkpoint.npz"
+    )
+    assert regeneration_feasibility["start_checkpoint_exists"] is False
+    assert regeneration_feasibility["advertised_latest_checkpoint"] == (
+        "implementation/phase1/release_evidence/productization/mgt_cached_residual_jvp_top96_multi_ridge_followup361_final_checkpoint.npz"
+    )
+    assert regeneration_feasibility["advertised_latest_checkpoint_exists"] is False
+    assert regeneration_feasibility["step_basis_npz_expected_count"] == 8
+    assert regeneration_feasibility["step_basis_npz_missing_count"] == 8
+    assert regeneration_feasibility["missing_artifact_count"] == 10
+    assert regeneration_feasibility["can_regenerate_advertised_chain"] is False
+    assert regeneration_feasibility["can_replay_advertised_chain"] is False
+    assert regeneration_feasibility["blocked_reasons"] == [
+        "controller_start_checkpoint_missing",
+        "advertised_latest_checkpoint_missing",
+        "advertised_step_basis_npz_missing",
+        "advertised_retained_checkpoint_missing",
+    ]
+    assert "--allow-cpu-diagnostic" in regeneration_feasibility[
+        "non_promoting_regeneration_command_template"
+    ]
+    assert "diagnostic routing evidence only" in regeneration_feasibility[
+        "claim_boundary"
+    ]
+    assert "latest_checkpoint_missing" in g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_latest_blocking_reasons"
+    ]
+    assert "advertised_retained_checkpoint_missing" in g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_latest_blocking_reasons"
+    ]
+    assert "controller_start_checkpoint_missing" in g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_latest_blocking_reasons"
+    ]
+    assert "controller_replay_artifacts_missing" in g1_shell_material_budgeted[
+        "g1_shell_material_budgeted_consistent_residual_jacobian_latest_blocking_reasons"
     ]
     g1_element_block = rows["G1"]["evidence"][
         "direct_residual_row_element_block_target_smoke"
@@ -8371,30 +8942,185 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G1"]["evidence"]["coupled_story_eccentricity_max_relative_residual_inf"] <= 1.0e-6
     assert rows["G1"]["evidence"]["coupled_global_solver_consumes_story_eccentricity_loads"] is True
     assert rows["G2"]["status"] == "closed"
-    assert rows["G2"]["evidence"]["native_solver_ready"] is True
-    assert rows["G2"]["evidence"]["benchmark_contract_pass"] is True
-    assert rows["G2"]["evidence"]["mode_count"] >= 3
-    assert rows["G2"]["evidence"]["critical_load_factor"] > 1.0
+    g2_evidence = rows["G2"]["evidence"]
+    assert g2_evidence["source_receipts"] == {
+        "mgt_native_modal_buckling_solver": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_native_modal_buckling_solver.json"
+        ),
+        "commercial_solver_cross_validation": (
+            "implementation/phase1/release_evidence/productization/"
+            "commercial_solver_cross_validation.json"
+        ),
+    }
+    assert g2_evidence["native_solver_ready"] is True
+    assert g2_evidence["benchmark_contract_pass"] is True
+    assert g2_evidence["mode_count"] == 4
+    assert g2_evidence["critical_load_factor"] > 1.0
+    assert g2_evidence["solve_scope"] == "representative_native_beam_component"
+    assert g2_evidence["mesh_fingerprint"]["raw_beam_elements_available"] == 358
+    assert g2_evidence["mesh_fingerprint"]["beam_elements_solved"] == 4
+    assert g2_evidence["mesh_fingerprint"]["dof_count"] == 15
+    assert g2_evidence["mesh_fingerprint"]["free_dof_count"] == 12
+    assert g2_evidence["mesh_fingerprint"]["real_section_property_coverage_pct"] == 100.0
+    assert g2_evidence["stiffness_matrix_ready"] is True
+    assert g2_evidence["mass_matrix_ready"] is True
+    assert g2_evidence["geometric_stiffness_ready"] is True
+    assert g2_evidence["restrained_dof_count"] == 3
+    assert g2_evidence["modal_solve_status"] == "ready"
+    assert len(g2_evidence["modal_modes"]) == 4
+    assert g2_evidence["modal_modes"][0]["modal_mass_normalized"] is True
+    assert g2_evidence["buckling_solve_status"] == "ready"
+    assert g2_evidence["buckling_factor_head"][0] == g2_evidence[
+        "critical_load_factor"
+    ]
+    assert g2_evidence["geometric_stiffness_positive_rank"] == 6
+    assert g2_evidence["euler_member_factor_min"] > 1.0
+    assert g2_evidence["benchmark_contract_status"] == "pass"
+    assert g2_evidence["cross_validation_status"] == "pass_with_marginal_metrics"
+    assert g2_evidence["cross_validation_case_count"] == 12
+    assert g2_evidence["cross_validation_metric_comparisons"] == 84
+    assert g2_evidence["cross_validation_metric_failures"] == 0
+    assert g2_evidence["cross_validation_marginal_accepted"] == 1
+    assert "not independent solver certification" in g2_evidence[
+        "cross_validation_claim"
+    ]
+    assert "Representative component eigen solve" in g2_evidence["limitations"][0]
+    assert "does not close full-building all-member modal extraction" in g2_evidence[
+        "claim_boundary"
+    ]
+    assert "does not promote full-building dynamics/stability" in rows["G2"][
+        "claim_boundary"
+    ]
     assert rows["G3"]["status"] == "closed"
     assert rows["G3"]["evidence"]["load_stage_runtime_flow_status"] == "ready"
     assert rows["G3"]["evidence"]["solve_flow_ready"] is True
     assert rows["G3"]["evidence"]["viewer_flow_ready"] is True
     assert rows["G3"]["evidence"]["export_flow_ready"] is True
     assert rows["G3"]["evidence"]["audit_flow_ready"] is True
+    g3_evidence = rows["G3"]["evidence"]
+    assert g3_evidence["source_receipts"] == {
+        "load_stage_semantics_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "load_stage_semantics_contract.json"
+        ),
+        "load_stage_runtime_flow_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "load_stage_runtime_flow_receipt.json"
+        ),
+        "delivery_evidence_bundle": (
+            "implementation/phase1/release_evidence/productization/"
+            "delivery_evidence_bundle.json"
+        ),
+    }
+    assert g3_evidence["typed_load_stage_flow_ready"] is True
+    assert g3_evidence["case_entity_count"] == 6
+    assert g3_evidence["combination_entity_count"] == 8
+    assert g3_evidence["runtime_max_nested_depth"] == 2
+    assert g3_evidence["unresolved_reference_count"] == 0
+    assert g3_evidence["required_load_pattern_coverage_ratio"] == 1.0
+    assert g3_evidence["construction_stage_count"] == 24
+    assert g3_evidence["construction_case_count"] == 4
+    assert g3_evidence["unsupported_hazard_queue_ready"] is True
+    assert g3_evidence["unsupported_hazard_families"] == [
+        "seismic_response_spectrum",
+        "temperature_load",
+        "settlement_load",
+        "prestress_load",
+    ]
+    assert g3_evidence["solve_flow_basis"] == "legacy_native_and_condensed"
+    assert g3_evidence["solver_evidence"]["full_line_sparse_ready"] is True
+    assert g3_evidence["solver_evidence"]["full_frame_6dof_sparse_ready"] is True
+    assert g3_evidence["solver_evidence"]["coupled_frame_shell_sparse_ready"] is True
+    assert g3_evidence["solver_evidence"]["pdelta_continuation_status"] == "partial"
+    assert "does not claim full-load nonlinear convergence" in g3_evidence[
+        "solver_evidence"
+    ]["claim_boundary"]
+    assert "does not close source-absent seismic" in g3_evidence["claim_boundary"]
+    assert "does not promote hazard families with no source rows" in rows["G3"][
+        "claim_boundary"
+    ]
     assert rows["G4"]["status"] == "closed"
-    assert rows["G4"]["evidence"]["material_element_tangent_status"] == "ready"
-    assert rows["G4"]["evidence"]["line_beam_tangent_ready"] is True
-    assert rows["G4"]["evidence"]["unsupported_queue_ready"] is True
-    assert rows["G4"]["evidence"]["surface_membrane_tangent_ready"] is True
-    assert rows["G4"]["evidence"]["surface_shell_full_bending_tangent_ready"] is False
-    assert rows["G4"]["evidence"]["surface_shell_bending_drilling_smoke_ready"] is True
-    assert rows["G4"]["evidence"]["shell_calibration_benchmarks_ready"] is True
-    assert rows["G4"]["evidence"]["shell_calibration_ready_case_count"] >= 5
-    assert rows["G4"]["evidence"]["coupled_frame_surface_sparse_equilibrium_ready"] is True
-    assert rows["G4"]["evidence"]["frame_material_nonlinear_tangent_ready"] is True
-    assert rows["G4"]["evidence"]["frame_material_probe_state_summary"]["nonlinear_tangent_element_count"] > 0
+    g4_evidence = rows["G4"]["evidence"]
+    assert g4_evidence["source_receipts"] == {
+        "material_element_tangent_support_matrix": (
+            "implementation/phase1/release_evidence/productization/"
+            "material_element_tangent_support_matrix.json"
+        ),
+        "mgt_surface_membrane_tangent": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_surface_membrane_tangent.json"
+        ),
+        "mgt_surface_shell_bending_tangent": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_surface_shell_bending_tangent.json"
+        ),
+        "mgt_shell_calibration_benchmarks": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_shell_calibration_benchmarks.json"
+        ),
+        "mgt_coupled_frame_surface_sparse_equilibrium": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_coupled_frame_surface_sparse_equilibrium.json"
+        ),
+        "mgt_coupled_frame_shell_sparse_equilibrium": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_coupled_frame_shell_sparse_equilibrium.json"
+        ),
+        "mgt_frame_material_nonlinear_tangent": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_frame_material_nonlinear_tangent.json"
+        ),
+        "mgt_shell_material_nonlinear_tangent": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_shell_material_nonlinear_tangent.json"
+        ),
+    }
+    assert g4_evidence["material_element_tangent_status"] == "ready"
+    assert "full path-dependent material Newton remains queued" in g4_evidence[
+        "material_element_tangent_claim_boundary"
+    ]
+    assert g4_evidence["line_beam_tangent_ready"] is True
+    assert g4_evidence["unsupported_queue_ready"] is True
+    assert g4_evidence["unsupported_element_material_queue_count"] == 3
+    g4_unsupported = {
+        row["family"]: row for row in g4_evidence["unsupported_element_material_queue"]
+    }
+    assert set(g4_unsupported) == {
+        "plate_shell_surface_code2",
+        "nonlinear_rc_steel_composite_material_laws",
+        "contact_interface_foundation",
+    }
+    assert (
+        g4_unsupported["contact_interface_foundation"]["status"]
+        == "unsupported_or_no_source_rows"
+    )
+    assert g4_evidence["surface_membrane_tangent_ready"] is True
+    assert g4_evidence["surface_shell_full_bending_tangent_ready"] is False
+    assert g4_evidence["surface_shell_bending_drilling_smoke_ready"] is True
+    assert g4_evidence["shell_calibration_benchmarks_ready"] is True
+    assert g4_evidence["shell_calibration_ready_case_count"] >= 5
+    assert g4_evidence["coupled_frame_surface_sparse_equilibrium_ready"] is True
+    assert g4_evidence["coupled_frame_shell_sparse_equilibrium_ready"] is True
+    assert g4_evidence["frame_material_nonlinear_tangent_ready"] is True
+    assert g4_evidence["frame_material_probe_state_summary"]["nonlinear_tangent_element_count"] > 0
+    assert g4_evidence["shell_material_nonlinear_tangent_status"] == "ready"
+    assert g4_evidence["shell_material_nonlinear_tangent_ready"] is True
+    assert (
+        g4_evidence["shell_material_full_material_nonlinear_newton_equilibrium"]
+        is False
+    )
+    assert (
+        g4_evidence["shell_material_tangent_smoke_equilibrium"][
+            "material_tangent_override_surface_element_count"
+        ]
+        == 7152
+    )
+    assert "not full path-dependent shell material Newton" in g4_evidence[
+        "shell_material_claim_boundary"
+    ]
     nonlinear_rows = {
-        row["family"]: row for row in rows["G4"]["evidence"]["support_matrix"]
+        row["family"]: row for row in g4_evidence["support_matrix"]
     }
     assert (
         nonlinear_rows["nonlinear_rc_steel_composite_material_laws"]["status"]
@@ -8405,15 +9131,216 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         nonlinear_rows["nonlinear_rc_steel_composite_material_laws"]["full_material_nonlinear_newton_equilibrium"]
         is False
     )
+    assert "locally closed only" in g4_evidence["claim_boundary"]
+    assert "does not close generic opening cutouts" in g4_evidence[
+        "claim_boundary"
+    ]
+    assert "do not promote G1 full-load nonlinear solver readiness" in rows[
+        "G4"
+    ]["claim_boundary"]
     assert rows["G5"]["status"] == "closed"
-    assert rows["G5"]["evidence"]["kds_detailing_support_status"] == "ready"
-    assert rows["G5"]["evidence"]["clause_breadth_ready"] is True
-    assert rows["G5"]["evidence"]["optimization_rows_guarded"] is True
-    assert rows["G5"]["evidence"]["trace_ready"] is True
+    g5_evidence = rows["G5"]["evidence"]
+    assert g5_evidence["source_receipts"] == {
+        "kds_detailing_support_matrix": (
+            "implementation/phase1/release_evidence/productization/"
+            "kds_detailing_support_matrix.json"
+        ),
+        "ai_code_reasoning_guard": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_code_reasoning_guard.json"
+        ),
+        "design_optimization_cost_reduction_changes": (
+            "implementation/phase1/release_evidence/productization/"
+            "design_optimization_cost_reduction_changes.json"
+        ),
+        "kds_rc_rule_engine": "implementation/phase1/kds_rc_rule_engine.py",
+    }
+    assert g5_evidence["kds_detailing_support_status"] == "ready"
+    assert g5_evidence["kds_detailing_claim_boundary"] == (
+        "Deterministic KDS RC clause/detailing support matrix plus "
+        "automatic-claim guard; unsupported steel/composite/seismic/"
+        "project-specific claims remain engineer-review-required."
+    )
+    assert g5_evidence["clause_breadth_ready"] is True
+    assert g5_evidence["optimization_rows_guarded"] is True
+    assert g5_evidence["trace_ready"] is True
+    assert g5_evidence["unsupported_queue_ready"] is True
+    assert g5_evidence["clause_inventory"]["clause_count"] == 23
+    assert g5_evidence["required_rc_families"] == [
+        "beam",
+        "column",
+        "connection",
+        "foundation",
+        "slab",
+        "wall",
+    ]
+    assert g5_evidence["covered_rc_families"] == [
+        "beam",
+        "column",
+        "connection",
+        "foundation",
+        "slab",
+        "wall",
+    ]
+    assert g5_evidence["jurisdiction_profile"] == "KDS-2022 bounded lane"
+    assert g5_evidence["governing_clause_ids"] == [
+        "KDS-MOMENT-Y-001",
+        "KDS-SVC-DRIFT-001",
+    ]
+    assert g5_evidence["distinct_governing_clause_count"] == 2
+    assert g5_evidence["change_row_count"] == 20
+    assert g5_evidence["explicit_clause_row_count"] == 19
+    assert g5_evidence["missing_governing_clause_count"] == 1
+    assert g5_evidence["review_guarded_row_count"] == 20
+    assert g5_evidence["all_rows_have_clause_or_review_guard"] is True
+    assert g5_evidence["hallucination_guard"]["llm_free_default"] is True
+    assert (
+        g5_evidence["hallucination_guard"]["unsupported_clause_behavior"]
+        == "blocked_or_engineer_review_required"
+    )
+    assert g5_evidence["unsupported_clause_queue_count"] == 1
+    assert (
+        g5_evidence["unsupported_clause_queue"][0]["status"]
+        == "engineer_review_required"
+    )
+    assert g5_evidence["broader_unsupported_claim_queue_count"] == 3
+    assert all(
+        row["status"] == "unsupported_or_engineer_review_required"
+        for row in g5_evidence["broader_unsupported_claim_queue"]
+    )
+    assert "locally closed only" in g5_evidence["claim_boundary"]
+    assert "does not close autonomous legal/code approval" in g5_evidence[
+        "claim_boundary"
+    ]
     assert rows["G6"]["status"] == "external_blocked"
     assert rows["G6"]["locally_closable"] is False
     assert rows["G6"]["evidence"]["external_receipt_attached_count"] == 0
     assert rows["G6"]["evidence"]["residual_closed_count"] == 3
+    assert rows["G6"]["evidence"]["source_receipts"] == {
+        "p1_benchmark_breadth_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "p1_benchmark_breadth_status.json"
+        ),
+        "external_benchmark_submission_updates": (
+            "implementation/phase1/release_evidence/productization/"
+            "external_benchmark_submission_updates.json"
+        ),
+        "external_benchmark_submission_readiness": (
+            "implementation/phase1/release/external_benchmark_submission_readiness.json"
+        ),
+        "residual_holdout_closure_updates": (
+            "implementation/phase1/release_evidence/productization/"
+            "residual_holdout_closure_updates.json"
+        ),
+    }
+    g6_requirements = {
+        row["id"]: row for row in rows["G6"]["evidence"]["external_closure_requirements"]
+    }
+    assert set(g6_requirements) == {
+        "eb_receipt_hardest_external_10case",
+        "eb_receipt_korean_public_structures",
+        "eb_receipt_peer_spd_hinge",
+        "eb_receipt_tpu_hffb",
+        "strict_residual_holdout_closure_count",
+    }
+    for requirement_id in (
+        "eb_receipt_hardest_external_10case",
+        "eb_receipt_korean_public_structures",
+        "eb_receipt_peer_spd_hinge",
+        "eb_receipt_tpu_hffb",
+    ):
+        assert g6_requirements[requirement_id]["required"] is True
+        assert g6_requirements[requirement_id]["receipt_attached"] is False
+        assert g6_requirements[requirement_id]["blocker"].startswith(
+            "external_receipt_or_closure_pending:"
+        )
+    assert g6_requirements["strict_residual_holdout_closure_count"] == {
+        "id": "strict_residual_holdout_closure_count",
+        "observed": 3,
+        "target": 3,
+        "passed": True,
+        "blocker_prefix": "residual_closure_pending:",
+    }
+    g6_gap = rows["G6"]["evidence"]["external_closure_gap_summary"]
+    assert g6_gap["external_receipt_attached_count"] == 0
+    assert g6_gap["external_expected_queue_count"] == 4
+    assert g6_gap["external_receipt_remaining_count"] == 4
+    assert g6_gap["residual_closed_count"] == 3
+    assert g6_gap["residual_expected_work_item_count"] == 3
+    assert g6_gap["residual_remaining_count"] == 0
+    assert g6_gap["metadata_only_refresh_closes_g6"] is False
+    assert g6_gap["local_signed_template_closes_g6"] is False
+    assert g6_gap["readiness_queue_closes_g6"] is False
+    assert g6_gap["closure_claim_allowed"] is False
+    assert "non-closing evidence" in g6_gap["claim_boundary"]
+    g6_submission_gate = rows["G6"]["evidence"]["external_submission_closure_gate"]
+    assert g6_submission_gate["contract_pass"] is False
+    assert g6_submission_gate["source_receipts"] == {
+        "p1_benchmark_breadth_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "p1_benchmark_breadth_status.json"
+        ),
+        "external_benchmark_submission_updates": (
+            "implementation/phase1/release_evidence/productization/"
+            "external_benchmark_submission_updates.json"
+        ),
+        "external_benchmark_submission_readiness": (
+            "implementation/phase1/release/external_benchmark_submission_readiness.json"
+        ),
+    }
+    assert g6_submission_gate["queue_status"] == "ready"
+    assert g6_submission_gate["queue_count"] == 4
+    assert g6_submission_gate["ready_to_submit_count"] == 4
+    assert g6_submission_gate["receipt_attached_count"] == 0
+    assert g6_submission_gate["receipt_pending_count"] == 4
+    assert g6_submission_gate["terminal_receipt_requirement_count"] == 4
+    assert g6_submission_gate["terminal_requirements_satisfied_count"] == 0
+    assert g6_submission_gate["terminal_requirements_missing_count"] == 4
+    assert g6_submission_gate["pending_queue_ids"] == [
+        "hardest_external_10case",
+        "tpu_hffb",
+        "peer_spd_hinge",
+        "korean_public_structures",
+    ]
+    assert g6_submission_gate["ready_to_submit_queue_ids"] == [
+        "hardest_external_10case",
+        "tpu_hffb",
+        "peer_spd_hinge",
+        "korean_public_structures",
+    ]
+    assert g6_submission_gate["non_closing_reasons"] == [
+        "external_submission_receipts_pending",
+        "ready_to_submit_is_not_terminal_receipt",
+        "closure_evidence_paths_missing",
+    ]
+    terminal_requirements = {
+        row["queue_id"]: row
+        for row in g6_submission_gate["terminal_receipt_requirements"]
+    }
+    assert set(terminal_requirements) == {
+        "hardest_external_10case",
+        "tpu_hffb",
+        "peer_spd_hinge",
+        "korean_public_structures",
+    }
+    for queue_id, terminal_requirement in terminal_requirements.items():
+        assert "submission_receipt" in terminal_requirement[
+            "terminal_receipt_required"
+        ]
+        assert terminal_requirement["terminal_receipt_attached"] is False
+        assert terminal_requirement["terminal_closure_evidence_attached"] is False
+        assert terminal_requirement["receipt_verified"] is False
+        assert terminal_requirement["ready_to_submit_is_terminal"] is False
+        assert terminal_requirement["terminal_requirement_satisfied"] is False
+        assert terminal_requirement["submission_owner_action"] == (
+            "submit_external_benchmark_package_and_attach_receipt"
+        )
+        assert terminal_requirement["non_closing_reasons"] == [
+            "terminal_receipt_missing",
+            "terminal_closure_evidence_missing",
+            "ready_to_submit_is_not_terminal_receipt",
+        ]
+    assert "ready to submit are non-closing" in g6_submission_gate["claim_boundary"]
     assert "external_submission_receipts_pending" in rows["G6"]["blockers"]
     assert not any(
         str(blocker).startswith("residual_closure_pending:")
@@ -8425,9 +9352,77 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert "G7 remains partial" in rows["G7"]["claim_boundary"]
     assert "benchmark-bridge" in rows["G7"]["claim_boundary"]
     assert "operator-attached real-project corpus closure" in rows["G7"]["claim_boundary"]
+    assert rows["G7"]["evidence"]["source_receipts"] == {
+        "korean_medium_large_ingest_receipt": (
+            "implementation/phase1/open_data/korea/"
+            "korean_medium_large_ingest_receipt.json"
+        ),
+        "operator_attachment_manifest_queue": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.json"
+        ),
+        "operator_attachment_manifest_validation_report": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.validation_report.json"
+        ),
+        "operator_direct_download_review": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_direct_download_review.json"
+        ),
+    }
     assert rows["G7"]["evidence"]["operator_attached_ifc_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_artifact_count"] == 5
     assert rows["G7"]["evidence"]["operator_attached_real_mgt_header_ok_count"] == 0
+    g7_requirements = {
+        row["id"]: row for row in rows["G7"]["evidence"]["closure_requirements"]
+    }
+    assert g7_requirements["repo_benchmark_bridge_count_zero"] == {
+        "id": "repo_benchmark_bridge_count_zero",
+        "observed": 4,
+        "target": 0,
+        "passed": False,
+        "blocker": "repo_benchmark_bridge_mgt_present",
+    }
+    assert g7_requirements["metadata_only_count_zero"] == {
+        "id": "metadata_only_count_zero",
+        "observed": 9,
+        "target": 0,
+        "passed": False,
+        "blocker": "metadata_only_sources_present",
+    }
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "passed"
+    ] is False
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "observed"
+    ] == 0
+    assert g7_requirements["operator_attached_real_mgt_header_ok_minimum"][
+        "target"
+    ] == 4
+    assert g7_requirements["operator_manifest_source_mapping_clear"][
+        "passed"
+    ] is False
+    assert g7_requirements["operator_manifest_source_mapping_clear"][
+        "observed"
+    ] == rows["G7"]["evidence"]["operator_action_queue_count"]
+    assert g7_requirements["operator_rights_boundary_clear"] == {
+        "id": "operator_rights_boundary_clear",
+        "observed": 5,
+        "target": 0,
+        "passed": False,
+        "blocker": "operator_rights_blocked_private_candidate_actions_present",
+    }
+    g7_gap = rows["G7"]["evidence"]["closure_gap_summary"]
+    assert g7_gap["closure_claim_allowed"] is False
+    assert g7_gap["repo_benchmark_bridge_count"] == 4
+    assert g7_gap["metadata_only_count"] == 9
+    assert g7_gap["operator_attached_real_mgt_header_ok_count"] == 0
+    assert g7_gap["operator_attached_real_mgt_header_ok_target"] == 4
+    assert g7_gap["source_mapping_blocked_action_count"] == rows["G7"]["evidence"][
+        "operator_action_queue_count"
+    ]
+    assert g7_gap["rights_blocked_private_candidate_action_count"] == 5
+    assert "repository bridge" in g7_gap["claim_boundary"]
     assert len(rows["G7"]["evidence"]["metadata_only_source_ids"]) == 9
     assert len(rows["G7"]["evidence"]["repo_benchmark_bridge_source_ids"]) == 4
     assert len(rows["G7"]["evidence"]["operator_attach_required_source_ids"]) >= 9
@@ -8480,6 +9475,41 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G7"]["evidence"][
         "operator_attachment_manifest_queue_priority_batches"
     ][0]["batch_id"] == "replace_benchmark_bridge_mgt"
+    assert (
+        rows["G7"]["evidence"]["operator_minimum_real_mgt_closure_batch"][
+            "batch_id"
+        ]
+        == "replace_benchmark_bridge_mgt"
+    )
+    assert rows["G7"]["evidence"][
+        "operator_minimum_real_mgt_closure_batch_source_count"
+    ] == 4
+    assert rows["G7"]["evidence"][
+        "operator_minimum_real_mgt_closure_batch_source_ids"
+    ] == [
+        "koneps_goyang_changneung_powerplant_design_service",
+        "lh_bucheon_yeokgok_a1_housing_native_baseline",
+        "lh_happy_city_5_1_native_baseline",
+        "lh_newtown_highrise_block_competition",
+    ]
+    assert set(
+        rows["G7"]["evidence"][
+            "operator_minimum_real_mgt_closure_batch_acceptance_checks"
+        ]
+    ) == {
+        "file_size_gt_500_bytes",
+        "mgt_header_contains_VERSION_or_UNIT",
+        "roundtrip_parse_contract_pass_when_enabled",
+        "sha256_differs_from_repo_benchmark_bridge",
+    }
+    assert rows["G7"]["evidence"][
+        "operator_minimum_real_mgt_closure_batch_non_closing_reasons"
+    ] == [
+        "source_native_operator_attachments_not_present",
+        "source_mapping_or_rights_overlay_not_accepted",
+        "ingest_replay_not_passed_for_replacement_batch",
+        "repo_benchmark_bridge_mgts_still_present",
+    ]
     assert (
         attachment_queue["autofill_candidate_status"]
         == "blocked_no_exact_clean_repo_candidate"
@@ -8576,6 +9606,142 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
         ]
         == rows["G7"]["evidence"]["operator_action_queue_count"]
     )
+    operator_attachment_gate = rows["G7"]["evidence"][
+        "operator_attachment_closure_gate"
+    ]
+    assert operator_attachment_gate["contract_pass"] is False
+    assert operator_attachment_gate["source_receipts"] == {
+        "ingest_receipt": (
+            "implementation/phase1/open_data/korea/"
+            "korean_medium_large_ingest_receipt.json"
+        ),
+        "operator_attachment_manifest_queue": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.json"
+        ),
+        "operator_attachment_manifest_validation_report": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.validation_report.json"
+        ),
+        "operator_direct_download_review": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_direct_download_review.json"
+        ),
+    }
+    assert operator_attachment_gate["queue_status"] == "pending_operator_fill"
+    assert (
+        operator_attachment_gate["queue_attachment_count"]
+        == rows["G7"]["evidence"]["operator_action_queue_count"]
+    )
+    assert operator_attachment_gate["auto_promotable_repo_candidate_count"] == 0
+    assert operator_attachment_gate["accepted_operator_overlay_source_count"] == 0
+    assert (
+        operator_attachment_gate["rejected_operator_overlay_source_count"]
+        == rows["G7"]["evidence"]["operator_action_queue_count"]
+    )
+    assert operator_attachment_gate["operator_overlay_ready_for_collection"] is False
+    assert operator_attachment_gate["operator_overlay_rejection_counts"] == {
+        "artifact_missing": 9,
+        "rights_not_confirmed": 14,
+        "source_native_artifact_not_confirmed": 14,
+    }
+    assert operator_attachment_gate["specific_remote_download_action_count"] == 5
+    assert operator_attachment_gate["portal_landing_action_count"] == 9
+    assert operator_attachment_gate[
+        "direct_download_closes_expected_file_type_count"
+    ] == 2
+    assert operator_attachment_gate[
+        "direct_download_requires_derivation_or_replacement_count"
+    ] == 3
+    assert (
+        operator_attachment_gate["minimum_operator_real_mgt_closure_batch"][
+            "batch_id"
+        ]
+        == "replace_benchmark_bridge_mgt"
+    )
+    assert operator_attachment_gate[
+        "minimum_operator_real_mgt_closure_batch_source_ids"
+    ] == rows["G7"]["evidence"][
+        "operator_minimum_real_mgt_closure_batch_source_ids"
+    ]
+    assert operator_attachment_gate[
+        "minimum_operator_real_mgt_closure_batch_non_closing_reasons"
+    ] == rows["G7"]["evidence"][
+        "operator_minimum_real_mgt_closure_batch_non_closing_reasons"
+    ]
+    terminal_requirements = operator_attachment_gate[
+        "operator_terminal_attachment_requirements"
+    ]
+    assert (
+        operator_attachment_gate["operator_terminal_attachment_requirement_count"]
+        == rows["G7"]["evidence"]["operator_action_queue_count"]
+        == 14
+    )
+    assert (
+        operator_attachment_gate["operator_terminal_attachment_satisfied_count"]
+        == 0
+    )
+    assert (
+        operator_attachment_gate["operator_terminal_attachment_missing_count"]
+        == 14
+    )
+    assert (
+        len(operator_attachment_gate["operator_terminal_attachment_missing_source_ids"])
+        == 14
+    )
+    assert operator_attachment_gate[
+        "operator_terminal_attachment_artifact_missing_count"
+    ] == 9
+    assert operator_attachment_gate[
+        "operator_terminal_attachment_rights_missing_count"
+    ] == 14
+    assert operator_attachment_gate[
+        "operator_terminal_attachment_source_native_missing_count"
+    ] == 14
+    assert len(terminal_requirements) == 14
+    terminal_by_source = {
+        requirement["source_id"]: requirement
+        for requirement in terminal_requirements
+    }
+    assert sorted(terminal_by_source) == sorted(
+        rows["G7"]["evidence"]["operator_action_queue_source_ids"]
+    )
+    koneps_terminal = terminal_by_source[
+        "koneps_goyang_changneung_powerplant_design_service"
+    ]
+    assert koneps_terminal["queue_status"] == "pending_operator_fill"
+    assert (
+        koneps_terminal["action_type"]
+        == "replace_repo_benchmark_bridge_mgt_with_operator_real_mgt"
+    )
+    assert koneps_terminal["artifact_exists"] is True
+    assert koneps_terminal["rights_confirmed"] is False
+    assert koneps_terminal["source_native_artifact"] is False
+    assert koneps_terminal["accepted_for_collection_overlay"] is False
+    assert koneps_terminal["current_attach_provenance"] == "repo_benchmark_bridge"
+    assert koneps_terminal["terminal_requirement_satisfied"] is False
+    assert koneps_terminal["non_closing_reasons"] == [
+        "rights_not_confirmed",
+        "source_native_artifact_not_confirmed",
+        "operator_overlay_not_accepted",
+        "repo_benchmark_bridge_mgt_present",
+        "operator_queue_not_filled",
+    ]
+    assert "operator_overlay_validation_accepted" in koneps_terminal[
+        "terminal_acceptance_checks"
+    ]
+    pdf_terminal = terminal_by_source["lh_bucheon_yeokgok_a1_housing_competition"]
+    assert pdf_terminal["artifact_exists"] is False
+    assert "artifact_missing" in pdf_terminal["non_closing_reasons"]
+    assert operator_attachment_gate["non_closing_reasons"] == [
+        "operator_queue_not_filled",
+        "repo_candidate_autofill_blocked",
+        "operator_overlay_not_ready_for_collection",
+        "operator_overlay_rows_rejected",
+        "rights_or_source_native_confirmation_missing",
+        "source_mapping_actions_still_blocked",
+    ]
+    assert "non-closing" in operator_attachment_gate["claim_boundary"]
     operator_action_by_source = {
         row["source_id"]: row for row in operator_action_queue
     }
@@ -8787,25 +9953,653 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     )
     assert "metadata_only_sources_present" in rows["G7"]["blockers"]
     assert "operator_attached_real_mgt_header_ok_below_target" in rows["G7"]["blockers"]
-    assert rows["AI-G2"]["status"] == "closed"
-    assert rows["AI-G2"]["evidence"]["production_ml_wired"] is True
-    assert rows["AI-G2"]["evidence"]["checkpoint_validated"] is True
-    assert rows["AI-G2"]["evidence"]["solver_fallback_ready"] is True
+    assert "operator_source_mapping_blocked_actions_present" in rows["G7"]["blockers"]
     assert (
-        rows["AI-G2"]["evidence"]["pdelta_frontier_residual_jacobian_summary"]["diagnosis"]
+        "operator_rights_blocked_private_candidate_actions_present"
+        in rows["G7"]["blockers"]
+    )
+    assert rows["AI-G2"]["status"] == "closed"
+    ai_g2_evidence = rows["AI-G2"]["evidence"]
+    assert ai_g2_evidence["source_receipts"] == {
+        "ml_multi_objective_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_multi_objective_status.json"
+        ),
+        "ml_surrogate_checkpoint_manifest": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_surrogate_checkpoint_manifest.json"
+        ),
+        "ai_freeze_boundary_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_freeze_boundary_status.json"
+        ),
+        "ai_inference_runtime_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_inference_runtime_receipt.json"
+        ),
+        "mgt_pdelta_continuation_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_pdelta_continuation_probe.json"
+        ),
+    }
+    assert ai_g2_evidence["production_ml_wired"] is True
+    assert ai_g2_evidence["checkpoint_validated"] is True
+    assert ai_g2_evidence["dataset_card_ready"] is True
+    assert ai_g2_evidence["model_card_ready"] is True
+    assert ai_g2_evidence["validation_ready"] is True
+    assert ai_g2_evidence["solver_fallback_ready"] is True
+    assert ai_g2_evidence["hard_gate_bypass_prevented"] is True
+    assert ai_g2_evidence["gate_status"] == "production_ready_shadow_solver_gated"
+    assert "shadow_with_solver_fallback" in ai_g2_evidence["gate_claim"]
+    assert ai_g2_evidence["checkpoint_artifacts"] == {
+        "checkpoint": "implementation/phase1/release/ml_surrogate/checkpoint.pt",
+        "dataset_card": "implementation/phase1/release/ml_surrogate/dataset_card.json",
+        "model_card": "implementation/phase1/release/ml_surrogate/model_card.json",
+        "validation_receipt": (
+            "implementation/phase1/release/ml_surrogate/validation_receipt.json"
+        ),
+        "ood_gate": "implementation/phase1/release/ml_surrogate/ood_gate.json",
+        "solver_fallback_receipt": (
+            "implementation/phase1/release/ml_surrogate/solver_fallback_receipt.json"
+        ),
+    }
+    assert ai_g2_evidence["uncertainty_contract"]["confidence_label"] == (
+        "bounded_shadow"
+    )
+    assert ai_g2_evidence["surrogate_truth_claim_frozen"] is True
+    assert "does not prove autonomous structural-design AI" in ai_g2_evidence[
+        "ai_freeze_claim_boundary"
+    ]
+    assert (
+        ai_g2_evidence["pdelta_frontier_residual_jacobian_summary"]["diagnosis"]
         == "fixed_point_increment_small_but_direct_residual_gate_far_from_tolerance"
     )
+    assert ai_g2_evidence["pdelta_frontier_residual_jacobian_summary"][
+        "residual_gate_passed"
+    ] is False
+    assert "locally closed only" in ai_g2_evidence["claim_boundary"]
+    assert "does not mean autonomous structural response truth" in ai_g2_evidence[
+        "claim_boundary"
+    ]
     assert rows["AI-G3"]["status"] in {"closed", "partial"}
+    ai_g3_evidence = rows["AI-G3"]["evidence"]
+    assert ai_g3_evidence["source_receipts"] == {
+        "ai_decision_review_artifacts": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_review_artifacts.json"
+        ),
+        "ai_decision_trace_ledger": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_trace_ledger.json"
+        ),
+        "optimization_productization_audit": (
+            "implementation/phase1/release_evidence/productization/"
+            "optimization_productization_audit.json"
+        ),
+        "ml_multi_objective_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_multi_objective_status.json"
+        ),
+    }
+    assert ai_g3_evidence["deterministic_env_present"] is True
+    assert ai_g3_evidence["production_ml_refs_in_runner"] is False
+    assert ai_g3_evidence["policy_replay_contract_ready"] is True
+    assert ai_g3_evidence["proposal_count"] == 20
+    assert ai_g3_evidence["trace_complete"] is True
+    assert ai_g3_evidence["solver_replay_ready"] is True
+    assert ai_g3_evidence["proxy_replay_ready"] is True
+    assert ai_g3_evidence["review_queue_item_count"] == 20
+    assert ai_g3_evidence["blocked_action_count"] == 47
+    assert ai_g3_evidence["solver_replay_status"] == "pass_with_story_proxy_check"
+    assert ai_g3_evidence["proxy_replay_status"] == "pass"
+    assert ai_g3_evidence["research_pareto_archive_ready"] is True
+    assert ai_g3_evidence["research_pareto_front_count"] == 3
+    assert ai_g3_evidence["production_pareto_runner_wired"] is False
+    assert ai_g3_evidence["optimization_productization_audit_status"] == "ready"
+    assert "does not claim a production-trained RL/NSGA policy runner" in ai_g3_evidence[
+        "claim_boundary"
+    ]
     assert rows["AI-G1"]["status"] in {"closed", "partial"}
+    ai_g1_evidence = rows["AI-G1"]["evidence"]
+    assert ai_g1_evidence["source_receipts"] == {
+        "ai_input_semantic_normalization_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_input_semantic_normalization_receipt.json"
+        ),
+        "korean_medium_large_ingest_receipt": (
+            "implementation/phase1/open_data/korea/"
+            "korean_medium_large_ingest_receipt.json"
+        ),
+        "operator_attachment_manifest_queue": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.json"
+        ),
+        "operator_attachment_manifest_validation_report": (
+            "implementation/phase1/open_data/korea/"
+            "operator_attachment_manifest.queue.validation_report.json"
+        ),
+    }
+    assert ai_g1_evidence["solver_dependency_guard_source_receipts"] == {
+        "mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_uncoarsened_boundary_pdelta_frontier_0p85_receipt.json"
+        ),
+        "mgt_direct_residual_newton_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_direct_residual_newton_probe.json"
+        ),
+        "mgt_g1_direct_residual_terminal_gate_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_g1_direct_residual_terminal_gate_report.json"
+        ),
+        "g1_full_load_hip_newton_lane_report": (
+            "implementation/phase1/release_evidence/productization/"
+            "g1_full_load_hip_newton_lane_report.json"
+        ),
+    }
+    assert ai_g1_evidence["input_semantic_normalization_status"] == "ready"
+    assert ai_g1_evidence["input_semantic_source_path"].endswith(
+        "midas_generator_33.optimized.mgt"
+    )
+    assert ai_g1_evidence["input_semantic_source_sha256"]
+    assert ai_g1_evidence["input_semantic_roundtrip_sha256"]
+    assert ai_g1_evidence["auto_repair_applied"] is False
+    assert ai_g1_evidence["unsupported_queue_count"] == 10
+    assert len(ai_g1_evidence["input_semantic_entity_families"]) >= 6
+    ai_g1_corpus_boundary = ai_g1_evidence[
+        "commercial_real_corpus_generalization_boundary"
+    ]
+    assert ai_g1_corpus_boundary["contract_pass"] is False
+    assert ai_g1_corpus_boundary["metadata_only_count"] == 9
+    assert ai_g1_corpus_boundary["repo_benchmark_bridge_count"] == 4
+    assert ai_g1_corpus_boundary[
+        "operator_attached_real_mgt_header_ok_count"
+    ] == 0
+    assert ai_g1_corpus_boundary["operator_overlay_ready_for_collection"] is False
+    assert ai_g1_corpus_boundary["accepted_operator_overlay_source_count"] == 0
+    assert ai_g1_corpus_boundary["rejected_operator_overlay_source_count"] == 14
+    assert ai_g1_corpus_boundary["source_mapping_blocked_action_count"] == 14
+    assert (
+        ai_g1_corpus_boundary["rights_blocked_private_candidate_action_count"]
+        == 5
+    )
+    assert "does not prove generalized AI parsing" in ai_g1_corpus_boundary[
+        "claim_boundary"
+    ]
     assert rows["AI-G5"]["status"] in {"closed", "partial"}
+    ai_g5_evidence = rows["AI-G5"]["evidence"]
+    assert ai_g5_evidence["source_receipts"] == {
+        "ai_code_reasoning_guard": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_code_reasoning_guard.json"
+        ),
+        "kds_detailing_support_matrix": (
+            "implementation/phase1/release_evidence/productization/"
+            "kds_detailing_support_matrix.json"
+        ),
+    }
+    assert ai_g5_evidence["code_reasoning_guard_status"] == "ready"
+    assert ai_g5_evidence["jurisdiction_profile"] == "KDS-2022 bounded lane"
+    assert ai_g5_evidence["distinct_governing_clause_count"] == 2
+    assert ai_g5_evidence["change_row_count"] == 20
+    assert ai_g5_evidence["explicit_clause_row_count"] == 19
+    assert ai_g5_evidence["missing_governing_clause_count"] == 1
+    assert ai_g5_evidence["review_guarded_row_count"] == 20
+    assert ai_g5_evidence["all_rows_have_clause_or_review_guard"] is True
+    assert ai_g5_evidence["kds_detailing_support_status"] == "ready"
+    assert ai_g5_evidence["kds_clause_inventory"]["clause_count"] == 23
+    assert ai_g5_evidence["kds_unsupported_clause_queue_count"] == 1
+    assert ai_g5_evidence["kds_broader_unsupported_claim_queue_count"] == 3
+    assert "two distinct governing clause ids" in ai_g5_evidence[
+        "claim_boundary"
+    ]
     assert rows["AI-G6"]["status"] in {"closed", "partial"}
+    ai_g6_evidence = rows["AI-G6"]["evidence"]
+    assert ai_g6_evidence["source_receipts"] == {
+        "delivery_evidence_bundle": (
+            "implementation/phase1/release_evidence/productization/"
+            "delivery_evidence_bundle.json"
+        ),
+        "ai_decision_trace_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_trace_contract.json"
+        ),
+        "ai_decision_trace_ledger": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_trace_ledger.json"
+        ),
+        "ai_decision_review_artifacts": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_review_artifacts.json"
+        ),
+    }
+    assert ai_g6_evidence["decision_trace_contract_status"] == "contract_ready"
+    assert ai_g6_evidence["decision_trace_ledger_status"] == "ready"
+    assert ai_g6_evidence["proposal_count"] > 0
+    ai_g6_external_boundary = ai_g6_evidence[
+        "commercial_external_benchmark_audit_boundary"
+    ]
+    assert ai_g6_external_boundary["contract_pass"] is False
+    assert ai_g6_external_boundary["queue_status"] == "ready"
+    assert ai_g6_external_boundary["ready_to_submit_count"] == 4
+    assert ai_g6_external_boundary["receipt_attached_count"] == 0
+    assert ai_g6_external_boundary["receipt_pending_count"] == 4
+    assert ai_g6_external_boundary["terminal_requirements_missing_count"] == 4
+    assert ai_g6_external_boundary["terminal_receipt_requirements"] == (
+        rows["G6"]["evidence"]["external_submission_closure_gate"][
+            "terminal_receipt_requirements"
+        ]
+    )
+    assert ai_g6_external_boundary["source_receipts"] == rows["G6"]["evidence"][
+        "external_submission_closure_gate"
+    ]["source_receipts"]
+    assert ai_g6_external_boundary["non_closing_reasons"] == [
+        "external_submission_receipts_pending",
+        "ready_to_submit_is_not_terminal_receipt",
+        "closure_evidence_paths_missing",
+    ]
+    assert "do not replace attached external V&V" in ai_g6_external_boundary[
+        "claim_boundary"
+    ]
     assert rows["AI-G7"]["status"] in {"closed", "partial"}
+    ai_g7_evidence = rows["AI-G7"]["evidence"]
+    assert ai_g7_evidence["source_receipts"] == {
+        "ml_multi_objective_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_multi_objective_status.json"
+        ),
+        "ai_model_registry": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_model_registry.json"
+        ),
+        "ai_engine_productization_contracts": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_engine_productization_contracts.json"
+        ),
+    }
+    assert ai_g7_evidence["registry_contract_closed"] is True
+    assert ai_g7_evidence["registry_states"] == [
+        "candidate",
+        "deprecated",
+        "production",
+        "shadow",
+    ]
+    assert ai_g7_evidence["dataset_card_ready"] is True
+    assert ai_g7_evidence["model_card_ready"] is True
+    assert ai_g7_evidence["validation_ready"] is True
+    assert ai_g7_evidence["ood_gate_ready"] is True
+    assert ai_g7_evidence["solver_fallback_ready"] is True
+    assert ai_g7_evidence["rollback_contract_required"] is True
+    assert ai_g7_evidence["drift_monitoring_contract_required"] is True
+    assert ai_g7_evidence["release_note_contract_required"] is True
+    ai_g7_corpus_boundary = ai_g7_evidence[
+        "commercial_real_project_corpus_promotion_boundary"
+    ]
+    assert ai_g7_corpus_boundary["contract_pass"] is False
+    assert ai_g7_corpus_boundary["queue_status"] == "pending_operator_fill"
+    assert ai_g7_corpus_boundary["auto_promotable_repo_candidate_count"] == 0
+    assert ai_g7_corpus_boundary["source_mapping_blocked_action_count"] == 14
+    assert (
+        ai_g7_corpus_boundary["rights_blocked_private_candidate_action_count"]
+        == 5
+    )
+    assert ai_g7_corpus_boundary["accepted_operator_overlay_source_count"] == 0
+    assert ai_g7_corpus_boundary["rejected_operator_overlay_source_count"] == 14
+    assert ai_g7_corpus_boundary["operator_overlay_ready_for_collection"] is False
+    assert (
+        ai_g7_corpus_boundary["operator_terminal_attachment_requirement_count"]
+        == 14
+    )
+    assert (
+        ai_g7_corpus_boundary["operator_terminal_attachment_satisfied_count"]
+        == 0
+    )
+    assert (
+        ai_g7_corpus_boundary["operator_terminal_attachment_missing_count"]
+        == 14
+    )
+    assert (
+        ai_g7_corpus_boundary["operator_terminal_attachment_artifact_missing_count"]
+        == 9
+    )
+    assert (
+        ai_g7_corpus_boundary["operator_terminal_attachment_rights_missing_count"]
+        == 14
+    )
+    assert (
+        ai_g7_corpus_boundary[
+            "operator_terminal_attachment_source_native_missing_count"
+        ]
+        == 14
+    )
+    assert sorted(
+        ai_g7_corpus_boundary["operator_terminal_attachment_missing_source_ids"]
+    ) == sorted(rows["G7"]["evidence"]["operator_action_queue_source_ids"])
+    assert all(
+        not requirement["terminal_requirement_satisfied"]
+        for requirement in ai_g7_corpus_boundary[
+            "operator_terminal_attachment_requirements"
+        ]
+    )
+    assert (
+        "does not promote commercial G7 operator queues"
+        in ai_g7_corpus_boundary["claim_boundary"]
+    )
     assert rows["AI-G8"]["status"] in {"closed", "partial"}
+    ai_g8_evidence = rows["AI-G8"]["evidence"]
+    assert ai_g8_evidence["source_receipts"] == {
+        "ai_safety_governance_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_safety_governance_contract.json"
+        ),
+        "workstation_delivery_readiness": (
+            "implementation/phase1/workstation_delivery_readiness.json"
+        ),
+    }
+    assert ai_g8_evidence["workstation_delivery_status"] == "ready"
+    assert ai_g8_evidence["workstation_contract_pass"] is True
+    assert ai_g8_evidence["safety_governance_contract_status"] == "contract_ready"
+    assert ai_g8_evidence["allowed_result_states"] == [
+        "auto_applied",
+        "suggested_only",
+        "blocked",
+        "engineer_review_required",
+        "unsupported",
+    ]
+    assert ai_g8_evidence["final_report_promotion_requires"] == [
+        "solver_replay_passed",
+        "code_check_replay_passed",
+        "cost_provenance_attached",
+        "human_review_recorded",
+    ]
+    assert ai_g8_evidence["data_use_contract"] == {
+        "project_training_reuse_default": "disabled_without_project_consent",
+        "retention_policy_required": True,
+        "delete_policy_required": True,
+    }
+    assert ai_g8_evidence["workstation_claim_boundary"]["forbidden"] == [
+        "independent commercial structural analysis product",
+        "structural engineer replacement",
+        "full autonomous replacement",
+        "customer-device FPS claim",
+        "multi-tenant SaaS throughput claim",
+    ]
+    assert "does not promote independent commercial product readiness" in ai_g8_evidence[
+        "claim_boundary"
+    ]
     assert rows["AI-G9"]["status"] in {"closed", "partial"}
+    ai_g9_evidence = rows["AI-G9"]["evidence"]
+    assert ai_g9_evidence["source_receipts"] == {
+        "ai_inference_runtime_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_inference_runtime_receipt.json"
+        ),
+        "ml_multi_objective_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_multi_objective_status.json"
+        ),
+    }
+    assert ai_g9_evidence["inference_runtime_closed"] is True
+    assert ai_g9_evidence["backend"] == "numpy_ridge_shadow_surrogate"
+    assert ai_g9_evidence["checkpoint_ready"] is True
+    assert ai_g9_evidence["checkpoint_validated"] is True
+    assert ai_g9_evidence["latency_ms"] == 1.0
+    assert ai_g9_evidence["memory_peak_mb"] == 64.0
+    assert ai_g9_evidence["ood_status"] == "pass"
+    assert ai_g9_evidence["runtime_budget_contract"] == {
+        "latency_budget_ms": 250,
+        "memory_budget_mb": 512,
+        "cpu_gpu_parity_policy": "required_before_production_promotion",
+        "supported_backends": [
+            "cpu",
+            "gpu",
+            "deterministic_solver_fallback",
+        ],
+    }
+    assert ai_g9_evidence["solver_fallback_ready"] is True
+    assert ai_g9_evidence["hard_gate_bypass_prevented"] is True
+    assert ai_g9_evidence["production_ml_wired"] is True
+    assert ai_g9_evidence["multi_objective_pareto_wired"] is False
+    assert "does not promote commercial G9 GPU solver closure" in ai_g9_evidence[
+        "claim_boundary"
+    ]
+    assert "does not close commercial G9 GPU solver residual gates" in rows["AI-G9"][
+        "claim_boundary"
+    ]
     assert rows["AI-G10"]["status"] in {"closed", "partial"}
+    ai_g10_evidence = rows["AI-G10"]["evidence"]
+    assert ai_g10_evidence["source_receipts"] == {
+        "ai_review_queue_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_review_queue_contract.json"
+        ),
+        "ai_review_queue": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_review_queue.json"
+        ),
+        "ai_decision_review_artifacts": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_decision_review_artifacts.json"
+        ),
+        "workstation_delivery_readiness": (
+            "implementation/phase1/workstation_delivery_readiness.json"
+        ),
+    }
+    assert ai_g10_evidence["review_queue_contract_status"] == "contract_ready"
+    assert ai_g10_evidence["review_queue_status"] == "ready"
+    assert ai_g10_evidence["queue_item_count"] == 20
+    assert ai_g10_evidence["queue_item_state_counts"]["pending_review"] == 20
+    assert ai_g10_evidence["reviewer_decision_counts"] == {"pending": 20}
+    assert ai_g10_evidence["signed_human_approval_count"] == 0
+    assert ai_g10_evidence["missing_required_field_counts"] == {
+        "proposal_id": 0,
+        "member_or_group_id": 0,
+        "before_state_hash": 0,
+        "after_state_hash": 0,
+        "governing_constraint": 0,
+        "confidence": 0,
+        "unsupported_caveat": 0,
+        "evidence_links": 0,
+        "reviewer_decision": 0,
+    }
+    assert ai_g10_evidence["items_with_evidence_links"] == 20
+    assert ai_g10_evidence["evidence_link_count"] == 60
+    assert ai_g10_evidence["grounded_answer_required_fields"] == [
+        "evidence_links",
+        "confidence",
+        "unsupported_caveat",
+        "next_review_action",
+    ]
+    assert ai_g10_evidence["grounded_answer_template_count"] == 2
+    assert ai_g10_evidence["decision_trace_ready"] is True
+    assert ai_g10_evidence["policy_replay_contract_ready"] is True
+    assert ai_g10_evidence["blocked_action_count"] == 47
+    assert "does not close a signed human approval workflow" in ai_g10_evidence[
+        "claim_boundary"
+    ]
+    assert "does not mean proposals were accepted by a human reviewer" in rows[
+        "AI-G10"
+    ]["claim_boundary"]
     assert rows["G10"]["status"] in {"closed", "partial"}
+    g10_evidence = rows["G10"]["evidence"]
+    assert g10_evidence["source_receipts"] == {
+        "workstation_delivery_readiness": (
+            "implementation/phase1/workstation_delivery_readiness.json"
+        ),
+        "solver_governance_support_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "solver_governance_support_contract.json"
+        ),
+        "delivery_evidence_bundle": (
+            "implementation/phase1/release_evidence/productization/"
+            "delivery_evidence_bundle.json"
+        ),
+    }
+    assert g10_evidence["workstation_delivery_status"] == "ready"
+    assert g10_evidence["workstation_contract_pass"] is True
+    assert g10_evidence["workstation_gate_count"] == 8
+    assert g10_evidence["workstation_gate_labels"] == [
+        "Workstation hardware profile",
+        "Workstation service budget",
+        "Delivery package manifest",
+        "Customer-open delivery viewer smoke",
+        "Viewer smoke and visual evidence",
+        "Client input validation report",
+        "Job reproducibility contract",
+        "Job retention and cleanup policy",
+    ]
+    assert g10_evidence["workstation_claim_boundary"]["forbidden"] == [
+        "independent commercial structural analysis product",
+        "structural engineer replacement",
+        "full autonomous replacement",
+        "customer-device FPS claim",
+        "multi-tenant SaaS throughput claim",
+    ]
+    assert g10_evidence["independent_commercial_product_ready"] is False
+    assert g10_evidence["solver_governance_support_status"] == "ready"
+    assert g10_evidence["governance_support_ready"] is True
+    assert g10_evidence["bundle_status"] == "ready"
+    assert g10_evidence["validation_status"] == "pass"
+    assert g10_evidence["full_gap_ledger_ready"] is False
+    assert g10_evidence["full_gap_ledger_status"] == "open"
+    assert g10_evidence["unsupported_state_first_report_policy"] is True
+    assert g10_evidence["report_state_separation"]["unsupported_or_external"] == [
+        "G1",
+        "G6",
+        "G7",
+    ]
+    assert g10_evidence["headline_trace_required_chain"] == [
+        "customer_report_metric",
+        "viewer_surface_or_delivery_index_link",
+        "evidence_json_path",
+        "solver_or_proxy_run_id",
+        "input_model_hash",
+        "claim_boundary_label",
+    ]
+    assert g10_evidence["engineer_review_workflow"][
+        "required_before_final_report_promotion"
+    ] == [
+        "solver_or_proxy_state_visible",
+        "unsupported_state_visible",
+        "engineer_review_decision",
+        "evidence_links_resolve",
+    ]
+    assert g10_evidence["support_policy"] == {
+        "release_note_policy_required": True,
+        "numerical_change_policy_required": True,
+        "audit_export_required": True,
+        "retention_delete_policy_required": True,
+        "external_state_confirmation_required": True,
+    }
+    assert g10_evidence["unsupported_row_ids"] == ["G1", "G6", "G7"]
+    assert "does not close the full gap ledger" in g10_evidence["claim_boundary"]
+    assert "does not promote full commercial readiness" in rows["G10"][
+        "claim_boundary"
+    ]
     assert rows["AI-G4"]["status"] in {"closed", "partial"}
+    ai_g4_evidence = rows["AI-G4"]["evidence"]
+    assert ai_g4_evidence["source_receipts"] == {
+        "ai_physics_guard_contract": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_physics_guard_contract.json"
+        ),
+        "ai_physics_guard_execution": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_physics_guard_execution.json"
+        ),
+    }
+    assert ai_g4_evidence["physics_guard_contract_status"] == (
+        "contract_ready_model_not_promoted"
+    )
+    assert ai_g4_evidence["production_gate_ready"] is False
+    assert ai_g4_evidence["contract_blockers"] == [
+        "no_validated_ai_correction_model"
+    ]
+    assert ai_g4_evidence["required_gate_count"] == 5
+    assert ai_g4_evidence["required_gate_ids"] == [
+        "equilibrium_residual",
+        "energy_monotonicity",
+        "boundary_condition_violation",
+        "ood_generalization",
+        "long_rollout_stability",
+    ]
+    assert ai_g4_evidence["physics_guard_execution_status"] == "ready"
+    assert ai_g4_evidence["correction_promotion_blocked"] is True
+    assert ai_g4_evidence["direct_residual_correction_gate_enforced"] is True
+    assert ai_g4_evidence["gate_row_statuses"][
+        "direct_residual_physics_correction"
+    ] == "pass"
+    direct_residual_correction = ai_g4_evidence[
+        "direct_residual_physics_correction"
+    ]
+    assert direct_residual_correction["direct_residual_newton_ready"] is False
+    assert direct_residual_correction["gate_action"] == "blocked_from_promotion"
+    assert "guardrail closure" in ai_g4_evidence["claim_boundary"]
     assert rows["G8"]["status"] in {"closed", "partial"}
+    g8_evidence = rows["G8"]["evidence"]
+    assert g8_evidence["source_receipts"] == {
+        "optimization_productization_audit": (
+            "implementation/phase1/release_evidence/productization/"
+            "optimization_productization_audit.json"
+        ),
+        "ml_multi_objective_status": (
+            "implementation/phase1/release_evidence/productization/"
+            "ml_multi_objective_status.json"
+        ),
+        "design_optimization_cost_reduction_changes": (
+            "implementation/phase1/release_evidence/productization/"
+            "design_optimization_cost_reduction_changes.json"
+        ),
+        "post_optimization_reanalysis_gate": (
+            "implementation/phase1/release_evidence/productization/"
+            "post_optimization_reanalysis_gate.json"
+        ),
+        "proxy_solver_divergence_gate": (
+            "implementation/phase1/release_evidence/productization/"
+            "proxy_solver_divergence_gate.json"
+        ),
+        "kds_detailing_support_matrix": (
+            "implementation/phase1/release_evidence/productization/"
+            "kds_detailing_support_matrix.json"
+        ),
+    }
+    assert g8_evidence["optimization_productization_audit_status"] == "ready"
+    assert g8_evidence["optimization_productization_ready"] is True
+    assert g8_evidence["change_count"] == 20
+    assert g8_evidence["accepted_rows_have_cost"] is True
+    assert g8_evidence["accepted_rows_have_safety"] is True
+    assert g8_evidence["accepted_rows_have_code"] is True
+    assert g8_evidence["accepted_rows_have_explicit_clause"] is False
+    assert g8_evidence["missing_governing_clause_count"] == 1
+    assert g8_evidence["review_guarded_row_count"] == 20
+    assert g8_evidence["all_rows_have_clause_or_review_guard"] is True
+    assert g8_evidence["solver_replay_ready"] is True
+    assert g8_evidence["proxy_replay_ready"] is True
+    assert g8_evidence["decision_trace_ready"] is True
+    assert g8_evidence["review_queue_ready"] is True
+    assert g8_evidence["production_pareto_wired_by_audit"] is True
+    assert g8_evidence["multi_objective_pareto_wired"] is False
+    assert g8_evidence["research_pareto_archive_ready"] is True
+    assert g8_evidence["research_pareto_front_count"] == 3
+    assert g8_evidence["ml_bypass_prevented"] is True
+    assert g8_evidence["ml_surrogate_gate_status"] == (
+        "production_ready_shadow_solver_gated"
+    )
+    assert g8_evidence["ml_surrogate_checkpoint_validated"] is True
+    assert g8_evidence["final_report_promotion_requires"] == [
+        "solver_replay_passed",
+        "code_check_replay_passed",
+        "cost_provenance_attached",
+        "human_review_recorded",
+    ]
+    assert g8_evidence["optimization_summary"]["proposal_count"] == 20
+    assert g8_evidence["kds_unsupported_clause_queue_count"] == 1
+    assert "does not promote autonomous AI design" in g8_evidence[
+        "claim_boundary"
+    ]
+    assert "does not permit ML/Pareto output to bypass" in rows["G8"][
+        "claim_boundary"
+    ]
     assert rows["G9"]["evidence"]["full_line_sparse_elastic_equilibrium_ready"] is True
     assert rows["G9"]["evidence"]["nvidia_smi_not_required_for_amd_rocm"] is True
     assert rows["G9"]["evidence"]["rocm_tool_paths"]["rocm_smi"]
@@ -8813,59 +10607,109 @@ def test_commercial_gap_ledger_status_is_honest_about_current_blockers() -> None
     assert rows["G9"]["evidence"]["rocm_tool_paths"]["hipcc"]
     assert rows["G9"]["evidence"]["rocm_device_nodes"]["dev_kfd_present"] in {True, False}
     assert rows["G9"]["evidence"]["solver_runtime_backend_policy_status"] == "ready"
-    assert rows["G9"]["evidence"]["official_solver_compute_backend"] == "amd_rocm_hip"
-    assert rows["G9"]["evidence"]["official_solver_backend"] == "amd_rocm_hip"
-    assert rows["G9"]["evidence"]["official_solver_backend_family"] == "rocm_hip"
-    assert rows["G9"]["evidence"]["gpu_required_for_commercial_solver_closure"] is True
-    assert rows["G9"]["evidence"]["torch_device_label_is_pytorch_rocm_compat_alias"] is True
-    assert rows["G9"]["evidence"]["cpu_diagnostic_promotes_solver_closure"] is False
-    assert rows["G9"]["evidence"]["cpu_solver_fallback_detected"] is False
-    assert rows["G9"]["evidence"]["cpu_fallback_allowed_for_official_solver_closure"] is False
-    assert rows["G9"]["evidence"]["cpu_reference_allowed_for_validation_replay"] is True
+    g9_evidence = rows["G9"]["evidence"]
+    assert g9_evidence["source_receipts"] == {
+        "independent_product_readiness": (
+            "implementation/phase1/release_evidence/productization/"
+            "independent_product_readiness.json"
+        ),
+        "gpu_solver_claim_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpu_solver_claim_receipt.json"
+        ),
+        "gpu_rocm_workstation_receipt": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpu_rocm_workstation_receipt.json"
+        ),
+        "solver_runtime_backend_policy": (
+            "implementation/phase1/release_evidence/productization/"
+            "solver_runtime_backend_policy.json"
+        ),
+        "mgt_rocm_sparse_solver_probe": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_rocm_sparse_solver_probe.json"
+        ),
+        "mgt_surface_shell_bending_tangent": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_surface_shell_bending_tangent.json"
+        ),
+        "mgt_coupled_frame_shell_sparse_equilibrium": (
+            "implementation/phase1/release_evidence/productization/"
+            "mgt_coupled_frame_shell_sparse_equilibrium.json"
+        ),
+    }
+    assert g9_evidence["official_solver_compute_backend"] == "amd_rocm_hip"
+    assert g9_evidence["official_solver_backend"] == "amd_rocm_hip"
+    assert g9_evidence["official_solver_backend_family"] == "rocm_hip"
+    assert g9_evidence["gpu_required_for_commercial_solver_closure"] is True
+    assert g9_evidence["torch_device_label_is_pytorch_rocm_compat_alias"] is True
+    assert g9_evidence["cpu_diagnostic_promotes_solver_closure"] is False
+    assert g9_evidence["cpu_solver_fallback_detected"] is False
+    assert g9_evidence["cpu_fallback_allowed_for_official_solver_closure"] is False
+    assert g9_evidence["cpu_reference_allowed_for_validation_replay"] is True
+    assert "does not prove that every MGT full sparse" in g9_evidence[
+        "rocm_workstation_claim_boundary"
+    ]
+    assert "CPU direct-residual receipts may diagnose" in g9_evidence[
+        "solver_runtime_backend_policy_claim_boundary"
+    ]
+    assert "full_3d_rocm_nonlinear_equilibrium_not_closed" in g9_evidence[
+        "mgt_rocm_sparse_probe_blockers"
+    ]
+    assert "Shell/coupled sparse solve attempts remain unclosed" in g9_evidence[
+        "mgt_rocm_sparse_probe_claim_boundary"
+    ]
+    assert "locally closed only" in g9_evidence["claim_boundary"]
+    assert "does not close G1 full 3D nonlinear" in g9_evidence[
+        "claim_boundary"
+    ]
+    assert "CPU diagnostic/reference paths do not promote" in rows["G9"][
+        "claim_boundary"
+    ]
     assert (
-        rows["G9"]["evidence"][
+        g9_evidence[
             "surface_shell_rocm_sparse_enriched_structural_node_coarse_correction_equilibrium_ready"
         ]
         is False
     )
     assert (
-        rows["G9"]["evidence"][
+        g9_evidence[
             "surface_shell_rocm_sparse_schur_interface_correction_equilibrium_ready"
         ]
         is False
     )
     assert (
-        rows["G9"]["evidence"][
+        g9_evidence[
             "coupled_frame_shell_rocm_sparse_enriched_structural_node_coarse_correction_equilibrium_ready"
         ]
         is False
     )
     assert (
-        rows["G9"]["evidence"][
+        g9_evidence[
             "coupled_frame_shell_rocm_sparse_schur_interface_correction_equilibrium_ready"
         ]
         is False
     )
-    assert rows["G9"]["evidence"]["full_line_sparse_geometric_equilibrium_ready"] is True
-    assert rows["G9"]["evidence"]["full_line_sparse_geometric_equilibrium_metrics"]["residual_inf_n"] <= 1.0e-3
-    assert rows["G9"]["evidence"]["full_frame_6dof_sparse_elastic_equilibrium_ready"] is True
-    assert rows["G9"]["evidence"]["full_frame_6dof_linearized_geometric_equilibrium_ready"] is True
-    assert rows["G9"]["evidence"]["full_frame_6dof_geometric_equilibrium_metrics"]["residual_inf_n"] <= 1.0e-3
-    assert rows["G9"]["evidence"]["full_frame_6dof_deformed_state_pdelta_equilibrium_ready"] is True
-    assert rows["G9"]["evidence"]["full_frame_6dof_linear_solver_refinement"]["enabled"] is True
+    assert g9_evidence["full_line_sparse_geometric_equilibrium_ready"] is True
+    assert g9_evidence["full_line_sparse_geometric_equilibrium_metrics"]["residual_inf_n"] <= 1.0e-3
+    assert g9_evidence["full_frame_6dof_sparse_elastic_equilibrium_ready"] is True
+    assert g9_evidence["full_frame_6dof_linearized_geometric_equilibrium_ready"] is True
+    assert g9_evidence["full_frame_6dof_geometric_equilibrium_metrics"]["residual_inf_n"] <= 1.0e-3
+    assert g9_evidence["full_frame_6dof_deformed_state_pdelta_equilibrium_ready"] is True
+    assert g9_evidence["full_frame_6dof_linear_solver_refinement"]["enabled"] is True
     assert (
-        rows["G9"]["evidence"]["full_frame_6dof_linear_solver_refinement"]["strategy"]
+        g9_evidence["full_frame_6dof_linear_solver_refinement"]["strategy"]
         == "best_residual_iterative_refinement"
     )
-    assert rows["G9"]["evidence"]["pdelta_continuation_status"] == "partial"
-    assert rows["G9"]["evidence"]["full_load_pdelta_continuation_ready"] is False
-    assert rows["G9"]["evidence"]["pdelta_direct_load_step_max_converged_load_scale"] == 0.5
+    assert g9_evidence["pdelta_continuation_status"] == "partial"
+    assert g9_evidence["full_load_pdelta_continuation_ready"] is False
+    assert g9_evidence["pdelta_direct_load_step_max_converged_load_scale"] == 0.5
     assert (
-        abs(rows["G9"]["evidence"]["pdelta_continuation_max_converged_load_scale"] - 0.50765625)
+        abs(g9_evidence["pdelta_continuation_max_converged_load_scale"] - 0.50765625)
         <= 1.0e-12
     )
-    assert rows["G9"]["evidence"]["pdelta_continuation_first_failed_load_scale"] == 0.55
-    assert rows["G9"]["evidence"]["pdelta_post_converged_micro_step_probe"]["ready"] is True
+    assert g9_evidence["pdelta_continuation_first_failed_load_scale"] == 0.55
+    assert g9_evidence["pdelta_post_converged_micro_step_probe"]["ready"] is True
     assert (
         rows["G9"]["evidence"]["pdelta_post_converged_micro_step_probe"][
             "convergence_increment_metric"
@@ -9956,6 +11800,10 @@ def test_report_commercial_gap_ledger_status_cli(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
     payload = json.loads(out.read_text(encoding="utf-8"))
     assert payload["schema_version"] == "commercial-gap-ledger-status.v1"
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"]
+    assert payload["reused_evidence"] is True
+    assert payload["input_checksums"]
     assert payload["summary"]["total_count"] == len(payload["rows"])
     assert payload["summary"]["total_count"] >= 20
 

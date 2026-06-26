@@ -1,0 +1,163 @@
+{
+  "claim_boundary": "This artifact authors the commercial comparison import template and mapping expectations only. It does not attach operator files, grant redistribution permission, ingest commercial outputs, compare two independent reference solvers, or close Phase 4/Phase 6.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "comparison_diagnostic_policy": {
+    "commercial_outputs_are_absolute_truth": false,
+    "diagnostic_order": [
+      "unit_system",
+      "local_axis_convention",
+      "rigid_offset_policy",
+      "end_release_policy",
+      "diaphragm_policy",
+      "mass_source_policy",
+      "self_weight_policy",
+      "material_modulus_convention",
+      "shell_formulation",
+      "mesh_density",
+      "damping_policy",
+      "p_delta_policy",
+      "eigen_solver",
+      "load_combinations",
+      "convergence_tolerance"
+    ],
+    "difference_triage": "When comparison metrics differ, diagnose declared modeling convention differences before attributing correctness to any solver.",
+    "policy_id": "modeling_assumption_first",
+    "required_result_field": "modeling_assumption_diagnostics",
+    "solver_correctness_claim_allowed": false
+  },
+  "contract_pass": true,
+  "csv_columns": [
+    "case_id",
+    "modeling_convention_id",
+    "modeling_assumption_diagnostic_status",
+    "primary_modeling_assumption_delta",
+    "modeling_assumption_delta_codes",
+    "engine_name",
+    "engine_version",
+    "input_checksum",
+    "node_mapping_coverage_ratio",
+    "member_mapping_coverage_ratio",
+    "max_displacement_rel_error",
+    "max_reaction_rel_error",
+    "max_member_force_rel_error",
+    "mode_frequency_rel_error",
+    "mode_shape_mac",
+    "nonlinear_peak_rel_error",
+    "nonlinear_curve_area_rel_error",
+    "equilibrium_residual_norm",
+    "runtime_seconds",
+    "peak_memory_mb",
+    "warning_codes",
+    "unsupported_feature_codes"
+  ],
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "generated_at": "2026-06-23T16:09:52.091578+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:50f8ae957a4f85f70cf6b59878c074cfb0775afe502ffc0ec2d501c96cf8cdd5",
+    "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
+    "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211"
+  },
+  "json_template": {
+    "case_id": "OPERATOR_CASE_ID",
+    "displacement_metrics": [],
+    "engine_name": "ETABS|SAP2000|MIDAS|RFEM|ABAQUS|OTHER",
+    "engine_version": "ENGINE_VERSION",
+    "equilibrium_residual": {
+      "norm": null,
+      "normalization": "operator_declared"
+    },
+    "input_checksum": "sha256:OPERATOR_INPUT_SHA256",
+    "member_force_metrics": [],
+    "modal_metrics": [],
+    "modeling_assumption_diagnostics": {
+      "delta_codes": [],
+      "diagnostic_order": [
+        "unit_system",
+        "local_axis_convention",
+        "rigid_offset_policy",
+        "end_release_policy",
+        "diaphragm_policy",
+        "mass_source_policy",
+        "self_weight_policy",
+        "material_modulus_convention",
+        "shell_formulation",
+        "mesh_density",
+        "damping_policy",
+        "p_delta_policy",
+        "eigen_solver",
+        "load_combinations",
+        "convergence_tolerance"
+      ],
+      "notes": [],
+      "primary_delta": null,
+      "status": "missing|matched|differences_found|blocked"
+    },
+    "modeling_convention_id": "CONVENTION_ID",
+    "node_member_mapping_coverage": {
+      "member_ratio": 0.0,
+      "node_ratio": 0.0,
+      "unmapped_member_count": 0,
+      "unmapped_node_count": 0
+    },
+    "nonlinear_curve_metrics": [],
+    "peak_memory": {
+      "megabytes": null
+    },
+    "reaction_metrics": [],
+    "runtime": {
+      "seconds": null
+    },
+    "unsupported_features": [],
+    "warnings": []
+  },
+  "operator_attachment_requirements": [
+    "Attach raw commercial-tool export files outside bundled repo data.",
+    "Record SHA256 for every operator-attached input and result file.",
+    "Declare modeling convention for units, local axes, releases, offsets, mass source, damping, P-Delta, eigen solver, load combinations, and convergence tolerance.",
+    "Triage result deltas through the modeling-assumption diagnostic order before recording any solver-correctness hypothesis.",
+    "Keep commercial-tool outputs as comparison references, not absolute truth.",
+    "Mark missing mappings, warnings, and unsupported features explicitly; silent drops are blocking."
+  ],
+  "phase3_closure_claim": false,
+  "remaining_blockers": [
+    "operator_files_missing",
+    "license_or_customer_permission_missing",
+    "operator_file_checksums_missing",
+    "two_reference_solver_comparison_not_available",
+    "commercial_cross_solver_execution_missing"
+  ],
+  "required_result_fields": [
+    "case_id",
+    "modeling_convention_id",
+    "modeling_assumption_diagnostics",
+    "engine_name",
+    "engine_version",
+    "input_checksum",
+    "node_member_mapping_coverage",
+    "displacement_metrics",
+    "reaction_metrics",
+    "member_force_metrics",
+    "modal_metrics",
+    "nonlinear_curve_metrics",
+    "equilibrium_residual",
+    "runtime",
+    "peak_memory",
+    "warnings",
+    "unsupported_features"
+  ],
+  "schema_version": "phase4-commercial-comparison-import-template.v1",
+  "selected_benchmark_lanes": [
+    "commercial-cross-solver"
+  ],
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "ready",
+  "template_scope": {
+    "commercial_results_are_absolute_truth": false,
+    "operator_files_bundled": false,
+    "requires_two_reference_solvers_for_phase4_closure": true,
+    "supports_operator_attached_csv": true,
+    "supports_operator_attached_json": true
+  },
+  "truth_class": "comparison_reference"
+}

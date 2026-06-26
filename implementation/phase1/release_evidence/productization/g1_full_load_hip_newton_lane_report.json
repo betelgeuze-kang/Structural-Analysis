@@ -1,6 +1,8 @@
 {
   "blockers": [
     "checkpoint_load_scale_below_required_full_load",
+    "checkpoint_resolution_no_full_load_candidate",
+    "hip_consistency_proof_production_hip_path_not_proven",
     "hip_consistency_proof_gate_not_passed",
     "hip_consistency_proof_has_blockers",
     "hip_consistency_proof_runtime::dev_kfd_missing",
@@ -12,132 +14,132 @@
     "frontier_load_scale": null,
     "load_path_provenance_present": false,
     "load_scale": 0.656,
-    "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+    "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
     "schema": "mgt-direct-residual-newton-state.v1"
   },
   "checkpoint_resolution": {
     "mode": "auto_select",
     "requested_path": null,
     "selection": {
-      "candidate_count": 23,
+      "candidate_count": 50,
       "highest_observed_load_scale": 0.656,
       "loadable_candidates": [
         {
-          "candidate_index": 22,
+          "candidate_index": 49,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 21,
+          "candidate_index": 48,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup397_compact_smoke_final_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 20,
+          "candidate_index": 47,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_direct_residual_shell_material_adaptive_global_krylov_followup396_smoke_final_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup428_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 19,
+          "candidate_index": 46,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup395_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup427_target128_support4_cpu_continuation_candidate1_target128_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 18,
+          "candidate_index": 45,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup394_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 17,
+          "candidate_index": 44,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup393_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup424_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 16,
+          "candidate_index": 43,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup392_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup423_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 15,
+          "candidate_index": 42,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup391_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup422_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 14,
+          "candidate_index": 41,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup389_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup421_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 13,
+          "candidate_index": 40,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup388_multistep_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup420_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 12,
+          "candidate_index": 39,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup387_target4_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup419_target64_support4_cpu_continuation_candidate1_target64_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         },
         {
-          "candidate_index": 11,
+          "candidate_index": 38,
           "dof_count": 78282,
           "exists": true,
           "load_scale": 0.656,
-          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup386_continue_target2_support4_compact_checkpoint.npz",
+          "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup418_target32_support4_cpu_continuation_candidate1_target32_support4_final_checkpoint.npz",
           "provenance_context": {},
           "schema": "mgt-direct-residual-newton-state.v1"
         }
       ],
-      "loadable_count": 15,
+      "loadable_count": 42,
       "mode": "auto_select",
       "selected_checkpoint": {
         "dof_count": 78282,
         "load_scale": 0.656,
         "meets_full_load": false,
-        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
         "provenance_context": {},
         "schema": "mgt-direct-residual-newton-state.v1"
       },
@@ -161,7 +163,7 @@
         },
         {
           "available": true,
-          "candidate_count": 15,
+          "candidate_count": 42,
           "candidate_paths_sample": [
             "implementation/phase1/release_evidence/productization/mgt_equilibrium_newton_focused_followup365_attached_regularized_direct_final_checkpoint.npz",
             "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup384_target2_support4_compact_checkpoint.npz",
@@ -181,6 +183,25 @@
       ],
       "unloadable_count": 8
     }
+  },
+  "checkpoint_resolution_gate": {
+    "blockers": [
+      "checkpoint_resolution_no_full_load_candidate"
+    ],
+    "candidate_count": 50,
+    "claim_boundary": "This gate proves only whether the scanned checkpoint evidence contains a loadable checkpoint at the required full-load scale. It does not prove residual, increment, material Newton, or production ROCm/HIP closure.",
+    "full_load_candidate_count": 0,
+    "full_load_tolerance": 1e-12,
+    "highest_observed_gap_to_required_load_scale": 0.344,
+    "highest_observed_load_scale": 0.656,
+    "loadable_count": 42,
+    "mode": "auto_select",
+    "passed": false,
+    "required_load_scale": 1.0,
+    "schema_version": "g1-checkpoint-resolution-gate.v1",
+    "selected_checkpoint_load_scale": 0.656,
+    "selected_checkpoint_meets_full_load": false,
+    "unloadable_count": 8
   },
   "child_exit_code": null,
   "child_gate_evidence": {
@@ -253,7 +274,7 @@
     "/usr/bin/python3",
     "implementation/phase1/run_mgt_direct_residual_newton_probe.py",
     "--checkpoint-npz",
-    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz",
     "--output-json",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_direct_probe.json",
     "--apply-shell-material-tangent",
@@ -281,9 +302,1135 @@
   "contract_pass": false,
   "dry_run": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
+  "frontier_non_promoting_evidence": {
+    "claim_boundary": "Frontier and launch-only receipts are attached as non-promoting diagnostic context. They may explain why the lane is blocked, but they do not close full-load, material Newton, consistent residual/Jacobian Newton, production ROCm/HIP residency, or full G1.",
+    "direct_residual_gate_tolerance_n": 0.0005,
+    "evidence_role": "non_promoting_partial_frontier_context",
+    "frontier_chain_count": 44,
+    "frontier_residual_above_tolerance": true,
+    "latest_frontier_direct_residual_inf_n": 1.3092276661494922,
+    "latest_frontier_receipt": "mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8.json",
+    "non_promoting_launch_receipt_count": 24,
+    "non_promoting_launch_receipts": [
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 0,
+        "child_best_base_direct_residual_inf_n": null,
+        "child_best_final_direct_residual_inf_n": null,
+        "child_row_correction_stop_reasons": [],
+        "claim_boundary": "Launch receipt only. A completed child direct-residual receipt is required before claiming residual progress.",
+        "controller_promotion_count": null,
+        "controller_row_jacobian_mode": null,
+        "controller_row_support_column_counts": null,
+        "controller_row_support_selection": null,
+        "controller_row_target_counts": null,
+        "controller_row_target_mode": null,
+        "controller_stop_reason": null,
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": null,
+        "final_checkpoint_path": null,
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_children/mgt_shell_material_rowcorr_budget_controller_followup390_multistep_target4_support4_candidate1_target4_support4.json",
+        "runtime_budget_exceeded": null,
+        "schema_version": "mgt-shell-material-rowcorr-child-launch.v1",
+        "status": "in_progress",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": false,
+        "top_level_direct_residual_counted": true,
+        "top_level_direct_residual_inf_n": null,
+        "top_level_residual_boundary": ""
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": null,
+        "child_best_final_direct_residual_inf_n": null,
+        "child_row_correction_stop_reasons": [
+          "rocm_hip_runtime_unavailable"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "finite_difference",
+        "controller_row_support_column_counts": [
+          4
+        ],
+        "controller_row_support_selection": "target_rows",
+        "controller_row_target_counts": [
+          4
+        ],
+        "controller_row_target_mode": "current_component_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 5.74426714604332,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup399_target_rows_strict_hip_smoke.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup399_target_rows_strict_hip_smoke.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": false,
+        "top_level_direct_residual_counted": true,
+        "top_level_direct_residual_inf_n": 5.74426714604332,
+        "top_level_residual_boundary": ""
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 0,
+        "child_best_base_direct_residual_inf_n": null,
+        "child_best_final_direct_residual_inf_n": null,
+        "child_row_correction_stop_reasons": [],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": false,
+          "cpu_fallback_expectation_zero_suppressed": true,
+          "g1_closure_claimed": false,
+          "global_krylov_lane_requires_full_assembly_replay": true,
+          "host_shell_csr_operator_refresh_not_full_production_rocm_hip_residency": true,
+          "official_rocm_hip_closure_required": true,
+          "residual_replay_requires_hip_only": true,
+          "rocm_hip_runtime_available": false,
+          "row_fd_component_lane_is_candidate_generation_only": true,
+          "strict_hip_residual_engine_active": true,
+          "strict_hip_runtime_preflight_passed": false,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": null,
+        "controller_row_support_column_counts": [
+          4
+        ],
+        "controller_row_support_selection": "target_rows",
+        "controller_row_target_counts": [
+          4
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "strict_hip_runtime_unavailable",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 5.74426714604332,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup398_after_global_krylov_target4_support4_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup400_strict_hip_target_rows_alternating_smoke.json",
+        "receipt": "mgt_g1_followup400_strict_hip_target_rows_alternating_smoke.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-g1-alternating-newton-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": false,
+        "strict_hip_runtime_preflight": {
+          "available": false,
+          "reason": "torch_hip_device_unavailable",
+          "torch_hip_device_available": false,
+          "torch_imported": true,
+          "torch_rocm_build": true,
+          "torch_rocm_version": "6.1.40091-a8dbc0c19",
+          "torch_version": "2.6.0+rocm6.1"
+        },
+        "top_level_child_frontier_mismatch": false,
+        "top_level_direct_residual_counted": true,
+        "top_level_direct_residual_inf_n": 5.74426714604332,
+        "top_level_residual_boundary": ""
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 4.985171267567502,
+        "child_best_final_direct_residual_inf_n": 4.985171267567502,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          4
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          4
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 4.985171267567502,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup403_target4_support4_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup404_target4_support4_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup404_target4_support4_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 4.7551275786384295,
+        "child_best_final_direct_residual_inf_n": 4.7551275786384295,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          8
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 4.7551275786384295,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup405_target8_support4_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup406_target8_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup406_target8_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.5789301142824925,
+        "child_best_final_direct_residual_inf_n": 1.5789301142824925,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          4
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          64
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.5789301142824925,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup425_target64_support4_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup426_target64_support4_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup426_target64_support4_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3277400507770736,
+        "child_best_final_direct_residual_inf_n": 1.3277400507770736,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          4
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          256
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3277400507770736,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup429_target128_support4_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup430_target256_support4_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup430_target256_support4_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          16
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup432_target128_support16_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup432_target128_support16_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          192
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup433_target192_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup433_target192_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          96
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup434_target96_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup434_target96_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_shell_bending_drilling_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup435_bending_drilling_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup435_bending_drilling_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_shell_normal_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup436_normal_rows_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup436_normal_rows_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_shell_geometry_normal_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup437_geometry_normal_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup437_geometry_normal_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_shell_geometry_normal_bending_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup438_geometry_normal_bending_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup438_geometry_normal_bending_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_shell_element_blocks",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup439_shell_element_blocks_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup439_shell_element_blocks_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_element_blocks",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup440_element_blocks_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup440_element_blocks_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_frame_element_blocks",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup441_frame_element_blocks_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup441_frame_element_blocks_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "residual_node_blocks",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup442_node_blocks_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup442_node_blocks_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "current_component_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup443_current_component_rows_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup443_current_component_rows_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "frontier_component_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup444_frontier_component_rows_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup444_frontier_component_rows_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "finite_difference",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "row_strongest",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup445_fd_largest_rows_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup445_fd_largest_rows_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "current_tangent",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "residual_weighted",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup446_residual_weighted_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup446_residual_weighted_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "finite_difference",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "target_rows",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup447_fd_target_rows_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup447_fd_target_rows_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      },
+      {
+        "available": true,
+        "child_accepted_count": 0,
+        "child_attempt_count": 1,
+        "child_best_base_direct_residual_inf_n": 1.3092276661494922,
+        "child_best_final_direct_residual_inf_n": 1.3092276661494922,
+        "child_row_correction_stop_reasons": [
+          "no_residual_descent"
+        ],
+        "claim_boundary": {
+          "child_receipts_are_source_of_residual_progress": true,
+          "cpu_diagnostic_only": true,
+          "hip_required_material_tangent_backend_available": false,
+          "official_rocm_hip_closure_required": true,
+          "rocm_hip_runtime_available": false,
+          "shell_material_tangent_required": true,
+          "timeouts_do_not_claim_descent": true
+        },
+        "controller_promotion_count": 0,
+        "controller_row_jacobian_mode": "finite_difference",
+        "controller_row_support_column_counts": [
+          8
+        ],
+        "controller_row_support_selection": "residual_weighted",
+        "controller_row_target_counts": [
+          128
+        ],
+        "controller_row_target_mode": "largest_rows",
+        "controller_stop_reason": "max_candidates_reached",
+        "counted_in_frontier": false,
+        "direct_residual_inf_n": 1.3092276661494922,
+        "final_checkpoint_path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_compact_checkpoint.npz",
+        "non_count_reason": "completed frontier-promoting child direct-residual receipt required",
+        "path": "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup448_fd_residual_weighted_support8_cpu_continuation.json",
+        "receipt": "mgt_shell_material_rowcorr_budget_controller_followup448_fd_residual_weighted_support8_cpu_continuation.json",
+        "runtime_budget_exceeded": false,
+        "schema_version": "mgt-shell-material-rowcorr-budget-controller.v1",
+        "status": "partial",
+        "strict_hip_runtime_available": null,
+        "strict_hip_runtime_preflight": null,
+        "top_level_child_frontier_mismatch": true,
+        "top_level_direct_residual_counted": false,
+        "top_level_direct_residual_inf_n": 14.90754179546407,
+        "top_level_residual_boundary": "top_level_controller_residual_differs_from_child_frontier; status uses child receipt residual for non-promoting boundary evidence"
+      }
+    ],
+    "present": true,
+    "promotes_g1_closure": false,
+    "promotes_lane_status": false,
+    "schema_version": "g1-frontier-non-promoting-context.v1",
+    "source_blockers": [
+      "direct_residual_gate_not_closed",
+      "full_mesh_nonlinear_equilibrium_not_closed",
+      "production_rocm_hip_residual_row_backend_not_closed",
+      "consistent_residual_jacobian_newton_not_closed"
+    ],
+    "source_candidates": [
+      {
+        "has_frontier_chain": false,
+        "has_non_promoting_launch_receipts": false,
+        "path": "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json",
+        "present": true
+      },
+      {
+        "has_frontier_chain": true,
+        "has_non_promoting_launch_receipts": true,
+        "path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+        "present": true
+      }
+    ],
+    "source_claim_boundary": {
+      "cpu_diagnostic_only": true,
+      "direct_residual_newton_closed": false,
+      "equilibrium_newton_closed": false,
+      "full_mesh_nonlinear_equilibrium_closed": false,
+      "launch_only_receipts_do_not_claim_descent": true,
+      "official_rocm_hip_closure_required": true,
+      "pending_launch_only_receipts_do_not_claim_descent": true
+    },
+    "source_contract_pass": false,
+    "source_path": "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json",
+    "source_status": "partial"
+  },
   "full_load_input_pass": false,
   "full_load_tolerance": 1e-12,
-  "generated_at": "2026-06-21T11:43:43.410270+00:00",
+  "generated_at": "2026-06-24T20:36:40.526136+00:00",
   "hip_consistency_proof": {
     "consistent_residual_jacobian_newton_gate_passed": false,
     "cpu_diagnostic_assembler_used": false,
@@ -303,8 +1450,15 @@
       "dev_kfd_missing",
       "dev_dri_missing"
     ],
-    "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
+    "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
     "status": "partial"
+  },
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/g1_checkpoint_retention_manifest.json": "sha256:b35be5bd18a33d52ec5afab1ee79b4953d6f9a8c933336e8a3680ddea36c4b24",
+    "implementation/phase1/release_evidence/productization/mgt_g1_followup387_shell_material_budgeted_continuation_status.json": "sha256:179c928abdad6c909ad0512c60b8fa5d8cfde8234a15c6b5a5ce1aea7e20ffdf",
+    "implementation/phase1/release_evidence/productization/mgt_residual_jacobian_consistency_hip_required_probe.json": "sha256:df2eb0349e62bf018eac0845cc44e1e1dd02c504f0e272c86ad5e009181dc5e5",
+    "implementation/phase1/release_evidence/productization/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_children/mgt_shell_material_rowcorr_budget_controller_followup431_target128_support8_cpu_continuation_candidate1_target128_support8_final_checkpoint.npz": "sha256:e3a48e50edfb68648d1d7c5d720faec45f632de667061be71b30a57a042d1235",
+    "implementation/phase1/run_mgt_direct_residual_newton_probe.py": "sha256:d400fd848ae388b3829640a9c4af7c2f4de5c3cb532ef0afde76db282944e736"
   },
   "load_path_provenance": {
     "context": {},
@@ -316,6 +1470,6 @@
   "required_load_scale": 1.0,
   "reused_evidence": false,
   "schema_version": "g1-full-load-hip-newton-lane.v1",
-  "source_commit_sha": "c2b1b70db15c1b253056ffaad5f083e8ebfefb37",
+  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
   "status": "blocked"
 }

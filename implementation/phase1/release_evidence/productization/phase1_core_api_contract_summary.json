@@ -1,0 +1,115 @@
+{
+  "analysis_type": "model_health",
+  "artifacts": {
+    "cli_result": "implementation/phase1/release_evidence/productization/phase1_core_api_cli_model_health_result.json",
+    "cli_validation_report": "implementation/phase1/release_evidence/productization/phase1_core_api_cli_model_health_report.json",
+    "model": "implementation/phase1/release_evidence/productization/phase1_core_api_sample_model.json",
+    "result": "implementation/phase1/release_evidence/productization/phase1_core_api_model_health_result.json",
+    "result_schema": "src/structural_analysis/schemas/result.schema.json",
+    "validation_report": "implementation/phase1/release_evidence/productization/phase1_core_api_model_health_report.json",
+    "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
+  },
+  "claim_boundary": "These artifacts prove the GUI can consume the stable Phase 1 core API model_health result and validation report schema, and that the CLI emits the same JSON envelopes as the Python API for the same canonical model. Reference mismatches are blocking validation outcomes in both surfaces. The package also has narrow axial-truss linear_static and 1D material-mesh nonlinear_static preview paths, but these artifacts do not close general linear frame/shell, modal, buckling, nonlinear, external benchmark, or commercial solver readiness blockers.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "cli_contract": {
+    "api_result_checksum": "sha256:998399c53337e62f678d91dd25732cc29d2e48328a6a4e61e99be000efe6ba2c",
+    "api_validation_report_checksum": "sha256:b255ed2f028e14c7f44eaba441359a80408048ef95510402a7f3372ebc4a28a8",
+    "cli_result_checksum": "sha256:998399c53337e62f678d91dd25732cc29d2e48328a6a4e61e99be000efe6ba2c",
+    "cli_validation_report_checksum": "sha256:b255ed2f028e14c7f44eaba441359a80408048ef95510402a7f3372ebc4a28a8",
+    "contract_pass": true,
+    "entry_point": "structural-analysis = structural_analysis.api.cli:main",
+    "module_command": "python -m structural_analysis.api.cli",
+    "report_claim_boundary_version": "developer-preview-core-api-v1",
+    "report_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
+    "result_claim_boundary_version": "developer-preview-core-api-v1",
+    "result_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
+    "same_result_schema_as_python_api": true,
+    "same_validation_report_schema_as_python_api": true,
+    "status": "ready"
+  },
+  "contract_pass": true,
+  "convergence_history_count": 1,
+  "developer_preview_blocked_field_count": 0,
+  "engine_version": "1.0.0",
+  "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
+  "generated_at": "2026-06-24T13:12:35.699905+00:00",
+  "input_checksums": {
+    "src/structural_analysis/api/cli.py": "sha256:1b35c7aeaacfb435aee30b5d84979687d142cc33be6628b56cba7380689ae05b",
+    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
+    "src/structural_analysis/assembly/linear_static.py": "sha256:95d5e9c56a5f0d65cb7c1adef6e6f064596b09ce8b48f2bf2a908882d7885dc5",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:afc7ecf37b7fe7c2fc172b9b223d18640a44c22f6896aa47c20fdf35761fb41b",
+    "src/structural_analysis/elements/axial.py": "sha256:11d6ca1a6fd5f2d30b0d932b523c9eb118eb0b9d48c0f1abf0502fb5d5fb3ffe",
+    "src/structural_analysis/schemas/result.schema.json": "sha256:441e909d0f17936e80c03ec8a380ad8275d45fe0b7733e7afb4a28c8eafab98b",
+    "src/structural_analysis/schemas/validation_report.schema.json": "sha256:a7f591f997b048a8436bfb82c9fadd5e71e3e0c9f6ca563d808901e0a73ffe1d",
+    "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
+    "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:c43772246853be09cacee662312fadac9de5d87b91e9ff2d105e9cb6342d16c6"
+  },
+  "invocation_surfaces": [
+    "python_api",
+    "cli",
+    "gui_json_consumption"
+  ],
+  "metrics": {
+    "element_count": 1,
+    "load_count": 0,
+    "node_count": 2,
+    "support_count": 0,
+    "unit_force": "kN",
+    "unit_length": "m",
+    "up_axis": "Z"
+  },
+  "model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
+  "reference_validation_contract": {
+    "cli_blocked_fields": [
+      "reference_mismatch:node_count"
+    ],
+    "cli_blocks_reference_mismatch": true,
+    "contract_pass": true,
+    "mismatch_field": "node_count",
+    "python_api_blocked_fields": [
+      "reference_mismatch:node_count"
+    ],
+    "python_api_blocks_reference_mismatch": true,
+    "status": "ready"
+  },
+  "report_status": "pass",
+  "result_status": "ready",
+  "reused_evidence": false,
+  "schema_validation": {
+    "checks": {
+      "cli_result": {
+        "error_count": 0,
+        "errors": [],
+        "schema_valid": true
+      },
+      "cli_validation_report": {
+        "error_count": 0,
+        "errors": [],
+        "schema_valid": true
+      },
+      "python_api_result": {
+        "error_count": 0,
+        "errors": [],
+        "schema_valid": true
+      },
+      "python_api_validation_report": {
+        "error_count": 0,
+        "errors": [],
+        "schema_valid": true
+      }
+    },
+    "contract_pass": true,
+    "result_schema": "src/structural_analysis/schemas/result.schema.json",
+    "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
+  },
+  "schema_version": "phase1-core-api-contract-artifacts.v1",
+  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
+  "status": "ready",
+  "supported_preview_analysis_types": [
+    "model_health",
+    "linear_static_axial_truss",
+    "nonlinear_static_material_mesh_axial_chain"
+  ],
+  "tolerance": 1e-08,
+  "unsupported_feature_count": 0
+}

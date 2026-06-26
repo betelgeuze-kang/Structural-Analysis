@@ -12,6 +12,7 @@ import sys
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
@@ -29,6 +30,7 @@ from report_commercialization_level import (  # noqa: E402
 )
 from report_source_boundary_footprint import build_footprint_report  # noqa: E402
 from plan_source_boundary_cleanup import DEFAULT_ALLOWLIST_MANIFEST, _git_files  # noqa: E402
+from release_evidence_metadata import input_checksums  # noqa: E402
 
 
 SCHEMA_VERSION = "independent-commercial-product-readiness.v1"
@@ -72,7 +74,7 @@ def _git_head() -> str:
     try:
         return subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
-            cwd=SCRIPT_DIR.parent,
+            cwd=REPO_ROOT,
             text=True,
             stderr=subprocess.DEVNULL,
         ).strip()
@@ -523,11 +525,42 @@ def build_report(
         for gate in gates
         for blocker in gate.get("blockers", [])
     ]
+    checksum_inputs = [
+        *(
+            path
+            for path in (
+                p0_status,
+                p1_readiness_status,
+                p1_benchmark_breadth_status,
+                commercialization_status,
+                strict_evidence_preflight,
+            )
+            if path is not None
+        ),
+        *claim_docs,
+        independent_plan,
+        production_security_doc,
+        runtime_packaging_doc,
+        project_ops_api,
+        project_ops_deployment_drill,
+        runtime_strict_probe,
+        runtime_packaging_manifest,
+        support_bundle_manifest,
+        onprem_deployment_packaging_manifest,
+        viewer_performance_budget_manifest,
+        viewer_browser_performance_probe,
+        viewer_visual_regression_baseline,
+        workstation_delivery_readiness,
+        source_boundary_allowlist,
+        DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_UPDATES,
+        DEFAULT_RESIDUAL_HOLDOUT_CLOSURE_UPDATES,
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": _git_head(),
         "engine_version": ENGINE_VERSION,
+        "input_checksums": input_checksums(checksum_inputs, repo_root=repo_root),
         "reused_evidence": False,
         "contract_pass": independent_ready,
         "independent_commercial_product_ready": independent_ready,

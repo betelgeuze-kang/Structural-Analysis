@@ -1,0 +1,126 @@
+{
+  "all_cases_have_license_checksum_truth_and_expected_outputs": true,
+  "analytic_component_quantity_gate_met": true,
+  "artifacts": {
+    "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "buildingsmart_ifc_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "clean_checkout_reproduction": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+    "commercial_comparison_import_template": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "commercial_operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "commercial_operator_reference_ingest_validator": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+    "git_clean_clone_reproduction": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
+    "ifc_import_health_execution_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "ifc_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "manifest": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
+    "opensees_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "phase4_analytic_physical_fallback_scorecard": "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "reproducibility_bundle": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_reproducibility_bundle.json",
+    "scorecard": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
+  },
+  "case_count": 30,
+  "claim_boundary": "This is a generated analytic-small benchmark factory seed. It proves manifest + checksum/license/truth/expected-output metadata and a deterministic scorecard run for generated axial, axis-aligned element patch, and narrow nonlinear material-mesh axial-chain cases only. The analytic/component quantity gate is satisfied only inside these repo-generated seed families; it does not close OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or G1 solver-core gates.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "engine_version": "1.0.0",
+  "full_phase3_quantity_gates_met": false,
+  "generated_at": "2026-06-23T16:09:52.127005+00:00",
+  "input_checksums": {
+    "pyproject.toml": "sha256:f8ae0ae5e2b649dafd7ebd5c2e0734b34f72dc02f6673909bdb23cc3e00b9924",
+    "setup.cfg": "sha256:84309a0e08f03cb932f24eec12421725e2ca8bc6b035c32eaf16e0862c2f1f70",
+    "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
+    "src/structural_analysis/benchmark/__init__.py": "sha256:e12ee630f324fbbc3c326d656e1285e560c00fd981cf2730f502b9ee28ec7060",
+    "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
+    "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
+    "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65",
+    "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985"
+  },
+  "lane_case_counts": {
+    "analytic-small": 20,
+    "element-patch": 6,
+    "nonlinear-material-mesh": 4
+  },
+  "lane_count": 3,
+  "lanes": [
+    "analytic-small",
+    "element-patch",
+    "nonlinear-material-mesh"
+  ],
+  "package_benchmark_runner": {
+    "contract_pass": true,
+    "developer_preview_release_candidate_claim": false,
+    "entry_point": "structural-analysis-benchmark = structural_analysis.benchmark.cli:main",
+    "expected_output_comparison_count": 88,
+    "expected_output_comparison_pass_count": 88,
+    "expected_output_contract_pass": true,
+    "factory_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "factory_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "invocation_surfaces": [
+      "python_api_factory",
+      "package_cli"
+    ],
+    "module_command": "python -m structural_analysis.benchmark.cli",
+    "package_cli_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "package_cli_scorecard_checksum": "sha256:91024bb460c2bbdd3085097659ad84e343627c733af5e0661b25719722cd8bf1",
+    "phase3_closure_claim": false,
+    "same_manifest_as_python_factory": true,
+    "same_scorecard_as_python_factory": true,
+    "scope": "generated analytic-small, element-patch, and nonlinear material-mesh seed only",
+    "status": "ready"
+  },
+  "pass_count": 30,
+  "phase3_closure_claim": false,
+  "remaining_corpus_lanes": [
+    {
+      "case_count": 6,
+      "lane": "element-patch",
+      "status": "seed_ready"
+    },
+    {
+      "lane": "opensees-medium",
+      "status": "not_started"
+    },
+    {
+      "lane": "opensees-megatall",
+      "status": "not_started"
+    },
+    {
+      "lane": "buildingsmart-clean-ifc",
+      "status": "not_started"
+    },
+    {
+      "lane": "buildingsmart-dirty-ifc",
+      "status": "not_started"
+    },
+    {
+      "lane": "ifc-query-and-gui",
+      "status": "not_started"
+    },
+    {
+      "lane": "commercial-cross-solver",
+      "status": "not_started"
+    },
+    {
+      "lane": "large-model-performance",
+      "status": "not_started"
+    }
+  ],
+  "remaining_quantity_targets": {
+    "analytic_component_cases_current": 30,
+    "analytic_component_cases_required": 20,
+    "ifc_clean_dirty_import_cases_current": 0,
+    "ifc_clean_dirty_import_cases_required": 10,
+    "large_structural_models_current": 0,
+    "large_structural_models_required": 2,
+    "medium_structural_models_current": 0,
+    "medium_structural_models_required": 5
+  },
+  "schema_version": "phase3-benchmark-factory-seed-artifacts.v1",
+  "scorecard_expected_output_comparison_count": 88,
+  "scorecard_expected_output_comparison_pass_count": 88,
+  "scorecard_expected_output_contract_pass": true,
+  "scorecard_reproducible_from_manifest": true,
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "ready"
+}

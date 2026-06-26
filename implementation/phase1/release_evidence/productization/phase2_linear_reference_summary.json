@@ -1,0 +1,83 @@
+{
+  "actual": {
+    "energy_balance_error": 0.0,
+    "n1_reaction_ux": -100.0,
+    "n2_ux": 0.1,
+    "relative_residual": 0.0
+  },
+  "analysis_type": "linear_static",
+  "artifacts": {
+    "analytic_model": "implementation/phase1/release_evidence/productization/phase2_linear_reference_axial_bar_model.json",
+    "analytic_result": "implementation/phase1/release_evidence/productization/phase2_linear_reference_axial_bar_result.json",
+    "analytic_validation_report": "implementation/phase1/release_evidence/productization/phase2_linear_reference_axial_bar_report.json",
+    "convergence_suite": "implementation/phase1/release_evidence/productization/phase2_linear_reference_convergence_suite.json",
+    "mechanism_model": "implementation/phase1/release_evidence/productization/phase2_linear_reference_mechanism_model.json",
+    "mechanism_result": "implementation/phase1/release_evidence/productization/phase2_linear_reference_mechanism_result.json",
+    "rigid_body_model": "implementation/phase1/release_evidence/productization/phase2_linear_reference_rigidbody_model.json",
+    "rigid_body_result": "implementation/phase1/release_evidence/productization/phase2_linear_reference_rigidbody_result.json",
+    "sparse_backend": "implementation/phase1/release_evidence/productization/phase2_linear_reference_sparse_backend.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase2_linear_reference_summary.json",
+    "tangent_jacobian": "implementation/phase1/release_evidence/productization/phase2_linear_reference_tangent_jacobian.json"
+  },
+  "blockers_remaining": [
+    "full_mesh_full_load_nonlinear_equilibrium_not_closed",
+    "consistent_tangent_jacobian_newton_not_closed",
+    "frame_shell_material_coupling_not_closed",
+    "mesh_load_step_convergence_suite_not_closed",
+    "sparse_matrix_backend_not_closed",
+    "production_rocm_hip_parity_not_closed"
+  ],
+  "claim_boundary": "This proves the canonical API has a deterministic single-bar axial linear reference path with residual R=F_internal-F_external, energy balance, dense-numpy matrix backend metadata, a singular-mechanism/rigid-body translation guard that blocks without regularization, a small axial mesh/load scaling convergence scorecard, a narrow tangent/Jacobian verification showing that dR/du equals the assembled dense stiffness for the axial linear preview with finite-difference checks over free DOFs, and a narrow CPU scipy sparse CSR assembly/spsolve seed that is selectable through the canonical AnalysisConfig matrix_backend path with dense-vs-sparse equivalence on the analytic single-bar reference. It does not close G1 full-mesh/full-load nonlinear equilibrium, material Newton breadth, general frame-shell convergence, production sparse matrix backends, or production GPU/HIP gates.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "contract_pass": true,
+  "energy_gate_passed": true,
+  "engine_version": "1.0.0",
+  "errors": {
+    "n1_reaction_ux_abs": 0.0,
+    "n2_ux_abs": 0.0
+  },
+  "expected": {
+    "analytic_model_checksum": "sha256:721e136f51bdf890b7169547d49c0d9ebda9a686afbb8c868abde8c396bd0eb2",
+    "n1_reaction_ux": -100.0,
+    "n2_ux": 0.1
+  },
+  "fallback_used": false,
+  "g1_closure_claim": false,
+  "generated_at": "2026-06-22T16:08:07.242679+00:00",
+  "input_checksums": {
+    "src/structural_analysis/api/core.py": "sha256:ef477d1b05002353ae998b68270acc09109b93ee7d051dbc1d13d8e4b8c3f957",
+    "src/structural_analysis/assembly/linear_static.py": "sha256:95d5e9c56a5f0d65cb7c1adef6e6f064596b09ce8b48f2bf2a908882d7885dc5",
+    "src/structural_analysis/schemas/result.schema.json": "sha256:441e909d0f17936e80c03ec8a380ad8275d45fe0b7733e7afb4a28c8eafab98b",
+    "src/structural_analysis/solvers/linear/static.py": "sha256:b095b9bb6e1b5e43db45fb0630843eef3eb069260bb1cec4a33928c2c7006f65"
+  },
+  "linear_axial_convergence_case_count": 4,
+  "linear_axial_convergence_suite_ready": true,
+  "linear_axial_tangent_jacobian_verification_ready": true,
+  "load_step_scaling_gate_passed": true,
+  "matrix_backend": "numpy_linalg_solve_dense",
+  "matrix_backend_gate_passed": true,
+  "mechanism_blocked_without_regularization": true,
+  "mesh_refinement_gate_passed": true,
+  "regularization_used": false,
+  "residual_contract": "F_internal_minus_F_external",
+  "residual_gate_passed": true,
+  "rigid_body_blocked_without_regularization": true,
+  "schema_version": "phase2-linear-reference-artifacts.v1",
+  "source_commit_sha": "c7dea7e22b3ba69d9d46b9fb11901ed85f2c5978",
+  "sparse_backend_api_config_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "sparse_backend_api_config_solver": "phase2_linear_reference_sparse_api",
+  "sparse_backend_api_path_verification_ready": true,
+  "sparse_backend_equivalence_gate_passed": true,
+  "sparse_backend_seed_matrix_backend": "scipy_sparse_spsolve_cpu",
+  "sparse_backend_seed_stiffness_storage": "scipy_sparse_csr",
+  "sparse_backend_seed_verification_ready": true,
+  "sparse_backend_used": false,
+  "sparse_mechanism_blocked_without_regularization": true,
+  "sparse_rigid_body_blocked_without_regularization": true,
+  "status": "ready",
+  "stiffness_storage": "dense_numpy",
+  "tangent_jacobian_equals_stiffness_gate_passed": true,
+  "tangent_jacobian_finite_difference_gate_passed": true,
+  "tangent_jacobian_gate_passed": true,
+  "truth_class": "analytic_truth"
+}

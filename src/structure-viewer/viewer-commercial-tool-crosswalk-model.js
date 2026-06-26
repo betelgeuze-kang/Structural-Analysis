@@ -20,6 +20,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['section', 'section_name'],
       dcr_after: ['dcr', 'dcr_after', 'utilization'],
       story: ['story', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number'],
       receipt_path: ['receipt_path', 'path'],
     },
   },
@@ -31,6 +32,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['section', 'section_name', 'property'],
       dcr_after: ['dcr', 'ratio', 'utilization'],
       story: ['story', 'floor', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number'],
       load_combo: ['load_combo', 'combination', 'lc'],
     },
   },
@@ -42,6 +44,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['frame_section', 'section', 'property'],
       dcr_after: ['dcr', 'ratio', 'pm_ratio', 'utilization'],
       story: ['story', 'story_name', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number', 'modal_case'],
       load_combo: ['output_case', 'case', 'combo', 'load_combo'],
     },
   },
@@ -53,6 +56,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['frame_section', 'section', 'property'],
       dcr_after: ['dcr', 'ratio', 'pm_ratio', 'utilization'],
       story: ['story', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number', 'modal_case'],
       load_combo: ['output_case', 'case', 'combo', 'load_combo'],
     },
   },
@@ -64,6 +68,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['cross_section', 'section', 'profile'],
       dcr_after: ['design_ratio', 'utilization', 'ratio', 'dcr'],
       story: ['story', 'level', 'location'],
+      mode: ['mode', 'mode_id', 'mode_number', 'eigenmode'],
       load_combo: ['loading', 'load_combination', 'combination'],
     },
   },
@@ -75,6 +80,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['profile', 'profile_name', 'section'],
       material: ['material', 'material_name', 'grade'],
       story: ['phase', 'floor', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number'],
       receipt_path: ['model_path', 'receipt_path'],
     },
   },
@@ -86,6 +92,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['family_type', 'type_name', 'section', 'profile'],
       material: ['structural_material', 'material', 'material_name'],
       story: ['level', 'base_level', 'reference_level'],
+      mode: ['mode', 'mode_id', 'mode_number'],
       receipt_path: ['source_path', 'receipt_path'],
     },
   },
@@ -97,6 +104,7 @@ const CSV_MAPPER_PRESETS = {
       section: ['profile', 'profile_name', 'section'],
       material: ['material', 'material_name'],
       story: ['building_storey', 'storey', 'level'],
+      mode: ['mode', 'mode_id', 'mode_number'],
       receipt_path: ['ifc_path', 'receipt_path'],
     },
   },
@@ -183,6 +191,14 @@ function rowDcr(row = {}) {
   );
 }
 
+function rowStory(row = {}) {
+  return firstText(row.story, row.story_name, row.level, row.storey, row.building_storey, row.floor, row.location);
+}
+
+function rowMode(row = {}) {
+  return firstText(row.mode, row.mode_id, row.mode_number, row.modal_case, row.mode_shape, row.eigenmode);
+}
+
 function buildElementIndex(elements = []) {
   const index = new Map();
   (Array.isArray(elements) ? elements : []).forEach((element) => {
@@ -202,6 +218,41 @@ function buildElementIndex(elements = []) {
     });
   });
   return index;
+}
+
+function buildTraceability(row = {}, element = null) {
+  const externalMemberId = rowMemberId(row);
+  const viewerMemberId = element ? memberIdFromElement(element) : '';
+  const story = rowStory(row);
+  const mode = rowMode(row);
+  const memberStatus = viewerMemberId && externalMemberId ? 'traced' : 'missing';
+  const storyStatus = story ? 'traced' : 'missing';
+  const modeStatus = mode ? 'traced' : 'missing';
+  return {
+    traceKey: [
+      `member:${viewerMemberId || externalMemberId || 'missing'}`,
+      `story:${story || 'missing'}`,
+      `mode:${mode || 'missing'}`,
+    ].join('|'),
+    member: {
+      status: memberStatus,
+      externalId: externalMemberId || '',
+      viewerId: viewerMemberId || '',
+    },
+    story: {
+      status: storyStatus,
+      label: story || '',
+    },
+    mode: {
+      status: modeStatus,
+      label: mode || '',
+    },
+    missingDimensions: [
+      ...(memberStatus === 'missing' ? ['member'] : []),
+      ...(storyStatus === 'missing' ? ['story'] : []),
+      ...(modeStatus === 'missing' ? ['mode'] : []),
+    ],
+  };
 }
 
 function classifyRow(row = {}, element = null, {
@@ -230,20 +281,46 @@ function buildRow(row = {}, element = null, options = {}) {
   const status = classifyRow(row, element, options);
   const externalDcr = rowDcr(row);
   const viewerDcr = dcrFromElement(element || {});
+  const traceability = buildTraceability(row, element);
   return {
     status,
     tone: rowTone(status),
+    traceKey: traceability.traceKey,
+    traceability,
     externalMemberId: externalMemberId || '--',
     viewerMemberId: element ? memberIdFromElement(element) || '--' : '--',
     sourceTool: firstText(row.source_tool, row.tool, row.source_tool_profile, row.source_family, row.source_type),
     sourceProfile: normalizeToken(row.source_tool_profile || row.source_profile || row.source_family || row.source_type) || 'generic',
-    story: firstText(row.story, row.level, row.storey),
+    story: rowStory(row),
+    mode: rowMode(row),
     externalSection: rowSection(row) || '--',
     viewerSection: element ? sectionFromElement(element) || '--' : '--',
     externalDcr: Number.isFinite(externalDcr) ? externalDcr.toFixed(3) : '--',
     viewerDcr: Number.isFinite(viewerDcr) ? viewerDcr.toFixed(3) : '--',
     receiptPath: firstText(row.receipt_path, row.receiptPath, row.path, row.artifact_path),
     evidence: element ? 'crosswalk exact id' : 'missing evidence',
+  };
+}
+
+function buildTraceCoverage(rows = []) {
+  const total = rows.length;
+  const member = rows.filter((row) => row.traceability?.member?.status === 'traced').length;
+  const story = rows.filter((row) => row.traceability?.story?.status === 'traced').length;
+  const mode = rows.filter((row) => row.traceability?.mode?.status === 'traced').length;
+  const full = rows.filter((row) => !row.traceability?.missingDimensions?.length).length;
+  const missingDimensions = [
+    ...(member === total ? [] : ['member']),
+    ...(story === total ? [] : ['story']),
+    ...(mode === total ? [] : ['mode']),
+  ];
+  return {
+    total,
+    member,
+    story,
+    mode,
+    full,
+    missingDimensions,
+    contractPass: total > 0 && full === total,
   };
 }
 
@@ -328,6 +405,7 @@ export function buildCommercialToolCrosswalkModel({
     dcr_mismatch: builtRows.filter((row) => row.status === 'dcr_mismatch').length,
     missing_viewer_member: builtRows.filter((row) => row.status === 'missing_viewer_member').length,
   };
+  const traceCoverage = buildTraceCoverage(builtRows);
   const profileCounts = builtRows.reduce((acc, row) => {
     const profile = normalizeToken(row.sourceProfile) || 'generic';
     acc[profile] = (acc[profile] || 0) + 1;
@@ -345,11 +423,13 @@ export function buildCommercialToolCrosswalkModel({
   return {
     schema_version: STRUCTURE_VIEWER_COMMERCIAL_TOOL_CROSSWALK_SCHEMA_VERSION,
     status,
+    traceabilityStatus: traceCoverage.contractPass ? 'ready' : counts.total ? 'missing_trace_dimensions' : 'missing',
     tone: status === 'ready' ? 'success' : status === 'needs_review' ? 'warn' : 'neutral',
     summary: counts.total
       ? `${profileLabels || 'Commercial tool'} · matched ${counts.matched}/${counts.total} · mismatches ${mismatchCount}`
       : 'commercial tool crosswalk pending',
     counts,
+    traceCoverage,
     profiles: Object.entries(profileCounts).map(([profile, count]) => ({
       profile,
       label: sourceProfileLabel(profile),

@@ -3,6 +3,10 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "generated_at": "2026-06-21T09:08:51.866874+00:00",
+  "input_checksums": {
+    ".github/workflows": "dir-sha256:653530551c3898dc6c2a611089fdaba93f6a1cea4e8b3a9dcec03f0ff39897d0",
+    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:4b220e1a624c1518012cf8c3ff5f7e6401c44dde35eed6a5276f39c656d15302"
+  },
   "lanes": {
     "nightly": {
       "allowed_events": [
@@ -125,7 +129,7 @@
   "repo": "betelgeuze-kang/Structural-Analysis",
   "reused_evidence": true,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "b883c03e55c969cb8f953fbc3d9ae76d08fa5e49",
+  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
@@ -143,7 +147,7 @@
   "threshold": 30,
   "workflow_discovery": {
     "local_workflow_count": 3,
-    "local_workflow_metadata_generated_at": "2026-06-21T09:19:54.220483+00:00",
+    "local_workflow_metadata_generated_at": "2026-06-24T13:12:37.771673+00:00",
     "local_workflows": [
       {
         "exists": true,

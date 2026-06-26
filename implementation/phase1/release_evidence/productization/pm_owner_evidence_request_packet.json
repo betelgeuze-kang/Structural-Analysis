@@ -1,7 +1,7 @@
 {
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_blocker_ids": [
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -9,6 +9,7 @@
       "ux::human_new_user_30min_sample_evidence_missing",
       "security::license_status_not_configured",
       "github_sync::github_sync_preflight::worktree_not_clean",
+      "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
       "github_sync::github_sync_preflight::remote_mutation_approval_required",
       "github_sync::github_sync_remote_sync_pending",
       "github_sync::github_sync_preflight_not_synced"
@@ -20,7 +21,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-21T09:32:20.463138+00:00",
+  "generated_at": "2026-06-21T15:29:04.952786+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -1827,9 +1828,10 @@
         "release_tier.limited_commercial_full_gate_ready",
         "release_tier.ga_enterprise_evidence_gate_pass"
       ],
-      "blocker_count": 4,
+      "blocker_count": 5,
       "blocker_ids": [
         "github_sync::github_sync_preflight::worktree_not_clean",
+        "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -1869,6 +1871,45 @@
             "release_tier.ga_enterprise_evidence_gate_pass"
           ],
           "blocker_id": "github_sync::github_sync_preflight::worktree_not_clean",
+          "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
+          "evidence_artifacts": {
+            "github_development_sync_preflight": "<live-git-state>",
+            "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+          },
+          "evidence_state": "blocked",
+          "expected_intake_artifact": "",
+          "expected_intake_detail": {},
+          "expected_intake_path": "",
+          "external_input_required": true,
+          "handoff_ready": true,
+          "handoff_state": "external_owner_input_ready",
+          "next_action": "Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
+          "owner_input_required": true,
+          "reproduction_commands": [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md"
+          ],
+          "scope": "release_area",
+          "title": "GitHub Development Sync",
+          "verification_commands": [
+            "python3 scripts/check_github_development_sync_preflight.py --fetch --json",
+            "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json --out-md implementation/phase1/release_evidence/productization/pm_release_gate_report.md",
+            "python3 scripts/build_pm_release_blocker_action_register.py --out implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json --out-md implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md --fail-blocked"
+          ]
+        },
+        {
+          "acceptance_criteria": [
+            "Explicit R4 approval phrase received: `feature push + main fast-forward 승인`",
+            "`check_github_development_sync_preflight.py --fetch --json` reports `remote_sync_needed == false`",
+            "`github_sync` absent from `release_area_blockers` after PM release gate regeneration",
+            "`origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD"
+          ],
+          "blocked_release_tiers": [
+            "release_tier.limited_commercial_full_gate_ready",
+            "release_tier.ga_enterprise_evidence_gate_pass"
+          ],
+          "blocker_id": "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
           "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
           "evidence_artifacts": {
             "github_development_sync_preflight": "<live-git-state>",
@@ -2774,6 +2815,7 @@
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
         "github_sync::github_sync_preflight::worktree_not_clean",
+        "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -2808,6 +2850,7 @@
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
             "github_sync::github_sync_preflight::worktree_not_clean",
+            "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
@@ -2863,6 +2906,7 @@
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
         "github_sync::github_sync_preflight::worktree_not_clean",
+        "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced"
@@ -3141,6 +3185,7 @@
             "ux::human_new_user_30min_sample_evidence_missing",
             "security::license_status_not_configured",
             "github_sync::github_sync_preflight::worktree_not_clean",
+            "github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
             "github_sync::github_sync_preflight::remote_mutation_approval_required",
             "github_sync::github_sync_remote_sync_pending",
             "github_sync::github_sync_preflight_not_synced"
@@ -3306,7 +3351,7 @@
   ],
   "schema_version": "pm-owner-evidence-request-packet.v1",
   "summary": {
-    "blocked_release_tier_impact_count": 29,
+    "blocked_release_tier_impact_count": 31,
     "evidence_closure_pass": false,
     "expected_intake_contract_pass_count": 1,
     "expected_intake_count": 5,
@@ -3314,7 +3359,7 @@
     "expected_intake_lane_request_count": 2,
     "expected_intake_open_blocker_count": 31,
     "expected_intake_signoff_request_count": 3,
-    "external_input_required_count": 13,
+    "external_input_required_count": 14,
     "full_release_gate_ready": false,
     "handoff_contract_pass": true,
     "incomplete_request_count": 0,
@@ -3322,12 +3367,12 @@
     "limited_commercial_ready": false,
     "limited_commercial_release_ready": false,
     "missing_release_tier_impact_count": 0,
-    "open_blocker_count": 20,
-    "open_blocker_with_release_tier_impact_count": 20,
-    "owner_input_required_count": 13,
+    "open_blocker_count": 21,
+    "open_blocker_with_release_tier_impact_count": 21,
+    "owner_input_required_count": 14,
     "owner_packet_count": 8,
     "paid_pilot_candidate": true,
-    "release_area_blocker_count": 9,
+    "release_area_blocker_count": 10,
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
     "release_area_total_count": 16,
@@ -3338,5 +3383,5 @@
     "release_tier_owner_packet_count": 2,
     "release_tier_request_count": 2
   },
-  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=20 | tier_requests=2 | incomplete=0"
+  "summary_line": "PM owner evidence request packet: PASS | owners=8 | open_blockers=21 | tier_requests=2 | incomplete=0"
 }

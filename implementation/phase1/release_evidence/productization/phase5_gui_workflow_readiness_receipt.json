@@ -1,0 +1,817 @@
+{
+  "actual_gui_workflow_step_partial_count": 0,
+  "actual_gui_workflow_step_pass_count": 5,
+  "actual_gui_workflow_steps": [
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "import",
+      "label": "Import",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "present_workflow_model_anchors": [
+        "import",
+        "Import",
+        "Phase5 workflow step: Import"
+      ],
+      "required_capabilities": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "required_gui_contract_anchors": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "import",
+        "Import",
+        "Phase5 workflow step: Import"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "model_health",
+      "label": "Model Health",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "present_workflow_model_anchors": [
+        "model_health",
+        "Model Health",
+        "Phase5 workflow step: Model Health"
+      ],
+      "required_capabilities": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "required_gui_contract_anchors": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "model_health",
+        "Model Health",
+        "Phase5 workflow step: Model Health"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "analysis_setup",
+      "label": "Analysis Setup",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "present_workflow_model_anchors": [
+        "analysis_setup",
+        "Analysis Setup",
+        "Phase5 workflow step: Analysis Setup"
+      ],
+      "required_capabilities": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "required_gui_contract_anchors": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "analysis_setup",
+        "Analysis Setup",
+        "Phase5 workflow step: Analysis Setup"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "run_monitor",
+      "label": "Run & Monitor",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "present_workflow_model_anchors": [
+        "run_monitor",
+        "Run & Monitor",
+        "Phase5 workflow step: Run & Monitor"
+      ],
+      "required_capabilities": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "required_gui_contract_anchors": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "run_monitor",
+        "Run & Monitor",
+        "Phase5 workflow step: Run & Monitor"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "compare_report",
+      "label": "Compare & Report",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "present_workflow_model_anchors": [
+        "compare_report",
+        "Compare & Report",
+        "Phase5 workflow step: Compare & Report"
+      ],
+      "required_capabilities": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "required_gui_contract_anchors": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "compare_report",
+        "Compare & Report",
+        "Phase5 workflow step: Compare & Report"
+      ]
+    }
+  ],
+  "app_surface": "src/App.tsx",
+  "blockers": [
+    "human_new_user_observation_not_passed",
+    "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
+    "task_based_ux_browser_execution_not_passed",
+    "workflow_execution_step_not_proven:analysis_setup",
+    "workflow_execution_step_not_proven:compare_report",
+    "workflow_execution_step_not_proven:import",
+    "workflow_execution_step_not_proven:model_health",
+    "workflow_execution_step_not_proven:run_monitor"
+  ],
+  "claim_boundary": "This receipt separates visible GUI workflow shell coverage from execution receipts, task-based browser smoke tests, UX observation templates, and owner handoff packets. A rendered five-step shell or a test artifact does not prove task execution, human new-user success, Phase 5 closure, or Developer Preview RC readiness.",
+  "claim_boundary_version": "developer-preview-core-api-v1",
+  "collapsible_provenance_contract": {
+    "claim_boundary": "This contract proves that advanced Phase 5 workflow provenance is available behind a collapsed disclosure. It does not prove source correctness, browser execution, UX success, or Developer Preview RC readiness.",
+    "contract_pass": true,
+    "panel_anchor_pass": {
+      "includes_advanced_provenance": true,
+      "includes_claim_boundary": true,
+      "renders_details_anchor": true,
+      "renders_disclosure": true,
+      "renders_summary_anchor": true,
+      "uses_details": true,
+      "uses_summary": true
+    },
+    "path": "src/workbench/DeveloperPreviewWorkflowPanel.tsx",
+    "status": "ready"
+  },
+  "contract_pass": false,
+  "developer_preview_release_candidate_claim": false,
+  "engine_version": "1.0.0",
+  "evidence_console_absorption_contract": {
+    "claim_boundary": "This contract proves that the Phase 5 Compare & Report source surface carries forward the current Evidence Console scope and references its scope-status receipt. It does not prove Evidence Console launch readiness, customer-shadow completion, browser task execution, human UX success, or Phase 5 closure.",
+    "contract_pass": true,
+    "evidence_console_feature_count": 7,
+    "evidence_console_feature_pass_count": 7,
+    "expected_features": [
+      "case_list",
+      "source_provenance_inspector",
+      "reference_vs_engine_comparison",
+      "residual_audit",
+      "worst_member_story",
+      "reviewer_decision",
+      "reproduce_bundle_export"
+    ],
+    "external_blocker": "customer_shadow_completed_project_cases_ready",
+    "feature_presence": {
+      "case_list": true,
+      "reference_vs_engine_comparison": true,
+      "reproduce_bundle_export": true,
+      "residual_audit": true,
+      "reviewer_decision": true,
+      "source_provenance_inspector": true,
+      "worst_member_story": true
+    },
+    "launch_ready": false,
+    "model_anchor_pass": {
+      "exports_absorption": true,
+      "keeps_claim_boundary": true,
+      "references_source_receipt": true,
+      "targets_compare_report": true
+    },
+    "panel_anchor_pass": {
+      "renders_absorption": true,
+      "renders_feature": true,
+      "renders_feature_vocabulary": true,
+      "renders_source": true,
+      "states_compare_report": true,
+      "states_evidence_console": true
+    },
+    "passed_features": [
+      "case_list",
+      "reference_vs_engine_comparison",
+      "reproduce_bundle_export",
+      "residual_audit",
+      "reviewer_decision",
+      "source_provenance_inspector",
+      "worst_member_story"
+    ],
+    "path": "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json",
+    "scope_contract_pass": true,
+    "status": "ready",
+    "workflow_step_id": "compare_report"
+  },
+  "execution_receipt_count": 0,
+  "execution_workflow_step_pass_count": 0,
+  "generated_at": "2026-06-23T15:52:39.555193+00:00",
+  "handoff_surface": {
+    "intake_missing_required_workflow_steps": [],
+    "intake_packet": "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json",
+    "intake_required_workflow_step_count": 5,
+    "observation_contract_pass": false,
+    "observation_missing_required_workflow_steps": [],
+    "observation_report": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
+    "observation_required_workflow_step_count": 5
+  },
+  "human_ux_observation_claim": false,
+  "input_checksums": {
+    "docs/templates/ux_new_user_observation.template.json": "sha256:a60d0f0904265603b48d903dd6503cff21eeb72b3a55910c958106d5ce9d7ae8",
+    "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:024be667cd75462bdb8b201afd0b9efbf1004025d37ab549cf9a5413a8070e1b",
+    "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json": "sha256:6c780bd923b28b1a8c82bb7a9149fb65c867c9ed351e7a1ad083103737f62a55",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
+    "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:982c1d5ff4c9a9a4e0fda88738321411121aa96379f4436f7bf944e6002936c6",
+    "scripts/build_phase5_gui_workflow_readiness_receipt.py": "sha256:aaf19fb488a83e2a34d12e36ce0e594eb10e2a71b130f2665f7eee48836163ab",
+    "scripts/build_ux_new_user_observation_intake_packet.py": "sha256:f2facc56aab7c302f5831b827a76a64fa6394005c50832e937129cc4b2fc6b20",
+    "scripts/build_ux_new_user_observation_report.py": "sha256:07ad656057f508467dafa4110dcad511983b6d984fc26ec76773381302d32d72",
+    "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:1dfdcffb5e47b96c817a52651daeae10b6994cf2d711e9b7f6654dafbf6c1ab9",
+    "src/App.tsx": "sha256:a7dbc97ef43c67e16df81332abda9e0988308f7e4936be8e829189839af5457d",
+    "src/workbench/DeveloperPreviewWorkflowPanel.tsx": "sha256:95bec3c0caaff2f23cdae2c4679eaac1a1a730b87a0fc53cafda320879b10c83",
+    "src/workbench/developerPreviewWorkflow.ts": "sha256:ce80e7fecdf8b7479fd19d78fa16501a318a98da35f068c09b9a1a5894831f96",
+    "src/workbench/developerPreviewWorkflow.worker.ts": "sha256:bb8a425a4c4239e8a21b1db459f058699390fd5cf8922e2a16259a05939de065",
+    "src/workbench/developerPreviewWorkflowState.ts": "sha256:99ad24d06f523d8c7b9586b48ea39b15ccbd6be9189a2dab6451df43a67bf17f",
+    "tests/frontend/developer-preview-workflow.spec.ts": "sha256:94f92ea6cfb5f2a529ebe915d7014f42a814f5dc78408e107f65154776bd9401"
+  },
+  "missing_actual_gui_workflow_steps": [],
+  "missing_execution_workflow_steps": [
+    "analysis_setup",
+    "compare_report",
+    "import",
+    "model_health",
+    "run_monitor"
+  ],
+  "missing_workflow_shell_steps": [],
+  "owner_action": "Attach execution receipts for the five-step GUI workflow and a passing human new-user observation record for that exact workflow before promoting Phase 5 or Developer Preview RC readiness.",
+  "partial_actual_gui_workflow_steps": [],
+  "phase5_closure_claim": false,
+  "required_workflow_step_count": 5,
+  "required_workflow_steps": [
+    {
+      "id": "import",
+      "label": "Import"
+    },
+    {
+      "id": "model_health",
+      "label": "Model Health"
+    },
+    {
+      "id": "analysis_setup",
+      "label": "Analysis Setup"
+    },
+    {
+      "id": "run_monitor",
+      "label": "Run & Monitor"
+    },
+    {
+      "id": "compare_report",
+      "label": "Compare & Report"
+    }
+  ],
+  "route_case_run_state_model": {
+    "app_anchor_pass": {
+      "imports_builder": true,
+      "renders_case_id": true,
+      "renders_route_id": true,
+      "renders_route_state": true,
+      "renders_route_status": true,
+      "renders_run_id": true
+    },
+    "case_id": "open-benchmark-seed-corpus",
+    "claim_boundary": "The route/case/run model replaces ad hoc workflow display state for the Phase 5 shell only. It does not replace all ResourceMap loading and does not prove execution or UX readiness.",
+    "contract_pass": true,
+    "model_anchor_pass": {
+      "case_id": true,
+      "execution_boundary": true,
+      "route_case_run_boundary": true,
+      "route_id": true,
+      "run_id": true
+    },
+    "path": "src/workbench/developerPreviewWorkflowState.ts",
+    "route_id": "developer-preview-local-workflow",
+    "run_id": "execution-receipt-pending",
+    "status": "ready"
+  },
+  "schema_version": "phase5-gui-workflow-readiness-receipt.v1",
+  "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+  "status": "blocked",
+  "status_vocabulary_contract": {
+    "allowed_statuses": [
+      "ready",
+      "blocked",
+      "missing",
+      "error"
+    ],
+    "app_anchor_pass": {
+      "renders_status_tokens": true,
+      "renders_vocabulary": true
+    },
+    "claim_boundary": "This contract proves that the Phase 5 workflow UI has a constrained ready/blocked/missing/error vocabulary and normalizer. It does not prove workflow execution, browser UX success, or Developer Preview RC readiness.",
+    "contract_pass": true,
+    "model_anchor_pass": {
+      "exports_normalizer": true,
+      "exports_vocabulary": true
+    },
+    "path": "src/workbench/developerPreviewWorkflow.ts",
+    "state_anchor_pass": {
+      "status_type": true,
+      "uses_normalizer": true
+    },
+    "status": "ready",
+    "status_presence": {
+      "blocked": true,
+      "error": true,
+      "missing": true,
+      "ready": true
+    }
+  },
+  "summary_line": "Phase 5 GUI workflow readiness: BLOCKED | shell=5/5 | execution=0/5 | observation_pass=False | task_test=ready | route_state=ready | status_vocabulary=ready | value_kind=ready | feature_module=ready | provenance=ready | selection_state=ready | web_worker=ready | evidence_console_absorption=ready | browser_execution=blocked",
+  "task_based_ux_browser_execution_receipt": {
+    "base_url": "http://127.0.0.1:4173",
+    "blocked_workflow_steps": [
+      "import",
+      "model_health",
+      "analysis_setup",
+      "run_monitor",
+      "compare_report"
+    ],
+    "blocker": "preview_server_loopback_bind_permission_blocked",
+    "blocker_category": "environment_loopback_bind_permission",
+    "blocker_evidence": {
+      "address": "127.0.0.1",
+      "code": "EPERM",
+      "port": 4173,
+      "syscall": "listen"
+    },
+    "blocker_reason_code": "listen_eperm_127_0_0_1",
+    "browser_execution_passed": false,
+    "claim_boundary": "This receipt records an actual local attempt to run the Phase 5 task-based Playwright browser smoke. It proves browser execution only when the Playwright command exits 0 against a served app.",
+    "claim_boundary_version": "developer-preview-core-api-v1",
+    "commands": {
+      "build": {
+        "argv": [
+          "npm",
+          "run",
+          "build"
+        ],
+        "exit_code": 0,
+        "output_excerpt": "\n> structural-optimization-workbench@1.0.0 build\n> tsc --noEmit && vite build\n\nvite v8.0.16 building client environment for production...\n\u001b[2K\ntransforming...✓ 19 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/assets/developerPreviewWorkflow.worker-DYkMGago.js    0.43 kB\ndist/index.html                                            1.00 kB │ gzip:  0.57 kB\ndist/assets/index-CMNzzxcX.css                            30.62 kB │ gzip:  5.72 kB\ndist/assets/index-CKuiw8XN.js                            283.22 kB │ gzip: 76.73 kB\n\n✓ built in 117ms\n"
+      },
+      "preview": {
+        "argv": [
+          "npm",
+          "run",
+          "preview",
+          "--",
+          "--host",
+          "127.0.0.1",
+          "--port",
+          "4173"
+        ],
+        "exit_code": 1,
+        "output_excerpt": "\n> structural-optimization-workbench@1.0.0 preview\n> vite preview --host 127.0.0.1 --port 4173\n\nerror when starting preview server:\nError: listen EPERM: operation not permitted 127.0.0.1:4173\n    at Server.setupListenHandle [as _listen2] (node:net:1886:21)\n    at listenInCluster (node:net:1965:12)\n    at doListen (node:net:2139:7)\n    at process.processTicksAndRejections (node:internal/process/task_queues:83:21) {\n  code: 'EPERM',\n  errno: -1,\n  syscall: 'listen',\n  address: '127.0.0.1',\n  port: 4173\n}\n"
+      }
+    },
+    "contract_pass": false,
+    "engine_version": "1.0.0",
+    "environment_blocker": true,
+    "executed_workflow_steps": [],
+    "failed_phase": "preview_server_start",
+    "generated_at": "2026-06-23T15:52:14.057211+00:00",
+    "input_checksums": {
+      "package.json": "sha256:ea041fe994a1088c476c8c1ecd459af578b19d19d40aca6307c6dd4471b31275",
+      "scripts/run_phase5_task_based_ux_browser_smoke.py": "sha256:1dfdcffb5e47b96c817a52651daeae10b6994cf2d711e9b7f6654dafbf6c1ab9",
+      "src/App.tsx": "sha256:a7dbc97ef43c67e16df81332abda9e0988308f7e4936be8e829189839af5457d",
+      "src/workbench/DeveloperPreviewWorkflowPanel.tsx": "sha256:95bec3c0caaff2f23cdae2c4679eaac1a1a730b87a0fc53cafda320879b10c83",
+      "src/workbench/developerPreviewWorkflow.ts": "sha256:ce80e7fecdf8b7479fd19d78fa16501a318a98da35f068c09b9a1a5894831f96",
+      "src/workbench/developerPreviewWorkflow.worker.ts": "sha256:bb8a425a4c4239e8a21b1db459f058699390fd5cf8922e2a16259a05939de065",
+      "src/workbench/developerPreviewWorkflowState.ts": "sha256:99ad24d06f523d8c7b9586b48ea39b15ccbd6be9189a2dab6451df43a67bf17f",
+      "tests/frontend/developer-preview-workflow.spec.ts": "sha256:94f92ea6cfb5f2a529ebe915d7014f42a814f5dc78408e107f65154776bd9401"
+    },
+    "required_workflow_steps": [
+      "import",
+      "model_health",
+      "analysis_setup",
+      "run_monitor",
+      "compare_report"
+    ],
+    "schema_version": "phase5-task-based-ux-browser-execution.v1",
+    "source_commit_sha": "2469407690370e54afa5b0d92fc028f3ac56f542",
+    "status": "blocked",
+    "summary_line": "Phase 5 task-based UX browser execution: BLOCKED | phase=preview_server_start | blocker=preview_server_loopback_bind_permission_blocked",
+    "test_path": "tests/frontend/developer-preview-workflow.spec.ts"
+  },
+  "task_based_ux_test": {
+    "blocks_readiness_promotion": true,
+    "browser_execution_blocker": "preview_server_loopback_bind_permission_blocked",
+    "browser_execution_blocker_category": "environment_loopback_bind_permission",
+    "browser_execution_blocker_evidence": {
+      "address": "127.0.0.1",
+      "code": "EPERM",
+      "port": 4173,
+      "syscall": "listen"
+    },
+    "browser_execution_blocker_reason_code": "listen_eperm_127_0_0_1",
+    "browser_execution_environment_blocker": true,
+    "browser_execution_failed_phase": "preview_server_start",
+    "browser_execution_passed": false,
+    "browser_execution_receipt": "implementation/phase1/release_evidence/productization/phase5_task_based_ux_browser_execution_receipt.json",
+    "browser_execution_receipt_attached": true,
+    "browser_execution_status": "blocked",
+    "claim_boundary": "The Playwright task smoke is a runnable test artifact. It does not prove the UX final gate until a browser execution receipt passes in an environment that can launch a browser and serve/open the app.",
+    "contract_pass": true,
+    "covered_labels": [
+      "Analysis Setup",
+      "Compare & Report",
+      "Import",
+      "Model Health",
+      "Run & Monitor"
+    ],
+    "covered_step_ids": [
+      "analysis_setup",
+      "compare_report",
+      "import",
+      "model_health",
+      "run_monitor"
+    ],
+    "execution_blocker": "task_based_ux_browser_execution_not_passed",
+    "execution_environment_blocker": "task_based_ux_browser_execution_environment_blocked:listen_eperm_127_0_0_1",
+    "missing_step_ids": [],
+    "path": "tests/frontend/developer-preview-workflow.spec.ts",
+    "required_step_ids": [
+      "analysis_setup",
+      "compare_report",
+      "import",
+      "model_health",
+      "run_monitor"
+    ],
+    "shell_selector_present": true,
+    "status": "ready"
+  },
+  "unified_selection_state_contract": {
+    "channel_presence": {
+      "3d": true,
+      "chart": true,
+      "comparison_row": true,
+      "table": true
+    },
+    "claim_boundary": "This contract proves that the Phase 5 workflow surface exposes a single selection-state vocabulary for 3D, table, chart, and comparison-row contexts. It does not prove live 3D picking, chart interaction, browser execution, or UX success.",
+    "contract_pass": true,
+    "model_anchor_pass": {
+      "exports_channels": true,
+      "types_channel": true
+    },
+    "panel_anchor_pass": {
+      "renders_channel_vocabulary": true,
+      "renders_selection_channel": true,
+      "renders_selection_state": true,
+      "states_single_selection": true
+    },
+    "path": "src/workbench/DeveloperPreviewWorkflowPanel.tsx",
+    "selection_channels": [
+      "3d",
+      "table",
+      "chart",
+      "comparison_row"
+    ],
+    "status": "ready"
+  },
+  "value_kind_contract": {
+    "allowed_value_kinds": [
+      "exact_value",
+      "derived_proxy",
+      "reference_value"
+    ],
+    "app_anchor_pass": {
+      "renders_legend": true,
+      "renders_value_kind": true,
+      "renders_value_kind_tokens": true
+    },
+    "claim_boundary": "This contract proves that Phase 5 workflow evidence signals visibly distinguish exact values, derived proxies, and reference values. It does not prove that the underlying workflow was executed or that reference values are authoritative for every case.",
+    "contract_pass": true,
+    "model_anchor_pass": {
+      "exports_value_kinds": true,
+      "has_value_kind_field": true,
+      "types_evidence_signal": true
+    },
+    "path": "src/workbench/developerPreviewWorkflow.ts",
+    "status": "ready",
+    "value_kind_presence": {
+      "derived_proxy": true,
+      "exact_value": true,
+      "reference_value": true
+    }
+  },
+  "web_worker_boundary_contract": {
+    "claim_boundary": "This contract proves that the Phase 5 workflow source exposes a Web Worker boundary for large IFC parsing and result processing. It does not prove large-model execution, browser worker execution, task-based UX success, or Developer Preview RC readiness.",
+    "contract_pass": true,
+    "model_anchor_pass": {
+      "creates_worker": true,
+      "exports_worker_boundary": true,
+      "exports_worker_tasks": true,
+      "uses_worker_entry": true
+    },
+    "panel_anchor_pass": {
+      "renders_worker_boundary": true,
+      "renders_worker_task": true,
+      "renders_worker_task_vocabulary": true,
+      "states_off_ui_thread": true
+    },
+    "path": "src/workbench/developerPreviewWorkflow.worker.ts",
+    "status": "ready",
+    "task_presence": {
+      "ifc_parse": true,
+      "result_processing": true
+    },
+    "worker_anchor_pass": {
+      "has_message_handler": true,
+      "ifc_parse_task": true,
+      "keeps_claim_boundary": true,
+      "posts_message": true,
+      "processed_on_worker": true,
+      "result_processing_task": true
+    },
+    "worker_tasks": [
+      "ifc_parse",
+      "result_processing"
+    ]
+  },
+  "workflow_feature_module_contract": {
+    "app_anchor_pass": {
+      "imports_panel": true,
+      "passes_route_state": true,
+      "passes_steps": true
+    },
+    "claim_boundary": "This contract proves that the Phase 5 workflow panel is separated into a feature module and wired from App.tsx. It does not prove task execution, UX success, or Developer Preview RC readiness.",
+    "contract_pass": true,
+    "panel_anchor_pass": {
+      "declares_props": true,
+      "exports_panel": true,
+      "renders_feature_module_anchor": true,
+      "renders_workflow_shell": true,
+      "renders_workflow_steps": true
+    },
+    "path": "src/workbench/DeveloperPreviewWorkflowPanel.tsx",
+    "status": "ready"
+  },
+  "workflow_model": "src/workbench/developerPreviewWorkflow.ts",
+  "workflow_panel": "src/workbench/DeveloperPreviewWorkflowPanel.tsx",
+  "workflow_shell_step_pass_count": 5,
+  "workflow_shell_steps": [
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "import",
+      "label": "Import",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "present_workflow_model_anchors": [
+        "import",
+        "Import",
+        "Phase5 workflow step: Import"
+      ],
+      "required_capabilities": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "required_gui_contract_anchors": [
+        "file and license/provenance review",
+        "unit and coordinate-system review",
+        "source-to-canonical mapping",
+        "unsupported entity inventory"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "import",
+        "Import",
+        "Phase5 workflow step: Import"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "model_health",
+      "label": "Model Health",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "present_workflow_model_anchors": [
+        "model_health",
+        "Model Health",
+        "Phase5 workflow step: Model Health"
+      ],
+      "required_capabilities": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "required_gui_contract_anchors": [
+        "disconnected component checks",
+        "zero-length member checks",
+        "duplicate node checks",
+        "unstable DOF checks"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "model_health",
+        "Model Health",
+        "Phase5 workflow step: Model Health"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "analysis_setup",
+      "label": "Analysis Setup",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "present_workflow_model_anchors": [
+        "analysis_setup",
+        "Analysis Setup",
+        "Phase5 workflow step: Analysis Setup"
+      ],
+      "required_capabilities": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "required_gui_contract_anchors": [
+        "analysis type selection",
+        "load case and combination selection",
+        "solver tolerance controls",
+        "expected memory and runtime estimate"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "analysis_setup",
+        "Analysis Setup",
+        "Phase5 workflow step: Analysis Setup"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "run_monitor",
+      "label": "Run & Monitor",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "present_workflow_model_anchors": [
+        "run_monitor",
+        "Run & Monitor",
+        "Phase5 workflow step: Run & Monitor"
+      ],
+      "required_capabilities": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "required_gui_contract_anchors": [
+        "load-step progress",
+        "residual and increment trace",
+        "fallback and warning visibility",
+        "explicit stop reason"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "run_monitor",
+        "Run & Monitor",
+        "Phase5 workflow step: Run & Monitor"
+      ]
+    },
+    {
+      "app_shell_wired": true,
+      "claim_boundary": "The visible GUI shell proves only that the five-step workflow is presented in the app source. It does not prove task execution, human UX pass, or solver/benchmark correctness.",
+      "contract_pass": true,
+      "id": "compare_report",
+      "label": "Compare & Report",
+      "label_present": true,
+      "present_required_gui_contract_anchors": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "present_workflow_model_anchors": [
+        "compare_report",
+        "Compare & Report",
+        "Phase5 workflow step: Compare & Report"
+      ],
+      "required_capabilities": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "required_gui_contract_anchors": [
+        "engine versus reference comparison",
+        "story/member/mode traceability",
+        "worst-error and residual reporting",
+        "reproduction bundle export"
+      ],
+      "status": "ready",
+      "workflow_model_anchors": [
+        "compare_report",
+        "Compare & Report",
+        "Phase5 workflow step: Compare & Report"
+      ]
+    }
+  ],
+  "workflow_worker": "src/workbench/developerPreviewWorkflow.worker.ts"
+}

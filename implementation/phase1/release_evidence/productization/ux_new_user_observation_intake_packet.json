@@ -8,6 +8,9 @@
     "participant_not_new_user",
     "new_to_product_not_confirmed",
     "completion_minutes_missing",
+    "workflow_steps_missing",
+    "required_workflow_steps_missing",
+    "required_workflow_step_not_passed",
     "blocking_usability_issue_present",
     "approval_decision_not_accepted"
   ],
@@ -64,8 +67,19 @@
       "placeholder": false,
       "report_check": "required_fields_present",
       "report_check_pass": false,
-      "required_value": "observed workflow steps, including reviewer package/report export",
-      "template_value": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report"
+      "required_value": "observed workflow scope covering the full five-step workflow",
+      "template_value": "OWNER_INPUT_REQUIRED: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report"
+    },
+    {
+      "current_value": "",
+      "field": "workflow_steps",
+      "missing": true,
+      "owner_note": "Each required workflow step must have a human-observed pass/outcome signal.",
+      "placeholder": false,
+      "report_check": "all_required_workflow_steps_passed",
+      "report_check_pass": false,
+      "required_value": "all five steps observed and passed: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report",
+      "template_value": "[{\"id\": \"import\", \"label\": \"Import\", \"outcome\": \"OWNER_INPUT_REQUIRED: pass\"}, {\"id\": \"model_health\", \"label\": \"Model Health\", \"outcome\": \"OWNER_INPUT_REQUIRED: pass\"}, {\"id\": \"analysis_setup\", \"label\": \"Analysis Setup\", \"outcome\": \"OWNER_INPUT_REQUIRED: pass\"}, {\"id\": \"run_monitor\", \"label\": \"Run & Monitor\", \"outcome\": \"OWNER_INPUT_REQUIRED: pass\"}, {\"id\": \"compare_report\", \"label\": \"Compare & Report\", \"outcome\": \"OWNER_INPUT_REQUIRED: pass\"}]"
     },
     {
       "current_value": "",
@@ -176,9 +190,31 @@
       "report_check_pass": false,
       "required_value": "completion_minutes equals elapsed_minutes within tolerance",
       "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "pass=0/5; missing=['import', 'model_health', 'analysis_setup', 'run_monitor', 'compare_report']",
+      "field": "workflow_step_coverage",
+      "missing": false,
+      "owner_note": "The observed task must cover Import through Compare & Report without skipped steps.",
+      "placeholder": false,
+      "report_check": "all_required_workflow_steps_observed",
+      "report_check_pass": false,
+      "required_value": "required workflow observed count == 5/5",
+      "template_value": "derived from observation timestamps"
+    },
+    {
+      "current_value": "[]",
+      "field": "workflow_step_placeholders",
+      "missing": false,
+      "owner_note": "Template workflow step placeholders must be replaced with real observed outcomes.",
+      "placeholder": false,
+      "report_check": "workflow_step_placeholders_absent",
+      "report_check_pass": false,
+      "required_value": "no placeholder workflow step labels or outcomes",
+      "template_value": "derived from observation timestamps"
     }
   ],
-  "generated_at": "2026-06-16T21:27:08.161963+00:00",
+  "generated_at": "2026-06-22T18:17:37.676201+00:00",
   "observation_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation.json",
   "observation_report_path": "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",
   "reason_code": "ERR_UX_NEW_USER_OBSERVATION_OWNER_INPUT_REQUIRED",
@@ -187,15 +223,49 @@
     "completion_minutes": null,
     "declared_completion_minutes": null,
     "elapsed_minutes": null,
-    "field_count": 15,
+    "field_count": 18,
     "field_pass_count": 0,
     "max_completion_minutes": 30.0,
-    "observation_blocker_count": 8,
+    "missing_workflow_steps": [
+      "import",
+      "model_health",
+      "analysis_setup",
+      "run_monitor",
+      "compare_report"
+    ],
+    "not_passed_workflow_steps": [],
+    "observation_blocker_count": 11,
     "observation_contract_pass": false,
-    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
-    "timestamp_tolerance_minutes": 1.0
+    "owner_action": "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
+    "placeholder_workflow_steps": [],
+    "required_workflow_step_count": 5,
+    "required_workflow_steps": [
+      {
+        "id": "import",
+        "label": "Import"
+      },
+      {
+        "id": "model_health",
+        "label": "Model Health"
+      },
+      {
+        "id": "analysis_setup",
+        "label": "Analysis Setup"
+      },
+      {
+        "id": "run_monitor",
+        "label": "Run & Monitor"
+      },
+      {
+        "id": "compare_report",
+        "label": "Compare & Report"
+      }
+    ],
+    "timestamp_tolerance_minutes": 1.0,
+    "workflow_step_count": 0,
+    "workflow_step_pass_count": 0
   },
-  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/15 | blockers=8",
+  "summary_line": "UX new-user observation intake: BLOCKED | fields=0/18 | blockers=11",
   "template_path": "docs/templates/ux_new_user_observation.template.json",
   "validation_commands": [
     "python3 scripts/build_ux_new_user_observation_report.py --out implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json",

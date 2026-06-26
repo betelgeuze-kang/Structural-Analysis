@@ -1,0 +1,12 @@
+{
+  "blockers": [],
+  "command_result": {
+    "returncode": 0,
+    "stderr_tail": "",
+    "stdout_tail": "Wrote NDTHA residual gate report: implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json\n"
+  },
+  "contract_pass": true,
+  "reason_code": "PASS",
+  "receipt_path": "implementation/phase1/release_evidence/full_validation/productization_heavy_profile.fresh_validation_receipt.json",
+  "schema_version": "fresh-validation-receipt-builder.v1"
+}

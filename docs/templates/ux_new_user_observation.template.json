@@ -3,7 +3,34 @@
   "participant_role": "OWNER_INPUT_REQUIRED: new_user | first_time_user | pilot_user",
   "new_to_product": "OWNER_INPUT_REQUIRED: true",
   "sample_project_id": "OWNER_INPUT_REQUIRED: sample project identifier",
-  "workflow_scope": "OWNER_INPUT_REQUIRED: open sample project, inspect engine/reviewer evidence package, export reviewer report",
+  "workflow_scope": "OWNER_INPUT_REQUIRED: Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report",
+  "workflow_steps": [
+    {
+      "id": "import",
+      "label": "Import",
+      "outcome": "OWNER_INPUT_REQUIRED: pass"
+    },
+    {
+      "id": "model_health",
+      "label": "Model Health",
+      "outcome": "OWNER_INPUT_REQUIRED: pass"
+    },
+    {
+      "id": "analysis_setup",
+      "label": "Analysis Setup",
+      "outcome": "OWNER_INPUT_REQUIRED: pass"
+    },
+    {
+      "id": "run_monitor",
+      "label": "Run & Monitor",
+      "outcome": "OWNER_INPUT_REQUIRED: pass"
+    },
+    {
+      "id": "compare_report",
+      "label": "Compare & Report",
+      "outcome": "OWNER_INPUT_REQUIRED: pass"
+    }
+  ],
   "observer": "OWNER_INPUT_REQUIRED: UX research owner or human observer",
   "started_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:00:00Z",
   "completed_at_utc": "OWNER_INPUT_REQUIRED: timezone-aware ISO timestamp, e.g. 2026-06-16T09:24:00Z",

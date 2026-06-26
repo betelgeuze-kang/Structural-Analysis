@@ -204,6 +204,141 @@ def _receipt_artifact_integrity_blockers(
     return blockers
 
 
+def _fresh_validation_blocker_grouping_metadata(blockers: list[str]) -> dict[str, Any]:
+    group_specs = [
+        (
+            "lane_publication_boundary",
+            {
+                "scope": "release_publication_boundary",
+                "description": "Materialized evidence and documentation boundary gaps.",
+                "matches": (
+                    "materialized_publication_evidence_missing",
+                    "validation_lane_boundary_missing_from_docs",
+                ),
+            },
+        ),
+        (
+            "fresh_receipt_presence",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Missing fresh validation receipts for named lanes.",
+                "matches": ("fresh_validation_receipt_missing",),
+            },
+        ),
+        (
+            "fresh_receipt_metadata_freshness",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Receipt metadata and reused-evidence freshness failures.",
+                "matches": (
+                    "fresh_validation_receipt_metadata_missing",
+                    "fresh_validation_receipt_reuses_evidence",
+                ),
+            },
+        ),
+        (
+            "fresh_receipt_identity",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Receipt pass, lane identity, or runner identity failures.",
+                "matches": (
+                    "fresh_validation_receipt_not_green",
+                    "fresh_validation_receipt_lane_mismatch",
+                    "fresh_validation_receipt_runner_mismatch",
+                ),
+            },
+        ),
+        (
+            "fresh_receipt_schema_contract",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Fresh validation receipt schema or validator failures.",
+                "matches": (
+                    "fresh_validation_receipt_invalid",
+                    "fresh_validation_receipt_invalid:",
+                ),
+            },
+        ),
+        (
+            "fresh_receipt_artifact_integrity",
+            {
+                "scope": "fresh_validation_receipt_required",
+                "description": "Receipt artifact checksum or path integrity failures.",
+                "matches": (
+                    "fresh_validation_receipt_artifact_integrity_failed",
+                    "fresh_validation_receipt_artifact_integrity_failed:",
+                ),
+            },
+        ),
+    ]
+    groups: dict[str, dict[str, Any]] = {}
+    classified: set[str] = set()
+    for group_name, spec in group_specs:
+        matches = tuple(str(match) for match in spec["matches"])
+        grouped = [
+            blocker
+            for blocker in blockers
+            if blocker not in classified
+            and any(
+                blocker.endswith(f"::{match}") or f"::{match}" in blocker
+                for match in matches
+            )
+        ]
+        classified.update(grouped)
+        groups[group_name] = {
+            "scope": spec["scope"],
+            "description": spec["description"],
+            "blocker_count": len(grouped),
+            "blockers": grouped,
+        }
+    unassigned_blockers = [blocker for blocker in blockers if blocker not in classified]
+    return {
+        "schema_version": "fresh-full-validation-blocker-groups.v1",
+        "grouping_policy": (
+            "Preserve every lane blocker while separating publication boundary, "
+            "fresh receipt presence, receipt metadata/freshness, receipt identity, "
+            "schema validation, and artifact integrity failures."
+        ),
+        "blocker_count": len(blockers),
+        "unassigned_blocker_count": len(unassigned_blockers),
+        "unassigned_blockers": unassigned_blockers,
+        "groups": groups,
+    }
+
+
+def _lane_scope(row: dict[str, Any]) -> str:
+    lane_id = str(row.get("lane_id", ""))
+    if lane_id == "gpu_hip_solver":
+        return "performance_track_after_cpu_reference_parity"
+    if lane_id in {"commercial_benchmark_torch", "external_benchmark_refresh"}:
+        return "benchmark_validation_refresh"
+    if lane_id in {"performance_profile", "productization_heavy_profile"}:
+        return "performance_or_heavy_profile_refresh"
+    return "fresh_full_validation_refresh"
+
+
+def _lane_boundary_metadata(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    lanes: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        lane_id = str(row.get("lane_id", ""))
+        lanes[lane_id] = {
+            "runner": str(row.get("runner", "")),
+            "scope": _lane_scope(row),
+            "pass": bool(row.get("pass") is True),
+            "fresh_validation_receipt": str(row.get("fresh_validation_receipt", "")),
+            "blockers": list(row.get("blockers", [])),
+        }
+    return {
+        "schema_version": "fresh-full-validation-lane-boundaries.v1",
+        "gpu_hip_policy": (
+            "GPU/HIP validation remains a performance-track lane after CPU reference "
+            "parity. Missing GPU/HIP fresh receipts must stay visible and must not be "
+            "used to replace CPU full-load/full-mesh/material-Newton closure evidence."
+        ),
+        "lanes": lanes,
+    }
+
+
 def _lane_row(
     lane: dict[str, Any],
     *,
@@ -363,6 +498,8 @@ def build_status(
         },
         "rows": rows,
         "blockers": blockers,
+        "blocker_grouping_metadata": _fresh_validation_blocker_grouping_metadata(blockers),
+        "lane_boundary_metadata": _lane_boundary_metadata(rows),
         "claim_boundary": (
             "This status separates release publication materialization from fresh full-validation. "
             "A release evidence freshness PASS only proves metadata/source recency. Level 3 promotion "

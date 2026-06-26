@@ -2870,11 +2870,18 @@ def build_report(
                 "opencode_configured_model_available": bool(
                     ai_orchestration_summary.get("opencode_configured_model_available", False)
                 ),
+                "opencode_assignment_routed_to_cursor": bool(
+                    ai_orchestration_summary.get("opencode_assignment_routed_to_cursor", False)
+                ),
+                "opencode_assignment_cursor_model": str(
+                    ai_orchestration_summary.get("opencode_assignment_cursor_model", "")
+                ),
             },
             "claim_boundary": (
-                "Cursor/OpenCode are implementation workers for scoped slices. OpenCode model availability is "
-                "local provider-registry evidence only, not proof of remote credentials or successful inference. "
-                "Codex still owns PM gate review, verification, and final acceptance."
+                "Cursor/OpenCode are implementation workers for scoped slices. Current OpenCode assignment may be "
+                "routed to Cursor; model availability is local provider-registry evidence only, not proof of remote "
+                "credentials, successful inference, worker execution, or release readiness. Codex still owns PM gate "
+                "review, verification, and final acceptance."
             ),
         },
         "gap_ledger_status": {
