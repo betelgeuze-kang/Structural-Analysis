@@ -53,6 +53,32 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await open(page)
     await expect(page.getByText('Read-only evidence')).toBeVisible()
   })
+
+  test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {
+    await open(page)
+    const evidence = page.locator('.wb2-evidence')
+    await expect(evidence).toBeVisible()
+
+    // When the bundle manifest cannot be fetched, the panel must surface a
+    // bundle-missing / unavailable marker rather than rendering source cards.
+    const missing = evidence.locator('[data-bundle-missing], [data-wb2-unavailable]')
+    const cards = evidence.locator('[data-evidence-id]')
+
+    const cardCount = await cards.count()
+    if (cardCount === 0) {
+      // No bundle published in this build: must be explicitly unavailable.
+      await expect(missing.first()).toBeVisible()
+      // Nothing may claim a positive release-ready verdict without evidence.
+      await expect(evidence.locator('[data-release-ready="true"]')).toHaveCount(0)
+    } else {
+      // A bundle is present: every source card must carry an explicit gate
+      // state and never an inferred/blank readiness.
+      for (let i = 0; i < cardCount; i += 1) {
+        const gate = await cards.nth(i).getAttribute('data-gate')
+        expect(['ready', 'blocked', 'missing', 'unavailable']).toContain(gate)
+      }
+    }
+  })
 })
 
 test.describe('Workbench v2 — viewer, mobile, a11y', () => {

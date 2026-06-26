@@ -13,10 +13,16 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-
 const args = process.argv.slice(2)
 const checkOnly = args.includes('--check')
+
+// --root <dir> overrides the repository root the builder reads sources from.
+// This keeps the production behaviour (repo root) the default while letting a
+// contract test point the builder at a synthetic fixture tree.
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const rootArgIdx = args.indexOf('--root')
+const rootDir = rootArgIdx >= 0 ? path.resolve(args[rootArgIdx + 1]) : repoRoot
+
 const outArgIdx = args.indexOf('--out')
 const outDir = path.resolve(rootDir, outArgIdx >= 0 ? args[outArgIdx + 1] : 'public/evidence')
 
