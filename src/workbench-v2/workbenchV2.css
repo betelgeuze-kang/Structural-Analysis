@@ -268,3 +268,16 @@
 .wb2-btn:disabled { opacity: 0.6; cursor: progress; }
 .wb2-bench-compare { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: #c3d2e0; cursor: pointer; }
 .wb2-bench-compare input { width: 16px; height: 16px; accent-color: #7fd8d0; }
+
+
+
+/* Member inspector + manual focus (PR workbench-polish) */
+.wb2-member-inspector { margin-top: 12px; padding: 11px 13px; border-radius: 12px; border: 1px solid var(--wb2-border); background: rgba(10, 18, 29, 0.5); display: flex; flex-direction: column; gap: 10px; }
+.wb2-member-current { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wb2-member-current__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-member-none { color: var(--wb2-dim); font-size: 12.5px; }
+.wb2-member-focus { display: flex; flex-direction: column; gap: 8px; }
+.wb2-member-focus__field { display: flex; flex-direction: column; gap: 5px; }
+.wb2-member-focus__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-member-focus__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 640px) { .wb2-member-focus__actions { flex-direction: column; align-items: stretch; } }
