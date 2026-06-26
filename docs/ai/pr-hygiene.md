@@ -30,19 +30,20 @@ Example: `web/workbench-case-samples`, `web/evidence-bundle-hardening`.
 | #30 | `web/evidence-bundle-hardening` | merged to `main` |
 | #31 | `web/workbench-case-samples` | merged to `main` |
 | #32 | `web/commercial-ux-realignment` | merged to `main` |
-| (this) | `web/workbench-polish` | export + viewer + run-monitor + a11y + this doc |
+| #33 | `web/workbench-polish` | merged to `main` |
+| (this) | `web/compare-and-live` | compare table + live sample + usage guide + this doc |
 
-The three merged branches above are safe to delete on GitHub. The local copies
-were already removed.
+The merged branches above are safe to delete on GitHub. Local copies are removed
+as each merges.
 
 ## 3. Branches to delete (merged or superseded)
 
 Safe to delete on GitHub (Branches → trash) after confirming the PR is
 closed/merged and the content is on `main`:
 
-- Workbench-v2 hardening line (merged via #30/#31/#32):
+- Workbench-v2 hardening line (merged via #30/#31/#32/#33):
   `web/evidence-bundle-hardening`, `web/workbench-case-samples`,
-  `web/commercial-ux-realignment`
+  `web/commercial-ux-realignment`, `web/workbench-polish`
 - Web track, integrated via #22:
   `feat/frontend-web-ci`, `feat/workbench-prototype-safe`,
   `feat/workbench-v2-react`, `feat/workbench-v2-evidence-reader`,

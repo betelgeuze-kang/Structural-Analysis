@@ -17,6 +17,7 @@ import { ReviewDecision } from './components/ReviewDecision'
 import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
+import { ComparePanel } from './components/ComparePanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -30,9 +31,11 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
+  const liveCaseUrl = `${baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`}evidence/workbench-case.json`
   const provider = useMemo(
-    () => createWorkbenchProvider(providerMode, { demoCaseId }),
-    [providerMode, demoCaseId],
+    () => createWorkbenchProvider(providerMode, { demoCaseId, url: liveCaseUrl }),
+    [providerMode, demoCaseId, liveCaseUrl],
   )
 
   const [state, dispatch] = useReducer(workbenchReducer, initialWorkbenchState)
@@ -42,8 +45,6 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const [errors, setErrors] = useState<string[]>([])
   const [warnings, setWarnings] = useState<string[]>([])
   const [compareIds, setCompareIds] = useState<string[]>([])
-
-  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
 
   function toggleCompare(id: string): void {
     setCompareIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -62,6 +63,9 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
         truthClass: c.truthClass,
         comparable: isAccuracyComparable(c),
         referenceSolver: c.verification.referenceSolver,
+        referenceResultsAvailable: c.verification.referenceResultsAvailable,
+        referenceResultsPath: c.verification.referenceResultsPath,
+        runnerId: c.verification.runnerId,
       }))
   }, [compareIds])
 
@@ -113,7 +117,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
   const claimBoundary =
     state.dataMode === 'demo'
       ? 'Demo case. Values are illustrative; the review decision is never inferred.'
-      : null
+      : 'Live case loaded from the published evidence path. Provenance and checksums describe the source only; the review decision and release readiness are never inferred.'
 
   return (
     <WorkbenchShell
@@ -193,13 +197,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       </div>
 
       <div id="wb2-sec-compare" className="wb2-section">
-        <section className="wb2-panel" aria-labelledby="wb2-compare-title">
-          <h2 id="wb2-compare-title" className="wb2-panel__title">Compare</h2>
-          <p className="wb2-unavailable" data-wb2-unavailable>
-            Cross-case and reference comparison is not configured for this case. Comparison requires attached
-            reference results; it is never synthesized.
-          </p>
-        </section>
+        <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
       </div>
 
       {/* Verification layer: Evidence + Benchmarks */}

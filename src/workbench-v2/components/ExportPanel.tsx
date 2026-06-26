@@ -11,6 +11,9 @@ export interface ComparisonRow {
   truthClass: string
   comparable: boolean
   referenceSolver: string | null
+  referenceResultsAvailable: boolean
+  referenceResultsPath: string | null
+  runnerId: string | null
 }
 
 interface ExportPanelProps {

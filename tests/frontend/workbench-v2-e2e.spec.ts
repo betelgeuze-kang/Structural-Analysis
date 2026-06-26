@@ -204,6 +204,43 @@ test.describe('Workbench v2 — run monitor, viewer focus, richer export', () =>
   })
 })
 
+test.describe('Workbench v2 — compare set & live mode', () => {
+  test('compare set is empty until a benchmark is added, then shows a row with status', async ({ page }) => {
+    await open(page)
+    const compare = page.locator('[data-compare-panel]')
+    await expect(compare.locator('[data-compare-empty]')).toBeVisible()
+    const box = page.locator('[data-bench-compare]').first()
+    await box.scrollIntoViewIfNeeded()
+    await box.check()
+    await expect(compare.locator('[data-compare-table]')).toBeVisible()
+    const row = compare.locator('[data-compare-row]').first()
+    await expect(row).toBeVisible()
+    // Status must be an explicit ready/blocked state, never a synthesized delta.
+    const status = await row.locator('[data-compare-status]').getAttribute('data-compare-status')
+    expect(['ready', 'blocked']).toContain(status)
+  })
+
+  test('compare clear resets the set', async ({ page }) => {
+    await open(page)
+    const box = page.locator('[data-bench-compare]').first()
+    await box.scrollIntoViewIfNeeded()
+    await box.check()
+    const compare = page.locator('[data-compare-panel]')
+    await expect(compare.locator('[data-compare-table]')).toBeVisible()
+    await compare.locator('[data-compare-clear]').click()
+    await expect(compare.locator('[data-compare-empty]')).toBeVisible()
+  })
+
+  test('live mode reports MISSING when no case is published — nothing is fabricated', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-provider="live"]').click()
+    // No bundle is committed/served in the build, so the live case is unavailable.
+    await expect(page.locator('#wb2-sec-project [data-wb2-unavailable]')).toBeVisible()
+    // The data-mode badge reflects LIVE even though the case is missing.
+    await expect(page.locator('[data-wb2-provider="live"]')).toHaveAttribute('aria-pressed', 'true')
+  })
+})
+
 test.describe('Workbench v2 — viewer, mobile, a11y', () => {
   test('embeds the structure viewer iframe with a deep-linkable src', async ({ page }) => {
     await open(page)
