@@ -4261,10 +4261,42 @@ function App() {
   ]
 
   return (
-    <main className="shell">
-      <div className="shell__glow shell__glow--a" />
-      <div className="shell__glow shell__glow--b" />
-      <section className="hero">
+    <div className="app-shell">
+      <header className="app-bar">
+        <div className="app-bar__brand">
+          <span className="app-bar__mark" aria-hidden="true" />
+          <div className="app-bar__brand-copy">
+            <p className="app-bar__product">Structural Optimization Workbench</p>
+            <p className="app-bar__env">Local evidence workspace</p>
+          </div>
+        </div>
+        <div className="app-bar__status">
+          <span className="app-bar__active" title={activeSurface.title}>{activeSurface.title}</span>
+          <span className={`status-pill status-pill--${activeSnapshot.tone}`}>{activeSnapshot.statusLabel}</span>
+        </div>
+      </header>
+      <nav className="app-nav" aria-label="Review surfaces">
+        <p className="app-nav__label">Review desks</p>
+        <ul className="app-nav__list">
+          {reviewSurfaces.map((surface) => (
+            <li key={`nav-${surface.id}`}>
+              <button
+                type="button"
+                className={`app-nav__item${surface.id === activeSurfaceId ? ' is-active' : ''}`}
+                aria-current={surface.id === activeSurfaceId ? 'page' : undefined}
+                onClick={() => setActiveSurfaceId(surface.id)}
+              >
+                <span className="app-nav__item-title">{surface.title}</span>
+                <span className="app-nav__item-badge">{surface.badge}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <main className="shell app-shell__main">
+        <div className="shell__glow shell__glow--a" />
+        <div className="shell__glow shell__glow--b" />
+        <section className="hero">
         <div className="hero__copy">
           <div className="hero__eyebrow-row">
             <p className="eyebrow">Structural Signal Desk</p>
@@ -5782,6 +5814,12 @@ function App() {
         </div>
       </section>
     </main>
+      <footer className="app-statusbar" aria-label="Workspace status">
+        <span className="app-statusbar__item">source: {activeSnapshot.sourceLabel}</span>
+        <span className="app-statusbar__item">surface: {activeSurface.id}</span>
+        <span className="app-statusbar__item app-statusbar__item--status">{activeSnapshot.statusLabel}</span>
+      </footer>
+    </div>
   )
 }
 
