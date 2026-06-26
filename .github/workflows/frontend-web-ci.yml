@@ -67,6 +67,9 @@ jobs:
       - name: Frontend build contract
         run: npm run verify:frontend-contract
 
+      - name: Workbench case contract
+        run: node --test tests/frontend/workbench-case-contract.test.mjs
+
       - name: Workbench prototype DOM contract
         run: npm run verify:workbench-prototype-dom-contract
 
