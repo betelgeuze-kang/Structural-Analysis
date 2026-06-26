@@ -26,6 +26,13 @@ const rootDir = rootArgIdx >= 0 ? path.resolve(args[rootArgIdx + 1]) : repoRoot
 const outArgIdx = args.indexOf('--out')
 const outDir = path.resolve(rootDir, outArgIdx >= 0 ? args[outArgIdx + 1] : 'public/evidence')
 
+// --include-case <path> optionally includes a workbench-case.json in the bundle.
+// The case's sourceCommitSha must match the evidence sources (same single-commit
+// rule). If omitted, the bundle contains only readiness artifacts; the workbench
+// case can be served separately or left as MISSING (honest).
+const caseArgIdx = args.indexOf('--include-case')
+const includeCasePath = caseArgIdx >= 0 ? path.resolve(rootDir, args[caseArgIdx + 1]) : null
+
 // id -> source (read-only original) + bundle (copy path, relative to outDir)
 const SOURCES = [
   { id: 'product_readiness', label: 'Product readiness', source: 'implementation/phase1/release_evidence/productization/product_readiness_snapshot.json', bundle: 'readiness/product-readiness.json' },
@@ -102,6 +109,26 @@ function main() {
     return
   }
 
+  // Optionally include a workbench case file in the bundle (same-commit gate).
+  let caseArtifact = null
+  if (includeCasePath) {
+    if (!fs.existsSync(includeCasePath)) fail(`--include-case file not found: ${includeCasePath}`)
+    const caseRaw = fs.readFileSync(includeCasePath)
+    let caseObj
+    try { caseObj = JSON.parse(caseRaw.toString('utf8')) } catch { fail('--include-case is not valid JSON') }
+    const caseSha = sha256(caseRaw)
+    const caseCommit = caseObj?.provenance?.sourceCommitSha ?? null
+    if (caseCommit && caseCommit !== 'demo-local' && caseCommit !== 'sample-not-a-release' && caseCommit !== sourceCommitSha) {
+      fail(
+        `--include-case source commit (${(caseCommit ?? '').slice(0, 8)}) does not match the evidence sources ` +
+          `(${sourceCommitSha.slice(0, 8)}). The case must be generated at the same commit as the readiness bundle.`,
+      )
+    }
+    const sensitive = scanSensitive('workbench_case', caseRaw.toString('utf8'), caseObj)
+    if (sensitive) fail(`sensitive data gate (case): ${sensitive}`)
+    caseArtifact = { raw: caseRaw, sha: caseSha, sourcePath: path.relative(rootDir, includeCasePath) }
+  }
+
   // Write the read-only copy + manifest. Originals are untouched.
   fs.rmSync(outDir, { recursive: true, force: true })
   fs.mkdirSync(path.join(outDir, 'readiness'), { recursive: true })
@@ -110,6 +137,18 @@ function main() {
     fs.writeFileSync(path.join(outDir, def.bundle), raw)
     return { id: def.id, label: def.label, path: def.bundle, source_path: def.source, sha256: sha, read_only: true }
   })
+
+  if (caseArtifact) {
+    fs.writeFileSync(path.join(outDir, 'workbench-case.json'), caseArtifact.raw)
+    artifacts.push({
+      id: 'workbench_case',
+      label: 'Workbench case (analysis result)',
+      path: 'workbench-case.json',
+      source_path: caseArtifact.sourcePath,
+      sha256: caseArtifact.sha,
+      read_only: true,
+    })
+  }
 
   const manifest = {
     schema_version: 'workbench-evidence-manifest.v1',
