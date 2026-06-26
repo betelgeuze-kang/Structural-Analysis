@@ -125,7 +125,7 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
   test('left navigation lists the commercial sections in order', async ({ page }) => {
     await open(page)
     await expect(page.locator('[data-wb2-nav]')).toBeVisible()
-    for (const id of ['wb2-sec-project', 'wb2-sec-model', 'wb2-sec-analysis', 'wb2-sec-results', 'wb2-sec-evidence', 'wb2-sec-benchmarks', 'wb2-sec-review', 'wb2-sec-export']) {
+    for (const id of ['wb2-sec-project', 'wb2-sec-model', 'wb2-sec-analysis', 'wb2-sec-run', 'wb2-sec-results', 'wb2-sec-evidence', 'wb2-sec-benchmarks', 'wb2-sec-review', 'wb2-sec-export']) {
       await expect(page.locator(`[data-wb2-nav-link="${id}"]`)).toBeVisible()
     }
   })
@@ -160,6 +160,47 @@ test.describe('Workbench v2 — commercial layout, review draft, benchmarks', ()
     if (await geo.count()) {
       await expect(geo.first().locator('[data-geometry-excluded]')).toBeVisible()
     }
+  })
+})
+
+test.describe('Workbench v2 — run monitor, viewer focus, richer export', () => {
+  test('run monitor reflects the converged sample with progress and within-tolerance', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-case="converged"]').click()
+    const monitor = page.locator('[data-run-monitor]')
+    await expect(monitor).toHaveAttribute('data-run-monitor', 'converged')
+    await expect(monitor.locator('[data-run-progress]')).toBeVisible()
+    await expect(monitor.locator('[data-run-within-tol="true"]')).toBeVisible()
+  })
+
+  test('run monitor reports UNAVAILABLE for the no-convergence sample, inferring nothing', async ({ page }) => {
+    await open(page)
+    await page.locator('[data-wb2-case="unavailable"]').click()
+    const monitor = page.locator('[data-run-monitor]')
+    await expect(monitor).toHaveAttribute('data-run-monitor', 'unavailable')
+    await expect(monitor.locator('[data-wb2-unavailable]')).toBeVisible()
+    await expect(monitor.locator('[data-run-progress]')).toHaveCount(0)
+  })
+
+  test('member focus round-trips to the inspector and clears', async ({ page }) => {
+    await open(page)
+    const inspector = page.locator('[data-wb2-member-inspector]')
+    await expect(inspector).toBeVisible()
+    await inspector.locator('[data-wb2-member-input]').fill('C12')
+    await inspector.locator('[data-wb2-member-focus]').click()
+    await expect(page.locator('[data-wb2-selected-member]')).toHaveText('C12')
+    await page.locator('[data-wb2-member-clear]').click()
+    await expect(page.locator('[data-wb2-selected-member]')).toHaveText(/none selected/i)
+  })
+
+  test('export panel lists blockers/comparison counts and selecting a benchmark updates the count', async ({ page }) => {
+    await open(page)
+    const exportContents = page.locator('.wb2-export-contents')
+    await expect(exportContents).toContainText(/selected comparison rows \(0\)/i)
+    const compare = page.locator('[data-bench-compare]').first()
+    await compare.scrollIntoViewIfNeeded()
+    await compare.check()
+    await expect(exportContents).toContainText(/selected comparison rows \(1\)/i)
   })
 })
 
