@@ -5,6 +5,7 @@ import type { WorkbenchCaseV2 } from './model/caseSchema'
 import { defaultDemoCaseId, type DemoCaseId } from './model/demoCases'
 import { initialWorkbenchState, workbenchReducer } from './model/workbenchState'
 import { WorkbenchShell } from './components/WorkbenchShell'
+import { WorkbenchNav } from './components/WorkbenchNav'
 import { AnalysisRibbon } from './components/AnalysisRibbon'
 import { CaseSelector } from './components/CaseSelector'
 import { CaseSummary } from './components/CaseSummary'
@@ -89,28 +90,26 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
       sourceLabel={sourceLabel}
       claimBoundary={claimBoundary}
       onProviderModeChange={setProviderMode}
+      nav={<WorkbenchNav />}
     >
-      <EvidenceReaderPanel />
-      <BenchmarkBrowser />
-
-      {providerMode === 'demo' ? (
-        <CaseSelector selectedId={demoCaseId} onSelect={setDemoCaseId} />
-      ) : null}
-
-      {loadState === 'loading' ? (
-        <section className="wb2-panel"><p className="wb2-empty">Loading case…</p></section>
-      ) : !caseV2 ? (
-        <section className="wb2-panel">
-          <p className="wb2-unavailable" data-wb2-unavailable>
-            Case unavailable{errors[0] ? ` (${errors[0]})` : ''}. Nothing is inferred.
-            {errors.length > 1 ? ` (+${errors.length - 1} more validation error(s))` : ''}
-          </p>
-        </section>
-      ) : (
-        <>
-          <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
-          <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />
+      {/* Primary flow: Model -> Analysis -> Results -> Compare */}
+      <div id="wb2-sec-project" className="wb2-section">
+        {loadState === 'loading' ? (
+          <section className="wb2-panel"><p className="wb2-empty">Loading case…</p></section>
+        ) : caseV2 ? (
           <CaseSummary caseV2={caseV2} />
+        ) : (
+          <section className="wb2-panel">
+            <p className="wb2-unavailable" data-wb2-unavailable>
+              Case unavailable{errors[0] ? ` (${errors[0]})` : ''}. Nothing is inferred.
+              {errors.length > 1 ? ` (+${errors.length - 1} more validation error(s))` : ''}
+            </p>
+          </section>
+        )}
+      </div>
+
+      <div id="wb2-sec-model" className="wb2-section">
+        {caseV2 ? (
           <ModelViewport
             model={caseV2.model}
             selectedMemberId={state.selectedMemberId}
@@ -119,12 +118,59 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             sourcePath={caseV2.provenance.sourcePath}
             sourceCommit={caseV2.provenance.sourceCommitSha}
           />
-          <ResidualAuditPanel
-            residualHistory={caseV2.residualHistory}
-            sourceLabel={sourceLabel}
-            residualTolerance={caseV2.analysis?.residualTolerance}
-          />
-          <ReviewDecision dataMode={state.dataMode} />
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Model Health</h2><p className="wb2-unavailable" data-wb2-unavailable>No model attached.</p></section>
+        )}
+      </div>
+
+      <div id="wb2-sec-analysis" className="wb2-section">
+        {providerMode === 'demo' ? <CaseSelector selectedId={demoCaseId} onSelect={setDemoCaseId} /> : null}
+        {caseV2 ? (
+          <AnalysisRibbon runStatus={state.runStatus} analysis={caseV2.analysis} convergenceAvailable={state.convergenceAvailable} />
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Analysis</h2><p className="wb2-unavailable" data-wb2-unavailable>No analysis attached.</p></section>
+        )}
+      </div>
+
+      <div id="wb2-sec-results" className="wb2-section">
+        {caseV2 ? (
+          <>
+            <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />
+            <ResidualAuditPanel
+              residualHistory={caseV2.residualHistory}
+              sourceLabel={sourceLabel}
+              residualTolerance={caseV2.analysis?.residualTolerance}
+            />
+          </>
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Results</h2><p className="wb2-unavailable" data-wb2-unavailable>No results attached.</p></section>
+        )}
+      </div>
+
+      <div id="wb2-sec-compare" className="wb2-section">
+        <section className="wb2-panel" aria-labelledby="wb2-compare-title">
+          <h2 id="wb2-compare-title" className="wb2-panel__title">Compare</h2>
+          <p className="wb2-unavailable" data-wb2-unavailable>
+            Cross-case and reference comparison is not configured for this case. Comparison requires attached
+            reference results; it is never synthesized.
+          </p>
+        </section>
+      </div>
+
+      {/* Verification layer: Evidence + Benchmarks */}
+      <div id="wb2-sec-evidence" className="wb2-section">
+        <EvidenceReaderPanel />
+      </div>
+      <div id="wb2-sec-benchmarks" className="wb2-section">
+        <BenchmarkBrowser />
+      </div>
+
+      {/* Decision: Review + Export */}
+      <div id="wb2-sec-review" className="wb2-section">
+        <ReviewDecision dataMode={state.dataMode} />
+      </div>
+      <div id="wb2-sec-export" className="wb2-section">
+        {caseV2 ? (
           <ExportPanel
             caseV2={caseV2}
             dataMode={state.dataMode}
@@ -132,8 +178,10 @@ export function WorkbenchPage({ initialProviderMode = 'demo' }: WorkbenchPagePro
             selectedMemberId={state.selectedMemberId}
             convergenceAvailable={state.convergenceAvailable}
           />
-        </>
-      )}
+        ) : (
+          <section className="wb2-panel"><h2 className="wb2-panel__title">Export</h2><p className="wb2-unavailable" data-wb2-unavailable>Nothing to export until a valid case is loaded.</p></section>
+        )}
+      </div>
 
       {warnings.length ? (
         <section className="wb2-panel"><p className="wb2-note wb2-note--warn" data-wb2-warnings>{warnings.join(' · ')}</p></section>
