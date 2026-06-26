@@ -9,6 +9,7 @@ interface WorkbenchShellProps {
   sourceLabel: string
   claimBoundary: string | null
   onProviderModeChange: (mode: ProviderMode) => void
+  nav?: ReactNode
   children: ReactNode
 }
 
@@ -18,6 +19,7 @@ export function WorkbenchShell({
   sourceLabel,
   claimBoundary,
   onProviderModeChange,
+  nav,
   children,
 }: WorkbenchShellProps): ReactElement {
   const claimText =
@@ -59,9 +61,16 @@ export function WorkbenchShell({
       </p>
       <p className="wb2-provenance" data-wb2-source>Source: {sourceLabel}</p>
 
-      <main id="wb2-main" className="wb2-main" tabIndex={-1}>
-        {children}
-      </main>
+      <div className={`wb2-layout${nav ? ' has-nav' : ''}`}>
+        {nav ? (
+          <aside className="wb2-nav-col" aria-label="Workbench navigation">
+            {nav}
+          </aside>
+        ) : null}
+        <main id="wb2-main" className="wb2-main" tabIndex={-1} aria-label="Workbench content">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

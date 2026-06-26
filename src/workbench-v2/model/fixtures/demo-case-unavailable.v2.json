@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "workbench-case.v2",
+  "provenance": {
+    "sourcePath": "demo/midrise-import-only.case.json",
+    "sourceSha256": "sha256:demounavail0000000000000000000000000000000000000000000000000000000",
+    "sourceCommitSha": "demo-local",
+    "engineVersion": "structural-optimization-workbench@1.0.0",
+    "generatedAt": "2026-06-21T00:00:00+00:00"
+  },
+  "model": {
+    "unitSystem": "SI",
+    "coordinateSystem": "global_xyz",
+    "nodeCount": 642,
+    "elementCount": 1510,
+    "dofCount": 3852
+  },
+  "residualHistory": []
+}

@@ -184,3 +184,138 @@
 .wb2-bench-life--discovered { color: #b6c4d4; background: rgba(148, 168, 190, 0.08); border-color: rgba(148, 168, 190, 0.36); border-style: dashed; }
 .wb2-bench-target { font-size: 10px; font-weight: 800; color: #ffd9a3; background: rgba(230, 169, 93, 0.16); border: 1px solid rgba(230, 169, 93, 0.5); border-radius: 999px; padding: 3px 8px; }
 .wb2-bench-run__blocked { margin: 0; font-size: 11.5px; color: #ffb3ac; }
+
+
+
+/* Demo case selector (PR C) */
+.wb2-case-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.wb2-case-tab { cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; border: 1px solid rgba(148, 168, 190, 0.28); background: rgba(10, 18, 29, 0.6); color: #c3d2e0; }
+.wb2-case-tab.is-active { border-color: rgba(79, 183, 173, 0.6); background: rgba(79, 183, 173, 0.16); color: #c9f3ee; }
+
+/* Result summary card (PR C) */
+.wb2-result-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.wb2-result-sub { color: var(--wb2-dim); font-size: 12.5px; }
+.wb2-result-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin: 0; }
+.wb2-result-metric { border: 1px solid var(--wb2-border); border-radius: 10px; background: rgba(10, 18, 29, 0.5); padding: 9px 11px; }
+.wb2-result-metric dt { color: var(--wb2-dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 4px; }
+.wb2-result-metric dd { margin: 0; font-size: 14px; }
+.wb2-result-tol { margin: 12px 0 0; font-size: 12.5px; }
+.wb2-result-tol.is-ok { color: #9ff0cf; }
+.wb2-result-tol.is-no { color: #ffb3ac; }
+
+/* Residual chart (PR C) */
+.wb2-residual-chart { display: block; width: 100%; height: auto; max-width: 520px; margin: 0 0 14px; }
+.wb2-chart-grid { stroke: rgba(148, 168, 190, 0.18); stroke-width: 1; }
+.wb2-chart-axis { fill: var(--wb2-dim); font-size: 9px; font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+.wb2-chart-line { stroke: #7fd8d0; stroke-width: 1.8; }
+.wb2-chart-dot { fill: #c9f3ee; }
+.wb2-chart-tol { stroke: #f4b56b; stroke-width: 1.2; stroke-dasharray: 5 4; }
+.wb2-chart-tol-label { fill: #f3d6ad; font-size: 9px; font-family: 'IBM Plex Mono', ui-monospace, monospace; }
+
+
+
+/* Commercial layout: left nav + content (PR commercial-ux) */
+.wb2-layout { display: block; }
+.wb2-layout.has-nav { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 20px; align-items: start; }
+.wb2-nav-col { position: sticky; top: 14px; align-self: start; }
+.wb2-nav { display: flex; flex-direction: column; gap: 14px; }
+.wb2-nav-group__label { margin: 0 0 6px; font-size: 10px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #7fd8d0; }
+.wb2-nav-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.wb2-nav-link { display: block; padding: 7px 11px; border-radius: 9px; font-size: 13px; font-weight: 600; color: #c3d2e0; text-decoration: none; border: 1px solid transparent; }
+.wb2-nav-link:hover { background: rgba(148, 168, 190, 0.08); }
+.wb2-nav-link.is-active { color: #c9f3ee; background: rgba(79, 183, 173, 0.14); border-color: rgba(79, 183, 173, 0.4); }
+
+/* Each section is a full-width slot holding one or more panels. */
+.wb2-section { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; scroll-margin-top: 16px; margin-bottom: 16px; }
+.wb2-section > .wb2-panel { grid-column: 1 / -1; }
+
+@media (max-width: 900px) {
+  .wb2-layout.has-nav { grid-template-columns: 1fr; }
+  .wb2-nav-col { position: static; }
+  .wb2-nav { flex-direction: row; flex-wrap: wrap; gap: 10px 16px; }
+  .wb2-nav-list { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+}
+
+
+
+/* Review draft editor (PR commercial-ux) */
+.wb2-review-auto { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.wb2-review-auto__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-review-draft { margin-top: 14px; border-top: 1px solid var(--wb2-border); padding-top: 12px; }
+.wb2-review-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.wb2-review-field__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-review-decisions { display: flex; gap: 8px; flex-wrap: wrap; }
+.wb2-review-decision { cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px; border: 1px solid rgba(148, 168, 190, 0.28); background: rgba(10, 18, 29, 0.6); color: #c3d2e0; }
+.wb2-review-decision.is-active { border-color: rgba(79, 183, 173, 0.6); background: rgba(79, 183, 173, 0.16); color: #c9f3ee; }
+.wb2-review-input, .wb2-review-textarea { font: inherit; font-size: 13px; color: var(--wb2-text); background: rgba(10, 18, 29, 0.6); border: 1px solid var(--wb2-border); border-radius: 9px; padding: 8px 10px; }
+.wb2-review-textarea { resize: vertical; min-height: 56px; }
+.wb2-review-meta { margin: 4px 0 6px; color: var(--wb2-dim); font-size: 12px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+
+
+/* Benchmark copy button + acquisition + geometry-only exclusion (PR commercial-ux) */
+.wb2-bench-cmd-row { display: flex; align-items: flex-start; gap: 8px; }
+.wb2-bench-cmd-row .wb2-bench-run__cmd { flex: 1 1 auto; }
+.wb2-copy-btn { cursor: pointer; font: inherit; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(79, 183, 173, 0.45); background: rgba(79, 183, 173, 0.12); color: #c9f3ee; white-space: nowrap; flex: 0 0 auto; }
+.wb2-copy-btn:hover { background: rgba(79, 183, 173, 0.22); }
+.wb2-bench-acq { display: flex; flex-direction: column; gap: 3px; margin-top: 6px; }
+.wb2-bench-excluded { margin: 4px 0 2px; padding: 8px 10px; border-radius: 10px; font-size: 11.5px; line-height: 1.45; color: #c6d2df; background: rgba(148, 168, 190, 0.08); border: 1px dashed rgba(148, 168, 190, 0.45); }
+
+
+
+/* Export contents + benchmark compare selection (PR workbench-polish) */
+.wb2-export-contents { margin: 0 0 12px; padding-left: 18px; font-size: 12.5px; color: #c3d2e0; display: flex; flex-direction: column; gap: 3px; }
+.wb2-btn:disabled { opacity: 0.6; cursor: progress; }
+.wb2-bench-compare { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 12px; color: #c3d2e0; cursor: pointer; }
+.wb2-bench-compare input { width: 16px; height: 16px; accent-color: #7fd8d0; }
+
+
+
+/* Member inspector + manual focus (PR workbench-polish) */
+.wb2-member-inspector { margin-top: 12px; padding: 11px 13px; border-radius: 12px; border: 1px solid var(--wb2-border); background: rgba(10, 18, 29, 0.5); display: flex; flex-direction: column; gap: 10px; }
+.wb2-member-current { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.wb2-member-current__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-member-none { color: var(--wb2-dim); font-size: 12.5px; }
+.wb2-member-focus { display: flex; flex-direction: column; gap: 8px; }
+.wb2-member-focus__field { display: flex; flex-direction: column; gap: 5px; }
+.wb2-member-focus__label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--wb2-dim); }
+.wb2-member-focus__actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+@media (max-width: 640px) { .wb2-member-focus__actions { flex-direction: column; align-items: stretch; } }
+
+
+
+/* Run Monitor (PR workbench-polish) */
+.wb2-run-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+.wb2-run-status-label { font-size: 13px; font-weight: 700; color: #c9f3ee; }
+.wb2-run-progress { height: 10px; border-radius: 999px; background: rgba(148, 168, 190, 0.14); border: 1px solid var(--wb2-border); overflow: hidden; }
+.wb2-run-progress__bar { height: 100%; background: linear-gradient(90deg, #4fb7ad, #7fd8d0); border-radius: 999px; transition: width 200ms ease; }
+.wb2-run-progress__caption { margin: 6px 0 12px; font-size: 12px; color: var(--wb2-dim); }
+@media (prefers-reduced-motion: reduce) { .wb2-run-progress__bar { transition: none; } }
+
+
+
+/* Accessibility & responsive polish (PR workbench-polish) */
+/* Smooth in-page nav scrolling, disabled for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+/* Keep the sticky nav usable on short viewports (e.g. 1366x768) by letting it
+   scroll internally instead of clipping lower items. */
+.wb2-nav-col { max-height: calc(100vh - 28px); overflow-y: auto; overscroll-behavior: contain; }
+.wb2-nav-link { min-height: 36px; display: flex; align-items: center; }
+/* Sections clear the top so anchor jumps are not hidden under the header. */
+.wb2-section { scroll-margin-top: 20px; }
+
+/* Mid-width (tablet / 1024–900): nav stays a sidebar but narrower. */
+@media (max-width: 1180px) and (min-width: 901px) {
+  .wb2-layout.has-nav { grid-template-columns: 176px minmax(0, 1fr); gap: 16px; }
+}
+/* Mobile: horizontal nav can scroll if it overflows. */
+@media (max-width: 900px) {
+  .wb2-nav-col { max-height: none; overflow: visible; }
+  .wb2-nav { overflow-x: auto; }
+}
+/* High-contrast support for the active nav item border. */
+@media (forced-colors: active) {
+  .wb2-nav-link.is-active { border-color: Highlight; }
+}

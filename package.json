@@ -22,6 +22,7 @@
     "build:benchmark-catalog": "node ./scripts/build-benchmark-catalog.mjs",
     "verify:workbench-v2-e2e": "node ./scripts/verify-workbench-v2-e2e.mjs",
     "build:evidence-bundle": "node ./scripts/build-workbench-evidence-bundle.mjs",
+    "verify:evidence-bundle-contract": "node ./scripts/verify-evidence-bundle-contract.mjs",
     "capture:readme-viewer-image": "node ./scripts/capture-readme-viewer-image.mjs",
     "export:viewer-report-pdf": "node ./scripts/export-structure-viewer-report-pdf.mjs",
     "verify:viewer-report-pdf": "node ./scripts/verify-structure-viewer-report-pdf.mjs",

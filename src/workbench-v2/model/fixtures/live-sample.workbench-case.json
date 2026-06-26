@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "workbench-case.v2",
+  "provenance": {
+    "sourcePath": "sample/demo-highrise.workbench-case.json",
+    "sourceSha256": "sha256:samplelivecase00000000000000000000000000000000000000000000000000",
+    "sourceCommitSha": "sample-not-a-release",
+    "engineVersion": "structural-optimization-workbench@1.0.0-sample",
+    "generatedAt": "2026-06-21T00:00:00+00:00"
+  },
+  "model": {
+    "unitSystem": "SI",
+    "coordinateSystem": "global_xyz",
+    "nodeCount": 1840,
+    "elementCount": 4360,
+    "dofCount": 11040
+  },
+  "analysis": {
+    "type": "nonlinear_static",
+    "solver": "demo-newton",
+    "converged": true,
+    "loadScale": 1.0,
+    "iterationCount": 7,
+    "residualTolerance": 1e-6,
+    "finalNormalizedResidual": 4.2e-7,
+    "finalRelativeIncrement": 8.1e-7,
+    "status": "converged"
+  },
+  "residualHistory": [
+    { "iteration": 1, "residual": 1.0, "relativeIncrement": 1.0, "alpha": 1.0 },
+    { "iteration": 2, "residual": 0.18, "relativeIncrement": 0.22, "alpha": 1.0 },
+    { "iteration": 3, "residual": 2.4e-2, "relativeIncrement": 3.1e-2, "alpha": 1.0 },
+    { "iteration": 4, "residual": 1.9e-3, "relativeIncrement": 2.6e-3, "alpha": 1.0 },
+    { "iteration": 5, "residual": 7.7e-5, "relativeIncrement": 1.0e-4, "alpha": 1.0 },
+    { "iteration": 6, "residual": 3.1e-6, "relativeIncrement": 5.2e-6, "alpha": 1.0 },
+    { "iteration": 7, "residual": 4.2e-7, "relativeIncrement": 8.1e-7, "alpha": 1.0 }
+  ]
+}

@@ -9,6 +9,7 @@ import {
   type LifecycleStatus,
   type TruthClass,
 } from '../model/benchmark/benchmarkSchema'
+import { CopyButton } from './CopyButton'
 
 const TRUTH_FILTERS: (TruthClass | 'all')[] = [
   'all',
@@ -34,13 +35,22 @@ function yn(v: boolean): string {
   return v ? 'verified' : 'unverified'
 }
 
-function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
+function CaseCard({
+  c,
+  selected,
+  onToggleCompare,
+}: {
+  c: BenchmarkCase
+  selected?: boolean
+  onToggleCompare?: (id: string) => void
+}): ReactElement {
   const comparable = isAccuracyComparable(c)
   const lifecycle = deriveLifecycle(c)
   const run = benchmarkRunCommand(c)
   const v = c.verification
+  const geometryOnly = c.truthClass === 'geometry_only'
   return (
-    <article className="wb2-bench-card" data-bench-id={c.id} data-truth={c.truthClass} data-lifecycle={lifecycle}>
+    <article className="wb2-bench-card" data-bench-id={c.id} data-truth={c.truthClass} data-lifecycle={lifecycle} data-geometry-only={geometryOnly ? 'true' : 'false'}>
       <header className="wb2-bench-card__head">
         <h3>{c.title}</h3>
         <div className="wb2-bench-chips">
@@ -50,6 +60,13 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
         </div>
       </header>
       <p className="wb2-bench-family">{c.structureFamily}</p>
+
+      {geometryOnly ? (
+        <p className="wb2-bench-excluded" data-geometry-excluded role="note">
+          Geometry-only — excluded from accuracy validation. Used for import / geometry checks only; no
+          accuracy claim is made or inferred from this case.
+        </p>
+      ) : null}
 
       <dl className="wb2-evidence-kv">
         <dt>Source</dt>
@@ -76,12 +93,38 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
         {run.runnable ? (
           <>
             <span className="wb2-bench-run__label">Run command</span>
-            <code className="wb2-mono wb2-bench-run__cmd">{run.command}</code>
+            <div className="wb2-bench-cmd-row">
+              <code className="wb2-mono wb2-bench-run__cmd">{run.command}</code>
+              <CopyButton value={run.command} label="Copy" />
+            </div>
           </>
         ) : (
-          <p className="wb2-bench-run__blocked" data-run-blocked>⛔ {run.reason}.{v.acquisitionCommand ? ` Acquire first: ${v.acquisitionCommand}` : ''}</p>
+          <>
+            <p className="wb2-bench-run__blocked" data-run-blocked>⛔ {run.reason}.</p>
+            {v.acquisitionCommand ? (
+              <div className="wb2-bench-acq">
+                <span className="wb2-bench-run__label">Acquire first</span>
+                <div className="wb2-bench-cmd-row">
+                  <code className="wb2-mono wb2-bench-run__cmd" data-acq-cmd>{v.acquisitionCommand}</code>
+                  <CopyButton value={v.acquisitionCommand} label="Copy" />
+                </div>
+              </div>
+            ) : null}
+          </>
         )}
       </div>
+
+      {onToggleCompare ? (
+        <label className="wb2-bench-compare">
+          <input
+            type="checkbox"
+            checked={!!selected}
+            data-bench-compare={c.id}
+            onChange={() => onToggleCompare(c.id)}
+          />
+          <span>Add to comparison{!comparable ? ' (not accuracy-comparable)' : ''}</span>
+        </label>
+      ) : null}
 
       {c.sourceUrl ? (
         <a className="wb2-bench-report" href={c.sourceUrl} target="_blank" rel="noreferrer">Open source / report ↗</a>
@@ -90,12 +133,18 @@ function CaseCard({ c }: { c: BenchmarkCase }): ReactElement {
   )
 }
 
-export function BenchmarkBrowser(): ReactElement {
+export interface BenchmarkBrowserProps {
+  selectedCompareIds?: string[]
+  onToggleCompare?: (id: string) => void
+}
+
+export function BenchmarkBrowser({ selectedCompareIds, onToggleCompare }: BenchmarkBrowserProps = {}): ReactElement {
   const catalog = useMemo(() => getBenchmarkCatalog(), [])
   const [truth, setTruth] = useState<TruthClass | 'all'>('all')
   const [size, setSize] = useState<string>('all')
   const [lifecycle, setLifecycle] = useState<LifecycleStatus | 'all' | 'first-targets'>('all')
   const [query, setQuery] = useState<string>('')
+  const selectedSet = useMemo(() => new Set(selectedCompareIds ?? []), [selectedCompareIds])
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -112,6 +161,7 @@ export function BenchmarkBrowser(): ReactElement {
   const comparableCount = catalog.cases.filter((c) => isAccuracyComparable(c)).length
   const validatedCount = catalog.cases.filter((c) => deriveLifecycle(c) === 'VALIDATED').length
   const runnableCount = catalog.cases.filter((c) => c.verification.runnerId).length
+  const geometryOnlyCount = catalog.cases.filter((c) => c.truthClass === 'geometry_only').length
 
   return (
     <section className="wb2-panel wb2-bench" aria-labelledby="wb2-bench-title">
@@ -119,7 +169,8 @@ export function BenchmarkBrowser(): ReactElement {
 
       <p className="wb2-note">
         {catalog.cases.length} candidate(s) · {comparableCount} accuracy-comparable · {validatedCount} validated ·{' '}
-        {runnableCount} runnable. <span className="wb2-bench-kind">catalog: {catalog.catalogKind} ({catalog.schemaVersion})</span>
+        {runnableCount} runnable · <span data-geometry-excluded-count>{geometryOnlyCount} geometry-only (excluded from accuracy)</span>.{' '}
+        <span className="wb2-bench-kind">catalog: {catalog.catalogKind} ({catalog.schemaVersion})</span>
       </p>
       {catalog.disclaimer ? <p className="wb2-bench-disclaimer">{catalog.disclaimer}</p> : null}
 
@@ -150,7 +201,9 @@ export function BenchmarkBrowser(): ReactElement {
 
       {filtered.length ? (
         <div className="wb2-bench-grid">
-          {filtered.map((c) => (<CaseCard key={c.id} c={c} />))}
+          {filtered.map((c) => (
+            <CaseCard key={c.id} c={c} selected={selectedSet.has(c.id)} onToggleCompare={onToggleCompare} />
+          ))}
         </div>
       ) : (
         <p className="wb2-empty">No cases match the current filters.</p>
