@@ -67,7 +67,7 @@ export function WorkbenchShell({
             {nav}
           </aside>
         ) : null}
-        <main id="wb2-main" className="wb2-main" tabIndex={-1}>
+        <main id="wb2-main" className="wb2-main" tabIndex={-1} aria-label="Workbench content">
           {children}
         </main>
       </div>

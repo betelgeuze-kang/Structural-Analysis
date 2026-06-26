@@ -291,3 +291,31 @@
 .wb2-run-progress__bar { height: 100%; background: linear-gradient(90deg, #4fb7ad, #7fd8d0); border-radius: 999px; transition: width 200ms ease; }
 .wb2-run-progress__caption { margin: 6px 0 12px; font-size: 12px; color: var(--wb2-dim); }
 @media (prefers-reduced-motion: reduce) { .wb2-run-progress__bar { transition: none; } }
+
+
+
+/* Accessibility & responsive polish (PR workbench-polish) */
+/* Smooth in-page nav scrolling, disabled for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+/* Keep the sticky nav usable on short viewports (e.g. 1366x768) by letting it
+   scroll internally instead of clipping lower items. */
+.wb2-nav-col { max-height: calc(100vh - 28px); overflow-y: auto; overscroll-behavior: contain; }
+.wb2-nav-link { min-height: 36px; display: flex; align-items: center; }
+/* Sections clear the top so anchor jumps are not hidden under the header. */
+.wb2-section { scroll-margin-top: 20px; }
+
+/* Mid-width (tablet / 1024–900): nav stays a sidebar but narrower. */
+@media (max-width: 1180px) and (min-width: 901px) {
+  .wb2-layout.has-nav { grid-template-columns: 176px minmax(0, 1fr); gap: 16px; }
+}
+/* Mobile: horizontal nav can scroll if it overflows. */
+@media (max-width: 900px) {
+  .wb2-nav-col { max-height: none; overflow: visible; }
+  .wb2-nav { overflow-x: auto; }
+}
+/* High-contrast support for the active nav item border. */
+@media (forced-colors: active) {
+  .wb2-nav-link.is-active { border-color: Highlight; }
+}
