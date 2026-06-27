@@ -17,11 +17,11 @@ body.structural-surface {
   --panel-soft:rgba(17,28,41,.82);
   --panel-strong:rgba(10,18,29,.92);
   --panel-edge:rgba(148,168,190,.18);
-  --panel-edge-strong:rgba(244,181,107,.22);
+  --panel-edge-strong:rgba(47,111,235,.22);
   --text:#ecf2f6;
   --muted:#96a8bb;
-  --accent:#4fb7ad;
-  --accent2:#f4b56b;
+  --accent:#2f6feb;
+  --accent2:#2f6feb;
   --accent-ink:#08121d;
   --success:#63c7a1;
   --warn:#e6a95d;
@@ -34,8 +34,8 @@ body.structural-surface {
   font-family:'IBM Plex Sans KR','Pretendard','Noto Sans KR',sans-serif;
   color:var(--text);
   background:
-    radial-gradient(circle at 12% 8%, rgba(79,183,173,.14), transparent 22%),
-    radial-gradient(circle at 84% 12%, rgba(244,181,107,.12), transparent 20%),
+    radial-gradient(circle at 12% 8%, rgba(47,111,235,.14), transparent 22%),
+    radial-gradient(circle at 84% 12%, rgba(47,111,235,.12), transparent 20%),
     radial-gradient(circle at 50% -12%, rgba(255,255,255,.06), transparent 30%),
     linear-gradient(180deg,#07111c 0%,#0b1621 40%,#111c29 100%);
   position:relative;
@@ -51,8 +51,8 @@ body.structural-surface.light-mode {
   --panel-edge-strong:rgba(201,109,44,.22);
   --text:#1c2430;
   --muted:#667085;
-  --accent:#0f6a73;
-  --accent2:#c96d2c;
+  --accent:#1f5fbf;
+  --accent2:#1f5fbf;
   --accent-ink:#f8f3ea;
   --success:#2f7d5a;
   --warn:#b76a11;
@@ -178,7 +178,7 @@ body.structural-surface .header-copy svg,
 body.structural-surface header svg {
   color:var(--accent);
   flex-shrink:0;
-  filter:drop-shadow(0 4px 12px rgba(79,183,173,.18));
+  filter:drop-shadow(0 4px 12px rgba(47,111,235,.18));
 }
 
 body.structural-surface .header-title {
@@ -246,7 +246,7 @@ body.structural-surface .provenance-card::before {
   position:absolute;
   inset:0 0 auto 0;
   height:2px;
-  background:linear-gradient(90deg, rgba(79,183,173,0), rgba(79,183,173,.56), rgba(244,181,107,.48), rgba(79,183,173,0));
+  background:linear-gradient(90deg, rgba(47,111,235,0), rgba(47,111,235,.56), rgba(47,111,235,.48), rgba(47,111,235,0));
 }
 
 body.structural-surface .provenance-label,
@@ -359,14 +359,14 @@ body.structural-surface .source-badge:hover,
 body.structural-surface .provenance-link:hover,
 body.structural-surface .chip-link:hover {
   transform:translateY(-1px);
-  border-color:rgba(244,181,107,.42);
+  border-color:rgba(47,111,235,.42);
   box-shadow:0 10px 22px rgba(0,0,0,.16);
 }
 
 body.structural-surface .toolbar button.active,
 body.structural-surface .tabs button.active {
   border-color:transparent;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  background:var(--accent);
   color:var(--accent-ink);
   font-weight:700;
   box-shadow:0 14px 28px rgba(11,18,24,.20);
@@ -415,7 +415,7 @@ body.structural-surface input[type=range] {
   padding:0;
   border:none;
   border-radius:999px;
-  background:linear-gradient(90deg, rgba(79,183,173,.28), rgba(244,181,107,.24));
+  background:linear-gradient(90deg, rgba(47,111,235,.28), rgba(47,111,235,.24));
   -webkit-appearance:none;
   appearance:none;
 }
@@ -427,7 +427,7 @@ body.structural-surface input[type=range]::-webkit-slider-thumb {
   height:14px;
   border-radius:50%;
   border:none;
-  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  background:var(--accent);
   box-shadow:0 4px 10px rgba(0,0,0,.22);
   cursor:pointer;
 }
@@ -437,7 +437,7 @@ body.structural-surface input[type=range]::-moz-range-thumb {
   height:14px;
   border:none;
   border-radius:50%;
-  background:linear-gradient(135deg, var(--accent), var(--accent2));
+  background:var(--accent);
   box-shadow:0 4px 10px rgba(0,0,0,.22);
   cursor:pointer;
 }
@@ -452,7 +452,7 @@ body.structural-surface #info {
   min-height:0;
   overflow:auto;
   scrollbar-width:thin;
-  scrollbar-color:rgba(79,183,173,.34) transparent;
+  scrollbar-color:rgba(47,111,235,.34) transparent;
 }
 
 body.structural-surface #left-panel,
@@ -476,8 +476,8 @@ body.structural-surface #viewport {
   min-height:0;
   border-radius:26px;
   background:
-    radial-gradient(circle at 18% 14%, rgba(79,183,173,.08), transparent 18%),
-    radial-gradient(circle at 82% 16%, rgba(244,181,107,.06), transparent 16%),
+    radial-gradient(circle at 18% 14%, rgba(47,111,235,.08), transparent 18%),
+    radial-gradient(circle at 82% 16%, rgba(47,111,235,.06), transparent 16%),
     linear-gradient(180deg, rgba(10,14,26,.22), rgba(10,14,26,.46)),
     rgba(10,14,26,.35);
 }
@@ -493,7 +493,7 @@ body.structural-surface.light-mode #viewport {
 body.structural-surface canvas {
   display:block;
   background:
-    radial-gradient(circle at 18% 14%, rgba(79,183,173,.08), transparent 18%),
+    radial-gradient(circle at 18% 14%, rgba(47,111,235,.08), transparent 18%),
     linear-gradient(180deg, rgba(10,14,26,.22), rgba(10,14,26,.46)),
     rgba(10,14,26,.35);
   border:1px solid rgba(148,168,190,.10);
@@ -801,9 +801,9 @@ body.structural-surface .source-badge.warn {
 }
 
 body.structural-surface .source-badge.proxy {
-  background:rgba(79,183,173,.10);
+  background:rgba(47,111,235,.10);
   color:var(--accent);
-  border-color:rgba(79,183,173,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface .tree-item {
@@ -819,11 +819,11 @@ body.structural-surface .tree-item {
 body.structural-surface .tree-item:hover,
 body.structural-surface .story-drift-row:hover,
 body.structural-surface .midas-load-graph-quick-button:hover {
-  background:rgba(79,183,173,.08);
+  background:rgba(47,111,235,.08);
 }
 
 body.structural-surface .tree-item.selected {
-  background:rgba(79,183,173,.16);
+  background:rgba(47,111,235,.16);
   border-left:2px solid var(--accent);
 }
 
@@ -895,10 +895,10 @@ body.structural-surface .load-case-evidence-row {
 }
 
 body.structural-surface .load-case-evidence-row.selected {
-  border-left:1px solid rgba(79,183,173,.55);
-  border-color:rgba(79,183,173,.44);
+  border-left:1px solid rgba(47,111,235,.55);
+  border-color:rgba(47,111,235,.44);
   background:
-    linear-gradient(180deg, rgba(79,183,173,.14), rgba(79,183,173,.045)),
+    linear-gradient(180deg, rgba(47,111,235,.14), rgba(47,111,235,.045)),
     rgba(15,23,42,.58);
 }
 
@@ -981,12 +981,12 @@ body.structural-surface .badge {
 
 body.structural-surface .badge-beam {
   background:#163239;
-  color:#4fb7ad;
+  color:#2f6feb;
 }
 
 body.structural-surface .badge-col {
   background:#3b231f;
-  color:#f4b56b;
+  color:#2f6feb;
 }
 
 body.structural-surface .badge-wall {
@@ -1007,7 +1007,7 @@ body.structural-surface .quality-badge--exact {
 
 body.structural-surface .badge-real-drawing-proxy,
 body.structural-surface .quality-badge--proxy {
-  background:rgba(79,183,173,.12);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
 }
 
@@ -1030,7 +1030,7 @@ body.structural-surface .quality-badge--geometry {
 }
 
 body.structural-surface .quality-badge--review {
-  background:rgba(79,183,173,.14);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -1153,8 +1153,8 @@ body.structural-surface .real-drawing-switcher__button {
 
 body.structural-surface .real-drawing-switcher__button:hover,
 body.structural-surface .real-drawing-switcher__button.is-active {
-  border-color:rgba(79,183,173,.46);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.46);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -1190,8 +1190,8 @@ body.structural-surface .real-drawing-action-row button {
   min-height:30px;
   padding:6px 9px;
   border-radius:8px;
-  border:1px solid rgba(79,183,173,.28);
-  background:rgba(79,183,173,.12);
+  border:1px solid rgba(47,111,235,.28);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
   font-size:11px;
   font-weight:800;
@@ -1221,7 +1221,7 @@ body.structural-surface .real-drawing-active-inspector {
   gap:8px;
   padding:9px;
   border-radius:8px;
-  border:1px solid rgba(79,183,173,.2);
+  border:1px solid rgba(47,111,235,.2);
   background:rgba(7,18,28,.26);
 }
 
@@ -1424,8 +1424,8 @@ body.structural-surface .real-drawing-browser__toolbar button {
   min-height:30px;
   padding:6px 9px;
   border-radius:8px;
-  border:1px solid rgba(79,183,173,.28);
-  background:rgba(79,183,173,.12);
+  border:1px solid rgba(47,111,235,.28);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
   font-size:11px;
   font-weight:800;
@@ -1484,8 +1484,8 @@ body.structural-surface .real-drawing-recent-chip {
 
 body.structural-surface .real-drawing-recent-chip:hover,
 body.structural-surface .real-drawing-recent-chip.is-active {
-  border-color:rgba(79,183,173,.42);
-  background:rgba(79,183,173,.12);
+  border-color:rgba(47,111,235,.42);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
 }
 
@@ -1521,8 +1521,8 @@ body.structural-surface .real-drawing-browser-item {
 
 body.structural-surface .real-drawing-browser-item:hover,
 body.structural-surface .real-drawing-browser-item.is-active {
-  border-color:rgba(79,183,173,.46);
-  background:rgba(79,183,173,.10);
+  border-color:rgba(47,111,235,.46);
+  background:rgba(47,111,235,.10);
 }
 
 body.structural-surface.light-mode .real-drawing-browser-item {
@@ -1603,8 +1603,8 @@ body.structural-surface .quality-filter-button span {
 }
 
 body.structural-surface .quality-filter-button.is-active {
-  border-color:rgba(79,183,173,.46);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.46);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -1642,8 +1642,8 @@ body.structural-surface.light-mode .project-recent-chip {
 body.structural-surface .project-variant-toolbar button.is-active,
 body.structural-surface .project-drawing-button.is-active,
 body.structural-surface .project-recent-chip.is-active {
-  border-color:rgba(79,183,173,.52);
-  background:rgba(79,183,173,.15);
+  border-color:rgba(47,111,235,.52);
+  background:rgba(47,111,235,.15);
   color:var(--accent);
 }
 
@@ -1881,8 +1881,8 @@ body.structural-surface .integrated-review-drawing em {
 
 body.structural-surface .integrated-review-drawing.is-active,
 body.structural-surface .integrated-review-section.is-active {
-  border-color:rgba(79,183,173,.54);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.54);
+  background:rgba(47,111,235,.14);
 }
 
 body.structural-surface .integrated-review-navigator__section-grid {
@@ -2026,9 +2026,9 @@ body.structural-surface .integrated-review-navigator__preview-actions {
 body.structural-surface .integrated-review-navigator__preview-actions button {
   min-width:112px;
   min-height:30px;
-  border:1px solid rgba(79,183,173,.36);
+  border:1px solid rgba(47,111,235,.36);
   border-radius:6px;
-  background:rgba(79,183,173,.14);
+  background:rgba(47,111,235,.14);
   color:var(--text);
   font-size:11px;
   font-weight:900;
@@ -2099,7 +2099,7 @@ body.structural-surface .explainability-chip--danger {
 
 body.structural-surface .project-status-badge--accent,
 body.structural-surface .explainability-chip--accent {
-  background:rgba(79,183,173,.14);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -2181,8 +2181,8 @@ body.structural-surface .project-variant-chip {
 }
 
 body.structural-surface .project-variant-chip.is-active {
-  border-color:rgba(79,183,173,.45);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.45);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -2267,8 +2267,8 @@ body.structural-surface .member-comparison-toolbar button {
 }
 
 body.structural-surface .member-comparison-toolbar button.is-active {
-  border-color:rgba(79,183,173,.45);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.45);
+  background:rgba(47,111,235,.14);
   color:var(--accent);
 }
 
@@ -2471,12 +2471,12 @@ body.structural-surface .real-drawing-promotion-panel {
   gap:8px;
   padding:9px;
   border-radius:12px;
-  border:1px solid rgba(79,183,173,.2);
-  background:rgba(79,183,173,.08);
+  border:1px solid rgba(47,111,235,.2);
+  background:rgba(47,111,235,.08);
 }
 
 body.structural-surface.light-mode .real-drawing-promotion-panel {
-  background:rgba(79,183,173,.1);
+  background:rgba(47,111,235,.1);
   border-color:rgba(15,118,110,.2);
 }
 
@@ -2501,7 +2501,7 @@ body.structural-surface .real-drawing-promotion-header strong {
 
 body.structural-surface .real-drawing-promotion-header--subtle {
   padding-top:4px;
-  border-top:1px solid rgba(79,183,173,.18);
+  border-top:1px solid rgba(47,111,235,.18);
 }
 
 body.structural-surface .real-drawing-promotion-header--subtle span {
@@ -2530,8 +2530,8 @@ body.structural-surface .real-drawing-review-item {
 }
 
 body.structural-surface .real-drawing-review-item:hover {
-  border-color:rgba(79,183,173,.42);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.42);
+  background:rgba(47,111,235,.08);
 }
 
 body.structural-surface.light-mode .real-drawing-review-item {
@@ -2716,7 +2716,7 @@ body.structural-surface .stage-result-receipt__title strong {
 body.structural-surface .stage-result-receipt__title strong {
   padding:2px 5px;
   border-radius:999px;
-  background:rgba(79,183,173,.12);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
   font-size:8px;
 }
@@ -2790,7 +2790,7 @@ body.structural-surface .stage-model-stack__swatch {
   height:9px;
   border-radius:999px;
   border:1px solid rgba(255,255,255,.36);
-  box-shadow:0 0 0 3px rgba(79,183,173,.09), 0 0 14px rgba(79,183,173,.22);
+  box-shadow:0 0 0 3px rgba(47,111,235,.09), 0 0 14px rgba(47,111,235,.22);
 }
 
 body.structural-surface .stage-model-stack__swatch--optimized {
@@ -2803,8 +2803,8 @@ body.structural-surface .stage-model-stack__swatch--original {
 }
 
 body.structural-surface .stage-model-stack__swatch--deformed {
-  background:#f4b56b;
-  box-shadow:0 0 0 3px rgba(244,181,107,.12), 0 0 14px rgba(244,181,107,.24);
+  background:#2f6feb;
+  box-shadow:0 0 0 3px rgba(47,111,235,.12), 0 0 14px rgba(47,111,235,.24);
 }
 
 body.structural-surface .stage-model-stack__row--button {
@@ -2815,8 +2815,8 @@ body.structural-surface .stage-model-stack__row--button {
 body.structural-surface .stage-model-stack__row--button:hover,
 body.structural-surface .stage-model-stack__row--button:focus-visible,
 body.structural-surface .stage-model-stack__row--button.is-active {
-  border-color:rgba(79,183,173,.58);
-  background:rgba(79,183,173,.11);
+  border-color:rgba(47,111,235,.58);
+  background:rgba(47,111,235,.11);
 }
 
 body.structural-surface .stage-model-stack__row span {
@@ -2862,7 +2862,7 @@ body.structural-surface .stage-model-stack__row--button strong {
 }
 
 body.structural-surface .stage-model-stack__row--button.is-active strong {
-  background:rgba(79,183,173,.18);
+  background:rgba(47,111,235,.18);
   color:var(--accent);
 }
 
@@ -2871,9 +2871,9 @@ body.structural-surface .stage-deformation-control {
   gap:6px;
   min-width:0;
   padding:8px;
-  border:1px solid rgba(79,183,173,.24);
+  border:1px solid rgba(47,111,235,.24);
   border-radius:8px;
-  background:linear-gradient(180deg,rgba(79,183,173,.10),rgba(8,18,29,.30));
+  background:linear-gradient(180deg,rgba(47,111,235,.10),rgba(8,18,29,.30));
 }
 
 body.structural-surface .stage-deformation-control__head,
@@ -3009,7 +3009,7 @@ body.structural-surface .stage-overlay-receipt[data-overlay-status="pending"] .s
 }
 
 body.structural-surface .stage-overlay-receipt[data-overlay-status="blocked"] .stage-overlay-receipt__title strong {
-  background:rgba(244,181,107,.16);
+  background:rgba(47,111,235,.16);
   color:#ffd18a;
 }
 
@@ -3716,7 +3716,7 @@ body.structural-surface .stage-member-material-state-card {
   width:176px;
   min-height:50px;
   padding:6px 7px;
-  border:1px solid rgba(79,183,173,.54);
+  border:1px solid rgba(47,111,235,.54);
   border-radius:8px;
   color:var(--text);
   background:linear-gradient(180deg, rgba(9,29,34,.96), rgba(4,13,22,.90));
@@ -3790,8 +3790,8 @@ body.structural-surface .stage-member-material-state-card__meter i {
   width:100%;
   height:8px;
   border-radius:999px;
-  background:linear-gradient(90deg, #4fb7ad var(--stage-member-material-state,0%), rgba(148,168,190,.18) var(--stage-member-material-state,0%));
-  box-shadow:0 0 12px rgba(79,183,173,.42);
+  background:linear-gradient(90deg, #2f6feb var(--stage-member-material-state,0%), rgba(148,168,190,.18) var(--stage-member-material-state,0%));
+  box-shadow:0 0 12px rgba(47,111,235,.42);
 }
 
 body.structural-surface .stage-member-material-state-card__meter small {
@@ -4156,18 +4156,18 @@ body.structural-surface .stage-drift-band__bar i {
 body.structural-surface .stage-drift-band__bar strong {
   left:var(--drift-limit, 100%);
   width:2px;
-  background:#f4b56b;
-  box-shadow:0 0 8px rgba(244,181,107,.56);
+  background:#2f6feb;
+  box-shadow:0 0 8px rgba(47,111,235,.56);
 }
 
 body.structural-surface .stage-drift-band--warn {
-  border-color:rgba(244,181,107,.45);
+  border-color:rgba(47,111,235,.45);
 }
 
 body.structural-surface .stage-drift-band--warn .stage-drift-band__bar i,
 body.structural-surface .stage-drift-band--warn .stage-drift-band__leader::before,
 body.structural-surface .stage-drift-band--warn .stage-drift-band__leader::after {
-  background:#f4b56b;
+  background:#2f6feb;
 }
 
 body.structural-surface .stage-drift-band--danger {
@@ -4214,7 +4214,7 @@ body.structural-surface .stage-story-force-flow-bands__receipt {
   gap:8px;
   width:236px;
   padding:5px 7px;
-  border:1px solid rgba(244,181,107,.28);
+  border:1px solid rgba(47,111,235,.28);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(24,18,10,.82), rgba(5,12,22,.68));
   color:var(--text);
@@ -4231,7 +4231,7 @@ body.structural-surface .stage-story-force-flow-bands__receipt strong {
 }
 
 body.structural-surface .stage-story-force-flow-bands__receipt span {
-  color:#f4b56b;
+  color:#2f6feb;
   font-size:8px;
   font-weight:900;
   text-transform:uppercase;
@@ -4251,7 +4251,7 @@ body.structural-surface .stage-story-force-flow-band {
   width:236px;
   min-height:40px;
   padding:5px 7px;
-  border:1px solid rgba(244,181,107,.26);
+  border:1px solid rgba(47,111,235,.26);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(20,21,26,.82), rgba(8,13,21,.70));
   color:var(--text);
@@ -4273,8 +4273,8 @@ body.structural-surface .stage-story-force-flow-band__leader::after {
   content:"";
   position:absolute;
   top:50%;
-  background:#f4b56b;
-  box-shadow:0 0 14px rgba(244,181,107,.38);
+  background:#2f6feb;
+  box-shadow:0 0 14px rgba(47,111,235,.38);
   transform:translateY(-50%);
 }
 
@@ -4364,7 +4364,7 @@ body.structural-surface .stage-story-force-flow-bar--shear::after { background:v
 body.structural-surface .stage-story-force-flow-bar--moment::after { background:var(--warn); }
 
 body.structural-surface .stage-story-force-flow-band--warn {
-  border-color:rgba(244,181,107,.48);
+  border-color:rgba(47,111,235,.48);
 }
 
 body.structural-surface .stage-story-force-flow-band--danger {
@@ -4524,14 +4524,14 @@ body.structural-surface .stage-force-demand-contour-marker small {
 }
 
 body.structural-surface .stage-force-demand-contour-marker--warn {
-  border-color:rgba(244,181,107,.48);
+  border-color:rgba(47,111,235,.48);
 }
 
 body.structural-surface .stage-force-demand-contour-marker--warn .stage-force-demand-contour-marker__pulse {
   background:
     radial-gradient(circle at 50% 50%, rgba(255,244,223,.96) 0 22%, transparent 24%),
-    conic-gradient(from -90deg, #f4b56b var(--force-demand-intensity, 0%), rgba(77,96,122,.34) 0);
-  box-shadow:0 0 16px rgba(244,181,107,.40);
+    conic-gradient(from -90deg, #2f6feb var(--force-demand-intensity, 0%), rgba(77,96,122,.34) 0);
+  box-shadow:0 0 16px rgba(47,111,235,.40);
 }
 
 body.structural-surface .stage-force-demand-contour-marker--danger {
@@ -4691,7 +4691,7 @@ body.structural-surface .stage-material-model-demand-badge small {
 }
 
 body.structural-surface .stage-material-model-demand-badge--warn {
-  border-color:rgba(244,181,107,.48);
+  border-color:rgba(47,111,235,.48);
   background:linear-gradient(180deg, rgba(48,35,15,.88), rgba(17,15,11,.78));
 }
 
@@ -4902,11 +4902,11 @@ body.structural-surface .stage-material-force-ribbon__bar--shear::before {
 }
 
 body.structural-surface .stage-material-force-ribbon__bar--moment::before {
-  background:#f4b56b;
+  background:#2f6feb;
 }
 
 body.structural-surface .stage-material-force-ribbon--warn {
-  border-color:rgba(244,181,107,.50);
+  border-color:rgba(47,111,235,.50);
   background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
 }
 
@@ -5108,7 +5108,7 @@ body.structural-surface .stage-material-force-envelope-card__point.is-selected {
 }
 
 body.structural-surface .stage-material-force-envelope-card__point.is-governing {
-  fill:#f4b56b;
+  fill:#2f6feb;
 }
 
 body.structural-surface .stage-material-force-envelope-card__bars {
@@ -5143,11 +5143,11 @@ body.structural-surface .stage-material-force-envelope-card__bar--shear::before 
 }
 
 body.structural-surface .stage-material-force-envelope-card__bar--moment::before {
-  background:#f4b56b;
+  background:#2f6feb;
 }
 
 body.structural-surface .stage-material-force-envelope-card--warn {
-  border-color:rgba(244,181,107,.50);
+  border-color:rgba(47,111,235,.50);
   background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
 }
 
@@ -5345,7 +5345,7 @@ body.structural-surface .stage-material-capacity-envelope-card__point.is-selecte
 }
 
 body.structural-surface .stage-material-capacity-envelope-card__point.is-governing {
-  fill:#f4b56b;
+  fill:#2f6feb;
 }
 
 body.structural-surface .stage-material-capacity-envelope-card__bars {
@@ -5384,7 +5384,7 @@ body.structural-surface .stage-material-capacity-envelope-card__bar--margin::bef
 }
 
 body.structural-surface .stage-material-capacity-envelope-card--warn {
-  border-color:rgba(244,181,107,.50);
+  border-color:rgba(47,111,235,.50);
   background:linear-gradient(180deg, rgba(48,35,15,.90), rgba(17,15,11,.80));
 }
 
@@ -5425,7 +5425,7 @@ body.structural-surface .stage-critical-hotspot {
   width:154px;
   min-height:46px;
   padding:6px 8px;
-  border:1px solid rgba(244,181,107,.42);
+  border:1px solid rgba(47,111,235,.42);
   border-radius:9px;
   background:linear-gradient(180deg, rgba(17,28,41,.92), rgba(8,18,29,.84));
   color:var(--text);
@@ -5446,8 +5446,8 @@ body.structural-surface .stage-critical-hotspot__leader::before,
 body.structural-surface .stage-critical-hotspot__leader::after {
   content:"";
   position:absolute;
-  background:#f4b56b;
-  box-shadow:0 0 14px rgba(244,181,107,.52);
+  background:#2f6feb;
+  box-shadow:0 0 14px rgba(47,111,235,.52);
 }
 
 body.structural-surface .stage-critical-hotspot__leader::before {
@@ -5485,7 +5485,7 @@ body.structural-surface .stage-critical-hotspot small {
 }
 
 body.structural-surface .stage-critical-hotspot__label {
-  color:#f4b56b;
+  color:#2f6feb;
   font-size:8px;
   font-weight:900;
   text-transform:uppercase;
@@ -5506,7 +5506,7 @@ body.structural-surface .stage-critical-hotspot small {
 
 body.structural-surface .stage-critical-hotspot--danger,
 body.structural-surface .stage-critical-hotspot--warn {
-  border-color:rgba(244,181,107,.56);
+  border-color:rgba(47,111,235,.56);
 }
 
 body.structural-surface .stage-critical-hotspot--success {
@@ -5944,9 +5944,9 @@ body.structural-surface.command-center-shell .app-brand-mark {
   place-items:center;
   flex-shrink:0;
   background:
-    radial-gradient(circle at 28% 28%, rgba(79,183,173,.28), transparent 58%),
+    radial-gradient(circle at 28% 28%, rgba(47,111,235,.28), transparent 58%),
     linear-gradient(160deg, rgba(8,18,29,.98), rgba(17,28,41,.94));
-  border:1px solid rgba(79,183,173,.22);
+  border:1px solid rgba(47,111,235,.22);
   box-shadow:0 20px 32px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
 }
 
@@ -6002,12 +6002,12 @@ body.structural-surface.command-center-shell .context-chip {
 
 body.structural-surface.command-center-shell .context-chip.is-accent {
   color:var(--accent);
-  border-color:rgba(79,183,173,.26);
+  border-color:rgba(47,111,235,.26);
 }
 
 body.structural-surface.command-center-shell .context-chip.is-warn {
   color:var(--accent2);
-  border-color:rgba(244,181,107,.28);
+  border-color:rgba(47,111,235,.28);
 }
 
 body.structural-surface.command-center-shell.light-mode .context-chip {
@@ -6070,7 +6070,7 @@ body.structural-surface.command-center-shell.light-mode #right-panel {
 
 body.structural-surface.command-center-shell .workflow-section {
   background:
-    radial-gradient(circle at top left, rgba(79,183,173,.10), transparent 42%),
+    radial-gradient(circle at top left, rgba(47,111,235,.10), transparent 42%),
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
     rgba(8,18,29,.58);
 }
@@ -6121,8 +6121,8 @@ body.structural-surface.command-center-shell .workflow-link {
 
 body.structural-surface.command-center-shell .workflow-link:hover {
   transform:translateY(-1px);
-  border-color:rgba(79,183,173,.28);
-  background:rgba(79,183,173,.10);
+  border-color:rgba(47,111,235,.28);
+  background:rgba(47,111,235,.10);
 }
 
 body.structural-surface.command-center-shell .workflow-link span {
@@ -6132,7 +6132,7 @@ body.structural-surface.command-center-shell .workflow-link span {
   width:24px;
   height:24px;
   border-radius:999px;
-  background:rgba(79,183,173,.12);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
   font-size:10px;
   font-weight:700;
@@ -6228,9 +6228,9 @@ body.structural-surface.command-center-shell .stage-view-toolbar button {
 }
 
 body.structural-surface.command-center-shell .stage-view-toolbar {
-  border-color:rgba(79,183,173,.22);
+  border-color:rgba(47,111,235,.22);
   background:
-    linear-gradient(180deg, rgba(79,183,173,.10), rgba(244,181,107,.04)),
+    linear-gradient(180deg, rgba(47,111,235,.10), rgba(47,111,235,.04)),
     rgba(8,18,29,.58);
 }
 
@@ -6242,8 +6242,8 @@ body.structural-surface.command-center-shell .stage-frame {
   border-radius:32px;
   overflow:hidden;
   background:
-    radial-gradient(circle at top left, rgba(79,183,173,.12), transparent 28%),
-    radial-gradient(circle at top right, rgba(244,181,107,.08), transparent 24%),
+    radial-gradient(circle at top left, rgba(47,111,235,.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(47,111,235,.08), transparent 24%),
     linear-gradient(180deg, rgba(14,24,36,.98), rgba(8,18,29,.98));
   border:1px solid rgba(148,168,190,.16);
   box-shadow:0 30px 70px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.04);
@@ -6254,7 +6254,7 @@ body.structural-surface.command-center-shell .stage-frame::before {
   position:absolute;
   inset:12px;
   border-radius:24px;
-  border:1px solid rgba(79,183,173,.10);
+  border:1px solid rgba(47,111,235,.10);
   pointer-events:none;
 }
 
@@ -6264,8 +6264,8 @@ body.structural-surface.command-center-shell #viewport {
   border-radius:24px;
   border:1px solid rgba(148,168,190,.12);
   background:
-    radial-gradient(circle at 16% 12%, rgba(79,183,173,.08), transparent 18%),
-    radial-gradient(circle at 84% 14%, rgba(244,181,107,.07), transparent 16%),
+    radial-gradient(circle at 16% 12%, rgba(47,111,235,.08), transparent 18%),
+    radial-gradient(circle at 84% 14%, rgba(47,111,235,.07), transparent 16%),
     linear-gradient(180deg, rgba(8,18,29,.30), rgba(8,18,29,.56)),
     rgba(4,10,17,.90);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
@@ -6292,7 +6292,7 @@ body.structural-surface.command-center-shell .panel-section {
 
 body.structural-surface.command-center-shell #right-panel .panel-section--kpi {
   background:
-    radial-gradient(circle at top left, rgba(79,183,173,.10), transparent 38%),
+    radial-gradient(circle at top left, rgba(47,111,235,.10), transparent 38%),
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
     rgba(8,18,29,.58);
 }
@@ -6457,8 +6457,8 @@ body.structural-surface.command-center-shell .kpi-card__trend--danger {
 
 body.structural-surface.command-center-shell .kpi-card__trend--accent {
   color:var(--accent);
-  background:rgba(79,183,173,.10);
-  border-color:rgba(79,183,173,.20);
+  background:rgba(47,111,235,.10);
+  border-color:rgba(47,111,235,.20);
 }
 
 body.structural-surface.command-center-shell .kpi-card--success {
@@ -6478,7 +6478,7 @@ body.structural-surface.command-center-shell .kpi-card--danger .kpi-card__value 
 }
 
 body.structural-surface.command-center-shell .kpi-card--accent {
-  border-color:rgba(79,183,173,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface.command-center-shell .kpi-card--accent .kpi-card__value {
@@ -6571,7 +6571,7 @@ body.structural-surface.command-center-shell .analysis-result-evidence-row--warn
 }
 
 body.structural-surface.command-center-shell .analysis-result-evidence-row--accent {
-  border-color:rgba(79,183,173,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface.command-center-shell .analysis-result-evidence-row--accent strong {
@@ -6584,7 +6584,7 @@ body.structural-surface.command-center-shell .optimization-delta-strip {
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(79,183,173,.17);
+  border:1px solid rgba(47,111,235,.17);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(8,23,33,.72), rgba(5,14,23,.64));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
@@ -6634,10 +6634,10 @@ body.structural-surface.command-center-shell .optimization-delta-strip__head em 
 
 body.structural-surface.command-center-shell .optimization-delta-strip__head strong {
   padding:3px 6px;
-  border:1px solid rgba(79,183,173,.22);
+  border:1px solid rgba(47,111,235,.22);
   border-radius:999px;
   color:var(--accent);
-  background:rgba(79,183,173,.08);
+  background:rgba(47,111,235,.08);
   font-size:8px;
   font-weight:900;
 }
@@ -6707,7 +6707,7 @@ body.structural-surface.command-center-shell .optimization-delta-tile__bar-befor
 
 body.structural-surface.command-center-shell .optimization-delta-tile__bar-after {
   background:linear-gradient(90deg, var(--accent), var(--success));
-  box-shadow:0 0 8px rgba(79,183,173,.22);
+  box-shadow:0 0 8px rgba(47,111,235,.22);
 }
 
 body.structural-surface.command-center-shell .optimization-delta-tile__foot {
@@ -6736,7 +6736,7 @@ body.structural-surface.command-center-shell .result-step-schedule-panel {
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(79,183,173,.16);
+  border:1px solid rgba(47,111,235,.16);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(9,22,35,.70), rgba(6,15,25,.62));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
@@ -6809,14 +6809,14 @@ body.structural-surface.command-center-shell .result-step-row {
 
 body.structural-surface.command-center-shell .result-step-row:hover,
 body.structural-surface.command-center-shell .result-step-row:focus-visible {
-  border-color:rgba(79,183,173,.34);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
 body.structural-surface.command-center-shell .result-step-row.is-active {
-  border-color:rgba(79,183,173,.42);
-  background:linear-gradient(180deg, rgba(79,183,173,.16), rgba(8,20,31,.66));
+  border-color:rgba(47,111,235,.42);
+  background:linear-gradient(180deg, rgba(47,111,235,.16), rgba(8,20,31,.66));
 }
 
 body.structural-surface.command-center-shell .result-step-row--success {
@@ -6865,7 +6865,7 @@ body.structural-surface.command-center-shell .result-step-row__bar i {
   width:var(--result-step-progress,0%);
   border-radius:inherit;
   background:linear-gradient(90deg, var(--accent), var(--success));
-  box-shadow:0 0 10px rgba(79,183,173,.24);
+  box-shadow:0 0 10px rgba(47,111,235,.24);
 }
 
 body.structural-surface.command-center-shell .result-envelope-panel {
@@ -6923,10 +6923,10 @@ body.structural-surface.command-center-shell .result-envelope__head em {
 
 body.structural-surface.command-center-shell .result-envelope__head strong {
   padding:3px 6px;
-  border:1px solid rgba(79,183,173,.20);
+  border:1px solid rgba(47,111,235,.20);
   border-radius:999px;
   color:var(--accent);
-  background:rgba(79,183,173,.075);
+  background:rgba(47,111,235,.075);
   font-size:8px;
   font-weight:900;
 }
@@ -6956,8 +6956,8 @@ body.structural-surface.command-center-shell .result-envelope-row {
 
 body.structural-surface.command-center-shell .result-envelope-row:hover,
 body.structural-surface.command-center-shell .result-envelope-row:focus-visible {
-  border-color:rgba(79,183,173,.34);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -6986,7 +6986,7 @@ body.structural-surface.command-center-shell .result-envelope-row__govern b {
 }
 
 body.structural-surface.command-center-shell .result-envelope-row--accent {
-  border-color:rgba(79,183,173,.22);
+  border-color:rgba(47,111,235,.22);
 }
 
 body.structural-surface.command-center-shell .result-envelope-row--accent .result-envelope-row__metric strong {
@@ -7023,7 +7023,7 @@ body.structural-surface.command-center-shell .force-flow-lens-panel {
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(79,183,173,.18);
+  border:1px solid rgba(47,111,235,.18);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(7,17,28,.70), rgba(4,12,21,.64));
 }
@@ -7088,10 +7088,10 @@ body.structural-surface.command-center-shell .force-flow-row em {
 
 body.structural-surface.command-center-shell .force-flow-lens__head strong {
   padding:3px 6px;
-  border:1px solid rgba(244,181,107,.24);
+  border:1px solid rgba(47,111,235,.24);
   border-radius:999px;
   color:var(--accent2);
-  background:rgba(244,181,107,.08);
+  background:rgba(47,111,235,.08);
   font-size:8px;
   font-weight:900;
 }
@@ -7142,8 +7142,8 @@ body.structural-surface.command-center-shell .force-flow-row {
 
 body.structural-surface.command-center-shell .force-flow-row:hover,
 body.structural-surface.command-center-shell .force-flow-row:focus-visible {
-  border-color:rgba(79,183,173,.34);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -7359,7 +7359,7 @@ body.structural-surface.command-center-shell .load-combination-force-matrix-pane
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(244,181,107,.18);
+  border:1px solid rgba(47,111,235,.18);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(20,16,8,.58), rgba(4,12,21,.66));
 }
@@ -7431,10 +7431,10 @@ body.structural-surface.command-center-shell .load-combination-force-row small {
 
 body.structural-surface.command-center-shell .load-combination-force-matrix__head strong {
   padding:3px 6px;
-  border:1px solid rgba(244,181,107,.25);
+  border:1px solid rgba(47,111,235,.25);
   border-radius:999px;
   color:var(--accent2);
-  background:rgba(244,181,107,.09);
+  background:rgba(47,111,235,.09);
   font-size:8px;
   font-weight:900;
 }
@@ -7510,8 +7510,8 @@ body.structural-surface.command-center-shell .load-combination-force-step strong
 body.structural-surface.command-center-shell .load-combination-force-step:hover,
 body.structural-surface.command-center-shell .load-combination-force-step:focus-visible,
 body.structural-surface.command-center-shell .load-combination-force-step.is-active {
-  border-color:rgba(244,181,107,.42);
-  background:rgba(244,181,107,.10);
+  border-color:rgba(47,111,235,.42);
+  background:rgba(47,111,235,.10);
   outline:none;
 }
 
@@ -7543,8 +7543,8 @@ body.structural-surface.command-center-shell .load-combination-force-row {
 body.structural-surface.command-center-shell .load-combination-force-row:hover,
 body.structural-surface.command-center-shell .load-combination-force-row:focus-visible,
 body.structural-surface.command-center-shell .load-combination-force-row.is-active {
-  border-color:rgba(244,181,107,.36);
-  background:rgba(244,181,107,.08);
+  border-color:rgba(47,111,235,.36);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -7583,7 +7583,7 @@ body.structural-surface.command-center-shell .member-force-diagram-panel {
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(79,183,173,.18);
+  border:1px solid rgba(47,111,235,.18);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(7,24,25,.58), rgba(4,12,21,.66));
 }
@@ -7650,10 +7650,10 @@ body.structural-surface.command-center-shell .member-force-diagram-row small {
 
 body.structural-surface.command-center-shell .member-force-diagram__head strong {
   padding:3px 6px;
-  border:1px solid rgba(79,183,173,.25);
+  border:1px solid rgba(47,111,235,.25);
   border-radius:999px;
   color:var(--accent);
-  background:rgba(79,183,173,.09);
+  background:rgba(47,111,235,.09);
   font-size:8px;
   font-weight:900;
 }
@@ -7704,8 +7704,8 @@ body.structural-surface.command-center-shell .member-force-diagram-row {
 
 body.structural-surface.command-center-shell .member-force-diagram-row:hover,
 body.structural-surface.command-center-shell .member-force-diagram-row:focus-visible {
-  border-color:rgba(79,183,173,.36);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.36);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -8117,7 +8117,7 @@ body.structural-surface.command-center-shell .member-material-nonlinear-state-pa
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(244,181,107,.18);
+  border:1px solid rgba(47,111,235,.18);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(31,22,10,.55), rgba(5,13,22,.68));
 }
@@ -8192,10 +8192,10 @@ body.structural-surface.command-center-shell .member-material-nonlinear-force-ro
 
 body.structural-surface.command-center-shell .member-material-nonlinear-state__head strong {
   padding:3px 6px;
-  border:1px solid rgba(244,181,107,.26);
+  border:1px solid rgba(47,111,235,.26);
   border-radius:999px;
   color:var(--accent2);
-  background:rgba(244,181,107,.08);
+  background:rgba(47,111,235,.08);
   font-size:8px;
   font-weight:900;
 }
@@ -8244,8 +8244,8 @@ body.structural-surface.command-center-shell .member-material-nonlinear-row {
 
 body.structural-surface.command-center-shell .member-material-nonlinear-row:hover,
 body.structural-surface.command-center-shell .member-material-nonlinear-row:focus-visible {
-  border-color:rgba(244,181,107,.38);
-  background:rgba(244,181,107,.08);
+  border-color:rgba(47,111,235,.38);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -8333,8 +8333,8 @@ body.structural-surface.command-center-shell .member-material-nonlinear-force-ro
 body.structural-surface.command-center-shell .member-material-nonlinear-force-row:hover,
 body.structural-surface.command-center-shell .member-material-nonlinear-force-row:focus-visible,
 body.structural-surface.command-center-shell .member-material-nonlinear-force-row.is-active {
-  border-color:rgba(244,181,107,.34);
-  background:rgba(244,181,107,.08);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -8502,7 +8502,7 @@ body.structural-surface.command-center-shell .member-section-capacity-row__bar::
 }
 
 body.structural-surface.command-center-shell .member-section-capacity-row__bar--estimate::before {
-  background:linear-gradient(90deg, var(--accent2), rgba(244,181,107,.50));
+  background:linear-gradient(90deg, var(--accent2), rgba(47,111,235,.50));
 }
 
 body.structural-surface.command-center-shell .member-section-capacity-row--warn .member-section-capacity-row__meta strong { color:var(--warn); }
@@ -8756,10 +8756,10 @@ body.structural-surface.command-center-shell .critical-triage__head em {
 
 body.structural-surface.command-center-shell .critical-triage__head strong {
   padding:3px 6px;
-  border:1px solid rgba(244,181,107,.24);
+  border:1px solid rgba(47,111,235,.24);
   border-radius:999px;
   color:var(--warn);
-  background:rgba(244,181,107,.09);
+  background:rgba(47,111,235,.09);
   font-size:8px;
   font-weight:900;
 }
@@ -8810,8 +8810,8 @@ body.structural-surface.command-center-shell .critical-triage-row {
 
 body.structural-surface.command-center-shell .critical-triage-row:hover,
 body.structural-surface.command-center-shell .critical-triage-row:focus-visible {
-  border-color:rgba(244,181,107,.36);
-  background:rgba(244,181,107,.08);
+  border-color:rgba(47,111,235,.36);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -8822,9 +8822,9 @@ body.structural-surface.command-center-shell .critical-triage-row.is-selected {
 }
 
 body.structural-surface.command-center-shell .critical-triage-row.is-primary {
-  border-color:rgba(244,181,107,.48);
-  background:rgba(244,181,107,.11);
-  box-shadow:inset 3px 0 0 rgba(244,181,107,.82);
+  border-color:rgba(47,111,235,.48);
+  background:rgba(47,111,235,.11);
+  box-shadow:inset 3px 0 0 rgba(47,111,235,.82);
 }
 
 body.structural-surface.command-center-shell .critical-triage-row__id b {
@@ -8906,7 +8906,7 @@ body.structural-surface.command-center-shell .critical-triage-row__action {
 
 body.structural-surface.command-center-shell .critical-triage-row--warn,
 body.structural-surface.command-center-shell .critical-triage-row--danger {
-  border-color:rgba(244,181,107,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface.command-center-shell .critical-triage-row--danger .critical-triage-row__status,
@@ -8925,7 +8925,7 @@ body.structural-surface.command-center-shell .panel-zone-evidence-panel {
   min-width:0;
   margin-top:7px;
   padding:7px;
-  border:1px solid rgba(79,183,173,.18);
+  border:1px solid rgba(47,111,235,.18);
   border-radius:8px;
   background:linear-gradient(180deg, rgba(7,20,31,.76), rgba(5,13,22,.66));
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
@@ -9067,8 +9067,8 @@ body.structural-surface.command-center-shell .panel-zone-candidate-row {
 
 body.structural-surface.command-center-shell .panel-zone-candidate-row:hover,
 body.structural-surface.command-center-shell .panel-zone-candidate-row:focus-visible {
-  border-color:rgba(79,183,173,.34);
-  background:rgba(79,183,173,.08);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.08);
   outline:none;
 }
 
@@ -9166,7 +9166,7 @@ body.structural-surface.command-center-shell .delivery-review-receipt__row--dang
 }
 
 body.structural-surface.command-center-shell .delivery-review-receipt__row--accent {
-  border-color:rgba(79,183,173,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface.command-center-shell .delivery-review-receipt__row--accent strong {
@@ -9597,13 +9597,13 @@ body.structural-surface.charts-command-shell .tabs button {
 
 body.structural-surface.charts-command-shell .tabs button:hover {
   transform:translateY(-1px);
-  border-color:rgba(244,181,107,.42);
+  border-color:rgba(47,111,235,.42);
   box-shadow:0 10px 22px rgba(0,0,0,.16);
 }
 
 body.structural-surface.charts-command-shell .tabs button.active {
   border-color:transparent;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  background:var(--accent);
   color:var(--accent-ink);
 }
 
@@ -9680,7 +9680,7 @@ body.structural-surface.history-command-shell canvas {
   display:block;
   border-radius:18px;
   background:
-    radial-gradient(circle at 18% 14%, rgba(79,183,173,.06), transparent 18%),
+    radial-gradient(circle at 18% 14%, rgba(47,111,235,.06), transparent 18%),
     linear-gradient(180deg, rgba(10,14,26,.18), rgba(10,14,26,.40)),
     rgba(10,14,26,.30);
   border:1px solid rgba(148,168,190,.10);
@@ -9933,7 +9933,7 @@ body.structural-surface.history-command-shell .suite-route-tab.is-active,
 body.structural-surface.panel-inspection-shell .suite-route-tab.is-active {
   color:var(--accent-ink);
   border-color:transparent;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  background:var(--accent);
 }
 
 body.structural-surface.command-center-shell .suite-route-tab:hover,
@@ -9941,13 +9941,13 @@ body.structural-surface.charts-command-shell .suite-route-tab:hover,
 body.structural-surface.history-command-shell .suite-route-tab:hover,
 body.structural-surface.panel-inspection-shell .suite-route-tab:hover {
   transform:translateY(-1px);
-  border-color:rgba(244,181,107,.34);
+  border-color:rgba(47,111,235,.34);
 }
 
 body.structural-surface.charts-command-shell .context-chip.is-accent,
 body.structural-surface.history-command-shell .context-chip.is-accent {
   color:var(--accent);
-  border-color:rgba(79,183,173,.26);
+  border-color:rgba(47,111,235,.26);
 }
 
 body.structural-surface.charts-command-shell .suite-chip-row,
@@ -9975,9 +9975,9 @@ body.structural-surface.charts-command-shell .app-brand-mark {
   place-items:center;
   flex-shrink:0;
   background:
-    radial-gradient(circle at 28% 28%, rgba(79,183,173,.28), transparent 58%),
+    radial-gradient(circle at 28% 28%, rgba(47,111,235,.28), transparent 58%),
     linear-gradient(160deg, rgba(8,18,29,.98), rgba(17,28,41,.94));
-  border:1px solid rgba(79,183,173,.22);
+  border:1px solid rgba(47,111,235,.22);
   box-shadow:0 20px 32px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.06);
 }
 
@@ -9992,7 +9992,7 @@ body.structural-surface.history-command-shell .stage-strip {
   margin:14px 14px 0;
   border-radius:24px;
   background:
-    radial-gradient(circle at 12% 16%, rgba(79,183,173,.12), transparent 34%),
+    radial-gradient(circle at 12% 16%, rgba(47,111,235,.12), transparent 34%),
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
     rgba(8,18,29,.52);
   border:1px solid rgba(148,168,190,.14);
@@ -10036,7 +10036,7 @@ body.structural-surface.panel-inspection-shell .panel-command-topbar::before {
   position:absolute;
   inset:0 0 auto;
   height:2px;
-  background:linear-gradient(90deg, rgba(79,183,173,0), rgba(79,183,173,.62), rgba(244,181,107,.52), rgba(79,183,173,0));
+  background:linear-gradient(90deg, rgba(47,111,235,0), rgba(47,111,235,.62), rgba(47,111,235,.52), rgba(47,111,235,0));
   pointer-events:none;
 }
 
@@ -10088,8 +10088,8 @@ body.structural-surface.history-command-shell .companion-canvas {
   padding:0;
   border-radius:30px;
   background:
-    radial-gradient(circle at 14% 10%, rgba(79,183,173,.10), transparent 24%),
-    radial-gradient(circle at 84% 12%, rgba(244,181,107,.08), transparent 22%),
+    radial-gradient(circle at 14% 10%, rgba(47,111,235,.10), transparent 24%),
+    radial-gradient(circle at 84% 12%, rgba(47,111,235,.08), transparent 22%),
     linear-gradient(180deg, rgba(8,18,29,.32), rgba(8,18,29,.12));
   border:1px solid rgba(148,168,190,.12);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
@@ -10133,7 +10133,7 @@ body.structural-surface.history-command-shell .insight-event-card {
   border-radius:22px;
   border:1px solid rgba(148,168,190,.16);
   background:
-    radial-gradient(circle at 18% 18%, rgba(79,183,173,.16), transparent 36%),
+    radial-gradient(circle at 18% 18%, rgba(47,111,235,.16), transparent 36%),
     linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.018)),
     rgba(7,17,31,.58);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
@@ -10163,7 +10163,7 @@ body.structural-surface.history-command-shell .insight-rail-badge {
   white-space:nowrap;
   padding:7px 10px;
   border-radius:999px;
-  background:linear-gradient(135deg, rgba(79,183,173,.22), rgba(244,181,107,.18));
+  background:linear-gradient(135deg, rgba(47,111,235,.22), rgba(47,111,235,.18));
   color:var(--text);
   font-size:10px;
   font-weight:800;
@@ -10197,7 +10197,7 @@ body.structural-surface.history-command-shell .insight-handoff-row span {
   white-space:nowrap;
   padding:6px 9px;
   border-radius:999px;
-  background:rgba(79,183,173,.10);
+  background:rgba(47,111,235,.10);
   color:var(--muted);
   font-size:10px;
   font-weight:700;
@@ -10210,9 +10210,9 @@ body.structural-surface.history-command-shell .summary-bar.companion-insight .ca
 
 body.structural-surface.history-command-shell .summary-bar.companion-insight .card.is-active {
   transform:translateY(-1px);
-  border-color:rgba(244,181,107,.42);
+  border-color:rgba(47,111,235,.42);
   background:
-    linear-gradient(180deg, rgba(244,181,107,.105), rgba(79,183,173,.045)),
+    linear-gradient(180deg, rgba(47,111,235,.105), rgba(47,111,235,.045)),
     rgba(10,18,29,.62);
 }
 
@@ -10252,8 +10252,8 @@ body.structural-surface.history-command-shell .shell-nav-item {
 
 body.structural-surface.charts-command-shell .shell-nav-item.is-active,
 body.structural-surface.history-command-shell .shell-nav-item.is-active {
-  border-color:rgba(79,183,173,.34);
-  background:rgba(79,183,173,.12);
+  border-color:rgba(47,111,235,.34);
+  background:rgba(47,111,235,.12);
 }
 
 body.structural-surface.charts-command-shell .shell-nav-item__icon,
@@ -10264,7 +10264,7 @@ body.structural-surface.history-command-shell .shell-nav-item__icon {
   width:25px;
   height:25px;
   border-radius:999px;
-  background:rgba(79,183,173,.12);
+  background:rgba(47,111,235,.12);
   color:var(--accent);
   font-size:10px;
   font-weight:700;
@@ -10336,7 +10336,7 @@ body.structural-surface.charts-command-shell .kpi-card__meta {
 }
 
 body.structural-surface.charts-command-shell .kpi-card--accent {
-  border-color:rgba(79,183,173,.24);
+  border-color:rgba(47,111,235,.24);
 }
 
 body.structural-surface.charts-command-shell .kpi-card--accent .kpi-card__value {
@@ -10657,8 +10657,8 @@ body.structural-surface.panel-inspection-shell .panel-stage {
   display:block;
   overflow:hidden;
   background:
-    radial-gradient(circle at 46% 42%, rgba(79,183,173,.08), transparent 30%),
-    radial-gradient(circle at 74% 20%, rgba(244,181,107,.06), transparent 24%),
+    radial-gradient(circle at 46% 42%, rgba(47,111,235,.08), transparent 30%),
+    radial-gradient(circle at 74% 20%, rgba(47,111,235,.06), transparent 24%),
     linear-gradient(180deg, rgba(6,11,20,.96), rgba(3,7,14,.98));
 }
 
@@ -10675,7 +10675,7 @@ body.structural-surface.panel-inspection-shell .panel-crosshair {
 
 body.structural-surface.panel-inspection-shell .panel-stage::before {
   background:
-    linear-gradient(90deg, rgba(79,183,173,.12), transparent 18%, transparent 82%, rgba(244,181,107,.10)),
+    linear-gradient(90deg, rgba(47,111,235,.12), transparent 18%, transparent 82%, rgba(47,111,235,.10)),
     radial-gradient(circle at 50% 52%, transparent 0 35%, rgba(0,0,0,.18) 76%);
   mix-blend-mode:screen;
   opacity:.68;
@@ -10687,7 +10687,7 @@ body.structural-surface.panel-inspection-shell .panel-stage::after {
   border-radius:32px;
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.025),
-    inset 0 0 60px rgba(79,183,173,.035);
+    inset 0 0 60px rgba(47,111,235,.035);
 }
 
 body.structural-surface.panel-inspection-shell .panel-stage-grid {
@@ -10712,7 +10712,7 @@ body.structural-surface.panel-inspection-shell .panel-viewport.is-pick-hover {
 }
 
 body.structural-surface.panel-inspection-shell .panel-viewport:focus-visible {
-  outline:2px solid rgba(244,181,107,.72);
+  outline:2px solid rgba(47,111,235,.72);
   outline-offset:-14px;
 }
 
@@ -10762,7 +10762,7 @@ body.structural-surface.panel-inspection-shell .viewport-pick-status {
   border:1px solid rgba(148,168,190,.16);
   border-radius:999px;
   background:
-    linear-gradient(90deg, rgba(244,181,107,.16), transparent 34%),
+    linear-gradient(90deg, rgba(47,111,235,.16), transparent 34%),
     linear-gradient(180deg, rgba(14,24,36,.74), rgba(8,18,29,.64));
   color:rgba(226,232,240,.84);
   box-shadow:0 16px 42px rgba(0,0,0,.26);
@@ -10784,15 +10784,15 @@ body.structural-surface.panel-inspection-shell .viewport-pick-status::before {
   width:10px;
   height:10px;
   transform:translateY(-50%);
-  border:1px solid rgba(244,181,107,.82);
+  border:1px solid rgba(47,111,235,.82);
   border-radius:2px;
-  box-shadow:0 0 0 3px rgba(244,181,107,.08);
+  box-shadow:0 0 0 3px rgba(47,111,235,.08);
 }
 
 body.structural-surface.panel-inspection-shell .viewport-pick-status.is-selected {
-  border-color:rgba(244,181,107,.34);
+  border-color:rgba(47,111,235,.34);
   background:
-    linear-gradient(90deg, rgba(244,181,107,.24), transparent 38%),
+    linear-gradient(90deg, rgba(47,111,235,.24), transparent 38%),
     linear-gradient(180deg, rgba(14,24,36,.78), rgba(8,18,29,.68));
 }
 
@@ -10888,8 +10888,8 @@ body.structural-surface.panel-inspection-shell .panel-tool-rail button {
 
 body.structural-surface.panel-inspection-shell .panel-tool-rail button:hover {
   transform:translateY(-1px);
-  border-color:rgba(244,181,107,.42);
-  background:rgba(79,183,173,.14);
+  border-color:rgba(47,111,235,.42);
+  background:rgba(47,111,235,.14);
 }
 
 body.structural-surface.panel-inspection-shell .panel-insight-rail {
@@ -11009,7 +11009,7 @@ body.structural-surface.panel-inspection-shell .panel-command-topbar .context-ch
 body.structural-surface.panel-inspection-shell .panel-command-topbar .viewer-tab.is-active {
   color:var(--accent-ink);
   border-color:transparent;
-  background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  background:var(--accent);
 }
 
 body.structural-surface.panel-inspection-shell #info {
@@ -11248,9 +11248,9 @@ body.structural-surface.panel-inspection-shell canvas {
   body.structural-surface.command-center-shell .app-menu-button:hover {
     transform:translateY(-1px);
     color:var(--accent);
-    border-color:rgba(79,183,173,.28);
+    border-color:rgba(47,111,235,.28);
     background:
-      linear-gradient(180deg, rgba(79,183,173,.12), rgba(255,255,255,.02)),
+      linear-gradient(180deg, rgba(47,111,235,.12), rgba(255,255,255,.02)),
       rgba(8,18,29,.66);
   }
 
@@ -11419,10 +11419,10 @@ body.structural-surface.panel-inspection-shell canvas {
     min-height:28px;
     max-width:170px;
     padding:0 11px;
-    border:1px solid rgba(79,183,173,.22);
+    border:1px solid rgba(47,111,235,.22);
     border-radius:999px;
     background:
-      linear-gradient(180deg, rgba(79,183,173,.10), rgba(255,255,255,.02)),
+      linear-gradient(180deg, rgba(47,111,235,.10), rgba(255,255,255,.02)),
       rgba(8,18,29,.64);
     color:var(--text);
     overflow:hidden;
@@ -11465,9 +11465,9 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .status-pill--accent {
-    border-color:rgba(79,183,173,.30);
+    border-color:rgba(47,111,235,.30);
     background:
-      linear-gradient(180deg, rgba(79,183,173,.16), rgba(255,255,255,.02)),
+      linear-gradient(180deg, rgba(47,111,235,.16), rgba(255,255,255,.02)),
       rgba(10,18,29,.56);
     color:var(--accent);
   }
@@ -11519,7 +11519,7 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .viewer-tab.is-active {
-    background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    background:var(--accent);
     color:var(--accent-ink);
     box-shadow:0 12px 24px rgba(0,0,0,.20);
   }
@@ -11605,7 +11605,7 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .shell-nav-section {
     background:
-      radial-gradient(circle at top left, rgba(79,183,173,.14), transparent 44%),
+      radial-gradient(circle at top left, rgba(47,111,235,.14), transparent 44%),
       linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
       rgba(8,18,29,.64);
   }
@@ -11634,16 +11634,16 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .shell-nav-item:hover {
     transform:translateX(2px);
-    border-color:rgba(79,183,173,.24);
+    border-color:rgba(47,111,235,.24);
     background:
-      linear-gradient(180deg, rgba(79,183,173,.10), rgba(255,255,255,.015)),
+      linear-gradient(180deg, rgba(47,111,235,.10), rgba(255,255,255,.015)),
       rgba(10,18,29,.62);
   }
 
   body.structural-surface.command-center-shell .shell-nav-item.is-active {
-    border-color:rgba(79,183,173,.32);
+    border-color:rgba(47,111,235,.32);
     background:
-      linear-gradient(135deg, rgba(79,183,173,.20), rgba(244,181,107,.10)),
+      linear-gradient(135deg, rgba(47,111,235,.20), rgba(47,111,235,.10)),
       rgba(8,18,29,.68);
     box-shadow:0 12px 24px rgba(0,0,0,.16);
   }
@@ -11654,14 +11654,14 @@ body.structural-surface.panel-inspection-shell canvas {
     width:28px;
     height:28px;
     border-radius:11px;
-    background:rgba(79,183,173,.12);
+    background:rgba(47,111,235,.12);
     color:var(--accent);
     font-size:12px;
     flex-shrink:0;
   }
 
   body.structural-surface.command-center-shell .shell-nav-item.is-active .shell-nav-item__icon {
-    background:linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    background:var(--accent);
     color:var(--accent-ink);
   }
 
@@ -11758,7 +11758,7 @@ body.structural-surface.panel-inspection-shell canvas {
   body.structural-surface.command-center-shell .edit-preview-list,
   body.structural-surface.command-center-shell .top-search-results {
     scrollbar-width:thin;
-    scrollbar-color:rgba(79,183,173,.30) transparent;
+    scrollbar-color:rgba(47,111,235,.30) transparent;
   }
 
   body.structural-surface.command-center-shell #left-panel .panel-field {
@@ -11876,9 +11876,9 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .stage-result-receipt {
-    border-color:rgba(79,183,173,.20);
+    border-color:rgba(47,111,235,.20);
     background:
-      linear-gradient(180deg, rgba(79,183,173,.08), rgba(255,255,255,.015)),
+      linear-gradient(180deg, rgba(47,111,235,.08), rgba(255,255,255,.015)),
       rgba(5,12,21,.70);
   }
 
@@ -11955,13 +11955,11 @@ body.structural-surface.panel-inspection-shell canvas {
     width:34px;
     min-height:34px;
     padding:0;
-    border:1px solid rgba(148,168,190,.18);
-    border-radius:11px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.015)),
-      rgba(10,18,29,.58);
+    border:1px solid rgba(217,222,229,.14);
+    border-radius:8px;
+    background:rgba(21,27,34,.85);
     color:var(--text);
-    transition:transform 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+    transition:border-color 140ms ease, background 140ms ease, color 140ms ease;
   }
 
   body.structural-surface.command-center-shell .viewport-tool-button__icon {
@@ -11987,21 +11985,16 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .viewport-tool-rail button:hover,
   body.structural-surface.command-center-shell .viewport-tool-rail button:focus-visible {
-    transform:translateY(-1px);
-    border-color:rgba(79,183,173,.30);
-    background:
-      linear-gradient(180deg, rgba(79,183,173,.12), rgba(255,255,255,.015)),
-      rgba(10,18,29,.70);
+    border-color:rgba(47,111,235,.55);
+    background:rgba(47,111,235,.12);
     color:var(--accent);
   }
 
   body.structural-surface.command-center-shell .viewport-tool-rail button.is-active {
-    border-color:rgba(79,183,173,.52);
-    background:
-      linear-gradient(180deg, rgba(79,183,173,.22), rgba(79,183,173,.07)),
-      rgba(10,18,29,.84);
-    color:var(--accent);
-    box-shadow:inset 0 0 0 1px rgba(79,183,173,.12), 0 0 0 1px rgba(79,183,173,.08);
+    border-color:var(--accent);
+    background:rgba(47,111,235,.20);
+    color:#cfe0ff;
+    box-shadow:inset 0 0 0 1px rgba(47,111,235,.30);
   }
 
   body.structural-surface.command-center-shell .viewport-tool-rail button::after {
@@ -12056,7 +12049,7 @@ body.structural-surface.panel-inspection-shell canvas {
     position:absolute;
     inset:0 0 auto 0;
     height:2px;
-    background:linear-gradient(90deg, rgba(79,183,173,.08), rgba(79,183,173,.72), rgba(244,181,107,.56), rgba(79,183,173,.08));
+    background:linear-gradient(90deg, rgba(47,111,235,.08), rgba(47,111,235,.72), rgba(47,111,235,.56), rgba(47,111,235,.08));
   }
 
   body.structural-surface.command-center-shell .kpi-card__value {
@@ -12123,7 +12116,7 @@ body.structural-surface.panel-inspection-shell canvas {
     position:absolute;
     inset:0 0 auto 0;
     height:1px;
-    background:linear-gradient(90deg, rgba(79,183,173,.08), rgba(79,183,173,.55), rgba(244,181,107,.38), rgba(79,183,173,.08));
+    background:linear-gradient(90deg, rgba(47,111,235,.08), rgba(47,111,235,.55), rgba(47,111,235,.38), rgba(47,111,235,.08));
   }
 
   body.structural-surface.command-center-shell .analysis-chart-title {
@@ -12153,8 +12146,8 @@ body.structural-surface.panel-inspection-shell canvas {
     max-width:44%;
     padding:2px 6px;
     border-radius:999px;
-    border:1px solid rgba(79,183,173,.25);
-    background:rgba(79,183,173,.11);
+    border:1px solid rgba(47,111,235,.25);
+    background:rgba(47,111,235,.11);
     color:#A9FFF5;
     font-size:9px;
     font-weight:700;
@@ -12521,7 +12514,7 @@ body.structural-surface.panel-inspection-shell canvas {
     background:linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent2) 72%, #0b1522));
     box-shadow:
       inset 0 1px 0 rgba(255,255,255,.24),
-      0 0 18px rgba(79,183,173,.15);
+      0 0 18px rgba(47,111,235,.15);
   }
 
   body.structural-surface.command-center-shell .analysis-material-label {
@@ -12697,8 +12690,8 @@ body.structural-surface.panel-inspection-shell canvas {
     min-height:24px;
     padding:4px 8px;
     border-radius:6px;
-    border:1px solid rgba(79,183,173,.24);
-    background:rgba(79,183,173,.08);
+    border:1px solid rgba(47,111,235,.24);
+    background:rgba(47,111,235,.08);
     color:var(--accent);
     font-size:9px;
     font-weight:800;
@@ -12708,8 +12701,8 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .optimization-summary-details-link:hover {
-    border-color:rgba(79,183,173,.42);
-    background:rgba(79,183,173,.14);
+    border-color:rgba(47,111,235,.42);
+    background:rgba(47,111,235,.14);
   }
 
   body.structural-surface.command-center-shell .critical-members-table {
@@ -12742,8 +12735,8 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell button.critical-members-row:hover {
-    border-color:rgba(79,183,173,.26);
-    background:rgba(79,183,173,.08);
+    border-color:rgba(47,111,235,.26);
+    background:rgba(47,111,235,.08);
   }
 
   body.structural-surface.command-center-shell .critical-members-row--header {
@@ -13198,9 +13191,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:6px;
     min-width:0;
     padding:7px;
-    border:1px solid rgba(79,183,173,.20);
+    border:1px solid rgba(47,111,235,.20);
     border-radius:8px;
-    background:linear-gradient(135deg, rgba(79,183,173,.09), rgba(7,15,24,.46));
+    background:linear-gradient(135deg, rgba(47,111,235,.09), rgba(7,15,24,.46));
   }
 
   body.structural-surface.command-center-shell .material-model-demand-atlas__head {
@@ -13254,10 +13247,10 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-model-demand-atlas__head strong {
     padding:3px 6px;
-    border:1px solid rgba(79,183,173,.28);
+    border:1px solid rgba(47,111,235,.28);
     border-radius:999px;
     color:var(--success);
-    background:rgba(79,183,173,.09);
+    background:rgba(47,111,235,.09);
     font-size:8px;
     font-weight:900;
   }
@@ -13313,8 +13306,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-model-demand-row:hover,
   body.structural-surface.command-center-shell .material-model-demand-row:focus-visible {
-    border-color:rgba(79,183,173,.38);
-    background:rgba(79,183,173,.07);
+    border-color:rgba(47,111,235,.38);
+    background:rgba(47,111,235,.07);
     outline:none;
   }
 
@@ -13573,9 +13566,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:6px;
     min-width:0;
     padding:7px;
-    border:1px solid rgba(244,181,107,.20);
+    border:1px solid rgba(47,111,235,.20);
     border-radius:8px;
-    background:linear-gradient(135deg, rgba(244,181,107,.08), rgba(7,15,24,.46));
+    background:linear-gradient(135deg, rgba(47,111,235,.08), rgba(7,15,24,.46));
   }
 
   body.structural-surface.command-center-shell .material-model-capacity-envelope__head {
@@ -13629,10 +13622,10 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-model-capacity-envelope__head strong {
     padding:3px 6px;
-    border:1px solid rgba(244,181,107,.30);
+    border:1px solid rgba(47,111,235,.30);
     border-radius:999px;
     color:var(--warn);
-    background:rgba(244,181,107,.09);
+    background:rgba(47,111,235,.09);
     font-size:8px;
     font-weight:900;
   }
@@ -13688,8 +13681,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-model-capacity-envelope-row:hover,
   body.structural-surface.command-center-shell .material-model-capacity-envelope-row:focus-visible {
-    border-color:rgba(244,181,107,.42);
-    background:rgba(244,181,107,.075);
+    border-color:rgba(47,111,235,.42);
+    background:rgba(47,111,235,.075);
     outline:none;
   }
 
@@ -13728,7 +13721,7 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .material-model-capacity-envelope-row__point {
-    fill:rgba(244,181,107,.72);
+    fill:rgba(47,111,235,.72);
     stroke:rgba(7,15,24,.78);
     stroke-width:1;
     vector-effect:non-scaling-stroke;
@@ -13942,9 +13935,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:6px;
     min-width:0;
     padding:7px;
-    border:1px solid rgba(79,183,173,.18);
+    border:1px solid rgba(47,111,235,.18);
     border-radius:8px;
-    background:linear-gradient(135deg, rgba(79,183,173,.10), rgba(7,15,24,.42));
+    background:linear-gradient(135deg, rgba(47,111,235,.10), rgba(7,15,24,.42));
   }
 
   body.structural-surface.command-center-shell .material-coverage-readiness--needs_review {
@@ -14021,9 +14014,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:1px;
     min-width:0;
     padding:4px 5px;
-    border:1px solid rgba(79,183,173,.14);
+    border:1px solid rgba(47,111,235,.14);
     border-radius:7px;
-    background:rgba(79,183,173,.055);
+    background:rgba(47,111,235,.055);
   }
 
   body.structural-surface.command-center-shell .material-coverage-check--review {
@@ -14055,9 +14048,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:6px;
     min-width:0;
     padding:7px;
-    border:1px solid rgba(244,181,107,.18);
+    border:1px solid rgba(47,111,235,.18);
     border-radius:8px;
-    background:linear-gradient(135deg, rgba(244,181,107,.08), rgba(7,15,24,.42));
+    background:linear-gradient(135deg, rgba(47,111,235,.08), rgba(7,15,24,.42));
   }
 
   body.structural-surface.command-center-shell .material-constitutive-lens__head {
@@ -14108,10 +14101,10 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-constitutive-lens__head strong {
     padding:3px 6px;
-    border:1px solid rgba(244,181,107,.24);
+    border:1px solid rgba(47,111,235,.24);
     border-radius:999px;
     color:var(--accent2);
-    background:rgba(244,181,107,.08);
+    background:rgba(47,111,235,.08);
     font-size:8px;
     font-weight:900;
   }
@@ -14142,8 +14135,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-constitutive-row:hover,
   body.structural-surface.command-center-shell .material-constitutive-row:focus-visible {
-    border-color:rgba(244,181,107,.36);
-    background:rgba(244,181,107,.07);
+    border-color:rgba(47,111,235,.36);
+    background:rgba(47,111,235,.07);
     outline:none;
   }
 
@@ -14178,9 +14171,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:6px;
     min-width:0;
     padding:7px;
-    border:1px solid rgba(79,183,173,.18);
+    border:1px solid rgba(47,111,235,.18);
     border-radius:8px;
-    background:linear-gradient(135deg, rgba(79,183,173,.08), rgba(7,15,24,.42));
+    background:linear-gradient(135deg, rgba(47,111,235,.08), rgba(7,15,24,.42));
   }
 
   body.structural-surface.command-center-shell .material-stress-strain-curves__head {
@@ -14231,10 +14224,10 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-stress-strain-curves__head strong {
     padding:3px 6px;
-    border:1px solid rgba(79,183,173,.26);
+    border:1px solid rgba(47,111,235,.26);
     border-radius:999px;
     color:var(--accent);
-    background:rgba(79,183,173,.08);
+    background:rgba(47,111,235,.08);
     font-size:8px;
     font-weight:900;
   }
@@ -14265,8 +14258,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-stress-strain-row:hover,
   body.structural-surface.command-center-shell .material-stress-strain-row:focus-visible {
-    border-color:rgba(79,183,173,.38);
-    background:rgba(79,183,173,.08);
+    border-color:rgba(47,111,235,.38);
+    background:rgba(47,111,235,.08);
     outline:none;
   }
 
@@ -14406,8 +14399,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-catalog-row:hover,
   body.structural-surface.command-center-shell .material-catalog-row:focus-visible {
-    border-color:rgba(79,183,173,.34);
-    background:rgba(79,183,173,.08);
+    border-color:rgba(47,111,235,.34);
+    background:rgba(47,111,235,.08);
     outline:none;
   }
 
@@ -14419,7 +14412,7 @@ body.structural-surface.panel-inspection-shell canvas {
     width:9px;
     height:24px;
     border-radius:999px;
-    background:linear-gradient(180deg, var(--accent), rgba(79,183,173,.22));
+    background:linear-gradient(180deg, var(--accent), rgba(47,111,235,.22));
     box-shadow:0 0 0 1px rgba(255,255,255,.12);
   }
 
@@ -14518,9 +14511,9 @@ body.structural-surface.panel-inspection-shell canvas {
     gap:1px;
     min-width:0;
     padding:4px 5px;
-    border:1px solid rgba(79,183,173,.14);
+    border:1px solid rgba(47,111,235,.14);
     border-radius:7px;
-    background:rgba(79,183,173,.055);
+    background:rgba(47,111,235,.055);
   }
 
   body.structural-surface.command-center-shell .material-family-chip--warn {
@@ -14558,7 +14551,7 @@ body.structural-surface.panel-inspection-shell canvas {
     min-width:0;
     grid-column:2;
     padding:7px;
-    border:1px solid rgba(79,183,173,.14);
+    border:1px solid rgba(47,111,235,.14);
     border-radius:8px;
     background:rgba(7,15,24,.40);
   }
@@ -14613,8 +14606,8 @@ body.structural-surface.panel-inspection-shell canvas {
 
   body.structural-surface.command-center-shell .material-section-schedule__row:hover,
   body.structural-surface.command-center-shell .material-section-schedule__row:focus-visible {
-    border-color:rgba(79,183,173,.32);
-    background:rgba(79,183,173,.08);
+    border-color:rgba(47,111,235,.32);
+    background:rgba(47,111,235,.08);
     outline:none;
   }
 
@@ -14622,7 +14615,7 @@ body.structural-surface.panel-inspection-shell canvas {
     width:8px;
     height:20px;
     border-radius:999px;
-    background:linear-gradient(180deg, var(--accent), rgba(79,183,173,.22));
+    background:linear-gradient(180deg, var(--accent), rgba(47,111,235,.22));
     box-shadow:0 0 0 1px rgba(255,255,255,.12);
   }
 
@@ -14847,14 +14840,14 @@ body.structural-surface.panel-inspection-shell canvas {
   }
 
   body.structural-surface.command-center-shell .tree-item:hover {
-    border-color:rgba(79,183,173,.18);
+    border-color:rgba(47,111,235,.18);
   }
 
   body.structural-surface.command-center-shell .tree-item.selected {
     border-left:none;
-    border-color:rgba(79,183,173,.28);
-    background:rgba(79,183,173,.14);
-    box-shadow:inset 0 0 0 1px rgba(79,183,173,.10);
+    border-color:rgba(47,111,235,.28);
+    background:rgba(47,111,235,.14);
+    box-shadow:inset 0 0 0 1px rgba(47,111,235,.10);
   }
 
   body.structural-surface.command-center-shell .legend-bar {
@@ -14877,7 +14870,7 @@ body.structural-surface.panel-inspection-shell canvas {
     position:absolute;
     inset:0 0 auto 0;
     height:1px;
-    background:linear-gradient(90deg, transparent, rgba(79,183,173,.52), rgba(244,181,107,.44), transparent);
+    background:linear-gradient(90deg, transparent, rgba(47,111,235,.52), rgba(47,111,235,.44), transparent);
   }
 
   body.structural-surface.command-center-shell .instrument-group {
@@ -15314,9 +15307,9 @@ body.structural-surface.light-mode .viewport-status-bar b {
 }
 
 .viewport-toolbar__btn:hover {
-  background:rgba(79,183,173,.2);
+  background:rgba(47,111,235,.2);
   color:#ecf2f6;
-  border-color:rgba(79,183,173,.4);
+  border-color:rgba(47,111,235,.4);
 }
 
 .viewport-toolbar__btn:active {
@@ -15349,7 +15342,7 @@ body.structural-surface.light-mode .viewport-toolbar__btn {
 
 body.structural-surface.light-mode .viewport-toolbar__btn:hover {
   background:rgba(15,106,115,.15);
-  color:#0f6a73;
+  color:#1f5fbf;
   border-color:rgba(15,106,115,.3);
 }
 
@@ -15358,7 +15351,7 @@ body.structural-surface.light-mode .viewport-toolbar__btn:hover {
   position:fixed;
   padding:8px 12px;
   background:rgba(10,14,26,.95);
-  border:1px solid rgba(79,183,173,.3);
+  border:1px solid rgba(47,111,235,.3);
   border-radius:8px;
   color:#ecf2f6;
   font-size:11px;
@@ -15373,7 +15366,7 @@ body.structural-surface.light-mode .viewport-toolbar__btn:hover {
 .viewport-tooltip__id {
   font-weight:700;
   font-size:12px;
-  color:#4fb7ad;
+  color:#2f6feb;
   margin-bottom:2px;
 }
 
@@ -15385,7 +15378,7 @@ body.structural-surface.light-mode .viewport-toolbar__btn:hover {
 }
 
 .viewport-tooltip__section {
-  color:#f4b56b;
+  color:#2f6feb;
   font-size:10px;
   margin-top:2px;
 }
@@ -15398,7 +15391,7 @@ body.structural-surface.light-mode .viewport-tooltip {
 }
 
 body.structural-surface.light-mode .viewport-tooltip__id {
-  color:#0f6a73;
+  color:#1f5fbf;
 }
 
 body.structural-surface.light-mode .viewport-tooltip__type {
@@ -15406,7 +15399,7 @@ body.structural-surface.light-mode .viewport-tooltip__type {
 }
 
 body.structural-surface.light-mode .viewport-tooltip__section {
-  color:#c96d2c;
+  color:#1f5fbf;
 }
 
 /* ── Loading Indicator ── */
@@ -15427,8 +15420,8 @@ body.structural-surface.light-mode .viewport-tooltip__section {
 .loading-indicator__spinner {
   width:40px;
   height:40px;
-  border:3px solid rgba(79,183,173,.2);
-  border-top-color:#4fb7ad;
+  border:3px solid rgba(47,111,235,.2);
+  border-top-color:#2f6feb;
   border-radius:50%;
   animation:spin 1s linear infinite;
 }
@@ -15449,7 +15442,7 @@ body.structural-surface.light-mode .loading-indicator {
 
 body.structural-surface.light-mode .loading-indicator__spinner {
   border-color:rgba(15,106,115,.2);
-  border-top-color:#0f6a73;
+  border-top-color:#1f5fbf;
 }
 
 body.structural-surface.light-mode .loading-indicator__text {
@@ -15458,7 +15451,7 @@ body.structural-surface.light-mode .loading-indicator__text {
 
 /* ── Selection Glow Effect ── */
 .selection-glow {
-  filter:drop-shadow(0 0 8px rgba(79,183,173,.6));
+  filter:drop-shadow(0 0 8px rgba(47,111,235,.6));
 }
 
 body.structural-surface.light-mode .selection-glow {
@@ -15521,12 +15514,12 @@ body.structural-surface.light-mode .selection-glow {
 
 .file-drop-zone:hover {
   border-color: var(--accent);
-  background: rgba(79, 183, 173, 0.05);
+  background: rgba(47, 111, 235, 0.05);
 }
 
 .file-drop-zone.drag-over {
   border-color: var(--accent);
-  background: rgba(79, 183, 173, 0.1);
+  background: rgba(47, 111, 235, 0.1);
   transform: scale(1.02);
 }
 
