@@ -6352,6 +6352,27 @@ function init(){
   controls.addEventListener('change',refreshViewportHudFromModel);
   refreshViewportHudFromModel();
 
+  // Camera-synced axis gizmo: orient the corner XYZ triad to the live view.
+  const axisGizmoEl=document.querySelector('.axis-helper');
+  function updateAxisGizmo(){
+    if(!axisGizmoEl||!camera||!THREE) return;
+    const qInv=camera.getWorldQuaternion(new THREE.Quaternion()).invert();
+    for(const name of ['x','y','z']){
+      const v=new THREE.Vector3(name==='x'?1:0,name==='y'?1:0,name==='z'?1:0).applyQuaternion(qInv);
+      const angle=Math.atan2(-v.y,v.x)*180/Math.PI;
+      const planar=Math.min(1,Math.hypot(v.x,v.y));
+      const seg=axisGizmoEl.querySelector('.axis-helper__axis--'+name);
+      if(!seg) continue;
+      seg.style.transform='rotate('+angle.toFixed(2)+'deg)';
+      seg.style.opacity=(0.4+0.6*planar).toFixed(3);
+      seg.style.zIndex=v.z<=0?'2':'1';
+      const label=seg.querySelector('b');
+      if(label) label.style.transform='rotate('+(-angle).toFixed(2)+'deg)';
+    }
+  }
+  controls.addEventListener('change',updateAxisGizmo);
+  updateAxisGizmo();
+
   raycaster=new THREE.Raycaster();
   mouse=new THREE.Vector2();
   renderer.domElement.addEventListener('click',onMouseClick);
