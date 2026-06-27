@@ -368,6 +368,9 @@ def build_mgt_physical_residual_closure(
     active = np.where(np.abs(diag) > 1.0e-9)[0]
     free = np.asarray([i for i in active.tolist() if i not in restrained], dtype=np.int64)
     f_ext = np.asarray(assembled_f_ext, dtype=np.float64)
+    # free-space assembled tangent (for F2b-ii-a sparse-direct / ILU solves)
+    tangent_csr = stiffness.tocsr()
+    tangent_free_csr = tangent_csr[free][:, free].tocsr()
 
     def residual_fn(x_free: np.ndarray) -> np.ndarray:
         u = u0.copy()
@@ -392,6 +395,8 @@ def build_mgt_physical_residual_closure(
         "free_dof_count": int(free.size),
         "external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
         "diag_free": np.asarray(diag[free], dtype=np.float64),
+        "tangent_free_csr": tangent_free_csr,
+        "tangent_free_nnz": int(tangent_free_csr.nnz),
     }
     return residual_fn, u0[free].copy(), meta
 
