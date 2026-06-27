@@ -414,6 +414,7 @@ select {
   background: var(--color-surface-dark-soft);
   color: inherit;
   cursor: pointer;
+  scroll-margin-top: 64px;
   transition:
     border-color 140ms ease,
     background 140ms ease;

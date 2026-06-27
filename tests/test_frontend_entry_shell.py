@@ -456,3 +456,9 @@ def test_frontend_entry_shell_wraps_content_in_product_app_shell() -> None:
     assert ".app-nav__item.is-active {" in index_css
     assert ".app-statusbar {" in index_css
     assert "grid-template-areas:" in index_css
+
+    # Side nav drives real in-page navigation: each review desk has an anchor id
+    # and the nav scrolls to it.
+    assert "id={`desk-${surface.id}`}" in app_tsx
+    assert "scrollIntoView({ behavior: 'smooth', block: 'start' })" in app_tsx
+    assert "scroll-margin-top:" in index_css
