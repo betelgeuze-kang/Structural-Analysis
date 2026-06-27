@@ -72,6 +72,17 @@
 ### 진행 반영
 - B1 일부 반영: `orthogonal_krylov_projection.py`에 `reason_code` 및 `suggested_reorth_pass` 추가
 - B3 일부 반영: `run_phase1_steps.py` Gate 출력에 `fallback_policy_version`/`fallback_policy_fingerprint` 추가, `fallback-policy-spec.md` 문서화
+- A1/A2/A3 모바일 정적 pass 반영: `implementation/phase1/mobile-static-contracts.md`에 LF→GNN 계약, strict Rust/HIP producer handoff, Step5 RCA static schema 운용 규칙을 추가
+- A3 스키마 앵커 추가: `implementation/phase1/step5_rca_summary.schema.json`는 현재 gate 필수값(`timing_breakdown_seconds.compute|host_copy|serialization`)과 선택 provenance(`schema_version`, `generated_at_utc`, `run_id`, `producer`, `host_copy_share`, `strict_probe_ref`, `artifact_manifest`)를 정의
+- A3 helper 추가: `implementation/phase1/step5_rca_contract.py`는 `validate_step5_rca_summary()`와 `missing_fields`/`invalid_fields` detail payload를 제공하며, 이후 `phase1_ci_gate.py::_validate_inputs()`가 import 또는 inline할 수 있는 정적 계약 구현이다
+- A1 코드 반영: `lf_to_gnn_e2e_smoke.py`는 `LF_GNN_REQUIRED_INPUT_FIELDS`, `LF_GNN_OUTPUT_FIELDS`, `LF_GNN_STANDARD_REASON_CODES`, `LEGACY_TO_STANDARD_REASON_CODE`, `claim_boundary`를 노출하고 report에 `standard_reason_code`를 추가한다
+- A1 모델 반영: `gnn_residual_model.py`는 compatibility entrypoint/docstring, required batch/node/edge field constants, `mobile_static_contract_ref`, `claim_boundary` metric을 노출한다
+- A1/A2/A3 README 앵커 보조 문서 추가: `implementation/phase1/README.mobile-static-contracts.md`는 `mobile-static-contracts.md`, `step5_rca_summary.schema.json`, `step5_rca_contract.py`, LF→GNN 파일군, strict Rust/HIP handoff를 한 곳에 연결한다
+- 모바일 정적 코드리뷰 병목 수정: `ERR_RESIDUAL_ACCURACY`와 `ERR_COMPLEXITY_GUARDRAIL`를 각각 `ERR_LF_GNN_ACCURACY_BELOW_TARGET`, `ERR_LF_GNN_COMPLEXITY_GUARDRAIL`로 분리해 과도한 unsupported/shape-mismatch 분류를 제거했다
+- 모바일 정적 코드리뷰 병목 수정: LF→GNN smoke fallback 경로가 `model_module=gnn_residual_model`로 보일 수 있는 혼동을 줄이기 위해 `fallback_used`, `fallback_reason`, `model_module=python_fallback` 리포트 필드를 표준화했다
+- 모바일 정적 코드리뷰 병목 수정: GitHub Markdown 자동 앵커에 맞춰 A1/A2/A3 문서 링크와 코드 내 `mobile_static_contract_ref`를 소문자 앵커로 통일했다
+- 모바일 정적 테스트 추가: `tests/test_phase1_mobile_static_contracts.py`는 Step5 RCA missing timing subfield, `host_copy_share` 범위 위반, NaN/inf/음수/비숫자 timing, LF→GNN fallback reporting을 workstation/CI에서 검증할 수 있게 한다
+- 이번 pass에서는 모바일 원칙에 맞춰 Python/Rust/HIP/npm/CI 실행, protected evidence 재생성, release/solver/benchmark/customer-shadow/HIP claim 승격을 하지 않음
 
 ## 완료 보고 포맷 (모바일웹 개발환경용)
 
@@ -94,6 +105,11 @@
 1) `phase1_ci_gate.py` 입력 검증 강화(스키마/범위 체크) 구현
 2) `implementation/phase1/README.md`에 strict probe 실제 producer 연결 템플릿 추가
 3) `lf_to_gnn_e2e_smoke.py`/`gnn_residual_model.py` 인터페이스 문서화 및 reason_code 표준 추가
+
+## 이번 pass 이후 추천 Next-3
+1) `phase1_ci_gate.py::_validate_inputs()`가 `step5_rca_contract.validate_step5_rca_summary()`를 직접 호출하거나 같은 helper를 inline해서 `missing_fields`/`invalid_fields`를 top-level gate details에 보존하도록 반영
+2) `tests/test_phase1_ci_gate.py` 또는 새 gate integration test에서 `_validate_inputs()`가 `host_copy_share < 0`, `host_copy_share > 1`, `NaN/inf timing`, `missing timing subfield`를 같은 reason/detail 어휘로 반환하는지 확인
+3) `implementation/phase1/README.md` 본문에 `README.mobile-static-contracts.md` 링크를 직접 삽입해 보조 README anchor를 주 문서 표면으로 승격
 
 ## 이번 기준 추천 Later-3
 1) Krylov adaptive 재직교화 정책표(구간별 pass 증가) 반영
