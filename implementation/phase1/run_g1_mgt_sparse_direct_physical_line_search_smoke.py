@@ -222,6 +222,7 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
     ilu_drop_tol: float = 1.0e-4,
     ilu_fill_factor: float = 10.0,
     gmres_maxiter: int = 400,
+    frame_service_tangent_source: str = "real_per_element",
     output_json: Path | None = DEFAULT_OUTPUT_JSON,
 ) -> dict[str, Any]:
     operator = normalize_global_newton_operator(global_newton_operator)
@@ -234,6 +235,7 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
             t0 = time.perf_counter()
             residual_fn, x0, meta = build_mgt_physical_residual_closure(
                 mgt_path=mgt_model, roundtrip_npz=roundtrip_npz, load_scale=load_scale,
+                frame_service_tangent_source=frame_service_tangent_source,
             )
             build_seconds = time.perf_counter() - t0
         except Exception as exc:  # noqa: BLE001
@@ -250,6 +252,8 @@ def run_g1_mgt_sparse_direct_physical_line_search_smoke(
                 "build_seconds": float(build_seconds),
                 "diag_min_abs": float(np.min(np.abs(diag))) if diag.size else 0.0,
                 "diag_max_abs": float(np.max(np.abs(diag))) if diag.size else 0.0,
+                "frame_service_tangent_source": meta.get("frame_service_tangent_source"),
+                "frame_service_tangent_stats_mpa": meta.get("frame_service_tangent_stats_mpa"),
             }
             payload = run_sparse_direct_smoke_from_closure(
                 residual_fn, x0, k_free, direction_solver=direction_solver, operator=operator,
@@ -285,6 +289,10 @@ def main() -> int:
     parser.add_argument("--ilu-drop-tol", type=float, default=1.0e-4)
     parser.add_argument("--ilu-fill-factor", type=float, default=10.0)
     parser.add_argument("--gmres-maxiter", type=int, default=400)
+    parser.add_argument(
+        "--frame-service-tangent-source",
+        choices=["real_per_element", "placeholder_1mpa"], default="real_per_element",
+    )
     parser.add_argument("--out", "--output-json", dest="output_json", type=Path, default=DEFAULT_OUTPUT_JSON)
     args = parser.parse_args()
     payload = run_g1_mgt_sparse_direct_physical_line_search_smoke(
@@ -292,6 +300,7 @@ def main() -> int:
         direction_solver=args.direction_solver, global_newton_operator=args.global_newton_operator,
         load_scale=args.load_scale, ilu_drop_tol=args.ilu_drop_tol,
         ilu_fill_factor=args.ilu_fill_factor, gmres_maxiter=args.gmres_maxiter,
+        frame_service_tangent_source=args.frame_service_tangent_source,
         output_json=args.output_json,
     )
     tp = payload.get("assembled_tangent_parity", {})

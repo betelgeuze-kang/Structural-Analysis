@@ -264,6 +264,7 @@ def build_mgt_physical_residual_closure(
     frame_gravity_load_scale: float = 0.01,
     stiffness_scale_to_si: float = 1000.0,
     apply_shell_material_tangent: bool = False,
+    frame_service_tangent_source: str = "real_per_element",
 ) -> tuple[ReducedResidualFn, np.ndarray, dict[str, Any]]:
     """Build a reduced free-space physical residual closure from a real MGT model.
 
@@ -353,7 +354,21 @@ def build_mgt_physical_residual_closure(
     ndof = int(node_xyz.shape[0]) * DOF_PER_NODE
     u0 = np.zeros(ndof, dtype=np.float64)
 
-    service_tangent = {int(e.elem_id): 1.0 for e in frame_elements}
+    service_tangent_source = str(frame_service_tangent_source)
+    if service_tangent_source == "placeholder_1mpa":
+        service_tangent = {int(e.elem_id): 1.0 for e in frame_elements}
+    elif service_tangent_source == "real_per_element":
+        from run_mgt_direct_residual_newton_probe import _service_tangent_by_element
+
+        service_tangent, _svc_meta = _service_tangent_by_element(
+            elements=frame_elements, node_xyz=node_xyz, u=u0, material_props=material_props,
+        )
+    else:
+        raise ValueError(
+            f"unknown frame_service_tangent_source {frame_service_tangent_source!r}; "
+            "expected 'real_per_element' or 'placeholder_1mpa'"
+        )
+    _svc_values = np.asarray(list(service_tangent.values()), dtype=np.float64)
     stiffness, assembled_f_ext, _ = assemble_newton_tangent_stiffness(
         u=u0, node_xyz=node_xyz, frame_elements=frame_elements,
         elem_type_code=elem_type_code, elem_section_id=elem_section_id,
@@ -435,6 +450,12 @@ def build_mgt_physical_residual_closure(
             "load_scale": float(load_scale),
             "free": free,
             "u0": u0,
+        },
+        "frame_service_tangent_source": service_tangent_source,
+        "frame_service_tangent_stats_mpa": {
+            "min": float(np.min(_svc_values)) if _svc_values.size else None,
+            "max": float(np.max(_svc_values)) if _svc_values.size else None,
+            "mean": float(np.mean(_svc_values)) if _svc_values.size else None,
         },
     }
     return residual_fn, u0[free].copy(), meta
