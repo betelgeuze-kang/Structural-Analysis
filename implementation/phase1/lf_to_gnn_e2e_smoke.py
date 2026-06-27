@@ -9,7 +9,9 @@ Mobile/static contract notes:
 - required interface fields and standard reason codes are mirrored in
   ``mobile-static-contracts.md`` for review without executing the model;
 - legacy reason codes remain stable for existing tests and reports, while
-  ``standard_reason_code`` maps them to the LF->GNN contract vocabulary.
+  ``standard_reason_code`` maps them to the LF->GNN contract vocabulary;
+- fallback reporting is explicit, so a fallback path cannot be mistaken for
+  successful ``gnn_residual_model`` execution.
 """
 
 from __future__ import annotations
@@ -25,7 +27,7 @@ from typing import Iterator
 INTERFACE_VERSION = "1.1.0"
 SCHEMA_VERSION = "1.2"
 RUN_ID = "phase1-lf-gnn-smoke"
-MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#A1-lf---gnn-interface-contract"
+MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#a1-lf---gnn-interface-contract"
 CLAIM_BOUNDARY = "residual_correction_assist_not_solver_truth"
 LF_GNN_REQUIRED_INPUT_FIELDS = (
     "schema_version",
@@ -56,6 +58,8 @@ LF_GNN_STANDARD_REASON_CODES = {
     "ERR_LF_GNN_TYPE": "field exists but has wrong type",
     "ERR_LF_GNN_EMPTY_BATCH": "node/edge/LF batch is empty",
     "ERR_LF_GNN_SHAPE_MISMATCH": "node, edge, or LF response dimensions are inconsistent",
+    "ERR_LF_GNN_ACCURACY_BELOW_TARGET": "residual correction did not meet the configured accuracy target",
+    "ERR_LF_GNN_COMPLEXITY_GUARDRAIL": "observed operation budget exceeded the linear-complexity guardrail",
     "ERR_LF_GNN_UNSUPPORTED_FEATURE": "feature family is outside the residual model scope",
     "ERR_LF_GNN_CLAIM_BOUNDARY": "output tries to claim autonomous solver truth",
 }
@@ -65,8 +69,8 @@ LEGACY_TO_STANDARD_REASON_CODE = {
     "ERR_EMPTY_EDGES": "ERR_LF_GNN_EMPTY_BATCH",
     "ERR_META_UNIT": "ERR_LF_GNN_FIELD_MISSING",
     "ERR_EMPTY_CORRECTION": "ERR_LF_GNN_EMPTY_BATCH",
-    "ERR_RESIDUAL_ACCURACY": "ERR_LF_GNN_UNSUPPORTED_FEATURE",
-    "ERR_COMPLEXITY_GUARDRAIL": "ERR_LF_GNN_SHAPE_MISMATCH",
+    "ERR_RESIDUAL_ACCURACY": "ERR_LF_GNN_ACCURACY_BELOW_TARGET",
+    "ERR_COMPLEXITY_GUARDRAIL": "ERR_LF_GNN_COMPLEXITY_GUARDRAIL",
 }
 
 REASON_CODES = {
@@ -114,6 +118,9 @@ def _apply_residual_batch_fallback(batch: list[dict], gain: float) -> tuple[list
 
     reduction_ratio = 0.0 if before <= 1e-12 else max(0.0, min(1.0, 1.0 - (after / before)))
     metrics = {
+        "model_module": "python_fallback",
+        "fallback_used": True,
+        "fallback_reason": "model_or_import_failure",
         "residual_l1_before": before,
         "residual_l1_after": after,
         "residual_reduction_ratio": reduction_ratio,
@@ -132,10 +139,16 @@ def _apply_residual_batch_fallback(batch: list[dict], gain: float) -> tuple[list
 
 
 def _apply_residual_batch_model(batch: list[dict], edges: list[dict], meta: dict, gain: float) -> tuple[list[dict], dict]:
-    from gnn_residual_model import run_one_batch_with_metrics
-
     try:
-        return run_one_batch_with_metrics(batch, edges, meta, gain)
+        from gnn_residual_model import run_one_batch_with_metrics
+
+        corrected, metrics = run_one_batch_with_metrics(batch, edges, meta, gain)
+        metrics.setdefault("model_module", "gnn_residual_model")
+        metrics.setdefault("fallback_used", False)
+        metrics.setdefault("fallback_reason", "")
+        metrics.setdefault("claim_boundary", CLAIM_BOUNDARY)
+        metrics.setdefault("mobile_static_contract_ref", MOBILE_STATIC_CONTRACT_REF)
+        return corrected, metrics
     except Exception:
         return _apply_residual_batch_fallback(batch, gain)
 
@@ -172,10 +185,12 @@ def run(
     operation_count_sum = 0
     linearity_flags: list[bool] = []
     complexity_class = "O(N+E)"
+    last_metrics: dict = {}
 
     for batch in loader:
         batch_count += 1
         corrected_batch, metrics = _apply_residual_batch_model(batch, edges, meta, gain=gain)
+        last_metrics = dict(metrics)
         corrected.extend(corrected_batch)
 
         residual_before_sum += float(metrics.get("residual_l1_before", 0.0))
@@ -230,7 +245,7 @@ def run(
         },
         "inference": {
             "backend": backend,
-            "model_module": "gnn_residual_model" if len(corrected) > 0 else "python_fallback",
+            "model_module": str(last_metrics.get("model_module", "not_run_empty_batch")),
             "model_api_version": "1.1.0",
             "torch_available": torch_available,
             "batch_size": batch_size,
@@ -238,6 +253,8 @@ def run(
             "processed_nodes": len(corrected),
             "residual_gain": gain,
             "residual_correction_applied": True,
+            "fallback_used": bool(last_metrics.get("fallback_used", False)),
+            "fallback_reason": str(last_metrics.get("fallback_reason", "")),
             "residual_l1_before": residual_before_sum,
             "residual_l1_after": residual_after_sum,
             "residual_reduction_ratio": reduction_ratio,
