@@ -425,6 +425,17 @@ def build_mgt_physical_residual_closure(
         "tangent_free_nnz": int(tangent_free_csr.nnz),
         "component_residual_fn": component_residual_fn,
         "spring_free_csr": spring_free_csr,
+        "frame_inputs": {
+            "frame_elements": frame_elements,
+            "node_xyz": node_xyz,
+            "section_props": section_props,
+            "material_props": material_props,
+            "base_axial": base_axial,
+            "frame_gravity_load_scale": float(frame_gravity_load_scale),
+            "load_scale": float(load_scale),
+            "free": free,
+            "u0": u0,
+        },
     }
     return residual_fn, u0[free].copy(), meta
 
