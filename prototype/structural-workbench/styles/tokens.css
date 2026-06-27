@@ -1,20 +1,20 @@
 /* Design tokens: colours, spacing, typography, and the six data-state colours. */
 
 :root {
-  --wb-bg-top: #07111c;
-  --wb-bg-mid: #0b1621;
-  --wb-bg-bot: #111c29;
-  --wb-surface: rgba(18, 30, 44, 0.92);
-  --wb-surface-2: rgba(12, 22, 33, 0.9);
-  --wb-border: rgba(148, 168, 190, 0.18);
-  --wb-text: #ecf2f6;
-  --wb-text-dim: #96a8bb;
-  --wb-accent: #4fb7ad;
-  --wb-focus: #7fd8d0;
+  --wb-bg-top: #0d1117;
+  --wb-bg-mid: #0f141b;
+  --wb-bg-bot: #151b22;
+  --wb-surface: rgba(21, 27, 34, 0.96);
+  --wb-surface-2: rgba(16, 21, 27, 0.96);
+  --wb-border: rgba(217, 222, 229, 0.14);
+  --wb-text: #e8edf2;
+  --wb-text-dim: #9aa5b1;
+  --wb-accent: #2f6feb;
+  --wb-focus: #5b8def;
 
-  --wb-radius: 16px;
-  --wb-radius-sm: 11px;
-  --wb-gap: 18px;
+  --wb-radius: 8px;
+  --wb-radius-sm: 6px;
+  --wb-gap: 16px;
   --wb-pad: 16px;
 
   --wb-font: 'IBM Plex Sans KR', 'Pretendard', 'Noto Sans KR', system-ui, sans-serif;
