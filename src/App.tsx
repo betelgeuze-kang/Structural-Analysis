@@ -4284,7 +4284,14 @@ function App() {
                 type="button"
                 className={`app-nav__item${surface.id === activeSurfaceId ? ' is-active' : ''}`}
                 aria-current={surface.id === activeSurfaceId ? 'page' : undefined}
-                onClick={() => setActiveSurfaceId(surface.id)}
+                onClick={() => {
+                  setActiveSurfaceId(surface.id)
+                  if (typeof document !== 'undefined') {
+                    document
+                      .getElementById(`desk-${surface.id}`)
+                      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                }}
               >
                 <span className="app-nav__item-title">{surface.title}</span>
                 <span className="app-nav__item-badge">{surface.badge}</span>
@@ -4392,6 +4399,7 @@ function App() {
               return (
                 <button
                   key={surface.id}
+                  id={`desk-${surface.id}`}
                   className={`surface-card ${surface.id === activeSurface.id ? 'surface-card--active' : ''}`}
                   onClick={() => setActiveSurfaceId(surface.id)}
                   type="button"
