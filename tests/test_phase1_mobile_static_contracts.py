@@ -5,13 +5,13 @@ import importlib.util
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Any
 
 import pytest
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-PHASE1_ROOT = REPO_ROOT / "implementation" / "phase1"
 
 
 def _load_module(module_name: str, relative_path: str):
@@ -19,6 +19,7 @@ def _load_module(module_name: str, relative_path: str):
     spec = importlib.util.spec_from_file_location(module_name, module_path)
     assert spec is not None and spec.loader is not None
     module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -106,7 +107,13 @@ def test_lf_to_gnn_smoke_reports_python_fallback_truthfully(tmp_path: Path, monk
 
     real_import = builtins.__import__
 
-    def _blocked_import(name: str, globals: dict[str, Any] | None = None, locals: dict[str, Any] | None = None, fromlist=(), level: int = 0):
+    def _blocked_import(
+        name: str,
+        globals: dict[str, Any] | None = None,
+        locals: dict[str, Any] | None = None,
+        fromlist=(),
+        level: int = 0,
+    ):
         if name == "gnn_residual_model":
             raise ImportError("forced fallback for mobile/static contract test")
         return real_import(name, globals, locals, fromlist, level)
