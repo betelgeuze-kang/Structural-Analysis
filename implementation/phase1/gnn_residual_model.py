@@ -22,7 +22,7 @@ from typing import Any
 
 MODEL_API_VERSION = "1.1.0"
 EPS = 1e-12
-MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#A1-lf---gnn-interface-contract"
+MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#a1-lf---gnn-interface-contract"
 CLAIM_BOUNDARY = "residual_correction_assist_not_solver_truth"
 LF_GNN_MODEL_ENTRYPOINTS = ("run_one_batch", "run_one_batch_with_metrics")
 LF_GNN_STANDARD_REASON_CODES = {
@@ -31,6 +31,8 @@ LF_GNN_STANDARD_REASON_CODES = {
     "ERR_LF_GNN_TYPE": "field exists but has wrong type",
     "ERR_LF_GNN_EMPTY_BATCH": "node/edge/LF batch is empty",
     "ERR_LF_GNN_SHAPE_MISMATCH": "node, edge, or LF response dimensions are inconsistent",
+    "ERR_LF_GNN_ACCURACY_BELOW_TARGET": "residual correction did not meet the configured accuracy target",
+    "ERR_LF_GNN_COMPLEXITY_GUARDRAIL": "observed operation budget exceeded the linear-complexity guardrail",
     "ERR_LF_GNN_UNSUPPORTED_FEATURE": "feature family is outside the residual model scope",
     "ERR_LF_GNN_CLAIM_BOUNDARY": "output tries to claim autonomous solver truth",
 }
