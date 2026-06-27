@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/betelgeuze-kang/Structural-Analysis/implementation/phase1/step5_rca_summary.schema.json",
+  "title": "Phase1 Step5 RCA Summary",
+  "description": "Mobile/static-development contract for the Step5 RCA summary consumed by phase1_ci_gate.py. The current CI gate requires timing_breakdown_seconds.compute, timing_breakdown_seconds.host_copy, and timing_breakdown_seconds.serialization to be finite non-negative numbers. Additional metadata fields are intentionally optional so older RCA receipts remain readable while new producers can attach stronger provenance.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["timing_breakdown_seconds"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Optional producer-declared schema version. Recommended value: phase1.step5_rca_summary.v1."
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Optional UTC timestamp when the RCA summary was generated."
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional deterministic run or artifact identifier."
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional script/tool name that produced the summary."
+    },
+    "timing_breakdown_seconds": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["compute", "host_copy", "serialization"],
+      "properties": {
+        "compute": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Finite non-negative compute/main-loop wall time in seconds."
+        },
+        "host_copy": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Finite non-negative host-copy wall time in seconds."
+        },
+        "serialization": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Finite non-negative serialization/reporting wall time in seconds."
+        }
+      }
+    },
+    "host_copy_share": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Optional normalized host-copy share. When absent, consumers may derive it from timing_breakdown_seconds."
+    },
+    "zero_copy_pass": {
+      "type": "boolean",
+      "description": "Optional producer-side zero-copy verdict. CI gates should still recompute or cross-check when strict evidence is available."
+    },
+    "strict_probe_ref": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional path, artifact id, or receipt id for the strict Rust/HIP probe consumed with this RCA summary."
+    },
+    "artifact_manifest": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional producer artifact manifest carrying version, run id, timestamp, source commit, and checksums."
+    }
+  }
+}
