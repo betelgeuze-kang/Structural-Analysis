@@ -78,6 +78,9 @@
 - A1 코드 반영: `lf_to_gnn_e2e_smoke.py`는 `LF_GNN_REQUIRED_INPUT_FIELDS`, `LF_GNN_OUTPUT_FIELDS`, `LF_GNN_STANDARD_REASON_CODES`, `LEGACY_TO_STANDARD_REASON_CODE`, `claim_boundary`를 노출하고 report에 `standard_reason_code`를 추가한다
 - A1 모델 반영: `gnn_residual_model.py`는 compatibility entrypoint/docstring, required batch/node/edge field constants, `mobile_static_contract_ref`, `claim_boundary` metric을 노출한다
 - A1/A2/A3 README 앵커 보조 문서 추가: `implementation/phase1/README.mobile-static-contracts.md`는 `mobile-static-contracts.md`, `step5_rca_summary.schema.json`, `step5_rca_contract.py`, LF→GNN 파일군, strict Rust/HIP handoff를 한 곳에 연결한다
+- 모바일 정적 코드리뷰 병목 수정: `ERR_RESIDUAL_ACCURACY`와 `ERR_COMPLEXITY_GUARDRAIL`를 각각 `ERR_LF_GNN_ACCURACY_BELOW_TARGET`, `ERR_LF_GNN_COMPLEXITY_GUARDRAIL`로 분리해 과도한 unsupported/shape-mismatch 분류를 제거했다
+- 모바일 정적 코드리뷰 병목 수정: LF→GNN smoke fallback 경로가 `model_module=gnn_residual_model`로 보일 수 있는 혼동을 줄이기 위해 `fallback_used`, `fallback_reason`, `model_module=python_fallback` 리포트 필드를 표준화했다
+- 모바일 정적 코드리뷰 병목 수정: GitHub Markdown 자동 앵커에 맞춰 A1/A2/A3 문서 링크와 코드 내 `mobile_static_contract_ref`를 소문자 앵커로 통일했다
 - 이번 pass에서는 모바일 원칙에 맞춰 Python/Rust/HIP/npm/CI 실행, protected evidence 재생성, release/solver/benchmark/customer-shadow/HIP claim 승격을 하지 않음
 
 ## 완료 보고 포맷 (모바일웹 개발환경용)
@@ -105,7 +108,7 @@
 ## 이번 pass 이후 추천 Next-3
 1) `phase1_ci_gate.py::_validate_inputs()`가 `step5_rca_contract.validate_step5_rca_summary()`를 직접 호출하거나 같은 helper를 inline해서 `missing_fields`/`invalid_fields`를 top-level gate details에 보존하도록 반영
 2) `tests/test_phase1_ci_gate.py`에 `host_copy_share < 0`, `host_copy_share > 1`, `NaN/inf timing`, `missing timing subfield` 케이스를 추가
-3) `implementation/phase1/README.md` 본문에 `README.mobile-static-contracts.md` 링크를 직접 삽입해 보조 README anchor를 주 문서 표면으로 승격
+3) LF→GNN smoke fallback 경로에 대한 workstation test를 추가해 모델 import/runtime 실패 시 `fallback_used=true`, `model_module=python_fallback`, `standard_reason_code=ERR_LF_GNN_ACCURACY_BELOW_TARGET`가 보존되는지 확인
 
 ## 이번 기준 추천 Later-3
 1) Krylov adaptive 재직교화 정책표(구간별 pass 증가) 반영
