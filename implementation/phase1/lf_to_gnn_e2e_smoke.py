@@ -3,6 +3,13 @@
 
 Loads LF exports (ulf_nodes/ulf_edges/ulf_meta), runs one-batch residual correction,
 and emits an O(N+E) + physics-accuracy focused report.
+
+Mobile/static contract notes:
+- this smoke is a residual-correction assist surface, not solver truth;
+- required interface fields and standard reason codes are mirrored in
+  ``mobile-static-contracts.md`` for review without executing the model;
+- legacy reason codes remain stable for existing tests and reports, while
+  ``standard_reason_code`` maps them to the LF->GNN contract vocabulary.
 """
 
 from __future__ import annotations
@@ -18,6 +25,49 @@ from typing import Iterator
 INTERFACE_VERSION = "1.1.0"
 SCHEMA_VERSION = "1.2"
 RUN_ID = "phase1-lf-gnn-smoke"
+MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#A1-lf---gnn-interface-contract"
+CLAIM_BOUNDARY = "residual_correction_assist_not_solver_truth"
+LF_GNN_REQUIRED_INPUT_FIELDS = (
+    "schema_version",
+    "case_id",
+    "source_model_ref",
+    "node_features",
+    "edge_index",
+    "lf_outputs",
+    "boundary_conditions",
+    "normalization",
+    "provenance",
+    "claim_boundary",
+)
+LF_GNN_OUTPUT_FIELDS = (
+    "status",
+    "reason_code",
+    "standard_reason_code",
+    "delta_u",
+    "corrected_state",
+    "residual_metrics",
+    "uncertainty",
+    "unsupported_features",
+    "warnings",
+)
+LF_GNN_STANDARD_REASON_CODES = {
+    "PASS": "input/output contract is satisfied",
+    "ERR_LF_GNN_FIELD_MISSING": "required field is absent",
+    "ERR_LF_GNN_TYPE": "field exists but has wrong type",
+    "ERR_LF_GNN_EMPTY_BATCH": "node/edge/LF batch is empty",
+    "ERR_LF_GNN_SHAPE_MISMATCH": "node, edge, or LF response dimensions are inconsistent",
+    "ERR_LF_GNN_UNSUPPORTED_FEATURE": "feature family is outside the residual model scope",
+    "ERR_LF_GNN_CLAIM_BOUNDARY": "output tries to claim autonomous solver truth",
+}
+LEGACY_TO_STANDARD_REASON_CODE = {
+    "PASS": "PASS",
+    "ERR_EMPTY_NODES": "ERR_LF_GNN_EMPTY_BATCH",
+    "ERR_EMPTY_EDGES": "ERR_LF_GNN_EMPTY_BATCH",
+    "ERR_META_UNIT": "ERR_LF_GNN_FIELD_MISSING",
+    "ERR_EMPTY_CORRECTION": "ERR_LF_GNN_EMPTY_BATCH",
+    "ERR_RESIDUAL_ACCURACY": "ERR_LF_GNN_UNSUPPORTED_FEATURE",
+    "ERR_COMPLEXITY_GUARDRAIL": "ERR_LF_GNN_SHAPE_MISMATCH",
+}
 
 REASON_CODES = {
     "PASS": "one-batch ingestion + correction completed",
@@ -27,6 +77,7 @@ REASON_CODES = {
     "ERR_EMPTY_CORRECTION": "no corrected nodes emitted",
     "ERR_RESIDUAL_ACCURACY": "residual correction accuracy below target",
     "ERR_COMPLEXITY_GUARDRAIL": "linear complexity guardrail violated",
+    **LF_GNN_STANDARD_REASON_CODES,
 }
 
 
@@ -74,6 +125,8 @@ def _apply_residual_batch_fallback(batch: list[dict], gain: float) -> tuple[list
         "operation_count_estimate": int(8 * len(batch)),
         "node_count": len(batch),
         "edge_count": 0,
+        "claim_boundary": CLAIM_BOUNDARY,
+        "mobile_static_contract_ref": MOBILE_STATIC_CONTRACT_REF,
     }
     return corrected, metrics
 
@@ -156,11 +209,19 @@ def run(
         reason_code = "PASS"
 
     pass_cond = reason_code == "PASS"
+    standard_reason_code = LEGACY_TO_STANDARD_REASON_CODE.get(reason_code, reason_code)
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": RUN_ID,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "interface_version": INTERFACE_VERSION,
+        "contract": {
+            "mobile_static_contract_ref": MOBILE_STATIC_CONTRACT_REF,
+            "claim_boundary": CLAIM_BOUNDARY,
+            "required_input_fields": list(LF_GNN_REQUIRED_INPUT_FIELDS),
+            "output_fields": list(LF_GNN_OUTPUT_FIELDS),
+            "standard_reason_codes": LF_GNN_STANDARD_REASON_CODES,
+        },
         "ingest": {
             "node_count": len(nodes),
             "edge_count": len(edges),
@@ -190,6 +251,8 @@ def run(
         },
         "pass": pass_cond,
         "reason_code": reason_code,
+        "standard_reason_code": standard_reason_code,
+        "claim_boundary": CLAIM_BOUNDARY,
         "reason": REASON_CODES[reason_code],
     }
 
