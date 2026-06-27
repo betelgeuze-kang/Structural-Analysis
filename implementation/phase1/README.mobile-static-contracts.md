@@ -30,7 +30,7 @@ Files:
 
 - [LF -> GNN smoke runner](lf_to_gnn_e2e_smoke.py)
 - [GNN residual model compatibility module](gnn_residual_model.py)
-- [Mobile/static LF -> GNN contract](mobile-static-contracts.md#A1-lf---gnn-interface-contract)
+- [Mobile/static LF -> GNN contract](mobile-static-contracts.md#a1-lf---gnn-interface-contract)
 
 Required static vocabulary:
 
@@ -45,7 +45,7 @@ The LF -> GNN path is an accelerator/reviewer-aid surface. It must not be used a
 
 Files:
 
-- [Mobile/static strict Rust/HIP handoff](mobile-static-contracts.md#A2-strict-rusthip-producer-handoff)
+- [Mobile/static strict Rust/HIP handoff](mobile-static-contracts.md#a2-strict-rusthip-producer-handoff)
 - [Zero-copy strict probe schema and command handoff](mobile-static-contracts.md#command-template)
 
 Static handoff command shape:
@@ -66,7 +66,7 @@ Files:
 
 - [Step5 RCA summary schema](step5_rca_summary.schema.json)
 - [Step5 RCA static validation helper](step5_rca_contract.py)
-- [Mobile/static Step5 RCA contract](mobile-static-contracts.md#A3-step5-rca-summary-static-schema)
+- [Mobile/static Step5 RCA contract](mobile-static-contracts.md#a3-step5-rca-summary-static-schema)
 
 Required current gate fields:
 
