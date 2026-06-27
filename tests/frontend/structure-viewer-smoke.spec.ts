@@ -18,9 +18,18 @@ async function openViewer(page, viewport: Viewport, query: string) {
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   page.on('console', (message) => {
-    if (message.type() === 'error') {
-      errors.push(message.text())
-    }
+    if (message.type() !== 'error') return
+    const url = message.location()?.url ?? ''
+    // Release-visualization data under implementation/phase1/release/ is hosted
+    // at deploy time and is intentionally gitignored, so it 404s on clean
+    // checkouts (CI). Ignore only those benign resource 404s; every other
+    // console error and all pageerrors still fail the smoke.
+    const isDeployTimeData404 =
+      /Failed to load resource/.test(message.text()) &&
+      /status of 404/.test(message.text()) &&
+      url.includes('/implementation/phase1/release/')
+    if (isDeployTimeData404) return
+    errors.push(message.text())
   })
   await page.goto(`${baseUrl}/src/structure-viewer/index.html?${query}`, {
     timeout: 90000,
