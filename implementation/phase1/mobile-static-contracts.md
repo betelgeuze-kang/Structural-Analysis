@@ -61,6 +61,8 @@ The residual-learning path remains an accelerator/reviewer-aid surface. It must 
 | `ERR_LF_GNN_TYPE` | Field exists but has wrong type. | Normalize JSON/tensor envelope before model handoff. |
 | `ERR_LF_GNN_EMPTY_BATCH` | Node/edge/LF batch is empty. | Block prediction; do not synthesize placeholder response. |
 | `ERR_LF_GNN_SHAPE_MISMATCH` | Node, edge, or LF response dimensions are inconsistent. | Fix adapter shape mapping before training/inference. |
+| `ERR_LF_GNN_ACCURACY_BELOW_TARGET` | Residual correction did not meet the configured accuracy target. | Keep the result blocked/review; inspect deterministic LF output, graph features, and target threshold before model changes. |
+| `ERR_LF_GNN_COMPLEXITY_GUARDRAIL` | Observed operation budget exceeded the linear-complexity guardrail. | Reduce message passes or fix batching/edge traversal before scaling. |
 | `ERR_LF_GNN_UNSUPPORTED_FEATURE` | Feature family is outside the residual model scope. | Route to deterministic solver/fallback and record unsupported feature. |
 | `ERR_LF_GNN_CLAIM_BOUNDARY` | Output tries to claim autonomous solver truth. | Downgrade wording to residual-correction assist. |
 
@@ -159,6 +161,11 @@ Static validation expectations:
 - `generated_at_utc`, when present, must be UTC date-time shaped.
 - Missing required timing fields should map to `ERR_MISSING_RCA_KEY`.
 - Non-numeric, NaN, infinity, or negative timing values should map to `ERR_INVALID_RCA_VALUE`.
+
+## Static review fixes in this pass
+
+- Split LF -> GNN target-accuracy and complexity failures into dedicated standard reason codes instead of overloading unsupported/shape failures.
+- Kept the contract explicitly mobile/static: no runtime, no protected evidence mutation, and no solver/HIP/product claim promotion.
 
 ## Done in this mobile/static pass
 
