@@ -37,6 +37,74 @@ DEFAULT_ALPHAS = (
     0.000244140625, 0.0001220703125,
 )
 
+PRECONDITIONER_MODES = (
+    "none", "jacobi_diag", "absolute_jacobi_diag", "damped_jacobi_diag",
+)
+DEFAULT_PRECONDITIONER = "none"
+DEFAULT_PRECONDITIONER_FLOOR = 1.0e-8
+DEFAULT_PRECONDITIONER_DAMPING_RATIO = 1.0e-3
+
+
+def build_jacobi_preconditioner(
+    diag: np.ndarray,
+    mode: str = DEFAULT_PRECONDITIONER,
+    *,
+    floor: float = DEFAULT_PRECONDITIONER_FLOOR,
+    damping_ratio: float = DEFAULT_PRECONDITIONER_DAMPING_RATIO,
+) -> tuple[Callable[[np.ndarray], np.ndarray] | None, dict[str, Any]]:
+    """Build a free-space diagonal (Jacobi) preconditioner M^-1 from a diagonal.
+
+    Modes:
+      - ``none``                : no preconditioner (returns None);
+      - ``jacobi_diag``         : 1/diag, preserving sign (floored magnitude);
+      - ``absolute_jacobi_diag``: 1/max(|diag|, floor);
+      - ``damped_jacobi_diag``  : 1/(max(|diag|, floor) + damping_ratio*max|diag|).
+    """
+    if mode not in PRECONDITIONER_MODES:
+        raise ValueError(f"unknown preconditioner mode {mode!r}; expected {PRECONDITIONER_MODES}")
+    diag = np.asarray(diag, dtype=np.float64)
+    n = int(diag.size)
+    abs_diag = np.abs(diag)
+    max_abs = float(np.max(abs_diag)) if n else 1.0
+    min_abs = float(np.min(abs_diag)) if n else 0.0
+    tiny = int(np.count_nonzero(abs_diag < floor))
+    meta = {
+        "mode": mode,
+        "applied_in_free_space": True,
+        "diag_min_abs": min_abs,
+        "diag_max_abs": max_abs,
+        "diag_floor": float(floor),
+        "tiny_diag_count": tiny,
+    }
+    if mode == "none":
+        return None, meta
+
+    if mode == "jacobi_diag":
+        floored_mag = np.maximum(abs_diag, floor)
+        sign = np.where(diag >= 0.0, 1.0, -1.0)
+        minv_vec = sign / floored_mag
+    elif mode == "absolute_jacobi_diag":
+        minv_vec = 1.0 / np.maximum(abs_diag, floor)
+    else:  # damped_jacobi_diag
+        meta["damping_ratio"] = float(damping_ratio)
+        minv_vec = 1.0 / (np.maximum(abs_diag, floor) + damping_ratio * max_abs)
+
+    if not bool(np.all(np.isfinite(minv_vec))):
+        meta["reason_code"] = "nonfinite_preconditioner"
+        return None, meta
+
+    def minv(r: np.ndarray) -> np.ndarray:
+        r = np.asarray(r, dtype=np.float64)
+        if r.shape != minv_vec.shape:
+            raise ValueError(
+                f"preconditioner expects free-space vector of shape {minv_vec.shape}, "
+                f"got {r.shape}"
+            )
+        return minv_vec * r
+
+    return minv, meta
+
+
 
 def _inf_norm(x: np.ndarray) -> float:
     x = np.asarray(x, dtype=np.float64)
@@ -54,13 +122,16 @@ def solve_physical_newton_direction(
     mode: str = "matrix_free_gmres",
     eps: float = DEFAULT_JVP_EPS,
     gmres_tol: float = 1.0e-8,
+    gmres_atol: float = 1.0e-10,
     gmres_maxiter: int = 500,
+    preconditioner_minv: Callable[[np.ndarray], np.ndarray] | None = None,
 ) -> tuple[np.ndarray | None, dict[str, Any]]:
     """Solve J_phys(u) p = -R(u) using the matrix-free physical JVP.
 
     ``mode='representative_direct'`` densely assembles J from JVPs (only suitable
     for small representative systems) and solves directly. ``mode='matrix_free_gmres'``
-    wraps the JVP in a scipy LinearOperator and runs GMRES.
+    wraps the JVP in a scipy LinearOperator and runs GMRES, optionally with a
+    free-space preconditioner ``preconditioner_minv`` (a callable M^-1 . r).
     """
     u = np.asarray(u, dtype=np.float64)
     r0 = np.asarray(residual_fn(u), dtype=np.float64)
@@ -87,15 +158,39 @@ def solve_physical_newton_direction(
             "converged": bool(converged),
             "reason_code": reason,
             "jacobian_assembled_dense": True,
+            "preconditioned": False,
+            "residual_norm_before": float(_inf_norm(r0)),
+            "residual_norm_after": float(_inf_norm(jac @ p + r0)) if converged else None,
         }
 
     # matrix-free GMRES
+    iter_count = {"n": 0}
+
+    def _count(_x):  # scipy callback (per-iteration)
+        iter_count["n"] += 1
+
     operator = LinearOperator((n, n), matvec=jvp, dtype=np.float64)
+    precond = (
+        LinearOperator((n, n), matvec=preconditioner_minv, dtype=np.float64)
+        if preconditioner_minv is not None
+        else None
+    )
     try:
-        p, info = gmres(operator, -r0, rtol=gmres_tol, maxiter=gmres_maxiter)
+        p, info = gmres(
+            operator, -r0, rtol=gmres_tol, atol=gmres_atol,
+            maxiter=gmres_maxiter, M=precond, callback=_count, callback_type="legacy",
+        )
     except TypeError:
-        # older scipy uses `tol` instead of `rtol`
-        p, info = gmres(operator, -r0, tol=gmres_tol, maxiter=gmres_maxiter)
+        try:
+            p, info = gmres(
+                operator, -r0, tol=gmres_tol, atol=gmres_atol,
+                maxiter=gmres_maxiter, M=precond, callback=_count, callback_type="legacy",
+            )
+        except TypeError:
+            # very old scipy: no callback_type support; drop iteration counting
+            p, info = gmres(
+                operator, -r0, tol=gmres_tol, maxiter=gmres_maxiter, M=precond,
+            )
     converged = bool(info == 0 and _is_finite(p))
     if info > 0:
         reason = "gmres_not_converged_maxiter"
@@ -105,12 +200,17 @@ def solve_physical_newton_direction(
         reason = "non_finite_direction"
     else:
         reason = "ok"
+    residual_after = float(_inf_norm(jvp(p) + r0)) if _is_finite(p) else None
     return (p if converged else None), {
         "mode": mode,
         "converged": converged,
         "reason_code": reason,
         "gmres_info": int(info),
         "gmres_maxiter": int(gmres_maxiter),
+        "iterations": int(iter_count["n"]),
+        "preconditioned": bool(precond is not None),
+        "residual_norm_before": float(_inf_norm(r0)),
+        "residual_norm_after": residual_after,
     }
 
 

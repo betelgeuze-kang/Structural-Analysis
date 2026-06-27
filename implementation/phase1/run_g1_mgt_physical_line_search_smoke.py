@@ -391,6 +391,7 @@ def build_mgt_physical_residual_closure(
         "element_count": int(elem_id.shape[0]),
         "free_dof_count": int(free.size),
         "external_load_inf_n": float(np.max(np.abs(f_ext))) if f_ext.size else 0.0,
+        "diag_free": np.asarray(diag[free], dtype=np.float64),
     }
     return residual_fn, u0[free].copy(), meta
 
