@@ -78,7 +78,6 @@ select {
   min-height: 100vh;
   padding: 32px 24px 40px;
   overflow: hidden;
-  border-top: 3px solid var(--color-primary);
 }
 
 .shell::before,
@@ -1884,5 +1883,219 @@ select {
   .hero__eyebrow-row {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   App shell: top app bar + left review-desk nav + main + status bar.
+   Wraps the existing .shell content without altering its internals.
+---------------------------------------------------------------------------- */
+.app-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'bar bar'
+    'nav main'
+    'status status';
+}
+
+.app-bar {
+  grid-area: bar;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 52px;
+  padding: 0 20px;
+  border-top: 3px solid var(--color-primary);
+  border-bottom: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-strong);
+}
+
+.app-bar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.app-bar__mark {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--color-primary);
+  box-shadow: inset 0 0 0 3px var(--color-surface-dark-strong), 0 0 0 1px var(--color-primary);
+}
+
+.app-bar__brand-copy {
+  min-width: 0;
+}
+
+.app-bar__product {
+  margin: 0;
+  font-family: 'Inter', 'IBM Plex Sans KR', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--color-text-dark);
+}
+
+.app-bar__env {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted-dark);
+}
+
+.app-bar__status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.app-bar__active {
+  overflow: hidden;
+  max-width: 36ch;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.82rem;
+  color: var(--color-muted-dark);
+}
+
+.app-nav {
+  grid-area: nav;
+  position: sticky;
+  top: 52px;
+  align-self: start;
+  max-height: calc(100vh - 52px);
+  overflow-y: auto;
+  padding: 16px 12px;
+  border-right: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-strong);
+}
+
+.app-nav__label {
+  margin: 0 0 10px 8px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-muted-dark);
+}
+
+.app-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.app-nav__item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.app-nav__item:hover {
+  background: var(--color-surface-dark-soft);
+}
+
+.app-nav__item.is-active {
+  background: var(--color-primary-weak);
+  border-color: var(--color-primary);
+}
+
+.app-nav__item-title {
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.app-nav__item-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-muted-dark);
+}
+
+.app-shell__main {
+  grid-area: main;
+}
+
+.shell.app-shell__main {
+  min-height: 0;
+}
+
+.app-statusbar {
+  grid-area: status;
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 30px;
+  padding: 0 18px;
+  border-top: 1px solid var(--color-line-dark);
+  background: var(--color-surface-dark-strong);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--color-muted-dark);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.app-statusbar__item {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-statusbar__item--status {
+  margin-left: auto;
+  color: var(--color-text-dark);
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'bar'
+      'nav'
+      'main'
+      'status';
+  }
+
+  .app-nav {
+    position: static;
+    max-height: none;
+    border-right: none;
+    border-bottom: 1px solid var(--color-line-dark);
+  }
+
+  .app-nav__list {
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(160px, 1fr);
+    overflow-x: auto;
   }
 }

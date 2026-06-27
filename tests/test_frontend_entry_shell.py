@@ -430,3 +430,29 @@ def test_frontend_entry_shell_adds_authoring_server_ops_and_family_track_surface
     assert "statusLabel: contractPass === true ? 'family track ready' : 'family track check'" in app_tsx
     assert "missingSnapshot('native authoring server ops summary를 아직 읽지 못했습니다.')" in app_tsx
     assert "missingSnapshot('native authoring family track JSON을 아직 읽지 못했습니다.')" in app_tsx
+
+
+def test_frontend_entry_shell_wraps_content_in_product_app_shell() -> None:
+    app_tsx = (ROOT / "src" / "App.tsx").read_text(encoding="utf-8")
+    index_css = (ROOT / "src" / "index.css").read_text(encoding="utf-8")
+
+    # App-shell chrome: top app bar + left review-desk nav + status bar.
+    assert 'className="app-shell"' in app_tsx
+    assert 'className="app-bar"' in app_tsx
+    assert "Local evidence workspace" in app_tsx
+    assert 'className="app-nav"' in app_tsx
+    assert 'aria-label="Review surfaces"' in app_tsx
+    assert "Review desks" in app_tsx
+    assert "app-nav__item" in app_tsx
+    assert "onClick={() => setActiveSurfaceId(surface.id)}" in app_tsx
+    assert 'aria-current={surface.id === activeSurfaceId ? \'page\' : undefined}' in app_tsx
+    assert 'className="shell app-shell__main"' in app_tsx
+    assert 'className="app-statusbar" aria-label="Workspace status"' in app_tsx
+
+    # Shell layout styles must be present.
+    assert ".app-shell {" in index_css
+    assert ".app-bar {" in index_css
+    assert ".app-nav__item {" in index_css
+    assert ".app-nav__item.is-active {" in index_css
+    assert ".app-statusbar {" in index_css
+    assert "grid-template-areas:" in index_css
