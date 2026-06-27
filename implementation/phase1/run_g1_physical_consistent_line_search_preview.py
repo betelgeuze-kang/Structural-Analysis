@@ -58,7 +58,6 @@ def run_g1_physical_consistent_line_search_preview(
     mode = normalize_global_newton_operator(global_newton_operator)
     system = _representative_physical_system(seed=seed)
     residual_fn = system["residual_fn"]
-    physical_jacobian = system["physical_jacobian"]
 
     rng = np.random.default_rng(seed + 2)
     n = int(system["f"].size)
