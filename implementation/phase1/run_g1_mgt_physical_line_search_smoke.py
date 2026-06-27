@@ -388,6 +388,32 @@ def build_mgt_physical_residual_closure(
         residual, _rhs = assemble_physical_residual(u=u, f_ext=f_ext, free=free, f_int=f_int)
         return np.asarray(residual, dtype=np.float64)
 
+    component_shell_cache: dict[str, Any] = {}
+
+    def component_residual_fn(x_free: np.ndarray) -> dict[str, np.ndarray]:
+        """Return free-space component internal forces (frame/spring/shell/...).
+
+        The physical residual is sum(components) - load_scale*F_ext; F_ext is
+        constant, so component directional derivatives sum to the total JVP.
+        """
+        u = u0.copy()
+        u[free] = np.asarray(x_free, dtype=np.float64)
+        _f_int, cmeta = assemble_physical_internal_forces(
+            u=u, node_xyz=node_xyz, frame_elements=frame_elements,
+            elem_type_code=elem_type_code, elem_section_id=elem_section_id,
+            elem_material_id=elem_material_id, conn_ptr=conn_ptr, conn_idx=conn_idx,
+            section_props=section_props, material_props=material_props,
+            plate_thickness_props=plate_thickness_props, spring_stiffness=spring_stiffness,
+            base_axial_forces=base_axial, frame_gravity_load_scale=frame_gravity_load_scale,
+            load_scale=load_scale, apply_shell_material_tangent=apply_shell_material_tangent,
+            include_component_forces=True, split_shell_components=True,
+            shell_operator_cache=component_shell_cache, frame_force_cache=frame_force_cache,
+        )
+        comps = cmeta.get("component_forces", {})
+        return {name: np.asarray(vals, dtype=np.float64)[free] for name, vals in comps.items()}
+
+    spring_free_csr = spring_stiffness.tocsr()[free][:, free].tocsr()
+
     meta = {
         "dof_count": int(ndof),
         "node_count": int(node_xyz.shape[0]),
@@ -397,6 +423,8 @@ def build_mgt_physical_residual_closure(
         "diag_free": np.asarray(diag[free], dtype=np.float64),
         "tangent_free_csr": tangent_free_csr,
         "tangent_free_nnz": int(tangent_free_csr.nnz),
+        "component_residual_fn": component_residual_fn,
+        "spring_free_csr": spring_free_csr,
     }
     return residual_fn, u0[free].copy(), meta
 
