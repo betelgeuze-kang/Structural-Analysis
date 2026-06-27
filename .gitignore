@@ -89,6 +89,10 @@ implementation/phase1/release_evidence/productization/*_test.json
 implementation/phase1/release_evidence/commercial/*_test.json
 implementation/phase1/workstation_jobs/20*/
 
+# Non-promoting local diagnostic evidence (never committed, never promoted)
+*.local.json
+implementation/phase1/local_diagnostics/
+
 # Generated model/data artifacts
 implementation/phase1/spatiotemporal_data/*.pt
 implementation/phase1/spatiotemporal_data/*_report*.json
