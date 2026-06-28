@@ -56,6 +56,7 @@ STOP_NO_DESCENT = "line_search_no_descent"
 STOP_SOLVE_FAILED = "solve_failed"
 STOP_NAN = "fail_closed_nan"
 STOP_STALLED = "stalled_min_reduction"
+STOP_PARITY_FAILED = "parity_failed"
 
 
 def _inf_norm(x: np.ndarray) -> float:
@@ -107,7 +108,7 @@ def run_multistep_newton(
                             "direction_solve_status": "blocked",
                             "reason_code": (meta or {}).get("reason_code", "solve_failed"),
                             "accepted_alpha": None})
-            stop_reason = STOP_SOLVE_FAILED
+            stop_reason = (meta or {}).get("solve_stop_reason", STOP_SOLVE_FAILED)
             break
         jvp_action = physical_consistent_jvp(residual_fn, x, p)
         ls = physical_residual_backtracking_line_search(
@@ -122,10 +123,14 @@ def run_multistep_newton(
         alpha = float(ls["accepted_alpha"])
         ra = float(ls["residual_after_n"])
         reduction = (rb - ra) / max(rb, 1.0e-30)
-        history.append({"iteration": it, "residual_before_n": rb,
-                        "direction_solve_status": "ready", "accepted_alpha": alpha,
-                        "residual_after_n": ra, "residual_reduction_ratio": reduction,
-                        "line_search_status": "ready"})
+        row = {"iteration": it, "residual_before_n": rb,
+               "direction_solve_status": "ready", "accepted_alpha": alpha,
+               "residual_after_n": ra, "residual_reduction_ratio": reduction,
+               "line_search_status": "ready"}
+        for key in ("tangent_rebuilt", "assembled_tangent_parity_pass"):
+            if meta and key in meta:
+                row[key] = meta[key]
+        history.append(row)
         if ra > rb:
             monotonic = False
         x = x + alpha * p
