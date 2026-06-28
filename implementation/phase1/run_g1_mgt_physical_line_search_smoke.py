@@ -478,6 +478,9 @@ def build_mgt_physical_residual_closure(
             "u0": u0,
         },
         "frame_service_tangent_source": service_tangent_source,
+        "node_id": node_id,
+        "free": free,
+        "dof_per_node": int(DOF_PER_NODE),
         "frame_service_tangent_stats_mpa": {
             "min": float(np.min(_svc_values)) if _svc_values.size else None,
             "max": float(np.max(_svc_values)) if _svc_values.size else None,
