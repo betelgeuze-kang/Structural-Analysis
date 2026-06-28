@@ -429,6 +429,31 @@ def build_mgt_physical_residual_closure(
 
     spring_free_csr = spring_stiffness.tocsr()[free][:, free].tocsr()
 
+    def tangent_rebuild_fn(x_free: np.ndarray) -> Any:
+        """Re-assemble the regularizable free-space Newton tangent at an arbitrary state.
+
+        Recomputes the per-element service material tangent at the deformed state
+        (true-Newton re-linearization) and restricts to the reference free DOF set.
+        """
+        from run_mgt_direct_residual_newton_probe import _service_tangent_by_element
+
+        u = u0.copy()
+        u[free] = np.asarray(x_free, dtype=np.float64)
+        state_service_tangent, _m = _service_tangent_by_element(
+            elements=frame_elements, node_xyz=node_xyz, u=u, material_props=material_props,
+        )
+        k_state, _fext, _meta = assemble_newton_tangent_stiffness(
+            u=u, node_xyz=node_xyz, frame_elements=frame_elements,
+            elem_type_code=elem_type_code, elem_section_id=elem_section_id,
+            elem_material_id=elem_material_id, conn_ptr=conn_ptr, conn_idx=conn_idx,
+            section_props=section_props, material_props=material_props,
+            plate_thickness_props=plate_thickness_props, spring_stiffness=spring_stiffness,
+            base_axial_forces=base_axial, frame_gravity_load_scale=frame_gravity_load_scale,
+            load_scale=load_scale, service_tangent_by_element=state_service_tangent,
+            service_material_meta={}, shell_pressure_load_allowed_surface_elements=pressure_allowed,
+        )
+        return k_state.tocsr()[free][:, free].tocsr()
+
     meta = {
         "dof_count": int(ndof),
         "node_count": int(node_xyz.shape[0]),
@@ -440,6 +465,7 @@ def build_mgt_physical_residual_closure(
         "tangent_free_nnz": int(tangent_free_csr.nnz),
         "component_residual_fn": component_residual_fn,
         "spring_free_csr": spring_free_csr,
+        "tangent_rebuild_fn": tangent_rebuild_fn,
         "frame_inputs": {
             "frame_elements": frame_elements,
             "node_xyz": node_xyz,
