@@ -123,6 +123,33 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
     ]
+    assert [
+        row["criterion_id"] for row in phase_2["summary"]["tier_beta_gate_criteria"]
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+        "dud_e_lit_pcba_enrichment_ready",
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached",
+    ]
+    assert all(
+        row["pass"] is False for row in phase_2["summary"]["tier_beta_gate_criteria"]
+    )
+    assert {
+        row["slot_id"]: row["status"]
+        for row in phase_2["summary"]["operator_intake_slots"]
+    } == {
+        "casf_pdbbind_subset_intake": "operator_input_required",
+        "pose_coordinate_intake": "operator_input_required",
+        "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
+        "vina_gnina_comparison_intake": "operator_input_required",
+    }
+    assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
+    assert phase_2["summary"]["vina_gnina_comparison_adapter_summary"][
+        "real_comparison_case_count"
+    ] == 0
     assert "attach_dud_e_lit_pcba_enrichment_intake" in phase_2["next_actions"]
     assert "attach_vina_gnina_comparison_intake" in phase_2["next_actions"]
 

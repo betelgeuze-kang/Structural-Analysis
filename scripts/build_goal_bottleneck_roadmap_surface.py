@@ -273,6 +273,27 @@ def _public_benchmark_row(
     capability = _capability_by_id(product_capabilities, "public_benchmark_harness")
     blockers = [str(row) for row in _as_list(public_benchmark.get("blockers"))]
     tier_beta_gate = _as_dict(public_benchmark.get("tier_beta_gate"))
+    operator_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": _as_bool(row.get("required")),
+            "depends_on_count": len(_as_list(row.get("depends_on"))),
+        }
+        for row in _as_list(public_benchmark_operator_intake.get("input_slots"))
+        if isinstance(row, dict)
+    ]
+    tier_beta_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": _as_bool(row.get("pass")),
+            "current": row.get("current"),
+            "required": row.get("required"),
+            "blocker_count": len(_as_list(row.get("blockers"))),
+        }
+        for row in _as_list(tier_beta_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
     ready = _as_bool(decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready"))
     return _roadmap_row(
         phase_id="phase_2_public_benchmark_harness",
@@ -306,8 +327,16 @@ def _public_benchmark_row(
             "tier_beta_failed_criteria": [
                 str(row) for row in _as_list(tier_beta_gate.get("failed_criteria"))
             ],
+            "tier_beta_gate_criteria": tier_beta_criteria,
+            "operator_intake_slots": operator_slots,
             "subset_manifest_summary": _as_dict(public_benchmark.get("subset_manifest_summary")),
+            "pose_validity_packet_summary": _as_dict(
+                public_benchmark.get("pose_validity_packet_summary")
+            ),
             "enrichment_scorecard_summary": _as_dict(public_benchmark.get("enrichment_scorecard_summary")),
+            "vina_gnina_comparison_adapter_summary": _as_dict(
+                public_benchmark.get("vina_gnina_comparison_adapter_summary")
+            ),
         },
     )
 
