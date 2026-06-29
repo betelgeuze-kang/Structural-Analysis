@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -95,6 +96,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     assert briefing["primary_release_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
+    assert briefing["refresh_required_operator_action_count"] == 0
+    assert briefing["refresh_required_operator_actions"] == []
     assert briefing["release_area_blocker_count"] == 9
     assert briefing["release_area_owner_handoff_count"] == 9
     release_area_handoffs = {
@@ -241,6 +244,62 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "phase_3_gpcr_hard_decoy_closure",
         "phase_4_pocketmd_lite",
     ]
+
+
+def test_goal_bottleneck_roadmap_surface_promotes_stale_refresh_operator_action(
+    monkeypatch,
+) -> None:
+    original_load_json = module._load_json
+    pm_report = original_load_json(REPO_ROOT, module.DEFAULT_PM_REPORT)
+    action_register = original_load_json(REPO_ROOT, module.DEFAULT_ACTION_REGISTER)
+
+    stale_pm_report = copy.deepcopy(pm_report)
+    decision = stale_pm_report["release_decision"]
+    decision["stale_artifact_count"] = 2
+    decision["operator_action_count"] = int(decision["operator_action_count"]) + 1
+    decision["operator_actions"] = [
+        {
+            "action_id": "refresh_release_evidence_freshness",
+            "status": "refresh_required",
+            "reason": (
+                "release_evidence_freshness_report has stale or incomplete "
+                "source-of-truth blockers"
+            ),
+            "artifact": "release_evidence_freshness_report",
+        },
+        *decision["operator_actions"],
+    ]
+
+    stale_action_register = copy.deepcopy(action_register)
+    stale_action_register["release_decision_operator_actions"] = [
+        row
+        for row in stale_action_register["release_decision_operator_actions"]
+        if row["action_id"] != "refresh_release_evidence_freshness"
+    ]
+
+    def fake_load_json(repo_root: Path, path: Path) -> dict[str, object]:
+        if path == module.DEFAULT_PM_REPORT:
+            return copy.deepcopy(stale_pm_report)
+        if path == module.DEFAULT_ACTION_REGISTER:
+            return copy.deepcopy(stale_action_register)
+        return original_load_json(repo_root, path)
+
+    monkeypatch.setattr(module, "_load_json", fake_load_json)
+
+    surface = module.build_goal_bottleneck_roadmap_surface(repo_root=REPO_ROOT)
+
+    assert surface["release_decision_kpis"]["stale_artifact_count"] == 2
+    assert "refresh_stale_goal_artifacts" in surface["next_actions"]
+    actions = {
+        row["action_id"]: row
+        for row in surface["release_decision_operator_actions"]
+    }
+    refresh_action = actions["refresh_release_evidence_freshness"]
+    assert refresh_action["status"] == "refresh_required"
+    assert refresh_action["artifact"] == "release_evidence_freshness_report"
+    briefing = surface["non_expert_release_briefing"]
+    assert briefing["refresh_required_operator_action_count"] == 1
+    assert briefing["refresh_required_operator_actions"] == [refresh_action]
 
 
 def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:

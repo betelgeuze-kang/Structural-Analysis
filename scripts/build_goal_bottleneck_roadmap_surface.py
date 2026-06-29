@@ -1142,9 +1142,54 @@ def _release_area_owner_handoffs(
     return handoffs
 
 
+def _release_decision_operator_actions(
+    *,
+    decision: dict[str, Any],
+    action_register: dict[str, Any],
+    release_decision_kpis: dict[str, Any],
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    for source_rows in (
+        _as_list(decision.get("operator_actions")),
+        _as_list(action_register.get("release_decision_operator_actions")),
+    ):
+        for row in source_rows:
+            if not isinstance(row, dict):
+                continue
+            action_id = str(row.get("action_id") or "")
+            if action_id and action_id in seen:
+                continue
+            if action_id:
+                seen.add(action_id)
+            actions.append(row)
+
+    if (
+        release_decision_kpis["stale_artifact_count"] > 0
+        and "refresh_release_evidence_freshness" not in seen
+    ):
+        actions.insert(
+            0,
+            {
+                "action_id": "refresh_release_evidence_freshness",
+                "status": "refresh_required",
+                "reason": (
+                    "release_evidence_freshness_report has stale or incomplete "
+                    "source-of-truth blockers"
+                ),
+                "artifact": "release_evidence_freshness_report",
+                "next_actions": ["refresh_stale_goal_artifacts"],
+            },
+        )
+
+    return actions
+
+
 def _non_expert_release_briefing(
     *,
     release_decision_kpis: dict[str, Any],
+    release_decision_operator_actions: list[dict[str, Any]],
     pm_report: dict[str, Any],
     action_register: dict[str, Any],
     roadmap_rows: list[dict[str, Any]],
@@ -1179,6 +1224,12 @@ def _non_expert_release_briefing(
         }
         and row.get("state") != "ready"
     ]
+    refresh_required_actions = [
+        row
+        for row in release_decision_operator_actions
+        if str(row.get("status") or "") == "refresh_required"
+        or str(row.get("action_id") or "").startswith("refresh_")
+    ]
     return {
         "audience": "non_expert_pm_operator",
         "release_allowed": _as_bool(release_decision_kpis.get("release_allowed")),
@@ -1189,6 +1240,8 @@ def _non_expert_release_briefing(
         "primary_release_blocker": str(
             release_decision_kpis.get("first_blocker") or ""
         ),
+        "refresh_required_operator_action_count": len(refresh_required_actions),
+        "refresh_required_operator_actions": refresh_required_actions,
         "release_area_blocker_count": len(release_area_blockers),
         "release_area_owner_handoff_count": len(release_area_owner_handoffs),
         "release_area_owner_handoffs": release_area_owner_handoffs,
@@ -1354,8 +1407,14 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         ),
     }
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)
+    release_decision_operator_actions = _release_decision_operator_actions(
+        decision=decision,
+        action_register=action_register,
+        release_decision_kpis=release_decision_kpis,
+    )
     non_expert_release_briefing = _non_expert_release_briefing(
         release_decision_kpis=release_decision_kpis,
+        release_decision_operator_actions=release_decision_operator_actions,
         pm_report=pm_report,
         action_register=action_register,
         roadmap_rows=roadmap_rows,
@@ -1413,11 +1472,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "operator_evidence_handoff_queue": operator_evidence_handoff_queue,
         "non_expert_release_briefing_ready": True,
         "non_expert_release_briefing": non_expert_release_briefing,
-        "release_decision_operator_actions": [
-            row
-            for row in _as_list(action_register.get("release_decision_operator_actions"))
-            if isinstance(row, dict)
-        ],
+        "release_decision_operator_actions": release_decision_operator_actions,
         "next_actions": _dedupe(
             [str(row) for row in _as_list(primary_bottleneck_row.get("next_actions"))]
             + (
