@@ -1,0 +1,321 @@
+{
+  "acceptance_criteria": [
+    "public_benchmark_subset_manifest.materialized_case_count >= 12",
+    "public_benchmark_subset_manifest.public_benchmark_ready == true",
+    "public_benchmark_pose_validity_input.pose_validity_ready == true",
+    "public_benchmark_pose_validity_packet.real_benchmark_case_count >= 12",
+    "public_benchmark_symmetry_rmsd_scorecard.real_benchmark_case_count >= 12",
+    "public_benchmark_enrichment_scorecard.public_benchmark_enrichment_ready == true",
+    "public_benchmark_source_of_truth.public_benchmark_ready == true"
+  ],
+  "claim_boundary": "This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T16:54:51.285200+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:4f2041f04b722c85da5a1731072dc3784cc739ab530e0b673de5e52c22966d70",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8209fffda51aeac2737cffa7d980bc94637e83d270f043f8002675b29228f815",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
+    "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
+    "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
+    "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:be514093c8259491fc533a88d890578c993342beac111605c216d4c9d9e96fea",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
+  },
+  "input_slots": [
+    {
+      "depends_on": [],
+      "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+      "local_source_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id"
+      ],
+      "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+      "owner_actions": [
+        "attach at least 12 local CASF/PDBBind case descriptors",
+        "attach protein, reference ligand, and predicted pose or docking-run files",
+        "declare license or accession references without redistributing restricted source data",
+        "declare ligand atom order and symmetry permutations for every case",
+        "run the subset materializer with --fail-blocked"
+      ],
+      "required": true,
+      "required_fields": [
+        "case_id",
+        "source_family",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum"
+      ],
+      "slot_id": "casf_pdbbind_subset_intake",
+      "status": "operator_input_required",
+      "template": {
+        "cases": [
+          {
+            "case_id": "casf_pdbbind_subset_001",
+            "complex_id": "SOURCE_COMPLEX_ID",
+            "ligand_atom_order_contract": {
+              "atom_count": 0,
+              "atom_id_basis": "reference_ligand_atom_order",
+              "atom_ids": []
+            },
+            "predicted_ligand_path_or_docking_run_id": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/predicted_pose.sdf",
+            "protein_structure_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/protein.pdb",
+            "reference_ligand_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/reference_ligand.sdf",
+            "source_checksum": "sha256:operator_supplied_source_bundle_checksum",
+            "source_family": "CASF/PDBBind",
+            "source_license_or_accession": "operator_supplied_accession_or_license_ref",
+            "symmetry_permutation_contract": {
+              "permutation_basis": "zero_based_indices_into_ligand_atom_order_contract.atom_ids",
+              "permutations": []
+            }
+          }
+        ],
+        "target_subset_case_count": 12
+      },
+      "title": "CASF/PDBBind subset source files and case descriptors",
+      "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+    },
+    {
+      "depends_on": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+      ],
+      "intake_artifact": "<operator-pose-coordinate-intake.json>",
+      "local_source_file_fields": [],
+      "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
+      "owner_actions": [
+        "use case_id values from the materialized CASF/PDBBind subset manifest",
+        "attach reference and predicted ligand atom coordinates in the declared atom order",
+        "keep receptor context and symmetry permutation contracts explicit",
+        "run pose-validity input materialization, PoseBusters-style packet, and RMSD scorecard"
+      ],
+      "required": true,
+      "required_fields": [
+        "case_id",
+        "reference_atoms",
+        "predicted_atoms",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "protein_structure_path",
+        "receptor_context"
+      ],
+      "slot_id": "pose_coordinate_intake",
+      "status": "operator_input_required",
+      "template": {
+        "cases": [
+          {
+            "case_id": "casf_pdbbind_subset_001",
+            "ligand_atom_order_contract": {
+              "atom_count": 2,
+              "atom_ids": [
+                "C1",
+                "O1"
+              ]
+            },
+            "predicted_atoms": [
+              {
+                "element": "C",
+                "x": 0.1,
+                "y": 0.0,
+                "z": 0.0
+              },
+              {
+                "element": "O",
+                "x": 1.3,
+                "y": 0.0,
+                "z": 0.0
+              }
+            ],
+            "protein_structure_path": "operator_attached/casf_pdbbind/SOURCE_COMPLEX_ID/protein.pdb",
+            "receptor_context": {
+              "binding_site_frame": "operator_supplied_receptor_frame",
+              "provenance_ref": "operator_supplied_pose_preparation_receipt"
+            },
+            "reference_atoms": [
+              {
+                "element": "C",
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              },
+              {
+                "element": "O",
+                "x": 1.2,
+                "y": 0.0,
+                "z": 0.0
+              }
+            ],
+            "symmetry_permutation_contract": {
+              "permutations": [
+                [
+                  0,
+                  1
+                ]
+              ]
+            }
+          }
+        ]
+      },
+      "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
+      "validation_command": "python3 scripts/validate_public_benchmark_pose_validity.py --input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --fail-blocked"
+    },
+    {
+      "depends_on": [],
+      "intake_artifact": "<operator-dud-e-lit-pcba-enrichment-intake.json>",
+      "local_source_file_fields": [],
+      "materialization_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
+      "owner_actions": [
+        "attach at least one DUD-E or LIT-PCBA target with active and decoy labels",
+        "preserve score direction and source accession or license references",
+        "include scored_molecules rows with molecule_id, is_active, and score",
+        "run the enrichment materializer with --fail-blocked"
+      ],
+      "required": true,
+      "required_fields": [
+        "benchmark_family",
+        "target_id",
+        "score_direction",
+        "scored_molecules",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref"
+      ],
+      "slot_id": "dud_e_lit_pcba_enrichment_intake",
+      "status": "operator_input_required",
+      "template": {
+        "targets": [
+          {
+            "benchmark_family": "DUD-E",
+            "provenance_ref": "operator_supplied_scoring_receipt",
+            "score_direction": "higher_is_better",
+            "scored_molecules": [
+              {
+                "is_active": true,
+                "molecule_id": "active_001",
+                "score": 0.0
+              },
+              {
+                "is_active": false,
+                "molecule_id": "decoy_001",
+                "score": 0.0
+              }
+            ],
+            "source_checksum": "sha256:operator_supplied_scored_rows_checksum",
+            "source_license_or_accession": "operator_supplied_dud_e_or_lit_pcba_accession",
+            "target_id": "SOURCE_TARGET_ID"
+          }
+        ]
+      },
+      "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
+      "validation_command": ""
+    }
+  ],
+  "linked_artifacts": {
+    "enrichment_scorecard": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+    "pose_validity_input": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+    "pose_validity_packet": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+    "rmsd_scorecard": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+    "source_of_truth": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+    "subset_manifest": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
+  },
+  "materialization_sequence": [
+    {
+      "command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "schema_version": "public-benchmark-subset-materialization.v1",
+      "step_id": "materialize_subset_manifest"
+    },
+    {
+      "command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json",
+      "schema_version": "public-benchmark-pose-validity-input-materialization.v1",
+      "step_id": "materialize_pose_validity_input"
+    },
+    {
+      "command": "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json",
+      "schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+      "step_id": "materialize_posebusters_validity_packet"
+    },
+    {
+      "command": "python3 scripts/materialize_public_benchmark_rmsd_scorecard.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_materialization_report.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+      "schema_version": "public-benchmark-rmsd-scorecard-materialization.v1",
+      "step_id": "materialize_symmetry_rmsd_scorecard"
+    },
+    {
+      "command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "schema_version": "public-benchmark-enrichment-materialization.v1",
+      "step_id": "materialize_enrichment_scorecard"
+    },
+    {
+      "command": "python3 scripts/build_public_benchmark_source_of_truth.py --source-of-truth-out implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json --subset-manifest-out implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-validity-packet-out implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --rmsd-scorecard-out implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json --enrichment-scorecard-out implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json",
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+      "schema_version": "public-benchmark-source-of-truth.v1",
+      "step_id": "refresh_public_benchmark_source_of_truth"
+    }
+  ],
+  "next_actions": [
+    "fill_public_benchmark_operator_intake_packet",
+    "run_public_benchmark_subset_materializer",
+    "run_public_benchmark_pose_validity_materializer",
+    "run_public_benchmark_rmsd_scorecard_materializer",
+    "run_public_benchmark_enrichment_materializer",
+    "refresh_public_benchmark_source_of_truth",
+    "regenerate_goal_bottleneck_roadmap_surface"
+  ],
+  "owner_input_required": true,
+  "packet_id": "public_benchmark_operator_intake_packet",
+  "public_benchmark_ready": false,
+  "reason_code": "PASS_INTAKE_PACKET",
+  "required_molecule_fields": [
+    "molecule_id",
+    "is_active",
+    "score"
+  ],
+  "required_slot_count": 3,
+  "reuse_policy": "public_benchmark_operator_intake_packet_from_materializer_contracts",
+  "reused_evidence": true,
+  "schema_version": "public-benchmark-operator-intake-packet.v1",
+  "source_commit_sha": "9da07f7912631ce356d44173c148cf00bf7f3845",
+  "source_of_truth_blockers": [
+    "casf_pdbbind_source_material_not_attached",
+    "public_benchmark_real_pose_predictions_missing",
+    "dud_e_lit_pcba_enrichment_rows_missing",
+    "public_benchmark_external_receipts_missing"
+  ],
+  "source_of_truth_next_actions": [
+    "fill_public_benchmark_operator_intake_packet",
+    "attach_checked_casf_pdbbind_subset_source_files",
+    "run_public_benchmark_subset_materializer",
+    "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+    "attach_public_benchmark_pose_coordinate_intake",
+    "run_public_benchmark_pose_validity_materializer",
+    "run_symmetry_aware_rmsd_on_real_subset",
+    "run_public_benchmark_rmsd_scorecard_materializer",
+    "materialize_posebusters_style_validity_packet_for_real_ligands",
+    "attach_dud_e_lit_pcba_enrichment_intake",
+    "run_public_benchmark_enrichment_materializer"
+  ],
+  "source_of_truth_status": "seed_ready_materialization_blocked",
+  "status": "ready_for_operator_input",
+  "summary": {
+    "public_benchmark_ready": false,
+    "required_slot_count": 3,
+    "source_of_truth_blocker_count": 4,
+    "source_of_truth_status": "seed_ready_materialization_blocked"
+  },
+  "summary_line": "Public benchmark operator intake packet: READY | slots=3 | source_blockers=4",
+  "supported_enrichment_families": [
+    "DUD-E",
+    "LIT-PCBA"
+  ],
+  "tier_beta_ready": false
+}
