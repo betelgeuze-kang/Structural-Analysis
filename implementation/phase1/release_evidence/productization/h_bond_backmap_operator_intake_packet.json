@@ -29,7 +29,7 @@
     "status": "locked"
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T17:42:37.002187+00:00",
+  "generated_at": "2026-06-29T17:45:30.469747+00:00",
   "handoff_sequence": [
     {
       "command": "attach authoritative H-bond BackMap receipt bundle",
@@ -171,7 +171,7 @@
   "reuse_policy": "h_bond_backmap_operator_intake_packet_from_locked_surface_contract",
   "reused_evidence": true,
   "schema_version": "h-bond-backmap-operator-intake-packet.v1",
-  "source_commit_sha": "e5578dae8352409ce9e331ee589f5f329becc543",
+  "source_commit_sha": "572f09fe108a4b9938d5ed028bf1eb5f5c682cb4",
   "status": "ready_for_operator_input",
   "summary": {
     "current_blocker_count": 2,

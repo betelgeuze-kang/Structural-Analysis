@@ -46,13 +46,13 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
-        "approval_token_count": 7,
-        "blocked_release_count": 8,
+        "approval_token_count": 8,
+        "blocked_release_count": 9,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "locked_evidence_surface_count": 3,
-        "operator_action_count": 16,
+        "operator_action_count": 17,
         "pocketmd_lite_product_surface_ready": False,
         "public_benchmark_ready": False,
         "release_allowed": False,
@@ -127,4 +127,4 @@ def test_goal_bottleneck_roadmap_surface_cli_writes_payload(tmp_path: Path) -> N
     ].startswith("sha256:")
     assert payload["reused_evidence"] is True
     assert payload["surface_id"] == "goal_bottleneck_roadmap_surface"
-    assert payload["primary_next_actions"][0] == "attach_checked_casf_pdbbind_subset_source_files"
+    assert payload["primary_next_actions"][0] == "fill_public_benchmark_operator_intake_packet"
