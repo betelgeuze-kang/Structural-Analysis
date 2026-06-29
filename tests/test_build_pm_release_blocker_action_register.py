@@ -161,6 +161,39 @@ def test_build_register_passes_when_pm_report_has_no_blockers(tmp_path: Path) ->
     assert payload["next_actions"] == []
 
 
+def test_build_register_preserves_release_decision_operator_actions(tmp_path: Path) -> None:
+    report = _pm_report(tmp_path / "pm_release_gate_report.json", blockers=[])
+    payload = json.loads(report.read_text(encoding="utf-8"))
+    payload["release_decision"] = {
+        "operator_actions": [
+            {
+                "action_id": "resolve_gpcr_evidence_surface",
+                "status": "science_evidence_required",
+                "surface_family": "gpcr",
+                "bottleneck": "broad_gpcr_family_claim_locked",
+                "first_blocked_target": "DRD2",
+                "root_cause_tags": ["operator_values_required"],
+                "reason": (
+                    "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
+                    "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
+                ),
+                "artifact": "gpcr_hard_decoy_evidence_surface",
+            }
+        ]
+    }
+    report.write_text(json.dumps(payload), encoding="utf-8")
+
+    register = build_register_module.build_register(pm_report=report)
+
+    assert register["contract_pass"] is True
+    assert register["rows"] == []
+    assert register["summary"]["release_decision_operator_action_count"] == 1
+    assert register["release_decision_operator_actions"] == payload["release_decision"][
+        "operator_actions"
+    ]
+    assert register["next_actions"] == []
+
+
 def test_build_register_surfaces_ga_enterprise_blockers(tmp_path: Path) -> None:
     fresh_status = _write_json(
         tmp_path / "fresh_full_validation_lane_status.json",

@@ -828,6 +828,10 @@ def _handoff_payload(
 
 def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     report = _load_json(pm_report)
+    release_decision = _as_dict(report.get("release_decision"))
+    release_decision_operator_actions = [
+        row for row in _as_list(release_decision.get("operator_actions")) if isinstance(row, dict)
+    ]
     release_area_rows = _indexed_rows(_as_list(report.get("release_area_matrix")), "area")
     milestone_rows = _indexed_rows(_as_list(report.get("milestones")), "milestone")
     release_tiers = _as_dict(report.get("release_tiers"))
@@ -971,6 +975,7 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "release_area_total_count": release_area_total_count,
             "milestone_blocker_count": len(milestone_blockers),
             "ga_enterprise_blocker_count": len(ga_enterprise_blockers),
+            "release_decision_operator_action_count": len(release_decision_operator_actions),
             "owner_input_required_count": sum(1 for row in rows if row["owner_input_required"]),
             "full_release_gate_ready": bool(report.get("full_release_gate_ready", False)),
             "release_area_gate_ready": bool(report.get("release_area_gate_ready", False)),
@@ -994,6 +999,7 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
             "all_open_blockers_have_handoff": all(row["handoff_ready"] for row in rows),
         },
         "rows": rows,
+        "release_decision_operator_actions": release_decision_operator_actions,
         "next_actions": [row["next_action"] for row in rows],
     }
 
