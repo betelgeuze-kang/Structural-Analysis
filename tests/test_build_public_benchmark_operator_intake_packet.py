@@ -90,6 +90,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "symmetry_permutation_contract",
         "source_license_or_accession",
         "source_checksum",
+        "ligand_atom_order_contract.atom_count",
+        "ligand_atom_order_contract.atom_ids",
+        "symmetry_permutation_contract.permutations",
     ]
     assert subset["local_source_file_fields"] == [
         "protein_structure_path",
@@ -150,6 +153,12 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "case_count"
     ] == 12
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "ligand_atom_order_contract_fields"
+    ] == ["atom_count", "atom_ids"]
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "symmetry_permutation_contract_fields"
+    ] == ["permutations"]
     assert gate_plan["pose_coordinate_intake"]["unblocks_tier_beta_criteria"] == [
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",

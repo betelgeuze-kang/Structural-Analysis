@@ -343,7 +343,12 @@ def build_public_benchmark_operator_intake_packet(
             status="operator_input_required",
             required=True,
             intake_artifact="<operator-casf-pdbbind-intake.json>",
-            required_fields=list(REQUIRED_CASE_FIELDS),
+            required_fields=[
+                *list(REQUIRED_CASE_FIELDS),
+                "ligand_atom_order_contract.atom_count",
+                "ligand_atom_order_contract.atom_ids",
+                "symmetry_permutation_contract.permutations",
+            ],
             local_source_file_fields=[str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
             template={
                 "target_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
@@ -369,6 +374,8 @@ def build_public_benchmark_operator_intake_packet(
                 "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
                 "source_family": "CASF/PDBBind",
                 "local_source_file_fields": [str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
+                "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
+                "symmetry_permutation_contract_fields": ["permutations"],
                 "receipt_fields": ["source_license_or_accession", "source_checksum"],
             },
             materialization_steps=["materialize_subset_manifest"],

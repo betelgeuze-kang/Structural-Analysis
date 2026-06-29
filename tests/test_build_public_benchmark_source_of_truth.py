@@ -77,6 +77,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
                 "reference_ligand_path",
                 "predicted_ligand_path_or_docking_run_id",
             ],
+            "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
+            "symmetry_permutation_contract_fields": ["permutations"],
             "receipt_fields": ["source_license_or_accession", "source_checksum"],
         },
         "materialization_command": (
