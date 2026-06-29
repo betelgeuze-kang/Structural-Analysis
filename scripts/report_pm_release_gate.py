@@ -463,6 +463,56 @@ def _science_surface_operator_actions(
     return actions
 
 
+def _public_benchmark_operator_actions(
+    public_benchmark_source_of_truth_payload: dict[str, Any],
+) -> list[dict[str, Any]]:
+    source_summary = _summary(public_benchmark_source_of_truth_payload)
+    source_ready = bool(
+        public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
+        or source_summary.get("public_benchmark_ready")
+    )
+    if source_ready:
+        return []
+
+    status = str(
+        public_benchmark_source_of_truth_payload.get("status")
+        or source_summary.get("status")
+        or "missing"
+    )
+    blockers = [
+        str(row)
+        for row in (
+            _as_list(public_benchmark_source_of_truth_payload.get("blockers"))
+            or _as_list(source_summary.get("blockers"))
+        )
+    ]
+    if not blockers:
+        blockers = ["public_benchmark_source_of_truth_missing_or_not_ready"]
+    next_actions = [
+        str(row)
+        for row in (
+            _as_list(public_benchmark_source_of_truth_payload.get("next_actions"))
+            or _as_list(source_summary.get("next_actions"))
+        )
+    ]
+    first_blocker = blockers[0] if blockers else ""
+    reason = f"public benchmark source-of-truth is {status}; first_blocker={first_blocker}"
+    if next_actions:
+        reason += f"; next_action={next_actions[0]}"
+    return [
+        {
+            "action_id": "materialize_public_benchmark_source_of_truth",
+            "status": "public_benchmark_evidence_required",
+            "bottleneck": "public_benchmark_source_of_truth_not_ready",
+            "first_blocker": first_blocker,
+            "blockers": blockers,
+            "next_actions": next_actions,
+            "reason": reason,
+            "artifact": str(DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH),
+        }
+    ]
+
+
 def _release_decision(
     *,
     release_allowed: bool,
@@ -545,6 +595,9 @@ def _release_decision(
             science_evidence_surface_status,
             evidence_surface_dir=evidence_surface_dir,
         )
+    )
+    operator_actions.extend(
+        _public_benchmark_operator_actions(public_benchmark_source_of_truth_payload)
     )
     operator_action_count = max(
         _operator_action_count(pm_blocker_register),

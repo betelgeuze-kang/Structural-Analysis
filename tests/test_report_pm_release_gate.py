@@ -723,6 +723,53 @@ def test_public_benchmark_ready_requires_source_of_truth_ready() -> None:
     )
 
 
+def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> None:
+    actions = report_pm_release_gate._public_benchmark_operator_actions(
+        {
+            "status": "seed_ready_materialization_blocked",
+            "public_benchmark_ready": False,
+            "blockers": [
+                "casf_pdbbind_source_material_not_attached",
+                "public_benchmark_real_pose_predictions_missing",
+            ],
+            "next_actions": [
+                "attach_checked_casf_pdbbind_subset_source_files",
+                "run_public_benchmark_subset_materializer",
+            ],
+        }
+    )
+
+    assert actions == [
+        {
+            "action_id": "materialize_public_benchmark_source_of_truth",
+            "status": "public_benchmark_evidence_required",
+            "bottleneck": "public_benchmark_source_of_truth_not_ready",
+            "first_blocker": "casf_pdbbind_source_material_not_attached",
+            "blockers": [
+                "casf_pdbbind_source_material_not_attached",
+                "public_benchmark_real_pose_predictions_missing",
+            ],
+            "next_actions": [
+                "attach_checked_casf_pdbbind_subset_source_files",
+                "run_public_benchmark_subset_materializer",
+            ],
+            "reason": (
+                "public benchmark source-of-truth is seed_ready_materialization_blocked; "
+                "first_blocker=casf_pdbbind_source_material_not_attached; "
+                "next_action=attach_checked_casf_pdbbind_subset_source_files"
+            ),
+            "artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "public_benchmark_source_of_truth.json"
+            ),
+        }
+    ]
+
+    assert report_pm_release_gate._public_benchmark_operator_actions(
+        {"contract_pass": True, "public_benchmark_ready": True}
+    ) == []
+
+
 def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp_path: Path) -> None:
     ndtha = _write(
         tmp_path / "release_evidence" / "productization" / "ndtha_residual_gate_report.json",
