@@ -103,6 +103,14 @@ DEFAULT_ARTIFACTS = (
         Path("scripts/build_developer_preview_rc_status.py"),
     ),
     (
+        "public_benchmark_source_of_truth",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_source_of_truth.json"
+        ),
+        Path("scripts/build_public_benchmark_source_of_truth.py"),
+    ),
+    (
         "accuracy_parity_scorecard",
         Path("implementation/phase1/real_accuracy_validation_report.json"),
         Path("implementation/phase1/run_real_accuracy_validation.py"),

@@ -4,7 +4,7 @@ Date: 2026-06-29
 
 Scope: read-only classification of the five remaining `/goal` source-of-truth candidates, followed by direct builder source-tracking fixes where the current repo has a clear producer/artifact pair and aggregator freshness policy where the candidate is a rollup.
 
-Current outcome: the two direct leaf candidates are now included in `report_release_evidence_freshness.py` and emit source-tracking metadata. The three rollup/operator candidates remain aggregator-review items, not leaf freshness rows; their current artifacts expose source tracking through their direct upstream inputs. The classification is also emitted in machine-readable form by the freshness report as `source_of_truth_gap_classification`.
+Current outcome: the two direct leaf candidates are now included in `report_release_evidence_freshness.py` and emit source-tracking metadata. The three rollup/operator candidates remain aggregator-review items, not leaf freshness rows; their current artifacts expose source tracking through their direct upstream inputs. The public benchmark source-of-truth is also audited as a release-decision dependency, separate from the five historical gap candidates. The classification is emitted in machine-readable form by the freshness report as `source_of_truth_gap_classification`.
 
 | Candidate | Current repo match | Classification | Decision |
 |---|---|---|---|
@@ -19,6 +19,7 @@ No `no-op` candidates were found in the classification pass: every row maps eith
 Aggregator freshness policy:
 
 - Leaf evidence such as direct validation reports can be listed in `report_release_evidence_freshness.py`.
+- Release-decision source-of-truth artifacts such as `public_benchmark_source_of_truth.json` can also be listed when stale state would directly affect `/goal` release cockpit KPIs.
 - Aggregators should not become direct leaf freshness rows unless they are the only source of a release decision. They must instead carry source tracking for their direct upstream artifacts and keep upstream blocked/proxy/fallback state visible.
 - Aggregator outputs must not make a release gate greener than their upstream inputs. A stale or missing upstream checksum is a refresh-required condition, not a closure signal.
 - Regression guard: `tests/test_report_release_evidence_freshness.py` asserts that the two fixed candidates are freshness leaf rows and the three aggregator-review candidates are excluded from `DEFAULT_ARTIFACTS`.
