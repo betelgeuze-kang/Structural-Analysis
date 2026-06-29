@@ -241,6 +241,10 @@ def _evidence_surface_json_paths(evidence_surface_dir: Path) -> list[Path]:
     return sorted(path for path in evidence_surface_dir.glob("*.json") if path.is_file())
 
 
+def _failed_criteria(gate: dict[str, Any]) -> list[str]:
+    return [str(row) for row in _as_list(gate.get("failed_criteria"))]
+
+
 def _surface_signal_payload(payload: dict[str, Any]) -> dict[str, Any]:
     signals = {
         "status": payload.get("status"),
@@ -288,6 +292,8 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
         status = str(payload.get("status") or payload.get("reason_code") or "").strip()
         if not status:
             status = "ready" if _truthy_contract(payload) else "blocked"
+        phase3_exit_gate = _as_dict(payload.get("phase3_exit_gate"))
+        phase4_exit_gate = _as_dict(payload.get("phase4_exit_gate"))
         surface_id = path.stem
         rows.append(
             {
@@ -311,6 +317,10 @@ def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
                     for row in _as_list(
                         payload.get("root_cause_tags") or summary.get("root_cause_tags")
                     )
+                ],
+                "blocked_criteria": [
+                    *(_failed_criteria(phase3_exit_gate)),
+                    *(_failed_criteria(phase4_exit_gate)),
                 ],
             }
         )
@@ -426,6 +436,13 @@ def _science_surface_status(
                 for tag in _as_list(row.get("root_cause_tags"))
             )
         ),
+        "blocked_criteria": list(
+            dict.fromkeys(
+                str(criterion)
+                for row in surfaces
+                for criterion in _as_list(row.get("blocked_criteria"))
+            )
+        ),
         "bottleneck": bottleneck,
     }
 
@@ -490,6 +507,9 @@ def _science_surface_operator_actions(
             continue
         first_blocked_target = str(status.get("first_blocked_target") or "")
         root_cause_tags = [str(row) for row in _as_list(status.get("root_cause_tags"))]
+        blocked_criteria = [
+            str(row) for row in _as_list(status.get("blocked_criteria"))
+        ]
         if family == "pocketmd_lite":
             action_id = "resolve_pocketmd_lite_science_product_surface"
             action_status = "science_product_surface_required"
@@ -513,6 +533,8 @@ def _science_surface_operator_actions(
                 "bottleneck": bottleneck,
                 "first_blocked_target": first_blocked_target,
                 "root_cause_tags": root_cause_tags,
+                "blocked_criteria": blocked_criteria,
+                "blocked_criteria_count": len(blocked_criteria),
                 "reason": reason,
                 "artifact": ", ".join(surface_ids) if surface_ids else str(evidence_surface_dir),
                 "operator_intake_artifact": str(hint.get("operator_intake_artifact") or ""),
@@ -570,6 +592,11 @@ def _public_benchmark_operator_actions(
             or source_summary.get("root_cause_tags")
         )
     ]
+    tier_beta_gate = _as_dict(
+        public_benchmark_source_of_truth_payload.get("tier_beta_gate")
+        or source_summary.get("tier_beta_gate")
+    )
+    blocked_criteria = _failed_criteria(tier_beta_gate)
     first_blocker = blockers[0] if blockers else ""
     reason = f"public benchmark source-of-truth is {status}; first_blocker={first_blocker}"
     if first_blocked_target:
@@ -586,6 +613,8 @@ def _public_benchmark_operator_actions(
             "first_blocker": first_blocker,
             "first_blocked_target": first_blocked_target,
             "root_cause_tags": root_cause_tags,
+            "blocked_criteria": blocked_criteria,
+            "blocked_criteria_count": len(blocked_criteria),
             "blockers": blockers,
             "next_actions": next_actions,
             "reason": reason,

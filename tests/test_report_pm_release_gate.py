@@ -710,6 +710,14 @@ def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
             "blockers": ["broad_gpcr_family_claim_locked"],
             "first_blocked_target": "DRD2",
             "root_cause_tags": ["operator_values_required"],
+            "phase3_exit_gate": {
+                "failed_criteria": [
+                    "ranking_pr_auc_ci_low_min",
+                    "top20_hit_rate_min",
+                    "decoys_above_positive_count_max",
+                    "no_positive_out_anchored_by_top_decoys",
+                ]
+            },
         },
     )
     return {
@@ -792,6 +800,12 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
                 "attach_checked_casf_pdbbind_subset_source_files",
                 "run_public_benchmark_subset_materializer",
             ],
+            "tier_beta_gate": {
+                "failed_criteria": [
+                    "casf_pdbbind_subset_materialized",
+                    "symmetry_rmsd_scorecard_real_cases",
+                ]
+            },
         }
     )
 
@@ -806,6 +820,11 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
                 "operator_source_material_required",
                 "operator_receipts_required",
             ],
+            "blocked_criteria": [
+                "casf_pdbbind_subset_materialized",
+                "symmetry_rmsd_scorecard_real_cases",
+            ],
+            "blocked_criteria_count": 2,
             "blockers": [
                 "casf_pdbbind_source_material_not_attached",
                 "public_benchmark_real_pose_predictions_missing",
@@ -1062,6 +1081,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "surface_ids": [],
         "first_blocked_target": "",
         "root_cause_tags": [],
+        "blocked_criteria": [],
         "bottleneck": "h_bond_evidence_surface_missing",
     }
     assert science_surface_status["gpcr"] == {
@@ -1074,6 +1094,12 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "surface_ids": ["gpcr_hard_decoy_surface"],
         "first_blocked_target": "DRD2",
         "root_cause_tags": ["operator_values_required"],
+        "blocked_criteria": [
+            "ranking_pr_auc_ci_low_min",
+            "top20_hit_rate_min",
+            "decoys_above_positive_count_max",
+            "no_positive_out_anchored_by_top_decoys",
+        ],
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": False,
     }
@@ -1087,6 +1113,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "surface_ids": [],
         "first_blocked_target": "",
         "root_cause_tags": [],
+        "blocked_criteria": [],
         "bottleneck": "pocketmd_lite_science_product_surface_missing",
         "product_surface_ready": False,
     }
@@ -1098,6 +1125,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "h_bond_evidence_surface_missing",
             "first_blocked_target": "",
             "root_cause_tags": [],
+            "blocked_criteria": [],
+            "blocked_criteria_count": 0,
             "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
             "artifact": str(base_kwargs["evidence_surface_dir"]),
             **_science_action_hints("h_bond"),
@@ -1109,6 +1138,13 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "broad_gpcr_family_claim_locked",
             "first_blocked_target": "DRD2",
             "root_cause_tags": ["operator_values_required"],
+            "blocked_criteria": [
+                "ranking_pr_auc_ci_low_min",
+                "top20_hit_rate_min",
+                "decoys_above_positive_count_max",
+                "no_positive_out_anchored_by_top_decoys",
+            ],
+            "blocked_criteria_count": 4,
             "reason": (
                 "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
@@ -1123,6 +1159,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "pocketmd_lite_science_product_surface_missing",
             "first_blocked_target": "",
             "root_cause_tags": [],
+            "blocked_criteria": [],
+            "blocked_criteria_count": 0,
             "reason": (
                 "pocketmd_lite science product surface is missing; "
                 "bottleneck=pocketmd_lite_science_product_surface_missing"
@@ -1407,6 +1445,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "h_bond_evidence_surface_missing",
             "first_blocked_target": "",
             "root_cause_tags": [],
+            "blocked_criteria": [],
+            "blocked_criteria_count": 0,
             "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
             "artifact": str(base_kwargs["evidence_surface_dir"]),
             **_science_action_hints("h_bond"),
@@ -1418,6 +1458,13 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "broad_gpcr_family_claim_locked",
             "first_blocked_target": "DRD2",
             "root_cause_tags": ["operator_values_required"],
+            "blocked_criteria": [
+                "ranking_pr_auc_ci_low_min",
+                "top20_hit_rate_min",
+                "decoys_above_positive_count_max",
+                "no_positive_out_anchored_by_top_decoys",
+            ],
+            "blocked_criteria_count": 4,
             "reason": (
                 "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
@@ -1432,6 +1479,8 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "bottleneck": "pocketmd_lite_science_product_surface_missing",
             "first_blocked_target": "",
             "root_cause_tags": [],
+            "blocked_criteria": [],
+            "blocked_criteria_count": 0,
             "reason": (
                 "pocketmd_lite science product surface is missing; "
                 "bottleneck=pocketmd_lite_science_product_surface_missing"
