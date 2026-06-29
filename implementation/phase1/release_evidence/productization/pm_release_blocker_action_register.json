@@ -28,10 +28,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T21:21:23.992178+00:00",
+  "generated_at": "2026-06-29T21:23:14.482255+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:9004c3c8fd2ebe9d2da8671881157d6ecae91b8496fc72d6b3667cc91a5c7ec4",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:abdef64b766c4edd87574595996469c775552cedce510e2afb2453f368a3c98b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e6e13e4659602064e4259b8412ba53cb25c57f643e9a40ede7f08f3a8987617a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:b637af7d671cf7878dc532f8649828ca05e1162cf9f9578e1b4f6019c2b39ae9",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -631,8 +631,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 241,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 242,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -643,9 +643,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 241,
+        "feature_ahead_count": 242,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -708,8 +708,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 241,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 242,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -720,9 +720,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 241,
+        "feature_ahead_count": 242,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -785,8 +785,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 241,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 242,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -797,9 +797,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 241,
+        "feature_ahead_count": 242,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -862,8 +862,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 241,
-        "main_ahead_count": 1,
+        "feature_ahead_count": 242,
+        "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -874,9 +874,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 241,
+        "feature_ahead_count": 242,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 1,
+        "main_ahead_count": 2,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -1167,7 +1167,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
+  "source_commit_sha": "522a858b88f0721ddff3bf2e342878dd77e46699",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 13,
