@@ -173,6 +173,28 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
     ]
+    assert [
+        row["criterion_id"] for row in phase_3["summary"]["phase3_exit_gate_criteria"]
+    ] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert phase_3["summary"]["phase3_exit_gate_criteria"][0][
+        "current_by_target"
+    ] == {"DRD2": None, "HTR2A": None, "OPRM1": None}
+    assert phase_3["summary"]["phase3_exit_gate_criteria"][0][
+        "failed_targets"
+    ] == ["DRD2", "HTR2A", "OPRM1"]
+    assert {
+        row["target_id"]: row["status"]
+        for row in phase_3["summary"]["operator_target_slots"]
+    } == {
+        "DRD2": "operator_input_required",
+        "HTR2A": "operator_input_required",
+        "OPRM1": "operator_input_required",
+    }
     assert "fill_gpcr_hard_decoy_operator_intake_packet" in phase_3["next_actions"]
 
     phase_4 = rows["phase_4_pocketmd_lite"]

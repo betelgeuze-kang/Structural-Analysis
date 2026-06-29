@@ -375,6 +375,31 @@ def _gpcr_row(
         gpcr_product_report.get("phase3_exit_gate")
         or gpcr_surface.get("phase3_exit_gate")
     )
+    phase3_gate_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": _as_bool(row.get("pass")),
+            "required": row.get("required"),
+            "current_by_target": _as_dict(row.get("current_by_target")),
+            "failed_targets": [
+                str(target) for target in _as_list(row.get("failed_targets"))
+            ],
+            "blocker_count": len(_as_list(row.get("blockers"))),
+        }
+        for row in _as_list(phase3_exit_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
+    operator_target_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": _as_bool(row.get("required")),
+            "required_field_count": len(_as_list(row.get("required_fields"))),
+        }
+        for row in _as_list(gpcr_operator_intake.get("target_slots"))
+        if isinstance(row, dict)
+    ]
     return _roadmap_row(
         phase_id="phase_3_gpcr_hard_decoy_closure",
         phase_label="Phase 3",
@@ -412,6 +437,8 @@ def _gpcr_row(
             "phase3_failed_criteria": [
                 str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
             ],
+            "phase3_exit_gate_criteria": phase3_gate_criteria,
+            "operator_target_slots": operator_target_slots,
         },
     )
 
