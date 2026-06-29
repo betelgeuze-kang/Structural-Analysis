@@ -27,9 +27,9 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:12:07.536668+00:00",
+  "generated_at": "2026-06-29T15:13:45.822494+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a392020e7b3e265df553f14e44f193d9a4b37161c98efd5b38abb967e7887434",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e3ee0b6436a6e4957e76659b2ee7d8b4748a2075a44c4cb4e6ee40a3669328c1",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2e49451bf32f86b091a82f8ed7f337805a1c5f9a891dae0331ed77af9158b31d",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:c48b2389548a5f69291e4360f832e41bb5857c512084fe43e9afbc761d8193e7"
   },
@@ -526,8 +526,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 123,
-        "main_ahead_count": 2,
+        "feature_ahead_count": 125,
+        "main_ahead_count": 4,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -538,9 +538,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 123,
+        "feature_ahead_count": 125,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 2,
+        "main_ahead_count": 4,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -603,8 +603,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 123,
-        "main_ahead_count": 2,
+        "feature_ahead_count": 125,
+        "main_ahead_count": 4,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -615,9 +615,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 123,
+        "feature_ahead_count": 125,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 2,
+        "main_ahead_count": 4,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -680,8 +680,8 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 123,
-        "main_ahead_count": 2,
+        "feature_ahead_count": 125,
+        "main_ahead_count": 4,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -692,9 +692,9 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 123,
+        "feature_ahead_count": 125,
         "feature_fast_forward_possible": true,
-        "main_ahead_count": 2,
+        "main_ahead_count": 4,
         "main_fast_forward_possible": true,
         "pending_remote_update_count": 2,
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -985,7 +985,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
+  "source_commit_sha": "24474943ada1fd1139644403c02d064f524500e8",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,
