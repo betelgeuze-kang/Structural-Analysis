@@ -46,6 +46,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_benchmark_case_count": 0,
         "dry_run_pose_success": True,
     }
+    assert source["pose_validity_packet_summary"] == {
+        "status": "ready_for_dry_run",
+        "check_count": 5,
+        "required_check_count": 5,
+        "validator_schema_version": "public-benchmark-pose-validity-validation.v1",
+        "dry_run_pose_validity_ready": True,
+        "real_benchmark_case_count": 0,
+    }
     assert source["subset_manifest_validation"]["status"] == "source_material_required"
     assert source["subset_manifest_validation"]["public_benchmark_ready"] is False
     assert source["subset_manifest_validation"]["blockers"] == [
@@ -92,6 +100,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "receptor_ligand_context_present",
     } <= check_ids
     assert pose_packet["real_benchmark_case_count"] == 0
+    assert pose_packet["validator"]["required_pose_fields"] == [
+        "case_id",
+        "reference_atoms",
+        "predicted_atoms",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "protein_structure_path",
+        "receptor_context",
+    ]
+    assert pose_packet["dry_run_validation"]["pose_validity_ready"] is True
+    assert pose_packet["dry_run_validation"]["dry_run_case_count"] == 1
+    assert pose_packet["dry_run_validation"]["real_benchmark_case_count"] == 0
+    assert pose_packet["dry_run_validation"]["blockers"] == []
 
     assert rmsd["schema_version"] == "public-benchmark-symmetry-rmsd-scorecard.v1"
     assert rmsd["contract_pass"] is True

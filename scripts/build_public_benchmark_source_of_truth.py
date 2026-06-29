@@ -23,6 +23,10 @@ from validate_public_benchmark_subset_manifest import (  # noqa: E402
     REQUIRED_CASE_FIELDS,
     validate_subset_manifest,
 )
+from validate_public_benchmark_pose_validity import (  # noqa: E402
+    REQUIRED_POSE_FIELDS,
+    validate_pose_validity_payload,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -105,6 +109,7 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_pose_validity.py"),
                 Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
@@ -180,8 +185,24 @@ def _dry_run_pose_case() -> dict[str, Any]:
     ]
     return {
         "case_id": "dry_run_symmetry_swap_pose",
+        "source_family": "synthetic",
+        "protein_structure_path": "synthetic://public_benchmark/dry_run/protein.pdb",
+        "receptor_context": {
+            "binding_site_frame": "synthetic_identity_frame",
+            "context_boundary": "synthetic receptor context for validator dry-run only",
+        },
         "reference_atoms": reference_atoms,
         "predicted_atoms": predicted_atoms,
+        "ligand_atom_order_contract": {
+            "atom_count": len(reference_atoms),
+            "atom_ids": ["C1", "O1", "O2", "N1"],
+        },
+        "symmetry_permutation_contract": {
+            "permutations": [
+                [0, 1, 2, 3],
+                [0, 2, 1, 3],
+            ],
+        },
         "symmetry_permutations": [
             [0, 1, 2, 3],
             [0, 2, 1, 3],
@@ -208,6 +229,7 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_pose_validity.py"),
                 Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
@@ -233,12 +255,14 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
 
 
 def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    dry_run_validation = validate_pose_validity_payload({"cases": [_dry_run_pose_case()]})
     return {
         "schema_version": POSE_PACKET_SCHEMA_VERSION,
         **release_evidence_metadata(
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_pose_validity.py"),
                 Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
@@ -248,6 +272,15 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "status": "ready_for_dry_run",
         "contract_pass": True,
         "real_benchmark_case_count": 0,
+        "validator": {
+            "schema_version": "public-benchmark-pose-validity-validation.v1",
+            "required_pose_fields": list(REQUIRED_POSE_FIELDS),
+            "validation_command": (
+                "python3 scripts/validate_public_benchmark_pose_validity.py "
+                "--input <pose-validity-input.json> --fail-blocked"
+            ),
+        },
+        "dry_run_validation": dry_run_validation,
         "checks": [
             {
                 "check_id": "coordinate_finiteness",
@@ -297,6 +330,7 @@ def build_source_of_truth(
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_pose_validity.py"),
                 Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
@@ -338,6 +372,13 @@ def build_source_of_truth(
             "status": pose_validity_packet["status"],
             "check_count": len(pose_validity_packet["checks"]),
             "required_check_count": sum(1 for row in pose_validity_packet["checks"] if row["required"]),
+            "validator_schema_version": pose_validity_packet["validator"]["schema_version"],
+            "dry_run_pose_validity_ready": pose_validity_packet["dry_run_validation"][
+                "pose_validity_ready"
+            ],
+            "real_benchmark_case_count": pose_validity_packet["dry_run_validation"][
+                "real_benchmark_case_count"
+            ],
         },
         "symmetry_rmsd_summary": {
             "status": rmsd_scorecard["status"],
