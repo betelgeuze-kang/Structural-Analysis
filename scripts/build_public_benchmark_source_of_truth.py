@@ -42,6 +42,13 @@ from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
 from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa: E402
+    ADAPTER_SCHEMA_VERSION as VINA_GNINA_ADAPTER_SCHEMA_VERSION,
+    REQUIRED_CASE_FIELDS as VINA_GNINA_REQUIRED_CASE_FIELDS,
+    REQUIRED_ENGINE_RUN_FIELDS as VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS,
+    SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+    SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
+)
 from build_public_benchmark_operator_intake_packet import (  # noqa: E402
     DEFAULT_OUT as DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     SCHEMA_VERSION as OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
@@ -55,6 +62,9 @@ DEFAULT_SUBSET_MANIFEST_OUT = PRODUCTIZATION / "public_benchmark_subset_manifest
 DEFAULT_POSE_VALIDITY_PACKET_OUT = PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
 DEFAULT_RMSD_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
 DEFAULT_ENRICHMENT_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+DEFAULT_VINA_GNINA_ADAPTER_OUT = (
+    PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_adapter.json"
+)
 DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT = DEFAULT_OPERATOR_INTAKE_PACKET_OUT.with_suffix(".md")
 SCHEMA_VERSION = "public-benchmark-source-of-truth.v1"
 SUBSET_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
@@ -69,6 +79,7 @@ def _source_input_paths() -> list[Path]:
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
+        Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/build_public_benchmark_operator_intake_packet.py"),
@@ -469,12 +480,117 @@ def build_enrichment_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
     }
 
 
+def _vina_gnina_case_template() -> dict[str, Any]:
+    return {
+        "case_id": "casf_pdbbind_subset_001",
+        "source_family": "CASF/PDBBind",
+        "complex_id": "SOURCE_COMPLEX_ID",
+        "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
+        "engine_runs": [
+            {
+                "engine_id": "vina",
+                "docking_run_id": "SOURCE_COMPLEX_ID_vina_run",
+                "predicted_ligand_path_or_pose_ref": (
+                    "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/vina_pose.sdf"
+                ),
+                "symmetry_aware_rmsd_angstrom": None,
+                "pose_success": None,
+                "score": None,
+                "score_direction": "lower_is_better",
+            },
+            {
+                "engine_id": "gnina",
+                "docking_run_id": "SOURCE_COMPLEX_ID_gnina_run",
+                "predicted_ligand_path_or_pose_ref": (
+                    "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/gnina_pose.sdf"
+                ),
+                "symmetry_aware_rmsd_angstrom": None,
+                "pose_success": None,
+                "score": None,
+                "score_direction": "lower_is_better",
+            },
+        ],
+        "source_license_or_accession": "operator_supplied_casf_pdbbind_accession",
+        "source_checksum": "sha256:operator_supplied_vina_gnina_rows_checksum",
+        "provenance_ref": "operator_supplied_vina_gnina_run_receipt",
+    }
+
+
+def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, Any]:
+    blockers = [
+        "vina_gnina_comparison_cases_missing",
+        "vina_gnina_engine_runs_missing",
+        "vina_gnina_external_receipts_missing",
+    ]
+    return {
+        "schema_version": VINA_GNINA_ADAPTER_SCHEMA_VERSION,
+        **release_evidence_metadata(
+            input_paths=_source_input_paths(),
+            reused_evidence=False,
+            reuse_policy="public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
+            repo_root=repo_root,
+        ),
+        "status": "operator_evidence_required",
+        "contract_pass": False,
+        "public_benchmark_engine_comparison_ready": False,
+        "real_comparison_case_count": 0,
+        "case_rows": [],
+        "engine_summaries": [
+            {
+                "engine_id": engine_id,
+                "run_count": 0,
+                "pose_success_count": 0,
+                "pose_success_rate": None,
+                "symmetry_aware_rmsd_median_angstrom": None,
+            }
+            for engine_id in VINA_GNINA_SUPPORTED_ENGINES
+        ],
+        "summary": {
+            "case_count": 0,
+            "ready_case_count": 0,
+            "engine_count": len(VINA_GNINA_SUPPORTED_ENGINES),
+            "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+            "blocker_count": len(blockers),
+        },
+        "materializer": {
+            "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "intake_case_key": "cases",
+            "required_case_fields": list(VINA_GNINA_REQUIRED_CASE_FIELDS),
+            "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
+            "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+            "template": {"cases": [_vina_gnina_case_template()]},
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+                "--intake <operator-vina-gnina-comparison-intake.json> "
+                "--out-adapter implementation/phase1/release_evidence/productization/"
+                "public_benchmark_vina_gnina_comparison_adapter.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_vina_gnina_materialization_report.json --fail-blocked"
+            ),
+            "claim_boundary": (
+                "The adapter consumes operator-attached Vina/GNINA comparison rows. It "
+                "does not run docking engines, fetch public benchmark files, infer ligand "
+                "chemistry, or close Tier beta."
+            ),
+        },
+        "supported_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+        "blockers": blockers,
+        "claim_boundary": (
+            "This seed defines the Vina/GNINA comparison adapter shape and materializer "
+            "command. With zero operator-attached engine comparison rows it is "
+            "intentionally blocked and cannot support engine comparison claims."
+        ),
+    }
+
+
 def build_source_of_truth(
     *,
     subset_manifest: dict[str, Any],
     pose_validity_packet: dict[str, Any],
     rmsd_scorecard: dict[str, Any],
     enrichment_scorecard: dict[str, Any],
+    vina_gnina_comparison_adapter: dict[str, Any],
     operator_intake_packet: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
@@ -508,8 +624,8 @@ def build_source_of_truth(
             },
             {
                 "family_id": "vina_gnina",
-                "role": "future_comparison_adapter",
-                "materialization_status": "planned_later",
+                "role": "docking_engine_comparison_adapter",
+                "materialization_status": "operator_intake_required",
             },
         ],
         "subset_manifest_summary": {
@@ -547,6 +663,17 @@ def build_source_of_truth(
                 "real_enrichment_target_count"
             ],
             "blockers": enrichment_scorecard["blockers"],
+        },
+        "vina_gnina_comparison_adapter_summary": {
+            "status": vina_gnina_comparison_adapter["status"],
+            "public_benchmark_engine_comparison_ready": vina_gnina_comparison_adapter[
+                "public_benchmark_engine_comparison_ready"
+            ],
+            "real_comparison_case_count": vina_gnina_comparison_adapter[
+                "real_comparison_case_count"
+            ],
+            "supported_engines": vina_gnina_comparison_adapter["supported_engines"],
+            "blockers": vina_gnina_comparison_adapter["blockers"],
         },
         "operator_intake_packet": {
             "schema_version": operator_intake_packet["schema_version"],
@@ -637,10 +764,23 @@ def build_source_of_truth(
                 "download benchmark data, validate chemistry, or close Tier beta alone."
             ),
         },
+        "vina_gnina_comparison_materializer": {
+            "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "materialization_command": vina_gnina_comparison_adapter["materializer"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The Vina/GNINA adapter materializer consumes operator-attached engine "
+                "comparison rows and reports per-engine pose-success summaries. It does "
+                "not run docking engines, fetch benchmark data, or close Tier beta alone."
+            ),
+        },
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
             "dud_e_lit_pcba_enrichment_rows_missing",
+            "vina_gnina_comparison_rows_missing",
             "public_benchmark_external_receipts_missing",
         ],
         "next_actions": [
@@ -655,6 +795,8 @@ def build_source_of_truth(
             "materialize_posebusters_style_validity_packet_for_real_ligands",
             "attach_dud_e_lit_pcba_enrichment_intake",
             "run_public_benchmark_enrichment_materializer",
+            "attach_vina_gnina_comparison_intake",
+            "run_public_benchmark_vina_gnina_comparison_materializer",
         ],
         "claim_boundary": (
             "This is the Phase 2 public benchmark harness seed. It closes source-of-truth "
@@ -670,12 +812,14 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
     enrichment_scorecard = build_enrichment_scorecard(repo_root=repo_root)
+    vina_gnina_comparison_adapter = build_vina_gnina_comparison_adapter(repo_root=repo_root)
     operator_intake_packet = build_public_benchmark_operator_intake_packet(repo_root=repo_root)
     source_of_truth = build_source_of_truth(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
         rmsd_scorecard=rmsd_scorecard,
         enrichment_scorecard=enrichment_scorecard,
+        vina_gnina_comparison_adapter=vina_gnina_comparison_adapter,
         operator_intake_packet=operator_intake_packet,
         repo_root=repo_root,
     )
@@ -685,6 +829,7 @@ def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dic
         "pose_validity_packet": pose_validity_packet,
         "rmsd_scorecard": rmsd_scorecard,
         "enrichment_scorecard": enrichment_scorecard,
+        "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter,
         "operator_intake_packet": operator_intake_packet,
     }
 
@@ -697,6 +842,7 @@ def write_public_benchmark_artifacts(
     pose_validity_packet_out: Path = DEFAULT_POSE_VALIDITY_PACKET_OUT,
     rmsd_scorecard_out: Path = DEFAULT_RMSD_SCORECARD_OUT,
     enrichment_scorecard_out: Path = DEFAULT_ENRICHMENT_SCORECARD_OUT,
+    vina_gnina_comparison_adapter_out: Path = DEFAULT_VINA_GNINA_ADAPTER_OUT,
     operator_intake_packet_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
     operator_intake_packet_md_out: Path = DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
 ) -> dict[str, dict[str, Any]]:
@@ -707,6 +853,7 @@ def write_public_benchmark_artifacts(
         "pose_validity_packet": pose_validity_packet_out,
         "rmsd_scorecard": rmsd_scorecard_out,
         "enrichment_scorecard": enrichment_scorecard_out,
+        "vina_gnina_comparison_adapter": vina_gnina_comparison_adapter_out,
         "operator_intake_packet": operator_intake_packet_out,
     }
     for key, out_path in outputs.items():
@@ -746,6 +893,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pose-validity-packet-out", type=Path, default=DEFAULT_POSE_VALIDITY_PACKET_OUT)
     parser.add_argument("--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT)
     parser.add_argument("--enrichment-scorecard-out", type=Path, default=DEFAULT_ENRICHMENT_SCORECARD_OUT)
+    parser.add_argument(
+        "--vina-gnina-comparison-adapter-out",
+        type=Path,
+        default=DEFAULT_VINA_GNINA_ADAPTER_OUT,
+    )
     parser.add_argument("--operator-intake-packet-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_OUT)
     parser.add_argument("--operator-intake-packet-md-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT)
     parser.add_argument("--json", action="store_true")
@@ -757,6 +909,7 @@ def main(argv: list[str] | None = None) -> int:
         pose_validity_packet_out=args.pose_validity_packet_out,
         rmsd_scorecard_out=args.rmsd_scorecard_out,
         enrichment_scorecard_out=args.enrichment_scorecard_out,
+        vina_gnina_comparison_adapter_out=args.vina_gnina_comparison_adapter_out,
         operator_intake_packet_out=args.operator_intake_packet_out,
         operator_intake_packet_md_out=args.operator_intake_packet_md_out,
     )

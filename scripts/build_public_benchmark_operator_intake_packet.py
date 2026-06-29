@@ -36,6 +36,13 @@ from materialize_public_benchmark_enrichment_scorecard import (  # noqa: E402
     SCHEMA_VERSION as ENRICHMENT_MATERIALIZER_SCHEMA_VERSION,
     SUPPORTED_FAMILIES,
 )
+from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa: E402
+    DEFAULT_ADAPTER_OUT as DEFAULT_VINA_GNINA_COMPARISON_ADAPTER,
+    REQUIRED_CASE_FIELDS as VINA_GNINA_REQUIRED_CASE_FIELDS,
+    REQUIRED_ENGINE_RUN_FIELDS as VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS,
+    SCHEMA_VERSION as VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+    SUPPORTED_ENGINES as VINA_GNINA_SUPPORTED_ENGINES,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -82,6 +89,7 @@ def _input_paths(source_of_truth_path: Path) -> list[Path]:
         Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_enrichment_scorecard.py"),
+        Path("scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"),
         Path("scripts/validate_public_benchmark_subset_manifest.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
         source_of_truth_path,
@@ -150,6 +158,42 @@ def _enrichment_target_template() -> dict[str, Any]:
         "source_license_or_accession": "operator_supplied_dud_e_or_lit_pcba_accession",
         "source_checksum": "sha256:operator_supplied_scored_rows_checksum",
         "provenance_ref": "operator_supplied_scoring_receipt",
+    }
+
+
+def _vina_gnina_case_template() -> dict[str, Any]:
+    return {
+        "case_id": "casf_pdbbind_subset_001",
+        "source_family": "CASF/PDBBind",
+        "complex_id": "SOURCE_COMPLEX_ID",
+        "reference_pose_id": "SOURCE_COMPLEX_ID_reference_ligand",
+        "engine_runs": [
+            {
+                "engine_id": "vina",
+                "docking_run_id": "SOURCE_COMPLEX_ID_vina_run",
+                "predicted_ligand_path_or_pose_ref": (
+                    "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/vina_pose.sdf"
+                ),
+                "symmetry_aware_rmsd_angstrom": None,
+                "pose_success": None,
+                "score": None,
+                "score_direction": "lower_is_better",
+            },
+            {
+                "engine_id": "gnina",
+                "docking_run_id": "SOURCE_COMPLEX_ID_gnina_run",
+                "predicted_ligand_path_or_pose_ref": (
+                    "operator_attached/vina_gnina/SOURCE_COMPLEX_ID/gnina_pose.sdf"
+                ),
+                "symmetry_aware_rmsd_angstrom": None,
+                "pose_success": None,
+                "score": None,
+                "score_direction": "lower_is_better",
+            },
+        ],
+        "source_license_or_accession": "operator_supplied_casf_pdbbind_accession",
+        "source_checksum": "sha256:operator_supplied_vina_gnina_rows_checksum",
+        "provenance_ref": "operator_supplied_vina_gnina_run_receipt",
     }
 
 
@@ -229,13 +273,21 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-report {PRODUCTIZATION / 'public_benchmark_enrichment_materialization_report.json'} "
         "--fail-blocked"
     )
+    vina_gnina_materialization = (
+        "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py "
+        "--intake <operator-vina-gnina-comparison-intake.json> "
+        f"--out-adapter {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER} "
+        f"--out-report {PRODUCTIZATION / 'public_benchmark_vina_gnina_materialization_report.json'} "
+        "--fail-blocked"
+    )
     refresh_source = (
         "python3 scripts/build_public_benchmark_source_of_truth.py "
         f"--source-of-truth-out {DEFAULT_SOURCE_OF_TRUTH} "
         f"--subset-manifest-out {DEFAULT_SUBSET_MANIFEST} "
         f"--pose-validity-packet-out {DEFAULT_POSE_VALIDITY_PACKET} "
         f"--rmsd-scorecard-out {DEFAULT_RMSD_SCORECARD} "
-        f"--enrichment-scorecard-out {DEFAULT_ENRICHMENT_SCORECARD}"
+        f"--enrichment-scorecard-out {DEFAULT_ENRICHMENT_SCORECARD} "
+        f"--vina-gnina-comparison-adapter-out {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER}"
     )
 
     slots = [
@@ -301,6 +353,23 @@ def build_public_benchmark_operator_intake_packet(
             ],
             materialization_command=enrichment_materialization,
         ),
+        _slot(
+            slot_id="vina_gnina_comparison_intake",
+            title="Vina/GNINA docking engine comparison rows",
+            status="operator_input_required",
+            required=True,
+            intake_artifact="<operator-vina-gnina-comparison-intake.json>",
+            depends_on=[str(DEFAULT_SUBSET_MANIFEST), str(DEFAULT_RMSD_SCORECARD)],
+            required_fields=list(VINA_GNINA_REQUIRED_CASE_FIELDS),
+            template={"cases": [_vina_gnina_case_template()]},
+            owner_actions=[
+                "attach Vina and GNINA run rows for the same materialized benchmark cases",
+                "include symmetry-aware RMSD and pose_success values for every engine run",
+                "preserve docking run receipts, source accession or license references, and checksums",
+                "run the Vina/GNINA comparison materializer with --fail-blocked",
+            ],
+            materialization_command=vina_gnina_materialization,
+        ),
     ]
 
     return {
@@ -355,6 +424,12 @@ def build_public_benchmark_operator_intake_packet(
                 "produces": str(DEFAULT_ENRICHMENT_SCORECARD),
             },
             {
+                "step_id": "materialize_vina_gnina_comparison_adapter",
+                "schema_version": VINA_GNINA_MATERIALIZER_SCHEMA_VERSION,
+                "command": vina_gnina_materialization,
+                "produces": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
+            },
+            {
                 "step_id": "refresh_public_benchmark_source_of_truth",
                 "schema_version": "public-benchmark-source-of-truth.v1",
                 "command": refresh_source,
@@ -368,10 +443,13 @@ def build_public_benchmark_operator_intake_packet(
             "public_benchmark_pose_validity_packet.real_benchmark_case_count >= 12",
             "public_benchmark_symmetry_rmsd_scorecard.real_benchmark_case_count >= 12",
             "public_benchmark_enrichment_scorecard.public_benchmark_enrichment_ready == true",
+            "public_benchmark_vina_gnina_comparison_adapter.public_benchmark_engine_comparison_ready == true",
             "public_benchmark_source_of_truth.public_benchmark_ready == true",
         ],
         "supported_enrichment_families": list(SUPPORTED_FAMILIES),
         "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
+        "supported_comparison_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+        "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
         "linked_artifacts": {
             "source_of_truth": str(DEFAULT_SOURCE_OF_TRUTH),
             "subset_manifest": str(DEFAULT_SUBSET_MANIFEST),
@@ -379,6 +457,7 @@ def build_public_benchmark_operator_intake_packet(
             "pose_validity_packet": str(DEFAULT_POSE_VALIDITY_PACKET),
             "rmsd_scorecard": str(DEFAULT_RMSD_SCORECARD),
             "enrichment_scorecard": str(DEFAULT_ENRICHMENT_SCORECARD),
+            "vina_gnina_comparison_adapter": str(DEFAULT_VINA_GNINA_COMPARISON_ADAPTER),
         },
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
@@ -386,6 +465,7 @@ def build_public_benchmark_operator_intake_packet(
             "run_public_benchmark_pose_validity_materializer",
             "run_public_benchmark_rmsd_scorecard_materializer",
             "run_public_benchmark_enrichment_materializer",
+            "run_public_benchmark_vina_gnina_comparison_materializer",
             "refresh_public_benchmark_source_of_truth",
             "regenerate_goal_bottleneck_roadmap_surface",
         ],

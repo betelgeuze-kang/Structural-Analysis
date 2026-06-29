@@ -47,12 +47,14 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "casf_pdbbind_source_material_not_attached",
         "public_benchmark_real_pose_predictions_missing",
         "dud_e_lit_pcba_enrichment_rows_missing",
+        "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
     ]
     assert set(slots) == {
         "casf_pdbbind_subset_intake",
         "pose_coordinate_intake",
         "dud_e_lit_pcba_enrichment_intake",
+        "vina_gnina_comparison_intake",
     }
 
     subset = slots["casf_pdbbind_subset_intake"]
@@ -96,6 +98,27 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["supported_enrichment_families"] == ["DUD-E", "LIT-PCBA"]
     assert packet["required_molecule_fields"] == ["molecule_id", "is_active", "score"]
 
+    comparison = slots["vina_gnina_comparison_intake"]
+    assert comparison["depends_on"] == [
+        "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json",
+    ]
+    assert comparison["required_fields"] == [
+        "case_id",
+        "source_family",
+        "complex_id",
+        "reference_pose_id",
+        "engine_runs",
+        "source_license_or_accession",
+        "source_checksum",
+        "provenance_ref",
+    ]
+    assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in comparison[
+        "materialization_command"
+    ]
+    assert packet["supported_comparison_engines"] == ["vina", "gnina"]
+    assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
+
 
 def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> None:
     packet = module.build_public_benchmark_operator_intake_packet(repo_root=REPO_ROOT)
@@ -107,6 +130,7 @@ def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ord
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
         "materialize_enrichment_scorecard",
+        "materialize_vina_gnina_comparison_adapter",
         "refresh_public_benchmark_source_of_truth",
     ]
     assert packet["acceptance_criteria"][-1] == (

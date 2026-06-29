@@ -70,13 +70,14 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert public_benchmark["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
-    assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 3
+    assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 4
     assert (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
         in public_benchmark["evidence_artifacts"]
     )
     assert "attach_dud_e_lit_pcba_enrichment_intake" in public_benchmark["next_actions"]
+    assert "attach_vina_gnina_comparison_intake" in public_benchmark["next_actions"]
     assert "fill_public_benchmark_operator_intake_packet" in public_benchmark["next_actions"]
 
     pocketmd = rows["pocketmd_lite_top_k_refinement"]

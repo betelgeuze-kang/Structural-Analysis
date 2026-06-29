@@ -27,6 +27,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     pose_packet = artifacts["pose_validity_packet"]
     rmsd = artifacts["rmsd_scorecard"]
     enrichment = artifacts["enrichment_scorecard"]
+    vina_gnina = artifacts["vina_gnina_comparison_adapter"]
 
     assert source["schema_version"] == "public-benchmark-source-of-truth.v1"
     assert source["contract_pass"] is True
@@ -55,6 +56,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "dud_e_lit_pcba_enrichment_targets_missing",
             "dud_e_lit_pcba_scored_molecules_missing",
             "dud_e_lit_pcba_active_decoy_labels_missing",
+        ],
+    }
+    assert source["vina_gnina_comparison_adapter_summary"] == {
+        "status": "operator_evidence_required",
+        "public_benchmark_engine_comparison_ready": False,
+        "real_comparison_case_count": 0,
+        "supported_engines": ["vina", "gnina"],
+        "blockers": [
+            "vina_gnina_comparison_cases_missing",
+            "vina_gnina_engine_runs_missing",
+            "vina_gnina_external_receipts_missing",
         ],
     }
     assert source["pose_validity_packet_summary"] == {
@@ -154,9 +166,22 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "download benchmark data, validate chemistry, or close Tier beta alone."
         ),
     }
+    assert source["vina_gnina_comparison_materializer"] == {
+        "schema_version": "public-benchmark-vina-gnina-comparison-materialization.v1",
+        "status": "ready_for_operator_intake",
+        "materialization_command": vina_gnina["materializer"]["materialization_command"],
+        "claim_boundary": (
+            "The Vina/GNINA adapter materializer consumes operator-attached engine "
+            "comparison rows and reports per-engine pose-success summaries. It does "
+            "not run docking engines, fetch benchmark data, or close Tier beta alone."
+        ),
+    }
     assert {
         row["family_id"]: row["materialization_status"] for row in source["source_families"]
     }["dud_e_lit_pcba"] == "operator_intake_required"
+    assert {
+        row["family_id"]: row["materialization_status"] for row in source["source_families"]
+    }["vina_gnina"] == "operator_intake_required"
     assert source["operator_intake_packet"]["schema_version"] == (
         "public-benchmark-operator-intake-packet.v1"
     )
@@ -165,11 +190,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
     )
-    assert source["operator_intake_packet"]["required_slot_count"] == 3
+    assert source["operator_intake_packet"]["required_slot_count"] == 4
     assert source["operator_intake_packet"]["input_slot_ids"] == [
         "casf_pdbbind_subset_intake",
         "pose_coordinate_intake",
         "dud_e_lit_pcba_enrichment_intake",
+        "vina_gnina_comparison_intake",
     ]
     assert source["operator_intake_packet"]["acceptance_criteria"][-1] == (
         "public_benchmark_source_of_truth.public_benchmark_ready == true"
@@ -186,6 +212,8 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "materialize_posebusters_style_validity_packet_for_real_ligands",
         "attach_dud_e_lit_pcba_enrichment_intake",
         "run_public_benchmark_enrichment_materializer",
+        "attach_vina_gnina_comparison_intake",
+        "run_public_benchmark_vina_gnina_comparison_materializer",
     ]
     assert "Vina/GNINA comparison" in source["claim_boundary"]
     assert "DUD-E/LIT-PCBA enrichment results" in source["claim_boundary"]
@@ -297,6 +325,24 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "input_checksums"
     ]
 
+    assert vina_gnina["schema_version"] == (
+        "public-benchmark-vina-gnina-comparison-adapter.v1"
+    )
+    assert vina_gnina["status"] == "operator_evidence_required"
+    assert vina_gnina["contract_pass"] is False
+    assert vina_gnina["public_benchmark_engine_comparison_ready"] is False
+    assert vina_gnina["real_comparison_case_count"] == 0
+    assert vina_gnina["supported_engines"] == ["vina", "gnina"]
+    assert vina_gnina["materializer"]["schema_version"] == (
+        "public-benchmark-vina-gnina-comparison-materialization.v1"
+    )
+    assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in vina_gnina[
+        "materializer"
+    ]["materialization_command"]
+    assert "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py" in vina_gnina[
+        "input_checksums"
+    ]
+
 
 def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     source_out = tmp_path / "public_benchmark_source_of_truth.json"
@@ -304,6 +350,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     pose_out = tmp_path / "public_benchmark_pose_validity_packet.json"
     rmsd_out = tmp_path / "public_benchmark_symmetry_rmsd_scorecard.json"
     enrichment_out = tmp_path / "public_benchmark_enrichment_scorecard.json"
+    vina_gnina_out = tmp_path / "public_benchmark_vina_gnina_comparison_adapter.json"
     operator_out = tmp_path / "public_benchmark_operator_intake_packet.json"
     operator_md_out = tmp_path / "public_benchmark_operator_intake_packet.md"
 
@@ -314,6 +361,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
         pose_validity_packet_out=pose_out,
         rmsd_scorecard_out=rmsd_out,
         enrichment_scorecard_out=enrichment_out,
+        vina_gnina_comparison_adapter_out=vina_gnina_out,
         operator_intake_packet_out=operator_out,
         operator_intake_packet_md_out=operator_md_out,
     )
@@ -323,6 +371,7 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert pose_out.exists()
     assert rmsd_out.exists()
     assert enrichment_out.exists()
+    assert vina_gnina_out.exists()
     assert operator_out.exists()
     assert operator_md_out.exists()
     assert json.loads(source_out.read_text(encoding="utf-8")) == artifacts["source_of_truth"]
@@ -331,6 +380,9 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert json.loads(rmsd_out.read_text(encoding="utf-8")) == artifacts["rmsd_scorecard"]
     assert json.loads(enrichment_out.read_text(encoding="utf-8")) == artifacts[
         "enrichment_scorecard"
+    ]
+    assert json.loads(vina_gnina_out.read_text(encoding="utf-8")) == artifacts[
+        "vina_gnina_comparison_adapter"
     ]
     assert json.loads(operator_out.read_text(encoding="utf-8")) == artifacts[
         "operator_intake_packet"

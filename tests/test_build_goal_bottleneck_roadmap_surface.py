@@ -80,6 +80,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_2["bottleneck"] == "public_benchmark_source_of_truth_not_ready"
     assert phase_2["first_blocker"] == "casf_pdbbind_source_material_not_attached"
     assert "attach_dud_e_lit_pcba_enrichment_intake" in phase_2["next_actions"]
+    assert "attach_vina_gnina_comparison_intake" in phase_2["next_actions"]
 
     phase_3 = rows["phase_3_gpcr_hard_decoy_closure"]
     assert phase_3["state"] == "blocked"
