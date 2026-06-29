@@ -215,8 +215,10 @@ def _roadmap_row(
     evidence_artifacts: list[Path] | None = None,
     linked_routes: list[str] | None = None,
     next_actions: list[str] | None = None,
+    blocked_criteria: list[str] | None = None,
     summary: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
+    criteria = blocked_criteria or []
     return {
         "phase_id": phase_id,
         "phase_label": phase_label,
@@ -229,6 +231,8 @@ def _roadmap_row(
         "evidence_artifacts": [str(path) for path in evidence_artifacts or []],
         "linked_routes": linked_routes or [],
         "next_actions": next_actions or [],
+        "blocked_criteria_count": len(criteria),
+        "blocked_criteria": criteria,
         "summary": summary or {},
     }
 
@@ -414,6 +418,9 @@ def _public_benchmark_row(
         for row in _as_list(tier_beta_gate.get("criteria"))
         if isinstance(row, dict)
     ]
+    tier_beta_failed_criteria = [
+        str(row) for row in _as_list(tier_beta_gate.get("failed_criteria"))
+    ]
     first_operator_evidence_gap = _as_dict(
         public_benchmark.get("first_operator_evidence_gap")
     )
@@ -472,6 +479,7 @@ def _public_benchmark_row(
             + [str(row) for row in _as_list(public_benchmark.get("next_actions"))]
             + [str(row) for row in _as_list(public_benchmark_operator_intake.get("next_actions"))]
         ),
+        blocked_criteria=tier_beta_failed_criteria,
         summary={
             "status": str(public_benchmark.get("status") or ""),
             "read_model_ready": _as_bool(public_benchmark.get("read_model_ready")),
@@ -506,9 +514,7 @@ def _public_benchmark_row(
             "tier_beta_failed_criterion_count": _as_int(
                 tier_beta_gate.get("failed_criterion_count")
             ),
-            "tier_beta_failed_criteria": [
-                str(row) for row in _as_list(tier_beta_gate.get("failed_criteria"))
-            ],
+            "tier_beta_failed_criteria": tier_beta_failed_criteria,
             "tier_beta_gate_criteria": tier_beta_criteria,
             "operator_intake_slots": operator_slots,
             "gate_unblock_plan": gate_unblock_plan,
@@ -581,6 +587,9 @@ def _gpcr_row(
         }
         for row in _as_list(phase3_exit_gate.get("criteria"))
         if isinstance(row, dict)
+    ]
+    phase3_failed_criteria = [
+        str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
     ]
     operator_target_slots = [
         {
@@ -673,6 +682,7 @@ def _gpcr_row(
             + [str(row) for row in _as_list(capability.get("next_actions"))]
             + (["run_gpcr_hard_decoy_suite_materializer"] if not broad_safe else [])
         ),
+        blocked_criteria=phase3_failed_criteria if not broad_safe else [],
         summary={
             "broad_gpcr_family_claim_safe": broad_safe,
             "target_count": _as_int(gpcr_product_report.get("target_count")),
@@ -702,9 +712,7 @@ def _gpcr_row(
             "phase3_failed_criterion_count": _as_int(
                 phase3_exit_gate.get("failed_criterion_count")
             ),
-            "phase3_failed_criteria": [
-                str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
-            ],
+            "phase3_failed_criteria": phase3_failed_criteria,
             "phase3_exit_gate_criteria": phase3_gate_criteria,
             "operator_target_slots": operator_target_slots,
             "gate_unblock_plan": gate_unblock_plan,
@@ -819,6 +827,9 @@ def _pocketmd_row(
         }
         for index, row in enumerate(gate_unblock_plan, start=1)
     ]
+    phase4_failed_criteria = [
+        str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
+    ]
     return _roadmap_row(
         phase_id="phase_4_pocketmd_lite",
         phase_label="Phase 4",
@@ -849,6 +860,7 @@ def _pocketmd_row(
             + [str(row) for row in _as_list(pocketmd_surface.get("next_actions"))]
             + [str(row) for row in _as_list(capability.get("next_actions"))]
         ),
+        blocked_criteria=phase4_failed_criteria if not ready else [],
         summary={
             "product_surface_ready": ready,
             "surface_status": str(pocketmd_surface.get("status") or ""),
@@ -905,9 +917,7 @@ def _pocketmd_row(
             "phase4_failed_criterion_count": _as_int(
                 phase4_exit_gate.get("failed_criterion_count")
             ),
-            "phase4_failed_criteria": [
-                str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
-            ],
+            "phase4_failed_criteria": phase4_failed_criteria,
             "broad_all_atom_fep_claim_locked": True,
         },
     )

@@ -246,6 +246,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "vina_gnina_comparison_ready",
         "external_receipts_attached",
     ]
+    assert phase_2["blocked_criteria_count"] == 7
+    assert phase_2["blocked_criteria"] == phase_2["summary"][
+        "tier_beta_failed_criteria"
+    ]
     assert [
         row["criterion_id"] for row in phase_2["summary"]["tier_beta_gate_criteria"]
     ] == [
@@ -358,6 +362,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "top20_hit_rate_min",
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert phase_3["blocked_criteria_count"] == 4
+    assert phase_3["blocked_criteria"] == phase_3["summary"][
+        "phase3_failed_criteria"
     ]
     assert [
         row["criterion_id"] for row in phase_3["summary"]["phase3_exit_gate_criteria"]
@@ -486,6 +494,10 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "clash_relief_materialized",
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
+    ]
+    assert phase_4["blocked_criteria_count"] == 7
+    assert phase_4["blocked_criteria"] == phase_4["summary"][
+        "phase4_failed_criteria"
     ]
     gate_plan = phase_4["summary"]["gate_unblock_plan"][0]
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
