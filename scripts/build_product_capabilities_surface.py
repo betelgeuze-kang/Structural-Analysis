@@ -266,6 +266,20 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             ),
             "tier_beta_ready": bool(payload.get("tier_beta_ready")),
             "public_benchmark_ready": ready,
+            "first_blocked_target": str(
+                payload.get("first_blocked_target")
+                or operator_intake.get("first_blocked_target")
+                or source_operator_summary.get("first_blocked_target")
+                or ""
+            ),
+            "root_cause_tags": [
+                str(row)
+                for row in _as_list(
+                    payload.get("root_cause_tags")
+                    or operator_intake.get("root_cause_tags")
+                    or source_operator_summary.get("root_cause_tags")
+                )
+            ],
             "operator_intake_route": str(
                 operator_intake.get("route")
                 or _as_dict(operator_intake.get("read_model")).get("route")

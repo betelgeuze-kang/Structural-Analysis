@@ -48,6 +48,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
+    assert source["first_blocked_target"] == "casf_pdbbind_subset_intake"
+    assert source["root_cause_tags"] == [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ]
     assert source["tier_beta_gate"]["status"] == "blocked"
     assert source["tier_beta_gate"]["claim"] == "tier_beta_public_benchmark_harness"
     assert source["tier_beta_gate"]["minimum_subset_case_count"] == 12
@@ -246,6 +251,17 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["operator_intake_packet"]["required_slot_count"] == 4
     assert source["operator_intake_packet"]["gate_unblock_plan_count"] == 4
     assert source["operator_intake_packet"]["minimum_subset_case_count"] == 12
+    assert source["operator_intake_packet"]["first_blocked_target"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert source["operator_intake_packet"]["root_cause_tags"] == [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ]
+    assert source["operator_intake_packet"]["operator_evidence_gap_count"] == 4
+    assert source["operator_intake_packet"]["first_operator_evidence_gap"][
+        "slot_id"
+    ] == "casf_pdbbind_subset_intake"
     assert source["operator_intake_packet"]["input_slot_ids"] == [
         "casf_pdbbind_subset_intake",
         "pose_coordinate_intake",

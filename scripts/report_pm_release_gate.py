@@ -555,8 +555,27 @@ def _public_benchmark_operator_actions(
             or _as_list(source_summary.get("next_actions"))
         )
     ]
+    first_blocked_target = str(
+        public_benchmark_source_of_truth_payload.get("first_blocked_target")
+        or source_summary.get("first_blocked_target")
+        or _as_dict(
+            public_benchmark_source_of_truth_payload.get("first_operator_evidence_gap")
+        ).get("slot_id")
+        or ""
+    )
+    root_cause_tags = [
+        str(row)
+        for row in _as_list(
+            public_benchmark_source_of_truth_payload.get("root_cause_tags")
+            or source_summary.get("root_cause_tags")
+        )
+    ]
     first_blocker = blockers[0] if blockers else ""
     reason = f"public benchmark source-of-truth is {status}; first_blocker={first_blocker}"
+    if first_blocked_target:
+        reason += f"; first_blocked_target={first_blocked_target}"
+    if root_cause_tags:
+        reason += f"; root_cause_tags={','.join(root_cause_tags)}"
     if next_actions:
         reason += f"; next_action={next_actions[0]}"
     return [
@@ -565,6 +584,8 @@ def _public_benchmark_operator_actions(
             "status": "public_benchmark_evidence_required",
             "bottleneck": "public_benchmark_source_of_truth_not_ready",
             "first_blocker": first_blocker,
+            "first_blocked_target": first_blocked_target,
+            "root_cause_tags": root_cause_tags,
             "blockers": blockers,
             "next_actions": next_actions,
             "reason": reason,

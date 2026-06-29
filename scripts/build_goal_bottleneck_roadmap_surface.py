@@ -344,6 +344,7 @@ def _public_benchmark_row(
 ) -> dict[str, Any]:
     action = _action_by_bottleneck(action_register, "public_benchmark_source_of_truth_not_ready")
     capability = _capability_by_id(product_capabilities, "public_benchmark_harness")
+    capability_summary = _as_dict(capability.get("summary"))
     blockers = [str(row) for row in _as_list(public_benchmark.get("blockers"))]
     tier_beta_gate = _as_dict(public_benchmark.get("tier_beta_gate"))
     operator_slots = [
@@ -403,6 +404,35 @@ def _public_benchmark_row(
         for row in _as_list(tier_beta_gate.get("criteria"))
         if isinstance(row, dict)
     ]
+    first_operator_evidence_gap = _as_dict(
+        public_benchmark.get("first_operator_evidence_gap")
+    )
+    if not first_operator_evidence_gap:
+        first_operator_evidence_gap = next(
+            (
+                row
+                for row in operator_evidence_gap_register
+                if row["tier_beta_blocked"]
+            ),
+            {},
+        )
+    first_blocked_target = str(
+        action.get("first_blocked_target")
+        or public_benchmark.get("first_blocked_target")
+        or public_benchmark_operator_intake.get("first_blocked_target")
+        or capability_summary.get("first_blocked_target")
+        or first_operator_evidence_gap.get("slot_id")
+        or ""
+    )
+    root_cause_tags = [
+        str(row)
+        for row in _as_list(
+            action.get("root_cause_tags")
+            or public_benchmark.get("root_cause_tags")
+            or public_benchmark_operator_intake.get("root_cause_tags")
+            or capability_summary.get("root_cause_tags")
+        )
+    ]
     ready = _as_bool(decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready"))
     source_route = str(
         public_benchmark.get("route")
@@ -422,6 +452,8 @@ def _public_benchmark_row(
         state="ready" if ready else "blocked",
         bottleneck="" if ready else "public_benchmark_source_of_truth_not_ready",
         first_blocker=str(action.get("first_blocker") or _first_str(blockers)),
+        first_blocked_target=first_blocked_target,
+        root_cause_tags=root_cause_tags,
         evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE],
         linked_routes=[source_route, operator_route, "/product/capabilities"],
         next_actions=_dedupe(
@@ -454,7 +486,7 @@ def _public_benchmark_row(
                 or len(operator_evidence_gap_register)
             ),
             "first_operator_evidence_gap": _as_dict(
-                public_benchmark.get("first_operator_evidence_gap")
+                first_operator_evidence_gap
             ),
             "minimum_subset_case_count": _as_int(
                 public_benchmark_operator_intake.get("minimum_subset_case_count")

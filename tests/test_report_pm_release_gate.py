@@ -783,6 +783,11 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
                 "casf_pdbbind_source_material_not_attached",
                 "public_benchmark_real_pose_predictions_missing",
             ],
+            "first_blocked_target": "casf_pdbbind_subset_intake",
+            "root_cause_tags": [
+                "operator_source_material_required",
+                "operator_receipts_required",
+            ],
             "next_actions": [
                 "attach_checked_casf_pdbbind_subset_source_files",
                 "run_public_benchmark_subset_materializer",
@@ -796,6 +801,11 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
             "status": "public_benchmark_evidence_required",
             "bottleneck": "public_benchmark_source_of_truth_not_ready",
             "first_blocker": "casf_pdbbind_source_material_not_attached",
+            "first_blocked_target": "casf_pdbbind_subset_intake",
+            "root_cause_tags": [
+                "operator_source_material_required",
+                "operator_receipts_required",
+            ],
             "blockers": [
                 "casf_pdbbind_source_material_not_attached",
                 "public_benchmark_real_pose_predictions_missing",
@@ -807,6 +817,8 @@ def test_public_benchmark_source_of_truth_blocker_becomes_operator_action() -> N
             "reason": (
                 "public benchmark source-of-truth is seed_ready_materialization_blocked; "
                 "first_blocker=casf_pdbbind_source_material_not_attached; "
+                "first_blocked_target=casf_pdbbind_subset_intake; "
+                "root_cause_tags=operator_source_material_required,operator_receipts_required; "
                 "next_action=attach_checked_casf_pdbbind_subset_source_files"
             ),
             "artifact": (

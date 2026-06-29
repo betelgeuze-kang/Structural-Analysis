@@ -251,6 +251,29 @@ def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
+def _operator_evidence_gap_register(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for index, slot in enumerate(slots, start=1):
+        owner_actions = [str(action) for action in _as_list(slot.get("owner_actions"))]
+        rows.append(
+            {
+                "slot_priority": index,
+                "slot_id": str(slot.get("slot_id") or ""),
+                "status": str(slot.get("status") or ""),
+                "tier_beta_blocked": True,
+                "blocked_tier_beta_criteria": [
+                    str(row) for row in _as_list(slot.get("unblocks_tier_beta_criteria"))
+                ],
+                "first_next_action": owner_actions[0] if owner_actions else "",
+                "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
+                "materialization_steps": [
+                    str(row) for row in _as_list(slot.get("materialization_steps"))
+                ],
+            }
+        )
+    return rows
+
+
 def build_public_benchmark_operator_intake_packet(
     *,
     repo_root: Path = ROOT,
@@ -453,6 +476,8 @@ def build_public_benchmark_operator_intake_packet(
         ),
     ]
     gate_unblock_plan = _gate_unblock_plan(slots)
+    operator_evidence_gap_register = _operator_evidence_gap_register(slots)
+    first_operator_evidence_gap = operator_evidence_gap_register[0]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -484,6 +509,14 @@ def build_public_benchmark_operator_intake_packet(
         "required_slot_count": len([slot for slot in slots if slot["required"]]),
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
+        "first_blocked_target": first_operator_evidence_gap["slot_id"],
+        "root_cause_tags": [
+            "operator_source_material_required",
+            "operator_receipts_required",
+        ],
+        "operator_evidence_gap_count": len(operator_evidence_gap_register),
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+        "operator_evidence_gap_register": operator_evidence_gap_register,
         "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "materialization_sequence": [
             {
@@ -565,6 +598,13 @@ def build_public_benchmark_operator_intake_packet(
         "summary": {
             "required_slot_count": len([slot for slot in slots if slot["required"]]),
             "gate_unblock_plan_count": len(gate_unblock_plan),
+            "first_blocked_target": first_operator_evidence_gap["slot_id"],
+            "root_cause_tags": [
+                "operator_source_material_required",
+                "operator_receipts_required",
+            ],
+            "operator_evidence_gap_count": len(operator_evidence_gap_register),
+            "first_operator_evidence_gap": first_operator_evidence_gap,
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "source_of_truth_blocker_count": len(source_blockers),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),

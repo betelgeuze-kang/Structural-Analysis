@@ -759,6 +759,11 @@ def build_source_of_truth(
         ),
         {},
     )
+    first_blocked_target = str(first_operator_evidence_gap.get("slot_id") or "")
+    root_cause_tags = [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -783,6 +788,8 @@ def build_source_of_truth(
         },
         "tier_beta_ready": False,
         "public_benchmark_ready": False,
+        "first_blocked_target": first_blocked_target,
+        "root_cause_tags": root_cause_tags,
         "tier_beta_gate": tier_beta_gate,
         "source_families": [
             {
@@ -865,6 +872,23 @@ def build_source_of_truth(
             "input_slot_ids": [row["slot_id"] for row in operator_intake_packet["input_slots"]],
             "gate_unblock_plan_count": operator_intake_packet["gate_unblock_plan_count"],
             "minimum_subset_case_count": operator_intake_packet["minimum_subset_case_count"],
+            "first_blocked_target": str(
+                operator_intake_packet.get("first_blocked_target") or first_blocked_target
+            ),
+            "root_cause_tags": [
+                str(row)
+                for row in (
+                    operator_intake_packet.get("root_cause_tags") or root_cause_tags
+                )
+            ],
+            "operator_evidence_gap_count": int(
+                operator_intake_packet.get("operator_evidence_gap_count")
+                or len(operator_evidence_gap_register)
+            ),
+            "first_operator_evidence_gap": dict(
+                operator_intake_packet.get("first_operator_evidence_gap")
+                or first_operator_evidence_gap
+            ),
             "gate_unblock_plan": operator_intake_packet["gate_unblock_plan"],
             "acceptance_criteria": operator_intake_packet["acceptance_criteria"],
             "materialization_sequence": [

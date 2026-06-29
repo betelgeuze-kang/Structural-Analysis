@@ -71,6 +71,13 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "/product/public-benchmark"
     )
     assert public_benchmark["summary"]["public_benchmark_ready"] is False
+    assert public_benchmark["summary"]["first_blocked_target"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert public_benchmark["summary"]["root_cause_tags"] == [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ]
     assert public_benchmark["summary"]["operator_intake_route"] == (
         "/product/public-benchmark/operator-intake"
     )

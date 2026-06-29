@@ -53,6 +53,15 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["public_benchmark_ready"] is False
     assert packet["tier_beta_ready"] is False
     assert packet["owner_input_required"] is True
+    assert packet["first_blocked_target"] == "casf_pdbbind_subset_intake"
+    assert packet["root_cause_tags"] == [
+        "operator_source_material_required",
+        "operator_receipts_required",
+    ]
+    assert packet["operator_evidence_gap_count"] == 4
+    assert packet["first_operator_evidence_gap"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
     assert packet["source_of_truth_status"] == "seed_ready_materialization_blocked"
     assert packet["source_of_truth_blockers"] == [
         "casf_pdbbind_source_material_not_attached",
@@ -131,6 +140,8 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
     assert packet["gate_unblock_plan_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
+    assert packet["summary"]["first_blocked_target"] == "casf_pdbbind_subset_intake"
+    assert packet["summary"]["operator_evidence_gap_count"] == 4
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",
