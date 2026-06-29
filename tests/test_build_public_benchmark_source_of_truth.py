@@ -87,10 +87,33 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "manifest. It does not fetch, redistribute, or license benchmark data."
         ),
     }
+    assert source["pose_validity_materializer"] == {
+        "schema_version": "public-benchmark-pose-validity-input-materialization.v1",
+        "status": "ready_for_operator_intake",
+        "required_pose_fields": [
+            "case_id",
+            "reference_atoms",
+            "predicted_atoms",
+            "ligand_atom_order_contract",
+            "symmetry_permutation_contract",
+            "protein_structure_path",
+            "receptor_context",
+        ],
+        "pose_intake_case_key": "cases",
+        "materialization_command": pose_packet["validator"]["materialization_command"],
+        "claim_boundary": (
+            "The pose materializer joins a materialized subset manifest with "
+            "operator-attached reference/predicted ligand coordinates and receptor "
+            "context, then runs the local PoseBusters-style validator. It does not "
+            "parse chemistry files or claim benchmark performance."
+        ),
+    }
     assert source["next_actions"] == [
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+        "attach_public_benchmark_pose_coordinate_intake",
+        "run_public_benchmark_pose_validity_materializer",
         "run_symmetry_aware_rmsd_on_real_subset",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
     ]
@@ -149,6 +172,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "symmetry_permutation_contract",
         "protein_structure_path",
         "receptor_context",
+    ]
+    assert "materialize_public_benchmark_pose_validity_input.py" in pose_packet[
+        "validator"
+    ]["materialization_command"]
+    assert "scripts/materialize_public_benchmark_pose_validity_input.py" in pose_packet[
+        "input_checksums"
     ]
     assert pose_packet["dry_run_validation"]["pose_validity_ready"] is True
     assert pose_packet["dry_run_validation"]["dry_run_case_count"] == 1

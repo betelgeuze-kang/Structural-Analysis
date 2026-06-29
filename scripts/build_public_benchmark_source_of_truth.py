@@ -30,6 +30,9 @@ from validate_public_benchmark_pose_validity import (  # noqa: E402
 from materialize_public_benchmark_subset_manifest import (  # noqa: E402
     SCHEMA_VERSION as MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_pose_validity_input import (  # noqa: E402
+    SCHEMA_VERSION as POSE_MATERIALIZER_SCHEMA_VERSION,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -46,6 +49,7 @@ RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
 def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
@@ -285,6 +289,16 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "python3 scripts/validate_public_benchmark_pose_validity.py "
                 "--input <pose-validity-input.json> --fail-blocked"
             ),
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_pose_validity_input.py "
+                "--subset-manifest implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_manifest.json "
+                "--pose-intake <operator-pose-coordinate-intake.json> "
+                "--out-input implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_validity_input.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_validity_materialization_report.json --fail-blocked"
+            ),
         },
         "dry_run_validation": dry_run_validation,
         "checks": [
@@ -407,6 +421,21 @@ def build_source_of_truth(
                 "manifest. It does not fetch, redistribute, or license benchmark data."
             ),
         },
+        "pose_validity_materializer": {
+            "schema_version": POSE_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "required_pose_fields": list(REQUIRED_POSE_FIELDS),
+            "pose_intake_case_key": "cases",
+            "materialization_command": pose_validity_packet["validator"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The pose materializer joins a materialized subset manifest with "
+                "operator-attached reference/predicted ligand coordinates and receptor "
+                "context, then runs the local PoseBusters-style validator. It does not "
+                "parse chemistry files or claim benchmark performance."
+            ),
+        },
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
@@ -416,6 +445,8 @@ def build_source_of_truth(
             "attach_checked_casf_pdbbind_subset_source_files",
             "run_public_benchmark_subset_materializer",
             "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+            "attach_public_benchmark_pose_coordinate_intake",
+            "run_public_benchmark_pose_validity_materializer",
             "run_symmetry_aware_rmsd_on_real_subset",
             "materialize_posebusters_style_validity_packet_for_real_ligands",
         ],
