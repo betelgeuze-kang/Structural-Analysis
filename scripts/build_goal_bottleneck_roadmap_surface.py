@@ -206,6 +206,7 @@ def _release_cockpit_row(
             "approval_token_count",
             "stale_artifact_count",
             "evidence_surface_count",
+            "missing_evidence_surface_count",
             "locked_evidence_surface_count",
             "public_benchmark_ready",
             "broad_gpcr_family_claim_safe",
@@ -440,6 +441,9 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "approval_token_count": _as_int(decision.get("approval_token_count")),
         "stale_artifact_count": _as_int(decision.get("stale_artifact_count")),
         "evidence_surface_count": _as_int(decision.get("evidence_surface_count")),
+        "missing_evidence_surface_count": _as_int(
+            decision.get("missing_evidence_surface_count")
+        ),
         "locked_evidence_surface_count": _as_int(decision.get("locked_evidence_surface_count")),
         "public_benchmark_ready": _as_bool(
             decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready")
