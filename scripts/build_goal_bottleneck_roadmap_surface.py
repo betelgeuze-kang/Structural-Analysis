@@ -980,6 +980,78 @@ def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list
     return queue
 
 
+def _non_expert_release_briefing(
+    *,
+    release_decision_kpis: dict[str, Any],
+    pm_report: dict[str, Any],
+    roadmap_rows: list[dict[str, Any]],
+    operator_evidence_handoff_queue: list[dict[str, Any]],
+    primary_bottleneck_row: dict[str, Any],
+) -> dict[str, Any]:
+    release_area_blockers = [
+        str(row) for row in _as_list(pm_report.get("release_area_blockers")) if str(row)
+    ]
+    human_ux_blockers = [
+        blocker for blocker in release_area_blockers if blocker.startswith("ux::")
+    ]
+    blocked_science_or_beta_rows = [
+        row
+        for row in roadmap_rows
+        if row.get("phase_id")
+        in {
+            "phase_2_public_benchmark_harness",
+            "phase_3_gpcr_hard_decoy_closure",
+            "phase_4_pocketmd_lite",
+        }
+        and row.get("state") != "ready"
+    ]
+    return {
+        "audience": "non_expert_pm_operator",
+        "release_allowed": _as_bool(release_decision_kpis.get("release_allowed")),
+        "plain_status": (
+            "Release is blocked. The product can remain in restricted alpha/beta "
+            "preparation, but it must not be presented as fully release-ready."
+        ),
+        "primary_release_blocker": str(
+            release_decision_kpis.get("first_blocker") or ""
+        ),
+        "release_area_blocker_count": len(release_area_blockers),
+        "human_ux_blockers": human_ux_blockers,
+        "human_ux_owner_action": (
+            "attach a passing human new-user observation record before claiming "
+            "the UX release-area gate"
+            if human_ux_blockers
+            else ""
+        ),
+        "primary_roadmap_bottleneck": str(primary_bottleneck_row.get("bottleneck") or ""),
+        "primary_roadmap_phase_id": str(primary_bottleneck_row.get("phase_id") or ""),
+        "blocked_science_or_beta_phase_count": len(blocked_science_or_beta_rows),
+        "blocked_science_or_beta_phases": [
+            {
+                "phase_id": str(row.get("phase_id") or ""),
+                "roadmap_item": str(row.get("roadmap_item") or ""),
+                "bottleneck": str(row.get("bottleneck") or ""),
+                "first_blocker": str(row.get("first_blocker") or ""),
+                "first_blocked_target": str(row.get("first_blocked_target") or ""),
+            }
+            for row in blocked_science_or_beta_rows
+        ],
+        "next_owner_handoff_count": len(operator_evidence_handoff_queue),
+        "first_operator_handoff": (
+            operator_evidence_handoff_queue[0]
+            if operator_evidence_handoff_queue
+            else {}
+        ),
+        "claim_boundaries": [
+            "do_not_claim_limited_commercial_release_until_release_allowed_true",
+            "do_not_claim_tier_beta_until_public_benchmark_ready_true",
+            "do_not_claim_broad_gpcr_until_broad_gpcr_family_claim_safe_true",
+            "do_not_claim_pocketmd_lite_ready_until_product_surface_ready_true",
+            "do_not_replace_human_ux_observation_with_templates_or_automation",
+        ],
+    }
+
+
 def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
     pm_report = _load_json(repo_root, DEFAULT_PM_REPORT)
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
@@ -1101,6 +1173,13 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         ),
     }
     operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)
+    non_expert_release_briefing = _non_expert_release_briefing(
+        release_decision_kpis=release_decision_kpis,
+        pm_report=pm_report,
+        roadmap_rows=roadmap_rows,
+        operator_evidence_handoff_queue=operator_evidence_handoff_queue,
+        primary_bottleneck_row=primary_bottleneck_row,
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1148,6 +1227,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             else {}
         ),
         "operator_evidence_handoff_queue": operator_evidence_handoff_queue,
+        "non_expert_release_briefing_ready": True,
+        "non_expert_release_briefing": non_expert_release_briefing,
         "release_decision_operator_actions": [
             row
             for row in _as_list(action_register.get("release_decision_operator_actions"))

@@ -88,6 +88,44 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "broad_gpcr_family_claim_locked",
         "pocketmd_lite_science_product_surface_locked",
     ]
+    assert surface["non_expert_release_briefing_ready"] is True
+    briefing = surface["non_expert_release_briefing"]
+    assert briefing["audience"] == "non_expert_pm_operator"
+    assert briefing["release_allowed"] is False
+    assert briefing["primary_release_blocker"] == (
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    )
+    assert briefing["release_area_blocker_count"] == 9
+    assert briefing["human_ux_blockers"] == [
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+    ]
+    assert briefing["human_ux_owner_action"] == (
+        "attach a passing human new-user observation record before claiming "
+        "the UX release-area gate"
+    )
+    assert briefing["primary_roadmap_bottleneck"] == (
+        "public_benchmark_source_of_truth_not_ready"
+    )
+    assert briefing["blocked_science_or_beta_phase_count"] == 3
+    assert [
+        row["phase_id"] for row in briefing["blocked_science_or_beta_phases"]
+    ] == [
+        "phase_2_public_benchmark_harness",
+        "phase_3_gpcr_hard_decoy_closure",
+        "phase_4_pocketmd_lite",
+    ]
+    assert briefing["next_owner_handoff_count"] == 3
+    assert briefing["first_operator_handoff"]["phase_id"] == (
+        "phase_2_public_benchmark_harness"
+    )
+    assert briefing["claim_boundaries"] == [
+        "do_not_claim_limited_commercial_release_until_release_allowed_true",
+        "do_not_claim_tier_beta_until_public_benchmark_ready_true",
+        "do_not_claim_broad_gpcr_until_broad_gpcr_family_claim_safe_true",
+        "do_not_claim_pocketmd_lite_ready_until_product_surface_ready_true",
+        "do_not_replace_human_ux_observation_with_templates_or_automation",
+    ]
     assert surface["operator_evidence_handoff_scope"] == (
         "first_blocked_operator_gap_per_blocked_phase"
     )
