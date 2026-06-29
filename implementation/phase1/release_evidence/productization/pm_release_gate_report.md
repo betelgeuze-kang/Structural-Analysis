@@ -17,7 +17,7 @@
 - `release_allowed`: `False`
 - `blocked_release_count`: `8`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `13`
+- `operator_action_count`: `12`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `8`
 - `locked_evidence_surface_count`: `0`
