@@ -33,6 +33,31 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["contract_pass"] is True
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
+    assert source["tier_beta_gate"]["status"] == "blocked"
+    assert source["tier_beta_gate"]["claim"] == "tier_beta_public_benchmark_harness"
+    assert source["tier_beta_gate"]["minimum_subset_case_count"] == 12
+    assert source["tier_beta_gate"]["failed_criterion_count"] == 7
+    assert source["tier_beta_gate"]["failed_criteria"] == [
+        "casf_pdbbind_subset_materialized",
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+        "dud_e_lit_pcba_enrichment_ready",
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached",
+    ]
+    assert {
+        row["criterion_id"]: row["pass"]
+        for row in source["tier_beta_gate"]["criteria"]
+    } == {
+        "casf_pdbbind_subset_materialized": False,
+        "real_pose_validity_packet_materialized": False,
+        "symmetry_rmsd_scorecard_real_cases": False,
+        "posebusters_style_validity_real_ligands": False,
+        "dud_e_lit_pcba_enrichment_ready": False,
+        "vina_gnina_comparison_ready": False,
+        "external_receipts_attached": False,
+    }
     assert source["subset_manifest_summary"] == {
         "target_subset_case_count": 12,
         "materialized_case_count": 0,

@@ -594,6 +594,83 @@ def build_source_of_truth(
     operator_intake_packet: dict[str, Any],
     repo_root: Path = ROOT,
 ) -> dict[str, Any]:
+    target_subset_case_count = int(subset_manifest["target_subset_case_count"])
+    subset_materialized_count = int(subset_manifest["materialized_case_count"])
+    pose_real_case_count = int(
+        pose_validity_packet["dry_run_validation"]["real_benchmark_case_count"]
+    )
+    rmsd_real_case_count = int(rmsd_scorecard["real_benchmark_case_count"])
+    enrichment_ready = bool(enrichment_scorecard["public_benchmark_enrichment_ready"])
+    engine_comparison_ready = bool(
+        vina_gnina_comparison_adapter["public_benchmark_engine_comparison_ready"]
+    )
+    tier_beta_gate = {
+        "status": "blocked",
+        "claim": "tier_beta_public_benchmark_harness",
+        "minimum_subset_case_count": target_subset_case_count,
+        "criteria": [
+            {
+                "criterion_id": "casf_pdbbind_subset_materialized",
+                "pass": bool(subset_materialized_count >= target_subset_case_count),
+                "current": subset_materialized_count,
+                "required": target_subset_case_count,
+                "blockers": subset_manifest["blockers"],
+            },
+            {
+                "criterion_id": "real_pose_validity_packet_materialized",
+                "pass": bool(pose_real_case_count >= target_subset_case_count),
+                "current": pose_real_case_count,
+                "required": target_subset_case_count,
+                "blockers": ["public_benchmark_real_pose_predictions_missing"]
+                if pose_real_case_count < target_subset_case_count
+                else [],
+            },
+            {
+                "criterion_id": "symmetry_rmsd_scorecard_real_cases",
+                "pass": bool(rmsd_real_case_count >= target_subset_case_count),
+                "current": rmsd_real_case_count,
+                "required": target_subset_case_count,
+                "blockers": ["public_benchmark_real_rmsd_rows_missing"]
+                if rmsd_real_case_count < target_subset_case_count
+                else [],
+            },
+            {
+                "criterion_id": "posebusters_style_validity_real_ligands",
+                "pass": bool(pose_real_case_count >= target_subset_case_count),
+                "current": pose_real_case_count,
+                "required": target_subset_case_count,
+                "blockers": ["public_benchmark_real_pose_validity_rows_missing"]
+                if pose_real_case_count < target_subset_case_count
+                else [],
+            },
+            {
+                "criterion_id": "dud_e_lit_pcba_enrichment_ready",
+                "pass": enrichment_ready,
+                "current": enrichment_scorecard["real_enrichment_target_count"],
+                "required": ">=1_ready_target_with_active_decoy_labels",
+                "blockers": enrichment_scorecard["blockers"],
+            },
+            {
+                "criterion_id": "vina_gnina_comparison_ready",
+                "pass": engine_comparison_ready,
+                "current": vina_gnina_comparison_adapter["real_comparison_case_count"],
+                "required": ">=1_case_with_vina_and_gnina_engine_runs",
+                "blockers": vina_gnina_comparison_adapter["blockers"],
+            },
+            {
+                "criterion_id": "external_receipts_attached",
+                "pass": False,
+                "current": 0,
+                "required": "source_license_or_accession_and_provenance_receipts_for_all_materialized_rows",
+                "blockers": ["public_benchmark_external_receipts_missing"],
+            },
+        ],
+    }
+    failed_gate_criteria = [
+        row["criterion_id"] for row in tier_beta_gate["criteria"] if not row["pass"]
+    ]
+    tier_beta_gate["failed_criterion_count"] = len(failed_gate_criteria)
+    tier_beta_gate["failed_criteria"] = failed_gate_criteria
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -606,6 +683,7 @@ def build_source_of_truth(
         "contract_pass": True,
         "tier_beta_ready": False,
         "public_benchmark_ready": False,
+        "tier_beta_gate": tier_beta_gate,
         "source_families": [
             {
                 "family_id": "casf_pdbbind",
