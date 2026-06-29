@@ -1,11 +1,10 @@
 {
-  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit. Local workflow trigger metadata is parsed from the current checkout and does not refresh or replace GitHub Actions run-history evidence.",
+  "claim_boundary": "GitHub Actions evidence is read-only run history from gh run list; PR lane only counts pull_request events and nightly lane only counts schedule/workflow_dispatch events. Job-start annotations are read-only GitHub check-run metadata and may identify external account/billing blockers, but they do not create CI streak credit.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-21T09:08:51.866874+00:00",
+  "generated_at": "2026-06-29T22:32:37.807470+00:00",
   "input_checksums": {
-    ".github/workflows": "dir-sha256:653530551c3898dc6c2a611089fdaba93f6a1cea4e8b3a9dcec03f0ff39897d0",
-    "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json": "sha256:4b220e1a624c1518012cf8c3ff5f7e6401c44dde35eed6a5276f39c656d15302"
+    ".github/workflows": "dir-sha256:8acb8a126ead40b2ce6a7ce24dbb8569bfdb9d927ed74296b6bc740c056936e3"
   },
   "lanes": {
     "nightly": {
@@ -14,7 +13,6 @@
         "workflow_dispatch"
       ],
       "blockers": [
-        "github_actions_query_failed",
         "nightly_github_actions_30_consecutive_pass_evidence_missing"
       ],
       "consecutive_pass_count": 0,
@@ -56,27 +54,177 @@
       ],
       "pass_count": 0,
       "pull_request_run_source_present": true,
-      "queried_run_count": 0,
-      "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
-      "registered_workflow": {},
-      "rows": [],
-      "run_count": 0,
+      "queried_run_count": 11,
+      "query_error": "",
+      "registered_workflow": {
+        "id": 298913064,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml",
+        "state": "active"
+      },
+      "rows": [
+        {
+          "conclusion": "",
+          "created_at": "2026-06-29T20:17:09Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "54a28ceb388838b3263eb4c07867d3535176bdb4",
+          "pass": false,
+          "run_id": 28399953457,
+          "status": "queued",
+          "updated_at": "2026-06-29T20:17:09Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28399953457",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-28T19:47:36Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "b5473047731c62ed026911742f784a27fa463d64",
+          "pass": false,
+          "run_id": 28333915899,
+          "status": "completed",
+          "updated_at": "2026-06-29T19:47:38Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28333915899",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-27T19:46:41Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "d2297e17bea6fb2023c0b2c3ccd8ec65d77b5a17",
+          "pass": false,
+          "run_id": 28299869228,
+          "status": "completed",
+          "updated_at": "2026-06-28T19:46:42Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28299869228",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-26T20:12:12Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "50c29ef4e65e1c80e6809ae4ef328f5e8b070098",
+          "pass": false,
+          "run_id": 28262692146,
+          "status": "completed",
+          "updated_at": "2026-06-27T20:12:13Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28262692146",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-25T20:23:23Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "15effc4dc00f9b15a5fa019c3aca6b1975b6ae6c",
+          "pass": false,
+          "run_id": 28198182781,
+          "status": "completed",
+          "updated_at": "2026-06-26T20:23:25Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28198182781",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-24T20:11:55Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "1b01751c515905824a0af409ec6baa0cb1cf882b",
+          "pass": false,
+          "run_id": 28126603448,
+          "status": "completed",
+          "updated_at": "2026-06-25T20:11:56Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28126603448",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-23T20:24:28Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "1b01751c515905824a0af409ec6baa0cb1cf882b",
+          "pass": false,
+          "run_id": 28054642594,
+          "status": "completed",
+          "updated_at": "2026-06-24T20:24:29Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28054642594",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-22T21:15:25Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "1b01751c515905824a0af409ec6baa0cb1cf882b",
+          "pass": false,
+          "run_id": 27984537595,
+          "status": "completed",
+          "updated_at": "2026-06-23T21:15:26Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27984537595",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "cancelled",
+          "created_at": "2026-06-21T20:04:59Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "1b01751c515905824a0af409ec6baa0cb1cf882b",
+          "pass": false,
+          "run_id": 27915946575,
+          "status": "completed",
+          "updated_at": "2026-06-22T20:05:00Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27915946575",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "failure",
+          "created_at": "2026-06-20T19:58:24Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "2ff3f9f8a2d977276832a8f988318d4a739259f6",
+          "pass": false,
+          "run_id": 27882237884,
+          "status": "completed",
+          "updated_at": "2026-06-20T19:58:27Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27882237884",
+          "workflow": "Nightly Full Quality"
+        },
+        {
+          "conclusion": "failure",
+          "created_at": "2026-06-19T20:04:48Z",
+          "event": "schedule",
+          "head_branch": "main",
+          "head_sha": "ce375aefa2b7ee6416d4767ba168f08172d39e77",
+          "pass": false,
+          "run_id": 27846091713,
+          "status": "completed",
+          "updated_at": "2026-06-19T20:04:52Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/27846091713",
+          "workflow": "Nightly Full Quality"
+        }
+      ],
+      "run_count": 11,
       "threshold": 30,
       "threshold_pass": false,
       "workflow": "Nightly Full Quality",
-      "workflow_registered": false
+      "workflow_registered": true
     },
     "pr": {
       "allowed_events": [
         "pull_request"
       ],
       "blockers": [
-        "github_actions_query_failed",
         "pr_github_actions_30_consecutive_pass_evidence_missing"
       ],
-      "consecutive_pass_count": 0,
-      "ignored_event_count": 0,
-      "ignored_event_names": [],
+      "consecutive_pass_count": 9,
+      "ignored_event_count": 91,
+      "ignored_event_names": [
+        "push"
+      ],
       "job_start_blocker_count": 0,
       "job_start_blockers": [],
       "lane": "pr",
@@ -98,57 +246,199 @@
         "self_hosted_runner_default": true,
         "trigger_events": [
           "pull_request",
-          "push"
+          "push",
+          "workflow_dispatch"
         ],
-        "workflow_dispatch_trigger_present": false
+        "workflow_dispatch_trigger_present": true
       },
-      "local_workflow_dispatch_trigger_present": false,
+      "local_workflow_dispatch_trigger_present": true,
       "local_workflow_present": true,
       "local_workflow_runs_on": [
         "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
       ],
       "local_workflow_trigger_events": [
         "pull_request",
-        "push"
+        "push",
+        "workflow_dispatch"
       ],
-      "pass_count": 0,
-      "pull_request_run_source_present": false,
-      "queried_run_count": 0,
-      "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
-      "registered_workflow": {},
-      "rows": [],
-      "run_count": 0,
+      "pass_count": 9,
+      "pull_request_run_source_present": true,
+      "queried_run_count": 100,
+      "query_error": "",
+      "registered_workflow": {
+        "id": 266642626,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml",
+        "state": "active"
+      },
+      "rows": [
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-28T02:42:17Z",
+          "event": "pull_request",
+          "head_branch": "g1/null-space-mode-audit",
+          "head_sha": "9fc86e4c7d29a7d023b62be1b1d5943f60be7a7d",
+          "pass": true,
+          "run_id": 28309123999,
+          "status": "completed",
+          "updated_at": "2026-06-28T02:45:33Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28309123999",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-28T02:29:08Z",
+          "event": "pull_request",
+          "head_branch": "g1/adaptive-regularization-reference-newton",
+          "head_sha": "f49238ab27994cfcf14b922d3c01bbf723b203e4",
+          "pass": true,
+          "run_id": 28308855699,
+          "status": "completed",
+          "updated_at": "2026-06-28T02:32:22Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28308855699",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-28T02:17:01Z",
+          "event": "pull_request",
+          "head_branch": "g1/true-newton-reference-candidate",
+          "head_sha": "97c5d6ba292152aa314222169f5bafc2b72d2a73",
+          "pass": true,
+          "run_id": 28308619441,
+          "status": "completed",
+          "updated_at": "2026-06-28T02:20:17Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28308619441",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T18:18:17Z",
+          "event": "pull_request",
+          "head_branch": "g1/regularized-reference-newton-candidate",
+          "head_sha": "4ff2a1341650faab18ce0a7f64100ec95d06bdba",
+          "pass": true,
+          "run_id": 28297722629,
+          "status": "completed",
+          "updated_at": "2026-06-27T18:21:30Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28297722629",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T18:04:39Z",
+          "event": "pull_request",
+          "head_branch": "g1/regularized-assembled-direction-smoke",
+          "head_sha": "a53fc21df3687470ab4f17c67ff427fdd119b6a7",
+          "pass": true,
+          "run_id": 28297394574,
+          "status": "completed",
+          "updated_at": "2026-06-27T18:08:06Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28297394574",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T17:45:54Z",
+          "event": "pull_request",
+          "head_branch": "g1/real-service-tangent-mgt-closure",
+          "head_sha": "bbb8912817183ae1f6a7c20261029bb867cbb727",
+          "pass": true,
+          "run_id": 28296945407,
+          "status": "completed",
+          "updated_at": "2026-06-27T17:48:08Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28296945407",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T17:30:04Z",
+          "event": "pull_request",
+          "head_branch": "g1/frame-operator-reconciliation-audit",
+          "head_sha": "bd6605931f22677464418535ca8200ca3fdb37fb",
+          "pass": true,
+          "run_id": 28296548393,
+          "status": "completed",
+          "updated_at": "2026-06-27T17:33:55Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28296548393",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T17:11:22Z",
+          "event": "pull_request",
+          "head_branch": "g1/component-operator-reconciliation-audit",
+          "head_sha": "233f7f29d9c5956a3b415080da32007a69c8aa66",
+          "pass": true,
+          "run_id": 28296086880,
+          "status": "completed",
+          "updated_at": "2026-06-27T17:14:36Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28296086880",
+          "workflow": "CI"
+        },
+        {
+          "conclusion": "success",
+          "created_at": "2026-06-27T16:55:39Z",
+          "event": "pull_request",
+          "head_branch": "g1/mgt-sparse-direct-line-search-smoke",
+          "head_sha": "5d74607a9e808e8321af1539e38abc1a18cf2437",
+          "pass": true,
+          "run_id": 28295703171,
+          "status": "completed",
+          "updated_at": "2026-06-27T16:59:05Z",
+          "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/28295703171",
+          "workflow": "CI"
+        }
+      ],
+      "run_count": 9,
       "threshold": 30,
       "threshold_pass": false,
       "workflow": "CI",
-      "workflow_registered": false
+      "workflow_registered": true
     }
   },
   "limit": 100,
   "reason_code": "ERR_CI_STREAK_INCOMPLETE",
   "repo": "betelgeuze-kang/Structural-Analysis",
-  "reused_evidence": true,
+  "reused_evidence": false,
   "schema_version": "github-actions-ci-streak-evidence.v1",
-  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
+  "source_commit_sha": "607ed2bd77e4e95805cf612f27aae3aae81d9467",
   "summary": {
     "nightly_consecutive_pass_count": 0,
     "nightly_job_start_blocker_count": 0,
     "nightly_local_required_trigger_present": true,
     "nightly_local_workflow_present": true,
     "nightly_threshold_pass": false,
-    "nightly_workflow_registered": false,
-    "pr_consecutive_pass_count": 0,
+    "nightly_workflow_registered": true,
+    "pr_consecutive_pass_count": 9,
     "pr_job_start_blocker_count": 0,
     "pr_local_required_trigger_present": true,
-    "pr_pull_request_run_source_present": false,
+    "pr_pull_request_run_source_present": true,
     "pr_threshold_pass": false,
-    "pr_workflow_registered": false
+    "pr_workflow_registered": true
   },
   "threshold": 30,
   "workflow_discovery": {
-    "local_workflow_count": 3,
-    "local_workflow_metadata_generated_at": "2026-06-24T13:12:37.771673+00:00",
+    "local_workflow_count": 8,
     "local_workflows": [
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "AI Contract Verify",
+        "path": ".github/workflows/ai-contract-verify.yml",
+        "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
+      },
       {
         "exists": true,
         "github_hosted_runner_default": false,
@@ -162,9 +452,45 @@
         "self_hosted_runner_default": true,
         "trigger_events": [
           "pull_request",
-          "push"
+          "push",
+          "workflow_dispatch"
         ],
-        "workflow_dispatch_trigger_present": false
+        "workflow_dispatch_trigger_present": true
+      },
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "Deploy Workbench (GitHub Pages)",
+        "path": ".github/workflows/deploy-pages.yml",
+        "pull_request_trigger_present": false,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
+          "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
+      },
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "Frontend Web CI",
+        "path": ".github/workflows/frontend-web-ci.yml",
+        "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
       },
       {
         "exists": true,
@@ -198,10 +524,113 @@
           "workflow_dispatch"
         ],
         "workflow_dispatch_trigger_present": true
+      },
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "Viewer Browser CI",
+        "path": ".github/workflows/viewer-browser-ci.yml",
+        "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
+      },
+      {
+        "exists": true,
+        "github_hosted_runner_default": false,
+        "name": "Workflow Contract CI",
+        "path": ".github/workflows/workflow-contract-ci.yml",
+        "pull_request_trigger_present": true,
+        "runs_on": [
+          "${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}"
+        ],
+        "schedule_trigger_present": false,
+        "self_hosted_runner_default": true,
+        "trigger_events": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ],
+        "workflow_dispatch_trigger_present": true
       }
     ],
-    "query_error": "* dial tcp: lookup api.github.com: Temporary failure in name resolution\nerror connecting to api.github.com\nlookup api.github.com: Temporary failure in name resolution\ncheck your internet connection or https://githubstatus.com",
-    "registered_workflow_count": 0,
-    "registered_workflows": []
+    "query_error": "",
+    "registered_workflow_count": 11,
+    "registered_workflows": [
+      {
+        "id": 301897972,
+        "name": "AI Contract Verify",
+        "path": ".github/workflows/ai-contract-verify.yml",
+        "state": "active"
+      },
+      {
+        "id": 266642626,
+        "name": "CI",
+        "path": ".github/workflows/ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 301994967,
+        "name": "Deploy Workbench (GitHub Pages)",
+        "path": ".github/workflows/deploy-pages.yml",
+        "state": "active"
+      },
+      {
+        "id": 301800016,
+        "name": "Evidence Console",
+        "path": ".github/workflows/evidence-console.yml",
+        "state": "active"
+      },
+      {
+        "id": 301813755,
+        "name": "Frontend Web CI",
+        "path": ".github/workflows/frontend-web-ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 298913064,
+        "name": "Nightly Full Quality",
+        "path": ".github/workflows/nightly-full-quality.yml",
+        "state": "active"
+      },
+      {
+        "id": 268963929,
+        "name": "Publish Release Assets",
+        "path": ".github/workflows/release-publish.yml",
+        "state": "active"
+      },
+      {
+        "id": 302082929,
+        "name": "Viewer Browser CI",
+        "path": ".github/workflows/viewer-browser-ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 302099948,
+        "name": "Workflow Contract CI",
+        "path": ".github/workflows/workflow-contract-ci.yml",
+        "state": "active"
+      },
+      {
+        "id": 302644799,
+        "name": "Copilot",
+        "path": "dynamic/agents/copilot-pull-request-reviewer",
+        "state": "active"
+      },
+      {
+        "id": 267086525,
+        "name": "Dependency Graph",
+        "path": "dynamic/dependabot/update-graph",
+        "state": "active"
+      }
+    ]
   }
 }
