@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-topk-precision-suite",
-  "generated_at": "2026-06-29T13:31:44.287252+00:00",
+  "generated_at": "2026-06-29T13:36:41.889624+00:00",
   "target_split": "test",
   "config": {
     "cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",

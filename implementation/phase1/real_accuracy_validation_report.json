@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-real-accuracy-validation",
-  "generated_at": "2026-06-29T13:31:44.292866+00:00",
-  "source_commit_sha": "8593a7269ced257b73eb05c0f8f9f946f80cf6e7",
+  "generated_at": "2026-06-29T13:36:41.895546+00:00",
+  "source_commit_sha": "36a3e952ad3ffae3f2bd51b9cdbd39f60ada0273",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "implementation/phase1/run_real_accuracy_validation.py": "sha256:c15100493ea0ff1e07795fe5e37d6dee58f6a84f1e707b37e192c36174ed4e80",
@@ -96,7 +96,7 @@
   "steps": [
     {
       "step": "build_cases_rwth",
-      "seconds": 5.426304817199707,
+      "seconds": 5.51667332649231,
       "command": "/usr/bin/python3 implementation/phase1/build_cases_from_rwth_zenodo.py --zip implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip --out implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --story-height-mm 3000.0 --effective-mass-kg 250000.0 --metric-source open_data_measurement --public-case-count 3 --min-source-families 1",
       "ok": true,
       "return_code": 0,
@@ -105,7 +105,7 @@
     },
     {
       "step": "benchmark_topk",
-      "seconds": 15.922850847244263,
+      "seconds": 15.97828483581543,
       "command": "/usr/bin/python3 implementation/phase1/benchmark_kpi_contract.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --out implementation/phase1/hf_benchmark_report.rwth_zenodo.json --comparison-out implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json --target-split test --epochs 220 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --seed 23 --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
       "ok": true,
       "return_code": 0,
@@ -114,7 +114,7 @@
     },
     {
       "step": "suite_multiseed",
-      "seconds": 80.30379343032837,
+      "seconds": 81.13394546508789,
       "command": "/usr/bin/python3 implementation/phase1/run_topk_precision_experiments.py --cases implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json --out implementation/phase1/topk_precision_suite_report.rwth_zenodo.json --seeds 11,17,23,31,47 --epochs 220 --branches 10 --top-k 3 --lr 0.055 --epsilon 0.11 --temperature 0.32 --target-split test --require-direct-metrics --accepted-metric-sources engine_export_direct,commercial_solver_export,open_data_measurement",
       "ok": true,
       "return_code": 0,

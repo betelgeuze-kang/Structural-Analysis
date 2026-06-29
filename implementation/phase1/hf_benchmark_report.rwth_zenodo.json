@@ -1,10 +1,10 @@
 {
   "schema_version": "1.2",
   "run_id": "phase1-hf-benchmark-topk-residual-meta-prod",
-  "generated_at": "2026-06-29T13:30:23.505364+00:00",
+  "generated_at": "2026-06-29T13:35:20.280632+00:00",
   "algorithm": "topk_weighted_residual_correction_with_meta_learning",
   "source_cases_path": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
-  "source_cases_sha256": "750ce31dda632fd24b342b06af30b4e377068d623c7062209de43ed87859a056",
+  "source_cases_sha256": "ada525eb701d8695caddf0300ada0553c20bae1a41460493676e6b2cab574544",
   "source_family_order": [
     "rwth_zenodo"
   ],

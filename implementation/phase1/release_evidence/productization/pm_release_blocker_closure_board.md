@@ -1,11 +1,11 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=19 | external_owner_ready=13 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=18 | external_owner_ready=13 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `19`
+- `open_blocker_count`: `18`
 - `release_area_summary`: `11/16`
-- `release_area_blocker_count`: `15`
+- `release_area_blocker_count`: `14`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -13,7 +13,6 @@
 |---|---|---|---|---|
 | `basic_ci::pr_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `github_actions_job_start_blocked` | Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff. |
 | `basic_ci::nightly_ci_30_consecutive_pass_evidence_missing` | `release_ci_owner` | `external_owner_input_ready` | `missing_tracked_ci_streak_evidence` | Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff. |
-| `evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_evidence_metadata_missing` | Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports. |
 | `evidence_freshness::customer_shadow_evidence_intake_packet::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_evidence_metadata_missing` | Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports. |
 | `evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch` | `release_owner` | `local_remediation_ready` | `release_evidence_metadata_missing` | Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports. |
 | `evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact` | `release_owner` | `local_remediation_ready` | `release_evidence_metadata_missing` | Regenerate the referenced P0/P1 release evidence with generated_at, source commit, engine version, input checksum, and reuse marker metadata, then rerun the freshness and PM release reports. |

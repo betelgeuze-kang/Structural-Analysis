@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-commercial-benchmark-cases-rwth-zenodo",
-  "generated_at": "2026-06-29T13:30:08.059902+00:00",
+  "generated_at": "2026-06-29T13:35:04.777568+00:00",
   "source": {
     "dataset": "zenodo:14173245",
     "doi": "10.5281/zenodo.14173245",

@@ -5,7 +5,6 @@
   "full_release_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-    "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
     "evidence_freshness::customer_shadow_evidence_intake_packet::source_commit_mismatch",
     "evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch",
     "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
@@ -66,7 +65,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-29T13:32:10.763064+00:00",
+  "generated_at": "2026-06-29T13:40:07.126386+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -119,12 +118,12 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d4ffb27e29be5a47cd0c150ff7eefb3db65009bbcc38ff46dc3017d047dc1a5f",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:476f9a18cb9863f0ee014bc718c15956b978c5a02e7084790b6dfc50fa9b5af0",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:4039761649ef76406332a37f9aab403b31f5372fb25b9067de61d837c4caa306",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:f31feed2bac832fd4f645a600706cd46769ae8a893545b1acd0ae21db258dd4d",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:85348ffa93f1ae4ad81a4412c22625a0f4eeb18559dea66759c7b13e0ee16460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:79b4b84422c2c4edc7780fa75a84c1ba316e25858ef87eb73d6706bf1160a2da",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d4721d3f98bab8ddf4e2a4001dc2d5d5c63469a1f3295c27a808eb234fa9c68d",
     "implementation/phase1/release_evidence/productization/residual_level3_status.json": "sha256:ac890000466348b538e25fdc3d57eedf9a0619fb314c6b0fe64d50bdbae9136c",
     "implementation/phase1/release_evidence/productization/runtime_memory_release_budget_report.json": "sha256:439c9b906fc717604ad7e20176715673931e207b5f0c94854537c988c81ea577",
     "implementation/phase1/release_evidence/productization/solver_runtime_backend_policy.json": "sha256:fa0166a93fe65ce8ddca1b0ea6745756bc299e059c9f7110e18de24964ded80f",
@@ -342,19 +341,19 @@
         ],
         "pm_blocker_closure_board_external_owner_input_ready_count": 13,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 19,
-        "pm_blocker_closure_board_open_blocker_count": 19,
+        "pm_blocker_closure_board_handoff_ready_count": 18,
+        "pm_blocker_closure_board_open_blocker_count": 18,
         "pm_blocker_register_external_owner_input_ready_count": 13,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 19,
-        "pm_blocker_register_open_blocker_count": 19,
-        "pm_blocker_register_release_area_blocker_count": 15,
+        "pm_blocker_register_handoff_ready_count": 18,
+        "pm_blocker_register_open_blocker_count": 18,
+        "pm_blocker_register_release_area_blocker_count": 14,
         "pm_release_reproduction_command_audit": "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json",
         "pm_release_reproduction_command_audit_command_count": 620,
         "pm_release_reproduction_command_audit_summary_line": "PM reproduction command audit: PASS | artifacts=7/7 | commands=620 | violations=0",
         "pm_release_reproduction_command_audit_violation_count": 0,
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json",
-        "release_evidence_freshness_blocker_count": 6,
+        "release_evidence_freshness_blocker_count": 5,
         "release_evidence_freshness_contract_pass": false,
         "release_registry_artifact_count": 12,
         "support_bundle_ci_streak_intake_packet": "implementation/phase1/release/support_bundle/redacted/ci_streak_intake_packet.json",
@@ -403,7 +402,6 @@
   "release_area_blockers": [
     "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-    "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
     "evidence_freshness::customer_shadow_evidence_intake_packet::source_commit_mismatch",
     "evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch",
     "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
@@ -513,7 +511,6 @@
         "release_evidence_freshness": "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
       },
       "blockers": [
-        "p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
         "customer_shadow_evidence_intake_packet::source_commit_mismatch",
         "fresh_full_validation_lane_status::source_commit_mismatch",
         "fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
@@ -534,10 +531,10 @@
       "status": "blocked",
       "summary": {
         "artifact_count": 14,
-        "blocker_count": 6,
-        "current_source_commit_sha": "8593a7269ced257b73eb05c0f8f9f946f80cf6e7",
+        "blocker_count": 5,
+        "current_source_commit_sha": "36a3e952ad3ffae3f2bd51b9cdbd39f60ada0273",
         "max_age_days": 30.0,
-        "pass_count": 10
+        "pass_count": 11
       },
       "title": "Evidence Freshness"
     },
@@ -860,13 +857,13 @@
         "one_click_failure_bundle_archive_sha256": "ee9211e12e63c318c732e46b6ff37c9b4573b8aad103cd09374fec33f32f8e83",
         "pm_blocker_closure_board_external_owner_input_ready_count": 13,
         "pm_blocker_closure_board_handoff_not_ready_count": 0,
-        "pm_blocker_closure_board_handoff_ready_count": 19,
-        "pm_blocker_closure_board_open_blocker_count": 19,
+        "pm_blocker_closure_board_handoff_ready_count": 18,
+        "pm_blocker_closure_board_open_blocker_count": 18,
         "pm_blocker_register_external_owner_input_ready_count": 13,
         "pm_blocker_register_handoff_not_ready_count": 0,
-        "pm_blocker_register_handoff_ready_count": 19,
-        "pm_blocker_register_open_blocker_count": 19,
-        "pm_blocker_register_release_area_blocker_count": 15,
+        "pm_blocker_register_handoff_ready_count": 18,
+        "pm_blocker_register_open_blocker_count": 18,
+        "pm_blocker_register_release_area_blocker_count": 14,
         "pm_failure_bundle_coverage_index": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
         "pm_failure_bundle_coverage_index_sha256": "abe0dd8d66f99bd21de932ae172b268e4a95975ec0b9b58e6de305713b6c48f0",
         "pm_owner_evidence_request_packet": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
@@ -964,10 +961,10 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 75,
-        "main_ahead_count": 0,
-        "pending_remote_update_count": 1,
-        "r4_risk": "External reviewers of the feature branch immediately see the current commits.",
+        "feature_ahead_count": 76,
+        "main_ahead_count": 1,
+        "pending_remote_update_count": 2,
+        "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
         "remote_mutation_approval_pending": true,
         "remote_mutation_approved": false,
@@ -979,7 +976,7 @@
   ],
   "release_decision": {
     "approval_token_count": 8,
-    "blocked_release_count": 15,
+    "blocked_release_count": 14,
     "broad_gpcr_family_claim_safe": false,
     "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked.",
     "evidence_surface_count": 8,
@@ -1087,7 +1084,7 @@
     "h_bond_evidence_surface_present": false,
     "locked_evidence_surface_count": 0,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 19,
+    "operator_action_count": 18,
     "operator_actions": [
       {
         "action_id": "refresh_release_evidence_freshness",
@@ -1098,7 +1095,7 @@
     ],
     "public_benchmark_ready": true,
     "release_allowed": false,
-    "stale_artifact_count": 6,
+    "stale_artifact_count": 5,
     "stale_artifact_refresh_required": true
   },
   "release_tiers": {
@@ -1129,7 +1126,6 @@
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
-      "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
       "evidence_freshness::customer_shadow_evidence_intake_packet::source_commit_mismatch",
       "evidence_freshness::fresh_full_validation_lane_status::source_commit_mismatch",
       "evidence_freshness::fresh_full_validation_lane_status::input_dependency_newer_than_artifact",
@@ -1163,6 +1159,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "8593a7269ced257b73eb05c0f8f9f946f80cf6e7",
+  "source_commit_sha": "36a3e952ad3ffae3f2bd51b9cdbd39f60ada0273",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=11/16 | measured_cases=304"
 }
