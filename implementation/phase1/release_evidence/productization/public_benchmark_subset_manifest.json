@@ -4,13 +4,51 @@
     "casf_pdbbind_case_checksums_missing",
     "casf_pdbbind_ligand_symmetry_contracts_missing"
   ],
-  "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract and operator slots, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
+  "case_row_schema": {
+    "required_fields": [
+      "case_id",
+      "source_family",
+      "complex_id",
+      "protein_structure_path",
+      "reference_ligand_path",
+      "predicted_ligand_path_or_docking_run_id",
+      "ligand_atom_order_contract",
+      "symmetry_permutation_contract",
+      "source_license_or_accession",
+      "source_checksum"
+    ],
+    "template": {
+      "case_id": "casf_pdbbind_subset_001",
+      "complex_id": "",
+      "ligand_atom_order_contract": {
+        "atom_count": 0,
+        "atom_id_basis": "reference_ligand_atom_order",
+        "atom_ids": []
+      },
+      "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+      "predicted_ligand_path_or_docking_run_id": "",
+      "protein_structure_path": "",
+      "reference_ligand_path": "",
+      "rmsd_threshold_angstrom": 2.0,
+      "source_checksum": "",
+      "source_family": "CASF/PDBBind",
+      "source_license_or_accession": "",
+      "symmetry_permutation_contract": {
+        "permutation_basis": "zero_based_indices_into_ligand_atom_order_contract.atom_ids",
+        "permutations": []
+      }
+    },
+    "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+  },
+  "case_rows": [],
+  "claim_boundary": "This manifest is a Tier beta source-of-truth seed. It defines the minimum CASF/PDBBind subset contract, operator slots, case-row schema, and validation command, but it does not attach or redistribute public benchmark source files and does not claim benchmark results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T14:11:14.718943+00:00",
+  "generated_at": "2026-06-29T14:19:25.306099+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:9eacd2ea506fe2ec55fe19a82ad91d4f8d30c7e1822566c8beecd05e78b6d96f",
-    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821"
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:62ba2bca4ac52250c846ec74eee6971a5b8d4a8dbe07f3a9ef5bec1871eeb821",
+    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
+    "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
   },
   "materialized_case_count": 0,
   "public_benchmark_ready": false,
@@ -67,7 +105,7 @@
       "status": "source_material_required"
     }
   ],
-  "source_commit_sha": "1e75077752bf56854ee1c0203d0ce5e4d3199e33",
+  "source_commit_sha": "02f5738c707d4f56425ca17184b8d560077cabd4",
   "source_families": [
     "CASF/PDBBind"
   ],
