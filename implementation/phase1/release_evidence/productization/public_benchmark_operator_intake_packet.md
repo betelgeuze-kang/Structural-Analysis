@@ -10,3 +10,4 @@
 | `casf_pdbbind_subset_intake` | `operator_input_required` | `<operator-casf-pdbbind-intake.json>` |
 | `pose_coordinate_intake` | `operator_input_required` | `<operator-pose-coordinate-intake.json>` |
 | `dud_e_lit_pcba_enrichment_intake` | `operator_input_required` | `<operator-dud-e-lit-pcba-enrichment-intake.json>` |
+| `vina_gnina_comparison_intake` | `operator_input_required` | `<operator-vina-gnina-comparison-intake.json>` |

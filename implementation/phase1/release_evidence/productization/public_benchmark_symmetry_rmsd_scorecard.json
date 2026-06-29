@@ -3,15 +3,16 @@
   "contract_pass": true,
   "dry_run_case_count": 1,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T16:54:51.281376+00:00",
+  "generated_at": "2026-06-29T17:34:18.047627+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:8209fffda51aeac2737cffa7d980bc94637e83d270f043f8002675b29228f815",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8a1a5c7aeab3ddd31bf10a7ebd395ca9f5893fe7397aa405b814bce37bcba28d",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ef02271482a5d93eab992420a4bb660b1ba4c56b6adf869d7ad2ed57ad29fcc6",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:bc0f910c6ff1f6df72d7af08b336796c0993a0226271089cc2f440505e891f6d",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:be514093c8259491fc533a88d890578c993342beac111605c216d4c9d9e96fea",
+    "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py": "sha256:8c21641e971fd7675a2a3d24cb6a11a1c2a7bee7f3322cfbd5b931803f4884ba",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
@@ -69,6 +70,6 @@
     }
   ],
   "schema_version": "public-benchmark-symmetry-rmsd-scorecard.v1",
-  "source_commit_sha": "9da07f7912631ce356d44173c148cf00bf7f3845",
+  "source_commit_sha": "aedfaf4da15ce3591dafc6714eb0102c3f9b0df4",
   "status": "ready"
 }
