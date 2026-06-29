@@ -49,15 +49,15 @@
     "promote_broad_gpcr_claim",
     "infer_missing_target_values"
   ],
-  "generated_at": "2026-06-29T17:06:40.640322+00:00",
+  "generated_at": "2026-06-29T18:17:23.052389+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:3de2d357a9a6e7e69929ceefb238e629c50f3c6bd38ebb92dd48f6631e6945ad",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:adcfe96ee079586804973cd96eca558a42449cd063bac6cfd46a395c5600c2a9",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:0b12c0a0f0ba8b0138b4d295427e651f43e53a4d7d97b888120bd23bdf350287",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
-    "scripts/build_gpcr_hard_decoy_product_report.py": "sha256:99541762dda572988b2cdf04c9f172f05a6d367e7df3f23310d8c93ed2a4feab",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:5a4335894ed448e419027bf8646d2fc3ae542f46b7ed8016d538974d98360b05"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:e8aa43b68caa7031571ad21b663f36b3c90aab35dc3ea7106afc1f5fc635a5a0",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
+    "scripts/build_gpcr_hard_decoy_product_report.py": "sha256:05952de0b3bb14cae0093aad9819b3fa52ccd62e6ae6061d43c5039c71ef0e4c",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:66126be653c213352f039110ede49531283745ca7c1a2a4491e663be44c53309"
   },
   "linked_artifacts": {
     "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
@@ -74,6 +74,102 @@
     "refresh_gpcr_hard_decoy_product_report",
     "regenerate_product_capabilities_surface"
   ],
+  "phase3_exit_gate": {
+    "claim": "broad_gpcr_hard_decoy_closure",
+    "criteria": [
+      {
+        "blockers": [
+          "DRD2:ranking_pr_auc_ci_low_required",
+          "HTR2A:ranking_pr_auc_ci_low_required",
+          "OPRM1:ranking_pr_auc_ci_low_required"
+        ],
+        "criterion_id": "ranking_pr_auc_ci_low_min",
+        "current_by_target": {
+          "DRD2": null,
+          "HTR2A": null,
+          "OPRM1": null
+        },
+        "failed_targets": [
+          "DRD2",
+          "HTR2A",
+          "OPRM1"
+        ],
+        "pass": false,
+        "required": ">=0.45"
+      },
+      {
+        "blockers": [
+          "DRD2:top20_hit_rate_required",
+          "HTR2A:top20_hit_rate_required",
+          "OPRM1:top20_hit_rate_required"
+        ],
+        "criterion_id": "top20_hit_rate_min",
+        "current_by_target": {
+          "DRD2": null,
+          "HTR2A": null,
+          "OPRM1": null
+        },
+        "failed_targets": [
+          "DRD2",
+          "HTR2A",
+          "OPRM1"
+        ],
+        "pass": false,
+        "required": ">=0.2"
+      },
+      {
+        "blockers": [
+          "DRD2:decoys_above_positive_count_required",
+          "HTR2A:decoys_above_positive_count_required",
+          "OPRM1:decoys_above_positive_count_required"
+        ],
+        "criterion_id": "decoys_above_positive_count_max",
+        "current_by_target": {
+          "DRD2": null,
+          "HTR2A": null,
+          "OPRM1": null
+        },
+        "failed_targets": [
+          "DRD2",
+          "HTR2A",
+          "OPRM1"
+        ],
+        "pass": false,
+        "required": "<=0"
+      },
+      {
+        "blockers": [
+          "DRD2:positive_out_anchored_by_top_decoys_required",
+          "HTR2A:positive_out_anchored_by_top_decoys_required",
+          "OPRM1:positive_out_anchored_by_top_decoys_required"
+        ],
+        "criterion_id": "no_positive_out_anchored_by_top_decoys",
+        "current_by_target": {
+          "DRD2": null,
+          "HTR2A": null,
+          "OPRM1": null
+        },
+        "failed_targets": [
+          "DRD2",
+          "HTR2A",
+          "OPRM1"
+        ],
+        "pass": false,
+        "required": false
+      }
+    ],
+    "failed_criteria": [
+      "ranking_pr_auc_ci_low_min",
+      "top20_hit_rate_min",
+      "decoys_above_positive_count_max",
+      "no_positive_out_anchored_by_top_decoys"
+    ],
+    "failed_criterion_count": 4,
+    "first_blocked_target": "DRD2",
+    "status": "blocked",
+    "target_count": 3,
+    "target_pass_count": 0
+  },
   "product_report_id": "gpcr_hard_decoy_suite_report",
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL",
@@ -111,12 +207,20 @@
     "OPRM1:positive_out_anchored_by_top_decoys_required"
   ],
   "science_claim_status": "blocked",
-  "source_commit_sha": "9c7decd038785dc6a15e4f580edd379226f5d067",
+  "source_commit_sha": "b3f276e3787ccf853795e03d0f1750503e8de9e2",
   "status": "ready_science_claim_blocked",
   "summary": {
     "first_blocked_target": "DRD2",
     "operator_intake_packet_status": "ready_for_operator_input",
     "operator_intake_required_slot_count": 3,
+    "phase3_exit_gate_status": "blocked",
+    "phase3_failed_criteria": [
+      "ranking_pr_auc_ci_low_min",
+      "top20_hit_rate_min",
+      "decoys_above_positive_count_max",
+      "no_positive_out_anchored_by_top_decoys"
+    ],
+    "phase3_failed_criterion_count": 4,
     "read_model_ready": true,
     "science_blocker_count": 12,
     "science_claim_status": "blocked",
