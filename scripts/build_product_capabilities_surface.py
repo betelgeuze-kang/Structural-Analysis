@@ -27,6 +27,7 @@ DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_H_BOND_SURFACE = SURFACE_DIR / "h_bond_backmap_evidence_surface.json"
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
+DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 
 STRUCTURAL_SURFACE_PATHS = (
     SURFACE_DIR / "element_material_breadth_gate_report.json",
@@ -226,6 +227,31 @@ def _single_surface_capability(
     )
 
 
+def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
+    surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
+    product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
+    state = _state(surface)
+    return _capability_row(
+        capability_id="gpcr_hard_decoy_evidence",
+        title="GPCR hard-decoy evidence",
+        capability_kind="science_evidence_surface",
+        state=state,
+        evidence_artifacts=[DEFAULT_GPCR_SURFACE, DEFAULT_GPCR_PRODUCT_REPORT],
+        contract_pass=state == "ready",
+        blocker_count=len(_blockers(surface)),
+        next_actions=_next_actions(surface) or ([] if state == "ready" else ["run_gpcr_hard_decoy_suite_materializer"]),
+        summary={
+            "status": str(surface.get("status") or ""),
+            "reason_code": str(surface.get("reason_code") or ""),
+            "first_blocked_target": str(surface.get("first_blocked_target") or ""),
+            "root_cause_tags": [str(row) for row in _as_list(surface.get("root_cause_tags"))],
+            "product_report_route": str(product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"),
+            "product_report_ready": bool(product_report.get("read_model_ready")),
+            "broad_gpcr_family_claim_safe": bool(surface.get("broad_gpcr_family_claim_safe")),
+        },
+    )
+
+
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_product_capabilities_surface.py"),
@@ -233,6 +259,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_POCKETMD_CONTRACT,
         DEFAULT_POCKETMD_TOPK_REPORT,
         DEFAULT_POCKETMD_SURFACE,
+        DEFAULT_GPCR_PRODUCT_REPORT,
         DEFAULT_H_BOND_SURFACE,
         DEFAULT_GPCR_SURFACE,
         *STRUCTURAL_SURFACE_PATHS,
@@ -251,14 +278,7 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
             capability_kind="science_evidence_surface",
             next_action_fallback="resolve_h_bond_backmap_evidence_surface",
         ),
-        _single_surface_capability(
-            repo_root=repo_root,
-            path=DEFAULT_GPCR_SURFACE,
-            capability_id="gpcr_hard_decoy_evidence",
-            title="GPCR hard-decoy evidence",
-            capability_kind="science_evidence_surface",
-            next_action_fallback="run_gpcr_hard_decoy_suite_materializer",
-        ),
+        _gpcr_capability(repo_root),
         _pocketmd_capability(repo_root),
     ]
     ready_count = sum(1 for row in capability_rows if row["state"] == "ready")

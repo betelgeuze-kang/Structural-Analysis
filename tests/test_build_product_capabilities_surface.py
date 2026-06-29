@@ -74,6 +74,15 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert pocketmd["summary"]["product_surface_ready"] is False
     assert "run_pocketmd_lite_topk_survival_materializer" in pocketmd["next_actions"]
 
+    gpcr = rows["gpcr_hard_decoy_evidence"]
+    assert gpcr["state"] == "blocked"
+    assert gpcr["summary"]["product_report_route"] == "/product/gpcr-hard-decoy-suite-report"
+    assert gpcr["summary"]["broad_gpcr_family_claim_safe"] is False
+    assert (
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
+        in gpcr["evidence_artifacts"]
+    )
+
 
 def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(
     tmp_path: Path,
