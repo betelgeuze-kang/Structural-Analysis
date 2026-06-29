@@ -27,10 +27,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T13:50:47.291955+00:00",
+  "generated_at": "2026-06-29T14:00:43.697886+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:3f879e28725bad390a801459b7cf49c049f456d1c6ba709a7d0ce8e576da72e5",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d9b3db9d5f01d17d4f172292f5a15a4ec75c0f8c4c8bfa347befa92a4f9474dc",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:24b14857a2b7c23d2527c0e25cb0fed8e83e4b65cdf138c13ff159bd61af1c98",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f44753d721e16cdec4f0a333d97a875305f8ae99eb6e9cdd482316cfe6e6f810",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:c48b2389548a5f69291e4360f832e41bb5857c512084fe43e9afbc761d8193e7"
   },
   "next_actions": [
@@ -526,7 +526,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "main_ahead_count": 1,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -538,7 +538,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 1,
         "main_fast_forward_possible": true,
@@ -603,7 +603,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "main_ahead_count": 1,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -615,7 +615,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 1,
         "main_fast_forward_possible": true,
@@ -680,7 +680,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "main_ahead_count": 1,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -692,7 +692,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 81,
+        "feature_ahead_count": 89,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 1,
         "main_fast_forward_possible": true,
@@ -985,7 +985,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "36fcb5ef6bf3fed9c3897f5eaa3afba9cb4be2b5",
+  "source_commit_sha": "2afac71b5a6716d3f5bb9b38236bc5fbae594078",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,

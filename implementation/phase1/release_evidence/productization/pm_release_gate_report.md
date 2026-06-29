@@ -18,11 +18,16 @@
 - `blocked_release_count`: `8`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
 - `operator_action_count`: `12`
+- `approval_token_count`: `7`
 - `stale_artifact_count`: `0`
 - `evidence_surface_count`: `8`
+- `missing_evidence_surface_count`: `0`
 - `locked_evidence_surface_count`: `0`
+- `h_bond_evidence_surface_present`: `False`
+- `gpcr_evidence_surface_present`: `False`
 - `public_benchmark_ready`: `True`
 - `broad_gpcr_family_claim_safe`: `False`
+- `science_evidence_surface_bottlenecks`: `h_bond_evidence_surface_missing, gpcr_evidence_surface_missing`
 - `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |
