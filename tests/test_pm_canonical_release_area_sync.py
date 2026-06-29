@@ -69,7 +69,7 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
     expected_blockers = sorted(str(item) for item in report["release_area_blockers"])
 
     assert expected_green_total == (12, 16)
-    assert len(expected_blockers) == 9
+    assert len(expected_blockers) == 8
     assert _summary_green_total(report["summary_line"]) == expected_green_total
 
     audit = _load_json(PRODUCTIZATION / "pm_release_gate_completion_audit.json")
@@ -101,8 +101,8 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
 
     support = _load_json(SUPPORT_BUNDLE)
     coverage = support["pm_failure_bundle_coverage"]
-    assert coverage["summary"]["open_blocker_count"] == 13
-    assert coverage["summary"]["release_tier_blocker_count"] == 13
+    assert coverage["summary"]["open_blocker_count"] == 12
+    assert coverage["summary"]["release_tier_blocker_count"] == 12
     assert coverage["summary"]["release_area_blocker_count"] == len(expected_blockers)
     assert sorted(coverage["release_area_blocker_ids"]) == expected_blockers
 
