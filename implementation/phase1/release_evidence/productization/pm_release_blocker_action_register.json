@@ -27,14 +27,14 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T22:17:28.813659+00:00",
+  "generated_at": "2026-06-29T22:38:16.128113+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:cff8ada6818695fff95886e6daceda578607da6059b4cb786f586513b6ffcffd",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e4a14a50f0de64bc708f713c159a2e171903a7b0c6bcf91d04dd5ffe4ef2cd5b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:86b06ba3e856a76d34f44c7e309dbf42d6e25953d5ab9d489887803a184441f5",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e7faa833a319760cc4175717f33a398c893ef7d828fc903fbe96e96352b7d11b",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
-    "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+    "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
     "Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision.",
@@ -206,7 +206,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -223,35 +223,36 @@
         "nightly_source_evidence_release_credit_pass": false,
         "nightly_streak_source": "missing_tracked_ci_evidence",
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-        "pr_github_actions_job_start_blocker_count": 5,
-        "pr_github_actions_pass_streak_count": 0,
+        "pr_github_actions_job_start_blocker_count": 0,
+        "pr_github_actions_pass_streak_count": 9,
         "pr_github_actions_workflow_state": "active",
         "pr_local_pass_streak_count": 2,
         "pr_local_required_trigger_present": true,
         "pr_local_workflow_trigger_events": [
           "pull_request",
-          "push"
+          "push",
+          "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+        "pr_owner_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "pr_pass_streak_count": 0,
-        "pr_pull_request_run_source_present": false,
+        "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
-        "pr_streak_source": "github_actions_job_start_blocked",
+        "pr_streak_source": "github_actions",
         "required_consecutive_pass_count": 30
       },
       "evidence_status": {
-        "github_actions_consecutive_pass_count": 0,
-        "github_actions_job_start_blocker_count": 5,
+        "github_actions_consecutive_pass_count": 9,
+        "github_actions_job_start_blocker_count": 0,
         "lane": "pr",
         "local_consecutive_pass_count": 2,
         "missing_consecutive_pass_count": 30,
-        "pull_request_run_source_present": false,
+        "pull_request_run_source_present": true,
         "release_consecutive_pass_count": 0,
         "required_consecutive_pass_count": 30,
         "source_policy": "github_actions_required",
-        "state": "github_actions_job_start_blocked",
-        "streak_source": "github_actions_job_start_blocked"
+        "state": "missing_tracked_ci_streak_evidence",
+        "streak_source": "github_actions"
       },
       "external_input_required": true,
       "handoff": {
@@ -271,9 +272,9 @@
       "handoff_ready": true,
       "handoff_state": "external_owner_input_ready",
       "namespace": "basic_ci",
-      "next_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "next_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner": "release_ci_owner",
-      "owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+      "owner_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "owner_input_required": true,
       "reproduction_commands": [
         "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -312,7 +313,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -329,21 +330,22 @@
         "nightly_source_evidence_release_credit_pass": false,
         "nightly_streak_source": "missing_tracked_ci_evidence",
         "pr_claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
-        "pr_github_actions_job_start_blocker_count": 5,
-        "pr_github_actions_pass_streak_count": 0,
+        "pr_github_actions_job_start_blocker_count": 0,
+        "pr_github_actions_pass_streak_count": 9,
         "pr_github_actions_workflow_state": "active",
         "pr_local_pass_streak_count": 2,
         "pr_local_required_trigger_present": true,
         "pr_local_workflow_trigger_events": [
           "pull_request",
-          "push"
+          "push",
+          "workflow_dispatch"
         ],
         "pr_missing_consecutive_pass_count": 30,
-        "pr_owner_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+        "pr_owner_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "pr_pass_streak_count": 0,
-        "pr_pull_request_run_source_present": false,
+        "pr_pull_request_run_source_present": true,
         "pr_source_evidence_release_credit_pass": false,
-        "pr_streak_source": "github_actions_job_start_blocked",
+        "pr_streak_source": "github_actions",
         "required_consecutive_pass_count": 30
       },
       "evidence_status": {
@@ -352,7 +354,7 @@
         "lane": "nightly",
         "local_consecutive_pass_count": 230,
         "missing_consecutive_pass_count": 30,
-        "pull_request_run_source_present": false,
+        "pull_request_run_source_present": true,
         "release_consecutive_pass_count": 0,
         "required_consecutive_pass_count": 30,
         "source_policy": "github_actions_required",
@@ -1117,7 +1119,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "ca236884e4fbc27b8fcb8bbe619cc4fbd3d4080a",
+  "source_commit_sha": "29168e3f78bbdf9bdf1a387d2eebcb2d862201b9",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,

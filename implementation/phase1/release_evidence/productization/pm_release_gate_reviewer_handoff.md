@@ -37,10 +37,10 @@
 - Owner: `release_ci_owner`
 - Release area status: `blocked_external_owner_input_ready`
 - Closure state: `external_owner_input_ready`
-- Evidence state: `github_actions_job_start_blocked`
+- Evidence state: `missing_tracked_ci_streak_evidence`
 - External input required: `True`
 - Owner input required: `True`
-- Next action: Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.
+- Next action: Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.
 
 Acceptance criteria:
 - `pr_pass_streak_count >= 30` in `pm_release_gate_report.json`

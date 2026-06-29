@@ -1,15 +1,15 @@
 {
   "schema_version": "gap-closure-status.v1",
-  "generated_at": "2026-06-24T14:20:56.753922+00:00",
-  "source_commit_sha": "78e9ac22d6df4575b5989c67493ae842daebc797",
+  "generated_at": "2026-06-29T22:36:37.938476+00:00",
+  "source_commit_sha": "29168e3f78bbdf9bdf1a387d2eebcb2d862201b9",
   "engine_version": "structural-optimization-workbench@1.0.0",
   "input_checksums": {
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/ai_freeze_boundary_status.json": "sha256:85722797bc2ff90c5fc6492aee108418d64ab73b5965d9770c0969a6e777c0f5",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:9fd16b596b1102f1b682ac8922889613adfa6641768a2898c293c334801def3f",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json": "sha256:03701856d29c8c6923f92857e55626888ed29116bd9b9a7018a89e5dcb2d2efd",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json": "sha256:06e288811890356086e09708429c0d6b1e29238b7082d62d73013892bd9f3d9d",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/delivery_evidence_bundle.json": "sha256:9dcb3fdb95c865eb269a4a6b2049e42dcccd499f585fa0c92c59931c88f18e28",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json": "sha256:becfdc4a1808f049c6d1737a9d34a580d24c295ed700f5f205318c8313576a82",
-    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:6714b5572b0e3c2ede2aa26e235e9cc321a54e952117af764af170c174b26534",
+    "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:15415535f716c31a55c661b4bcae2a013e4db247955ccedcf478ebf5984d8935",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_newton_certification_checklist.json": "sha256:6b2e1b6e34a84f793c7ec4f62f6486799c0b46f32192fc3acc6d5f89f952962c",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/gpu_solver_claim_receipt.json": "sha256:6ddcb6827eb70d369b008cf1c154298e7d06becd388c1b7e4d75dcae7137f07e",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/mgt_global_fea_condensed_solve.json": "sha256:99424209c38c877a7fcb39243a5e785bfa824e06d3b9a910b23eb2b0a02a01e8",
@@ -20,8 +20,8 @@
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json": "sha256:0c3a8200c63f58097c9aa282aa639fe2ee2b2af754fe7ed5c1cf7e9860216f8c",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_closure_checklist.json": "sha256:4686217db8e9130b0509607129f66ed53360135ac32f3ba33b2d5c9a5c871d2c",
     "/home/betelgeuze/\uac74\ucd95\uad6c\uc870\ubd84\uc11d/implementation/phase1/release_evidence/productization/rh_signed_closure_packet_template.json": "sha256:16c265d807ca57eb3440465738212109a888bb0afbed2a6798612db3084060b7",
-    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:0a5223a83e9aadb0125eb93e782413bfdec724f496bbe79f5c09b898e51c6892",
-    "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:7fecdb6b5147d335e42f9ab48fd5f29085864352a456ac7b6462ddf67524ef35"
+    "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:b8f1b140751f430e4c7dc594f3440320433be9b3e3f055f3e7fad62a2999b8af",
+    "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:b57d2296755145322bbad09abb1a471a18da9051eb202185d8bbfbddcb2b4c24"
   },
   "reused_evidence": false,
   "overall_status": "ready",
@@ -38,6 +38,10 @@
     "open_count": 0,
     "external_blocked_count": 1,
     "locally_closable_open_count": 1,
+    "locally_closable_nonclosed_count": 1,
+    "locally_closable_nonclosed_row_ids": [
+      "G1"
+    ],
     "ai_engine_guardrail_rows_ready": true,
     "autonomous_ai_engine_claim_ready": false,
     "autonomous_ai_engine_claim_blocker_count": 4,
@@ -200,7 +204,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "full-building native modal/buckling solve after G1 expands beyond representative component",
-      "claim_boundary": "G2 is locally closed only for the documented `Modal, Buckling, Stability` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: full-building native modal/buckling solve after G1 expands beyond representative component."
+      "claim_boundary": "G2 is locally closed only for representative component modal/buckling artifact evidence. The row-level closure does not promote full-building dynamics/stability, nonlinear buckling/path-following, external certification, or G1 full 3D nonlinear solver readiness."
     },
     {
       "id": "G3",
@@ -211,7 +215,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "attach source rows for currently unsupported hazard families before making those hazard-specific solver claims",
-      "claim_boundary": "G3 is locally closed only for the documented `Loads, Combinations, Staged Construction Semantics` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: attach source rows for currently unsupported hazard families before making those hazard-specific solver claims."
+      "claim_boundary": "G3 is locally closed for typed load/load-combination/stage runtime flow only. The row-level closure does not promote hazard families with no source rows, arbitrary construction-stage editor breadth, or G1 full-load/full-mesh nonlinear solver closure."
     },
     {
       "id": "G4",
@@ -222,7 +226,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "promote full shell/plate/contact and path-dependent material Newton families only after tangent benchmarks",
-      "claim_boundary": "G4 is locally closed only for the documented `Material, Section, Element Breadth` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: promote full shell/plate/contact and path-dependent material Newton families only after tangent benchmarks."
+      "claim_boundary": "G4 is locally closed only for the supported material/section/element tangent scope exposed in its source receipts. Unsupported shell, contact, and path-dependent material families remain queued and do not promote G1 full-load nonlinear solver readiness."
     },
     {
       "id": "G5",
@@ -278,7 +282,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "production optimization proposals replay through solver/code/cost gates with governed ML/Pareto promotion",
-      "claim_boundary": "G8 is locally closed only for the documented `Optimization And AI Productization` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: production optimization proposals replay through solver/code/cost gates with governed ML/Pareto promotion."
+      "claim_boundary": "G8 is locally closed for deterministic optimization replay and governed ML/Pareto guard evidence only. The row-level closure does not permit ML/Pareto output to bypass solver, code, cost, or human review gates, and it does not close full 3D nonlinear solver, measured cost calibration, autonomous AI design, or legal/code approval claims."
     },
     {
       "id": "G9",
@@ -289,7 +293,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "promote nonlinear/full-load GPU paths, pure-device preconditioners, and scale evidence beyond shell/coupled smoke probes",
-      "claim_boundary": "G9 is locally closed only for the documented `Runtime, GPU, Performance, And Scale` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: promote nonlinear/full-load GPU paths, pure-device preconditioners, and scale evidence beyond shell/coupled smoke probes."
+      "claim_boundary": "G9 is locally closed for the attached ROCm/HIP runtime and sparse-probe evidence only. CPU diagnostic/reference paths do not promote official solver closure, and full nonlinear G1 GPU solver closure remains separately gated."
     },
     {
       "id": "G10",
@@ -300,7 +304,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "customer report separates solver/proxy/unsupported states and signed engineer review workflow",
-      "claim_boundary": "G10 is locally closed only for the documented `Product UX, Reports, Governance, Support` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: customer report separates solver/proxy/unsupported states and signed engineer review workflow."
+      "claim_boundary": "G10 is locally closed for workstation delivery packaging plus governance/support contract evidence only. It does not promote full commercial readiness while G1, G6, or G7 remain partial or external-blocked, and it does not imply independent product, SaaS, external approval, or signed customer acceptance readiness."
     },
     {
       "id": "AI-G1",
@@ -399,7 +403,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "AI inference receipt records backend, checkpoint hash, latency, memory, OOD/confidence, and fallback reason when fallback is required",
-      "claim_boundary": "AI-G9 is locally closed only for the documented `Deployment Performance And Runtime` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: AI inference receipt records backend, checkpoint hash, latency, memory, OOD/confidence, and fallback reason when fallback is required."
+      "claim_boundary": "AI-G9 is locally closed for the AI inference runtime receipt and shadow solver-gated fallback contract only. The row-level closure does not close commercial G9 GPU solver residual gates, customer throughput evidence, CPU fallback promotion, or autonomous structural decision promotion."
     },
     {
       "id": "AI-G10",
@@ -410,7 +414,7 @@
       "locally_closable": true,
       "blockers": [],
       "next_gate": "review queue and grounded assistant answers link to evidence, confidence, caveat, and next review action",
-      "claim_boundary": "AI-G10 is locally closed only for the documented `User Workflow And AI Interface` row using the attached evidence payload and zero row blockers. This row-level closure does not imply full commercial solver readiness, external approval, customer shadow completion, or closure of other G/AI-G rows. Broader promotion remains limited by next gate: review queue and grounded assistant answers link to evidence, confidence, caveat, and next review action."
+      "claim_boundary": "AI-G10 is locally closed for the review queue and grounded-answer contract only. The row-level closure does not mean proposals were accepted by a human reviewer, that a production conversational UI is complete, or that AI suggestions can be applied without engineer review."
     }
   ],
   "artifacts": {

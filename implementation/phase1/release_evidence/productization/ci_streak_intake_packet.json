@@ -12,7 +12,7 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-29T22:32:38.576498+00:00",
+  "generated_at": "2026-06-29T22:38:15.988047+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -121,7 +121,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-06-29T22:32:37.807470+00:00",
+    "generated_at": "2026-06-29T22:38:15.223501+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -222,7 +222,7 @@
     "pr_source_threshold_pass": false,
     "source_evidence_age_hours": 0.0,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-06-29T22:32:37.807470+00:00",
+    "source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

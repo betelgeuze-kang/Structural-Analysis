@@ -19,7 +19,7 @@
   "claim_boundary": "This packet groups open PM blocker and release-tier evidence requests by owner. It does not create or replace tracked CI streaks, human UX observations, product/legal license approval, independent V&V, family validation signoff, customer audit/failure bundle acceptance, support SLA approval, or any other external release evidence. When reviewer handoff evidence is supplied, each open blocker must also show which release-tier promotion it blocks; missing tier-impact mapping keeps the owner handoff blocked. This packet does not convert missing evidence into a release pass.",
   "contract_pass": true,
   "ga_enterprise_signoff_intake_packet": "implementation/phase1/release_evidence/productization/ga_enterprise_signoff_intake_packet.json",
-  "generated_at": "2026-06-29T22:21:12.064496+00:00",
+  "generated_at": "2026-06-29T22:38:16.275105+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tier_requirements": [],
   "missing_release_tier_impacts": [],
@@ -43,7 +43,6 @@
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing"
       ],
       "evidence_states": [
-        "github_actions_job_start_blocked",
         "missing_tracked_ci_streak_evidence"
       ],
       "expected_intake_artifacts": [
@@ -53,10 +52,8 @@
         {
           "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
           "contract_pass": false,
-          "current_blocker_count": 10,
+          "current_blocker_count": 8,
           "current_blockers": [
-            "pr:pr_github_actions_job_start_blocked",
-            "pr:pr_pull_request_run_source_absent",
             "pr:pr_ci_30_consecutive_pass_evidence_missing",
             "pr:github_actions_lane_threshold_not_pass",
             "pr:github_actions_lane_streak_below_threshold",
@@ -72,26 +69,25 @@
           "lane_request_rows": [
             {
               "blockers": [
-                "pr_github_actions_job_start_blocked",
-                "pr_pull_request_run_source_absent",
                 "pr_ci_30_consecutive_pass_evidence_missing",
                 "github_actions_lane_threshold_not_pass",
                 "github_actions_lane_streak_below_threshold",
                 "github_actions_filtered_run_count_below_threshold"
               ],
               "consecutive_pass_count": 0,
-              "github_actions_consecutive_pass_count": 0,
+              "github_actions_consecutive_pass_count": 9,
               "github_actions_workflow_registered": true,
               "github_actions_workflow_state": "active",
               "lane": "pr",
               "local_required_trigger_present": true,
               "local_workflow_trigger_events": [
                 "pull_request",
-                "push"
+                "push",
+                "workflow_dispatch"
               ],
               "missing_consecutive_pass_count": 30,
               "source_evidence_release_credit_pass": false,
-              "streak_source": "github_actions_job_start_blocked",
+              "streak_source": "github_actions",
               "threshold": 30,
               "threshold_pass": false
             },
@@ -134,16 +130,16 @@
             "nightly_local_workflow_present": true,
             "nightly_missing_consecutive_pass_count": 30,
             "nightly_source_threshold_pass": false,
-            "open_blocker_count": 10,
+            "open_blocker_count": 8,
             "pr_github_actions_workflow_registered": true,
             "pr_github_actions_workflow_state": "active",
             "pr_local_required_trigger_present": true,
             "pr_missing_consecutive_pass_count": 30,
-            "pr_pull_request_run_source_present": false,
+            "pr_pull_request_run_source_present": true,
             "pr_source_threshold_pass": false,
             "source_evidence_age_hours": 0.0,
             "source_evidence_freshness_pass": true,
-            "source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
+            "source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
             "source_evidence_pass": false,
             "source_evidence_schema_pass": true,
             "threshold": 30
@@ -157,8 +153,6 @@
       "external_input_required": true,
       "incomplete_blockers": [],
       "intake_current_blockers": [
-        "pr:pr_github_actions_job_start_blocked",
-        "pr:pr_pull_request_run_source_absent",
         "pr:pr_ci_30_consecutive_pass_evidence_missing",
         "pr:github_actions_lane_threshold_not_pass",
         "pr:github_actions_lane_streak_below_threshold",
@@ -172,26 +166,25 @@
       "intake_lane_request_rows": [
         {
           "blockers": [
-            "pr_github_actions_job_start_blocked",
-            "pr_pull_request_run_source_absent",
             "pr_ci_30_consecutive_pass_evidence_missing",
             "github_actions_lane_threshold_not_pass",
             "github_actions_lane_streak_below_threshold",
             "github_actions_filtered_run_count_below_threshold"
           ],
           "consecutive_pass_count": 0,
-          "github_actions_consecutive_pass_count": 0,
+          "github_actions_consecutive_pass_count": 9,
           "github_actions_workflow_registered": true,
           "github_actions_workflow_state": "active",
           "lane": "pr",
           "local_required_trigger_present": true,
           "local_workflow_trigger_events": [
             "pull_request",
-            "push"
+            "push",
+            "workflow_dispatch"
           ],
           "missing_consecutive_pass_count": 30,
           "source_evidence_release_credit_pass": false,
-          "streak_source": "github_actions_job_start_blocked",
+          "streak_source": "github_actions",
           "threshold": 30,
           "threshold_pass": false
         },
@@ -221,7 +214,7 @@
       ],
       "intake_signoff_request_rows": [],
       "next_actions": [
-        "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+        "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
         "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff."
       ],
       "owner": "release_ci_owner",
@@ -255,15 +248,13 @@
             "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
             "pr_ci": "implementation/phase1/ci_gate_report.pr.json"
           },
-          "evidence_state": "github_actions_job_start_blocked",
+          "evidence_state": "missing_tracked_ci_streak_evidence",
           "expected_intake_artifact": "ci_streak_intake_packet",
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 10,
+            "current_blocker_count": 8,
             "current_blockers": [
-              "pr:pr_github_actions_job_start_blocked",
-              "pr:pr_pull_request_run_source_absent",
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
@@ -279,26 +270,25 @@
             "lane_request_rows": [
               {
                 "blockers": [
-                  "pr_github_actions_job_start_blocked",
-                  "pr_pull_request_run_source_absent",
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
                   "github_actions_lane_streak_below_threshold",
                   "github_actions_filtered_run_count_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
-                "github_actions_consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 9,
                 "github_actions_workflow_registered": true,
                 "github_actions_workflow_state": "active",
                 "lane": "pr",
                 "local_required_trigger_present": true,
                 "local_workflow_trigger_events": [
                   "pull_request",
-                  "push"
+                  "push",
+                  "workflow_dispatch"
                 ],
                 "missing_consecutive_pass_count": 30,
                 "source_evidence_release_credit_pass": false,
-                "streak_source": "github_actions_job_start_blocked",
+                "streak_source": "github_actions",
                 "threshold": 30,
                 "threshold_pass": false
               },
@@ -341,16 +331,16 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 10,
+              "open_blocker_count": 8,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
-              "pr_pull_request_run_source_present": false,
+              "pr_pull_request_run_source_present": true,
               "pr_source_threshold_pass": false,
               "source_evidence_age_hours": 0.0,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
+              "source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30
@@ -361,7 +351,7 @@
           "external_input_required": true,
           "handoff_ready": true,
           "handoff_state": "external_owner_input_ready",
-          "next_action": "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
+          "next_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
           "owner_input_required": true,
           "reproduction_commands": [
             "python3 scripts/build_github_actions_ci_streak_evidence.py --out implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
@@ -403,10 +393,8 @@
           "expected_intake_detail": {
             "claim_boundary": "This packet is an owner handoff checklist for CI streak evidence. It independently re-verifies github_actions_ci_streak_evidence.json and does not convert local gate artifacts or manifest-only claims into release streak credit; PR and nightly release credit still require tracked consecutive-pass GitHub Actions evidence for the configured release window.",
             "contract_pass": false,
-            "current_blocker_count": 10,
+            "current_blocker_count": 8,
             "current_blockers": [
-              "pr:pr_github_actions_job_start_blocked",
-              "pr:pr_pull_request_run_source_absent",
               "pr:pr_ci_30_consecutive_pass_evidence_missing",
               "pr:github_actions_lane_threshold_not_pass",
               "pr:github_actions_lane_streak_below_threshold",
@@ -422,26 +410,25 @@
             "lane_request_rows": [
               {
                 "blockers": [
-                  "pr_github_actions_job_start_blocked",
-                  "pr_pull_request_run_source_absent",
                   "pr_ci_30_consecutive_pass_evidence_missing",
                   "github_actions_lane_threshold_not_pass",
                   "github_actions_lane_streak_below_threshold",
                   "github_actions_filtered_run_count_below_threshold"
                 ],
                 "consecutive_pass_count": 0,
-                "github_actions_consecutive_pass_count": 0,
+                "github_actions_consecutive_pass_count": 9,
                 "github_actions_workflow_registered": true,
                 "github_actions_workflow_state": "active",
                 "lane": "pr",
                 "local_required_trigger_present": true,
                 "local_workflow_trigger_events": [
                   "pull_request",
-                  "push"
+                  "push",
+                  "workflow_dispatch"
                 ],
                 "missing_consecutive_pass_count": 30,
                 "source_evidence_release_credit_pass": false,
-                "streak_source": "github_actions_job_start_blocked",
+                "streak_source": "github_actions",
                 "threshold": 30,
                 "threshold_pass": false
               },
@@ -484,16 +471,16 @@
               "nightly_local_workflow_present": true,
               "nightly_missing_consecutive_pass_count": 30,
               "nightly_source_threshold_pass": false,
-              "open_blocker_count": 10,
+              "open_blocker_count": 8,
               "pr_github_actions_workflow_registered": true,
               "pr_github_actions_workflow_state": "active",
               "pr_local_required_trigger_present": true,
               "pr_missing_consecutive_pass_count": 30,
-              "pr_pull_request_run_source_present": false,
+              "pr_pull_request_run_source_present": true,
               "pr_source_threshold_pass": false,
               "source_evidence_age_hours": 0.0,
               "source_evidence_freshness_pass": true,
-              "source_evidence_generated_at": "2026-06-19T15:59:30.279153+00:00",
+              "source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
               "source_evidence_pass": false,
               "source_evidence_schema_pass": true,
               "threshold": 30
@@ -2891,7 +2878,7 @@
     "expected_intake_count": 5,
     "expected_intake_field_request_count": 24,
     "expected_intake_lane_request_count": 2,
-    "expected_intake_open_blocker_count": 34,
+    "expected_intake_open_blocker_count": 32,
     "expected_intake_signoff_request_count": 3,
     "external_input_required_count": 12,
     "full_release_gate_ready": false,
