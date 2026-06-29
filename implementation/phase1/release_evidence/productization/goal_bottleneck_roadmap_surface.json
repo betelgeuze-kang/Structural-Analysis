@@ -40,7 +40,7 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T20:24:37.842526+00:00",
+  "generated_at": "2026-06-29T20:28:41.997584+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88a46a6021d48c75a09db6f337fcfe001a8bc07a11038c0e0275b67440bba91e",
@@ -57,7 +57,7 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:01c4c36291834cb367a652a4bfcadb8417441fc7d4462e227bc8c7951dbc9676",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:264222d5247624994c4efbf83999e8da16cbe760f7b014b96fe682c5a47964a4",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:fad9d7ed1c166cf0760bf5e1d216641cbb6daa30b37bf459b4797e367ed1c308",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:b6ceaff69f9f6174309451d36b39083fa3a059419ebb6702c6d2d11f21c93cb6",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -274,6 +274,27 @@
         "approval_token_count": 8,
         "blocked_capability_count": 4,
         "blocked_release_count": 9,
+        "first_locked_science_evidence_surface": {
+          "bottleneck": "h_bond_evidence_surface_locked",
+          "capability_blocker_count": 2,
+          "capability_id": "h_bond_backmap_evidence",
+          "capability_state": "blocked",
+          "evidence_artifact_count": 3,
+          "first_blocked_target": "",
+          "first_next_action": "fill_h_bond_backmap_operator_intake_packet",
+          "locked": true,
+          "locked_count": 1,
+          "operator_intake_packet_status": "ready_for_operator_input",
+          "operator_intake_required_slot_count": 3,
+          "present": true,
+          "root_cause_tags": [],
+          "status": "locked",
+          "surface_count": 1,
+          "surface_family": "h_bond",
+          "surface_ids": [
+            "h_bond_backmap_evidence_surface"
+          ]
+        },
         "operator_action_count": 17,
         "product_capability_count": 5,
         "release_allowed": false,
@@ -281,6 +302,75 @@
           "h_bond_evidence_surface_locked",
           "broad_gpcr_family_claim_locked",
           "pocketmd_lite_science_product_surface_locked"
+        ],
+        "science_evidence_surface_status_rows": [
+          {
+            "bottleneck": "h_bond_evidence_surface_locked",
+            "capability_blocker_count": 2,
+            "capability_id": "h_bond_backmap_evidence",
+            "capability_state": "blocked",
+            "evidence_artifact_count": 3,
+            "first_blocked_target": "",
+            "first_next_action": "fill_h_bond_backmap_operator_intake_packet",
+            "locked": true,
+            "locked_count": 1,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 3,
+            "present": true,
+            "root_cause_tags": [],
+            "status": "locked",
+            "surface_count": 1,
+            "surface_family": "h_bond",
+            "surface_ids": [
+              "h_bond_backmap_evidence_surface"
+            ]
+          },
+          {
+            "bottleneck": "broad_gpcr_family_claim_locked",
+            "capability_blocker_count": 12,
+            "capability_id": "gpcr_hard_decoy_evidence",
+            "capability_state": "blocked",
+            "evidence_artifact_count": 4,
+            "first_blocked_target": "DRD2",
+            "first_next_action": "fill_gpcr_hard_decoy_operator_intake_packet",
+            "locked": true,
+            "locked_count": 1,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 3,
+            "present": true,
+            "root_cause_tags": [
+              "operator_values_required"
+            ],
+            "status": "locked",
+            "surface_count": 1,
+            "surface_family": "gpcr",
+            "surface_ids": [
+              "gpcr_hard_decoy_evidence_surface"
+            ]
+          },
+          {
+            "bottleneck": "pocketmd_lite_science_product_surface_locked",
+            "capability_blocker_count": 3,
+            "capability_id": "pocketmd_lite_top_k_refinement",
+            "capability_state": "blocked",
+            "evidence_artifact_count": 7,
+            "first_blocked_target": "top_k_refinement_operator_intake",
+            "first_next_action": "fill_pocketmd_lite_operator_intake_packet",
+            "locked": true,
+            "locked_count": 1,
+            "operator_intake_packet_status": "ready_for_operator_input",
+            "operator_intake_required_slot_count": 1,
+            "present": true,
+            "root_cause_tags": [
+              "operator_refinement_rows_required"
+            ],
+            "status": "locked",
+            "surface_count": 1,
+            "surface_family": "pocketmd_lite",
+            "surface_ids": [
+              "pocketmd_lite_science_product_surface"
+            ]
+          }
         ]
       }
     },
@@ -1486,7 +1576,7 @@
       ]
     }
   },
-  "source_commit_sha": "752388bdad13a8ad9ab1eee462c50965648925c6",
+  "source_commit_sha": "7d4dc4cc98479c3a4a5ec0a8cd4d29d1c56ee6e9",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",

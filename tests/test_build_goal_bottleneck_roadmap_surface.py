@@ -107,6 +107,41 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert rows["phase_1_goal_release_cockpit"]["first_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
+    phase_1_summary = rows["phase_1_goal_release_cockpit"]["summary"]
+    science_rows = {
+        row["surface_family"]: row
+        for row in phase_1_summary["science_evidence_surface_status_rows"]
+    }
+    assert set(science_rows) == {"h_bond", "gpcr", "pocketmd_lite"}
+    assert phase_1_summary["first_locked_science_evidence_surface"][
+        "surface_family"
+    ] == "h_bond"
+    assert science_rows["h_bond"] == {
+        "bottleneck": "h_bond_evidence_surface_locked",
+        "capability_blocker_count": 2,
+        "capability_id": "h_bond_backmap_evidence",
+        "capability_state": "blocked",
+        "evidence_artifact_count": 3,
+        "first_blocked_target": "",
+        "first_next_action": "fill_h_bond_backmap_operator_intake_packet",
+        "locked": True,
+        "locked_count": 1,
+        "operator_intake_packet_status": "ready_for_operator_input",
+        "operator_intake_required_slot_count": 3,
+        "present": True,
+        "root_cause_tags": [],
+        "status": "locked",
+        "surface_count": 1,
+        "surface_family": "h_bond",
+        "surface_ids": ["h_bond_backmap_evidence_surface"],
+    }
+    assert science_rows["gpcr"]["bottleneck"] == "broad_gpcr_family_claim_locked"
+    assert science_rows["gpcr"]["first_blocked_target"] == "DRD2"
+    assert science_rows["gpcr"]["root_cause_tags"] == ["operator_values_required"]
+    assert science_rows["gpcr"]["first_next_action"] == (
+        "fill_gpcr_hard_decoy_operator_intake_packet"
+    )
+    assert science_rows["gpcr"]["operator_intake_required_slot_count"] == 3
 
     phase_2 = rows["phase_2_public_benchmark_harness"]
     assert phase_2["state"] == "blocked"

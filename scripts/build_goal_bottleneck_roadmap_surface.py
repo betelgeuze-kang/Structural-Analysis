@@ -133,6 +133,65 @@ def _capability_by_id(product_capabilities: dict[str, Any], capability_id: str) 
     return {}
 
 
+def _science_evidence_surface_rows(
+    *,
+    decision: dict[str, Any],
+    product_capabilities: dict[str, Any],
+) -> list[dict[str, Any]]:
+    status_by_family = _as_dict(decision.get("science_evidence_surface_status"))
+    capability_by_family = (
+        ("h_bond", "h_bond_backmap_evidence"),
+        ("gpcr", "gpcr_hard_decoy_evidence"),
+        ("pocketmd_lite", "pocketmd_lite_top_k_refinement"),
+    )
+    rows: list[dict[str, Any]] = []
+    for family, capability_id in capability_by_family:
+        status = _as_dict(status_by_family.get(family))
+        capability = _capability_by_id(product_capabilities, capability_id)
+        capability_summary = _as_dict(capability.get("summary"))
+        next_actions = [str(row) for row in _as_list(capability.get("next_actions"))]
+        rows.append(
+            {
+                "surface_family": family,
+                "surface_ids": [str(row) for row in _as_list(status.get("surface_ids"))],
+                "present": _as_bool(status.get("present")),
+                "status": str(status.get("status") or capability_summary.get("status") or ""),
+                "bottleneck": str(status.get("bottleneck") or ""),
+                "locked": (
+                    _as_int(status.get("locked_count")) > 0
+                    or str(status.get("status") or "") == "locked"
+                    or str(capability.get("state") or "") == "blocked"
+                ),
+                "locked_count": _as_int(status.get("locked_count")),
+                "surface_count": _as_int(status.get("surface_count")),
+                "first_blocked_target": str(
+                    status.get("first_blocked_target")
+                    or capability_summary.get("first_blocked_target")
+                    or ""
+                ),
+                "root_cause_tags": [
+                    str(row)
+                    for row in _as_list(
+                        status.get("root_cause_tags")
+                        or capability_summary.get("root_cause_tags")
+                    )
+                ],
+                "capability_id": capability_id,
+                "capability_state": str(capability.get("state") or ""),
+                "capability_blocker_count": _as_int(capability.get("blocker_count")),
+                "operator_intake_packet_status": str(
+                    capability_summary.get("operator_intake_packet_status") or ""
+                ),
+                "operator_intake_required_slot_count": _as_int(
+                    capability_summary.get("operator_intake_required_slot_count")
+                ),
+                "first_next_action": _first_str(next_actions),
+                "evidence_artifact_count": len(_as_list(capability.get("evidence_artifacts"))),
+            }
+        )
+    return rows
+
+
 def _roadmap_row(
     *,
     phase_id: str,
@@ -217,6 +276,14 @@ def _release_cockpit_row(
     product_capabilities: dict[str, Any],
 ) -> dict[str, Any]:
     science_bottlenecks = [str(row) for row in _as_list(decision.get("science_evidence_surface_bottlenecks"))]
+    science_surface_rows = _science_evidence_surface_rows(
+        decision=decision,
+        product_capabilities=product_capabilities,
+    )
+    first_locked_science_surface = next(
+        (row for row in science_surface_rows if row["locked"]),
+        {},
+    )
     release_allowed = _as_bool(decision.get("release_allowed"))
     required_kpis_present = all(
         key in decision
@@ -258,6 +325,8 @@ def _release_cockpit_row(
             "operator_action_count": _as_int(decision.get("operator_action_count")),
             "approval_token_count": _as_int(decision.get("approval_token_count")),
             "science_evidence_surface_bottlenecks": science_bottlenecks,
+            "science_evidence_surface_status_rows": science_surface_rows,
+            "first_locked_science_evidence_surface": first_locked_science_surface,
             "action_register_contract_pass": _as_bool(action_register.get("contract_pass")),
             "product_capability_count": _as_int(product_capabilities.get("capability_count")),
             "blocked_capability_count": _as_int(product_capabilities.get("blocked_capability_count")),
