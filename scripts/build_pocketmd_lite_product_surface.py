@@ -28,6 +28,7 @@ DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 
 CONTRACT_SCHEMA_VERSION = "pocketmd-lite-contract.v1"
 SURVIVAL_REPORT_SCHEMA_VERSION = "pocketmd-lite-topk-survival-report.v1"
+MATERIALIZER_SCHEMA_VERSION = "pocketmd-lite-topk-survival-materialization.v1"
 READONLY_API_SCHEMA_VERSION = "pocketmd-lite-readonly-api.v1"
 HANDOFF_SCHEMA_VERSION = "pocketmd-lite-delivery-handoff.v1"
 SURFACE_SCHEMA_VERSION = "pocketmd-lite-science-product-surface.v1"
@@ -38,7 +39,10 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 
 def _input_paths() -> list[Path]:
-    return [Path("scripts/build_pocketmd_lite_product_surface.py")]
+    return [
+        Path("scripts/build_pocketmd_lite_product_surface.py"),
+        Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
+    ]
 
 
 def _metadata(*, repo_root: Path, reused_evidence: bool, reuse_policy: str) -> dict[str, Any]:
@@ -83,6 +87,28 @@ def _metric_contracts() -> list[dict[str, Any]]:
             "direction": "lower_is_better",
         },
     ]
+
+
+def _materializer_contract() -> dict[str, Any]:
+    return {
+        "schema_version": MATERIALIZER_SCHEMA_VERSION,
+        "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+        "status": "ready_for_operator_intake",
+        "input_contract": str(DEFAULT_CONTRACT_OUT),
+        "required_intake_key": "cases",
+        "outputs": {
+            "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
+            "science_product_surface": str(DEFAULT_SURFACE_OUT),
+        },
+        "command": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            "--intake <operator-pocketmd-lite-intake.json> "
+            f"--contract {DEFAULT_CONTRACT_OUT} "
+            f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
+            f"--out-surface {DEFAULT_SURFACE_OUT} "
+            "--fail-blocked"
+        ),
+    }
 
 
 def _operator_intake_schema() -> dict[str, Any]:
@@ -148,6 +174,7 @@ def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "candidate_scope": "top_k_candidates_only",
         },
         "reported_metrics": _metric_contracts(),
+        "materializer": _materializer_contract(),
         "operator_intake_schema": _operator_intake_schema(),
         "blocked_claims": [
             "broad_all_atom_md_claim",
@@ -194,11 +221,12 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "real_refinement_case_count": 0,
             "blocker_count": len(blockers),
         },
+        "materializer": _materializer_contract(),
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
         "blockers": blockers,
         "next_actions": [
             "attach_top_k_candidate_refinement_rows",
-            "compute_local_min_survival_report",
+            "run_pocketmd_lite_topk_survival_materializer",
             "compute_contact_and_h_bond_persistence",
             "compute_clash_relief_and_uncertainty_summary",
             "regenerate_pocketmd_lite_science_product_surface",
@@ -289,6 +317,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "science_product_surface.locked == false",
             "broad_all_atom_md_claim remains locked unless separately evidenced",
         ],
+        "materializer": _materializer_contract(),
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
             "not an approval to claim broad MD/FEP readiness."
@@ -344,6 +373,7 @@ def build_surface(
             "readonly_api": str(DEFAULT_READONLY_API_OUT),
             "delivery_handoff": str(DEFAULT_HANDOFF_OUT),
         },
+        "materializer": _materializer_contract(),
         "readiness_summary": {
             "contract_ready": bool(contract.get("contract_pass")),
             "readonly_api_ready": bool(readonly_api.get("contract_pass")),

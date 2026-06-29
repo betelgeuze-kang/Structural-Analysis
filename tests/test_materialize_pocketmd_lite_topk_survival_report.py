@@ -1,0 +1,237 @@
+from __future__ import annotations
+
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_PATH = REPO_ROOT / "scripts" / "materialize_pocketmd_lite_topk_survival_report.py"
+if str(REPO_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+spec = importlib.util.spec_from_file_location(
+    "materialize_pocketmd_lite_topk_survival_report",
+    SCRIPT_PATH,
+)
+assert spec is not None
+module = importlib.util.module_from_spec(spec)
+assert spec.loader is not None
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+
+
+def _valid_case(
+    *,
+    case_id: str,
+    candidate_id: str,
+    top_k_rank: int,
+    local_min_survived: bool,
+    contact_rate: float,
+    h_bond_rate: float,
+    clash_before: int,
+    clash_after: int,
+    uncertainty_low: float,
+    uncertainty_high: float,
+) -> dict[str, object]:
+    return {
+        "case_id": case_id,
+        "source_family": "CASF/PDBBind operator intake",
+        "top_k_rank": top_k_rank,
+        "candidate_id": candidate_id,
+        "pre_refinement_energy_proxy": -8.0 + top_k_rank,
+        "post_refinement_energy_proxy": -8.5 + top_k_rank,
+        "local_min_survived": local_min_survived,
+        "contact_persistence_rate": contact_rate,
+        "h_bond_persistence_rate": h_bond_rate,
+        "clash_count_before": clash_before,
+        "clash_count_after": clash_after,
+        "uncertainty_interval": {
+            "low": uncertainty_low,
+            "high": uncertainty_high,
+            "unit": "energy_proxy_delta",
+        },
+        "provenance_ref": f"operator://{case_id}/{candidate_id}",
+        "source_checksum": f"sha256:{case_id}-{candidate_id}",
+    }
+
+
+def _valid_intake() -> dict[str, object]:
+    return {
+        "schema_version": "pocketmd-lite-operator-intake.v1",
+        "cases": [
+            _valid_case(
+                case_id="case_a",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=0.8,
+                h_bond_rate=0.6,
+                clash_before=4,
+                clash_after=1,
+                uncertainty_low=-0.2,
+                uncertainty_high=0.2,
+            ),
+            _valid_case(
+                case_id="case_a",
+                candidate_id="pose_2",
+                top_k_rank=2,
+                local_min_survived=False,
+                contact_rate=0.7,
+                h_bond_rate=0.4,
+                clash_before=2,
+                clash_after=2,
+                uncertainty_low=0.1,
+                uncertainty_high=0.3,
+            ),
+            _valid_case(
+                case_id="case_b",
+                candidate_id="pose_1",
+                top_k_rank=1,
+                local_min_survived=True,
+                contact_rate=1.0,
+                h_bond_rate=0.9,
+                clash_before=5,
+                clash_after=3,
+                uncertainty_low=-0.1,
+                uncertainty_high=0.7,
+            ),
+        ],
+    }
+
+
+def test_pocketmd_lite_materializer_computes_topk_survival_summary() -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _valid_intake(),
+        repo_root=REPO_ROOT,
+    )
+
+    assert report["schema_version"] == "pocketmd-lite-topk-survival-report.v1"
+    assert report["materialization_schema_version"] == (
+        "pocketmd-lite-topk-survival-materialization.v1"
+    )
+    assert report["status"] == "ready"
+    assert report["contract_pass"] is True
+    assert report["product_surface_ready"] is True
+    assert report["real_refinement_case_count"] == 2
+    assert report["top_k_candidate_count"] == 3
+    assert report["blockers"] == []
+    assert report["summary"] == {
+        "blocker_count": 0,
+        "clash_relief_rate": 2 / 3,
+        "contact_persistence_rate_median": 0.8,
+        "h_bond_persistence_rate_median": 0.6,
+        "local_min_survival_rate": 2 / 3,
+        "real_refinement_case_count": 2,
+        "top_k_candidate_count": 3,
+        "uncertainty_width_median": 0.4,
+    }
+    assert "free_energy_perturbation_claim" in report["blocked_claims"]
+
+
+def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        _valid_intake(),
+        contract={"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True},
+        repo_root=REPO_ROOT,
+    )
+    surface = module.build_pocketmd_lite_science_product_surface(
+        report,
+        contract={"schema_version": "pocketmd-lite-contract.v1", "contract_pass": True},
+        report_path=Path("tmp/pocketmd_lite_topk_survival_report.json"),
+        contract_path=Path("implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json"),
+        repo_root=REPO_ROOT,
+    )
+
+    assert surface["surface_id"] == "pocketmd_lite_science_product_surface"
+    assert surface["surface_kind"] == "science_product_surface"
+    assert surface["status"] == "ready"
+    assert surface["reason_code"] == "PASS"
+    assert surface["contract_pass"] is True
+    assert surface["locked"] is False
+    assert surface["claim_locked"] is False
+    assert surface["blockers"] == []
+    assert "broad_all_atom_md_claim" in surface["blocked_claims"]
+    assert surface["goal_roadmap_linkage"]["bottleneck"] == (
+        "pocketmd_lite_science_product_surface_ready"
+    )
+
+
+def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
+    report = module.materialize_pocketmd_lite_topk_survival_report(
+        {"cases": []},
+        repo_root=REPO_ROOT,
+    )
+    surface = module.build_pocketmd_lite_science_product_surface(report, repo_root=REPO_ROOT)
+
+    assert report["status"] == "operator_evidence_required"
+    assert report["contract_pass"] is False
+    assert report["product_surface_ready"] is False
+    assert report["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert report["root_cause_tags"] == ["operator_refinement_rows_required"]
+    assert "pocketmd_lite_topk_candidate_rows_missing" in report["blockers"]
+    assert surface["status"] == "locked"
+    assert surface["locked"] is True
+    assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
+
+
+def test_pocketmd_lite_materializer_cli_writes_report_and_surface(tmp_path: Path) -> None:
+    intake = tmp_path / "pocketmd_lite_intake.json"
+    intake.write_text(json.dumps(_valid_intake()), encoding="utf-8")
+    out_report = tmp_path / "pocketmd_lite_topk_survival_report.json"
+    out_surface = tmp_path / "pocketmd_lite_science_product_surface.json"
+
+    assert (
+        module.main(
+            [
+                "--intake",
+                str(intake),
+                "--out-report",
+                str(out_report),
+                "--out-surface",
+                str(out_surface),
+                "--repo-root",
+                str(REPO_ROOT),
+                "--fail-blocked",
+            ]
+        )
+        == 0
+    )
+
+    report = json.loads(out_report.read_text(encoding="utf-8"))
+    surface = json.loads(out_surface.read_text(encoding="utf-8"))
+    assert report["product_surface_ready"] is True
+    assert surface["locked"] is False
+    assert report["input_checksums"][
+        "scripts/materialize_pocketmd_lite_topk_survival_report.py"
+    ].startswith("sha256:")
+    assert report["input_checksums"][str(intake)].startswith("sha256:")
+
+
+def test_pocketmd_lite_materializer_cli_fail_blocked_returns_one(tmp_path: Path) -> None:
+    intake = tmp_path / "empty_pocketmd_lite_intake.json"
+    intake.write_text(json.dumps({"cases": []}), encoding="utf-8")
+    out_report = tmp_path / "pocketmd_lite_topk_survival_report.json"
+    out_surface = tmp_path / "pocketmd_lite_science_product_surface.json"
+
+    assert (
+        module.main(
+            [
+                "--intake",
+                str(intake),
+                "--out-report",
+                str(out_report),
+                "--out-surface",
+                str(out_surface),
+                "--repo-root",
+                str(REPO_ROOT),
+                "--fail-blocked",
+            ]
+        )
+        == 1
+    )
+
+    report = json.loads(out_report.read_text(encoding="utf-8"))
+    assert report["product_surface_ready"] is False
+    assert "pocketmd_lite_topk_candidate_rows_missing" in report["blockers"]

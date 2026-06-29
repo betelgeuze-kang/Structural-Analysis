@@ -49,6 +49,36 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     } == {row["metric_id"] for row in contract["reported_metrics"]}
     assert "free_energy_perturbation_claim" in contract["blocked_claims"]
     assert "broad_all_atom_md_claim" in contract["blocked_claims"]
+    assert contract["materializer"] == {
+        "schema_version": "pocketmd-lite-topk-survival-materialization.v1",
+        "script": "scripts/materialize_pocketmd_lite_topk_survival_report.py",
+        "status": "ready_for_operator_intake",
+        "input_contract": (
+            "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json"
+        ),
+        "required_intake_key": "cases",
+        "outputs": {
+            "topk_survival_report": (
+                "implementation/phase1/release_evidence/productization/"
+                "pocketmd_lite_topk_survival_report.json"
+            ),
+            "science_product_surface": (
+                "implementation/phase1/release_evidence/surface/"
+                "pocketmd_lite_science_product_surface.json"
+            ),
+        },
+        "command": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            "--intake <operator-pocketmd-lite-intake.json> "
+            "--contract implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_contract.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_survival_report.json "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json "
+            "--fail-blocked"
+        ),
+    }
 
     assert survival["schema_version"] == "pocketmd-lite-topk-survival-report.v1"
     assert survival["contract_pass"] is False
@@ -56,6 +86,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert survival["summary"]["local_min_survival_rate"] is None
     assert "pocketmd_lite_topk_candidate_rows_missing" in survival["blockers"]
     assert "uncertainty_width_median" in survival["required_metrics"]
+    assert survival["materializer"]["status"] == "ready_for_operator_intake"
 
     assert api["schema_version"] == "pocketmd-lite-readonly-api.v1"
     assert api["contract_pass"] is True
@@ -125,6 +156,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         assert payload["source_commit_sha"]
         assert payload["input_checksums"][
             "scripts/build_pocketmd_lite_product_surface.py"
+        ].startswith("sha256:")
+        assert payload["input_checksums"][
+            "scripts/materialize_pocketmd_lite_topk_survival_report.py"
         ].startswith("sha256:")
 
     rows = pm_report._evidence_surface_rows(surface_out.parent)
