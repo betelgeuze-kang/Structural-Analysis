@@ -219,14 +219,24 @@ def _snapshot_input_checksums(
     repo_root: Path,
     paths: SnapshotInputPaths,
 ) -> dict[str, str]:
-    source_paths = [
+    return {
+        _path_key_for_repo_path(repo_root, path): _sha256_path(repo_root, path)
+        for path in _snapshot_source_paths(paths)
+    }
+
+
+def _snapshot_source_paths(paths: SnapshotInputPaths) -> list[Path]:
+    return [
         Path("scripts/build_product_readiness_snapshot.py"),
         *[getattr(paths, field) for field in paths.__dataclass_fields__],
     ]
-    return {
-        _path_key_for_repo_path(repo_root, path): _sha256_path(repo_root, path)
-        for path in source_paths
-    }
+
+
+def _snapshot_source_artifacts(repo_root: Path, paths: SnapshotInputPaths) -> list[str]:
+    return [
+        _path_key_for_repo_path(repo_root, path)
+        for path in _snapshot_source_paths(paths)
+    ]
 
 
 def _receipt_commit_allowed_paths(
@@ -1957,6 +1967,7 @@ def build_snapshot(
             "pushed, released, or mutated remote refs."
         ),
     }
+    aggregator_source_artifacts = _snapshot_source_artifacts(repo_root, paths)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1969,6 +1980,17 @@ def build_snapshot(
         ),
         "reused_evidence": False,
         "reuse_policy": AGGREGATOR_REUSE_POLICY,
+        "aggregator_freshness_policy": {
+            "mode": "direct_aggregator_source_tracking",
+            "source_artifact_count": len(aggregator_source_artifacts),
+            "source_artifacts": aggregator_source_artifacts,
+            "claim_boundary": (
+                "This readiness rollup does not rerun upstream release gates. It exposes "
+                "source commit and input checksums for every direct upstream artifact so "
+                "stale readiness snapshots can be detected without treating the rollup as "
+                "a leaf validation receipt."
+            ),
+        },
         "schema_valid": schema_valid,
         "evidence_fresh": evidence_fresh,
         "snapshot_source_state_consistent": snapshot_source_state_consistent,

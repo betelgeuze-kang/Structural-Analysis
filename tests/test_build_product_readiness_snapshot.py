@@ -855,6 +855,24 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         payload["reuse_policy"]
         == "product_readiness_snapshot_aggregates_release_readiness_inputs"
     )
+    assert payload["aggregator_freshness_policy"]["mode"] == (
+        "direct_aggregator_source_tracking"
+    )
+    assert payload["aggregator_freshness_policy"]["source_artifact_count"] == len(
+        payload["input_checksums"]
+    )
+    assert "scripts/build_product_readiness_snapshot.py" in payload[
+        "aggregator_freshness_policy"
+    ]["source_artifacts"]
+    assert "pm_release_gate_report.json" in payload[
+        "aggregator_freshness_policy"
+    ]["source_artifacts"]
+    assert "fresh_full_validation_lane_status.json" in payload[
+        "aggregator_freshness_policy"
+    ]["source_artifacts"]
+    assert "pm_release_blocker_action_register.json" in payload[
+        "aggregator_freshness_policy"
+    ]["source_artifacts"]
     assert payload["input_checksums"]["README.md"].startswith("sha256:")
     assert "pm_release_gate_report.json" in payload["input_checksums"]
     assert payload["evidence_fresh"] is True
