@@ -305,6 +305,24 @@ def _public_benchmark_row(
         )
         if isinstance(row, dict)
     ]
+    operator_evidence_gap_register = [
+        {
+            "slot_priority": _as_int(row.get("slot_priority")),
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "tier_beta_blocked": _as_bool(row.get("tier_beta_blocked")),
+            "blocked_tier_beta_criteria": [
+                str(item) for item in _as_list(row.get("blocked_tier_beta_criteria"))
+            ],
+            "first_next_action": str(row.get("first_next_action") or ""),
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(public_benchmark.get("operator_evidence_gap_register"))
+        if isinstance(row, dict)
+    ]
     tier_beta_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -362,6 +380,13 @@ def _public_benchmark_row(
                 or source_operator_summary.get("gate_unblock_plan_count")
                 or len(gate_unblock_plan)
             ),
+            "operator_evidence_gap_count": _as_int(
+                public_benchmark.get("operator_evidence_gap_count")
+                or len(operator_evidence_gap_register)
+            ),
+            "first_operator_evidence_gap": _as_dict(
+                public_benchmark.get("first_operator_evidence_gap")
+            ),
             "minimum_subset_case_count": _as_int(
                 public_benchmark_operator_intake.get("minimum_subset_case_count")
                 or source_operator_summary.get("minimum_subset_case_count")
@@ -376,6 +401,7 @@ def _public_benchmark_row(
             "tier_beta_gate_criteria": tier_beta_criteria,
             "operator_intake_slots": operator_slots,
             "gate_unblock_plan": gate_unblock_plan,
+            "operator_evidence_gap_register": operator_evidence_gap_register,
             "subset_manifest_summary": _as_dict(public_benchmark.get("subset_manifest_summary")),
             "pose_validity_packet_summary": _as_dict(
                 public_benchmark.get("pose_validity_packet_summary")

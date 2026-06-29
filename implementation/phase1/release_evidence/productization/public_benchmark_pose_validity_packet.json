@@ -94,10 +94,10 @@
     "status": "pass"
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T19:53:58.181704+00:00",
+  "generated_at": "2026-06-29T20:16:10.705604+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:037281420277035a34d380de5a6b045b8751a28278d361a8c49867d313af3e1f",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:008b02f146354243efc97684eb1af6e0dda4083916349ae1f1ecbde4e44c9ff5",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:16b5e16e796759c5b4acfebb9a31a7af846c4d8a8fa986411b66563ad2180c5a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -119,7 +119,7 @@
   "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "bcdcc552a994a9668290dfcb4da6055fe1f551c5",
+  "source_commit_sha": "e3c761aaff68420f16976b09a44cdf88c8a26fd8",
   "status": "ready_for_dry_run",
   "validator": {
     "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",

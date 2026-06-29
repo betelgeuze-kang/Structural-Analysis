@@ -123,6 +123,16 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "/product/public-benchmark/operator-intake"
     )
     assert phase_2["summary"]["gate_unblock_plan_count"] == 4
+    assert phase_2["summary"]["operator_evidence_gap_count"] == 4
+    assert phase_2["summary"]["first_operator_evidence_gap"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert phase_2["summary"]["first_operator_evidence_gap"][
+        "blocked_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
     assert phase_2["summary"]["minimum_subset_case_count"] == 12
     assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
     assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 7
@@ -173,6 +183,18 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "materialize_posebusters_validity_packet",
         "materialize_symmetry_rmsd_scorecard",
     ]
+    gap_register = {
+        row["slot_id"]: row
+        for row in phase_2["summary"]["operator_evidence_gap_register"]
+    }
+    assert gap_register["pose_coordinate_intake"]["blocked_tier_beta_criteria"] == [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+    ]
+    assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
+        "attach at least 12 local CASF/PDBBind case descriptors"
+    )
     assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
     assert phase_2["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",

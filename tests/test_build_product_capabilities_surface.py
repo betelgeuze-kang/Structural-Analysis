@@ -79,6 +79,16 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     )
     assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 4
     assert public_benchmark["summary"]["gate_unblock_plan_count"] == 4
+    assert public_benchmark["summary"]["operator_evidence_gap_count"] == 4
+    assert public_benchmark["summary"]["first_operator_evidence_gap"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert public_benchmark["summary"]["first_operator_evidence_gap"][
+        "blocked_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
     assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
     assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
     assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 7
@@ -119,6 +129,18 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gate_plan["dud_e_lit_pcba_enrichment_intake"][
         "materialization_steps"
     ] == ["materialize_enrichment_scorecard"]
+    gap_register = {
+        row["slot_id"]: row
+        for row in public_benchmark["summary"]["operator_evidence_gap_register"]
+    }
+    assert gap_register["pose_coordinate_intake"]["blocked_tier_beta_criteria"] == [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+    ]
+    assert gap_register["casf_pdbbind_subset_intake"]["first_next_action"] == (
+        "attach at least 12 local CASF/PDBBind case descriptors"
+    )
     assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
         "dry_run_case_count": 1,

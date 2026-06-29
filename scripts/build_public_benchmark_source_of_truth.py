@@ -587,6 +587,73 @@ def build_vina_gnina_comparison_adapter(*, repo_root: Path = ROOT) -> dict[str, 
     }
 
 
+def _operator_evidence_gap_register(
+    *,
+    tier_beta_gate: dict[str, Any],
+    operator_intake_packet: dict[str, Any],
+) -> list[dict[str, Any]]:
+    criteria_by_id = {
+        str(row.get("criterion_id") or ""): row
+        for row in tier_beta_gate.get("criteria", [])
+        if isinstance(row, dict)
+    }
+    plan_by_slot = {
+        str(row.get("slot_id") or ""): row
+        for row in operator_intake_packet.get("gate_unblock_plan", [])
+        if isinstance(row, dict)
+    }
+    rows: list[dict[str, Any]] = []
+    for index, slot in enumerate(operator_intake_packet.get("input_slots", []), start=1):
+        if not isinstance(slot, dict):
+            continue
+        slot_id = str(slot.get("slot_id") or "")
+        plan = plan_by_slot.get(slot_id, {})
+        criterion_gates = []
+        for criterion_id in plan.get("unblocks_tier_beta_criteria", []):
+            criterion = criteria_by_id.get(str(criterion_id), {})
+            criterion_gates.append(
+                {
+                    "criterion_id": str(criterion_id),
+                    "pass": bool(criterion.get("pass")),
+                    "current": criterion.get("current"),
+                    "required": criterion.get("required"),
+                    "blockers": [
+                        str(blocker) for blocker in criterion.get("blockers", [])
+                    ],
+                }
+            )
+        blocked_criteria = [
+            row["criterion_id"] for row in criterion_gates if not row["pass"]
+        ]
+        owner_actions = [
+            str(action) for action in slot.get("owner_actions", []) if str(action)
+        ]
+        rows.append(
+            {
+                "slot_priority": index,
+                "slot_id": slot_id,
+                "status": str(slot.get("status") or ""),
+                "tier_beta_blocked": bool(blocked_criteria),
+                "blocked_tier_beta_criteria": blocked_criteria,
+                "criterion_gates": criterion_gates,
+                "first_next_action": owner_actions[0] if owner_actions else "",
+                "owner_actions": owner_actions,
+                "depends_on": [
+                    str(path) for path in slot.get("depends_on", []) if str(path)
+                ],
+                "minimum_evidence": dict(plan.get("minimum_evidence") or {}),
+                "materialization_steps": [
+                    str(step)
+                    for step in plan.get("materialization_steps", [])
+                    if str(step)
+                ],
+                "materialization_command": str(slot.get("materialization_command") or ""),
+                "validation_command": str(slot.get("validation_command") or ""),
+            }
+        )
+    return rows
+
+
 def build_source_of_truth(
     *,
     subset_manifest: dict[str, Any],
@@ -680,6 +747,18 @@ def build_source_of_truth(
         "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
         "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
     }
+    operator_evidence_gap_register = _operator_evidence_gap_register(
+        tier_beta_gate=tier_beta_gate,
+        operator_intake_packet=operator_intake_packet,
+    )
+    first_operator_evidence_gap = next(
+        (
+            row
+            for row in operator_evidence_gap_register
+            if row["tier_beta_blocked"]
+        ),
+        {},
+    )
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -799,6 +878,9 @@ def build_source_of_truth(
             "claim_boundary": operator_intake_packet["claim_boundary"],
         },
         "operator_gate_unblock_plan": operator_intake_packet["gate_unblock_plan"],
+        "operator_evidence_gap_register": operator_evidence_gap_register,
+        "operator_evidence_gap_count": len(operator_evidence_gap_register),
+        "first_operator_evidence_gap": first_operator_evidence_gap,
         "subset_manifest_validation": validate_subset_manifest(subset_manifest),
         "subset_materializer": {
             "schema_version": MATERIALIZER_SCHEMA_VERSION,

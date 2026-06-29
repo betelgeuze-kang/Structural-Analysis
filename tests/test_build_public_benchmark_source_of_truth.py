@@ -259,6 +259,33 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["operator_gate_unblock_plan"] == source["operator_intake_packet"][
         "gate_unblock_plan"
     ]
+    assert source["operator_evidence_gap_count"] == 4
+    assert source["first_operator_evidence_gap"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert source["first_operator_evidence_gap"]["blocked_tier_beta_criteria"] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert source["first_operator_evidence_gap"]["first_next_action"] == (
+        "attach at least 12 local CASF/PDBBind case descriptors"
+    )
+    evidence_gap_register = {
+        row["slot_id"]: row for row in source["operator_evidence_gap_register"]
+    }
+    assert evidence_gap_register["pose_coordinate_intake"][
+        "blocked_tier_beta_criteria"
+    ] == [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+    ]
+    assert evidence_gap_register["dud_e_lit_pcba_enrichment_intake"][
+        "minimum_evidence"
+    ]["supported_families"] == ["DUD-E", "LIT-PCBA"]
+    assert evidence_gap_register["vina_gnina_comparison_intake"][
+        "materialization_steps"
+    ] == ["materialize_vina_gnina_comparison_adapter"]
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "case_count"
     ] == 12
