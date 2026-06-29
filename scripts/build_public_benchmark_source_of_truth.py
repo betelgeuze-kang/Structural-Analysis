@@ -33,6 +33,9 @@ from materialize_public_benchmark_subset_manifest import (  # noqa: E402
 from materialize_public_benchmark_pose_validity_input import (  # noqa: E402
     SCHEMA_VERSION as POSE_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_posebusters_validity_packet import (  # noqa: E402
+    SCHEMA_VERSION as POSEBUSTERS_PACKET_MATERIALIZER_SCHEMA_VERSION,
+)
 from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
     SCHEMA_VERSION as RMSD_MATERIALIZER_SCHEMA_VERSION,
 )
@@ -52,6 +55,7 @@ RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
 def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/materialize_public_benchmark_posebusters_validity_packet.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
         Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
@@ -322,6 +326,25 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "public_benchmark_pose_validity_materialization_report.json --fail-blocked"
             ),
         },
+        "materializer": {
+            "schema_version": POSEBUSTERS_PACKET_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_input",
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py "
+                "--pose-validity-input implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_validity_input.json "
+                "--out-packet implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_validity_packet.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_posebusters_validity_materialization_report.json "
+                "--fail-blocked"
+            ),
+            "claim_boundary": (
+                "The materializer turns validated pose-coordinate input into per-case "
+                "PoseBusters-style sanity rows for real benchmark ligands. It does not "
+                "vendor PoseBusters, infer chemistry, or close Tier beta."
+            ),
+        },
         "dry_run_validation": dry_run_validation,
         "checks": [
             {
@@ -333,6 +356,11 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "check_id": "atom_count_and_order_contract",
                 "required": True,
                 "description": "reference/predicted ligand atoms share a declared atom-order contract",
+            },
+            {
+                "check_id": "symmetry_permutation_contract",
+                "required": True,
+                "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
             },
             {
                 "check_id": "symmetry_aware_ligand_rmsd_angstrom",
@@ -410,6 +438,9 @@ def build_source_of_truth(
             "check_count": len(pose_validity_packet["checks"]),
             "required_check_count": sum(1 for row in pose_validity_packet["checks"] if row["required"]),
             "validator_schema_version": pose_validity_packet["validator"]["schema_version"],
+            "materializer_schema_version": pose_validity_packet["materializer"][
+                "schema_version"
+            ],
             "dry_run_pose_validity_ready": pose_validity_packet["dry_run_validation"][
                 "pose_validity_ready"
             ],
@@ -468,6 +499,18 @@ def build_source_of_truth(
                 "The RMSD scorecard materializer consumes validated pose-coordinate input "
                 "and produces per-case symmetry-aware ligand RMSD rows plus pose-success "
                 "counts. It does not compare docking engines or close Tier beta alone."
+            ),
+        },
+        "posebusters_validity_packet_materializer": {
+            "schema_version": POSEBUSTERS_PACKET_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_input",
+            "materialization_command": pose_validity_packet["materializer"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The PoseBusters-style packet materializer consumes validated "
+                "pose-coordinate input and emits per-case sanity-check rows for real "
+                "benchmark ligands. It does not infer chemistry or close Tier beta."
             ),
         },
         "blockers": [

@@ -48,9 +48,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["pose_validity_packet_summary"] == {
         "status": "ready_for_dry_run",
-        "check_count": 5,
-        "required_check_count": 5,
+        "check_count": 6,
+        "required_check_count": 6,
         "validator_schema_version": "public-benchmark-pose-validity-validation.v1",
+        "materializer_schema_version": (
+            "public-benchmark-posebusters-style-validity-packet-materialization.v1"
+        ),
         "dry_run_pose_validity_ready": True,
         "real_benchmark_case_count": 0,
     }
@@ -118,6 +121,18 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "counts. It does not compare docking engines or close Tier beta alone."
         ),
     }
+    assert source["posebusters_validity_packet_materializer"] == {
+        "schema_version": (
+            "public-benchmark-posebusters-style-validity-packet-materialization.v1"
+        ),
+        "status": "ready_for_pose_validity_input",
+        "materialization_command": pose_packet["materializer"]["materialization_command"],
+        "claim_boundary": (
+            "The PoseBusters-style packet materializer consumes validated "
+            "pose-coordinate input and emits per-case sanity-check rows for real "
+            "benchmark ligands. It does not infer chemistry or close Tier beta."
+        ),
+    }
     assert source["next_actions"] == [
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
@@ -170,6 +185,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert {
         "coordinate_finiteness",
         "atom_count_and_order_contract",
+        "symmetry_permutation_contract",
         "symmetry_aware_ligand_rmsd_angstrom",
         "minimum_interatomic_distance_guard",
         "receptor_ligand_context_present",
@@ -187,7 +203,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert "materialize_public_benchmark_pose_validity_input.py" in pose_packet[
         "validator"
     ]["materialization_command"]
+    assert pose_packet["materializer"]["schema_version"] == (
+        "public-benchmark-posebusters-style-validity-packet-materialization.v1"
+    )
+    assert "materialize_public_benchmark_posebusters_validity_packet.py" in pose_packet[
+        "materializer"
+    ]["materialization_command"]
     assert "scripts/materialize_public_benchmark_pose_validity_input.py" in pose_packet[
+        "input_checksums"
+    ]
+    assert "scripts/materialize_public_benchmark_posebusters_validity_packet.py" in pose_packet[
         "input_checksums"
     ]
     assert pose_packet["dry_run_validation"]["pose_validity_ready"] is True
