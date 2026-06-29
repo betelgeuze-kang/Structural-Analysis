@@ -46,6 +46,11 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "real_benchmark_case_count": 0,
         "dry_run_pose_success": True,
     }
+    assert source["subset_manifest_validation"]["status"] == "source_material_required"
+    assert source["subset_manifest_validation"]["public_benchmark_ready"] is False
+    assert source["subset_manifest_validation"]["blockers"] == [
+        "materialized_case_count_below_target",
+    ]
     assert "Vina/GNINA comparison" in source["claim_boundary"]
     assert "DUD-E/LIT-PCBA enrichment" in source["claim_boundary"]
 
@@ -53,6 +58,23 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert subset["source_families"] == ["CASF/PDBBind"]
     assert subset["target_subset_case_count"] == 12
     assert subset["materialized_case_count"] == 0
+    assert subset["case_rows"] == []
+    assert subset["case_row_schema"]["required_fields"] == [
+        "case_id",
+        "source_family",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum",
+    ]
+    assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
+    assert "validate_public_benchmark_subset_manifest.py" in subset["case_row_schema"][
+        "validation_command"
+    ]
     assert {row["slot_id"] for row in subset["slots"]} == {
         "casf_pdbbind_pose_success_seed",
         "casf_pdbbind_affinity_control_seed",

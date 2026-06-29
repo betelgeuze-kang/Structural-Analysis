@@ -19,6 +19,10 @@ from score_symmetry_aware_ligand_rmsd import (  # noqa: E402
     DEFAULT_THRESHOLD_ANGSTROM,
     score_symmetry_aware_rmsd,
 )
+from validate_public_benchmark_subset_manifest import (  # noqa: E402
+    REQUIRED_CASE_FIELDS,
+    validate_subset_manifest,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -34,6 +38,30 @@ RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+
+
+def _case_row_template() -> dict[str, Any]:
+    return {
+        "case_id": "casf_pdbbind_subset_001",
+        "source_family": "CASF/PDBBind",
+        "complex_id": "",
+        "protein_structure_path": "",
+        "reference_ligand_path": "",
+        "predicted_ligand_path_or_docking_run_id": "",
+        "ligand_atom_order_contract": {
+            "atom_count": 0,
+            "atom_ids": [],
+            "atom_id_basis": "reference_ligand_atom_order",
+        },
+        "symmetry_permutation_contract": {
+            "permutations": [],
+            "permutation_basis": "zero_based_indices_into_ligand_atom_order_contract.atom_ids",
+        },
+        "source_license_or_accession": "",
+        "source_checksum": "",
+        "pose_success_metric": "symmetry_aware_ligand_rmsd_angstrom",
+        "rmsd_threshold_angstrom": DEFAULT_THRESHOLD_ANGSTROM,
+    }
 
 
 def _operator_slot(
@@ -77,6 +105,7 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
             reuse_policy="source_of_truth_seed_manifest_generated_from_repo_contract",
@@ -88,6 +117,16 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "target_subset_case_count": 12,
         "materialized_case_count": 0,
         "source_families": ["CASF/PDBBind"],
+        "case_row_schema": {
+            "required_fields": list(REQUIRED_CASE_FIELDS),
+            "template": _case_row_template(),
+            "validation_command": (
+                "python3 scripts/validate_public_benchmark_subset_manifest.py "
+                "--manifest implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_manifest.json --fail-blocked"
+            ),
+        },
+        "case_rows": [],
         "slots": [
             _operator_slot(
                 slot_id="casf_pdbbind_pose_success_seed",
@@ -119,8 +158,9 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         ],
         "claim_boundary": (
             "This manifest is a Tier beta source-of-truth seed. It defines the minimum "
-            "CASF/PDBBind subset contract and operator slots, but it does not attach or "
-            "redistribute public benchmark source files and does not claim benchmark results."
+            "CASF/PDBBind subset contract, operator slots, case-row schema, and validation "
+            "command, but it does not attach or redistribute public benchmark source files "
+            "and does not claim benchmark results."
         ),
     }
 
@@ -168,6 +208,7 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
             reuse_policy="synthetic_dry_run_recomputes_symmetry_aware_rmsd",
@@ -198,6 +239,7 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
             reuse_policy="pose_validity_packet_generated_from_repo_contract",
@@ -255,6 +297,7 @@ def build_source_of_truth(
             input_paths=[
                 Path("scripts/build_public_benchmark_source_of_truth.py"),
                 Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+                Path("scripts/validate_public_benchmark_subset_manifest.py"),
             ],
             reused_evidence=False,
             reuse_policy="public_benchmark_contract_generated_from_repo_code",
@@ -302,6 +345,7 @@ def build_source_of_truth(
             "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
             "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
         },
+        "subset_manifest_validation": validate_subset_manifest(subset_manifest),
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
