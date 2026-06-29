@@ -88,6 +88,26 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "broad_gpcr_family_claim_locked",
         "pocketmd_lite_science_product_surface_locked",
     ]
+    assert surface["operator_evidence_handoff_scope"] == (
+        "first_blocked_operator_gap_per_blocked_phase"
+    )
+    assert surface["operator_evidence_handoff_count"] == 3
+    assert surface["first_operator_evidence_handoff"]["phase_id"] == (
+        "phase_2_public_benchmark_harness"
+    )
+    assert surface["first_operator_evidence_handoff"]["slot_id"] == (
+        "casf_pdbbind_subset_intake"
+    )
+    assert surface["first_operator_evidence_handoff"]["first_blocker"] == (
+        "casf_pdbbind_source_material_not_attached"
+    )
+    assert [
+        row["phase_id"] for row in surface["operator_evidence_handoff_queue"]
+    ] == [
+        "phase_2_public_benchmark_harness",
+        "phase_3_gpcr_hard_decoy_closure",
+        "phase_4_pocketmd_lite",
+    ]
 
 
 def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:

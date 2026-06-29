@@ -930,6 +930,56 @@ def _capability_summary_rows(product_capabilities: dict[str, Any]) -> list[dict[
     return rows
 
 
+def _operator_evidence_handoff_queue(roadmap_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    blocked_rows = [row for row in roadmap_rows if row["state"] != "ready"]
+    queue: list[dict[str, Any]] = []
+    for index, row in enumerate(blocked_rows, start=1):
+        summary = _as_dict(row.get("summary"))
+        first_gap = _as_dict(summary.get("first_operator_evidence_gap"))
+        if not first_gap:
+            continue
+        blocked_criteria = (
+            _as_list(first_gap.get("blocked_tier_beta_criteria"))
+            or _as_list(first_gap.get("blocked_phase3_criteria"))
+            or _as_list(first_gap.get("blocked_phase4_criteria"))
+        )
+        queue.append(
+            {
+                "queue_priority": index,
+                "phase_id": str(row.get("phase_id") or ""),
+                "phase_label": str(row.get("phase_label") or ""),
+                "roadmap_item": str(row.get("roadmap_item") or ""),
+                "bottleneck": str(row.get("bottleneck") or ""),
+                "first_blocker": str(row.get("first_blocker") or ""),
+                "first_blocked_target": str(row.get("first_blocked_target") or ""),
+                "root_cause_tags": [
+                    str(tag) for tag in _as_list(row.get("root_cause_tags"))
+                ],
+                "slot_id": str(first_gap.get("slot_id") or ""),
+                "target_id": str(first_gap.get("target_id") or ""),
+                "status": str(first_gap.get("status") or ""),
+                "blocked_criteria": [str(item) for item in blocked_criteria],
+                "first_next_action": str(
+                    first_gap.get("first_next_action")
+                    or _first_str([str(action) for action in _as_list(row.get("next_actions"))])
+                ),
+                "minimum_evidence": _as_dict(first_gap.get("minimum_evidence")),
+                "materialization_steps": [
+                    str(step) for step in _as_list(first_gap.get("materialization_steps"))
+                ],
+                "materialization_command": str(first_gap.get("materialization_command") or ""),
+                "validation_command": str(first_gap.get("validation_command") or ""),
+                "evidence_artifacts": [
+                    str(path) for path in _as_list(row.get("evidence_artifacts"))
+                ],
+                "linked_routes": [
+                    str(route) for route in _as_list(row.get("linked_routes"))
+                ],
+            }
+        )
+    return queue
+
+
 def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
     pm_report = _load_json(repo_root, DEFAULT_PM_REPORT)
     action_register = _load_json(repo_root, DEFAULT_ACTION_REGISTER)
@@ -1050,6 +1100,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             )
         ),
     }
+    operator_evidence_handoff_queue = _operator_evidence_handoff_queue(roadmap_rows)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -1089,6 +1140,14 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         "primary_roadmap_bottleneck": primary_bottleneck,
         "primary_roadmap_phase_id": str(primary_bottleneck_row.get("phase_id") or ""),
         "primary_next_actions": [str(row) for row in _as_list(primary_bottleneck_row.get("next_actions"))],
+        "operator_evidence_handoff_scope": "first_blocked_operator_gap_per_blocked_phase",
+        "operator_evidence_handoff_count": len(operator_evidence_handoff_queue),
+        "first_operator_evidence_handoff": (
+            operator_evidence_handoff_queue[0]
+            if operator_evidence_handoff_queue
+            else {}
+        ),
+        "operator_evidence_handoff_queue": operator_evidence_handoff_queue,
         "release_decision_operator_actions": [
             row
             for row in _as_list(action_register.get("release_decision_operator_actions"))
