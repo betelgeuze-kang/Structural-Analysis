@@ -59,6 +59,41 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["subset_manifest_validation"]["blockers"] == [
         "materialized_case_count_below_target",
     ]
+    assert source["subset_materializer"] == {
+        "schema_version": "public-benchmark-subset-materialization.v1",
+        "status": "ready_for_operator_intake",
+        "intake_case_key": "cases",
+        "required_case_fields": [
+            "case_id",
+            "source_family",
+            "complex_id",
+            "protein_structure_path",
+            "reference_ligand_path",
+            "predicted_ligand_path_or_docking_run_id",
+            "ligand_atom_order_contract",
+            "symmetry_permutation_contract",
+            "source_license_or_accession",
+            "source_checksum",
+        ],
+        "local_source_file_fields": [
+            "protein_structure_path",
+            "reference_ligand_path",
+            "predicted_ligand_path_or_docking_run_id",
+        ],
+        "materialization_command": subset["case_row_schema"]["materialization_command"],
+        "claim_boundary": (
+            "The materializer consumes operator-attached local CASF/PDBBind case "
+            "descriptors and files, computes checksums, and validates the subset "
+            "manifest. It does not fetch, redistribute, or license benchmark data."
+        ),
+    }
+    assert source["next_actions"] == [
+        "attach_checked_casf_pdbbind_subset_source_files",
+        "run_public_benchmark_subset_materializer",
+        "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+        "run_symmetry_aware_rmsd_on_real_subset",
+        "materialize_posebusters_style_validity_packet_for_real_ligands",
+    ]
     assert "Vina/GNINA comparison" in source["claim_boundary"]
     assert "DUD-E/LIT-PCBA enrichment" in source["claim_boundary"]
 
@@ -82,6 +117,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
     assert "validate_public_benchmark_subset_manifest.py" in subset["case_row_schema"][
         "validation_command"
+    ]
+    assert "materialize_public_benchmark_subset_manifest.py" in subset["case_row_schema"][
+        "materialization_command"
+    ]
+    assert "scripts/materialize_public_benchmark_subset_manifest.py" in subset[
+        "input_checksums"
     ]
     assert {row["slot_id"] for row in subset["slots"]} == {
         "casf_pdbbind_pose_success_seed",

@@ -27,6 +27,9 @@ from validate_public_benchmark_pose_validity import (  # noqa: E402
     REQUIRED_POSE_FIELDS,
     validate_pose_validity_payload,
 )
+from materialize_public_benchmark_subset_manifest import (  # noqa: E402
+    SCHEMA_VERSION as MATERIALIZER_SCHEMA_VERSION,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -38,6 +41,16 @@ SCHEMA_VERSION = "public-benchmark-source-of-truth.v1"
 SUBSET_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 POSE_PACKET_SCHEMA_VERSION = "public-benchmark-pose-validity-packet.v1"
 RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
+
+
+def _source_input_paths() -> list[Path]:
+    return [
+        Path("scripts/build_public_benchmark_source_of_truth.py"),
+        Path("scripts/materialize_public_benchmark_subset_manifest.py"),
+        Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
+        Path("scripts/validate_public_benchmark_pose_validity.py"),
+        Path("scripts/validate_public_benchmark_subset_manifest.py"),
+    ]
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -106,12 +119,7 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": SUBSET_SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[
-                Path("scripts/build_public_benchmark_source_of_truth.py"),
-                Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
-                Path("scripts/validate_public_benchmark_pose_validity.py"),
-                Path("scripts/validate_public_benchmark_subset_manifest.py"),
-            ],
+            input_paths=_source_input_paths(),
             reused_evidence=False,
             reuse_policy="source_of_truth_seed_manifest_generated_from_repo_contract",
             repo_root=repo_root,
@@ -129,6 +137,14 @@ def build_subset_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "python3 scripts/validate_public_benchmark_subset_manifest.py "
                 "--manifest implementation/phase1/release_evidence/productization/"
                 "public_benchmark_subset_manifest.json --fail-blocked"
+            ),
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+                "--intake <operator-casf-pdbbind-intake.json> "
+                "--out-manifest implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_manifest.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_subset_materialization_report.json --fail-blocked"
             ),
         },
         "case_rows": [],
@@ -226,12 +242,7 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": RMSD_SCORECARD_SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[
-                Path("scripts/build_public_benchmark_source_of_truth.py"),
-                Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
-                Path("scripts/validate_public_benchmark_pose_validity.py"),
-                Path("scripts/validate_public_benchmark_subset_manifest.py"),
-            ],
+            input_paths=_source_input_paths(),
             reused_evidence=False,
             reuse_policy="synthetic_dry_run_recomputes_symmetry_aware_rmsd",
             repo_root=repo_root,
@@ -259,12 +270,7 @@ def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": POSE_PACKET_SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[
-                Path("scripts/build_public_benchmark_source_of_truth.py"),
-                Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
-                Path("scripts/validate_public_benchmark_pose_validity.py"),
-                Path("scripts/validate_public_benchmark_subset_manifest.py"),
-            ],
+            input_paths=_source_input_paths(),
             reused_evidence=False,
             reuse_policy="pose_validity_packet_generated_from_repo_contract",
             repo_root=repo_root,
@@ -327,12 +333,7 @@ def build_source_of_truth(
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
-            input_paths=[
-                Path("scripts/build_public_benchmark_source_of_truth.py"),
-                Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
-                Path("scripts/validate_public_benchmark_pose_validity.py"),
-                Path("scripts/validate_public_benchmark_subset_manifest.py"),
-            ],
+            input_paths=_source_input_paths(),
             reused_evidence=False,
             reuse_policy="public_benchmark_contract_generated_from_repo_code",
             repo_root=repo_root,
@@ -387,6 +388,25 @@ def build_source_of_truth(
             "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
         },
         "subset_manifest_validation": validate_subset_manifest(subset_manifest),
+        "subset_materializer": {
+            "schema_version": MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_operator_intake",
+            "intake_case_key": "cases",
+            "required_case_fields": list(REQUIRED_CASE_FIELDS),
+            "local_source_file_fields": [
+                "protein_structure_path",
+                "reference_ligand_path",
+                "predicted_ligand_path_or_docking_run_id",
+            ],
+            "materialization_command": subset_manifest["case_row_schema"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The materializer consumes operator-attached local CASF/PDBBind case "
+                "descriptors and files, computes checksums, and validates the subset "
+                "manifest. It does not fetch, redistribute, or license benchmark data."
+            ),
+        },
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
@@ -394,6 +414,7 @@ def build_source_of_truth(
         ],
         "next_actions": [
             "attach_checked_casf_pdbbind_subset_source_files",
+            "run_public_benchmark_subset_materializer",
             "fill_ligand_atom_order_and_symmetry_permutation_contracts",
             "run_symmetry_aware_rmsd_on_real_subset",
             "materialize_posebusters_style_validity_packet_for_real_ligands",
