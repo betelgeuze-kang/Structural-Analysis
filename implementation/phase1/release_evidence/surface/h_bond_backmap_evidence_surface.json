@@ -1,0 +1,35 @@
+{
+  "blockers": [
+    "h_bond_backmap_authoritative_receipts_required",
+    "h_bond_backmap_operator_handoff_not_attached"
+  ],
+  "claim_boundary": "This is a release-cockpit science evidence surface seed. It makes the blocked science claim visible to PM routing, but it does not attach authoritative experimental receipts or promote a release claim.",
+  "claim_locked": true,
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T15:11:41.373816+00:00",
+  "input_checksums": {
+    "scripts/build_science_evidence_surface_seeds.py": "sha256:6dbb5a919d0d86c412c59b63af167cf5408bbf3a56e87f68b69962f17dbabddb"
+  },
+  "locked": true,
+  "next_actions": [
+    "attach_h_bond_backmap_operator_receipts",
+    "materialize_h_bond_backmap_evidence_rows",
+    "regenerate_pm_release_gate_report"
+  ],
+  "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
+  "required_receipts": [
+    "operator_attached_h_bond_backmap_cases",
+    "contact_persistence_or_backmap_accuracy_rows",
+    "reviewer_reproduction_command"
+  ],
+  "reuse_policy": "locked_science_evidence_surface_seed_from_goal_contract",
+  "reused_evidence": false,
+  "schema_version": "science-evidence-surface-seed.v1",
+  "science_surface_family": "h_bond",
+  "source_commit_sha": "fc19614c10cd3124f317684be8288f30c3acf5dc",
+  "status": "locked",
+  "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
+  "surface_id": "h_bond_backmap_evidence_surface",
+  "surface_scope": "h_bond_backmap"
+}
