@@ -430,6 +430,39 @@ def _science_surface_status(
     }
 
 
+def _science_surface_operator_actions(
+    science_evidence_surface_status: dict[str, dict[str, Any]],
+    *,
+    evidence_surface_dir: Path,
+) -> list[dict[str, Any]]:
+    actions: list[dict[str, Any]] = []
+    for family, status in science_evidence_surface_status.items():
+        bottleneck = str(status.get("bottleneck") or "")
+        if not bottleneck:
+            continue
+        first_blocked_target = str(status.get("first_blocked_target") or "")
+        root_cause_tags = [str(row) for row in _as_list(status.get("root_cause_tags"))]
+        reason = f"{family} evidence surface is {status.get('status')}; bottleneck={bottleneck}"
+        if first_blocked_target:
+            reason += f"; first_blocked_target={first_blocked_target}"
+        if root_cause_tags:
+            reason += f"; root_cause_tags={','.join(root_cause_tags)}"
+        surface_ids = [str(row) for row in _as_list(status.get("surface_ids"))]
+        actions.append(
+            {
+                "action_id": f"resolve_{family}_evidence_surface",
+                "status": "science_evidence_required",
+                "surface_family": family,
+                "bottleneck": bottleneck,
+                "first_blocked_target": first_blocked_target,
+                "root_cause_tags": root_cause_tags,
+                "reason": reason,
+                "artifact": ", ".join(surface_ids) if surface_ids else str(evidence_surface_dir),
+            }
+        )
+    return actions
+
+
 def _release_decision(
     *,
     release_allowed: bool,
@@ -488,7 +521,7 @@ def _release_decision(
         if row["bottleneck"]
     ]
     stale_count = _stale_artifact_count(release_evidence_freshness_payload)
-    operator_actions: list[dict[str, str]] = []
+    operator_actions: list[dict[str, Any]] = []
     if stale_count:
         operator_actions.append(
             {
@@ -507,11 +540,21 @@ def _release_decision(
                 "artifact": str(evidence_surface_dir),
             }
         )
+    operator_actions.extend(
+        _science_surface_operator_actions(
+            science_evidence_surface_status,
+            evidence_surface_dir=evidence_surface_dir,
+        )
+    )
+    operator_action_count = max(
+        _operator_action_count(pm_blocker_register),
+        len(full_release_blockers),
+    ) + len(operator_actions)
     return {
         "release_allowed": bool(release_allowed),
         "blocked_release_count": len(full_release_blockers),
         "first_blocker": full_release_blockers[0] if full_release_blockers else "",
-        "operator_action_count": max(_operator_action_count(pm_blocker_register), len(full_release_blockers)),
+        "operator_action_count": operator_action_count,
         "approval_token_count": _approval_token_count(
             full_release_blockers=full_release_blockers,
             pm_blocker_register=pm_blocker_register,

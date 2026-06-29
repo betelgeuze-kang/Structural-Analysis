@@ -920,7 +920,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["release_allowed"] is True
     assert decision["blocked_release_count"] == 0
     assert decision["first_blocker"] == ""
-    assert decision["operator_action_count"] == 16
+    assert decision["operator_action_count"] == 18
     assert decision["approval_token_count"] == 0
     assert decision["stale_artifact_count"] == 0
     assert decision["stale_artifact_refresh_required"] is False
@@ -964,7 +964,31 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": False,
     }
-    assert decision["operator_actions"] == []
+    assert decision["operator_actions"] == [
+        {
+            "action_id": "resolve_h_bond_evidence_surface",
+            "status": "science_evidence_required",
+            "surface_family": "h_bond",
+            "bottleneck": "h_bond_evidence_surface_missing",
+            "first_blocked_target": "",
+            "root_cause_tags": [],
+            "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
+            "artifact": str(base_kwargs["evidence_surface_dir"]),
+        },
+        {
+            "action_id": "resolve_gpcr_evidence_surface",
+            "status": "science_evidence_required",
+            "surface_family": "gpcr",
+            "bottleneck": "broad_gpcr_family_claim_locked",
+            "first_blocked_target": "DRD2",
+            "root_cause_tags": ["operator_values_required"],
+            "reason": (
+                "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
+                "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
+            ),
+            "artifact": "gpcr_hard_decoy_surface",
+        },
+    ]
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
     assert surface_paths["structural_contact_surface"]["contract_pass"] is True
     assert surface_paths["gpcr_hard_decoy_surface"]["locked"] is True
@@ -1233,7 +1257,30 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "status": "refresh_required",
             "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
             "artifact": "release_evidence_freshness_report",
-        }
+        },
+        {
+            "action_id": "resolve_h_bond_evidence_surface",
+            "status": "science_evidence_required",
+            "surface_family": "h_bond",
+            "bottleneck": "h_bond_evidence_surface_missing",
+            "first_blocked_target": "",
+            "root_cause_tags": [],
+            "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
+            "artifact": str(base_kwargs["evidence_surface_dir"]),
+        },
+        {
+            "action_id": "resolve_gpcr_evidence_surface",
+            "status": "science_evidence_required",
+            "surface_family": "gpcr",
+            "bottleneck": "broad_gpcr_family_claim_locked",
+            "first_blocked_target": "DRD2",
+            "root_cause_tags": ["operator_values_required"],
+            "reason": (
+                "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; "
+                "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
+            ),
+            "artifact": "gpcr_hard_decoy_surface",
+        },
     ]
 
     ci_gap_kwargs = dict(base_kwargs)
