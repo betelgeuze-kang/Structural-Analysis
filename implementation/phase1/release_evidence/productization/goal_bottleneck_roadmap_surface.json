@@ -40,7 +40,7 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T18:34:45.939003+00:00",
+  "generated_at": "2026-06-29T18:36:30.803113+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:90a17645943e5c7b379fd67cc6e5c90e4febafafad430cff90ab27dbad59dbc6",
@@ -51,7 +51,7 @@
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:12529c5b3da12ab2716426b393b15cc1081e44e7c844a079f8b22fc7b0c4597e",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:b6720b20b6613059ed21c8f22c47a2b7f72d8305c8d89a6379f9fad23ac6e517",
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:f729fadd98ab4d69eb2174f8d26653170b1f40263b7a34a6470dae5d6bec6424",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ca5364e46c7483c01ad7fbb978237fbfa655c5ff2bdb6dacb143355507d8e08a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:162c53426291342e27f8dd595ff42df25869a610d9cff59fbedf0362fff6fd61",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:cc6f76930e2491b855f8ad3508caf614ec493d0aab6b89811cccdac7cd3159cb",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ba61abae73a013c889a2d7c4431d419be9f92619341f6a6216a762c7d5a19ba3",
@@ -502,7 +502,7 @@
       ]
     }
   },
-  "source_commit_sha": "63e70b27fd48508df23e8066e0047d704971911d",
+  "source_commit_sha": "0412f5fb01002d627bfbe9cd05fd407cbc3e6528",
   "status": "ready_release_blocked",
   "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=public_benchmark_source_of_truth_not_ready | blocked_roadmap_rows=3",
   "surface_id": "goal_bottleneck_roadmap_surface",
