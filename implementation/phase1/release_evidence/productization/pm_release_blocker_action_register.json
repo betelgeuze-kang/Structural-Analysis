@@ -27,10 +27,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T22:38:16.128113+00:00",
+  "generated_at": "2026-06-29T22:44:19.511748+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:86b06ba3e856a76d34f44c7e309dbf42d6e25953d5ab9d489887803a184441f5",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e7faa833a319760cc4175717f33a398c893ef7d828fc903fbe96e96352b7d11b",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:e7c570762c459fd97f3ecc9f31ff4a089afbaf4f2a8b65b46238b469eceac813",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:1f49ba6348ef03754d18290f66f8ce0c5ecf466980047c27520089b1b6d4df4d",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
   "next_actions": [
@@ -206,7 +206,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T22:43:49.393389+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -313,7 +313,7 @@
       "evidence_snapshot": {
         "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
-        "ci_streak_source_evidence_generated_at": "2026-06-29T22:38:15.223501+00:00",
+        "ci_streak_source_evidence_generated_at": "2026-06-29T22:43:49.393389+00:00",
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
         "nightly_github_actions_pass_streak_count": 0,
@@ -1119,7 +1119,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "29168e3f78bbdf9bdf1a387d2eebcb2d862201b9",
+  "source_commit_sha": "f5f2f41620194cb8140e5d84be2219bdd9cdd749",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,
