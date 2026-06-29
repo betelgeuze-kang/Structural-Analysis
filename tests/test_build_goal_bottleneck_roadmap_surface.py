@@ -233,6 +233,22 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_3["summary"]["gate_unblock_plan_count"] == 3
     assert phase_3["summary"]["minimum_target_count"] == 3
     assert phase_3["summary"]["minimum_metric_field_count_per_target"] == 4
+    assert phase_3["summary"]["operator_evidence_gap_count"] == 3
+    assert phase_3["summary"]["first_operator_evidence_gap"]["slot_id"] == (
+        "drd2_hard_decoy_metrics"
+    )
+    assert phase_3["summary"]["first_operator_evidence_gap"]["target_id"] == "DRD2"
+    assert phase_3["summary"]["first_operator_evidence_gap"][
+        "blocked_phase3_criteria"
+    ] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert phase_3["summary"]["first_operator_evidence_gap"][
+        "first_next_action"
+    ] == "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
     assert phase_3["summary"]["phase3_exit_gate_status"] == "blocked"
     assert phase_3["summary"]["phase3_failed_criterion_count"] == 4
     assert phase_3["summary"]["phase3_failed_criteria"] == [
@@ -263,8 +279,13 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "HTR2A": "operator_input_required",
         "OPRM1": "operator_input_required",
     }
+    assert {
+        row["target_id"]: row["phase3_blocked"]
+        for row in phase_3["summary"]["operator_evidence_gap_register"]
+    } == {"DRD2": True, "HTR2A": True, "OPRM1": True}
     gate_plan = {row["target_id"]: row for row in phase_3["summary"]["gate_unblock_plan"]}
     assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert gate_plan["DRD2"]["status"] == "operator_input_required"
     assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
         "ranking_pr_auc_ci_low_min",
         "top20_hit_rate_min",
@@ -326,6 +347,32 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["summary"]["gate_unblock_plan_count"] == 1
     assert phase_4["summary"]["minimum_refinement_case_count"] == 1
     assert phase_4["summary"]["minimum_top_k_candidate_count"] == 1
+    assert phase_4["summary"]["operator_intake_slots"] == [
+        {
+            "required": True,
+            "required_case_field_count": 14,
+            "slot_id": "top_k_refinement_rows",
+            "status": "operator_input_required",
+        }
+    ]
+    assert phase_4["summary"]["operator_evidence_gap_count"] == 1
+    assert phase_4["summary"]["first_operator_evidence_gap"]["slot_id"] == (
+        "top_k_refinement_rows"
+    )
+    assert phase_4["summary"]["first_operator_evidence_gap"][
+        "blocked_phase4_criteria"
+    ] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert phase_4["summary"]["first_operator_evidence_gap"][
+        "first_next_action"
+    ] == "attach top-k candidate refinement rows"
     assert phase_4["summary"]["phase4_exit_gate_status"] == "blocked"
     assert phase_4["summary"]["phase4_failed_criterion_count"] == 7
     assert phase_4["summary"]["phase4_failed_criteria"] == [
@@ -339,6 +386,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     ]
     gate_plan = phase_4["summary"]["gate_unblock_plan"][0]
     assert gate_plan["slot_id"] == "top_k_refinement_rows"
+    assert gate_plan["status"] == "operator_input_required"
     assert gate_plan["unblocks_phase4_criteria"] == [
         "top_k_refinement_rows_present",
         "local_min_survival_materialized",

@@ -482,6 +482,7 @@ def _gpcr_row(
         {
             "slot_id": str(row.get("slot_id") or ""),
             "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or ""),
             "unblocks_phase3_criteria": [
                 str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
             ],
@@ -495,6 +496,36 @@ def _gpcr_row(
             or source_operator_summary.get("gate_unblock_plan")
         )
         if isinstance(row, dict)
+    ]
+    operator_status_by_slot = {
+        str(row.get("slot_id") or ""): str(row.get("status") or "")
+        for row in operator_target_slots
+    }
+    operator_evidence_gap_register = [
+        {
+            "slot_priority": index,
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or "")
+            or operator_status_by_slot.get(str(row.get("slot_id") or ""), ""),
+            "phase3_blocked": not broad_safe
+            and bool(_as_list(row.get("unblocks_phase3_criteria"))),
+            "blocked_phase3_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
+            ]
+            if not broad_safe
+            else [],
+            "first_next_action": (
+                f"fill {row.get('target_id')} hard-decoy metrics in the GPCR operator intake packet"
+                if row.get("target_id")
+                else "fill GPCR hard-decoy metrics in the operator intake packet"
+            ),
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for index, row in enumerate(gate_unblock_plan, start=1)
     ]
     product_report_route = str(
         gpcr_product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"
@@ -560,6 +591,13 @@ def _gpcr_row(
             "phase3_exit_gate_criteria": phase3_gate_criteria,
             "operator_target_slots": operator_target_slots,
             "gate_unblock_plan": gate_unblock_plan,
+            "operator_evidence_gap_count": len(operator_evidence_gap_register),
+            "first_operator_evidence_gap": (
+                operator_evidence_gap_register[0]
+                if operator_evidence_gap_register
+                else {}
+            ),
+            "operator_evidence_gap_register": operator_evidence_gap_register,
         },
     )
 
@@ -603,9 +641,20 @@ def _pocketmd_row(
         or _as_dict(pocketmd_operator_intake.get("read_model")).get("route")
         or "/product/pocketmd-lite/operator-intake"
     )
+    operator_intake_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": _as_bool(row.get("required")),
+            "required_case_field_count": len(_as_list(row.get("required_case_fields"))),
+        }
+        for row in _as_list(pocketmd_operator_intake.get("input_slots"))
+        if isinstance(row, dict)
+    ]
     gate_unblock_plan = [
         {
             "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
             "unblocks_phase4_criteria": [
                 str(item) for item in _as_list(row.get("unblocks_phase4_criteria"))
             ],
@@ -619,6 +668,34 @@ def _pocketmd_row(
         }
         for row in _as_list(pocketmd_operator_intake.get("gate_unblock_plan"))
         if isinstance(row, dict)
+    ]
+    operator_status_by_slot = {
+        str(row.get("slot_id") or ""): str(row.get("status") or "")
+        for row in operator_intake_slots
+    }
+    operator_evidence_gap_register = [
+        {
+            "slot_priority": index,
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or "")
+            or operator_status_by_slot.get(str(row.get("slot_id") or ""), ""),
+            "phase4_blocked": not ready
+            and bool(_as_list(row.get("unblocks_phase4_criteria"))),
+            "blocked_phase4_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase4_criteria"))
+            ]
+            if not ready
+            else [],
+            "first_next_action": "attach top-k candidate refinement rows",
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+            "preserves_phase4_criteria": [
+                str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
+            ],
+        }
+        for index, row in enumerate(gate_unblock_plan, start=1)
     ]
     return _roadmap_row(
         phase_id="phase_4_pocketmd_lite",
@@ -681,6 +758,7 @@ def _pocketmd_row(
             "operator_intake_required_slot_count": _as_int(
                 pocketmd_operator_intake.get("required_slot_count")
             ),
+            "operator_intake_slots": operator_intake_slots,
             "gate_unblock_plan_count": _as_int(
                 pocketmd_operator_intake.get("gate_unblock_plan_count")
                 or len(gate_unblock_plan)
@@ -692,6 +770,13 @@ def _pocketmd_row(
                 pocketmd_operator_intake.get("minimum_top_k_candidate_count")
             ),
             "gate_unblock_plan": gate_unblock_plan,
+            "operator_evidence_gap_count": len(operator_evidence_gap_register),
+            "first_operator_evidence_gap": (
+                operator_evidence_gap_register[0]
+                if operator_evidence_gap_register
+                else {}
+            ),
+            "operator_evidence_gap_register": operator_evidence_gap_register,
             "readiness_summary": _as_dict(pocketmd_surface.get("readiness_summary")),
             "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
             "phase4_failed_criterion_count": _as_int(
