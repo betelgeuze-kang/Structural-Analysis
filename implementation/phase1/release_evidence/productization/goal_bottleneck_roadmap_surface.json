@@ -88,7 +88,7 @@
     "target_id": "",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-29T21:50:58.076011+00:00",
+  "generated_at": "2026-06-29T21:57:46.988162+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:d5942eb227dd2a51d1c112ed214e97fe8a77b717b275b5334e88737656e0fd93",
@@ -107,7 +107,7 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:3eaf5b6c9c478b51b50c82f772301872c3f103e9413c7983081c1f7c68d39d79",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:e112dc8d868f9e2f56b869a1b044b5c5ed1dd4274300b8fbc2da528d4fff50ac",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:672d12aa6bca16e78e6021016c436c4b13ea6efd8aa98a693a77506d524ce75d",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:6a4c78543c41663b8532dfcd01b4faff9a24bbf7cd2aa5454381955bdbebf033",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -300,6 +300,8 @@
     "primary_release_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "primary_roadmap_bottleneck": "public_benchmark_source_of_truth_not_ready",
     "primary_roadmap_phase_id": "phase_2_public_benchmark_harness",
+    "refresh_required_operator_action_count": 0,
+    "refresh_required_operator_actions": [],
     "release_allowed": false,
     "release_area_blocker_count": 9,
     "release_area_owner_handoff_count": 9,
@@ -2326,7 +2328,7 @@
       ]
     }
   },
-  "source_commit_sha": "46a3d4082245948fca50b5c8f3844d1867688837",
+  "source_commit_sha": "1cf41e0b7ce5ce562cbd243723cfb956e27fa540",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
