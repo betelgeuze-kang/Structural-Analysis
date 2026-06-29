@@ -38,6 +38,12 @@ DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
     PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
 )
 DEFAULT_H_BOND_SURFACE = SURFACE_DIR / "h_bond_backmap_evidence_surface.json"
+DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET = (
+    PRODUCTIZATION / "h_bond_backmap_operator_intake_packet.json"
+)
+DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET_MD = (
+    PRODUCTIZATION / "h_bond_backmap_operator_intake_packet.md"
+)
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
@@ -274,6 +280,42 @@ def _single_surface_capability(
     )
 
 
+def _h_bond_capability(repo_root: Path) -> dict[str, Any]:
+    surface = _load_json(repo_root, DEFAULT_H_BOND_SURFACE)
+    operator_intake = _load_json(repo_root, DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET)
+    state = _state(surface)
+    return _capability_row(
+        capability_id="h_bond_backmap_evidence",
+        title="H-bond backmap evidence",
+        capability_kind="science_evidence_surface",
+        state=state,
+        evidence_artifacts=[
+            DEFAULT_H_BOND_SURFACE,
+            DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET,
+            DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET_MD,
+        ],
+        contract_pass=state == "ready",
+        blocker_count=len(_blockers(surface)),
+        next_actions=_dedupe(
+            _next_actions(operator_intake)
+            + _next_actions(surface)
+            + ([] if state == "ready" else ["fill_h_bond_backmap_operator_intake_packet"])
+        ),
+        summary={
+            "status": str(surface.get("status") or ""),
+            "reason_code": str(surface.get("reason_code") or ""),
+            "first_blocked_target": str(surface.get("first_blocked_target") or ""),
+            "root_cause_tags": [str(row) for row in _as_list(surface.get("root_cause_tags"))],
+            "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": int(
+                operator_intake.get("required_slot_count") or 0
+            ),
+            "required_receipts": [str(row) for row in _as_list(surface.get("required_receipts"))],
+            "claim_locked": bool(surface.get("claim_locked", True)),
+        },
+    )
+
+
 def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
     surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
@@ -329,6 +371,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
         DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_H_BOND_SURFACE,
+        DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET,
+        DEFAULT_H_BOND_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_GPCR_SURFACE,
         *STRUCTURAL_SURFACE_PATHS,
     ]
@@ -338,14 +382,7 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
     capability_rows = [
         _structural_solver_capability(repo_root),
         _public_benchmark_capability(repo_root),
-        _single_surface_capability(
-            repo_root=repo_root,
-            path=DEFAULT_H_BOND_SURFACE,
-            capability_id="h_bond_backmap_evidence",
-            title="H-bond backmap evidence",
-            capability_kind="science_evidence_surface",
-            next_action_fallback="resolve_h_bond_backmap_evidence_surface",
-        ),
+        _h_bond_capability(repo_root),
         _gpcr_capability(repo_root),
         _pocketmd_capability(repo_root),
     ]

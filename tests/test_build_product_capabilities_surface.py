@@ -80,6 +80,26 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert "attach_vina_gnina_comparison_intake" in public_benchmark["next_actions"]
     assert "fill_public_benchmark_operator_intake_packet" in public_benchmark["next_actions"]
 
+    h_bond = rows["h_bond_backmap_evidence"]
+    assert h_bond["state"] == "blocked"
+    assert h_bond["summary"]["operator_intake_packet_status"] == (
+        "ready_for_operator_input"
+    )
+    assert h_bond["summary"]["operator_intake_required_slot_count"] == 3
+    assert h_bond["summary"]["claim_locked"] is True
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "h_bond_backmap_operator_intake_packet.json"
+        in h_bond["evidence_artifacts"]
+    )
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "h_bond_backmap_operator_intake_packet.md"
+        in h_bond["evidence_artifacts"]
+    )
+    assert "fill_h_bond_backmap_operator_intake_packet" in h_bond["next_actions"]
+    assert "attach_h_bond_backmap_operator_receipts" in h_bond["next_actions"]
+
     pocketmd = rows["pocketmd_lite_top_k_refinement"]
     assert pocketmd["state"] == "blocked"
     assert pocketmd["summary"]["product_surface_ready"] is False

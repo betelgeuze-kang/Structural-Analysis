@@ -1,0 +1,184 @@
+{
+  "acceptance_criteria": [
+    "h_bond_backmap_evidence_surface.required_receipts are all attached",
+    "h_bond_backmap_evidence_surface.blockers == []",
+    "h_bond_backmap_evidence_surface.contract_pass == true",
+    "h_bond_backmap_evidence_surface.locked == false",
+    "h_bond_backmap_evidence_surface.claim_locked == false"
+  ],
+  "claim_boundary": "This packet is an owner-facing intake contract for H-bond BackMap receipts. It does not generate molecular evidence, infer missing receipt values, or unlock the H-bond BackMap evidence surface without authoritative rows and reviewer reproduction evidence.",
+  "claim_locked": true,
+  "contract_pass": true,
+  "current_surface_status": {
+    "artifact": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "blocker_count": 2,
+    "blockers": [
+      "h_bond_backmap_authoritative_receipts_required",
+      "h_bond_backmap_operator_handoff_not_attached"
+    ],
+    "claim_locked": true,
+    "contract_pass": false,
+    "locked": true,
+    "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
+    "required_receipts": [
+      "operator_attached_h_bond_backmap_cases",
+      "contact_persistence_or_backmap_accuracy_rows",
+      "reviewer_reproduction_command"
+    ],
+    "schema_version": "science-evidence-surface-seed.v1",
+    "status": "locked"
+  },
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T17:42:37.002187+00:00",
+  "handoff_sequence": [
+    {
+      "command": "attach authoritative H-bond BackMap receipt bundle",
+      "produces": "operator-owned H-bond BackMap receipt bundle",
+      "step_id": "attach_h_bond_backmap_operator_receipts"
+    },
+    {
+      "command": "materialize receipt-backed H-bond BackMap rows into implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "produces": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+      "step_id": "materialize_h_bond_backmap_evidence_rows"
+    },
+    {
+      "command": "python3 scripts/build_product_capabilities_surface.py --out implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+      "produces": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+      "schema_version": "product-capabilities-surface.v1",
+      "step_id": "refresh_product_capabilities_surface"
+    },
+    {
+      "command": "python3 scripts/build_goal_bottleneck_roadmap_surface.py --out implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+      "produces": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+      "schema_version": "goal-bottleneck-roadmap-surface.v1",
+      "step_id": "refresh_goal_bottleneck_roadmap_surface"
+    },
+    {
+      "command": "python3 scripts/report_pm_release_gate.py --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+      "produces": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+      "schema_version": "pm-release-gate-report.v1",
+      "step_id": "refresh_pm_release_gate_report"
+    }
+  ],
+  "input_checksums": {
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
+    "scripts/build_h_bond_backmap_operator_intake_packet.py": "sha256:87bad50e03355adabc1d4e8a0f64cb4021ac28123563b27c5b2c33f0aeac2e51"
+  },
+  "input_slots": [
+    {
+      "owner_actions": [
+        "attach authoritative H-bond BackMap case rows",
+        "keep persistence and accuracy values as fractions, not percents",
+        "include a provenance reference and checksum for each source artifact"
+      ],
+      "required": true,
+      "required_fields": [
+        "case_id",
+        "receptor_id",
+        "ligand_id",
+        "source_system_ref",
+        "donor_acceptor_map_ref",
+        "contact_persistence_rate",
+        "backmap_accuracy_rate",
+        "h_bond_distance_error_angstrom_median",
+        "h_bond_angle_error_degree_median",
+        "reviewer_reproduction_command",
+        "provenance_ref",
+        "source_checksum"
+      ],
+      "slot_id": "operator_attached_h_bond_backmap_cases",
+      "status": "operator_input_required",
+      "template": {
+        "backmap_accuracy_rate": null,
+        "case_id": "h_bond_backmap_case_001",
+        "contact_persistence_rate": null,
+        "donor_acceptor_map_ref": "",
+        "h_bond_angle_error_degree_median": null,
+        "h_bond_distance_error_angstrom_median": null,
+        "ligand_id": "",
+        "provenance_ref": "",
+        "receptor_id": "",
+        "reviewer_reproduction_command": "",
+        "source_checksum": "",
+        "source_system_ref": ""
+      }
+    },
+    {
+      "owner_actions": [
+        "attach measured contact persistence or BackMap accuracy rows",
+        "link every measured row back to an authoritative case receipt"
+      ],
+      "required": true,
+      "required_fields": [
+        "case_id",
+        "contact_persistence_rate",
+        "backmap_accuracy_rate",
+        "h_bond_distance_error_angstrom_median",
+        "h_bond_angle_error_degree_median",
+        "source_checksum"
+      ],
+      "slot_id": "contact_persistence_or_backmap_accuracy_rows",
+      "status": "operator_input_required"
+    },
+    {
+      "owner_actions": [
+        "attach a reviewer reproduction command for the receipt bundle",
+        "ensure the command regenerates the same rows and checksums"
+      ],
+      "required": true,
+      "required_fields": [
+        "command",
+        "expected_outputs",
+        "environment_ref",
+        "source_checksum"
+      ],
+      "slot_id": "reviewer_reproduction_command",
+      "status": "operator_input_required"
+    }
+  ],
+  "linked_artifacts": {
+    "evidence_surface": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+    "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+    "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+    "product_capabilities_surface": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+  },
+  "next_actions": [
+    "fill_h_bond_backmap_operator_intake_packet",
+    "attach_h_bond_backmap_operator_receipts",
+    "materialize_h_bond_backmap_evidence_rows",
+    "regenerate_product_capabilities_surface",
+    "regenerate_goal_bottleneck_roadmap_surface",
+    "regenerate_pm_release_gate_report"
+  ],
+  "owner_input_required": true,
+  "packet_id": "h_bond_backmap_operator_intake_packet",
+  "reason_code": "PASS_INTAKE_PACKET",
+  "required_operator_fields": [
+    "case_id",
+    "receptor_id",
+    "ligand_id",
+    "source_system_ref",
+    "donor_acceptor_map_ref",
+    "contact_persistence_rate",
+    "backmap_accuracy_rate",
+    "h_bond_distance_error_angstrom_median",
+    "h_bond_angle_error_degree_median",
+    "reviewer_reproduction_command",
+    "provenance_ref",
+    "source_checksum"
+  ],
+  "required_slot_count": 3,
+  "reuse_policy": "h_bond_backmap_operator_intake_packet_from_locked_surface_contract",
+  "reused_evidence": true,
+  "schema_version": "h-bond-backmap-operator-intake-packet.v1",
+  "source_commit_sha": "e5578dae8352409ce9e331ee589f5f329becc543",
+  "status": "ready_for_operator_input",
+  "summary": {
+    "current_blocker_count": 2,
+    "current_surface_locked": true,
+    "current_surface_status": "locked",
+    "required_receipt_count": 3,
+    "required_slot_count": 3
+  },
+  "summary_line": "H-bond BackMap operator intake packet: READY | slots=3 | surface_status=locked"
+}
