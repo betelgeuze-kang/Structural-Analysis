@@ -40,21 +40,21 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T18:03:17.270854+00:00",
+  "generated_at": "2026-06-29T18:11:28.829993+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:3de2d357a9a6e7e69929ceefb238e629c50f3c6bd38ebb92dd48f6631e6945ad",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:810b2763e7a6f5dd7ce1f0d799d16ee44280425e44d11a8d371c1dc470393d1a",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:75b1c1e9ca91d1401eeff72c00d6593e689d6a18599d6f6e898a4552c776092a",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:063e7a5e35840f17a7f801eb976752ad5988947cedfd3cfdfd71d67cf30dac46",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2d02d2b2438f439488ca345b04a75093db5fe496f84be845f012ac6a457cbf5a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a6078f667a81b9dd0ee78855e61479d4f95d923cf9ae9f3bf9937b1e883888cd",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:76590332eea78e7eea6af8609dc368a98dd194f32cc0f98dcc7a88fe8415273d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:ea787bb5f04314f6cde77682eed41ab3d6d50114dab98efe61b5ffb06b5783f9",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:4d7915971b505825e598f38bdbde070054695b90626da115f7bee0fd2d0bd8cc",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:941982c678524383aff71076c35290892daaed591a14414abb59b14cfafd6613",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:3f43daa8d4e11fb021128d1951d07c6822ea294cf338f927b885ea4abb9b9b02",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:b6720b20b6613059ed21c8f22c47a2b7f72d8305c8d89a6379f9fad23ac6e517",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:f729fadd98ab4d69eb2174f8d26653170b1f40263b7a34a6470dae5d6bec6424",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:f2093a217cf426347a6acc06f15f0af425e48252f3f0243b76b89cfeaa4b252c",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:78ea46380b157593636f8056eec6b72328cc9007520f2695a2833db4d252d3e0",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:7bf9c6102c84c94a9052a1f5d73b89ceac5d8e893e48e311a4d4f2eef87c9136",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:cec112ec4188688660e6a26d6099ad72faf11eabde09faa06477dc2f27dba4b9"
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:b3f55b8f1df83e2d361674414dfaa4fb67c5b42308858cd9f0d1fc85060a1023",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:49defade8ffc77e3d6a8ebd773ca54a50a255b159e87a7c5e1880162e22054bc"
   },
   "mutation_allowed": false,
   "next_actions": [
@@ -310,6 +310,17 @@
           "materialized_case_count": 0,
           "target_subset_case_count": 12
         },
+        "tier_beta_failed_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "real_pose_validity_packet_materialized",
+          "symmetry_rmsd_scorecard_real_cases",
+          "posebusters_style_validity_real_ligands",
+          "dud_e_lit_pcba_enrichment_ready",
+          "vina_gnina_comparison_ready",
+          "external_receipts_attached"
+        ],
+        "tier_beta_failed_criterion_count": 7,
+        "tier_beta_gate_status": "blocked",
         "tier_beta_ready": false
       }
     },
@@ -459,7 +470,7 @@
       ]
     }
   },
-  "source_commit_sha": "ff6a5c85ddb26d535707c0fea00deb31cb5ca5e4",
+  "source_commit_sha": "0b5e7751bd94b1a90bdde42afb1e2da5ea2f30d1",
   "status": "ready_release_blocked",
   "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=public_benchmark_source_of_truth_not_ready | blocked_roadmap_rows=3",
   "surface_id": "goal_bottleneck_roadmap_surface",
