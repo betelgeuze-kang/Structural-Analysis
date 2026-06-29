@@ -1970,9 +1970,20 @@ def test_snapshot_blocks_package_pyproject_version_mismatch(tmp_path: Path) -> N
 def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
+    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
+        "schema_version": "support-bundle-manifest.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "contract_pass": True,
+    })
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
-    receipt_commit = _commit_all(tmp_path, "receipt")
+    _commit_all(tmp_path, "receipt")
+    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
+        "schema_version": "support-bundle-manifest.v1",
+        "generated_at": "2026-06-21T00:00:01+00:00",
+        "contract_pass": True,
+    })
+    receipt_commit = _commit_all(tmp_path, "support bundle manifest")
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -2335,12 +2346,22 @@ def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
 ) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
+    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
+        "schema_version": "support-bundle-manifest.v1",
+        "generated_at": "2026-06-21T00:00:00+00:00",
+        "contract_pass": True,
+    })
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     pm_report = json.loads((tmp_path / "pm_release_gate_report.json").read_text())
     pm_report["generated_at"] = "2026-06-21T00:00:01+00:00"
     _write_json(tmp_path / "pm_release_gate_report.json", pm_report)
+    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
+        "schema_version": "support-bundle-manifest.v1",
+        "generated_at": "2026-06-21T00:00:01+00:00",
+        "contract_pass": True,
+    })
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -2349,10 +2370,12 @@ def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
 
     assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
     assert payload["state_consistency"]["worktree"]["dirty"] is False
-    assert payload["state_consistency"]["worktree"]["status_rows"] == [
+    assert sorted(payload["state_consistency"]["worktree"]["status_rows"]) == [
+        " M implementation/phase1/support_bundle_manifest.json",
         " M pm_release_gate_report.json",
     ]
-    assert payload["state_consistency"]["worktree"]["dirty_paths"] == [
+    assert sorted(payload["state_consistency"]["worktree"]["dirty_paths"]) == [
+        "implementation/phase1/support_bundle_manifest.json",
         "pm_release_gate_report.json",
     ]
     assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []

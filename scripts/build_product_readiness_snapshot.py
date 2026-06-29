@@ -296,6 +296,7 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return path.endswith((".json", ".md"))
     if path in {
         "implementation/phase1/customer_shadow_evidence_status.json",
+        "implementation/phase1/support_bundle_manifest.json",
         "implementation/phase1/workstation_delivery_readiness.json",
         "implementation/phase1/release/independent_product_readiness.json",
         "implementation/phase1/release/external_benchmark_submission_readiness.json",
