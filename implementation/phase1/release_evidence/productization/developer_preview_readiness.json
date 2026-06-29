@@ -4,7 +4,7 @@
     "phase1_core_api_contract": "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json",
     "product_readiness_snapshot": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "blocker_count": 20,
+  "blocker_count": 30,
   "blockers": [
     "g1::full_load_gate_not_closed",
     "g1::full_mesh_nonlinear_equilibrium_not_closed",
@@ -13,10 +13,20 @@
     "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "human_ux::observation_file_missing",
+    "runner_policy::.github/workflows/ai-contract-verify.yml:47:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/ci.yml:40:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/deploy-pages.yml:30:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/deploy-pages.yml:62:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/frontend-web-ci.yml:44:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/viewer-browser-ci.yml:45:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+    "runner_policy::.github/workflows/workflow-contract-ci.yml:26:github_hosted_runner_label:ubuntu-latest",
     "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+    "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
     "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+    "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
     "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+    "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
     "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
     "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
     "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
@@ -89,13 +99,23 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 14,
+      "blocker_count": 24,
       "blockers": [
         "human_ux::observation_file_missing",
+        "runner_policy::.github/workflows/ai-contract-verify.yml:47:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/ci.yml:40:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/deploy-pages.yml:30:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/deploy-pages.yml:62:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/frontend-web-ci.yml:44:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/viewer-browser-ci.yml:45:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+        "runner_policy::.github/workflows/workflow-contract-ci.yml:26:github_hosted_runner_label:ubuntu-latest",
         "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+        "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
         "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+        "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
         "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+        "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
         "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
         "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
         "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
@@ -232,7 +252,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-24T22:04:14.515607+00:00",
+  "generated_at": "2026-06-28T16:00:29.379198+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -251,11 +271,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:1a6bbf4b5e1a472cffaab8d26e499b98bfe5d29339f6e7765f83bc8e070ad2e3",
+      "input_checksum": "sha256:b5b307c4cf27b5aed344399a2fb0050688888bae8248fc7545844232427a5117",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "12235cbb39e0299b7f1f29b9a6c0e52fc57b4c51",
+      "source_commit_sha": "b5473047731c62ed026911742f784a27fa463d64",
       "status": "stale_or_inconsistent"
     }
   },
@@ -263,7 +283,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:e58901801eb5b686db197475444206364f2c5877e9922c383d056bd9b0a65362",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:1a6bbf4b5e1a472cffaab8d26e499b98bfe5d29339f6e7765f83bc8e070ad2e3"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:b5b307c4cf27b5aed344399a2fb0050688888bae8248fc7545844232427a5117"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "stale_or_inconsistent",
@@ -1796,7 +1816,7 @@
     "product_snapshot_root_blockers": {
       "CI runner/streak": {
         "blocked": true,
-        "blocker_count": 7,
+        "blocker_count": 14,
         "blockers": [
           "ci_streak::nightly::github_actions_query_failed",
           "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -1804,6 +1824,13 @@
           "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
           "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
           "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+          "runner_policy::.github/workflows/ai-contract-verify.yml:47:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_AI_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/ci.yml:40:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/deploy-pages.yml:30:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/deploy-pages.yml:62:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/frontend-web-ci.yml:44:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/viewer-browser-ci.yml:45:github_hosted_runner_label:${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || '[\"ubuntu-latest\"]') }}",
+          "runner_policy::.github/workflows/workflow-contract-ci.yml:26:github_hosted_runner_label:ubuntu-latest",
           "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
         ]
       },
@@ -1873,7 +1900,7 @@
       },
       "release freshness/sync": {
         "blocked": true,
-        "blocker_count": 20,
+        "blocker_count": 23,
         "blockers": [
           "pm_release::github_sync::github_sync_preflight::main_remote_not_ancestor_of_head",
           "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
@@ -1881,10 +1908,13 @@
           "pm_release::github_sync::github_sync_preflight_not_synced",
           "pm_release::github_sync::github_sync_remote_sync_pending",
           "stale_or_inconsistent:source_commit_mismatch:commercial_gap_ledger_status",
+          "stale_or_inconsistent:source_commit_mismatch:customer_shadow_evidence_status",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_readiness",
           "stale_or_inconsistent:source_commit_mismatch:external_benchmark_submission_updates",
+          "stale_or_inconsistent:source_commit_mismatch:fresh_full_validation_lane_status",
           "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
           "stale_or_inconsistent:source_commit_mismatch:gap_closure_status",
+          "stale_or_inconsistent:source_commit_mismatch:gap_ledger_evidence_audit",
           "stale_or_inconsistent:source_commit_mismatch:github_actions_ci_streak_evidence",
           "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness",
           "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report",
@@ -2091,6 +2121,6 @@
       }
     }
   },
-  "source_commit_sha": "12235cbb39e0299b7f1f29b9a6c0e52fc57b4c51",
+  "source_commit_sha": "b5473047731c62ed026911742f784a27fa463d64",
   "status": "blocked"
 }

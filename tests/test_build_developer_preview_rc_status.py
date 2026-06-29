@@ -241,9 +241,16 @@ def test_developer_preview_rc_status_aggregates_deliverables_without_promotion()
         final_gates["benchmark_results_clean_checkout_regenerated"]["notes"]
     )
 
-    assert payload["known_limitations"]["developer_preview_blocker_count"] == len(
-        payload["known_limitations"]["developer_preview_blockers"]
+    preview_readiness = json.loads(
+        (REPO_ROOT / module.DEVELOPER_PREVIEW_READINESS).read_text(encoding="utf-8")
     )
+    assert (
+        payload["known_limitations"]["developer_preview_blocker_count"]
+        == preview_readiness["blocker_count"]
+    )
+    assert payload["known_limitations"]["developer_preview_blockers"] == preview_readiness[
+        "blockers"
+    ][:20]
     assert payload["known_limitations"]["dataset_license_blockers"] == []
     assert payload["known_limitations"]["dataset_license_external_corpus_blockers"] == [
         "phase3_external_corpus:authoritative_source_checksums_pending=4",
