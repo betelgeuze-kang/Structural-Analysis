@@ -126,7 +126,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 39,
+      "blocker_count": 38,
       "blockers": [
         "ci_streak::nightly::github_actions_query_failed",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -163,7 +163,6 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
         "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "stale_or_inconsistent:worktree_dirty"
@@ -176,7 +175,7 @@
       ]
     }
   },
-  "blocker_count": 67,
+  "blocker_count": 66,
   "blockers": [
     "ci_streak::nightly::github_actions_query_failed",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -241,7 +240,6 @@
     "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
     "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-    "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
     "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
     "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
     "stale_or_inconsistent:worktree_dirty"
@@ -2274,6 +2272,7 @@
         "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
         "evidence_surfaces": [
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2288,6 +2287,7 @@
             "surface_id": "element_material_breadth_gate_report"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2302,6 +2302,12 @@
             "surface_id": "general_fe_contact_benchmark_gate_report"
           },
           {
+            "blocked_criteria": [
+              "ranking_pr_auc_ci_low_min",
+              "top20_hit_rate_min",
+              "decoys_above_positive_count_max",
+              "no_positive_out_anchored_by_top_decoys"
+            ],
             "blocker_count": 12,
             "contract_pass": false,
             "first_blocked_target": "DRD2",
@@ -2318,20 +2324,25 @@
             "surface_id": "gpcr_hard_decoy_evidence_surface"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 2,
             "contract_pass": false,
-            "first_blocked_target": "",
+            "first_blocked_target": "operator_attached_h_bond_backmap_cases",
             "locked": true,
             "missing": false,
             "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
             "present": true,
             "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
-            "root_cause_tags": [],
+            "root_cause_tags": [
+              "operator_receipts_required",
+              "operator_handoff_required"
+            ],
             "status": "locked",
             "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
             "surface_id": "h_bond_backmap_evidence_surface"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2346,6 +2357,15 @@
             "surface_id": "material_constitutive_gate_report"
           },
           {
+            "blocked_criteria": [
+              "top_k_refinement_rows_present",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
             "blocker_count": 3,
             "contract_pass": false,
             "first_blocked_target": "top_k_refinement_operator_intake",
@@ -2362,6 +2382,7 @@
             "surface_id": "pocketmd_lite_science_product_surface"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2376,6 +2397,7 @@
             "surface_id": "product_capabilities_surface"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2390,6 +2412,7 @@
             "surface_id": "solver_breadth_report"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2404,6 +2427,7 @@
             "surface_id": "solver_truthfulness_gate_report"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2418,6 +2442,7 @@
             "surface_id": "steel_composite_constitutive_gate_report"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2432,6 +2457,7 @@
             "surface_id": "structural_contact_gate_report"
           },
           {
+            "blocked_criteria": [],
             "blocker_count": 0,
             "contract_pass": true,
             "first_blocked_target": "",
@@ -2456,18 +2482,50 @@
           {
             "action_id": "resolve_h_bond_evidence_surface",
             "artifact": "h_bond_backmap_evidence_surface",
+            "blocked_criteria": [],
+            "blocked_criteria_count": 0,
             "bottleneck": "h_bond_evidence_surface_locked",
-            "first_blocked_target": "",
-            "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
-            "root_cause_tags": [],
+            "first_blocked_target": "operator_attached_h_bond_backmap_cases",
+            "next_actions": [
+              "fill_h_bond_backmap_operator_intake_packet",
+              "attach_h_bond_backmap_operator_receipts",
+              "materialize_h_bond_backmap_evidence_rows",
+              "regenerate_product_capabilities_surface",
+              "regenerate_goal_bottleneck_roadmap_surface",
+              "regenerate_pm_release_gate_report"
+            ],
+            "operator_intake_artifact": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+            "operator_intake_route": "/product/capabilities",
+            "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked; first_blocked_target=operator_attached_h_bond_backmap_cases; root_cause_tags=operator_receipts_required,operator_handoff_required",
+            "root_cause_tags": [
+              "operator_receipts_required",
+              "operator_handoff_required"
+            ],
             "status": "science_evidence_required",
             "surface_family": "h_bond"
           },
           {
             "action_id": "resolve_gpcr_evidence_surface",
             "artifact": "gpcr_hard_decoy_evidence_surface",
+            "blocked_criteria": [
+              "ranking_pr_auc_ci_low_min",
+              "top20_hit_rate_min",
+              "decoys_above_positive_count_max",
+              "no_positive_out_anchored_by_top_decoys"
+            ],
+            "blocked_criteria_count": 4,
             "bottleneck": "broad_gpcr_family_claim_locked",
             "first_blocked_target": "DRD2",
+            "next_actions": [
+              "fill_gpcr_hard_decoy_operator_intake_packet",
+              "fill_drd2_htr2a_oprm1_operator_template_values",
+              "run_gpcr_hard_decoy_materializer",
+              "refresh_gpcr_hard_decoy_product_report",
+              "regenerate_product_capabilities_surface",
+              "regenerate_goal_bottleneck_roadmap_surface"
+            ],
+            "operator_intake_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+            "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
             "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
             "root_cause_tags": [
               "operator_values_required"
@@ -2478,8 +2536,27 @@
           {
             "action_id": "resolve_pocketmd_lite_science_product_surface",
             "artifact": "pocketmd_lite_science_product_surface",
+            "blocked_criteria": [
+              "top_k_refinement_rows_present",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
+            "blocked_criteria_count": 7,
             "bottleneck": "pocketmd_lite_science_product_surface_locked",
             "first_blocked_target": "top_k_refinement_operator_intake",
+            "next_actions": [
+              "fill_pocketmd_lite_operator_intake_packet",
+              "attach_top_k_candidate_refinement_rows",
+              "run_pocketmd_lite_topk_survival_materializer",
+              "regenerate_product_capabilities_surface",
+              "regenerate_goal_bottleneck_roadmap_surface"
+            ],
+            "operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+            "operator_intake_route": "/product/pocketmd-lite/operator-intake",
             "reason": "pocketmd_lite science product surface is locked; bottleneck=pocketmd_lite_science_product_surface_locked; first_blocked_target=top_k_refinement_operator_intake; root_cause_tags=operator_refinement_rows_required",
             "root_cause_tags": [
               "operator_refinement_rows_required"
@@ -2490,6 +2567,16 @@
           {
             "action_id": "materialize_public_benchmark_source_of_truth",
             "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+            "blocked_criteria": [
+              "casf_pdbbind_subset_materialized",
+              "real_pose_validity_packet_materialized",
+              "symmetry_rmsd_scorecard_real_cases",
+              "posebusters_style_validity_real_ligands",
+              "dud_e_lit_pcba_enrichment_ready",
+              "vina_gnina_comparison_ready",
+              "external_receipts_attached"
+            ],
+            "blocked_criteria_count": 7,
             "blockers": [
               "casf_pdbbind_source_material_not_attached",
               "public_benchmark_real_pose_predictions_missing",
@@ -2498,6 +2585,7 @@
               "public_benchmark_external_receipts_missing"
             ],
             "bottleneck": "public_benchmark_source_of_truth_not_ready",
+            "first_blocked_target": "casf_pdbbind_subset_intake",
             "first_blocker": "casf_pdbbind_source_material_not_attached",
             "next_actions": [
               "fill_public_benchmark_operator_intake_packet",
@@ -2514,7 +2602,11 @@
               "attach_vina_gnina_comparison_intake",
               "run_public_benchmark_vina_gnina_comparison_materializer"
             ],
-            "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; next_action=fill_public_benchmark_operator_intake_packet",
+            "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; first_blocked_target=casf_pdbbind_subset_intake; root_cause_tags=operator_source_material_required,operator_receipts_required; next_action=fill_public_benchmark_operator_intake_packet",
+            "root_cause_tags": [
+              "operator_source_material_required",
+              "operator_receipts_required"
+            ],
             "status": "public_benchmark_evidence_required"
           }
         ],
@@ -2538,6 +2630,12 @@
         ],
         "science_evidence_surface_status": {
           "gpcr": {
+            "blocked_criteria": [
+              "ranking_pr_auc_ci_low_min",
+              "top20_hit_rate_min",
+              "decoys_above_positive_count_max",
+              "no_positive_out_anchored_by_top_decoys"
+            ],
             "bottleneck": "broad_gpcr_family_claim_locked",
             "broad_family_claim_safe": false,
             "contract_pass_count": 0,
@@ -2555,12 +2653,16 @@
             ]
           },
           "h_bond": {
+            "blocked_criteria": [],
             "bottleneck": "h_bond_evidence_surface_locked",
             "contract_pass_count": 0,
-            "first_blocked_target": "",
+            "first_blocked_target": "operator_attached_h_bond_backmap_cases",
             "locked_count": 1,
             "present": true,
-            "root_cause_tags": [],
+            "root_cause_tags": [
+              "operator_receipts_required",
+              "operator_handoff_required"
+            ],
             "status": "locked",
             "surface_count": 1,
             "surface_family": "h_bond",
@@ -2569,6 +2671,15 @@
             ]
           },
           "pocketmd_lite": {
+            "blocked_criteria": [
+              "top_k_refinement_rows_present",
+              "local_min_survival_materialized",
+              "contact_persistence_materialized",
+              "h_bond_persistence_materialized",
+              "clash_relief_materialized",
+              "uncertainty_summary_materialized",
+              "report_blockers_resolved"
+            ],
             "bottleneck": "pocketmd_lite_science_product_surface_locked",
             "contract_pass_count": 0,
             "first_blocked_target": "top_k_refinement_operator_intake",
@@ -2668,7 +2779,7 @@
   "engine_version": "structural-optimization-workbench@1.0.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-06-29T19:13:59.264644+00:00",
+  "generated_at": "2026-06-29T21:41:31.756798+00:00",
   "independent_product_ready": false,
   "input_checksums": {
     ".github/workflows": "sha256-dir:0d8e16db27226dcde2972d13461bcca03d8964ec4c97befb00533bf958c16ffb",
@@ -2681,7 +2792,7 @@
     "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json": "sha256:0b1dcd84d2502a54c3e75799bc17535c2f4e73fb0346dcbb7ebbcbf11f1b3472",
     "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:1bd1d337fe53c4d19a1ac85557f61e17942841633d6e5283c2518a3f71c7be58",
     "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:39d3766bda88af619ee7d404b7ac685c8b5ec4088e6d987ef494efb296bbe3ee",
-    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:2c094bea7650b8952f482e672582b7c855cf392be9ec244f36084ba80215fb7a",
+    "implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json": "sha256:b00016b4f4e4ff7b08629dceb0dc126091fcfb16e92ac5ab7aee87a8c4291608",
     "implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json": "sha256:14c60cb775e2fccd1a37c705e9d7bd211e284aaa48320cdb7725ee690cbd6e51",
     "implementation/phase1/release_evidence/productization/gap_closure_status.json": "sha256:7574293681879e6ee911ee836999699d05c64e2640a4116004a400a12b91e482",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:15415535f716c31a55c661b4bcae2a013e4db247955ccedcf478ebf5984d8935",
@@ -2692,8 +2803,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:e58901801eb5b686db197475444206364f2c5877e9922c383d056bd9b0a65362",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:638aa8f628d76d3edfdfc08357046b7388ef7b304de129a5e9a00a08b71ca162",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:ec94c4595cebff33eb0cb6ff240f0cd368e632080164161f7069f2a723372659",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6dd3db6bec23033990995612827743411a7e7c318ecf70e4310d4cce9c365eea",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:675371ab3254c393918735b08e61de8e21458a6bb5dd4cbec39facff14167fbb",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:fb4301bdb04e7e58b19ffd2c36c12c3015d1222de6b577d431b3156b51aab71d",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:79bde373448c48c69641172650d70641943e60f81de9391ac0c047a7677675c3",
     "implementation/phase1/workstation_delivery_readiness.json": "sha256:9244b37b3f1bd429cfc6a4a564e0d473fe0d48091903da93cca9a0f064b377c3",
     "package.json": "sha256:e9643b833da9392e13198e6bb0b4769e483a2bd8ff0868ea11a701c5850a62c6",
@@ -2712,6 +2823,7 @@
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
     "evidence_surfaces": [
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2726,6 +2838,7 @@
         "surface_id": "element_material_breadth_gate_report"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2740,6 +2853,12 @@
         "surface_id": "general_fe_contact_benchmark_gate_report"
       },
       {
+        "blocked_criteria": [
+          "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate_min",
+          "decoys_above_positive_count_max",
+          "no_positive_out_anchored_by_top_decoys"
+        ],
         "blocker_count": 12,
         "contract_pass": false,
         "first_blocked_target": "DRD2",
@@ -2756,20 +2875,25 @@
         "surface_id": "gpcr_hard_decoy_evidence_surface"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 2,
         "contract_pass": false,
-        "first_blocked_target": "",
+        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
         "locked": true,
         "missing": false,
         "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
         "present": true,
         "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
-        "root_cause_tags": [],
+        "root_cause_tags": [
+          "operator_receipts_required",
+          "operator_handoff_required"
+        ],
         "status": "locked",
         "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
         "surface_id": "h_bond_backmap_evidence_surface"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2784,6 +2908,15 @@
         "surface_id": "material_constitutive_gate_report"
       },
       {
+        "blocked_criteria": [
+          "top_k_refinement_rows_present",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
         "blocker_count": 3,
         "contract_pass": false,
         "first_blocked_target": "top_k_refinement_operator_intake",
@@ -2800,6 +2933,7 @@
         "surface_id": "pocketmd_lite_science_product_surface"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2814,6 +2948,7 @@
         "surface_id": "product_capabilities_surface"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2828,6 +2963,7 @@
         "surface_id": "solver_breadth_report"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2842,6 +2978,7 @@
         "surface_id": "solver_truthfulness_gate_report"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2856,6 +2993,7 @@
         "surface_id": "steel_composite_constitutive_gate_report"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2870,6 +3008,7 @@
         "surface_id": "structural_contact_gate_report"
       },
       {
+        "blocked_criteria": [],
         "blocker_count": 0,
         "contract_pass": true,
         "first_blocked_target": "",
@@ -2894,18 +3033,50 @@
       {
         "action_id": "resolve_h_bond_evidence_surface",
         "artifact": "h_bond_backmap_evidence_surface",
+        "blocked_criteria": [],
+        "blocked_criteria_count": 0,
         "bottleneck": "h_bond_evidence_surface_locked",
-        "first_blocked_target": "",
-        "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
-        "root_cause_tags": [],
+        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
+        "next_actions": [
+          "fill_h_bond_backmap_operator_intake_packet",
+          "attach_h_bond_backmap_operator_receipts",
+          "materialize_h_bond_backmap_evidence_rows",
+          "regenerate_product_capabilities_surface",
+          "regenerate_goal_bottleneck_roadmap_surface",
+          "regenerate_pm_release_gate_report"
+        ],
+        "operator_intake_artifact": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+        "operator_intake_route": "/product/capabilities",
+        "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked; first_blocked_target=operator_attached_h_bond_backmap_cases; root_cause_tags=operator_receipts_required,operator_handoff_required",
+        "root_cause_tags": [
+          "operator_receipts_required",
+          "operator_handoff_required"
+        ],
         "status": "science_evidence_required",
         "surface_family": "h_bond"
       },
       {
         "action_id": "resolve_gpcr_evidence_surface",
         "artifact": "gpcr_hard_decoy_evidence_surface",
+        "blocked_criteria": [
+          "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate_min",
+          "decoys_above_positive_count_max",
+          "no_positive_out_anchored_by_top_decoys"
+        ],
+        "blocked_criteria_count": 4,
         "bottleneck": "broad_gpcr_family_claim_locked",
         "first_blocked_target": "DRD2",
+        "next_actions": [
+          "fill_gpcr_hard_decoy_operator_intake_packet",
+          "fill_drd2_htr2a_oprm1_operator_template_values",
+          "run_gpcr_hard_decoy_materializer",
+          "refresh_gpcr_hard_decoy_product_report",
+          "regenerate_product_capabilities_surface",
+          "regenerate_goal_bottleneck_roadmap_surface"
+        ],
+        "operator_intake_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
         "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
         "root_cause_tags": [
           "operator_values_required"
@@ -2916,8 +3087,27 @@
       {
         "action_id": "resolve_pocketmd_lite_science_product_surface",
         "artifact": "pocketmd_lite_science_product_surface",
+        "blocked_criteria": [
+          "top_k_refinement_rows_present",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
+        "blocked_criteria_count": 7,
         "bottleneck": "pocketmd_lite_science_product_surface_locked",
         "first_blocked_target": "top_k_refinement_operator_intake",
+        "next_actions": [
+          "fill_pocketmd_lite_operator_intake_packet",
+          "attach_top_k_candidate_refinement_rows",
+          "run_pocketmd_lite_topk_survival_materializer",
+          "regenerate_product_capabilities_surface",
+          "regenerate_goal_bottleneck_roadmap_surface"
+        ],
+        "operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+        "operator_intake_route": "/product/pocketmd-lite/operator-intake",
         "reason": "pocketmd_lite science product surface is locked; bottleneck=pocketmd_lite_science_product_surface_locked; first_blocked_target=top_k_refinement_operator_intake; root_cause_tags=operator_refinement_rows_required",
         "root_cause_tags": [
           "operator_refinement_rows_required"
@@ -2928,6 +3118,16 @@
       {
         "action_id": "materialize_public_benchmark_source_of_truth",
         "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+        "blocked_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "real_pose_validity_packet_materialized",
+          "symmetry_rmsd_scorecard_real_cases",
+          "posebusters_style_validity_real_ligands",
+          "dud_e_lit_pcba_enrichment_ready",
+          "vina_gnina_comparison_ready",
+          "external_receipts_attached"
+        ],
+        "blocked_criteria_count": 7,
         "blockers": [
           "casf_pdbbind_source_material_not_attached",
           "public_benchmark_real_pose_predictions_missing",
@@ -2936,6 +3136,7 @@
           "public_benchmark_external_receipts_missing"
         ],
         "bottleneck": "public_benchmark_source_of_truth_not_ready",
+        "first_blocked_target": "casf_pdbbind_subset_intake",
         "first_blocker": "casf_pdbbind_source_material_not_attached",
         "next_actions": [
           "fill_public_benchmark_operator_intake_packet",
@@ -2952,7 +3153,11 @@
           "attach_vina_gnina_comparison_intake",
           "run_public_benchmark_vina_gnina_comparison_materializer"
         ],
-        "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; next_action=fill_public_benchmark_operator_intake_packet",
+        "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; first_blocked_target=casf_pdbbind_subset_intake; root_cause_tags=operator_source_material_required,operator_receipts_required; next_action=fill_public_benchmark_operator_intake_packet",
+        "root_cause_tags": [
+          "operator_source_material_required",
+          "operator_receipts_required"
+        ],
         "status": "public_benchmark_evidence_required"
       }
     ],
@@ -2976,6 +3181,12 @@
     ],
     "science_evidence_surface_status": {
       "gpcr": {
+        "blocked_criteria": [
+          "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate_min",
+          "decoys_above_positive_count_max",
+          "no_positive_out_anchored_by_top_decoys"
+        ],
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": false,
         "contract_pass_count": 0,
@@ -2993,12 +3204,16 @@
         ]
       },
       "h_bond": {
+        "blocked_criteria": [],
         "bottleneck": "h_bond_evidence_surface_locked",
         "contract_pass_count": 0,
-        "first_blocked_target": "",
+        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
         "locked_count": 1,
         "present": true,
-        "root_cause_tags": [],
+        "root_cause_tags": [
+          "operator_receipts_required",
+          "operator_handoff_required"
+        ],
         "status": "locked",
         "surface_count": 1,
         "surface_family": "h_bond",
@@ -3007,6 +3222,15 @@
         ]
       },
       "pocketmd_lite": {
+        "blocked_criteria": [
+          "top_k_refinement_rows_present",
+          "local_min_survival_materialized",
+          "contact_persistence_materialized",
+          "h_bond_persistence_materialized",
+          "clash_relief_materialized",
+          "uncertainty_summary_materialized",
+          "report_blockers_resolved"
+        ],
         "bottleneck": "pocketmd_lite_science_product_surface_locked",
         "contract_pass_count": 0,
         "first_blocked_target": "top_k_refinement_operator_intake",
@@ -3117,7 +3341,7 @@
     },
     "release freshness/sync": {
       "blocked": true,
-      "blocker_count": 24,
+      "blocker_count": 23,
       "blockers": [
         "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
         "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
@@ -3139,7 +3363,6 @@
         "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:paid_pilot_scope_guard_report",
         "stale_or_inconsistent:source_commit_mismatch:phase1_core_api_contract",
-        "stale_or_inconsistent:source_commit_mismatch:pm_release_gate_report",
         "stale_or_inconsistent:source_commit_mismatch:ux_new_user_observation_report",
         "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness",
         "stale_or_inconsistent:worktree_dirty"
@@ -3150,7 +3373,7 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "d4a6fb638578d5bfbdbe74b10e57bbe960c0a795",
+  "source_commit_sha": "399d07ef91231812748d85a72c3b92401557f6f7",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
@@ -3247,17 +3470,15 @@
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
-        "changed_paths_since_source_commit": [
-          "implementation/phase1/support_bundle_manifest.json"
-        ],
-        "generated_at": "2026-06-29T19:12:53.998362+00:00",
+        "changed_paths_since_source_commit": [],
+        "generated_at": "2026-06-29T21:40:22.296904+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
-        "source_commit_matches_head": false,
-        "source_commit_sha": "6680c1846e381ac1ba8dcf06e87901cdcf9b0f2e",
-        "source_state_fresh": false,
-        "source_state_kind": "non_receipt_paths_changed"
+        "source_commit_matches_head": true,
+        "source_commit_sha": "399d07ef91231812748d85a72c3b92401557f6f7",
+        "source_state_fresh": true,
+        "source_state_kind": "exact"
       },
       {
         "artifact": "gap_closure_status",
@@ -4690,7 +4911,33 @@
       {
         "artifact": "developer_preview_rc_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/support_bundle_manifest.json"
+          "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+          "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+          "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
+          "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+          "implementation/phase1/support_bundle_manifest.json",
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
+          "scripts/build_gpcr_hard_decoy_operator_intake_packet.py",
+          "scripts/build_gpcr_hard_decoy_product_report.py",
+          "scripts/build_h_bond_backmap_operator_intake_packet.py",
+          "scripts/build_pocketmd_lite_product_surface.py",
+          "scripts/build_product_capabilities_surface.py",
+          "scripts/build_public_benchmark_operator_intake_packet.py",
+          "scripts/build_public_benchmark_source_of_truth.py",
+          "scripts/build_science_evidence_surface_seeds.py",
+          "scripts/materialize_gpcr_hard_decoy_suite_report.py",
+          "scripts/report_pm_release_gate.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_build_gpcr_hard_decoy_operator_intake_packet.py",
+          "tests/test_build_gpcr_hard_decoy_product_report.py",
+          "tests/test_build_h_bond_backmap_operator_intake_packet.py",
+          "tests/test_build_pocketmd_lite_product_surface.py",
+          "tests/test_build_product_capabilities_surface.py",
+          "tests/test_build_public_benchmark_operator_intake_packet.py",
+          "tests/test_build_public_benchmark_source_of_truth.py",
+          "tests/test_build_science_evidence_surface_seeds.py",
+          "tests/test_materialize_gpcr_hard_decoy_suite_report.py",
+          "tests/test_report_pm_release_gate.py"
         ],
         "generated_at": "2026-06-29T19:12:23.421367+00:00",
         "input_checksum_present": true,
@@ -4704,14 +4951,17 @@
       {
         "artifact": "fresh_full_validation_lane_status",
         "changed_paths_since_source_commit": [
-          "implementation/phase1/support_bundle_manifest.json"
+          "scripts/build_goal_bottleneck_roadmap_surface.py",
+          "scripts/report_pm_release_gate.py",
+          "tests/test_build_goal_bottleneck_roadmap_surface.py",
+          "tests/test_report_pm_release_gate.py"
         ],
-        "generated_at": "2026-06-29T19:10:49.793813+00:00",
+        "generated_at": "2026-06-29T21:23:14.071982+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": false,
-        "source_commit_sha": "584d50a6f68696b96a51223dd5c5142d90fb3ea4",
+        "source_commit_sha": "522a858b88f0721ddff3bf2e342878dd77e46699",
         "source_state_fresh": false,
         "source_state_kind": "non_receipt_paths_changed"
       },
@@ -8708,6 +8958,12 @@
     "worktree": {
       "dirty": true,
       "dirty_paths": [
+        "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+        "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "scripts/build_f2g_f2h_authoritative_surface_recovery_packet.py",
         "scripts/build_f2g_f2h_surface_preflight.py",
         "scripts/build_f2h_lightweight_continuation_status.py",
@@ -8753,6 +9009,12 @@
         "track_or_add_required_path_count": 1
       },
       "status_rows": [
+        " M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+        " M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json",
+        " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "?? scripts/build_f2g_f2h_authoritative_surface_recovery_packet.py",
         "?? scripts/build_f2g_f2h_surface_preflight.py",
         "?? scripts/build_f2h_lightweight_continuation_status.py",
