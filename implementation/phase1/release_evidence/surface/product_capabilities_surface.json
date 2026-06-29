@@ -112,15 +112,25 @@
       "contract_pass": false,
       "evidence_artifacts": [
         "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
-        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md"
       ],
       "next_actions": [
+        "fill_gpcr_hard_decoy_operator_intake_packet",
+        "fill_drd2_htr2a_oprm1_operator_template_values",
+        "run_gpcr_hard_decoy_materializer",
+        "refresh_gpcr_hard_decoy_product_report",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface",
         "run_gpcr_hard_decoy_suite_materializer"
       ],
       "state": "blocked",
       "summary": {
         "broad_gpcr_family_claim_safe": false,
         "first_blocked_target": "DRD2",
+        "operator_intake_packet_status": "ready_for_operator_input",
+        "operator_intake_required_slot_count": 3,
         "product_report_ready": true,
         "product_report_route": "/product/gpcr-hard-decoy-suite-report",
         "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
@@ -163,9 +173,11 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T16:59:10.419962+00:00",
+  "generated_at": "2026-06-29T17:06:40.682069+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:5f9f6eb2709b526ea9e6a66b07bf38bb7b12af6351b81fd4efed00e5ca07ee10",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:3de2d357a9a6e7e69929ceefb238e629c50f3c6bd38ebb92dd48f6631e6945ad",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:adcfe96ee079586804973cd96eca558a42449cd063bac6cfd46a395c5600c2a9",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:810b2763e7a6f5dd7ce1f0d799d16ee44280425e44d11a8d371c1dc470393d1a",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:e77d084e3dff3b72f1accd1d741d3cd8609c199936a6b2a48e612d67b8161f3d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:7121747e684a731ccb0af55cc967f35a74a106424f7f5cfa04648dfc6d061400",
     "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:267ef9d4107261781954279a936884785883b93f369afb75553dae06a7ca753a",
@@ -182,7 +194,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:f5f62236cc11e33096df2ec590b63f85bc1e018fd8beed0cd2a384f129d50620"
+    "scripts/build_product_capabilities_surface.py": "sha256:073a967b966aa274a951eb02403b9db3dec56b4654fe35f1a90a5a3c0cdc28f3"
   },
   "locked": false,
   "next_actions": [
@@ -202,7 +214,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "173742e06c726cdcd4571f177ff99e3bb09424bc",
+  "source_commit_sha": "9c7decd038785dc6a15e4f580edd379226f5d067",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",

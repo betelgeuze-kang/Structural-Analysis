@@ -1,0 +1,225 @@
+{
+  "acceptance_criteria": [
+    "gpcr_hard_decoy_suite_report.target_pass_count == 3",
+    "gpcr_hard_decoy_suite_report.broad_gpcr_family_claim_safe == true",
+    "gpcr_hard_decoy_suite_report.blockers == []",
+    "gpcr_hard_decoy_product_report.science_claim_status == ready",
+    "gpcr_hard_decoy_evidence_surface.locked == false"
+  ],
+  "broad_gpcr_family_claim_safe": false,
+  "claim_boundary": "This packet is an owner-facing intake contract for GPCR hard-decoy metrics. It does not generate docking results, infer missing values, or promote broad GPCR claims. DRD2, HTR2A, and OPRM1 must all pass the numeric exit criteria.",
+  "contract_pass": true,
+  "current_suite_status": {
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+    "blocker_count": 12,
+    "first_blocked_target": "DRD2",
+    "root_cause_tags": [
+      "operator_values_required"
+    ],
+    "schema_version": "gpcr-hard-decoy-suite-report.v1",
+    "status": "locked",
+    "target_count": 3,
+    "target_pass_count": 0
+  },
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "exit_criteria": {
+    "decoys_above_positive_count_max": 0,
+    "positive_out_anchored_by_top_decoys_allowed": false,
+    "ranking_pr_auc_ci_low_min": 0.45,
+    "top20_hit_rate_min": 0.2
+  },
+  "generated_at": "2026-06-29T17:06:40.605468+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:0b12c0a0f0ba8b0138b4d295427e651f43e53a4d7d97b888120bd23bdf350287",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:4360c4b9420cadcc2fa3ed3f80e9c1d993bb63cdcd88d925a2e8dbfbfd7b5958",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:5a4335894ed448e419027bf8646d2fc3ae542f46b7ed8016d538974d98360b05"
+  },
+  "linked_artifacts": {
+    "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+    "goal_bottleneck_roadmap_surface": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+    "operator_template": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "product_capabilities_surface": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    "product_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+    "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json"
+  },
+  "materialization_sequence": [
+    {
+      "command": "edit implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+      "step_id": "fill_gpcr_hard_decoy_operator_template"
+    },
+    {
+      "command": "python3 scripts/materialize_gpcr_hard_decoy_suite_report.py --intake implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json --out-report implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json --out-surface implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json --fail-blocked",
+      "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+      "schema_version": "gpcr-hard-decoy-suite-report.v1",
+      "step_id": "materialize_gpcr_hard_decoy_suite_report"
+    },
+    {
+      "command": "python3 scripts/build_gpcr_hard_decoy_product_report.py --out implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+      "produces": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json",
+      "schema_version": "gpcr-hard-decoy-product-report.v1",
+      "step_id": "refresh_gpcr_hard_decoy_product_report"
+    },
+    {
+      "command": "python3 scripts/build_product_capabilities_surface.py --out implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+      "produces": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+      "schema_version": "product-capabilities-surface.v1",
+      "step_id": "refresh_product_capabilities_surface"
+    },
+    {
+      "command": "python3 scripts/build_goal_bottleneck_roadmap_surface.py --out implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+      "produces": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
+      "schema_version": "goal-bottleneck-roadmap-surface.v1",
+      "step_id": "refresh_goal_bottleneck_roadmap_surface"
+    }
+  ],
+  "next_actions": [
+    "fill_gpcr_hard_decoy_operator_intake_packet",
+    "fill_drd2_htr2a_oprm1_operator_template_values",
+    "run_gpcr_hard_decoy_materializer",
+    "refresh_gpcr_hard_decoy_product_report",
+    "regenerate_product_capabilities_surface",
+    "regenerate_goal_bottleneck_roadmap_surface"
+  ],
+  "operator_template": {
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
+    "required_targets": [
+      "DRD2",
+      "HTR2A",
+      "OPRM1"
+    ],
+    "schema_version": "gpcr-hard-decoy-operator-intake.v1",
+    "targets_json_pointer": "/targets"
+  },
+  "owner_input_required": true,
+  "packet_id": "gpcr_hard_decoy_operator_intake_packet",
+  "reason_code": "PASS_INTAKE_PACKET",
+  "required_operator_fields": [
+    "target_id",
+    "ranking_pr_auc_ci_low",
+    "top20_hit_rate",
+    "decoys_above_positive_count",
+    "positive_out_anchored_by_top_decoys"
+  ],
+  "required_slot_count": 3,
+  "required_targets": [
+    "DRD2",
+    "HTR2A",
+    "OPRM1"
+  ],
+  "reuse_policy": "gpcr_hard_decoy_operator_intake_packet_from_template_and_suite_contracts",
+  "reused_evidence": true,
+  "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
+  "source_commit_sha": "9c7decd038785dc6a15e4f580edd379226f5d067",
+  "status": "ready_for_operator_input",
+  "summary": {
+    "broad_gpcr_family_claim_safe": false,
+    "current_blocker_count": 12,
+    "first_blocked_target": "DRD2",
+    "required_slot_count": 3
+  },
+  "summary_line": "GPCR hard-decoy operator intake packet: READY | targets=3 | first_blocked_target=DRD2",
+  "target_slots": [
+    {
+      "exit_criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "owner_actions": [
+        "attach authoritative hard-decoy evaluation metrics for this target",
+        "keep ranking_pr_auc_ci_low as the lower confidence bound",
+        "keep top20_hit_rate as a fraction, not a percent",
+        "verify decoys_above_positive_count is zero",
+        "verify positive_out_anchored_by_top_decoys is false"
+      ],
+      "required": true,
+      "required_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "slot_id": "drd2_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "target_id": "DRD2",
+      "template": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "target_id": "DRD2",
+        "top20_hit_rate": null
+      }
+    },
+    {
+      "exit_criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "owner_actions": [
+        "attach authoritative hard-decoy evaluation metrics for this target",
+        "keep ranking_pr_auc_ci_low as the lower confidence bound",
+        "keep top20_hit_rate as a fraction, not a percent",
+        "verify decoys_above_positive_count is zero",
+        "verify positive_out_anchored_by_top_decoys is false"
+      ],
+      "required": true,
+      "required_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "slot_id": "htr2a_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "target_id": "HTR2A",
+      "template": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "target_id": "HTR2A",
+        "top20_hit_rate": null
+      }
+    },
+    {
+      "exit_criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "owner_actions": [
+        "attach authoritative hard-decoy evaluation metrics for this target",
+        "keep ranking_pr_auc_ci_low as the lower confidence bound",
+        "keep top20_hit_rate as a fraction, not a percent",
+        "verify decoys_above_positive_count is zero",
+        "verify positive_out_anchored_by_top_decoys is false"
+      ],
+      "required": true,
+      "required_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "slot_id": "oprm1_hard_decoy_metrics",
+      "status": "operator_input_required",
+      "target_id": "OPRM1",
+      "template": {
+        "decoys_above_positive_count": null,
+        "positive_out_anchored_by_top_decoys": null,
+        "ranking_pr_auc_ci_low": null,
+        "target_id": "OPRM1",
+        "top20_hit_rate": null
+      }
+    }
+  ]
+}
