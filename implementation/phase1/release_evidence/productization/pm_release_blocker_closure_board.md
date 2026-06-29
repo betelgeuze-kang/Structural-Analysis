@@ -1,11 +1,11 @@
 # PM Release Blocker Closure Board
 
-- `summary_line`: `PM release blocker closure board: BLOCKED | open=13 | external_owner_ready=13 | handoff_not_ready=0`
+- `summary_line`: `PM release blocker closure board: BLOCKED | open=12 | external_owner_ready=12 | handoff_not_ready=0`
 - `pm_summary_line`: `PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304`
 - `contract_pass`: `False`
-- `open_blocker_count`: `13`
+- `open_blocker_count`: `12`
 - `release_area_summary`: `12/16`
-- `release_area_blocker_count`: `9`
+- `release_area_blocker_count`: `8`
 - `all_open_blockers_have_handoff`: `True`
 - `action_register_matches_pm_report`: `True`
 
@@ -16,10 +16,9 @@
 | `ux::human_new_user_observation_missing_or_failed` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_observation` | Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `ux::human_new_user_30min_sample_evidence_missing` | `ux_research_owner` | `external_owner_input_ready` | `missing_human_new_user_completion_evidence` | Attach a human new-user observation record for the sample project workflow, including participant status, observer, all five workflow steps (Import, Model Health, Analysis Setup, Run & Monitor, Compare & Report), timezone-aware start/end timestamps, wall-clock completion minutes, blocker count, evidence reference, and accepted release decision. |
 | `security::license_status_not_configured` | `product_legal_owner` | `external_owner_input_ready` | `not_configured` | Populate license_status.json from an approved product/legal decision, including approver role, approval timestamp, retrievable evidence reference, scoped product boundary, and no template placeholders before release-area security can pass. |
-| `github_sync::github_sync_preflight::worktree_not_clean` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
-| `github_sync::github_sync_preflight::remote_mutation_approval_required` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
-| `github_sync::github_sync_remote_sync_pending` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
-| `github_sync::github_sync_preflight_not_synced` | `release_owner` | `external_owner_input_ready` | `blocked` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
+| `github_sync::github_sync_preflight::remote_mutation_approval_required` | `release_owner` | `external_owner_input_ready` | `approval_required` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
+| `github_sync::github_sync_remote_sync_pending` | `release_owner` | `external_owner_input_ready` | `approval_required` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
+| `github_sync::github_sync_preflight_not_synced` | `release_owner` | `external_owner_input_ready` | `approval_required` | Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`. |
 | `independent_vv_missing` | `independent_vv_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach an approved independent V&V attestation and regenerate GA/Enterprise readiness evidence. |
 | `family_validation_manual_signoff_missing` | `validation_manual_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach family validation manual signoff evidence and regenerate GA/Enterprise readiness evidence. |
 | `customer_audit_failure_bundle_sla_missing` | `customer_success_ops_owner` | `external_owner_input_ready` | `missing_external_ga_enterprise_signoff_evidence` | Attach customer audit/failure-bundle and support SLA approval evidence before GA/Enterprise release. |
