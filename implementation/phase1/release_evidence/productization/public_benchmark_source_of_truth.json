@@ -7,7 +7,7 @@
   "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:05:54.753246+00:00",
+  "generated_at": "2026-06-29T15:31:57.016313+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:e31e944090066c644d29a069c3872c212875050210d5fe464ecb106afa81c97c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
@@ -69,7 +69,7 @@
     "status": "ready_for_pose_validity_input"
   },
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "3dbea443546cf674e9cefb038e24ef36823eb0be",
+  "source_commit_sha": "b7e1fe3cd206d50cecaff61f4af15924d34a2b9a",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
