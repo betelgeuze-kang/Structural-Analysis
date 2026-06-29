@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "run_id": "phase1-topk-precision-suite",
-  "generated_at": "2026-02-27T13:46:09.859336+00:00",
+  "generated_at": "2026-06-29T13:31:44.287252+00:00",
   "target_split": "test",
   "config": {
     "cases": "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
@@ -12,7 +12,7 @@
       31,
       47
     ],
-    "epochs": 120,
+    "epochs": 220,
     "branches": 10,
     "top_k": 3,
     "lr": 0.055,
@@ -36,14 +36,14 @@
     "max_mac_std": 0.01
   },
   "summary_metrics": {
-    "drift_error_pct_mean": 0.8686426419012045,
-    "drift_error_pct_std": 0.17764471758318245,
-    "base_shear_error_pct_mean": 0.7351803847951699,
-    "base_shear_error_pct_std": 0.130589941394652,
-    "mode_shape_mac_mean": 0.9767028093338013,
-    "mode_shape_mac_std": 0.004470874170264902,
-    "buckling_factor_error_pct_mean": 0.808408171526783,
-    "buckling_factor_error_pct_std": 0.05572039364343244
+    "drift_error_pct_mean": 1.2009320444399862,
+    "drift_error_pct_std": 0.4247477034181632,
+    "base_shear_error_pct_mean": 0.7699764089583655,
+    "base_shear_error_pct_std": 0.2603489889374346,
+    "mode_shape_mac_mean": 1.0,
+    "mode_shape_mac_std": 0.0,
+    "buckling_factor_error_pct_mean": 0.7158331958506853,
+    "buckling_factor_error_pct_std": 0.30568303941132974
   },
   "checks": {
     "quality_pass": true,
@@ -56,16 +56,16 @@
       "hf_report": "implementation/phase1/hf_benchmark_report.seed_11.json",
       "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_11.json",
       "metrics": {
-        "drift_error_pct": 0.9245367666637876,
-        "base_shear_error_pct": 0.9732276144314022,
-        "mode_shape_mac": 0.9784426093101501,
-        "buckling_factor_error_pct": 0.9132279741383229
+        "drift_error_pct": 1.5731167818789813,
+        "base_shear_error_pct": 0.4289628802033229,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.5490833858086044
       },
       "improvement_pct": {
-        "drift_error_reduction_pct": 94.17058388781476,
-        "base_shear_error_reduction_pct": 89.77262823041926,
-        "buckling_error_reduction_pct": 91.77412630767591,
-        "mode_shape_mac_gain_pct": 4.60757910500563
+        "drift_error_reduction_pct": 90.08113831132347,
+        "base_shear_error_reduction_pct": 95.49215128492563,
+        "buckling_error_reduction_pct": 95.0541478074224,
+        "mode_shape_mac_gain_pct": 6.912329971769203
       }
     },
     {
@@ -73,16 +73,16 @@
       "hf_report": "implementation/phase1/hf_benchmark_report.seed_17.json",
       "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_17.json",
       "metrics": {
-        "drift_error_pct": 0.9470960145073841,
-        "base_shear_error_pct": 0.6900710629998262,
-        "mode_shape_mac": 0.9733748286962509,
-        "buckling_factor_error_pct": 0.7466715549941292
+        "drift_error_pct": 0.8448472615474983,
+        "base_shear_error_pct": 1.1351562472643622,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.9080537171619488
       },
       "improvement_pct": {
-        "drift_error_reduction_pct": 94.0283426621545,
-        "base_shear_error_reduction_pct": 92.74823977035184,
-        "buckling_error_reduction_pct": 93.27437827687194,
-        "mode_shape_mac_gain_pct": 4.065770871787901
+        "drift_error_reduction_pct": 94.6730444733178,
+        "base_shear_error_reduction_pct": 88.07096635444569,
+        "buckling_error_reduction_pct": 91.82073327279812,
+        "mode_shape_mac_gain_pct": 6.912329971769203
       }
     },
     {
@@ -90,16 +90,16 @@
       "hf_report": "implementation/phase1/hf_benchmark_report.seed_23.json",
       "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_23.json",
       "metrics": {
-        "drift_error_pct": 0.8057718888663772,
-        "base_shear_error_pct": 0.5861906918980263,
-        "mode_shape_mac": 0.9746660590171814,
-        "buckling_factor_error_pct": 0.7975837111482146
+        "drift_error_pct": 1.3771790640182677,
+        "base_shear_error_pct": 0.7809009690563499,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.39167183827460494
       },
       "improvement_pct": {
-        "drift_error_reduction_pct": 94.91942364969057,
-        "base_shear_error_reduction_pct": 93.83988899923322,
-        "buckling_error_reduction_pct": 92.81578855142848,
-        "mode_shape_mac_gain_pct": 4.203819313928774
+        "drift_error_reduction_pct": 91.31657050901066,
+        "base_shear_error_reduction_pct": 91.79373416111787,
+        "buckling_error_reduction_pct": 96.47202761881307,
+        "mode_shape_mac_gain_pct": 6.912329971769203
       }
     },
     {
@@ -107,16 +107,16 @@
       "hf_report": "implementation/phase1/hf_benchmark_report.seed_31.json",
       "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_31.json",
       "metrics": {
-        "drift_error_pct": 0.5664441887724461,
-        "base_shear_error_pct": 0.6719529251624349,
-        "mode_shape_mac": 0.9723865389823914,
-        "buckling_factor_error_pct": 0.7989018315545032
+        "drift_error_pct": 1.6465950249889865,
+        "base_shear_error_pct": 0.5420427514064012,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 1.2206836090628528
       },
       "improvement_pct": {
-        "drift_error_reduction_pct": 96.42843962539287,
-        "base_shear_error_reduction_pct": 92.93863811981068,
-        "buckling_error_reduction_pct": 92.80391562125064,
-        "mode_shape_mac_gain_pct": 3.960110515792042
+        "drift_error_reduction_pct": 89.61784115568283,
+        "base_shear_error_reduction_pct": 94.30382713001981,
+        "buckling_error_reduction_pct": 89.00472886201749,
+        "mode_shape_mac_gain_pct": 6.912329971769203
       }
     },
     {
@@ -124,16 +124,16 @@
       "hf_report": "implementation/phase1/hf_benchmark_report.seed_47.json",
       "comparison_report": "implementation/phase1/topk_comparison_experiment_report.seed_47.json",
       "metrics": {
-        "drift_error_pct": 1.099364350696028,
-        "base_shear_error_pct": 0.7544596294841602,
-        "mode_shape_mac": 0.9846440106630325,
-        "buckling_factor_error_pct": 0.7856557857987448
+        "drift_error_pct": 0.5629220897661975,
+        "base_shear_error_pct": 0.9628191968613914,
+        "mode_shape_mac": 1.0,
+        "buckling_factor_error_pct": 0.5096734289454157
       },
       "improvement_pct": {
-        "drift_error_reduction_pct": 93.06825591995086,
-        "base_shear_error_reduction_pct": 92.07159866668732,
-        "buckling_error_reduction_pct": 92.92322898264041,
-        "mode_shape_mac_gain_pct": 5.270585372732368
+        "drift_error_reduction_pct": 96.4506472664906,
+        "base_shear_error_reduction_pct": 89.88200732575426,
+        "buckling_error_reduction_pct": 95.40913181640703,
+        "mode_shape_mac_gain_pct": 6.912329971769203
       }
     }
   ],

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import sys
 from pathlib import Path
@@ -36,3 +37,27 @@ def test_real_accuracy_source_tracking_metadata_contract(tmp_path: Path) -> None
     assert metadata["reuse_policy"] == "fresh_real_accuracy_validation_run"
     assert metadata["input_checksums"][source.as_posix()].startswith("sha256:")
     assert metadata["input_checksums"][missing.as_posix()] == "missing"
+
+
+def test_real_accuracy_source_tracking_excludes_generated_outputs() -> None:
+    args = argparse.Namespace(
+        zip="implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip",
+        cases_out="implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json",
+        benchmark_out="implementation/phase1/hf_benchmark_report.rwth_zenodo.json",
+        comparison_out="implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json",
+        suite_out="implementation/phase1/topk_precision_suite_report.rwth_zenodo.json",
+    )
+
+    paths = {path.as_posix() for path in real_accuracy._source_tracking_paths(args)}
+
+    root = real_accuracy.REPO_ROOT
+    assert (root / "implementation/phase1/run_real_accuracy_validation.py").as_posix() in paths
+    assert (
+        root / "implementation/phase1/open_data/rwth_zenodo_14173245/Data_v1.0.0.zip"
+    ).as_posix() in paths
+    assert (root / "implementation/phase1/commercial_benchmark_cases.rwth_zenodo.json").as_posix() not in paths
+    assert (root / "implementation/phase1/hf_benchmark_report.rwth_zenodo.json").as_posix() not in paths
+    assert (
+        root / "implementation/phase1/topk_comparison_experiment_report.rwth_zenodo.json"
+    ).as_posix() not in paths
+    assert (root / "implementation/phase1/topk_precision_suite_report.rwth_zenodo.json").as_posix() not in paths

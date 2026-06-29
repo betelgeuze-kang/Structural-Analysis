@@ -126,10 +126,6 @@ def _source_tracking_paths(args: argparse.Namespace) -> list[Path]:
         _resolve_repo_path("implementation/phase1/run_topk_precision_experiments.py"),
         _resolve_repo_path("implementation/phase1/runtime_contracts.py"),
         _resolve_repo_path(args.zip),
-        _resolve_repo_path(args.cases_out),
-        _resolve_repo_path(args.benchmark_out),
-        _resolve_repo_path(args.comparison_out),
-        _resolve_repo_path(args.suite_out),
     ]
 
 

@@ -15,10 +15,10 @@
 - `commercial_solver_gap_ready`: `False`
 - `ai_engine_gap_ready`: `False`
 - `release_allowed`: `False`
-- `blocked_release_count`: `21`
+- `blocked_release_count`: `15`
 - `first_blocker`: `basic_ci::pr_ci_30_consecutive_pass_evidence_missing`
-- `operator_action_count`: `25`
-- `stale_artifact_count`: `12`
+- `operator_action_count`: `19`
+- `stale_artifact_count`: `6`
 - `evidence_surface_count`: `8`
 - `locked_evidence_surface_count`: `0`
 - `public_benchmark_ready`: `True`
@@ -37,7 +37,7 @@
 |---|---|---|
 | basic_ci Basic CI | blocked | pr_ci_30_consecutive_pass_evidence_missing, nightly_ci_30_consecutive_pass_evidence_missing |
 | strict_ci Strict CI | pass | none |
-| evidence_freshness Evidence Freshness | blocked | p1_benchmark_breadth_status::input_dependency_newer_than_artifact, customer_shadow_evidence_intake_packet::source_commit_mismatch, fresh_full_validation_lane_status::source_commit_mismatch, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::input_dependency_newer_than_artifact, accuracy_parity_scorecard::generated_at_outside_allowed_window, accuracy_parity_scorecard::source_commit_missing, accuracy_parity_scorecard::engine_version_missing, accuracy_parity_scorecard::input_checksum_missing, accuracy_parity_scorecard::reuse_marker_missing, accuracy_parity_scorecard::producer_newer_than_artifact |
+| evidence_freshness Evidence Freshness | blocked | p1_benchmark_breadth_status::input_dependency_newer_than_artifact, customer_shadow_evidence_intake_packet::source_commit_mismatch, fresh_full_validation_lane_status::source_commit_mismatch, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::input_dependency_newer_than_artifact |
 | core_engine Core Engine | pass | none |
 | ndtha NDTHA | pass | none |
 | residual Residual | pass | none |
