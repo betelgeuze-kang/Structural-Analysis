@@ -254,6 +254,7 @@ def _public_benchmark_row(
     action = _action_by_bottleneck(action_register, "public_benchmark_source_of_truth_not_ready")
     capability = _capability_by_id(product_capabilities, "public_benchmark_harness")
     blockers = [str(row) for row in _as_list(public_benchmark.get("blockers"))]
+    tier_beta_gate = _as_dict(public_benchmark.get("tier_beta_gate"))
     ready = _as_bool(decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready"))
     return _roadmap_row(
         phase_id="phase_2_public_benchmark_harness",
@@ -280,6 +281,13 @@ def _public_benchmark_row(
             "operator_intake_required_slot_count": _as_int(
                 public_benchmark_operator_intake.get("required_slot_count")
             ),
+            "tier_beta_gate_status": str(tier_beta_gate.get("status") or ""),
+            "tier_beta_failed_criterion_count": _as_int(
+                tier_beta_gate.get("failed_criterion_count")
+            ),
+            "tier_beta_failed_criteria": [
+                str(row) for row in _as_list(tier_beta_gate.get("failed_criteria"))
+            ],
             "subset_manifest_summary": _as_dict(public_benchmark.get("subset_manifest_summary")),
             "enrichment_scorecard_summary": _as_dict(public_benchmark.get("enrichment_scorecard_summary")),
         },
