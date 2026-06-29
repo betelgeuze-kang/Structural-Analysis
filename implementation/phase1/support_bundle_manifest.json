@@ -208,47 +208,47 @@
     },
     {
       "available": true,
-      "bytes": 70775,
+      "bytes": 60828,
       "label": "pm_release_blocker_action_register",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_action_register.json",
-      "redacted_sha256": "e9e2f964f6a35adc23a050fc9ba1cbd142bab4a8e7d1c4b232a627a501700379",
-      "sha256": "e9e2f964f6a35adc23a050fc9ba1cbd142bab4a8e7d1c4b232a627a501700379",
+      "redacted_sha256": "6625cc45e7ec6e024fd099cc32aeb4bc6afd28e71b75bfd8026f7eef406fec52",
+      "sha256": "6625cc45e7ec6e024fd099cc32aeb4bc6afd28e71b75bfd8026f7eef406fec52",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json"
     },
     {
       "available": true,
-      "bytes": 40740,
+      "bytes": 34819,
       "label": "pm_release_blocker_closure_board",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_blocker_closure_board.json",
-      "redacted_sha256": "7af217b1bd59b7d43c921880b56720ecfe0808ff9e19527cfadaadf903170594",
-      "sha256": "7af217b1bd59b7d43c921880b56720ecfe0808ff9e19527cfadaadf903170594",
+      "redacted_sha256": "ad1f6cbf31eac46ca18e99e24bde96de35f7772352892ab6c95f400efe939b71",
+      "sha256": "ad1f6cbf31eac46ca18e99e24bde96de35f7772352892ab6c95f400efe939b71",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
     },
     {
       "available": true,
-      "bytes": 144444,
+      "bytes": 140531,
       "label": "pm_release_gate_completion_audit",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_completion_audit.json",
-      "redacted_sha256": "becc550634ae61bded243361283d171836729e261b0563584412ab591c2517f5",
-      "sha256": "f9b4581076b235e035080eb5352283fa6e9d00b95d92fe9826c8d8ec66c3bd1d",
+      "redacted_sha256": "6574d983d388758a92c17f8d40d5a40fae770d5708ec057b3a119ac3f3852298",
+      "sha256": "779a9605c1b745ed52155a274853b2ae47836d93de1468c8d0fe7c32a4560ff2",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json"
     },
     {
       "available": true,
-      "bytes": 49126,
+      "bytes": 41858,
       "label": "pm_release_gate_reviewer_handoff",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_release_gate_reviewer_handoff.json",
-      "redacted_sha256": "1cac42b23d68b5e43752e64ca29179e1fbc8952fc5e37133becd08ebc0fcc5bb",
-      "sha256": "1cac42b23d68b5e43752e64ca29179e1fbc8952fc5e37133becd08ebc0fcc5bb",
+      "redacted_sha256": "5c4b5430c3b027778d69a7d45035e6fd8f39f7ed7eb4d25e453edc8471e72a7c",
+      "sha256": "5c4b5430c3b027778d69a7d45035e6fd8f39f7ed7eb4d25e453edc8471e72a7c",
       "source_path": "implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json"
     },
     {
       "available": true,
-      "bytes": 168482,
+      "bytes": 158600,
       "label": "pm_owner_evidence_request_packet",
       "redacted_bundle_path": "implementation/phase1/release/support_bundle/redacted/pm_owner_evidence_request_packet.json",
-      "redacted_sha256": "f08013af9b3e6050a037f48f747c6e763d182e8f5a6b043c5937b777a5e444be",
-      "sha256": "f08013af9b3e6050a037f48f747c6e763d182e8f5a6b043c5937b777a5e444be",
+      "redacted_sha256": "eac5cd0f7e423138b1635697d2073cecc43176c490e8b32e64e8daaa71bb1d0d",
+      "sha256": "eac5cd0f7e423138b1635697d2073cecc43176c490e8b32e64e8daaa71bb1d0d",
       "source_path": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json"
     },
     {
@@ -473,7 +473,7 @@
     "audit_log_path": "",
     "bundle_path": "implementation/phase1/release/support_bundle/audit_digest.json",
     "event_count": 0,
-    "generated_at": "2026-06-29T23:40:39.473810+00:00",
+    "generated_at": "2026-06-29T23:42:08.198886+00:00",
     "schema_version": "support-bundle-audit-digest.v1",
     "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
   },
@@ -482,7 +482,7 @@
     "artifact_count": 51,
     "available_artifact_count": 51,
     "path": "implementation/phase1/release/support_bundle/support_bundle_index.json",
-    "sha256": "bcc423882752212dded12123eba961620c642b00f2dc69017ebc40a48b4cf3b4"
+    "sha256": "a96a4957164530beb93011c1275b57fd939b34646e12e2b3e739746c30224d5c"
   },
   "bundle_policy": {
     "copy_mode": "redacted_evidence_plus_digest",
@@ -504,7 +504,7 @@
   "contract_pass": true,
   "export_archive": {
     "available": true,
-    "bytes": 451475,
+    "bytes": 448495,
     "error": "",
     "member_count": 55,
     "members": [
@@ -565,9 +565,9 @@
       "support_bundle_index.json"
     ],
     "path": "implementation/phase1/release/support_bundle_export.zip",
-    "sha256": "c830b8745625dfe13c04d17a1eef995daa22d8f88868974ee7382d4705c44fd1"
+    "sha256": "fb8649ac79605adf6f138b17a1d2d8f325c2fc36823579f8a1955c0ba89b6192"
   },
-  "generated_at": "2026-06-29T23:40:39.532876+00:00",
+  "generated_at": "2026-06-29T23:42:08.258114+00:00",
   "license_status": {
     "available": false,
     "bundle_path": "implementation/phase1/release/support_bundle/license_status.json",
@@ -609,7 +609,6 @@
     "action_extra_blocker_ids": [],
     "blocked_requirement_ids": [
       "release_area.basic_ci",
-      "release_area.github_sync",
       "release_area.security",
       "release_area.ux",
       "release_tier.ga_enterprise_evidence_gate_pass",
@@ -618,18 +617,16 @@
     "bundle_path": "implementation/phase1/release/support_bundle/pm_failure_bundle_coverage.json",
     "canonical_release_area_evidence": {
       "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
-      "release_area_blocker_count": 7,
+      "release_area_blocker_count": 5,
       "release_area_blocker_ids": [
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
-        "security::license_status_not_configured",
-        "github_sync::github_sync_preflight::worktree_not_clean",
-        "github_sync::github_sync_preflight_not_synced"
+        "security::license_status_not_configured"
       ],
-      "release_area_green_count": 12,
-      "release_area_summary": "12/16",
+      "release_area_green_count": 13,
+      "release_area_summary": "13/16",
       "release_area_total_count": 16
     },
     "claim_boundary": "This index proves support-bundle coverage for open PM blocker handoff artifacts only. It does not close tracked CI streak, human UX observation, license, Limited Commercial, GA/Enterprise, or other external release evidence blockers.",
@@ -640,14 +637,12 @@
       "customer_audit_failure_bundle_sla_missing",
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
-      "github_sync::github_sync_preflight::worktree_not_clean",
-      "github_sync::github_sync_preflight_not_synced",
       "independent_vv_missing",
       "security::license_status_not_configured",
       "ux::human_new_user_30min_sample_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed"
     ],
-    "generated_at": "2026-06-29T23:40:39.476561+00:00",
+    "generated_at": "2026-06-29T23:42:08.201241+00:00",
     "missing_required_section_labels": [],
     "open_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
@@ -655,8 +650,6 @@
       "customer_audit_failure_bundle_sla_missing",
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
-      "github_sync::github_sync_preflight::worktree_not_clean",
-      "github_sync::github_sync_preflight_not_synced",
       "independent_vv_missing",
       "security::license_status_not_configured",
       "ux::human_new_user_30min_sample_evidence_missing",
@@ -666,8 +659,6 @@
     "release_area_blocker_ids": [
       "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
       "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-      "github_sync::github_sync_preflight::worktree_not_clean",
-      "github_sync::github_sync_preflight_not_synced",
       "security::license_status_not_configured",
       "ux::human_new_user_30min_sample_evidence_missing",
       "ux::human_new_user_observation_missing_or_failed"
@@ -678,8 +669,6 @@
       "customer_audit_failure_bundle_sla_missing",
       "customer_shadow::completed_shadow_case_count_below_minimum",
       "family_validation_manual_signoff_missing",
-      "github_sync::github_sync_preflight::worktree_not_clean",
-      "github_sync::github_sync_preflight_not_synced",
       "independent_vv_missing",
       "security::license_status_not_configured",
       "ux::human_new_user_30min_sample_evidence_missing",
@@ -833,7 +822,7 @@
       }
     ],
     "schema_version": "pm-failure-bundle-coverage.v1",
-    "sha256": "e5d31027deec5db9c7dfabe21571e746ba2f6b51e08f83617dd60a91be856d2c",
+    "sha256": "a5bdee4f23db2c1c47415050d561ca792bec49b37153ddbf8316db729d39db10",
     "source_artifacts": {
       "pm_owner_evidence_request_packet": "implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json",
       "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
@@ -848,8 +837,6 @@
         "customer_audit_failure_bundle_sla_missing",
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
-        "github_sync::github_sync_preflight::worktree_not_clean",
-        "github_sync::github_sync_preflight_not_synced",
         "independent_vv_missing",
         "security::license_status_not_configured",
         "ux::human_new_user_30min_sample_evidence_missing",
@@ -861,8 +848,6 @@
         "customer_audit_failure_bundle_sla_missing",
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
-        "github_sync::github_sync_preflight::worktree_not_clean",
-        "github_sync::github_sync_preflight_not_synced",
         "independent_vv_missing",
         "security::license_status_not_configured",
         "ux::human_new_user_30min_sample_evidence_missing",
@@ -874,8 +859,6 @@
         "customer_audit_failure_bundle_sla_missing",
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
-        "github_sync::github_sync_preflight::worktree_not_clean",
-        "github_sync::github_sync_preflight_not_synced",
         "independent_vv_missing",
         "security::license_status_not_configured",
         "ux::human_new_user_30min_sample_evidence_missing",
@@ -887,8 +870,6 @@
         "customer_audit_failure_bundle_sla_missing",
         "customer_shadow::completed_shadow_case_count_below_minimum",
         "family_validation_manual_signoff_missing",
-        "github_sync::github_sync_preflight::worktree_not_clean",
-        "github_sync::github_sync_preflight_not_synced",
         "independent_vv_missing",
         "security::license_status_not_configured",
         "ux::human_new_user_30min_sample_evidence_missing",
@@ -901,16 +882,16 @@
       "blocker_id_sources_match": true,
       "core_blocker_id_sources_match": true,
       "missing_required_section_count": 0,
-      "open_blocker_count": 11,
-      "owner_packet_blocked_release_tier_impact_count": 18,
+      "open_blocker_count": 9,
+      "owner_packet_blocked_release_tier_impact_count": 14,
       "owner_packet_missing_release_tier_impact_count": 0,
       "owner_packet_tier_impact_complete": true,
       "owner_packet_tier_impact_contract_pass": true,
       "owner_packets_present": true,
-      "release_area_blocker_count": 7,
-      "release_area_green_count": 12,
+      "release_area_blocker_count": 5,
+      "release_area_green_count": 13,
       "release_area_total_count": 16,
-      "release_tier_blocker_count": 11,
+      "release_tier_blocker_count": 9,
       "release_tier_owner_packets_present": true,
       "release_tier_rows_present": true,
       "required_section_count": 29
