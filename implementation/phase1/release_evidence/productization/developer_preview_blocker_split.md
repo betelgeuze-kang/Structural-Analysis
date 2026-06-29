@@ -6,11 +6,11 @@ This page separates Developer Preview RC blockers from Commercial Release blocke
 
 | Track | Source | Current status |
 |---|---|---|
-| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `blocked`, `blocker_count=34` |
-| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=5`, `future_commercial_blocker_count=29` |
+| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `stale_or_inconsistent`, `blocker_count=52` |
+| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=22`, `future_commercial_blocker_count=29` |
 | Developer Preview RC final gates | `developer_preview_rc_status.json` | `blocked`, deliverables `10/10`, final gates `3/9`, active RC blockers `6` |
 
-The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `34`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the six Developer Preview blockers.
+The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `52`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the six Developer Preview blockers.
 
 ## Developer Preview RC Blockers
 
