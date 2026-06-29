@@ -11,6 +11,11 @@
       "required": true
     },
     {
+      "check_id": "symmetry_permutation_contract",
+      "description": "allowed symmetry permutations are explicit zero-based atom-index maps",
+      "required": true
+    },
+    {
       "check_id": "symmetry_aware_ligand_rmsd_angstrom",
       "description": "pose success uses the best rigid-aligned RMSD over allowed symmetry permutations",
       "required": true,
@@ -89,22 +94,29 @@
     "status": "pass"
   },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T14:57:30.080941+00:00",
+  "generated_at": "2026-06-29T15:05:54.749005+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:38b6a356ba63603316d6892e471fd378618e7f14d1a058a2eb5050048c05e746",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:e31e944090066c644d29a069c3872c212875050210d5fe464ecb106afa81c97c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:be514093c8259491fc533a88d890578c993342beac111605c216d4c9d9e96fea",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
     "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
   },
+  "materializer": {
+    "claim_boundary": "The materializer turns validated pose-coordinate input into per-case PoseBusters-style sanity rows for real benchmark ligands. It does not vendor PoseBusters, infer chemistry, or close Tier beta.",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked",
+    "schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+    "status": "ready_for_pose_validity_input"
+  },
   "posebusters_style_boundary": "The packet defines PoseBusters-style sanity checks for a local harness. It does not vendor PoseBusters, infer chemistry, or replace toolkit-backed bond/order/protonation validation once real ligands are attached.",
   "real_benchmark_case_count": 0,
   "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "2a29e2912982c39f8265ed0857db352cd558e19a",
+  "source_commit_sha": "3dbea443546cf674e9cefb038e24ef36823eb0be",
   "status": "ready_for_dry_run",
   "validator": {
     "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",

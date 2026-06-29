@@ -7,10 +7,11 @@
   "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T14:57:30.084718+00:00",
+  "generated_at": "2026-06-29T15:05:54.753246+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:38b6a356ba63603316d6892e471fd378618e7f14d1a058a2eb5050048c05e746",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:e31e944090066c644d29a069c3872c212875050210d5fe464ecb106afa81c97c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
+    "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
     "scripts/materialize_public_benchmark_subset_manifest.py": "sha256:be514093c8259491fc533a88d890578c993342beac111605c216d4c9d9e96fea",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
@@ -44,12 +45,19 @@
     "status": "ready_for_operator_intake"
   },
   "pose_validity_packet_summary": {
-    "check_count": 5,
+    "check_count": 6,
     "dry_run_pose_validity_ready": true,
+    "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
     "real_benchmark_case_count": 0,
-    "required_check_count": 5,
+    "required_check_count": 6,
     "status": "ready_for_dry_run",
     "validator_schema_version": "public-benchmark-pose-validity-validation.v1"
+  },
+  "posebusters_validity_packet_materializer": {
+    "claim_boundary": "The PoseBusters-style packet materializer consumes validated pose-coordinate input and emits per-case sanity-check rows for real benchmark ligands. It does not infer chemistry or close Tier beta.",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_posebusters_validity_packet.py --pose-validity-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-packet implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_packet.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_posebusters_validity_materialization_report.json --fail-blocked",
+    "schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+    "status": "ready_for_pose_validity_input"
   },
   "public_benchmark_ready": false,
   "reuse_policy": "public_benchmark_contract_generated_from_repo_code",
@@ -61,7 +69,7 @@
     "status": "ready_for_pose_validity_input"
   },
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "2a29e2912982c39f8265ed0857db352cd558e19a",
+  "source_commit_sha": "3dbea443546cf674e9cefb038e24ef36823eb0be",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
