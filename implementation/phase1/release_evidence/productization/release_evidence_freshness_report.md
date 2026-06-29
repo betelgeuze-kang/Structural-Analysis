@@ -2,7 +2,7 @@
 
 - `contract_pass`: `False`
 - `reason_code`: `ERR_RELEASE_EVIDENCE_FRESHNESS`
-- `current_source_commit_sha`: `36a3e952ad3ffae3f2bd51b9cdbd39f60ada0273`
+- `current_source_commit_sha`: `cfed2de42d5f7f2cc10ebeb63379b429bb220869`
 - `blockers`: `customer_shadow_evidence_intake_packet::source_commit_mismatch, fresh_full_validation_lane_status::source_commit_mismatch, fresh_full_validation_lane_status::input_dependency_newer_than_artifact, evidence_console_scope_status::source_commit_mismatch, evidence_console_scope_status::input_dependency_newer_than_artifact`
 
 | Artifact | Status | Blockers | Newer Dependencies |
