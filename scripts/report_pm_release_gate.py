@@ -363,6 +363,40 @@ def _public_benchmark_ready(
     )
 
 
+def _science_surface_status(
+    *,
+    surface_family: str,
+    surfaces: list[dict[str, Any]],
+    missing_bottleneck: str,
+    locked_bottleneck: str,
+    contract_bottleneck: str,
+) -> dict[str, Any]:
+    locked_count = sum(1 for row in surfaces if row["locked"])
+    contract_pass_count = sum(1 for row in surfaces if row["contract_pass"])
+    if not surfaces:
+        status = "missing"
+        bottleneck = missing_bottleneck
+    elif locked_count:
+        status = "locked"
+        bottleneck = locked_bottleneck
+    elif contract_pass_count != len(surfaces):
+        status = "blocked"
+        bottleneck = contract_bottleneck
+    else:
+        status = "ready"
+        bottleneck = ""
+    return {
+        "surface_family": surface_family,
+        "present": bool(surfaces),
+        "status": status,
+        "surface_count": len(surfaces),
+        "contract_pass_count": contract_pass_count,
+        "locked_count": locked_count,
+        "surface_ids": [str(row["surface_id"]) for row in surfaces],
+        "bottleneck": bottleneck,
+    }
+
+
 def _release_decision(
     *,
     release_allowed: bool,
@@ -395,6 +429,30 @@ def _release_decision(
         and all(bool(row["contract_pass"]) for row in gpcr_surfaces)
         and not any(bool(row["locked"]) for row in gpcr_surfaces)
     )
+    science_evidence_surface_status = {
+        "h_bond": _science_surface_status(
+            surface_family="h_bond",
+            surfaces=h_bond_surfaces,
+            missing_bottleneck="h_bond_evidence_surface_missing",
+            locked_bottleneck="h_bond_evidence_surface_locked",
+            contract_bottleneck="h_bond_evidence_surface_contract_not_passing",
+        ),
+        "gpcr": _science_surface_status(
+            surface_family="gpcr",
+            surfaces=gpcr_surfaces,
+            missing_bottleneck="gpcr_evidence_surface_missing",
+            locked_bottleneck="broad_gpcr_family_claim_locked",
+            contract_bottleneck="gpcr_evidence_surface_contract_not_passing",
+        ),
+    }
+    science_evidence_surface_status["gpcr"][
+        "broad_family_claim_safe"
+    ] = broad_gpcr_family_claim_safe
+    science_surface_bottlenecks = [
+        str(row["bottleneck"])
+        for row in science_evidence_surface_status.values()
+        if row["bottleneck"]
+    ]
     stale_count = _stale_artifact_count(release_evidence_freshness_payload)
     operator_actions: list[dict[str, str]] = []
     if stale_count:
@@ -436,6 +494,8 @@ def _release_decision(
         "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
         "h_bond_evidence_surface_present": bool(h_bond_surfaces),
         "gpcr_evidence_surface_present": bool(gpcr_surfaces),
+        "science_evidence_surface_status": science_evidence_surface_status,
+        "science_evidence_surface_bottlenecks": science_surface_bottlenecks,
         "evidence_surface_dir": str(evidence_surface_dir),
         "evidence_surfaces": evidence_surfaces,
         "operator_actions": operator_actions,
@@ -3205,6 +3265,9 @@ def build_report(
 
 def _markdown(payload: dict[str, Any]) -> str:
     release_decision = _as_dict(payload.get("release_decision"))
+    science_surface_bottlenecks = _as_list(
+        release_decision.get("science_evidence_surface_bottlenecks")
+    )
     lines = [
         "# PM Release Gate",
         "",
@@ -3227,11 +3290,20 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `blocked_release_count`: `{release_decision.get('blocked_release_count', 0)}`",
         f"- `first_blocker`: `{release_decision.get('first_blocker', '') or 'none'}`",
         f"- `operator_action_count`: `{release_decision.get('operator_action_count', 0)}`",
+        f"- `approval_token_count`: `{release_decision.get('approval_token_count', 0)}`",
         f"- `stale_artifact_count`: `{release_decision.get('stale_artifact_count', 0)}`",
         f"- `evidence_surface_count`: `{release_decision.get('evidence_surface_count', 0)}`",
+        f"- `missing_evidence_surface_count`: "
+        f"`{release_decision.get('missing_evidence_surface_count', 0)}`",
         f"- `locked_evidence_surface_count`: `{release_decision.get('locked_evidence_surface_count', 0)}`",
+        f"- `h_bond_evidence_surface_present`: "
+        f"`{release_decision.get('h_bond_evidence_surface_present', False)}`",
+        f"- `gpcr_evidence_surface_present`: "
+        f"`{release_decision.get('gpcr_evidence_surface_present', False)}`",
         f"- `public_benchmark_ready`: `{release_decision.get('public_benchmark_ready', False)}`",
         f"- `broad_gpcr_family_claim_safe`: `{release_decision.get('broad_gpcr_family_claim_safe', False)}`",
+        f"- `science_evidence_surface_bottlenecks`: "
+        f"`{', '.join(str(item) for item in science_surface_bottlenecks) or 'none'}`",
         f"- `next_locally_closable_gaps`: "
         f"`{', '.join(payload['gap_ledger_status'].get('next_locally_closable_gaps', [])) or 'none'}`",
         "",

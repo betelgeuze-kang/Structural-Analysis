@@ -889,8 +889,35 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["missing_evidence_surface_count"] == 0
     assert decision["locked_evidence_surface_count"] == 1
     assert decision["public_benchmark_ready"] is True
+    assert decision["h_bond_evidence_surface_present"] is False
     assert decision["gpcr_evidence_surface_present"] is True
     assert decision["broad_gpcr_family_claim_safe"] is False
+    assert decision["science_evidence_surface_bottlenecks"] == [
+        "h_bond_evidence_surface_missing",
+        "broad_gpcr_family_claim_locked",
+    ]
+    science_surface_status = decision["science_evidence_surface_status"]
+    assert science_surface_status["h_bond"] == {
+        "surface_family": "h_bond",
+        "present": False,
+        "status": "missing",
+        "surface_count": 0,
+        "contract_pass_count": 0,
+        "locked_count": 0,
+        "surface_ids": [],
+        "bottleneck": "h_bond_evidence_surface_missing",
+    }
+    assert science_surface_status["gpcr"] == {
+        "surface_family": "gpcr",
+        "present": True,
+        "status": "locked",
+        "surface_count": 1,
+        "contract_pass_count": 0,
+        "locked_count": 1,
+        "surface_ids": ["gpcr_hard_decoy_surface"],
+        "bottleneck": "broad_gpcr_family_claim_locked",
+        "broad_family_claim_safe": False,
+    }
     assert decision["operator_actions"] == []
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
     assert surface_paths["structural_contact_surface"]["contract_pass"] is True
