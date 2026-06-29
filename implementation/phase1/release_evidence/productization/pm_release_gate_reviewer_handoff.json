@@ -19,7 +19,7 @@
   },
   "claim_boundary": "This reviewer handoff packages PM blocker review actions and verdict-change conditions. It does not convert missing tracked CI streak, human UX observation, license approval, release-tier blockers, or other external evidence into a release pass.",
   "contract_pass": true,
-  "generated_at": "2026-06-29T22:55:36.171351+00:00",
+  "generated_at": "2026-06-29T23:04:22.391949+00:00",
   "incomplete_blockers": [],
   "incomplete_release_tiers": [],
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -343,7 +343,7 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "blocked",
@@ -382,7 +382,7 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "blocked",
@@ -421,7 +421,7 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "blocked",
@@ -460,7 +460,7 @@
       "claim_boundary": "The GitHub development sync preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
       "closure_state": "external_owner_input_ready",
       "evidence_artifact_paths": {
-        "github_development_sync_preflight": "<live-git-state>",
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json",
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_state": "blocked",

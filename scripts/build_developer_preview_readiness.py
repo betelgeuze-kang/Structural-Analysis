@@ -84,6 +84,12 @@ INPUT_CHECKSUM_POLICY = (
     "product_snapshot_readiness_semantic_subset_excludes_self_referential_"
     "developer_preview_metadata"
 )
+SELF_REFERENTIAL_DEVELOPER_PREVIEW_METADATA_BLOCKERS = frozenset(
+    {
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
+    }
+)
 SCOPE_BOUNDARY_README = Path("README.md")
 SCOPE_BOUNDARY_REPORTS = (
     Path("docs/commercialization-gap-current-state.md"),
@@ -386,6 +392,10 @@ def _group_blockers(blockers: list[str]) -> dict[str, dict[str, Any]]:
     }
 
 
+def _developer_preview_product_blocker_visible(blocker: str) -> bool:
+    return bool(blocker) and blocker not in SELF_REFERENTIAL_DEVELOPER_PREVIEW_METADATA_BLOCKERS
+
+
 def _dataset_license_manifest(repo_root: Path, manifest_path: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, manifest_path)
     if payload:
@@ -550,7 +560,11 @@ def build_developer_preview_readiness(
     manifest = _dataset_license_manifest(repo_root, dataset_license_manifest_path)
     phase1_core_api = _load_json(repo_root, phase1_core_api_contract_path)
     blockers = [
-        *[str(item) for item in product_snapshot.get("blockers", []) if str(item)],
+        *[
+            str(item)
+            for item in product_snapshot.get("blockers", [])
+            if _developer_preview_product_blocker_visible(str(item))
+        ],
         *FUTURE_COMMERCIAL_SCOPE_BLOCKERS,
     ]
     if not _manifest_ready(manifest):

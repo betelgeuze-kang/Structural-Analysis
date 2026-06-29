@@ -38,7 +38,7 @@
   "claim_boundary": "This report verifies that license status evidence is populated and current; it does not create legal approval or substitute for counsel/product-owner signoff.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T22:55:34.394992+00:00",
+  "generated_at": "2026-06-29T23:04:07.069011+00:00",
   "input_checksums": {
     "docs/templates/license_status.template.json": "sha256:bd5c741b071bb5cde08710ea641889fbd2be704e0c1de5afd8537a550f4154b7",
     "implementation/phase1/release/support_bundle/license_status.json": "sha256:147abf67f7c0fa71a4f60cb12470f38114e8e3075367b875f274df9a1755d03c"
@@ -47,7 +47,7 @@
   "reason_code": "ERR_LICENSE_STATUS_NOT_CLOSED",
   "reused_evidence": false,
   "schema_version": "license-status-closure-report.v1",
-  "source_commit_sha": "adf97ad20690f31c09e1c74a44993780b301f8e2",
+  "source_commit_sha": "4ba38e46a5e743a8d676933819162d7be3d21b64",
   "summary": {
     "allowed_approver_roles": [
       "delegated_product_owner",

@@ -128,6 +128,8 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
                 "g1_full_load_lane::child_residual_gate_not_proven",
                 "fresh_full_validation::row_count_below_lane_count",
                 "stale_or_inconsistent:worktree_dirty",
+                "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness",
+                "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status",
             ],
             "root_blockers": {
                 "release freshness/sync": {
@@ -269,6 +271,14 @@ def test_developer_preview_keeps_numerical_benchmark_and_software_blockers(tmp_p
     assert payload["categories"]["benchmark"]["blocker_count"] == 2
     assert payload["categories"]["software product"]["blocker_count"] == 1
     assert payload["categories"]["future commercial"]["blocker_count"] == 2
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_readiness"
+        not in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
+        not in payload["blockers"]
+    )
     assert "commercial_sla::production_support_commitment_missing" in payload[
         "future_commercial_blockers"
     ]

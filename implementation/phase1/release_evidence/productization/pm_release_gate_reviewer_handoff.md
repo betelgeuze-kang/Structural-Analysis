@@ -257,7 +257,7 @@ Acceptance criteria:
 - `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
-- `github_development_sync_preflight`: `<live-git-state>`
+- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 
 Reproduction commands:
@@ -293,7 +293,7 @@ Acceptance criteria:
 - `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
-- `github_development_sync_preflight`: `<live-git-state>`
+- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 
 Reproduction commands:
@@ -329,7 +329,7 @@ Acceptance criteria:
 - `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
-- `github_development_sync_preflight`: `<live-git-state>`
+- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 
 Reproduction commands:
@@ -365,7 +365,7 @@ Acceptance criteria:
 - `origin/codex/create-architecture-definition-document-for-hybrid-ai` and `origin/main` match local release HEAD
 
 Evidence artifact paths:
-- `github_development_sync_preflight`: `<live-git-state>`
+- `github_development_sync_preflight`: `implementation/phase1/release_evidence/productization/github_development_sync_preflight.json`
 - `pm_release_gate_report`: `implementation/phase1/release_evidence/productization/pm_release_gate_report.json`
 
 Reproduction commands:

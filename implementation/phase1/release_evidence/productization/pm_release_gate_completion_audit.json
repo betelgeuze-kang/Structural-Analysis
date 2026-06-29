@@ -11,10 +11,10 @@
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T22:55:36.133746+00:00",
+  "generated_at": "2026-06-29T23:04:22.354613+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:cac36438807cadc46d08ec3df9d38d6d9ca90ba344cfb8b6f057b63c52cb7e67",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:375444baf15b36fa15e34ec9ec3c07cd4bc4d19b846272ebaf297021deabf111",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:9a1617ade12db2565a5df4f0ee639a8f7fe40b6f63e630d44e8235319441718e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7496cf37d94cbf8ad14e483e2ac54a114c3194375871b081b31ed5c571947234",
     "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -74,7 +74,7 @@
       "source_present": true,
       "status": "blocked_external_owner_input_ready",
       "summary_snapshot": {
-        "ci_streak_source_evidence_age_hours": 0.101,
+        "ci_streak_source_evidence_age_hours": 0.0,
         "ci_streak_source_evidence_freshness_pass": true,
         "nightly_claim_boundary": "Local nightly artifacts prove command-level readiness; release streak credit requires tracked nightly CI evidence for the consecutive-pass window.",
         "nightly_github_actions_job_start_blocker_count": 0,
@@ -172,7 +172,7 @@
       "summary_snapshot": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "fd3e18eb5b87ad0bb94303949db2c1db007350e9",
+        "current_source_commit_sha": "4ba38e46a5e743a8d676933819162d7be3d21b64",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -712,7 +712,7 @@
         "github_sync::github_sync_remote_sync_pending": "external_owner_input_ready"
       },
       "evidence_artifacts": {
-        "github_development_sync_preflight": "<live-git-state>"
+        "github_development_sync_preflight": "implementation/phase1/release_evidence/productization/github_development_sync_preflight.json"
       },
       "group": "release_area",
       "next_action": "4 blockers: Obtain explicit R4 approval phrase `feature push + main fast-forward 승인`, then run the pending remote-update commands from `check_github_development_sync_preflight.py --fetch --json`.",
@@ -752,8 +752,8 @@
       "source_present": true,
       "status": "blocked_external_owner_input_ready",
       "summary_snapshot": {
-        "feature_ahead_count": 274,
-        "main_ahead_count": 2,
+        "feature_ahead_count": 275,
+        "main_ahead_count": 3,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
         "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
@@ -2642,7 +2642,7 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "adf97ad20690f31c09e1c74a44993780b301f8e2",
+  "source_commit_sha": "4ba38e46a5e743a8d676933819162d7be3d21b64",
   "summary": {
     "blocked_external_owner_input_ready_count": 4,
     "blocked_handoff_incomplete_count": 0,

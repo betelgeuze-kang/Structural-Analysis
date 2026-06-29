@@ -101,8 +101,8 @@ def test_pm_release_area_counts_and_blockers_are_canonical() -> None:
 
     support = _load_json(SUPPORT_BUNDLE)
     coverage = support["pm_failure_bundle_coverage"]
-    assert coverage["summary"]["open_blocker_count"] == 12
-    assert coverage["summary"]["release_tier_blocker_count"] == 12
+    assert coverage["summary"]["open_blocker_count"] == 13
+    assert coverage["summary"]["release_tier_blocker_count"] == 13
     assert coverage["summary"]["release_area_blocker_count"] == len(expected_blockers)
     assert sorted(coverage["release_area_blocker_ids"]) == expected_blockers
 

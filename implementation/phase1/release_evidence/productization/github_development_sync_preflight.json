@@ -1,5 +1,6 @@
 {
   "blockers": [
+    "worktree_not_clean",
     "remote_mutation_approval_required"
   ],
   "checks": {
@@ -7,10 +8,10 @@
     "feature_fast_forward_possible": true,
     "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": true,
-    "remote_fetch_ok": true,
+    "main_synced_to_head": false,
+    "remote_fetch_ok": null,
     "remote_safety_ok": true,
-    "worktree_clean": true
+    "worktree_clean": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -19,43 +20,50 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-29T22:17:18.095194+00:00",
+  "generated_at": "2026-06-29T23:04:04.460682+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
       "command": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
       "rollback": "restore feature to previous remote SHA d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e with an approved restore action",
       "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+    },
+    {
+      "action": "fast-forward push current HEAD to main",
+      "command": "git push origin HEAD:main",
+      "rollback": "restore main to previous remote SHA 6342d5b953b0c437761e1cab51f078c329b662bc with an approved revert/restore action",
+      "target": "origin/main"
     }
   ],
-  "preflight_pass": true,
+  "preflight_pass": false,
   "r4_disclosure": {
-    "action": "push current HEAD to feature",
+    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
     "impact": "GitHub pending refs become externally visible at the local development state.",
-    "risk": "External reviewers of the feature branch immediately see the current commits.",
-    "rollback": "restore feature to previous remote SHA d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e with an approved restore action",
+    "risk": "Main CI and external reviewers immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e with an approved restore action; restore main to previous remote SHA 6342d5b953b0c437761e1cab51f078c329b662bc with an approved revert/restore action",
     "target": [
-      "origin/codex/create-architecture-definition-document-for-hybrid-ai"
+      "origin/codex/create-architecture-definition-document-for-hybrid-ai",
+      "origin/main"
     ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
   "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
-  "remote_fetch_attempted": true,
-  "remote_fetch_ok": true,
+  "remote_fetch_attempted": false,
+  "remote_fetch_ok": null,
   "remote_mutation_approved": false,
   "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "main",
-    "feature_ahead_count": 262,
+    "feature_ahead_count": 275,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "ca236884e4fbc27b8fcb8bbe619cc4fbd3d4080a",
-    "main_ahead_count": 0,
+    "local_head_sha": "4ba38e46a5e743a8d676933819162d7be3d21b64",
+    "main_ahead_count": 3,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
     "remote_feature_sha": "d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "ca236884e4fbc27b8fcb8bbe619cc4fbd3d4080a",
+    "remote_main_sha": "6342d5b953b0c437761e1cab51f078c329b662bc",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -69,7 +77,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.md\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.md\n M implementation/phase1/support_bundle_manifest.json"
   },
-  "status": "approval_required"
+  "status": "blocked"
 }

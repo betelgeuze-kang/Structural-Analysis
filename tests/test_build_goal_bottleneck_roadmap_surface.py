@@ -71,14 +71,14 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
-        "approval_token_count": 7,
+        "approval_token_count": 8,
         "blocked_release_count": 9,
         "broad_gpcr_family_claim_safe": False,
         "evidence_surface_count": 12,
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "locked_evidence_surface_count": 3,
         "missing_evidence_surface_count": 0,
-        "operator_action_count": 16,
+        "operator_action_count": 17,
         "pocketmd_lite_product_surface_ready": False,
         "public_benchmark_ready": False,
         "release_allowed": False,
@@ -98,8 +98,8 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
     )
     assert briefing["refresh_required_operator_action_count"] == 0
     assert briefing["refresh_required_operator_actions"] == []
-    assert briefing["release_area_blocker_count"] == 8
-    assert briefing["release_area_owner_handoff_count"] == 8
+    assert briefing["release_area_blocker_count"] == 9
+    assert briefing["release_area_owner_handoff_count"] == 9
     release_area_handoffs = {
         row["blocker_id"]: row
         for row in briefing["release_area_owner_handoffs"]
@@ -110,6 +110,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
         "security::license_status_not_configured",
+        "evidence_freshness::p1_benchmark_breadth_status::input_dependency_newer_than_artifact",
         "github_sync::github_sync_preflight::remote_mutation_approval_required",
         "github_sync::github_sync_remote_sync_pending",
         "github_sync::github_sync_preflight_not_synced",
