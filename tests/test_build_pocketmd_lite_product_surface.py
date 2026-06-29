@@ -106,7 +106,11 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert api["route"] == "/product/pocketmd-lite"
     assert api["read_model"] == {
         "route": "/product/pocketmd-lite",
-        "alternate_routes": ["/product/pocketmd-lite/handoff", "/product/capabilities"],
+        "alternate_routes": [
+            "/product/pocketmd-lite/operator-intake",
+            "/product/pocketmd-lite/handoff",
+            "/product/capabilities",
+        ],
         "artifact": (
             "implementation/phase1/release_evidence/productization/"
             "pocketmd_lite_readonly_api.json"
@@ -126,7 +130,11 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["route"] == "/product/pocketmd-lite/handoff"
     assert handoff["read_model"] == {
         "route": "/product/pocketmd-lite/handoff",
-        "alternate_routes": ["/product/pocketmd-lite", "/product/capabilities"],
+        "alternate_routes": [
+            "/product/pocketmd-lite",
+            "/product/pocketmd-lite/operator-intake",
+            "/product/capabilities",
+        ],
         "artifact": (
             "implementation/phase1/release_evidence/productization/"
             "pocketmd_lite_delivery_handoff.json"
@@ -157,6 +165,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert handoff["operator_intake_reference"]["required_slot_id"] == (
         "top_k_refinement_rows"
     )
+    assert handoff["operator_intake_reference"]["route"] == (
+        "/product/pocketmd-lite/operator-intake"
+    )
     assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
         "acceptance_criteria"
     ]
@@ -167,12 +178,52 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert operator["schema_version"] == "pocketmd-lite-operator-intake-packet.v1"
     assert operator["status"] == "ready_for_operator_input"
     assert operator["contract_pass"] is True
+    assert operator["read_model_ready"] is True
+    assert operator["route"] == "/product/pocketmd-lite/operator-intake"
+    assert operator["read_model"] == {
+        "route": "/product/pocketmd-lite/operator-intake",
+        "alternate_routes": [
+            "/product/pocketmd-lite",
+            "/product/pocketmd-lite/handoff",
+            "/product/capabilities",
+        ],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_intake_packet.json"
+        ),
+        "mutation_allowed": False,
+    }
+    assert operator["mutation_allowed"] is False
     assert operator["owner_input_required"] is True
     assert operator["product_surface_ready"] is False
     assert operator["broad_all_atom_md_claim_safe"] is False
     assert operator["broad_fep_claim_safe"] is False
     assert operator["required_slot_count"] == 1
     assert operator["input_slots"][0]["slot_id"] == "top_k_refinement_rows"
+    assert operator["gate_unblock_plan_count"] == 1
+    assert operator["minimum_refinement_case_count"] == 1
+    assert operator["minimum_top_k_candidate_count"] == 1
+    gate_plan = operator["gate_unblock_plan"][0]
+    assert gate_plan["slot_id"] == "top_k_refinement_rows"
+    assert gate_plan["unblocks_phase4_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert gate_plan["preserves_phase4_criteria"] == [
+        "broad_all_atom_fep_claims_locked"
+    ]
+    assert gate_plan["minimum_evidence"]["real_refinement_case_count"] == 1
+    assert gate_plan["minimum_evidence"]["top_k_candidate_count"] == 1
+    assert gate_plan["materialization_steps"] == [
+        "materialize_pocketmd_lite_topk_survival_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface",
+    ]
     assert operator["current_surface_status"]["first_blocked_target"] == (
         "top_k_refinement_operator_intake"
     )

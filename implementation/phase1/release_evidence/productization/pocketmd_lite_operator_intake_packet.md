@@ -10,6 +10,12 @@
 |---|---|---|
 | `top_k_refinement_rows` | `operator_input_required` | `case_id, source_family, top_k_rank, candidate_id, pre_refinement_energy_proxy, post_refinement_energy_proxy, local_min_survived, contact_persistence_rate, h_bond_persistence_rate, clash_count_before, clash_count_after, uncertainty_interval, provenance_ref, source_checksum` |
 
+## Gate Unblock Plan
+
+| Slot | Criteria | Minimum Evidence |
+|---|---|---|
+| `top_k_refinement_rows` | `top_k_refinement_rows_present`, `local_min_survival_materialized`, `contact_persistence_materialized`, `h_bond_persistence_materialized`, `clash_relief_materialized`, `uncertainty_summary_materialized`, `report_blockers_resolved` | `{"candidate_scope": "upstream_ranked_top_k_candidates_only", "real_refinement_case_count": 1, "receipt_fields": ["provenance_ref", "source_checksum"], "required_case_fields": ["case_id", "source_family", "top_k_rank", "candidate_id", "pre_refinement_energy_proxy", "post_refinement_energy_proxy", "local_min_survived", "contact_persistence_rate", "h_bond_persistence_rate", "clash_count_before", "clash_count_after", "uncertainty_interval", "provenance_ref", "source_checksum"], "top_k_candidate_count": 1}` |
+
 ## Materialization Sequence
 
 - `fill_pocketmd_lite_operator_intake_packet`: `create <operator-pocketmd-lite-intake.json> from packet template`

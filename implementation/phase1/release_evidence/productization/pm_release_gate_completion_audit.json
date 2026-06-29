@@ -11,10 +11,10 @@
   "claim_boundary": "This audit expands the PM release gate into explicit requirements. A blocked row with owner-handoff ready still remains blocked until the required evidence is attached and the PM release gate is regenerated.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T19:45:53.422250+00:00",
+  "generated_at": "2026-06-29T19:54:39.018392+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:7b82375496c846dd5a560fdb0e3fa308f0665fe5a6af988250c983f682016541",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:7e80e724df92e61f84d0bb35fa3e14c7962d8f034a8e12eb65b83f1e4808044b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:cc5005f2b49a7422953e151c82488ba302e1a1c520c1cd9a92dbec0bf2e06df4",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:45ccabb08297c639079502823fe77d123340155680708f3585e9ec5e9413f86f",
     "scripts/build_pm_release_gate_completion_audit.py": "sha256:39246c0a8e4784455e85036062d2aa268cbe4c01393b924790e076d86a9b81cc"
   },
   "pm_release_blocker_closure_board": "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
@@ -171,7 +171,7 @@
       "summary_snapshot": {
         "artifact_count": 15,
         "blocker_count": 0,
-        "current_source_commit_sha": "cb4aa9c2bded6f78acc459bde3379db9d6e443c8",
+        "current_source_commit_sha": "bcdcc552a994a9668290dfcb4da6055fe1f551c5",
         "max_age_days": 30.0,
         "pass_count": 15
       },
@@ -751,7 +751,7 @@
       "source_present": true,
       "status": "blocked_external_owner_input_ready",
       "summary_snapshot": {
-        "feature_ahead_count": 224,
+        "feature_ahead_count": 225,
         "main_ahead_count": 0,
         "pending_remote_update_count": 1,
         "r4_risk": "External reviewers of the feature branch immediately see the current commits.",
@@ -2641,7 +2641,7 @@
     "reason": "Completion audit snapshots exclude volatile timestamps and hashes. Support bundle manifests hash this audit as an output artifact, so the audit avoids embedding support-bundle archive hashes that would create circular freshness claims.",
     "stable_summary_snapshot": true
   },
-  "source_commit_sha": "cb4aa9c2bded6f78acc459bde3379db9d6e443c8",
+  "source_commit_sha": "bcdcc552a994a9668290dfcb4da6055fe1f551c5",
   "summary": {
     "blocked_external_owner_input_ready_count": 4,
     "blocked_handoff_incomplete_count": 0,

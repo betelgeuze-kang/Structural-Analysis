@@ -246,6 +246,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert phase_4["linked_routes"] == [
         "/product/pocketmd-lite",
+        "/product/pocketmd-lite/operator-intake",
         "/product/pocketmd-lite/handoff",
         "/product/capabilities",
     ]
@@ -276,7 +277,13 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
+    assert phase_4["summary"]["operator_intake_route"] == (
+        "/product/pocketmd-lite/operator-intake"
+    )
     assert phase_4["summary"]["operator_intake_required_slot_count"] == 1
+    assert phase_4["summary"]["gate_unblock_plan_count"] == 1
+    assert phase_4["summary"]["minimum_refinement_case_count"] == 1
+    assert phase_4["summary"]["minimum_top_k_candidate_count"] == 1
     assert phase_4["summary"]["phase4_exit_gate_status"] == "blocked"
     assert phase_4["summary"]["phase4_failed_criterion_count"] == 7
     assert phase_4["summary"]["phase4_failed_criteria"] == [
@@ -287,6 +294,22 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "clash_relief_materialized",
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
+    ]
+    gate_plan = phase_4["summary"]["gate_unblock_plan"][0]
+    assert gate_plan["slot_id"] == "top_k_refinement_rows"
+    assert gate_plan["unblocks_phase4_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert gate_plan["materialization_steps"] == [
+        "materialize_pocketmd_lite_topk_survival_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface",
     ]
     assert "fill_pocketmd_lite_operator_intake_packet" in phase_4["next_actions"]
     assert "regenerate_goal_bottleneck_action_board" in phase_4["next_actions"]

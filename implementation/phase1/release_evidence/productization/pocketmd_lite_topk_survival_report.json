@@ -8,9 +8,9 @@
   "claim_boundary": "This report is a seed shape for PocketMD Lite evidence. With zero real refinement rows it is intentionally blocked and cannot support a product claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T19:21:22.448740+00:00",
+  "generated_at": "2026-06-29T19:53:01.393904+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:b96199ea1669063d130796ef8db5f3eacfca5e7a23167909b917c15fbba2b7ab",
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:0d0386c74e40f1c7cf4f63d462959e430e18e35794346cccfa77305efa21dd95",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "materializer": {
@@ -140,7 +140,7 @@
   "reused_evidence": false,
   "rows": [],
   "schema_version": "pocketmd-lite-topk-survival-report.v1",
-  "source_commit_sha": "a98435ea8f163803fe8cd77c8819b8b85a30692b",
+  "source_commit_sha": "bcdcc552a994a9668290dfcb4da6055fe1f551c5",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 4,

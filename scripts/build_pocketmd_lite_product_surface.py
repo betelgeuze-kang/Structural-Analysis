@@ -39,6 +39,9 @@ SURFACE_SCHEMA_VERSION = "pocketmd-lite-science-product-surface.v1"
 
 POCKETMD_LITE_ROUTE = "/product/pocketmd-lite"
 POCKETMD_LITE_HANDOFF_ROUTE = "/product/pocketmd-lite/handoff"
+POCKETMD_LITE_OPERATOR_INTAKE_ROUTE = "/product/pocketmd-lite/operator-intake"
+POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT = 1
+POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT = 1
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -161,6 +164,43 @@ def _operator_intake_schema() -> dict[str, Any]:
     }
 
 
+def _operator_gate_unblock_plan(
+    *,
+    required_case_fields: list[str],
+    materializer_command: str,
+) -> list[dict[str, Any]]:
+    return [
+        {
+            "slot_id": "top_k_refinement_rows",
+            "title": "Top-k candidate local refinement rows",
+            "status": "operator_input_required",
+            "unblocks_phase4_criteria": [
+                "top_k_refinement_rows_present",
+                "local_min_survival_materialized",
+                "contact_persistence_materialized",
+                "h_bond_persistence_materialized",
+                "clash_relief_materialized",
+                "uncertainty_summary_materialized",
+                "report_blockers_resolved",
+            ],
+            "preserves_phase4_criteria": ["broad_all_atom_fep_claims_locked"],
+            "minimum_evidence": {
+                "real_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
+                "top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
+                "candidate_scope": "upstream_ranked_top_k_candidates_only",
+                "required_case_fields": required_case_fields,
+                "receipt_fields": ["provenance_ref", "source_checksum"],
+            },
+            "materialization_steps": [
+                "materialize_pocketmd_lite_topk_survival_report",
+                "refresh_product_capabilities_surface",
+                "refresh_goal_bottleneck_roadmap_surface",
+            ],
+            "materialization_command": materializer_command,
+        }
+    ]
+
+
 def build_contract(*, repo_root: Path = ROOT) -> dict[str, Any]:
     return {
         "schema_version": CONTRACT_SCHEMA_VERSION,
@@ -268,7 +308,11 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "route": POCKETMD_LITE_ROUTE,
         "read_model": {
             "route": POCKETMD_LITE_ROUTE,
-            "alternate_routes": [POCKETMD_LITE_HANDOFF_ROUTE, "/product/capabilities"],
+            "alternate_routes": [
+                POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+                POCKETMD_LITE_HANDOFF_ROUTE,
+                "/product/capabilities",
+            ],
             "artifact": str(DEFAULT_READONLY_API_OUT),
             "mutation_allowed": False,
         },
@@ -335,7 +379,11 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "route": POCKETMD_LITE_HANDOFF_ROUTE,
         "read_model": {
             "route": POCKETMD_LITE_HANDOFF_ROUTE,
-            "alternate_routes": [POCKETMD_LITE_ROUTE, "/product/capabilities"],
+            "alternate_routes": [
+                POCKETMD_LITE_ROUTE,
+                POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+                "/product/capabilities",
+            ],
             "artifact": str(DEFAULT_HANDOFF_OUT),
             "mutation_allowed": False,
         },
@@ -365,6 +413,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "operator_intake_reference": {
             "source_artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
             "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
+            "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
             "required_slot_id": "top_k_refinement_rows",
             "case_key": "cases",
         },
@@ -412,6 +461,10 @@ def build_operator_intake_packet(
         f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
         f"--out-surface {DEFAULT_SURFACE_OUT} --fail-blocked"
     )
+    gate_unblock_plan = _operator_gate_unblock_plan(
+        required_case_fields=required_case_fields,
+        materializer_command=materializer_command,
+    )
     return {
         "schema_version": OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
         **_metadata(
@@ -423,6 +476,19 @@ def build_operator_intake_packet(
         "status": "ready_for_operator_input",
         "reason_code": "PASS_INTAKE_PACKET",
         "contract_pass": True,
+        "read_model_ready": True,
+        "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "read_model": {
+            "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+            "alternate_routes": [
+                POCKETMD_LITE_ROUTE,
+                POCKETMD_LITE_HANDOFF_ROUTE,
+                "/product/capabilities",
+            ],
+            "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            "mutation_allowed": False,
+        },
+        "mutation_allowed": False,
         "owner_input_required": True,
         "product_surface_ready": False,
         "broad_all_atom_md_claim_safe": False,
@@ -449,6 +515,10 @@ def build_operator_intake_packet(
                 ],
             }
         ],
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
+        "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
         "current_surface_status": {
             "artifact": str(DEFAULT_SURFACE_OUT),
             "status": str(surface.get("status") or ""),
@@ -522,6 +592,9 @@ def build_operator_intake_packet(
         "summary": {
             "required_slot_count": 1,
             "required_case_field_count": len(required_case_fields),
+            "gate_unblock_plan_count": len(gate_unblock_plan),
+            "minimum_refinement_case_count": POCKETMD_LITE_MINIMUM_REFINEMENT_CASE_COUNT,
+            "minimum_top_k_candidate_count": POCKETMD_LITE_MINIMUM_TOP_K_CANDIDATE_COUNT,
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
             "product_surface_ready": False,
@@ -693,6 +766,14 @@ def _operator_intake_markdown(payload: dict[str, Any]) -> str:
             f"| `{slot['slot_id']}` | `{slot['status']}` | "
             f"`{', '.join(slot['required_case_fields'])}` |"
         )
+    lines.extend(["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"])
+    lines.append("|---|---|---|")
+    for row in payload["gate_unblock_plan"]:
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["unblocks_phase4_criteria"]
+        )
+        minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
+        lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")

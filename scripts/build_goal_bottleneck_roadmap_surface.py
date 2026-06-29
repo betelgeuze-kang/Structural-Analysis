@@ -539,6 +539,28 @@ def _pocketmd_row(
         decision.get("pocketmd_lite_product_surface_ready")
         or pocketmd_surface.get("product_surface_ready")
     )
+    operator_intake_route = str(
+        pocketmd_operator_intake.get("route")
+        or _as_dict(pocketmd_operator_intake.get("read_model")).get("route")
+        or "/product/pocketmd-lite/operator-intake"
+    )
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "unblocks_phase4_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase4_criteria"))
+            ],
+            "preserves_phase4_criteria": [
+                str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(pocketmd_operator_intake.get("gate_unblock_plan"))
+        if isinstance(row, dict)
+    ]
     return _roadmap_row(
         phase_id="phase_4_pocketmd_lite",
         phase_label="Phase 4",
@@ -558,6 +580,7 @@ def _pocketmd_row(
         ],
         linked_routes=[
             "/product/pocketmd-lite",
+            operator_intake_route,
             "/product/pocketmd-lite/handoff",
             "/product/capabilities",
         ],
@@ -595,9 +618,21 @@ def _pocketmd_row(
                 or ""
             ),
             "operator_intake_packet_status": str(pocketmd_operator_intake.get("status") or ""),
+            "operator_intake_route": operator_intake_route,
             "operator_intake_required_slot_count": _as_int(
                 pocketmd_operator_intake.get("required_slot_count")
             ),
+            "gate_unblock_plan_count": _as_int(
+                pocketmd_operator_intake.get("gate_unblock_plan_count")
+                or len(gate_unblock_plan)
+            ),
+            "minimum_refinement_case_count": _as_int(
+                pocketmd_operator_intake.get("minimum_refinement_case_count")
+            ),
+            "minimum_top_k_candidate_count": _as_int(
+                pocketmd_operator_intake.get("minimum_top_k_candidate_count")
+            ),
+            "gate_unblock_plan": gate_unblock_plan,
             "readiness_summary": _as_dict(pocketmd_surface.get("readiness_summary")),
             "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
             "phase4_failed_criterion_count": _as_int(

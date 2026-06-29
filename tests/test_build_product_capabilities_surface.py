@@ -160,7 +160,13 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert pocketmd["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
+    assert pocketmd["summary"]["operator_intake_route"] == (
+        "/product/pocketmd-lite/operator-intake"
+    )
     assert pocketmd["summary"]["operator_intake_required_slot_count"] == 1
+    assert pocketmd["summary"]["gate_unblock_plan_count"] == 1
+    assert pocketmd["summary"]["minimum_refinement_case_count"] == 1
+    assert pocketmd["summary"]["minimum_top_k_candidate_count"] == 1
     assert pocketmd["summary"]["phase4_exit_gate_status"] == "blocked"
     assert pocketmd["summary"]["phase4_failed_criterion_count"] == 7
     assert pocketmd["summary"]["phase4_failed_criteria"] == [
@@ -188,6 +194,23 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         row["slot_id"]: row["status"]
         for row in pocketmd["summary"]["operator_intake_slots"]
     } == {"top_k_refinement_rows": "operator_input_required"}
+    gate_plan = pocketmd["summary"]["gate_unblock_plan"][0]
+    assert gate_plan["slot_id"] == "top_k_refinement_rows"
+    assert gate_plan["unblocks_phase4_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert gate_plan["preserves_phase4_criteria"] == [
+        "broad_all_atom_fep_claims_locked"
+    ]
+    assert gate_plan["minimum_evidence"]["candidate_scope"] == (
+        "upstream_ranked_top_k_candidates_only"
+    )
     assert (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_readonly_api.json"

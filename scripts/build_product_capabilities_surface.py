@@ -346,6 +346,23 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
         for row in _as_list(operator_intake.get("input_slots"))
         if isinstance(row, dict)
     ]
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "unblocks_phase4_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase4_criteria"))
+            ],
+            "preserves_phase4_criteria": [
+                str(item) for item in _as_list(row.get("preserves_phase4_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(operator_intake.get("gate_unblock_plan"))
+        if isinstance(row, dict)
+    ]
     ready = bool(surface.get("product_surface_ready") and surface.get("contract_pass"))
     return _capability_row(
         capability_id="pocketmd_lite_top_k_refinement",
@@ -393,8 +410,22 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
                 or ""
             ),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_route": str(
+                operator_intake.get("route")
+                or _as_dict(operator_intake.get("read_model")).get("route")
+                or ""
+            ),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
+            ),
+            "gate_unblock_plan_count": int(
+                operator_intake.get("gate_unblock_plan_count") or len(gate_unblock_plan)
+            ),
+            "minimum_refinement_case_count": int(
+                operator_intake.get("minimum_refinement_case_count") or 0
+            ),
+            "minimum_top_k_candidate_count": int(
+                operator_intake.get("minimum_top_k_candidate_count") or 0
             ),
             "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
             "phase4_failed_criterion_count": int(
@@ -405,6 +436,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             ],
             "phase4_exit_gate_criteria": phase4_criteria,
             "operator_intake_slots": operator_slots,
+            "gate_unblock_plan": gate_unblock_plan,
         },
     )
 
