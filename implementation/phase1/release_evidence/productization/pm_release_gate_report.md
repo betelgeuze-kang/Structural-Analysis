@@ -20,17 +20,17 @@
 - `operator_action_count`: `12`
 - `approval_token_count`: `7`
 - `stale_artifact_count`: `0`
-- `evidence_surface_count`: `8`
+- `evidence_surface_count`: `10`
 - `missing_evidence_surface_count`: `0`
-- `locked_evidence_surface_count`: `0`
-- `h_bond_evidence_surface_present`: `False`
-- `gpcr_evidence_surface_present`: `False`
+- `locked_evidence_surface_count`: `2`
+- `h_bond_evidence_surface_present`: `True`
+- `gpcr_evidence_surface_present`: `True`
 - `public_benchmark_ready`: `False`
 - `public_benchmark_source_of_truth_ready`: `False`
 - `public_benchmark_source_of_truth_status`: `seed_ready_materialization_blocked`
 - `public_benchmark_source_of_truth_blockers`: `casf_pdbbind_source_material_not_attached, public_benchmark_real_pose_predictions_missing, public_benchmark_external_receipts_missing`
 - `broad_gpcr_family_claim_safe`: `False`
-- `science_evidence_surface_bottlenecks`: `h_bond_evidence_surface_missing, gpcr_evidence_surface_missing`
+- `science_evidence_surface_bottlenecks`: `h_bond_evidence_surface_locked, broad_gpcr_family_claim_locked`
 - `next_locally_closable_gaps`: `G1`
 
 | Milestone | Status | Blockers |

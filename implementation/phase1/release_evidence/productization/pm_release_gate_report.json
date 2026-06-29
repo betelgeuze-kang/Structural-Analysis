@@ -59,7 +59,7 @@
       "total_count": 20
     }
   },
-  "generated_at": "2026-06-29T15:06:11.147369+00:00",
+  "generated_at": "2026-06-29T15:12:07.488553+00:00",
   "implementation_orchestration": {
     "artifacts": {
       "ai_orchestration_preflight": "implementation/phase1/release_evidence/productization/ai_orchestration_preflight_report.json"
@@ -112,8 +112,8 @@
     "implementation/phase1/release_evidence/productization/ndtha_residual_gate_report.json": "sha256:1b8b864471f2361e0088615ed342423a3e924c57533a9709df8368a00027ecf5",
     "implementation/phase1/release_evidence/productization/opensees_roundtrip_trace_report.json": "sha256:591741c395b8d77e12d7a7f2801bb3b3087a9e24457de28f68777ee2f7af82e1",
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:099ad0cebcf7fffccc7be492962dd5a5cc13a035a6eafefad835bb2e515e6a48",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8b27df05ca3331b649dbf719cdb6a0b420d64f1c993a756f185093c33d0985bc",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:25df0528af3d8e92c0eaa0824e63eed038f9b5c5bbd2b61ee1ad684b3ace855b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:2a4722616c23aa2f015fb38198fa1f415664a5eca3250bc48531e676a772b51c",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json": "sha256:a70e1a74ded6893cd58d6b8b07eba99bb7a5f7bd40790a18c976d4f6d48758b2",
     "implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json": "sha256:85348ffa93f1ae4ad81a4412c22625a0f4eeb18559dea66759c7b13e0ee16460",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_hip_report.json": "sha256:d5e1a37e6616cdf3ac46571bdebb546cd77083fa4d32c1239e5b4f0157e9adc7",
     "implementation/phase1/release_evidence/productization/pm_strict_ci_require_ndtha_report.json": "sha256:d0ef76e08c8a845687bc7c11d949952b478d3709e56b112ac2d52e2d962da509",
@@ -128,6 +128,8 @@
     "implementation/phase1/release_evidence/productization/worst_case_report.json": "sha256:bef6af55560c5094526cfc686123a549cfb267edf1559f642e9deccd4dbdb2b4",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:dc2689e2c94ae6c08b97de3272a63d3320a6902f6cf1f0b970edf63cd53182a2",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
     "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
@@ -943,7 +945,7 @@
       "ok": false,
       "status": "blocked",
       "summary": {
-        "feature_ahead_count": 120,
+        "feature_ahead_count": 123,
         "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -961,7 +963,7 @@
     "blocked_release_count": 8,
     "broad_gpcr_family_claim_safe": false,
     "claim_boundary": "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked.",
-    "evidence_surface_count": 8,
+    "evidence_surface_count": 10,
     "evidence_surface_dir": "implementation/phase1/release_evidence/surface",
     "evidence_surfaces": [
       {
@@ -987,6 +989,30 @@
         "status": "PASS",
         "summary_line": "General FE contact matrix: PASS | ready=10/10 | direct=6/6 | foundation=yes | interface=yes | ssi=yes | soil_tunnel=yes | support=contact:6,foundation:4,device:5 | support_search=9 | node_surface_proxy=5 | support_depth=21 | coupling_depth=31 | support_families=2/2 | proxy_families=2/2",
         "surface_id": "general_fe_contact_benchmark_gate_report"
+      },
+      {
+        "blocker_count": 3,
+        "contract_pass": false,
+        "locked": true,
+        "missing": false,
+        "path": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "present": true,
+        "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
+        "status": "locked",
+        "summary_line": "GPCR hard-decoy evidence surface: LOCKED | DRD2/HTR2A/OPRM1 numeric criteria missing",
+        "surface_id": "gpcr_hard_decoy_evidence_surface"
+      },
+      {
+        "blocker_count": 2,
+        "contract_pass": false,
+        "locked": true,
+        "missing": false,
+        "path": "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json",
+        "present": true,
+        "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
+        "status": "locked",
+        "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
+        "surface_id": "h_bond_backmap_evidence_surface"
       },
       {
         "blocker_count": 0,
@@ -1062,9 +1088,9 @@
       }
     ],
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "gpcr_evidence_surface_present": false,
-    "h_bond_evidence_surface_present": false,
-    "locked_evidence_surface_count": 0,
+    "gpcr_evidence_surface_present": true,
+    "h_bond_evidence_surface_present": true,
+    "locked_evidence_surface_count": 2,
     "missing_evidence_surface_count": 0,
     "operator_action_count": 12,
     "operator_actions": [],
@@ -1078,30 +1104,34 @@
     "public_benchmark_source_of_truth_status": "seed_ready_materialization_blocked",
     "release_allowed": false,
     "science_evidence_surface_bottlenecks": [
-      "h_bond_evidence_surface_missing",
-      "gpcr_evidence_surface_missing"
+      "h_bond_evidence_surface_locked",
+      "broad_gpcr_family_claim_locked"
     ],
     "science_evidence_surface_status": {
       "gpcr": {
-        "bottleneck": "gpcr_evidence_surface_missing",
+        "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": false,
         "contract_pass_count": 0,
-        "locked_count": 0,
-        "present": false,
-        "status": "missing",
-        "surface_count": 0,
+        "locked_count": 1,
+        "present": true,
+        "status": "locked",
+        "surface_count": 1,
         "surface_family": "gpcr",
-        "surface_ids": []
+        "surface_ids": [
+          "gpcr_hard_decoy_evidence_surface"
+        ]
       },
       "h_bond": {
-        "bottleneck": "h_bond_evidence_surface_missing",
+        "bottleneck": "h_bond_evidence_surface_locked",
         "contract_pass_count": 0,
-        "locked_count": 0,
-        "present": false,
-        "status": "missing",
-        "surface_count": 0,
+        "locked_count": 1,
+        "present": true,
+        "status": "locked",
+        "surface_count": 1,
         "surface_family": "h_bond",
-        "surface_ids": []
+        "surface_ids": [
+          "h_bond_backmap_evidence_surface"
+        ]
       }
     },
     "stale_artifact_count": 0,
@@ -1162,6 +1192,6 @@
   "reuse_policy": "status_rebuilt_from_pm_release_gate_input_receipts",
   "reused_evidence": true,
   "schema_version": "pm-release-gate-report.v1",
-  "source_commit_sha": "9b1d9164968ff9938ecf57c257807fd21e530695",
+  "source_commit_sha": "805535fc436b121690d567fd23bf402e6d54b7b9",
   "summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304"
 }
