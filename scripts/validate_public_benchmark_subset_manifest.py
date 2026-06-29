@@ -46,8 +46,12 @@ def _validate_case_row(row: dict[str, Any], *, index: int) -> list[str]:
         atom_ids = _as_list(atom_order.get("atom_ids"))
         if atom_count <= 0:
             blockers.append(f"case_row_{index}:atom_count_missing")
+        if not atom_ids:
+            blockers.append(f"case_row_{index}:atom_ids_missing")
         if atom_ids and atom_count and len(atom_ids) != atom_count:
             blockers.append(f"case_row_{index}:atom_ids_count_mismatch")
+        if atom_ids and len({str(atom_id) for atom_id in atom_ids}) != len(atom_ids):
+            blockers.append(f"case_row_{index}:atom_ids_not_unique")
     symmetry = row.get("symmetry_permutation_contract")
     if isinstance(symmetry, dict):
         permutations = _as_list(symmetry.get("permutations"))

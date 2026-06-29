@@ -67,6 +67,42 @@ def test_validate_complete_manifest_ready() -> None:
     assert result["materialized_case_count"] == 2
 
 
+def test_validate_manifest_requires_explicit_ligand_atom_ids() -> None:
+    row = _complete_row("case_a")
+    row["ligand_atom_order_contract"] = {
+        "atom_count": 3,
+        "atom_ids": [],
+    }
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:atom_ids_missing"]
+
+
+def test_validate_manifest_rejects_duplicate_ligand_atom_ids() -> None:
+    row = _complete_row("case_a")
+    row["ligand_atom_order_contract"] = {
+        "atom_count": 3,
+        "atom_ids": ["C1", "O1", "O1"],
+    }
+
+    result = module.validate_subset_manifest(
+        {
+            "target_subset_case_count": 1,
+            "case_rows": [row],
+        }
+    )
+
+    assert result["public_benchmark_ready"] is False
+    assert result["blockers"] == ["case_row_0:atom_ids_not_unique"]
+
+
 def test_validate_manifest_cli_writes_result(tmp_path: Path) -> None:
     manifest = tmp_path / "manifest.json"
     manifest.write_text(
