@@ -538,6 +538,24 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
         for row in _as_list(operator_intake.get("target_slots"))
         if isinstance(row, dict)
     ]
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "unblocks_phase3_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(
+            operator_intake.get("gate_unblock_plan")
+            or _as_dict(product_report.get("operator_intake_packet")).get("gate_unblock_plan")
+        )
+        if isinstance(row, dict)
+    ]
     state = _state(surface)
     return _capability_row(
         capability_id="gpcr_hard_decoy_evidence",
@@ -575,6 +593,27 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),
+            "gate_unblock_plan_count": int(
+                operator_intake.get("gate_unblock_plan_count")
+                or _as_dict(product_report.get("operator_intake_packet")).get(
+                    "gate_unblock_plan_count"
+                )
+                or len(gate_unblock_plan)
+            ),
+            "minimum_target_count": int(
+                operator_intake.get("minimum_target_count")
+                or _as_dict(product_report.get("operator_intake_packet")).get(
+                    "minimum_target_count"
+                )
+                or 0
+            ),
+            "minimum_metric_field_count_per_target": int(
+                operator_intake.get("minimum_metric_field_count_per_target")
+                or _as_dict(product_report.get("operator_intake_packet")).get(
+                    "minimum_metric_field_count_per_target"
+                )
+                or 0
+            ),
             "broad_gpcr_family_claim_safe": bool(surface.get("broad_gpcr_family_claim_safe")),
             "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
             "phase3_failed_criterion_count": int(
@@ -585,6 +624,7 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             ],
             "phase3_exit_gate_criteria": phase3_gate_criteria,
             "operator_target_slots": operator_target_slots,
+            "gate_unblock_plan": gate_unblock_plan,
         },
     )
 

@@ -44,6 +44,12 @@ REQUIRED_OPERATOR_FIELDS = (
     "decoys_above_positive_count",
     "positive_out_anchored_by_top_decoys",
 )
+PHASE3_EXIT_CRITERIA_BY_FIELD = {
+    "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+    "top20_hit_rate": "top20_hit_rate_min",
+    "decoys_above_positive_count": "decoys_above_positive_count_max",
+    "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+}
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -104,6 +110,38 @@ def _target_slot(target_id: str) -> dict[str, Any]:
     }
 
 
+def _gate_unblock_plan(*, materialize_command: str) -> list[dict[str, Any]]:
+    return [
+        {
+            "slot_id": f"{target_id.lower()}_hard_decoy_metrics",
+            "target_id": target_id,
+            "status": "operator_input_required",
+            "unblocks_phase3_criteria": list(PHASE3_EXIT_CRITERIA_BY_FIELD.values()),
+            "minimum_evidence": {
+                "target_id": target_id,
+                "required_operator_fields": list(REQUIRED_OPERATOR_FIELDS),
+                "criterion_by_field": dict(PHASE3_EXIT_CRITERIA_BY_FIELD),
+                "thresholds": {
+                    "ranking_pr_auc_ci_low": f">={EXIT_CRITERIA['ranking_pr_auc_ci_low_min']}",
+                    "top20_hit_rate": f">={EXIT_CRITERIA['top20_hit_rate_min']}",
+                    "decoys_above_positive_count": f"<={EXIT_CRITERIA['decoys_above_positive_count_max']}",
+                    "positive_out_anchored_by_top_decoys": EXIT_CRITERIA[
+                        "positive_out_anchored_by_top_decoys_allowed"
+                    ],
+                },
+            },
+            "materialization_steps": [
+                "materialize_gpcr_hard_decoy_suite_report",
+                "refresh_gpcr_hard_decoy_product_report",
+                "refresh_product_capabilities_surface",
+                "refresh_goal_bottleneck_roadmap_surface",
+            ],
+            "materialization_command": materialize_command,
+        }
+        for target_id in REQUIRED_TARGETS
+    ]
+
+
 def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
@@ -135,6 +173,7 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "python3 scripts/build_goal_bottleneck_roadmap_surface.py "
         f"--out {DEFAULT_GOAL_BOTTLENECK}"
     )
+    gate_unblock_plan = _gate_unblock_plan(materialize_command=materialize_command)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -163,6 +202,10 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "exit_criteria": EXIT_CRITERIA,
         "target_slots": [_target_slot(target_id) for target_id in REQUIRED_TARGETS],
         "required_slot_count": len(REQUIRED_TARGETS),
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "minimum_target_count": len(REQUIRED_TARGETS),
+        "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
         "operator_template": {
             "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             "schema_version": str(template.get("schema_version") or "gpcr-hard-decoy-operator-intake.v1"),
@@ -236,6 +279,9 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         ],
         "summary": {
             "required_slot_count": len(REQUIRED_TARGETS),
+            "gate_unblock_plan_count": len(gate_unblock_plan),
+            "minimum_target_count": len(REQUIRED_TARGETS),
+            "minimum_metric_field_count_per_target": len(REQUIRED_OPERATOR_FIELDS) - 1,
             "current_blocker_count": len(blockers),
             "first_blocked_target": first_blocked_target,
             "broad_gpcr_family_claim_safe": False,
@@ -270,6 +316,14 @@ def _markdown(payload: dict[str, Any]) -> str:
             f"| `{slot['target_id']}` | `{slot['status']}` | "
             f"`{', '.join(slot['required_fields'])}` |"
         )
+    lines.extend(["", "## Gate Unblock Plan", "", "| Target | Criteria | Minimum Evidence |"])
+    lines.append("|---|---|---|")
+    for row in payload["gate_unblock_plan"]:
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["unblocks_phase3_criteria"]
+        )
+        minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
+        lines.append(f"| `{row['target_id']}` | {criteria} | `{minimum}` |")
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")

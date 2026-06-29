@@ -451,6 +451,25 @@ def _gpcr_row(
         for row in _as_list(gpcr_operator_intake.get("target_slots"))
         if isinstance(row, dict)
     ]
+    source_operator_summary = _as_dict(gpcr_product_report.get("operator_intake_packet"))
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "unblocks_phase3_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_phase3_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(
+            gpcr_operator_intake.get("gate_unblock_plan")
+            or source_operator_summary.get("gate_unblock_plan")
+        )
+        if isinstance(row, dict)
+    ]
     product_report_route = str(
         gpcr_product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"
     )
@@ -492,6 +511,19 @@ def _gpcr_row(
             "operator_intake_required_slot_count": _as_int(
                 gpcr_operator_intake.get("required_slot_count")
             ),
+            "gate_unblock_plan_count": _as_int(
+                gpcr_operator_intake.get("gate_unblock_plan_count")
+                or source_operator_summary.get("gate_unblock_plan_count")
+                or len(gate_unblock_plan)
+            ),
+            "minimum_target_count": _as_int(
+                gpcr_operator_intake.get("minimum_target_count")
+                or source_operator_summary.get("minimum_target_count")
+            ),
+            "minimum_metric_field_count_per_target": _as_int(
+                gpcr_operator_intake.get("minimum_metric_field_count_per_target")
+                or source_operator_summary.get("minimum_metric_field_count_per_target")
+            ),
             "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
             "phase3_failed_criterion_count": _as_int(
                 phase3_exit_gate.get("failed_criterion_count")
@@ -501,6 +533,7 @@ def _gpcr_row(
             ],
             "phase3_exit_gate_criteria": phase3_gate_criteria,
             "operator_target_slots": operator_target_slots,
+            "gate_unblock_plan": gate_unblock_plan,
         },
     )
 

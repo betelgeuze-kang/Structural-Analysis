@@ -63,6 +63,36 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
         "HTR2A",
         "OPRM1",
     ]
+    assert packet["gate_unblock_plan_count"] == 3
+    assert packet["minimum_target_count"] == 3
+    assert packet["minimum_metric_field_count_per_target"] == 4
+    gate_plan = {row["target_id"]: row for row in packet["gate_unblock_plan"]}
+    assert set(gate_plan) == {"DRD2", "HTR2A", "OPRM1"}
+    assert gate_plan["DRD2"]["slot_id"] == "drd2_hard_decoy_metrics"
+    assert gate_plan["DRD2"]["unblocks_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert gate_plan["DRD2"]["minimum_evidence"]["thresholds"] == {
+        "decoys_above_positive_count": "<=0",
+        "positive_out_anchored_by_top_decoys": False,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2",
+    }
+    assert gate_plan["DRD2"]["minimum_evidence"]["criterion_by_field"] == {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min",
+    }
+    assert gate_plan["DRD2"]["materialization_steps"] == [
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface",
+    ]
     assert packet["current_suite_status"]["first_blocked_target"] == "DRD2"
     assert packet["current_suite_status"]["blocker_count"] == 12
 
@@ -106,4 +136,5 @@ def test_gpcr_hard_decoy_operator_intake_packet_cli_writes_json_and_markdown(
     ].startswith("sha256:")
     assert payload["packet_id"] == "gpcr_hard_decoy_operator_intake_packet"
     assert "# GPCR Hard-Decoy Operator Intake Packet" in markdown
+    assert "## Gate Unblock Plan" in markdown
     assert "materialize_gpcr_hard_decoy_suite_report" in markdown

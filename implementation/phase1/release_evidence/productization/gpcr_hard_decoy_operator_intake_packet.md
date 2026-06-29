@@ -12,6 +12,14 @@
 | `HTR2A` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys` |
 | `OPRM1` | `operator_input_required` | `target_id, ranking_pr_auc_ci_low, top20_hit_rate, decoys_above_positive_count, positive_out_anchored_by_top_decoys` |
 
+## Gate Unblock Plan
+
+| Target | Criteria | Minimum Evidence |
+|---|---|---|
+| `DRD2` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "DRD2", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+| `HTR2A` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "HTR2A", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+| `OPRM1` | `ranking_pr_auc_ci_low_min`, `top20_hit_rate_min`, `decoys_above_positive_count_max`, `no_positive_out_anchored_by_top_decoys` | `{"criterion_by_field": {"decoys_above_positive_count": "decoys_above_positive_count_max", "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys", "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min", "top20_hit_rate": "top20_hit_rate_min"}, "required_operator_fields": ["target_id", "ranking_pr_auc_ci_low", "top20_hit_rate", "decoys_above_positive_count", "positive_out_anchored_by_top_decoys"], "target_id": "OPRM1", "thresholds": {"decoys_above_positive_count": "<=0", "positive_out_anchored_by_top_decoys": false, "ranking_pr_auc_ci_low": ">=0.45", "top20_hit_rate": ">=0.2"}}` |
+
 ## Materialization Sequence
 
 - `fill_gpcr_hard_decoy_operator_template`: `edit implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json`

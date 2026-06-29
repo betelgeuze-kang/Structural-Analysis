@@ -167,6 +167,29 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
                 "mutation_allowed": False,
             },
             "required_slot_count": int(operator_intake.get("required_slot_count") or 0),
+            "gate_unblock_plan_count": int(
+                operator_intake.get("gate_unblock_plan_count") or 0
+            ),
+            "minimum_target_count": int(operator_intake.get("minimum_target_count") or 0),
+            "minimum_metric_field_count_per_target": int(
+                operator_intake.get("minimum_metric_field_count_per_target") or 0
+            ),
+            "gate_unblock_plan": [
+                {
+                    "slot_id": str(row.get("slot_id") or ""),
+                    "target_id": str(row.get("target_id") or ""),
+                    "unblocks_phase3_criteria": [
+                        str(item)
+                        for item in _as_list(row.get("unblocks_phase3_criteria"))
+                    ],
+                    "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+                    "materialization_steps": [
+                        str(item) for item in _as_list(row.get("materialization_steps"))
+                    ],
+                }
+                for row in _as_list(operator_intake.get("gate_unblock_plan"))
+                if isinstance(row, dict)
+            ],
         },
         "endpoints": [
             {
@@ -229,6 +252,13 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
+            ),
+            "gate_unblock_plan_count": int(
+                operator_intake.get("gate_unblock_plan_count") or 0
+            ),
+            "minimum_target_count": int(operator_intake.get("minimum_target_count") or 0),
+            "minimum_metric_field_count_per_target": int(
+                operator_intake.get("minimum_metric_field_count_per_target") or 0
             ),
             "first_blocked_target": str(
                 suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
