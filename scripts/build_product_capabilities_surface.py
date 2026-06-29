@@ -34,6 +34,8 @@ DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_rep
 DEFAULT_H_BOND_SURFACE = SURFACE_DIR / "h_bond_backmap_evidence_surface.json"
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
+DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
+DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.md"
 
 STRUCTURAL_SURFACE_PATHS = (
     SURFACE_DIR / "element_material_breadth_gate_report.json",
@@ -262,16 +264,27 @@ def _single_surface_capability(
 def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
     surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
+    operator_intake = _load_json(repo_root, DEFAULT_GPCR_OPERATOR_INTAKE_PACKET)
     state = _state(surface)
     return _capability_row(
         capability_id="gpcr_hard_decoy_evidence",
         title="GPCR hard-decoy evidence",
         capability_kind="science_evidence_surface",
         state=state,
-        evidence_artifacts=[DEFAULT_GPCR_SURFACE, DEFAULT_GPCR_PRODUCT_REPORT],
+        evidence_artifacts=[
+            DEFAULT_GPCR_SURFACE,
+            DEFAULT_GPCR_PRODUCT_REPORT,
+            DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
+            DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD,
+        ],
         contract_pass=state == "ready",
         blocker_count=len(_blockers(surface)),
-        next_actions=_next_actions(surface) or ([] if state == "ready" else ["run_gpcr_hard_decoy_suite_materializer"]),
+        next_actions=_dedupe(
+            _next_actions(product_report)
+            + _next_actions(operator_intake)
+            + _next_actions(surface)
+            + ([] if state == "ready" else ["run_gpcr_hard_decoy_suite_materializer"])
+        ),
         summary={
             "status": str(surface.get("status") or ""),
             "reason_code": str(surface.get("reason_code") or ""),
@@ -279,6 +292,10 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "root_cause_tags": [str(row) for row in _as_list(surface.get("root_cause_tags"))],
             "product_report_route": str(product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"),
             "product_report_ready": bool(product_report.get("read_model_ready")),
+            "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": int(
+                operator_intake.get("required_slot_count") or 0
+            ),
             "broad_gpcr_family_claim_safe": bool(surface.get("broad_gpcr_family_claim_safe")),
         },
     )
@@ -294,6 +311,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_POCKETMD_TOPK_REPORT,
         DEFAULT_POCKETMD_SURFACE,
         DEFAULT_GPCR_PRODUCT_REPORT,
+        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
+        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_H_BOND_SURFACE,
         DEFAULT_GPCR_SURFACE,
         *STRUCTURAL_SURFACE_PATHS,

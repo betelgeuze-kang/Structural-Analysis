@@ -28,6 +28,9 @@ DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE = (
     PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 )
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
+DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = (
+    PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
+)
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
@@ -79,6 +82,7 @@ def _input_paths() -> list[Path]:
         DEFAULT_PUBLIC_BENCHMARK,
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
         DEFAULT_GPCR_PRODUCT_REPORT,
+        DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
         DEFAULT_GPCR_SURFACE,
         DEFAULT_POCKETMD_SURFACE,
         DEFAULT_PRODUCT_CAPABILITIES,
@@ -277,6 +281,7 @@ def _gpcr_row(
     *,
     decision: dict[str, Any],
     gpcr_product_report: dict[str, Any],
+    gpcr_operator_intake: dict[str, Any],
     gpcr_surface: dict[str, Any],
     action_register: dict[str, Any],
     product_capabilities: dict[str, Any],
@@ -310,10 +315,15 @@ def _gpcr_row(
         bottleneck="" if broad_safe else "broad_gpcr_family_claim_locked",
         first_blocked_target=first_target,
         root_cause_tags=root_cause_tags,
-        evidence_artifacts=[DEFAULT_GPCR_PRODUCT_REPORT, DEFAULT_GPCR_SURFACE],
+        evidence_artifacts=[
+            DEFAULT_GPCR_PRODUCT_REPORT,
+            DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
+            DEFAULT_GPCR_SURFACE,
+        ],
         linked_routes=["/product/gpcr-hard-decoy-suite-report"],
         next_actions=_dedupe(
             [str(row) for row in _as_list(gpcr_product_report.get("next_actions"))]
+            + [str(row) for row in _as_list(gpcr_operator_intake.get("next_actions"))]
             + [str(row) for row in _as_list(capability.get("next_actions"))]
             + (["run_gpcr_hard_decoy_suite_materializer"] if not broad_safe else [])
         ),
@@ -323,6 +333,10 @@ def _gpcr_row(
             "target_pass_count": _as_int(gpcr_product_report.get("target_pass_count")),
             "science_claim_status": str(gpcr_product_report.get("science_claim_status") or ""),
             "product_report_ready": _as_bool(gpcr_product_report.get("read_model_ready")),
+            "operator_intake_packet_status": str(gpcr_operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": _as_int(
+                gpcr_operator_intake.get("required_slot_count")
+            ),
         },
     )
 
@@ -395,6 +409,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE
     )
     gpcr_product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
+    gpcr_operator_intake = _load_json(repo_root, DEFAULT_GPCR_OPERATOR_INTAKE_PACKET)
     gpcr_surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     pocketmd_surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
@@ -439,6 +454,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         _gpcr_row(
             decision=decision,
             gpcr_product_report=gpcr_product_report,
+            gpcr_operator_intake=gpcr_operator_intake,
             gpcr_surface=gpcr_surface,
             action_register=action_register,
             product_capabilities=product_capabilities,

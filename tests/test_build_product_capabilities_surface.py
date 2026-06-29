@@ -88,10 +88,17 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gpcr["state"] == "blocked"
     assert gpcr["summary"]["product_report_route"] == "/product/gpcr-hard-decoy-suite-report"
     assert gpcr["summary"]["broad_gpcr_family_claim_safe"] is False
+    assert gpcr["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
+    assert gpcr["summary"]["operator_intake_required_slot_count"] == 3
     assert (
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
         in gpcr["evidence_artifacts"]
     )
+    assert (
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json"
+        in gpcr["evidence_artifacts"]
+    )
+    assert "fill_gpcr_hard_decoy_operator_intake_packet" in gpcr["next_actions"]
 
 
 def test_product_capabilities_surface_cli_writes_pm_visible_ready_surface(

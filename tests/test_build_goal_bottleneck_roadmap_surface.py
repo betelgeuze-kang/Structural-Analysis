@@ -87,6 +87,13 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_3["first_blocked_target"] == "DRD2"
     assert phase_3["root_cause_tags"] == ["operator_values_required"]
     assert phase_3["linked_routes"] == ["/product/gpcr-hard-decoy-suite-report"]
+    assert (
+        "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json"
+        in phase_3["evidence_artifacts"]
+    )
+    assert phase_3["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
+    assert phase_3["summary"]["operator_intake_required_slot_count"] == 3
+    assert "fill_gpcr_hard_decoy_operator_intake_packet" in phase_3["next_actions"]
 
     phase_4 = rows["phase_4_pocketmd_lite"]
     assert phase_4["state"] == "blocked"

@@ -21,6 +21,8 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 
 DEFAULT_OPERATOR_TEMPLATE = PRODUCTIZATION / "gpcr_hard_decoy_operator_template.json"
+DEFAULT_OPERATOR_INTAKE_PACKET = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
+DEFAULT_OPERATOR_INTAKE_PACKET_MD = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.md"
 DEFAULT_SUITE_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_suite_report.json"
 DEFAULT_EVIDENCE_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
@@ -56,6 +58,8 @@ def _input_paths() -> list[Path]:
         Path("scripts/build_gpcr_hard_decoy_product_report.py"),
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
         DEFAULT_OPERATOR_TEMPLATE,
+        DEFAULT_OPERATOR_INTAKE_PACKET,
+        DEFAULT_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_SUITE_REPORT,
         DEFAULT_EVIDENCE_SURFACE,
     ]
@@ -86,6 +90,7 @@ def _required_fields_from_template(template: dict[str, Any]) -> list[str]:
 
 def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
     template = _load_json(repo_root, DEFAULT_OPERATOR_TEMPLATE)
+    operator_intake = _load_json(repo_root, DEFAULT_OPERATOR_INTAKE_PACKET)
     suite = _load_json(repo_root, DEFAULT_SUITE_REPORT)
     surface = _load_json(repo_root, DEFAULT_EVIDENCE_SURFACE)
     broad_safe = bool(suite.get("broad_gpcr_family_claim_safe"))
@@ -127,6 +132,8 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "required_operator_fields": _required_fields_from_template(template),
         "science_blockers": science_blockers,
         "linked_artifacts": {
+            "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+            "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD),
             "operator_template": str(DEFAULT_OPERATOR_TEMPLATE),
             "suite_report": str(DEFAULT_SUITE_REPORT),
             "evidence_surface": str(DEFAULT_EVIDENCE_SURFACE),
@@ -151,6 +158,12 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
                 "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             },
             {
+                "endpoint_id": "get_gpcr_hard_decoy_operator_intake_packet",
+                "method": "GET",
+                "route": "/product/gpcr-hard-decoy-suite-report/operator-intake-packet",
+                "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+            },
+            {
                 "endpoint_id": "list_gpcr_hard_decoy_required_fields",
                 "method": "GET",
                 "route": "/product/gpcr-hard-decoy-suite-report/required-fields",
@@ -168,6 +181,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             ["review_gpcr_hard_decoy_suite_report"]
             if broad_safe
             else [
+                "fill_gpcr_hard_decoy_operator_intake_packet",
                 "fill_drd2_htr2a_oprm1_operator_template_values",
                 "run_gpcr_hard_decoy_materializer",
                 "refresh_gpcr_hard_decoy_product_report",
@@ -180,6 +194,10 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "target_count": target_count,
             "target_pass_count": target_pass_count,
             "science_blocker_count": len(science_blockers),
+            "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": int(
+                operator_intake.get("required_slot_count") or 0
+            ),
             "first_blocked_target": str(
                 suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
             ),

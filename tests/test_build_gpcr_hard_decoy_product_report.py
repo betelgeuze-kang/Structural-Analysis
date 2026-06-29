@@ -46,12 +46,28 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert "DRD2:ranking_pr_auc_ci_low_required" in report["science_blockers"]
     assert report["linked_artifacts"] == {
         "evidence_surface": "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json",
+        "operator_intake_packet": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.json"
+        ),
+        "operator_intake_packet_markdown": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.md"
+        ),
         "operator_template": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
         "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
     }
     assert {row["method"] for row in report["endpoints"]} == {"GET"}
+    assert {
+        row["endpoint_id"] for row in report["endpoints"]
+    } >= {"get_gpcr_hard_decoy_operator_intake_packet"}
     assert "promote_broad_gpcr_claim" in report["forbidden_operations"]
+    assert "fill_gpcr_hard_decoy_operator_intake_packet" in report["next_actions"]
     assert "fill_drd2_htr2a_oprm1_operator_template_values" in report["next_actions"]
+    assert report["summary"]["operator_intake_packet_status"] == (
+        "ready_for_operator_input"
+    )
+    assert report["summary"]["operator_intake_required_slot_count"] == 3
 
 
 def test_gpcr_hard_decoy_product_report_cli_writes_contract(tmp_path: Path) -> None:
