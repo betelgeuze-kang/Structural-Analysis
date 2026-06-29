@@ -299,6 +299,17 @@ def _public_benchmark_row(
         if isinstance(row, dict)
     ]
     ready = _as_bool(decision.get("public_benchmark_ready") or public_benchmark.get("public_benchmark_ready"))
+    source_route = str(
+        public_benchmark.get("route")
+        or _as_dict(public_benchmark.get("read_model")).get("route")
+        or "/product/public-benchmark"
+    )
+    operator_route = str(
+        public_benchmark_operator_intake.get("route")
+        or _as_dict(public_benchmark_operator_intake.get("read_model")).get("route")
+        or _as_dict(public_benchmark.get("operator_intake_packet")).get("route")
+        or "/product/public-benchmark/operator-intake"
+    )
     return _roadmap_row(
         phase_id="phase_2_public_benchmark_harness",
         phase_label="Phase 2",
@@ -307,6 +318,7 @@ def _public_benchmark_row(
         bottleneck="" if ready else "public_benchmark_source_of_truth_not_ready",
         first_blocker=str(action.get("first_blocker") or _first_str(blockers)),
         evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE],
+        linked_routes=[source_route, operator_route, "/product/capabilities"],
         next_actions=_dedupe(
             [str(row) for row in _as_list(action.get("next_actions"))]
             + [str(row) for row in _as_list(capability.get("next_actions"))]
@@ -315,9 +327,12 @@ def _public_benchmark_row(
         ),
         summary={
             "status": str(public_benchmark.get("status") or ""),
+            "read_model_ready": _as_bool(public_benchmark.get("read_model_ready")),
+            "source_of_truth_route": source_route,
             "tier_beta_ready": _as_bool(public_benchmark.get("tier_beta_ready")),
             "public_benchmark_ready": ready,
             "blockers": blockers,
+            "operator_intake_route": operator_route,
             "operator_intake_packet_status": str(
                 public_benchmark_operator_intake.get("status") or ""
             ),

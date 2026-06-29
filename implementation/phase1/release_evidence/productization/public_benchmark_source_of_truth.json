@@ -25,10 +25,10 @@
     "real_enrichment_target_count": 0,
     "status": "operator_evidence_required"
   },
-  "generated_at": "2026-06-29T19:00:37.664487+00:00",
+  "generated_at": "2026-06-29T19:30:18.269948+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ef02271482a5d93eab992420a4bb660b1ba4c56b6adf869d7ad2ed57ad29fcc6",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8efafea19055ca7e272b3094b40dc25ecfedacf0752a2a4c67c2066664e3720f",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9b5253296810ac5a3b31d7214af645aa8d67826448d6aa92ff45b88ac25a8737",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:fc0a9bb93e9a9c478908818b56c4e1e3673d6f207edce1107dd6a9c2fd05bc06",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -111,7 +111,17 @@
         "step_id": "refresh_public_benchmark_source_of_truth"
       }
     ],
+    "read_model": {
+      "alternate_routes": [
+        "/product/public-benchmark",
+        "/product/capabilities"
+      ],
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+      "mutation_allowed": false,
+      "route": "/product/public-benchmark/operator-intake"
+    },
     "required_slot_count": 4,
+    "route": "/product/public-benchmark/operator-intake",
     "schema_version": "public-benchmark-operator-intake-packet.v1",
     "status": "ready_for_operator_input"
   },
@@ -147,6 +157,17 @@
     "status": "ready_for_pose_validity_input"
   },
   "public_benchmark_ready": false,
+  "read_model": {
+    "alternate_routes": [
+      "/product/public-benchmark/operator-intake",
+      "/product/capabilities",
+      "/goal/bottleneck"
+    ],
+    "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+    "mutation_allowed": false,
+    "route": "/product/public-benchmark"
+  },
+  "read_model_ready": true,
   "reuse_policy": "public_benchmark_contract_generated_from_repo_code",
   "reused_evidence": false,
   "rmsd_scorecard_materializer": {
@@ -155,8 +176,9 @@
     "schema_version": "public-benchmark-rmsd-scorecard-materialization.v1",
     "status": "ready_for_pose_validity_input"
   },
+  "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "7ae180e1e0e0ab8b2a1e196820a3552c06984915",
+  "source_commit_sha": "257d3c3730bd84bc244391c5cb7f8ecae0a66ed3",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

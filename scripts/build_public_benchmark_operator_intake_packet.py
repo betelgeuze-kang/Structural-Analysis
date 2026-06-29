@@ -56,6 +56,8 @@ DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 
 SCHEMA_VERSION = "public-benchmark-operator-intake-packet.v1"
+PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
+PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -384,6 +386,14 @@ def build_public_benchmark_operator_intake_packet(
         "status": "ready_for_operator_input",
         "reason_code": "PASS_INTAKE_PACKET",
         "contract_pass": True,
+        "read_model_ready": True,
+        "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+        "read_model": {
+            "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+            "alternate_routes": [PUBLIC_BENCHMARK_ROUTE, "/product/capabilities"],
+            "artifact": str(DEFAULT_OUT),
+            "mutation_allowed": False,
+        },
         "public_benchmark_ready": False,
         "tier_beta_ready": False,
         "owner_input_required": True,

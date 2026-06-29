@@ -39,6 +39,17 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     assert packet["schema_version"] == "public-benchmark-operator-intake-packet.v1"
     assert packet["status"] == "ready_for_operator_input"
     assert packet["contract_pass"] is True
+    assert packet["read_model_ready"] is True
+    assert packet["route"] == "/product/public-benchmark/operator-intake"
+    assert packet["read_model"] == {
+        "route": "/product/public-benchmark/operator-intake",
+        "alternate_routes": ["/product/public-benchmark", "/product/capabilities"],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_operator_intake_packet.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert packet["public_benchmark_ready"] is False
     assert packet["tier_beta_ready"] is False
     assert packet["owner_input_required"] is True

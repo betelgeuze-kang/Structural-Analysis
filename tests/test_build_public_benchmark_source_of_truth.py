@@ -31,6 +31,21 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
 
     assert source["schema_version"] == "public-benchmark-source-of-truth.v1"
     assert source["contract_pass"] is True
+    assert source["read_model_ready"] is True
+    assert source["route"] == "/product/public-benchmark"
+    assert source["read_model"] == {
+        "route": "/product/public-benchmark",
+        "alternate_routes": [
+            "/product/public-benchmark/operator-intake",
+            "/product/capabilities",
+            "/goal/bottleneck",
+        ],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_source_of_truth.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
     assert source["tier_beta_gate"]["status"] == "blocked"
@@ -216,6 +231,18 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
     )
+    assert source["operator_intake_packet"]["route"] == (
+        "/product/public-benchmark/operator-intake"
+    )
+    assert source["operator_intake_packet"]["read_model"] == {
+        "route": "/product/public-benchmark/operator-intake",
+        "alternate_routes": ["/product/public-benchmark", "/product/capabilities"],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_operator_intake_packet.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert source["operator_intake_packet"]["required_slot_count"] == 4
     assert source["operator_intake_packet"]["input_slot_ids"] == [
         "casf_pdbbind_subset_intake",

@@ -112,6 +112,16 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_2["state"] == "blocked"
     assert phase_2["bottleneck"] == "public_benchmark_source_of_truth_not_ready"
     assert phase_2["first_blocker"] == "casf_pdbbind_source_material_not_attached"
+    assert phase_2["linked_routes"] == [
+        "/product/public-benchmark",
+        "/product/public-benchmark/operator-intake",
+        "/product/capabilities",
+    ]
+    assert phase_2["summary"]["read_model_ready"] is True
+    assert phase_2["summary"]["source_of_truth_route"] == "/product/public-benchmark"
+    assert phase_2["summary"]["operator_intake_route"] == (
+        "/product/public-benchmark/operator-intake"
+    )
     assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
     assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 7
     assert phase_2["summary"]["tier_beta_failed_criteria"] == [

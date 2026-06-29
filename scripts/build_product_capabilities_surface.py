@@ -223,8 +223,21 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
         next_actions=_dedupe(_next_actions(payload) + _next_actions(operator_intake)),
         summary={
             "status": str(payload.get("status") or ""),
+            "read_model_ready": bool(payload.get("read_model_ready")),
+            "source_of_truth_route": str(
+                payload.get("route")
+                or _as_dict(payload.get("read_model")).get("route")
+                or ""
+            ),
             "tier_beta_ready": bool(payload.get("tier_beta_ready")),
             "public_benchmark_ready": ready,
+            "operator_intake_route": str(
+                operator_intake.get("route")
+                or _as_dict(operator_intake.get("read_model")).get("route")
+                or source_operator_summary.get("route")
+                or _as_dict(source_operator_summary.get("read_model")).get("route")
+                or ""
+            ),
             "operator_intake_packet_status": str(
                 operator_intake.get("status") or source_operator_summary.get("status") or ""
             ),

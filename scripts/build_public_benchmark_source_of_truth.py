@@ -72,6 +72,9 @@ POSE_PACKET_SCHEMA_VERSION = "public-benchmark-pose-validity-packet.v1"
 RMSD_SCORECARD_SCHEMA_VERSION = "public-benchmark-symmetry-rmsd-scorecard.v1"
 ENRICHMENT_SCORECARD_SCHEMA_VERSION = "public-benchmark-enrichment-scorecard.v1"
 
+PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
+PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
+
 
 def _source_input_paths() -> list[Path]:
     return [
@@ -687,6 +690,18 @@ def build_source_of_truth(
         ),
         "status": "seed_ready_materialization_blocked",
         "contract_pass": True,
+        "read_model_ready": True,
+        "route": PUBLIC_BENCHMARK_ROUTE,
+        "read_model": {
+            "route": PUBLIC_BENCHMARK_ROUTE,
+            "alternate_routes": [
+                PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+                "/product/capabilities",
+                "/goal/bottleneck",
+            ],
+            "artifact": str(DEFAULT_SOURCE_OF_TRUTH_OUT),
+            "mutation_allowed": False,
+        },
         "tier_beta_ready": False,
         "public_benchmark_ready": False,
         "tier_beta_gate": tier_beta_gate,
@@ -760,6 +775,13 @@ def build_source_of_truth(
             "status": operator_intake_packet["status"],
             "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
             "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT),
+            "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+            "read_model": {
+                "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+                "alternate_routes": [PUBLIC_BENCHMARK_ROUTE, "/product/capabilities"],
+                "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+                "mutation_allowed": False,
+            },
             "required_slot_count": operator_intake_packet["required_slot_count"],
             "input_slot_ids": [row["slot_id"] for row in operator_intake_packet["input_slots"]],
             "acceptance_criteria": operator_intake_packet["acceptance_criteria"],

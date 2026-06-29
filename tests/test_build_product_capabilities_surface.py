@@ -66,7 +66,14 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
 
     public_benchmark = rows["public_benchmark_harness"]
     assert public_benchmark["state"] == "blocked"
+    assert public_benchmark["summary"]["read_model_ready"] is True
+    assert public_benchmark["summary"]["source_of_truth_route"] == (
+        "/product/public-benchmark"
+    )
     assert public_benchmark["summary"]["public_benchmark_ready"] is False
+    assert public_benchmark["summary"]["operator_intake_route"] == (
+        "/product/public-benchmark/operator-intake"
+    )
     assert public_benchmark["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
     )
