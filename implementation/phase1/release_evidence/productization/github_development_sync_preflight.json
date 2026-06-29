@@ -7,42 +7,35 @@
     "feature_fast_forward_possible": true,
     "feature_synced_to_head": false,
     "main_fast_forward_possible": true,
-    "main_synced_to_head": false,
+    "main_synced_to_head": true,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
     "worktree_clean": true
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
-    "feature_push": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
+    "feature_push": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-20T13:27:30.441494+00:00",
+  "generated_at": "2026-06-29T22:08:22.977546+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
-      "command": "git push origin HEAD:codex/create-architecture-definition-document-for-hybrid-ai",
-      "rollback": "restore feature to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved restore action",
+      "command": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
+      "rollback": "restore feature to previous remote SHA d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e with an approved restore action",
       "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
-    },
-    {
-      "action": "fast-forward push current HEAD to main",
-      "command": "git push origin HEAD:main",
-      "rollback": "restore main to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved revert/restore action",
-      "target": "origin/main"
     }
   ],
   "preflight_pass": true,
   "r4_disclosure": {
-    "action": "push current HEAD to feature; fast-forward push current HEAD to main",
+    "action": "push current HEAD to feature",
     "impact": "GitHub pending refs become externally visible at the local development state.",
-    "risk": "Main CI and external reviewers immediately see the current commits.",
-    "rollback": "restore feature to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved restore action; restore main to previous remote SHA 2ff3f9f8a2d977276832a8f988318d4a739259f6 with an approved revert/restore action",
+    "risk": "External reviewers of the feature branch immediately see the current commits.",
+    "rollback": "restore feature to previous remote SHA d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e with an approved restore action",
     "target": [
-      "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-      "origin/main"
+      "origin/codex/create-architecture-definition-document-for-hybrid-ai"
     ],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
@@ -53,16 +46,16 @@
   "remote_sync_needed": true,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
-    "branch": "HEAD",
-    "feature_ahead_count": 2,
+    "branch": "main",
+    "feature_ahead_count": 259,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "954f2f79793e4ba35f9a7393cb456430e114a956",
-    "main_ahead_count": 2,
+    "local_head_sha": "2cd235d55af12bdde88c0475c34730912a1a6452",
+    "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-    "remote_feature_sha": "2ff3f9f8a2d977276832a8f988318d4a739259f6",
+    "remote_feature_sha": "d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "2ff3f9f8a2d977276832a8f988318d4a739259f6",
+    "remote_main_sha": "2cd235d55af12bdde88c0475c34730912a1a6452",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
