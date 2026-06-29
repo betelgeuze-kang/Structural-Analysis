@@ -764,6 +764,36 @@ def build_source_of_truth(
         "operator_source_material_required",
         "operator_receipts_required",
     ]
+    blockers = [
+        "casf_pdbbind_source_material_not_attached",
+        "public_benchmark_real_pose_predictions_missing",
+        "dud_e_lit_pcba_enrichment_rows_missing",
+        "vina_gnina_comparison_rows_missing",
+        "public_benchmark_external_receipts_missing",
+    ]
+    blocked_operator_slot_count = sum(
+        1 for row in operator_evidence_gap_register if row["tier_beta_blocked"]
+    )
+    operator_handoff_summary = {
+        "route": PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
+        "first_blocker": blockers[0] if blockers else "",
+        "first_blocked_target": first_blocked_target,
+        "first_next_action": str(
+            first_operator_evidence_gap.get("first_next_action") or ""
+        ),
+        "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        "blocked_operator_slot_count": blocked_operator_slot_count,
+        "minimum_evidence": dict(
+            first_operator_evidence_gap.get("minimum_evidence") or {}
+        ),
+        "materialization_command": str(
+            first_operator_evidence_gap.get("materialization_command") or ""
+        ),
+        "validation_command": str(
+            first_operator_evidence_gap.get("validation_command") or ""
+        ),
+    }
     return {
         "schema_version": SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -788,8 +818,14 @@ def build_source_of_truth(
         },
         "tier_beta_ready": False,
         "public_benchmark_ready": False,
+        "blocker_count": len(blockers),
+        "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,
+        "first_required_operator_slot": first_blocked_target,
+        "required_slot_count": int(operator_intake_packet["required_slot_count"]),
+        "blocked_operator_slot_count": blocked_operator_slot_count,
         "root_cause_tags": root_cause_tags,
+        "operator_handoff_summary": operator_handoff_summary,
         "tier_beta_gate": tier_beta_gate,
         "source_families": [
             {
@@ -988,13 +1024,7 @@ def build_source_of_truth(
                 "not run docking engines, fetch benchmark data, or close Tier beta alone."
             ),
         },
-        "blockers": [
-            "casf_pdbbind_source_material_not_attached",
-            "public_benchmark_real_pose_predictions_missing",
-            "dud_e_lit_pcba_enrichment_rows_missing",
-            "vina_gnina_comparison_rows_missing",
-            "public_benchmark_external_receipts_missing",
-        ],
+        "blockers": blockers,
         "next_actions": [
             "fill_public_benchmark_operator_intake_packet",
             "attach_checked_casf_pdbbind_subset_source_files",

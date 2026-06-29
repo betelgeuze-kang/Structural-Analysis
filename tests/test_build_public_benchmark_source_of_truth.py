@@ -48,11 +48,51 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     }
     assert source["tier_beta_ready"] is False
     assert source["public_benchmark_ready"] is False
+    assert source["blocker_count"] == 5
+    assert source["first_blocker"] == "casf_pdbbind_source_material_not_attached"
     assert source["first_blocked_target"] == "casf_pdbbind_subset_intake"
+    assert source["first_required_operator_slot"] == "casf_pdbbind_subset_intake"
+    assert source["required_slot_count"] == 4
+    assert source["blocked_operator_slot_count"] == 4
     assert source["root_cause_tags"] == [
         "operator_source_material_required",
         "operator_receipts_required",
     ]
+    assert source["operator_handoff_summary"] == {
+        "route": "/product/public-benchmark/operator-intake",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "public_benchmark_operator_intake_packet.json"
+        ),
+        "first_blocker": "casf_pdbbind_source_material_not_attached",
+        "first_blocked_target": "casf_pdbbind_subset_intake",
+        "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+        "required_slot_count": 4,
+        "blocked_operator_slot_count": 4,
+        "minimum_evidence": {
+            "case_count": 12,
+            "source_family": "CASF/PDBBind",
+            "local_source_file_fields": [
+                "protein_structure_path",
+                "reference_ligand_path",
+                "predicted_ligand_path_or_docking_run_id",
+            ],
+            "receipt_fields": ["source_license_or_accession", "source_checksum"],
+        },
+        "materialization_command": (
+            "python3 scripts/materialize_public_benchmark_subset_manifest.py "
+            "--intake <operator-casf-pdbbind-intake.json> "
+            "--out-manifest implementation/phase1/release_evidence/productization/"
+            "public_benchmark_subset_manifest.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "public_benchmark_subset_materialization_report.json --fail-blocked"
+        ),
+        "validation_command": (
+            "python3 scripts/validate_public_benchmark_subset_manifest.py "
+            "--manifest implementation/phase1/release_evidence/productization/"
+            "public_benchmark_subset_manifest.json --fail-blocked"
+        ),
+    }
     assert source["tier_beta_gate"]["status"] == "blocked"
     assert source["tier_beta_gate"]["claim"] == "tier_beta_public_benchmark_harness"
     assert source["tier_beta_gate"]["minimum_subset_case_count"] == 12
