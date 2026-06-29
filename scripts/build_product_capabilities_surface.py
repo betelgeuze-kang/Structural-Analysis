@@ -31,6 +31,12 @@ DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD = (
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
+DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
+    PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
+)
+DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
+    PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
+)
 DEFAULT_H_BOND_SURFACE = SURFACE_DIR / "h_bond_backmap_evidence_surface.json"
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_GPCR_PRODUCT_REPORT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
@@ -208,6 +214,7 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
     surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
     contract = _load_json(repo_root, DEFAULT_POCKETMD_CONTRACT)
     topk_report = _load_json(repo_root, DEFAULT_POCKETMD_TOPK_REPORT)
+    operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     ready = bool(surface.get("product_surface_ready") and surface.get("contract_pass"))
     return _capability_row(
         capability_id="pocketmd_lite_top_k_refinement",
@@ -217,17 +224,23 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
         evidence_artifacts=[
             DEFAULT_POCKETMD_CONTRACT,
             DEFAULT_POCKETMD_TOPK_REPORT,
+            DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
+            DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
             DEFAULT_POCKETMD_SURFACE,
         ],
         contract_pass=bool(_truthy_contract(contract) and ready),
         blocker_count=len(_blockers(surface)),
-        next_actions=_next_actions(surface),
+        next_actions=_dedupe(_next_actions(operator_intake) + _next_actions(surface)),
         summary={
             "surface_status": str(surface.get("status") or ""),
             "product_surface_ready": ready,
             "real_refinement_case_count": _surface_summary(surface).get("real_refinement_case_count", 0),
             "top_k_candidate_count": _surface_summary(surface).get("top_k_candidate_count", 0),
             "topk_report_status": str(topk_report.get("status") or ""),
+            "operator_intake_packet_status": str(operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": int(
+                operator_intake.get("required_slot_count") or 0
+            ),
         },
     )
 
@@ -309,6 +322,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
         DEFAULT_POCKETMD_CONTRACT,
         DEFAULT_POCKETMD_TOPK_REPORT,
+        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
+        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_POCKETMD_SURFACE,
         DEFAULT_GPCR_PRODUCT_REPORT,
         DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,

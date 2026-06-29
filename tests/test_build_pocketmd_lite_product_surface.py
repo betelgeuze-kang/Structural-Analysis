@@ -33,6 +33,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     survival = artifacts["topk_survival_report"]
     api = artifacts["readonly_api"]
     handoff = artifacts["delivery_handoff"]
+    operator = artifacts["operator_intake_packet"]
     surface = artifacts["surface"]
 
     assert contract["schema_version"] == "pocketmd-lite-contract.v1"
@@ -96,9 +97,27 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
 
     assert handoff["schema_version"] == "pocketmd-lite-delivery-handoff.v1"
     assert handoff["contract_pass"] is True
+    assert handoff["evidence_artifacts"]["operator_intake_packet"].endswith(
+        "pocketmd_lite_operator_intake_packet.json"
+    )
     assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
         "acceptance_criteria"
     ]
+
+    assert operator["schema_version"] == "pocketmd-lite-operator-intake-packet.v1"
+    assert operator["status"] == "ready_for_operator_input"
+    assert operator["contract_pass"] is True
+    assert operator["owner_input_required"] is True
+    assert operator["product_surface_ready"] is False
+    assert operator["broad_all_atom_md_claim_safe"] is False
+    assert operator["broad_fep_claim_safe"] is False
+    assert operator["required_slot_count"] == 1
+    assert operator["input_slots"][0]["slot_id"] == "top_k_refinement_rows"
+    assert operator["current_surface_status"]["first_blocked_target"] == (
+        "top_k_refinement_operator_intake"
+    )
+    assert operator["next_actions"][0] == "fill_pocketmd_lite_operator_intake_packet"
+    assert operator["acceptance_criteria"][-1].startswith("broad_all_atom_md_claim")
 
     assert surface["schema_version"] == "pocketmd-lite-science-product-surface.v1"
     assert surface["surface_id"] == "pocketmd_lite_science_product_surface"
@@ -114,6 +133,7 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "roadmap_item": "PocketMD Lite science product surface",
         "bottleneck": "pocketmd_lite_science_product_surface_locked",
         "next_goal_actions": [
+            "fill_pocketmd_lite_operator_intake_packet",
             "run_pocketmd_lite_topk_survival_materializer",
             "publish_pocketmd_lite_readonly_api",
             "regenerate_product_capabilities_surface",
@@ -128,6 +148,8 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
     survival_out = tmp_path / "pocketmd_lite_topk_survival_report.json"
     api_out = tmp_path / "pocketmd_lite_readonly_api.json"
     handoff_out = tmp_path / "pocketmd_lite_delivery_handoff.json"
+    operator_out = tmp_path / "pocketmd_lite_operator_intake_packet.json"
+    operator_md_out = tmp_path / "pocketmd_lite_operator_intake_packet.md"
     surface_out = tmp_path / "surface" / "pocketmd_lite_science_product_surface.json"
 
     assert (
@@ -143,6 +165,10 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
                 str(api_out),
                 "--handoff-out",
                 str(handoff_out),
+                "--operator-intake-out",
+                str(operator_out),
+                "--operator-intake-md-out",
+                str(operator_md_out),
                 "--surface-out",
                 str(surface_out),
             ]
@@ -150,7 +176,7 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         == 0
     )
 
-    for path in (contract_out, survival_out, api_out, handoff_out, surface_out):
+    for path in (contract_out, survival_out, api_out, handoff_out, operator_out, surface_out):
         assert path.exists()
         payload = json.loads(path.read_text(encoding="utf-8"))
         assert payload["source_commit_sha"]
@@ -160,6 +186,9 @@ def test_pocketmd_lite_cli_writes_pm_visible_surface(tmp_path: Path) -> None:
         assert payload["input_checksums"][
             "scripts/materialize_pocketmd_lite_topk_survival_report.py"
         ].startswith("sha256:")
+    assert "# PocketMD Lite Operator Intake Packet" in operator_md_out.read_text(
+        encoding="utf-8"
+    )
 
     rows = pm_report._evidence_surface_rows(surface_out.parent)
     assert rows == [

@@ -33,6 +33,12 @@ DEFAULT_GPCR_OPERATOR_INTAKE_PACKET = (
 )
 DEFAULT_GPCR_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
+DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET = (
+    PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
+)
+DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD = (
+    PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.md"
+)
 DEFAULT_PRODUCT_CAPABILITIES = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "goal_bottleneck_roadmap_surface.json"
 
@@ -85,6 +91,8 @@ def _input_paths() -> list[Path]:
         DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
         DEFAULT_GPCR_SURFACE,
         DEFAULT_POCKETMD_SURFACE,
+        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
+        DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
         DEFAULT_PRODUCT_CAPABILITIES,
     ]
 
@@ -345,6 +353,7 @@ def _pocketmd_row(
     *,
     decision: dict[str, Any],
     pocketmd_surface: dict[str, Any],
+    pocketmd_operator_intake: dict[str, Any],
     product_capabilities: dict[str, Any],
 ) -> dict[str, Any]:
     linkage = _as_dict(pocketmd_surface.get("goal_roadmap_linkage"))
@@ -364,6 +373,8 @@ def _pocketmd_row(
         evidence_artifacts=[
             PRODUCTIZATION / "pocketmd_lite_contract.json",
             PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json",
+            DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET,
+            DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET_MD,
             PRODUCTIZATION / "pocketmd_lite_readonly_api.json",
             PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json",
             DEFAULT_POCKETMD_SURFACE,
@@ -371,12 +382,17 @@ def _pocketmd_row(
         linked_routes=["/product/capabilities"],
         next_actions=_dedupe(
             [str(row) for row in _as_list(linkage.get("next_goal_actions"))]
+            + [str(row) for row in _as_list(pocketmd_operator_intake.get("next_actions"))]
             + [str(row) for row in _as_list(pocketmd_surface.get("next_actions"))]
             + [str(row) for row in _as_list(capability.get("next_actions"))]
         ),
         summary={
             "product_surface_ready": ready,
             "surface_status": str(pocketmd_surface.get("status") or ""),
+            "operator_intake_packet_status": str(pocketmd_operator_intake.get("status") or ""),
+            "operator_intake_required_slot_count": _as_int(
+                pocketmd_operator_intake.get("required_slot_count")
+            ),
             "readiness_summary": _as_dict(pocketmd_surface.get("readiness_summary")),
             "broad_all_atom_fep_claim_locked": True,
         },
@@ -412,6 +428,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     gpcr_operator_intake = _load_json(repo_root, DEFAULT_GPCR_OPERATOR_INTAKE_PACKET)
     gpcr_surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     pocketmd_surface = _load_json(repo_root, DEFAULT_POCKETMD_SURFACE)
+    pocketmd_operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
     product_capabilities = _load_json(repo_root, DEFAULT_PRODUCT_CAPABILITIES)
 
     decision = _as_dict(pm_report.get("release_decision"))
@@ -462,6 +479,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
         _pocketmd_row(
             decision=decision,
             pocketmd_surface=pocketmd_surface,
+            pocketmd_operator_intake=pocketmd_operator_intake,
             product_capabilities=product_capabilities,
         ),
     ]

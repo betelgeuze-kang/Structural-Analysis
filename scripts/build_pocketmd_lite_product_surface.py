@@ -24,6 +24,8 @@ DEFAULT_CONTRACT_OUT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_SURVIVAL_REPORT_OUT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
 DEFAULT_READONLY_API_OUT = PRODUCTIZATION / "pocketmd_lite_readonly_api.json"
 DEFAULT_HANDOFF_OUT = PRODUCTIZATION / "pocketmd_lite_delivery_handoff.json"
+DEFAULT_OPERATOR_INTAKE_OUT = PRODUCTIZATION / "pocketmd_lite_operator_intake_packet.json"
+DEFAULT_OPERATOR_INTAKE_MD_OUT = DEFAULT_OPERATOR_INTAKE_OUT.with_suffix(".md")
 DEFAULT_SURFACE_OUT = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 
 CONTRACT_SCHEMA_VERSION = "pocketmd-lite-contract.v1"
@@ -31,6 +33,7 @@ SURVIVAL_REPORT_SCHEMA_VERSION = "pocketmd-lite-topk-survival-report.v1"
 MATERIALIZER_SCHEMA_VERSION = "pocketmd-lite-topk-survival-materialization.v1"
 READONLY_API_SCHEMA_VERSION = "pocketmd-lite-readonly-api.v1"
 HANDOFF_SCHEMA_VERSION = "pocketmd-lite-delivery-handoff.v1"
+OPERATOR_INTAKE_PACKET_SCHEMA_VERSION = "pocketmd-lite-operator-intake-packet.v1"
 SURFACE_SCHEMA_VERSION = "pocketmd-lite-science-product-surface.v1"
 
 
@@ -267,10 +270,15 @@ def build_readonly_api(*, repo_root: Path = ROOT) -> dict[str, Any]:
                 "artifact": str(DEFAULT_SURFACE_OUT),
             },
             {
+                "endpoint_id": "get_pocketmd_lite_operator_intake_packet",
+                "method": "GET",
+                "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            },
+            {
                 "endpoint_id": "list_operator_required_fields",
                 "method": "GET",
-                "artifact": str(DEFAULT_CONTRACT_OUT),
-                "json_pointer": "/operator_intake_schema/required_case_fields",
+                "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+                "json_pointer": "/required_case_fields",
             },
         ],
         "forbidden_operations": [
@@ -302,9 +310,12 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "contract": str(DEFAULT_CONTRACT_OUT),
             "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
             "readonly_api": str(DEFAULT_READONLY_API_OUT),
+            "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
             "science_product_surface": str(DEFAULT_SURFACE_OUT),
         },
         "operator_next_actions": [
+            "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
             "review_local_min_contact_hbond_clash_uncertainty_summary",
@@ -321,6 +332,152 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "claim_boundary": (
             "This handoff prepares the bounded PocketMD Lite evidence path only. It is "
             "not an approval to claim broad MD/FEP readiness."
+        ),
+    }
+
+
+def build_operator_intake_packet(
+    *,
+    contract: dict[str, Any],
+    topk_survival_report: dict[str, Any],
+    surface: dict[str, Any],
+    repo_root: Path = ROOT,
+) -> dict[str, Any]:
+    operator_schema = contract.get("operator_intake_schema", {})
+    required_case_fields = list(operator_schema.get("required_case_fields", []))
+    template = dict(operator_schema.get("template", {}))
+    blockers = list(topk_survival_report.get("blockers", []) or surface.get("blockers", []))
+    first_blocked_target = str(
+        surface.get("first_blocked_target") or "top_k_refinement_operator_intake"
+    )
+    materializer_command = (
+        "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+        f"--intake <operator-pocketmd-lite-intake.json> "
+        f"--contract {DEFAULT_CONTRACT_OUT} "
+        f"--out-report {DEFAULT_SURVIVAL_REPORT_OUT} "
+        f"--out-surface {DEFAULT_SURFACE_OUT} --fail-blocked"
+    )
+    return {
+        "schema_version": OPERATOR_INTAKE_PACKET_SCHEMA_VERSION,
+        **_metadata(
+            repo_root=repo_root,
+            reused_evidence=False,
+            reuse_policy="pocketmd_lite_operator_intake_packet_generated_from_contract",
+        ),
+        "packet_id": "pocketmd_lite_operator_intake_packet",
+        "status": "ready_for_operator_input",
+        "reason_code": "PASS_INTAKE_PACKET",
+        "contract_pass": True,
+        "owner_input_required": True,
+        "product_surface_ready": False,
+        "broad_all_atom_md_claim_safe": False,
+        "broad_fep_claim_safe": False,
+        "required_slot_count": 1,
+        "required_case_fields": required_case_fields,
+        "required_metrics": [row["metric_id"] for row in contract.get("reported_metrics", [])],
+        "top_k_policy": contract.get("top_k_policy", {}),
+        "input_slots": [
+            {
+                "slot_id": "top_k_refinement_rows",
+                "status": "operator_input_required",
+                "required": True,
+                "case_key": operator_schema.get("case_key", "cases"),
+                "required_case_fields": required_case_fields,
+                "template": template,
+                "owner_actions": [
+                    "attach already-ranked top-k candidate refinement rows",
+                    "fill local_min_survived as a boolean for every candidate",
+                    "fill contact_persistence_rate and h_bond_persistence_rate as fractions",
+                    "fill clash_count_before and clash_count_after as non-negative integers",
+                    "fill uncertainty_interval with low, high, and unit",
+                    "keep source_checksum and provenance_ref tied to local operator evidence",
+                ],
+            }
+        ],
+        "current_surface_status": {
+            "artifact": str(DEFAULT_SURFACE_OUT),
+            "status": str(surface.get("status") or ""),
+            "first_blocked_target": first_blocked_target,
+            "root_cause_tags": [str(row) for row in surface.get("root_cause_tags", [])],
+            "blocker_count": len(blockers),
+        },
+        "materialization_sequence": [
+            {
+                "step_id": "fill_pocketmd_lite_operator_intake_packet",
+                "command": "create <operator-pocketmd-lite-intake.json> from packet template",
+                "produces": "<operator-pocketmd-lite-intake.json>",
+            },
+            {
+                "step_id": "materialize_pocketmd_lite_topk_survival_report",
+                "schema_version": MATERIALIZER_SCHEMA_VERSION,
+                "command": materializer_command,
+                "produces": str(DEFAULT_SURVIVAL_REPORT_OUT),
+            },
+            {
+                "step_id": "refresh_product_capabilities_surface",
+                "schema_version": "product-capabilities-surface.v1",
+                "command": (
+                    "python3 scripts/build_product_capabilities_surface.py "
+                    "--out implementation/phase1/release_evidence/surface/"
+                    "product_capabilities_surface.json"
+                ),
+                "produces": (
+                    "implementation/phase1/release_evidence/surface/"
+                    "product_capabilities_surface.json"
+                ),
+            },
+            {
+                "step_id": "refresh_goal_bottleneck_roadmap_surface",
+                "schema_version": "goal-bottleneck-roadmap-surface.v1",
+                "command": (
+                    "python3 scripts/build_goal_bottleneck_roadmap_surface.py "
+                    "--out implementation/phase1/release_evidence/productization/"
+                    "goal_bottleneck_roadmap_surface.json"
+                ),
+                "produces": (
+                    "implementation/phase1/release_evidence/productization/"
+                    "goal_bottleneck_roadmap_surface.json"
+                ),
+            },
+        ],
+        "acceptance_criteria": [
+            "pocketmd_lite_topk_survival_report.real_refinement_case_count > 0",
+            "pocketmd_lite_topk_survival_report.blockers == []",
+            "pocketmd_lite_topk_survival_report.product_surface_ready == true",
+            "pocketmd_lite_science_product_surface.locked == false",
+            "broad_all_atom_md_claim and free_energy_perturbation_claim remain locked unless separately evidenced",
+        ],
+        "linked_artifacts": {
+            "contract": str(DEFAULT_CONTRACT_OUT),
+            "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
+            "readonly_api": str(DEFAULT_READONLY_API_OUT),
+            "delivery_handoff": str(DEFAULT_HANDOFF_OUT),
+            "science_product_surface": str(DEFAULT_SURFACE_OUT),
+            "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
+        },
+        "next_actions": [
+            "fill_pocketmd_lite_operator_intake_packet",
+            "attach_top_k_candidate_refinement_rows",
+            "run_pocketmd_lite_topk_survival_materializer",
+            "regenerate_product_capabilities_surface",
+            "regenerate_goal_bottleneck_roadmap_surface",
+        ],
+        "summary": {
+            "required_slot_count": 1,
+            "required_case_field_count": len(required_case_fields),
+            "current_blocker_count": len(blockers),
+            "first_blocked_target": first_blocked_target,
+            "product_surface_ready": False,
+        },
+        "summary_line": (
+            "PocketMD Lite operator intake packet: READY | slots=1 | "
+            f"first_blocked_target={first_blocked_target}"
+        ),
+        "claim_boundary": (
+            "This packet is an owner-facing intake contract for bounded PocketMD Lite "
+            "top-k refinement rows. It does not run MD, infer missing metrics, or "
+            "unlock broad all-atom MD/FEP claims."
         ),
     }
 
@@ -372,6 +529,8 @@ def build_surface(
             "topk_survival_report": str(DEFAULT_SURVIVAL_REPORT_OUT),
             "readonly_api": str(DEFAULT_READONLY_API_OUT),
             "delivery_handoff": str(DEFAULT_HANDOFF_OUT),
+            "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_OUT),
+            "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_MD_OUT),
         },
         "materializer": _materializer_contract(),
         "readiness_summary": {
@@ -389,6 +548,7 @@ def build_surface(
             "roadmap_item": "PocketMD Lite science product surface",
             "bottleneck": "pocketmd_lite_science_product_surface_locked",
             "next_goal_actions": [
+                "fill_pocketmd_lite_operator_intake_packet",
                 "run_pocketmd_lite_topk_survival_materializer",
                 "publish_pocketmd_lite_readonly_api",
                 "regenerate_product_capabilities_surface",
@@ -396,6 +556,7 @@ def build_surface(
             ],
         },
         "next_actions": [
+            "fill_pocketmd_lite_operator_intake_packet",
             "attach_top_k_candidate_refinement_rows",
             "run_pocketmd_lite_topk_survival_materializer",
             "regenerate_pocketmd_lite_science_product_surface",
@@ -425,13 +586,48 @@ def build_pocketmd_lite_artifacts(*, repo_root: Path = ROOT) -> dict[str, dict[s
         delivery_handoff=delivery_handoff,
         repo_root=repo_root,
     )
+    operator_intake_packet = build_operator_intake_packet(
+        contract=contract,
+        topk_survival_report=topk_survival_report,
+        surface=surface,
+        repo_root=repo_root,
+    )
     return {
         "contract": contract,
         "topk_survival_report": topk_survival_report,
         "readonly_api": readonly_api,
         "delivery_handoff": delivery_handoff,
+        "operator_intake_packet": operator_intake_packet,
         "surface": surface,
     }
+
+
+def _operator_intake_markdown(payload: dict[str, Any]) -> str:
+    lines = [
+        "# PocketMD Lite Operator Intake Packet",
+        "",
+        f"- `contract_pass`: `{payload['contract_pass']}`",
+        f"- `status`: `{payload['status']}`",
+        f"- `product_surface_ready`: `{payload['product_surface_ready']}`",
+        f"- `first_blocked_target`: `{payload['summary']['first_blocked_target']}`",
+        f"- `claim_boundary`: {payload['claim_boundary']}",
+        "",
+        "| Slot | Status | Required Fields |",
+        "|---|---|---|",
+    ]
+    for slot in payload["input_slots"]:
+        lines.append(
+            f"| `{slot['slot_id']}` | `{slot['status']}` | "
+            f"`{', '.join(slot['required_case_fields'])}` |"
+        )
+    lines.extend(["", "## Materialization Sequence", ""])
+    for step in payload["materialization_sequence"]:
+        lines.append(f"- `{step['step_id']}`: `{step['command']}`")
+    lines.extend(["", "## Acceptance Criteria", ""])
+    for criterion in payload["acceptance_criteria"]:
+        lines.append(f"- `{criterion}`")
+    lines.append("")
+    return "\n".join(lines)
 
 
 def write_pocketmd_lite_artifacts(
@@ -441,6 +637,8 @@ def write_pocketmd_lite_artifacts(
     survival_report_out: Path = DEFAULT_SURVIVAL_REPORT_OUT,
     readonly_api_out: Path = DEFAULT_READONLY_API_OUT,
     handoff_out: Path = DEFAULT_HANDOFF_OUT,
+    operator_intake_out: Path = DEFAULT_OPERATOR_INTAKE_OUT,
+    operator_intake_md_out: Path = DEFAULT_OPERATOR_INTAKE_MD_OUT,
     surface_out: Path = DEFAULT_SURFACE_OUT,
 ) -> dict[str, dict[str, Any]]:
     artifacts = build_pocketmd_lite_artifacts(repo_root=repo_root)
@@ -449,12 +647,23 @@ def write_pocketmd_lite_artifacts(
         "topk_survival_report": survival_report_out,
         "readonly_api": readonly_api_out,
         "delivery_handoff": handoff_out,
+        "operator_intake_packet": operator_intake_out,
         "surface": surface_out,
     }
     for key, raw_path in outputs.items():
         path = raw_path if raw_path.is_absolute() else repo_root / raw_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_json_text(artifacts[key]), encoding="utf-8")
+    md_path = (
+        operator_intake_md_out
+        if operator_intake_md_out.is_absolute()
+        else repo_root / operator_intake_md_out
+    )
+    md_path.parent.mkdir(parents=True, exist_ok=True)
+    md_path.write_text(
+        _operator_intake_markdown(artifacts["operator_intake_packet"]),
+        encoding="utf-8",
+    )
     return artifacts
 
 
@@ -464,6 +673,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--survival-report-out", type=Path, default=DEFAULT_SURVIVAL_REPORT_OUT)
     parser.add_argument("--readonly-api-out", type=Path, default=DEFAULT_READONLY_API_OUT)
     parser.add_argument("--handoff-out", type=Path, default=DEFAULT_HANDOFF_OUT)
+    parser.add_argument("--operator-intake-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_OUT)
+    parser.add_argument("--operator-intake-md-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_MD_OUT)
     parser.add_argument("--surface-out", type=Path, default=DEFAULT_SURFACE_OUT)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
     parser.add_argument("--json", action="store_true")
@@ -478,6 +689,8 @@ def main(argv: list[str] | None = None) -> int:
         survival_report_out=args.survival_report_out,
         readonly_api_out=args.readonly_api_out,
         handoff_out=args.handoff_out,
+        operator_intake_out=args.operator_intake_out,
+        operator_intake_md_out=args.operator_intake_md_out,
         surface_out=args.surface_out,
     )
     if args.json:

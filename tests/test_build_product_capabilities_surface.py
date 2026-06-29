@@ -82,6 +82,16 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     pocketmd = rows["pocketmd_lite_top_k_refinement"]
     assert pocketmd["state"] == "blocked"
     assert pocketmd["summary"]["product_surface_ready"] is False
+    assert pocketmd["summary"]["operator_intake_packet_status"] == (
+        "ready_for_operator_input"
+    )
+    assert pocketmd["summary"]["operator_intake_required_slot_count"] == 1
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_operator_intake_packet.json"
+        in pocketmd["evidence_artifacts"]
+    )
+    assert "fill_pocketmd_lite_operator_intake_packet" in pocketmd["next_actions"]
     assert "run_pocketmd_lite_topk_survival_materializer" in pocketmd["next_actions"]
 
     gpcr = rows["gpcr_hard_decoy_evidence"]

@@ -99,6 +99,16 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_4["state"] == "blocked"
     assert phase_4["bottleneck"] == "pocketmd_lite_science_product_surface_locked"
     assert phase_4["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert (
+        "implementation/phase1/release_evidence/productization/"
+        "pocketmd_lite_operator_intake_packet.json"
+        in phase_4["evidence_artifacts"]
+    )
+    assert phase_4["summary"]["operator_intake_packet_status"] == (
+        "ready_for_operator_input"
+    )
+    assert phase_4["summary"]["operator_intake_required_slot_count"] == 1
+    assert "fill_pocketmd_lite_operator_intake_packet" in phase_4["next_actions"]
     assert "regenerate_goal_bottleneck_action_board" in phase_4["next_actions"]
 
     assert surface["primary_roadmap_bottleneck"] == "public_benchmark_source_of_truth_not_ready"
