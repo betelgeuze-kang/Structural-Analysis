@@ -6,13 +6,13 @@
     "base_external_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
     "basis_kind": "existing_sidecar_metadata_refresh"
   },
-  "generated_at": "2026-06-29T22:43:38.717912+00:00",
+  "generated_at": "2026-06-29T22:55:31.207734+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:d03fadb1bb4a8d48b90a45e95585a5f77ca51a26341c0f6d0523f66bde307125"
+    "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json": "sha256:cbce85e130afaa4efd8f7b3e5e83196a149665d30b68c9f982b5fb39ee545c0a"
   },
   "reused_evidence": true,
   "schema_version": "external-benchmark-submission-updates.v1",
-  "source_commit_sha": "f5f2f41620194cb8140e5d84be2219bdd9cdd749",
+  "source_commit_sha": "adf97ad20690f31c09e1c74a44993780b301f8e2",
   "updates": {
     "hardest_external_10case": {
       "closure_evidence_path": "",

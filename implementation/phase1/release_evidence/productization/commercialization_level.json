@@ -12,8 +12,8 @@
     "commercial_readiness": "implementation/phase1/commercial_readiness_report.json",
     "external_benchmark_submission_readiness": "implementation/phase1/release/external_benchmark_submission_readiness.json",
     "external_benchmark_submission_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
-    "p1_benchmark_breadth_status": "implementation/phase1/release_evidence/productization/p1_benchmark_breadth_status.json",
-    "p1_operational_queues": "implementation/phase1/release_evidence/productization/p1_operational_queues.json",
+    "p1_benchmark_breadth_status": "implementation/phase1/release/p1_benchmark_breadth_status.json",
+    "p1_operational_queues": "implementation/phase1/release/p1_operational_queues/p1_operational_queues.json",
     "residual_holdout_closure_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
   },
   "blockers": [

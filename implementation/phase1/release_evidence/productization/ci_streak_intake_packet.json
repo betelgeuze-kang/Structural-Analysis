@@ -12,7 +12,7 @@
     "nightly:github_actions_lane_streak_below_threshold",
     "nightly:github_actions_filtered_run_count_below_threshold"
   ],
-  "generated_at": "2026-06-29T22:43:50.169587+00:00",
+  "generated_at": "2026-06-29T22:55:34.362881+00:00",
   "github_actions_ci_streak_evidence": "implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json",
   "lane_rows": [
     {
@@ -24,8 +24,8 @@
       ],
       "claim_boundary": "Local PR gate reports prove command-level readiness; release streak credit requires tracked PR CI evidence for the consecutive-pass window.",
       "consecutive_pass_count": 0,
-      "github_actions_consecutive_pass_count": 9,
-      "github_actions_filtered_run_count": 9,
+      "github_actions_consecutive_pass_count": 8,
+      "github_actions_filtered_run_count": 8,
       "github_actions_ignored_event_names": [
         "push"
       ],
@@ -47,10 +47,10 @@
         "push",
         "workflow_dispatch"
       ],
-      "manifest_consecutive_pass_count": 9,
+      "manifest_consecutive_pass_count": 8,
       "manifest_threshold_pass": false,
       "missing_consecutive_pass_count": 30,
-      "owner_action": "Collect 21 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
+      "owner_action": "Collect 22 additional consecutive successful PR CI run(s); keep the pull_request CI lane green and refresh github_actions_ci_streak_evidence before release signoff.",
       "pull_request_run_source_present": true,
       "source_evidence_blockers": [
         "github_actions_lane_threshold_not_pass",
@@ -110,7 +110,7 @@
   "reason_code": "ERR_CI_STREAK_SOURCE_EVIDENCE_INCOMPLETE",
   "schema_version": "ci-streak-intake-packet.v1",
   "source_evidence": {
-    "age_hours": 0.0,
+    "age_hours": 0.101,
     "blockers": [
       "pr:github_actions_lane_threshold_not_pass",
       "pr:github_actions_lane_streak_below_threshold",
@@ -121,7 +121,7 @@
     ],
     "contract_pass": false,
     "freshness_pass": true,
-    "generated_at": "2026-06-29T22:43:49.393389+00:00",
+    "generated_at": "2026-06-29T22:49:32.472991+00:00",
     "lanes": {
       "nightly": {
         "blockers": [
@@ -181,10 +181,10 @@
         ],
         "pull_request_run_source_present": true,
         "query_error": "",
-        "source_consecutive_pass_count": 9,
+        "source_consecutive_pass_count": 8,
         "source_lane_present": true,
         "source_release_credit_pass": false,
-        "source_run_count": 9,
+        "source_run_count": 8,
         "source_threshold": 30,
         "source_threshold_pass": false,
         "threshold": 30,
@@ -220,9 +220,9 @@
     "pr_missing_consecutive_pass_count": 30,
     "pr_pull_request_run_source_present": true,
     "pr_source_threshold_pass": false,
-    "source_evidence_age_hours": 0.0,
+    "source_evidence_age_hours": 0.101,
     "source_evidence_freshness_pass": true,
-    "source_evidence_generated_at": "2026-06-29T22:43:49.393389+00:00",
+    "source_evidence_generated_at": "2026-06-29T22:49:32.472991+00:00",
     "source_evidence_pass": false,
     "source_evidence_schema_pass": true,
     "threshold": 30

@@ -32,7 +32,7 @@
   "developer_preview_blocked_field_count": 0,
   "engine_version": "1.0.0",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
-  "generated_at": "2026-06-29T22:43:38.526701+00:00",
+  "generated_at": "2026-06-29T22:55:34.213890+00:00",
   "input_checksums": {
     "src/structural_analysis/api/cli.py": "sha256:1b35c7aeaacfb435aee30b5d84979687d142cc33be6628b56cba7380689ae05b",
     "src/structural_analysis/api/core.py": "sha256:57abbdac42cb3fe4f04d2940c58717c76605ccfab550a18d1e3c69dc913edb6f",
@@ -103,7 +103,7 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v1",
-  "source_commit_sha": "f5f2f41620194cb8140e5d84be2219bdd9cdd749",
+  "source_commit_sha": "adf97ad20690f31c09e1c74a44993780b301f8e2",
   "status": "ready",
   "supported_preview_analysis_types": [
     "model_health",
