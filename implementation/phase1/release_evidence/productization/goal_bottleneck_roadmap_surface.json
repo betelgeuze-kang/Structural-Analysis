@@ -40,7 +40,7 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T18:44:49.700163+00:00",
+  "generated_at": "2026-06-29T18:48:21.069673+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:90a17645943e5c7b379fd67cc6e5c90e4febafafad430cff90ab27dbad59dbc6",
@@ -55,7 +55,7 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:cc6f76930e2491b855f8ad3508caf614ec493d0aab6b89811cccdac7cd3159cb",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ba61abae73a013c889a2d7c4431d419be9f92619341f6a6216a762c7d5a19ba3",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:6f9d359877d95eb1a8c24d5579eb0a4719b0d9d7d49377168dd844a4c3a8a05f",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:07c8862ebf89b72d20606d0801a029a4486283a716119ba759452474940c4945",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -490,6 +490,95 @@
         "broad_gpcr_family_claim_safe": false,
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 3,
+        "operator_target_slots": [
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "drd2_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "DRD2"
+          },
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "htr2a_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "HTR2A"
+          },
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "oprm1_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "OPRM1"
+          }
+        ],
+        "phase3_exit_gate_criteria": [
+          {
+            "blocker_count": 3,
+            "criterion_id": "ranking_pr_auc_ci_low_min",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": ">=0.45"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "top20_hit_rate_min",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": ">=0.2"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "decoys_above_positive_count_max",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": "<=0"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "no_positive_out_anchored_by_top_decoys",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": false
+          }
+        ],
         "phase3_exit_gate_status": "blocked",
         "phase3_failed_criteria": [
           "ranking_pr_auc_ci_low_min",
@@ -634,7 +723,7 @@
       ]
     }
   },
-  "source_commit_sha": "619e50065a814ec9e1a44b8377a1b3bbb24a5c73",
+  "source_commit_sha": "a00ef6d32380e54b0c69f56c05ba47c17fc43fa5",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
