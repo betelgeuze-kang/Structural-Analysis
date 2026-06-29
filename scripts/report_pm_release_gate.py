@@ -45,6 +45,9 @@ DEFAULT_MEASURED_BREADTH = Path(
 DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
     "implementation/phase1/release/external_benchmark_submission_readiness.json"
 )
+DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH = Path(
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
+)
 DEFAULT_EVIDENCE_SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release_evidence/productization/worst_case_report.json")
 DEFAULT_WORKFLOW_PRODUCTIZATION = Path("implementation/phase1/workflow_productization_gate_report.json")
@@ -349,6 +352,7 @@ def _stale_artifact_count(release_evidence_freshness_payload: dict[str, Any]) ->
 def _public_benchmark_ready(
     measured_benchmark_breadth_payload: dict[str, Any],
     external_benchmark_submission_readiness_payload: dict[str, Any],
+    public_benchmark_source_of_truth_payload: dict[str, Any],
 ) -> bool:
     external_summary = _summary(external_benchmark_submission_readiness_payload)
     external_ready = bool(
@@ -356,10 +360,17 @@ def _public_benchmark_ready(
         or external_summary.get("ready_to_start_now")
         or external_summary.get("ready_to_submit")
     )
+    source_summary = _summary(public_benchmark_source_of_truth_payload)
+    source_ready = bool(
+        public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
+        or source_summary.get("public_benchmark_ready")
+    )
     return bool(
         _truthy_contract(measured_benchmark_breadth_payload)
         and _truthy_contract(external_benchmark_submission_readiness_payload)
         and external_ready
+        and _truthy_contract(public_benchmark_source_of_truth_payload)
+        and source_ready
     )
 
 
@@ -404,6 +415,7 @@ def _release_decision(
     release_area_blockers: list[str],
     measured_benchmark_breadth_payload: dict[str, Any],
     external_benchmark_submission_readiness_payload: dict[str, Any],
+    public_benchmark_source_of_truth_payload: dict[str, Any],
     release_evidence_freshness_payload: dict[str, Any],
     pm_blocker_register: dict[str, Any],
     evidence_surface_dir: Path,
@@ -490,7 +502,20 @@ def _release_decision(
         "public_benchmark_ready": _public_benchmark_ready(
             measured_benchmark_breadth_payload,
             external_benchmark_submission_readiness_payload,
+            public_benchmark_source_of_truth_payload,
         ),
+        "public_benchmark_source_of_truth_ready": bool(
+            public_benchmark_source_of_truth_payload.get("public_benchmark_ready")
+            or _summary(public_benchmark_source_of_truth_payload).get("public_benchmark_ready")
+        ),
+        "public_benchmark_source_of_truth_status": str(
+            public_benchmark_source_of_truth_payload.get("status")
+            or _summary(public_benchmark_source_of_truth_payload).get("status")
+            or ""
+        ),
+        "public_benchmark_source_of_truth_blockers": [
+            str(row) for row in _as_list(public_benchmark_source_of_truth_payload.get("blockers"))
+        ],
         "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
         "h_bond_evidence_surface_present": bool(h_bond_surfaces),
         "gpcr_evidence_surface_present": bool(gpcr_surfaces),
@@ -2855,6 +2880,7 @@ def build_report(
     zero_copy_strict: Path = DEFAULT_ZERO_COPY_STRICT,
     measured_benchmark_breadth: Path = DEFAULT_MEASURED_BREADTH,
     external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    public_benchmark_source_of_truth: Path = DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH,
     evidence_surface_dir: Path = DEFAULT_EVIDENCE_SURFACE_DIR,
     worst_case_report: Path = DEFAULT_WORST_CASE_REPORT,
     workflow_productization: Path = DEFAULT_WORKFLOW_PRODUCTIZATION,
@@ -3025,6 +3051,7 @@ def build_report(
     full_release_gate_ready = bool(limited_ready and release_area_ready)
     measured_benchmark_breadth_payload = _load_json(measured_benchmark_breadth)
     external_benchmark_submission_readiness_payload = _load_json(external_benchmark_submission_readiness)
+    public_benchmark_source_of_truth_payload = _load_json(public_benchmark_source_of_truth)
     release_evidence_freshness_payload = _load_json(release_evidence_freshness)
     pm_blocker_register_payload = _load_json(pm_release_blocker_action_register)
     release_decision = _release_decision(
@@ -3033,6 +3060,7 @@ def build_report(
         release_area_blockers=release_area_blockers,
         measured_benchmark_breadth_payload=measured_benchmark_breadth_payload,
         external_benchmark_submission_readiness_payload=external_benchmark_submission_readiness_payload,
+        public_benchmark_source_of_truth_payload=public_benchmark_source_of_truth_payload,
         release_evidence_freshness_payload=release_evidence_freshness_payload,
         pm_blocker_register=pm_blocker_register_payload,
         evidence_surface_dir=evidence_surface_dir,
@@ -3120,6 +3148,7 @@ def build_report(
             paid_pilot_scope_guard,
             customer_shadow_evidence_status,
             external_benchmark_submission_readiness,
+            public_benchmark_source_of_truth,
             *_evidence_surface_json_paths(evidence_surface_dir),
         ]
     )
@@ -3301,6 +3330,12 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `gpcr_evidence_surface_present`: "
         f"`{release_decision.get('gpcr_evidence_surface_present', False)}`",
         f"- `public_benchmark_ready`: `{release_decision.get('public_benchmark_ready', False)}`",
+        f"- `public_benchmark_source_of_truth_ready`: "
+        f"`{release_decision.get('public_benchmark_source_of_truth_ready', False)}`",
+        f"- `public_benchmark_source_of_truth_status`: "
+        f"`{release_decision.get('public_benchmark_source_of_truth_status', '') or 'unknown'}`",
+        f"- `public_benchmark_source_of_truth_blockers`: "
+        f"`{', '.join(release_decision.get('public_benchmark_source_of_truth_blockers', [])) or 'none'}`",
         f"- `broad_gpcr_family_claim_safe`: `{release_decision.get('broad_gpcr_family_claim_safe', False)}`",
         f"- `science_evidence_surface_bottlenecks`: "
         f"`{', '.join(str(item) for item in science_surface_bottlenecks) or 'none'}`",
@@ -3346,6 +3381,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--external-benchmark-submission-readiness",
         type=Path,
         default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument(
+        "--public-benchmark-source-of-truth",
+        type=Path,
+        default=DEFAULT_PUBLIC_BENCHMARK_SOURCE_OF_TRUTH,
     )
     parser.add_argument("--evidence-surface-dir", type=Path, default=DEFAULT_EVIDENCE_SURFACE_DIR)
     parser.add_argument("--worst-case-report", type=Path, default=DEFAULT_WORST_CASE_REPORT)
@@ -3454,6 +3494,7 @@ def main(argv: list[str] | None = None) -> int:
         zero_copy_strict=args.zero_copy_strict,
         measured_benchmark_breadth=args.measured_benchmark_breadth,
         external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+        public_benchmark_source_of_truth=args.public_benchmark_source_of_truth,
         evidence_surface_dir=args.evidence_surface_dir,
         worst_case_report=args.worst_case_report,
         workflow_productization=args.workflow_productization,

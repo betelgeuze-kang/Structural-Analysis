@@ -674,6 +674,15 @@ def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
                 "blockers": [],
             },
         ),
+        "public_benchmark_source_of_truth": _write(
+            tmp_path / "public_benchmark_source_of_truth.json",
+            {
+                "contract_pass": True,
+                "public_benchmark_ready": True,
+                "status": "ready",
+                "blockers": [],
+            },
+        ),
         "evidence_surface_dir": evidence_surface_dir,
     }
 
@@ -685,6 +694,31 @@ def _base_kwargs(tmp_path: Path) -> dict[str, Path]:
     kwargs.update(_release_area_inputs(tmp_path))
     kwargs.update(_release_decision_inputs(tmp_path))
     return kwargs
+
+
+def test_public_benchmark_ready_requires_source_of_truth_ready() -> None:
+    measured = {"contract_pass": True}
+    external = {
+        "contract_pass": True,
+        "summary": {"ready_to_start_full_submission_now": True},
+    }
+
+    assert (
+        report_pm_release_gate._public_benchmark_ready(
+            measured,
+            external,
+            {"contract_pass": True, "public_benchmark_ready": True},
+        )
+        is True
+    )
+    assert (
+        report_pm_release_gate._public_benchmark_ready(
+            measured,
+            external,
+            {"contract_pass": True, "public_benchmark_ready": False},
+        )
+        is False
+    )
 
 
 def test_pm_release_gate_keeps_paid_pilot_scope_when_limited_blockers_remain(tmp_path: Path) -> None:
@@ -875,6 +909,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["input_checksums"][str(base_kwargs["external_benchmark_submission_readiness"])].startswith(
         "sha256:"
     )
+    assert payload["input_checksums"][str(base_kwargs["public_benchmark_source_of_truth"])].startswith(
+        "sha256:"
+    )
     assert payload["release_area_gate_ready"] is True
     assert payload["full_release_gate_ready"] is True
     decision = payload["release_decision"]
@@ -889,6 +926,9 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["missing_evidence_surface_count"] == 0
     assert decision["locked_evidence_surface_count"] == 1
     assert decision["public_benchmark_ready"] is True
+    assert decision["public_benchmark_source_of_truth_ready"] is True
+    assert decision["public_benchmark_source_of_truth_status"] == "ready"
+    assert decision["public_benchmark_source_of_truth_blockers"] == []
     assert decision["h_bond_evidence_surface_present"] is False
     assert decision["gpcr_evidence_surface_present"] is True
     assert decision["broad_gpcr_family_claim_safe"] is False
