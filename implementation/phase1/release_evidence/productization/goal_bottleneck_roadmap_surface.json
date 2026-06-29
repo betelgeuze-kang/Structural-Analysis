@@ -40,7 +40,7 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T16:54:51.330469+00:00",
+  "generated_at": "2026-06-29T16:59:10.459527+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:5f9f6eb2709b526ea9e6a66b07bf38bb7b12af6351b81fd4efed00e5ca07ee10",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d5d9d14f2b39f23f7d7c8c5a9788b2802d5c609ef47e2496aa70a1f05c09eeb3",
@@ -50,7 +50,7 @@
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:e0984fb23df446d1cf501ae52416de57eb79a5ae1de945a62c568df50bad28ed",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:bc8a0bb6533d5e22ef9a2b2f61cc53e8ad247cf8caf30c560fde438f8fffb2ae",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:b2e09fd170ac96662aee94636b6fa60de646be969a84df97a97553c9a24d3ba6",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:be39212a329eb9ac63cece6ddcdb7bf40dfafceb79ece2c320559763355b096f",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:04f48000fff1c55242263a447f75fec8b1a61a6d21b0e638f20c8b96d776e5f6"
   },
   "mutation_allowed": false,
@@ -433,7 +433,7 @@
       ]
     }
   },
-  "source_commit_sha": "9da07f7912631ce356d44173c148cf00bf7f3845",
+  "source_commit_sha": "173742e06c726cdcd4571f177ff99e3bb09424bc",
   "status": "ready_release_blocked",
   "summary_line": "Goal bottleneck roadmap surface: READY | release_allowed=False | primary_bottleneck=public_benchmark_source_of_truth_not_ready | blocked_roadmap_rows=3",
   "surface_id": "goal_bottleneck_roadmap_surface",

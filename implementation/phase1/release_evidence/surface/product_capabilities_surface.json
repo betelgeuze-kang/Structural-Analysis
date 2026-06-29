@@ -33,9 +33,12 @@
       "capability_kind": "external_science_evidence",
       "contract_pass": false,
       "evidence_artifacts": [
-        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
+        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md"
       ],
       "next_actions": [
+        "fill_public_benchmark_operator_intake_packet",
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
         "fill_ligand_atom_order_and_symmetry_permutation_contracts",
@@ -45,7 +48,9 @@
         "run_public_benchmark_rmsd_scorecard_materializer",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
         "attach_dud_e_lit_pcba_enrichment_intake",
-        "run_public_benchmark_enrichment_materializer"
+        "run_public_benchmark_enrichment_materializer",
+        "refresh_public_benchmark_source_of_truth",
+        "regenerate_goal_bottleneck_roadmap_surface"
       ],
       "state": "blocked",
       "summary": {
@@ -59,6 +64,10 @@
           "real_enrichment_target_count": 0,
           "status": "operator_evidence_required"
         },
+        "operator_intake_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
+        "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
+        "operator_intake_packet_status": "ready_for_operator_input",
+        "operator_intake_required_slot_count": 3,
         "public_benchmark_ready": false,
         "status": "seed_ready_materialization_blocked",
         "subset_manifest_summary": {
@@ -154,12 +163,14 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T16:21:13.354875+00:00",
+  "generated_at": "2026-06-29T16:59:10.419962+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:5f9f6eb2709b526ea9e6a66b07bf38bb7b12af6351b81fd4efed00e5ca07ee10",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:e77d084e3dff3b72f1accd1d741d3cd8609c199936a6b2a48e612d67b8161f3d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:7121747e684a731ccb0af55cc967f35a74a106424f7f5cfa04648dfc6d061400",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:41f98b27c6d0f41afaf9a7ca2f0955ff7660f7e153e7b62b090fb6cf092886be",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:267ef9d4107261781954279a936884785883b93f369afb75553dae06a7ca753a",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md": "sha256:edd6919a5a7dc481ac32e6da02a4b51942634ef4173cf1d278587036adc6001c",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:e8db52e43387b93b193273c36fe7bf639e325d7416e17fce83e50756f4913cf6",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
@@ -171,7 +182,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:9d910ffa1be5e33c16dfdf29a7f9362fadc9f6bb46aaa1ba1b48733b72e5f63a"
+    "scripts/build_product_capabilities_surface.py": "sha256:f5f62236cc11e33096df2ec590b63f85bc1e018fd8beed0cd2a384f129d50620"
   },
   "locked": false,
   "next_actions": [
@@ -191,7 +202,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "d8e044b6e4782367c286e4ad59e09de0463feae4",
+  "source_commit_sha": "173742e06c726cdcd4571f177ff99e3bb09424bc",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
