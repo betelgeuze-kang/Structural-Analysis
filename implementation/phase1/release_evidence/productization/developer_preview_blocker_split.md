@@ -6,11 +6,11 @@ This page separates Developer Preview RC blockers from Commercial Release blocke
 
 | Track | Source | Current status |
 |---|---|---|
-| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `stale_or_inconsistent`, `blocker_count=66` |
-| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=30`, `future_commercial_blocker_count=36` |
+| Canonical Commercial Release snapshot | `product_readiness_snapshot.json` | `blocked`, `blocker_count=34` |
+| Developer Preview readiness bar | `developer_preview_readiness.json` | `blocked`, `blocker_count=5`, `future_commercial_blocker_count=29` |
 | Developer Preview RC final gates | `developer_preview_rc_status.json` | `blocked`, deliverables `10/10`, final gates `3/9`, active RC blockers `6` |
 
-The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `66`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the six Developer Preview blockers.
+The historical `42` release blocker count is no longer the stored canonical count after the current snapshot regeneration; the canonical Commercial Release blocker total is now `34`. Use `product_readiness_snapshot.json` for release blocker totals, and use the RC final-gate rows below for the six Developer Preview blockers.
 
 ## Developer Preview RC Blockers
 
@@ -31,7 +31,7 @@ These remain visible for Commercial Release and do not count as Developer Previe
 - Product/legal license approval, license-server operation, commercial SLA, and security/license release evidence.
 - Self-hosted runner online evidence and PR/nightly 30-run consecutive green streak receipts.
 - External benchmark receipts and independent V&V/signoff evidence.
-- GitHub remote sync approval and release-publication remote mutation handoff.
+- Release-publication remote mutation handoff.
 - Full G1 commercial solver closure beyond the bounded Developer Preview evidence bar.
 
 ## Core API Boundary
