@@ -2,14 +2,32 @@
   "blockers": [
     "casf_pdbbind_source_material_not_attached",
     "public_benchmark_real_pose_predictions_missing",
+    "dud_e_lit_pcba_enrichment_rows_missing",
     "public_benchmark_external_receipts_missing"
   ],
-  "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment.",
+  "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:31:57.016313+00:00",
+  "enrichment_scorecard_materializer": {
+    "claim_boundary": "The enrichment materializer consumes DUD-E/LIT-PCBA scored molecule rows and reports EF@1%, EF@5%, and ROC-AUC per target. It does not download benchmark data, validate chemistry, or close Tier beta alone.",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
+    "schema_version": "public-benchmark-enrichment-materialization.v1",
+    "status": "ready_for_operator_intake"
+  },
+  "enrichment_scorecard_summary": {
+    "blockers": [
+      "dud_e_lit_pcba_enrichment_targets_missing",
+      "dud_e_lit_pcba_scored_molecules_missing",
+      "dud_e_lit_pcba_active_decoy_labels_missing"
+    ],
+    "public_benchmark_enrichment_ready": false,
+    "real_enrichment_target_count": 0,
+    "status": "operator_evidence_required"
+  },
+  "generated_at": "2026-06-29T16:03:08.008853+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:e31e944090066c644d29a069c3872c212875050210d5fe464ecb106afa81c97c",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:56b7bbae0f0fdb94c3e0966b838a192037b672ca96a284f74564f843801cd80b",
+    "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
     "scripts/materialize_public_benchmark_rmsd_scorecard.py": "sha256:2d566cf9033ea153eed738a03b4f517d18ded9dac311aae5320a0f083861d976",
@@ -26,7 +44,9 @@
     "run_public_benchmark_pose_validity_materializer",
     "run_symmetry_aware_rmsd_on_real_subset",
     "run_public_benchmark_rmsd_scorecard_materializer",
-    "materialize_posebusters_style_validity_packet_for_real_ligands"
+    "materialize_posebusters_style_validity_packet_for_real_ligands",
+    "attach_dud_e_lit_pcba_enrichment_intake",
+    "run_public_benchmark_enrichment_materializer"
   ],
   "pose_validity_materializer": {
     "claim_boundary": "The pose materializer joins a materialized subset manifest with operator-attached reference/predicted ligand coordinates and receptor context, then runs the local PoseBusters-style validator. It does not parse chemistry files or claim benchmark performance.",
@@ -69,7 +89,7 @@
     "status": "ready_for_pose_validity_input"
   },
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "b7e1fe3cd206d50cecaff61f4af15924d34a2b9a",
+  "source_commit_sha": "0f53c4637d51dd105e5a16b6d0496d84fa5c7b23",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
@@ -83,8 +103,8 @@
     },
     {
       "family_id": "dud_e_lit_pcba",
-      "materialization_status": "planned_later",
-      "role": "future_enrichment"
+      "materialization_status": "operator_intake_required",
+      "role": "enrichment_scorecard"
     },
     {
       "family_id": "vina_gnina",
