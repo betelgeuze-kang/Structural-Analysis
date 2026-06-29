@@ -1,7 +1,7 @@
 {
   "artifacts": {
     "external_benchmark_submission_updates": "implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json",
-    "repo_root": ".",
+    "repo_root": "/home/betelgeuze/건축구조분석",
     "residual_holdout_closure_updates": "implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json"
   },
   "blockers": [

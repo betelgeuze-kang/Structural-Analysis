@@ -1,16 +1,16 @@
 {
   "blockers": [
-    "remote_mutation_approval_required"
+    "worktree_not_clean"
   ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
-    "feature_synced_to_head": false,
+    "feature_synced_to_head": true,
     "main_fast_forward_possible": true,
     "main_synced_to_head": true,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": true
+    "worktree_clean": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -19,43 +19,34 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-29T23:34:47.281395+00:00",
-  "pending_remote_updates": [
-    {
-      "action": "push current HEAD to feature",
-      "command": "git push origin main:codex/create-architecture-definition-document-for-hybrid-ai",
-      "rollback": "restore feature to previous remote SHA c4149c5ac6722d0823fb9bdffa40c6f7dc8686de with an approved restore action",
-      "target": "origin/codex/create-architecture-definition-document-for-hybrid-ai"
-    }
-  ],
-  "preflight_pass": true,
+  "generated_at": "2026-06-29T23:39:27.122361+00:00",
+  "pending_remote_updates": [],
+  "preflight_pass": false,
   "r4_disclosure": {
-    "action": "push current HEAD to feature",
-    "impact": "GitHub pending refs become externally visible at the local development state.",
-    "risk": "External reviewers of the feature branch immediately see the current commits.",
-    "rollback": "restore feature to previous remote SHA c4149c5ac6722d0823fb9bdffa40c6f7dc8686de with an approved restore action",
-    "target": [
-      "origin/codex/create-architecture-definition-document-for-hybrid-ai"
-    ],
+    "action": "no remote mutation required",
+    "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
+    "risk": "No remote mutation remains.",
+    "rollback": "no rollback needed",
+    "target": [],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
   "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
-  "remote_sync_needed": true,
+  "remote_sync_needed": false,
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "main",
-    "feature_ahead_count": 2,
+    "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "fe2ddbefa30d49345f9dc3b835a16528663ee73e",
+    "local_head_sha": "c988fc86d8441308dba12687769cace6c17a1c90",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-    "remote_feature_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
+    "remote_feature_sha": "c988fc86d8441308dba12687769cace6c17a1c90",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "fe2ddbefa30d49345f9dc3b835a16528663ee73e",
+    "remote_main_sha": "c988fc86d8441308dba12687769cace6c17a1c90",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -69,7 +60,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/customer_shadow_evidence_status.json\n M implementation/phase1/release_evidence/productization/commercial_gap_ledger_status.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.json\n M implementation/phase1/release_evidence/productization/developer_preview_readiness.md\n M implementation/phase1/release_evidence/productization/external_benchmark_submission_updates.json\n M implementation/phase1/release_evidence/productization/fresh_full_validation_lane_status.json\n M implementation/phase1/release_evidence/productization/g1_full_load_hip_newton_lane_report.json\n M implementation/phase1/release_evidence/productization/gap_closure_status.json\n M implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json\n M implementation/phase1/release_evidence/productization/github_actions_ci_streak_evidence.json\n M implementation/phase1/release_evidence/productization/github_development_sync_preflight.json\n M implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json\n M implementation/phase1/release_evidence/productization/license_status_closure_report.json\n M implementation/phase1/release_evidence/productization/mgt_g1_direct_residual_terminal_gate_report.json\n M implementation/phase1/release_evidence/productization/p1_evidence_sidecar_metadata_refresh_summary.json\n M implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json\n M implementation/phase1/release_evidence/productization/pm_owner_evidence_request_packet.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json\n M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_completion_audit.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.json\n M implementation/phase1/release_evidence/productization/pm_release_gate_report.md\n M implementation/phase1/release_evidence/productization/pm_release_gate_reviewer_handoff.json\n M implementation/phase1/release_evidence/productization/pm_release_reproduction_command_audit.json\n M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json\n M implementation/phase1/release_evidence/productization/residual_holdout_closure_updates.json\n M implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json\n M implementation/phase1/support_bundle_manifest.json\n M implementation/phase1/workstation_delivery_readiness.json"
   },
-  "status": "approval_required"
+  "status": "blocked"
 }
