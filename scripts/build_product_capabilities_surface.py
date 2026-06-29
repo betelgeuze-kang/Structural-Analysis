@@ -320,6 +320,9 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
     surface = _load_json(repo_root, DEFAULT_GPCR_SURFACE)
     product_report = _load_json(repo_root, DEFAULT_GPCR_PRODUCT_REPORT)
     operator_intake = _load_json(repo_root, DEFAULT_GPCR_OPERATOR_INTAKE_PACKET)
+    phase3_exit_gate = _as_dict(
+        product_report.get("phase3_exit_gate") or surface.get("phase3_exit_gate")
+    )
     state = _state(surface)
     return _capability_row(
         capability_id="gpcr_hard_decoy_evidence",
@@ -352,6 +355,13 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
                 operator_intake.get("required_slot_count") or 0
             ),
             "broad_gpcr_family_claim_safe": bool(surface.get("broad_gpcr_family_claim_safe")),
+            "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+            "phase3_failed_criterion_count": int(
+                phase3_exit_gate.get("failed_criterion_count") or 0
+            ),
+            "phase3_failed_criteria": [
+                str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
+            ],
         },
     )
 

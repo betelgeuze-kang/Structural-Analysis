@@ -121,6 +121,14 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gpcr["summary"]["broad_gpcr_family_claim_safe"] is False
     assert gpcr["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
     assert gpcr["summary"]["operator_intake_required_slot_count"] == 3
+    assert gpcr["summary"]["phase3_exit_gate_status"] == "blocked"
+    assert gpcr["summary"]["phase3_failed_criterion_count"] == 4
+    assert gpcr["summary"]["phase3_failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
     assert (
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
         in gpcr["evidence_artifacts"]
