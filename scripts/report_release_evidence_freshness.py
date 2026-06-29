@@ -102,6 +102,19 @@ DEFAULT_ARTIFACTS = (
         ),
         Path("scripts/build_developer_preview_rc_status.py"),
     ),
+    (
+        "accuracy_parity_scorecard",
+        Path("implementation/phase1/real_accuracy_validation_report.json"),
+        Path("implementation/phase1/run_real_accuracy_validation.py"),
+    ),
+    (
+        "product_production_ai_checkpoint_readiness",
+        Path(
+            "implementation/phase1/release_evidence/productization/"
+            "ai_engine_productization_contracts.json"
+        ),
+        Path("scripts/build_ai_engine_productization_contracts.py"),
+    ),
 )
 
 

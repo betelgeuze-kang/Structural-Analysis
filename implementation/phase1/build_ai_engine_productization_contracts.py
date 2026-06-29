@@ -8,11 +8,13 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PRODUCTIZATION = REPO_ROOT / "implementation/phase1/release_evidence/productization"
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -28,6 +30,44 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _path_key(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _sha256_or_missing(path: Path) -> str:
+    return f"sha256:{_sha256(path)}" if path.exists() else "missing"
+
+
+def _source_tracking_metadata(paths: list[Path]) -> dict[str, Any]:
+    return {
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": {_path_key(path): _sha256_or_missing(path) for path in paths},
+        "reused_evidence": True,
+        "reuse_policy": "ai_engine_productization_contracts_aggregate_ml_checkpoint_receipts",
+    }
+
+
+def _optional_path(value: Any) -> Path | None:
+    text = str(value or "").strip()
+    return Path(text) if text else None
 
 
 def _write(path: Path, payload: dict[str, Any]) -> None:
@@ -49,12 +89,32 @@ def build_contracts(
     generated_at = datetime.now(timezone.utc).isoformat()
     ml = _load(productization_dir / "ml_multi_objective_status.json")
     gate = _ml_gate(productization_dir)
-    checkpoint = Path(str(gate.get("checkpoint_path") or ""))
+    checkpoint_path_raw = str(gate.get("checkpoint_path") or "").strip()
+    checkpoint = Path(checkpoint_path_raw)
     checkpoint_ready = bool(gate.get("checkpoint_ready")) and checkpoint.is_file()
     checkpoint_validated = bool(gate.get("checkpoint_validated"))
     checkpoint_hash = str(gate.get("checkpoint_sha256") or (_sha256(checkpoint) if checkpoint_ready else ""))
     production_ml_wired = bool(ml.get("production_ml_wired"))
     production_ai_ready = production_ml_wired and checkpoint_ready and checkpoint_validated
+    optional_source_paths = [
+        path
+        for path in (
+            _optional_path(gate.get("dataset_card_path")),
+            _optional_path(gate.get("model_card_path")),
+            _optional_path(gate.get("validation_receipt_path")),
+            _optional_path(gate.get("ood_gate_path")),
+            _optional_path(gate.get("solver_fallback_receipt_path")),
+        )
+        if path is not None
+    ]
+    source_paths = [
+        REPO_ROOT / "implementation/phase1/build_ai_engine_productization_contracts.py",
+        REPO_ROOT / "scripts/build_ai_engine_productization_contracts.py",
+        productization_dir / "ml_multi_objective_status.json",
+        *([checkpoint] if checkpoint_path_raw else []),
+        *optional_source_paths,
+    ]
+    source_tracking = _source_tracking_metadata(source_paths)
     validation_summary = gate.get("validation_summary") if isinstance(gate.get("validation_summary"), dict) else {}
     test_metrics = validation_summary.get("test") if isinstance(validation_summary.get("test"), dict) else {}
     p95_errors = test_metrics.get("p95_abs_error") if isinstance(test_metrics.get("p95_abs_error"), dict) else {}
@@ -64,6 +124,7 @@ def build_contracts(
     registry = {
         "schema_version": "ai-model-registry.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "production_model_ready" if production_ai_ready else "no_validated_production_model",
         "production_model_ready": production_ai_ready,
         "checkpoint_path": str(checkpoint) if checkpoint else "",
@@ -112,6 +173,7 @@ def build_contracts(
     physics_guard = {
         "schema_version": "ai-physics-guard-contract.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "contract_ready_model_not_promoted",
         "production_gate_ready": False,
         "required_gates": [
@@ -147,6 +209,7 @@ def build_contracts(
     inference_receipt = {
         "schema_version": "ai-inference-runtime-receipt.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "ready" if production_ai_ready else "disabled_no_validated_checkpoint",
         "inference_executed": production_ai_ready,
         "backend": "numpy_ridge_shadow_surrogate" if production_ai_ready else "not_loaded",
@@ -190,6 +253,7 @@ def build_contracts(
     safety_contract = {
         "schema_version": "ai-safety-governance-contract.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "contract_ready",
         "allowed_result_states": [
             "auto_applied",
@@ -214,6 +278,7 @@ def build_contracts(
     decision_trace = {
         "schema_version": "ai-decision-trace-contract.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "contract_ready",
         "minimum_fields": [
             "input_hash",
@@ -232,6 +297,7 @@ def build_contracts(
     review_queue = {
         "schema_version": "ai-review-queue-contract.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "contract_ready",
         "queue_item_states": ["pending_review", "accepted", "rejected", "waived", "blocked", "unsupported"],
         "minimum_fields": [
@@ -275,6 +341,7 @@ def build_contracts(
     index = {
         "schema_version": "ai-engine-productization-contracts.v1",
         "generated_at": generated_at,
+        **source_tracking,
         "status": "contracts_ready_model_not_promoted" if blockers else "production_ai_ready",
         "contracts_ready": True,
         "production_ai_ready": not blockers,

@@ -32,8 +32,18 @@ def test_build_ai_engine_productization_contracts_writes_disabled_runtime_receip
     assert payload["schema_version"] == "ai-engine-productization-contracts.v1"
     assert payload["contracts_ready"] is True
     assert payload["production_ai_ready"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert (
+        payload["reuse_policy"]
+        == "ai_engine_productization_contracts_aggregate_ml_checkpoint_receipts"
+    )
+    assert "ml_multi_objective_status.json" in " ".join(payload["input_checksums"])
     receipt = json.loads((tmp_path / "ai_inference_runtime_receipt.json").read_text(encoding="utf-8"))
     assert receipt["schema_version"] == "ai-inference-runtime-receipt.v1"
+    assert receipt["source_commit_sha"] == payload["source_commit_sha"]
+    assert receipt["engine_version"] == payload["engine_version"]
     assert receipt["status"] == "disabled_no_validated_checkpoint"
     assert receipt["fallback_reason"] == "ml_surrogate_disabled_or_checkpoint_missing"
     assert receipt["runtime_budget_contract"]["latency_budget_ms"] == 250

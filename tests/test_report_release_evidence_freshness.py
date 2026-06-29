@@ -181,7 +181,9 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "g1_shell_material_budgeted_continuation_status" in labels
     assert "evidence_console_scope_status" in labels
     assert "developer_preview_rc_status" in labels
-    assert len(artifacts) == 12
+    assert "accuracy_parity_scorecard" in labels
+    assert "product_production_ai_checkpoint_readiness" in labels
+    assert len(artifacts) == 14
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)

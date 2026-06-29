@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -22,6 +23,9 @@ import time
 
 from runtime_contracts import InputContractError, get_logger, log_event, validate_input_contract
 
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
 
 REASONS = {
     "PASS": "real accuracy validation passed",
@@ -61,6 +65,72 @@ REAL_ACC_INPUT_SCHEMA = {
         "target_split": {"type": "string", "enum": ["all", "train", "val", "test"]},
     },
 }
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _path_key(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(REPO_ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _resolve_repo_path(value: str | Path) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else REPO_ROOT / path
+
+
+def _sha256_or_missing(path: Path) -> str:
+    if not path.exists():
+        return "missing"
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _input_checksums(paths: list[Path]) -> dict[str, str]:
+    checksums: dict[str, str] = {}
+    for path in paths:
+        checksums[_path_key(path)] = _sha256_or_missing(path)
+    return checksums
+
+
+def _source_tracking_metadata(paths: list[Path]) -> dict[str, object]:
+    return {
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": _input_checksums(paths),
+        "reused_evidence": False,
+        "reuse_policy": "fresh_real_accuracy_validation_run",
+    }
+
+
+def _source_tracking_paths(args: argparse.Namespace) -> list[Path]:
+    return [
+        _resolve_repo_path("implementation/phase1/run_real_accuracy_validation.py"),
+        _resolve_repo_path("implementation/phase1/build_cases_from_rwth_zenodo.py"),
+        _resolve_repo_path("implementation/phase1/benchmark_kpi_contract.py"),
+        _resolve_repo_path("implementation/phase1/run_topk_precision_experiments.py"),
+        _resolve_repo_path("implementation/phase1/runtime_contracts.py"),
+        _resolve_repo_path(args.zip),
+        _resolve_repo_path(args.cases_out),
+        _resolve_repo_path(args.benchmark_out),
+        _resolve_repo_path(args.comparison_out),
+        _resolve_repo_path(args.suite_out),
+    ]
 
 
 def _run(cmd: list[str]) -> tuple[bool, float, int, str, str]:
@@ -134,6 +204,7 @@ def main() -> None:
         "seeds": str(args.seeds),
         "target_split": str(args.target_split),
     }
+    source_tracking = _source_tracking_metadata(_source_tracking_paths(args))
 
     Path(args.summary_out).parent.mkdir(parents=True, exist_ok=True)
 
@@ -279,6 +350,7 @@ def main() -> None:
             "schema_version": "1.0",
             "run_id": "phase1-real-accuracy-validation",
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            **source_tracking,
             "inputs": {
                 "zip": args.zip,
                 "cases_out": args.cases_out,
@@ -356,6 +428,7 @@ def main() -> None:
             "schema_version": "1.0",
             "run_id": "phase1-real-accuracy-validation",
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            **source_tracking,
             "inputs": input_payload,
             "steps": steps,
             "overall_pass": False,
@@ -372,6 +445,7 @@ def main() -> None:
             "schema_version": "1.0",
             "run_id": "phase1-real-accuracy-validation",
             "generated_at": datetime.now(timezone.utc).isoformat(),
+            **source_tracking,
             "inputs": input_payload,
             "steps": steps,
             "overall_pass": False,
