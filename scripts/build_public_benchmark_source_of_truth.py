@@ -33,6 +33,9 @@ from materialize_public_benchmark_subset_manifest import (  # noqa: E402
 from materialize_public_benchmark_pose_validity_input import (  # noqa: E402
     SCHEMA_VERSION as POSE_MATERIALIZER_SCHEMA_VERSION,
 )
+from materialize_public_benchmark_rmsd_scorecard import (  # noqa: E402
+    SCHEMA_VERSION as RMSD_MATERIALIZER_SCHEMA_VERSION,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -50,6 +53,7 @@ def _source_input_paths() -> list[Path]:
     return [
         Path("scripts/build_public_benchmark_source_of_truth.py"),
         Path("scripts/materialize_public_benchmark_pose_validity_input.py"),
+        Path("scripts/materialize_public_benchmark_rmsd_scorecard.py"),
         Path("scripts/materialize_public_benchmark_subset_manifest.py"),
         Path("scripts/score_symmetry_aware_ligand_rmsd.py"),
         Path("scripts/validate_public_benchmark_pose_validity.py"),
@@ -255,6 +259,24 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "contract_pass": True,
         "real_benchmark_case_count": 0,
         "dry_run_case_count": 1,
+        "materializer": {
+            "schema_version": RMSD_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_input",
+            "materialization_command": (
+                "python3 scripts/materialize_public_benchmark_rmsd_scorecard.py "
+                "--pose-validity-input implementation/phase1/release_evidence/productization/"
+                "public_benchmark_pose_validity_input.json "
+                "--out-scorecard implementation/phase1/release_evidence/productization/"
+                "public_benchmark_symmetry_rmsd_scorecard.json "
+                "--out-report implementation/phase1/release_evidence/productization/"
+                "public_benchmark_symmetry_rmsd_materialization_report.json --fail-blocked"
+            ),
+            "claim_boundary": (
+                "The materializer computes per-case symmetry-aware RMSD from pose-validity "
+                "input and reports pose-success counts. It does not infer chemistry or "
+                "claim Tier beta."
+            ),
+        },
         "rows": [
             {
                 "case_id": dry_run_case["case_id"],
@@ -436,6 +458,18 @@ def build_source_of_truth(
                 "parse chemistry files or claim benchmark performance."
             ),
         },
+        "rmsd_scorecard_materializer": {
+            "schema_version": RMSD_MATERIALIZER_SCHEMA_VERSION,
+            "status": "ready_for_pose_validity_input",
+            "materialization_command": rmsd_scorecard["materializer"][
+                "materialization_command"
+            ],
+            "claim_boundary": (
+                "The RMSD scorecard materializer consumes validated pose-coordinate input "
+                "and produces per-case symmetry-aware ligand RMSD rows plus pose-success "
+                "counts. It does not compare docking engines or close Tier beta alone."
+            ),
+        },
         "blockers": [
             "casf_pdbbind_source_material_not_attached",
             "public_benchmark_real_pose_predictions_missing",
@@ -448,6 +482,7 @@ def build_source_of_truth(
             "attach_public_benchmark_pose_coordinate_intake",
             "run_public_benchmark_pose_validity_materializer",
             "run_symmetry_aware_rmsd_on_real_subset",
+            "run_public_benchmark_rmsd_scorecard_materializer",
             "materialize_posebusters_style_validity_packet_for_real_ligands",
         ],
         "claim_boundary": (

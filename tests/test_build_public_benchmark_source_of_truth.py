@@ -108,6 +108,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "parse chemistry files or claim benchmark performance."
         ),
     }
+    assert source["rmsd_scorecard_materializer"] == {
+        "schema_version": "public-benchmark-rmsd-scorecard-materialization.v1",
+        "status": "ready_for_pose_validity_input",
+        "materialization_command": rmsd["materializer"]["materialization_command"],
+        "claim_boundary": (
+            "The RMSD scorecard materializer consumes validated pose-coordinate input "
+            "and produces per-case symmetry-aware ligand RMSD rows plus pose-success "
+            "counts. It does not compare docking engines or close Tier beta alone."
+        ),
+    }
     assert source["next_actions"] == [
         "attach_checked_casf_pdbbind_subset_source_files",
         "run_public_benchmark_subset_materializer",
@@ -115,6 +125,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "attach_public_benchmark_pose_coordinate_intake",
         "run_public_benchmark_pose_validity_materializer",
         "run_symmetry_aware_rmsd_on_real_subset",
+        "run_public_benchmark_rmsd_scorecard_materializer",
         "materialize_posebusters_style_validity_packet_for_real_ligands",
     ]
     assert "Vina/GNINA comparison" in source["claim_boundary"]
@@ -187,6 +198,15 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert rmsd["schema_version"] == "public-benchmark-symmetry-rmsd-scorecard.v1"
     assert rmsd["contract_pass"] is True
     assert rmsd["real_benchmark_case_count"] == 0
+    assert rmsd["materializer"]["schema_version"] == (
+        "public-benchmark-rmsd-scorecard-materialization.v1"
+    )
+    assert "materialize_public_benchmark_rmsd_scorecard.py" in rmsd["materializer"][
+        "materialization_command"
+    ]
+    assert "scripts/materialize_public_benchmark_rmsd_scorecard.py" in rmsd[
+        "input_checksums"
+    ]
     score = rmsd["rows"][0]["score"]
     assert score["best_permutation"] == [0, 2, 1, 3]
     assert score["pose_success"] is True
