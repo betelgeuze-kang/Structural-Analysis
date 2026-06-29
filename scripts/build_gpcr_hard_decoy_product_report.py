@@ -28,6 +28,8 @@ DEFAULT_EVIDENCE_SURFACE = SURFACE_DIR / "gpcr_hard_decoy_evidence_surface.json"
 DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_product_report.json"
 
 SCHEMA_VERSION = "gpcr-hard-decoy-product-report.v1"
+GPCR_PRODUCT_REPORT_ROUTE = "/product/gpcr-hard-decoy-suite-report"
+GPCR_OPERATOR_INTAKE_ROUTE = "/product/gpcr-hard-decoy-suite-report/operator-intake"
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -115,7 +117,13 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "contract_pass": True,
         "read_model_ready": True,
         "mutation_allowed": False,
-        "route": "/product/gpcr-hard-decoy-suite-report",
+        "route": GPCR_PRODUCT_REPORT_ROUTE,
+        "read_model": {
+            "route": GPCR_PRODUCT_REPORT_ROUTE,
+            "alternate_routes": [GPCR_OPERATOR_INTAKE_ROUTE, "/product/capabilities"],
+            "artifact": str(DEFAULT_OUT),
+            "mutation_allowed": False,
+        },
         "product_report_id": "gpcr_hard_decoy_suite_report",
         "broad_gpcr_family_claim_safe": broad_safe,
         "science_claim_status": "ready" if broad_safe else "blocked",
@@ -142,35 +150,53 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "suite_report": str(DEFAULT_SUITE_REPORT),
             "evidence_surface": str(DEFAULT_EVIDENCE_SURFACE),
         },
+        "operator_intake_packet": {
+            "schema_version": str(
+                operator_intake.get("schema_version")
+                or "gpcr-hard-decoy-operator-intake-packet.v1"
+            ),
+            "status": str(operator_intake.get("status") or ""),
+            "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+            "markdown_artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD),
+            "route": str(operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE),
+            "read_model": _as_dict(operator_intake.get("read_model"))
+            or {
+                "route": GPCR_OPERATOR_INTAKE_ROUTE,
+                "alternate_routes": [GPCR_PRODUCT_REPORT_ROUTE, "/product/capabilities"],
+                "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+                "mutation_allowed": False,
+            },
+            "required_slot_count": int(operator_intake.get("required_slot_count") or 0),
+        },
         "endpoints": [
             {
                 "endpoint_id": "get_gpcr_hard_decoy_suite_report",
                 "method": "GET",
-                "route": "/product/gpcr-hard-decoy-suite-report",
+                "route": GPCR_PRODUCT_REPORT_ROUTE,
                 "artifact": str(DEFAULT_SUITE_REPORT),
             },
             {
                 "endpoint_id": "get_gpcr_hard_decoy_evidence_surface",
                 "method": "GET",
-                "route": "/product/gpcr-hard-decoy-suite-report/evidence-surface",
+                "route": f"{GPCR_PRODUCT_REPORT_ROUTE}/evidence-surface",
                 "artifact": str(DEFAULT_EVIDENCE_SURFACE),
             },
             {
                 "endpoint_id": "get_gpcr_hard_decoy_operator_template",
                 "method": "GET",
-                "route": "/product/gpcr-hard-decoy-suite-report/operator-template",
+                "route": f"{GPCR_PRODUCT_REPORT_ROUTE}/operator-template",
                 "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
             },
             {
                 "endpoint_id": "get_gpcr_hard_decoy_operator_intake_packet",
                 "method": "GET",
-                "route": "/product/gpcr-hard-decoy-suite-report/operator-intake-packet",
+                "route": GPCR_OPERATOR_INTAKE_ROUTE,
                 "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
             },
             {
                 "endpoint_id": "list_gpcr_hard_decoy_required_fields",
                 "method": "GET",
-                "route": "/product/gpcr-hard-decoy-suite-report/required-fields",
+                "route": f"{GPCR_PRODUCT_REPORT_ROUTE}/required-fields",
                 "artifact": str(DEFAULT_OPERATOR_TEMPLATE),
                 "json_pointer": "/targets/0",
             },
@@ -198,6 +224,8 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "target_count": target_count,
             "target_pass_count": target_pass_count,
             "science_blocker_count": len(science_blockers),
+            "product_report_route": GPCR_PRODUCT_REPORT_ROUTE,
+            "operator_intake_route": str(operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0

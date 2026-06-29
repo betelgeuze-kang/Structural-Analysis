@@ -28,6 +28,20 @@ def test_gpcr_hard_decoy_operator_intake_packet_exposes_required_targets() -> No
     assert packet["schema_version"] == "gpcr-hard-decoy-operator-intake-packet.v1"
     assert packet["status"] == "ready_for_operator_input"
     assert packet["contract_pass"] is True
+    assert packet["read_model_ready"] is True
+    assert packet["route"] == "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    assert packet["read_model"] == {
+        "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+        "alternate_routes": [
+            "/product/gpcr-hard-decoy-suite-report",
+            "/product/capabilities",
+        ],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert packet["broad_gpcr_family_claim_safe"] is False
     assert packet["owner_input_required"] is True
     assert packet["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]

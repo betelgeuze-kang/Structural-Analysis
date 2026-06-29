@@ -505,6 +505,12 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "root_cause_tags": [str(row) for row in _as_list(surface.get("root_cause_tags"))],
             "product_report_route": str(product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"),
             "product_report_ready": bool(product_report.get("read_model_ready")),
+            "operator_intake_route": str(
+                operator_intake.get("route")
+                or _as_dict(operator_intake.get("read_model")).get("route")
+                or _as_dict(product_report.get("operator_intake_packet")).get("route")
+                or ""
+            ),
             "operator_intake_packet_status": str(operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0

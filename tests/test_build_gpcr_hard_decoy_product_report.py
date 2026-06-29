@@ -29,6 +29,18 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert report["read_model_ready"] is True
     assert report["mutation_allowed"] is False
     assert report["route"] == "/product/gpcr-hard-decoy-suite-report"
+    assert report["read_model"] == {
+        "route": "/product/gpcr-hard-decoy-suite-report",
+        "alternate_routes": [
+            "/product/gpcr-hard-decoy-suite-report/operator-intake",
+            "/product/capabilities",
+        ],
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_product_report.json"
+        ),
+        "mutation_allowed": False,
+    }
     assert report["broad_gpcr_family_claim_safe"] is False
     assert report["science_claim_status"] == "blocked"
     assert report["target_count"] == 3
@@ -65,6 +77,32 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         "operator_template": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json",
         "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
     }
+    assert report["operator_intake_packet"] == {
+        "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
+        "status": "ready_for_operator_input",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.json"
+        ),
+        "markdown_artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.md"
+        ),
+        "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+        "read_model": {
+            "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+            "alternate_routes": [
+                "/product/gpcr-hard-decoy-suite-report",
+                "/product/capabilities",
+            ],
+            "artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_operator_intake_packet.json"
+            ),
+            "mutation_allowed": False,
+        },
+        "required_slot_count": 3,
+    }
     assert {row["method"] for row in report["endpoints"]} == {"GET"}
     assert {
         row["endpoint_id"] for row in report["endpoints"]
@@ -74,6 +112,12 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert "fill_drd2_htr2a_oprm1_operator_template_values" in report["next_actions"]
     assert report["summary"]["operator_intake_packet_status"] == (
         "ready_for_operator_input"
+    )
+    assert report["summary"]["product_report_route"] == (
+        "/product/gpcr-hard-decoy-suite-report"
+    )
+    assert report["summary"]["operator_intake_route"] == (
+        "/product/gpcr-hard-decoy-suite-report/operator-intake"
     )
     assert report["summary"]["operator_intake_required_slot_count"] == 3
     assert report["summary"]["phase3_exit_gate_status"] == "blocked"

@@ -423,6 +423,15 @@ def _gpcr_row(
         for row in _as_list(gpcr_operator_intake.get("target_slots"))
         if isinstance(row, dict)
     ]
+    product_report_route = str(
+        gpcr_product_report.get("route") or "/product/gpcr-hard-decoy-suite-report"
+    )
+    operator_intake_route = str(
+        gpcr_operator_intake.get("route")
+        or _as_dict(gpcr_operator_intake.get("read_model")).get("route")
+        or _as_dict(gpcr_product_report.get("operator_intake_packet")).get("route")
+        or "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    )
     return _roadmap_row(
         phase_id="phase_3_gpcr_hard_decoy_closure",
         phase_label="Phase 3",
@@ -436,7 +445,7 @@ def _gpcr_row(
             DEFAULT_GPCR_OPERATOR_INTAKE_PACKET,
             DEFAULT_GPCR_SURFACE,
         ],
-        linked_routes=["/product/gpcr-hard-decoy-suite-report"],
+        linked_routes=[product_report_route, operator_intake_route, "/product/capabilities"],
         next_actions=_dedupe(
             [str(row) for row in _as_list(gpcr_product_report.get("next_actions"))]
             + [str(row) for row in _as_list(gpcr_operator_intake.get("next_actions"))]
@@ -449,6 +458,8 @@ def _gpcr_row(
             "target_pass_count": _as_int(gpcr_product_report.get("target_pass_count")),
             "science_claim_status": str(gpcr_product_report.get("science_claim_status") or ""),
             "product_report_ready": _as_bool(gpcr_product_report.get("read_model_ready")),
+            "product_report_route": product_report_route,
+            "operator_intake_route": operator_intake_route,
             "operator_intake_packet_status": str(gpcr_operator_intake.get("status") or ""),
             "operator_intake_required_slot_count": _as_int(
                 gpcr_operator_intake.get("required_slot_count")

@@ -28,12 +28,12 @@
     "ranking_pr_auc_ci_low_min": 0.45,
     "top20_hit_rate_min": 0.2
   },
-  "generated_at": "2026-06-29T18:17:23.019040+00:00",
+  "generated_at": "2026-06-29T19:36:20.160969+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:e8aa43b68caa7031571ad21b663f36b3c90aab35dc3ea7106afc1f5fc635a5a0",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
-    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:4360c4b9420cadcc2fa3ed3f80e9c1d993bb63cdcd88d925a2e8dbfbfd7b5958",
+    "scripts/build_gpcr_hard_decoy_operator_intake_packet.py": "sha256:935fdb445231c1b32f2b7aa110510297735ec7dfc501d910a5ce5283cead0770",
     "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:66126be653c213352f039110ede49531283745ca7c1a2a4491e663be44c53309"
   },
   "linked_artifacts": {
@@ -95,6 +95,16 @@
   },
   "owner_input_required": true,
   "packet_id": "gpcr_hard_decoy_operator_intake_packet",
+  "read_model": {
+    "alternate_routes": [
+      "/product/gpcr-hard-decoy-suite-report",
+      "/product/capabilities"
+    ],
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+    "mutation_allowed": false,
+    "route": "/product/gpcr-hard-decoy-suite-report/operator-intake"
+  },
+  "read_model_ready": true,
   "reason_code": "PASS_INTAKE_PACKET",
   "required_operator_fields": [
     "target_id",
@@ -111,8 +121,9 @@
   ],
   "reuse_policy": "gpcr_hard_decoy_operator_intake_packet_from_template_and_suite_contracts",
   "reused_evidence": true,
+  "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "schema_version": "gpcr-hard-decoy-operator-intake-packet.v1",
-  "source_commit_sha": "b3f276e3787ccf853795e03d0f1750503e8de9e2",
+  "source_commit_sha": "b0a274a7a98bb38e0d98bf09b90bcf598040705f",
   "status": "ready_for_operator_input",
   "summary": {
     "broad_gpcr_family_claim_safe": false,

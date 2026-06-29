@@ -25,7 +25,7 @@
     "real_enrichment_target_count": 0,
     "status": "operator_evidence_required"
   },
-  "generated_at": "2026-06-29T19:30:18.269948+00:00",
+  "generated_at": "2026-06-29T19:37:29.154401+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9b5253296810ac5a3b31d7214af645aa8d67826448d6aa92ff45b88ac25a8737",
     "scripts/build_public_benchmark_source_of_truth.py": "sha256:fc0a9bb93e9a9c478908818b56c4e1e3673d6f207edce1107dd6a9c2fd05bc06",
@@ -178,7 +178,7 @@
   },
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "257d3c3730bd84bc244391c5cb7f8ecae0a66ed3",
+  "source_commit_sha": "b0a274a7a98bb38e0d98bf09b90bcf598040705f",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

@@ -35,6 +35,8 @@ DEFAULT_OUT = PRODUCTIZATION / "gpcr_hard_decoy_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 
 SCHEMA_VERSION = "gpcr-hard-decoy-operator-intake-packet.v1"
+GPCR_PRODUCT_REPORT_ROUTE = "/product/gpcr-hard-decoy-suite-report"
+GPCR_OPERATOR_INTAKE_ROUTE = "/product/gpcr-hard-decoy-suite-report/operator-intake"
 REQUIRED_OPERATOR_FIELDS = (
     "target_id",
     "ranking_pr_auc_ci_low",
@@ -146,6 +148,14 @@ def build_gpcr_hard_decoy_operator_intake_packet(*, repo_root: Path = ROOT) -> d
         "status": "ready_for_operator_input",
         "reason_code": "PASS_INTAKE_PACKET",
         "contract_pass": True,
+        "read_model_ready": True,
+        "route": GPCR_OPERATOR_INTAKE_ROUTE,
+        "read_model": {
+            "route": GPCR_OPERATOR_INTAKE_ROUTE,
+            "alternate_routes": [GPCR_PRODUCT_REPORT_ROUTE, "/product/capabilities"],
+            "artifact": str(DEFAULT_OUT),
+            "mutation_allowed": False,
+        },
         "broad_gpcr_family_claim_safe": False,
         "owner_input_required": True,
         "required_targets": list(REQUIRED_TARGETS),

@@ -201,6 +201,9 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     assert gpcr["state"] == "blocked"
     assert gpcr["summary"]["product_report_route"] == "/product/gpcr-hard-decoy-suite-report"
     assert gpcr["summary"]["broad_gpcr_family_claim_safe"] is False
+    assert gpcr["summary"]["operator_intake_route"] == (
+        "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    )
     assert gpcr["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
     assert gpcr["summary"]["operator_intake_required_slot_count"] == 3
     assert gpcr["summary"]["phase3_exit_gate_status"] == "blocked"
