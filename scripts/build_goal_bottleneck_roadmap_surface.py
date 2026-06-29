@@ -119,6 +119,16 @@ def _dedupe(rows: list[str]) -> list[str]:
     return deduped
 
 
+def _first_gate_blocker(gate: dict[str, Any]) -> str:
+    for criterion in _as_list(gate.get("criteria")):
+        if not isinstance(criterion, dict) or _as_bool(criterion.get("pass")):
+            continue
+        blocker = _first_str([str(row) for row in _as_list(criterion.get("blockers"))])
+        if blocker:
+            return blocker
+    return ""
+
+
 def _action_by_bottleneck(action_register: dict[str, Any], bottleneck: str) -> dict[str, Any]:
     for row in _as_list(action_register.get("release_decision_operator_actions")):
         if isinstance(row, dict) and row.get("bottleneck") == bottleneck:
@@ -553,6 +563,11 @@ def _gpcr_row(
         gpcr_product_report.get("phase3_exit_gate")
         or gpcr_surface.get("phase3_exit_gate")
     )
+    first_blocker = str(
+        action.get("first_blocker")
+        or _first_gate_blocker(phase3_exit_gate)
+        or _first_str([str(row) for row in _as_list(gpcr_surface.get("blockers"))])
+    )
     phase3_gate_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -643,6 +658,7 @@ def _gpcr_row(
         roadmap_item="GPCR hard-decoy closure",
         state="ready" if broad_safe else "blocked",
         bottleneck="" if broad_safe else "broad_gpcr_family_claim_locked",
+        first_blocker="" if broad_safe else first_blocker,
         first_blocked_target=first_target,
         root_cause_tags=root_cause_tags,
         evidence_artifacts=[
@@ -733,6 +749,11 @@ def _pocketmd_row(
                 or "top_k_refinement_operator_intake"
             ),
         )
+    first_blocker = str(
+        _first_gate_blocker(phase4_exit_gate)
+        or _first_str([str(row) for row in _as_list(pocketmd_surface.get("blockers"))])
+        or _first_str([str(row) for row in _as_list(pocketmd_topk_report.get("blockers"))])
+    )
     ready = _as_bool(
         decision.get("pocketmd_lite_product_surface_ready")
         or pocketmd_surface.get("product_surface_ready")
@@ -804,6 +825,7 @@ def _pocketmd_row(
         roadmap_item=str(linkage.get("roadmap_item") or "PocketMD Lite science product surface"),
         state="ready" if ready else "blocked",
         bottleneck=("" if ready else str(linkage.get("bottleneck") or "pocketmd_lite_science_product_surface_locked")),
+        first_blocker="" if ready else first_blocker,
         first_blocked_target=str(pocketmd_surface.get("first_blocked_target") or ""),
         root_cause_tags=[str(row) for row in _as_list(pocketmd_surface.get("root_cause_tags"))],
         evidence_artifacts=[

@@ -254,6 +254,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     phase_3 = rows["phase_3_gpcr_hard_decoy_closure"]
     assert phase_3["state"] == "blocked"
     assert phase_3["bottleneck"] == "broad_gpcr_family_claim_locked"
+    assert phase_3["first_blocker"] == "DRD2:ranking_pr_auc_ci_low_required"
     assert phase_3["first_blocked_target"] == "DRD2"
     assert phase_3["root_cause_tags"] == ["operator_values_required"]
     assert phase_3["linked_routes"] == [
@@ -349,6 +350,7 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     phase_4 = rows["phase_4_pocketmd_lite"]
     assert phase_4["state"] == "blocked"
     assert phase_4["bottleneck"] == "pocketmd_lite_science_product_surface_locked"
+    assert phase_4["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
     assert phase_4["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert phase_4["linked_routes"] == [
         "/product/pocketmd-lite",
