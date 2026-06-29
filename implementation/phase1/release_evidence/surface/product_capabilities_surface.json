@@ -1,0 +1,195 @@
+{
+  "blocked_capability_count": 4,
+  "blockers": [],
+  "capability_count": 5,
+  "capability_rows": [
+    {
+      "blocker_count": 0,
+      "capability_id": "structural_solver_restricted_alpha_surface",
+      "capability_kind": "engineering_core",
+      "contract_pass": true,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json",
+        "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json",
+        "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json",
+        "implementation/phase1/release_evidence/surface/solver_breadth_report.json",
+        "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json",
+        "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json",
+        "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json",
+        "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json"
+      ],
+      "next_actions": [],
+      "state": "ready",
+      "summary": {
+        "present_surface_count": 8,
+        "ready_surface_count": 8,
+        "surface_count": 8
+      },
+      "title": "Restricted alpha structural solver evidence"
+    },
+    {
+      "blocker_count": 4,
+      "capability_id": "public_benchmark_harness",
+      "capability_kind": "external_science_evidence",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json"
+      ],
+      "next_actions": [
+        "attach_checked_casf_pdbbind_subset_source_files",
+        "run_public_benchmark_subset_materializer",
+        "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+        "attach_public_benchmark_pose_coordinate_intake",
+        "run_public_benchmark_pose_validity_materializer",
+        "run_symmetry_aware_rmsd_on_real_subset",
+        "run_public_benchmark_rmsd_scorecard_materializer",
+        "materialize_posebusters_style_validity_packet_for_real_ligands",
+        "attach_dud_e_lit_pcba_enrichment_intake",
+        "run_public_benchmark_enrichment_materializer"
+      ],
+      "state": "blocked",
+      "summary": {
+        "enrichment_scorecard_summary": {
+          "blockers": [
+            "dud_e_lit_pcba_enrichment_targets_missing",
+            "dud_e_lit_pcba_scored_molecules_missing",
+            "dud_e_lit_pcba_active_decoy_labels_missing"
+          ],
+          "public_benchmark_enrichment_ready": false,
+          "real_enrichment_target_count": 0,
+          "status": "operator_evidence_required"
+        },
+        "public_benchmark_ready": false,
+        "status": "seed_ready_materialization_blocked",
+        "subset_manifest_summary": {
+          "blockers": [
+            "casf_pdbbind_source_material_not_attached",
+            "casf_pdbbind_case_checksums_missing",
+            "casf_pdbbind_ligand_symmetry_contracts_missing"
+          ],
+          "materialized_case_count": 0,
+          "target_subset_case_count": 12
+        },
+        "tier_beta_ready": false
+      },
+      "title": "Public benchmark harness"
+    },
+    {
+      "blocker_count": 2,
+      "capability_id": "h_bond_backmap_evidence",
+      "capability_kind": "science_evidence_surface",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json"
+      ],
+      "next_actions": [
+        "attach_h_bond_backmap_operator_receipts",
+        "materialize_h_bond_backmap_evidence_rows",
+        "regenerate_pm_release_gate_report"
+      ],
+      "state": "blocked",
+      "summary": {
+        "first_blocked_target": "",
+        "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
+        "root_cause_tags": [],
+        "status": "locked"
+      },
+      "title": "H-bond backmap evidence"
+    },
+    {
+      "blocker_count": 12,
+      "capability_id": "gpcr_hard_decoy_evidence",
+      "capability_kind": "science_evidence_surface",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json"
+      ],
+      "next_actions": [
+        "run_gpcr_hard_decoy_suite_materializer"
+      ],
+      "state": "blocked",
+      "summary": {
+        "first_blocked_target": "DRD2",
+        "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
+        "root_cause_tags": [
+          "operator_values_required"
+        ],
+        "status": "locked"
+      },
+      "title": "GPCR hard-decoy evidence"
+    },
+    {
+      "blocker_count": 3,
+      "capability_id": "pocketmd_lite_top_k_refinement",
+      "capability_kind": "science_product_surface",
+      "contract_pass": false,
+      "evidence_artifacts": [
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+        "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json",
+        "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json"
+      ],
+      "next_actions": [
+        "attach_top_k_candidate_refinement_rows",
+        "run_pocketmd_lite_topk_survival_materializer",
+        "regenerate_pocketmd_lite_science_product_surface",
+        "regenerate_pm_release_gate_report"
+      ],
+      "state": "blocked",
+      "summary": {
+        "product_surface_ready": false,
+        "real_refinement_case_count": 0,
+        "surface_status": "locked",
+        "top_k_candidate_count": 0,
+        "topk_report_status": "operator_evidence_required"
+      },
+      "title": "PocketMD Lite top-k refinement"
+    }
+  ],
+  "claim_boundary": "This surface is a read-only capability discovery map over existing evidence. It does not promote beta, GPCR, PocketMD, benchmark, or release claims beyond the referenced artifacts.",
+  "claim_locked": false,
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "first_blocked_target": "",
+  "generated_at": "2026-06-29T16:10:02.302548+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:e77d084e3dff3b72f1accd1d741d3cd8609c199936a6b2a48e612d67b8161f3d",
+    "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:7121747e684a731ccb0af55cc967f35a74a106424f7f5cfa04648dfc6d061400",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:41f98b27c6d0f41afaf9a7ca2f0955ff7660f7e153e7b62b090fb6cf092886be",
+    "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
+    "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:962a84c4468570e7106b97ab50b440f698b0b56300732ec5126d1933a4b9c42e",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
+    "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
+    "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:bc8a0bb6533d5e22ef9a2b2f61cc53e8ad247cf8caf30c560fde438f8fffb2ae",
+    "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
+    "implementation/phase1/release_evidence/surface/solver_truthfulness_gate_report.json": "sha256:f9915a0030bc802d175085ce67d820f6f5c9642b9d5f7cb8957b19b8b9995752",
+    "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
+    "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
+    "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
+    "scripts/build_product_capabilities_surface.py": "sha256:3fbd0afd0be3dba5d7f71a4e24929d7fea263ebc699ba3569e663f4e8dd5d130"
+  },
+  "locked": false,
+  "next_actions": [
+    "work_capability_rows_with_state_blocked",
+    "regenerate_pm_release_gate_report",
+    "regenerate_goal_bottleneck_action_board"
+  ],
+  "product_capabilities_ready": false,
+  "read_model": {
+    "artifact": "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+    "mutation_allowed": false,
+    "route": "/product/capabilities"
+  },
+  "ready_capability_count": 1,
+  "reason_code": "PASS",
+  "reuse_policy": "product_capabilities_surface_aggregates_science_and_release_evidence",
+  "reused_evidence": false,
+  "root_cause_tags": [],
+  "schema_version": "product-capabilities-surface.v1",
+  "source_commit_sha": "f782b84221e9c74837197cd5b4d7177efb49dba7",
+  "status": "ready",
+  "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
+  "surface_id": "product_capabilities_surface",
+  "surface_kind": "product_capabilities_surface",
+  "surface_scope": "product_capability_discovery"
+}
