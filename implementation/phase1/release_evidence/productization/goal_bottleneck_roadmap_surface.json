@@ -40,12 +40,12 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T21:00:20.515118+00:00",
+  "generated_at": "2026-06-29T21:02:41.781972+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:7d47093ce052cf344fccdfddd90991c75b1d85456d0bce355a0fdb25698d2c9e",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:5d911ae5b4d6dd7d43ab427aad34fef15b692706020e7a1f1db20e59be3d1c26",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:6b713073f7525c2cf496ae6e26346721558465bd72a1cd5cbf70b415a1be0d02",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:00b9858eb13920791923279d071c843d89b3a050992f2c828bb5c020622a6e5a",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8e804b6823ed31463a6154e1446a523f20215c42dadebec407140dbd30a49364",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:18cfed4da22bf244dc0d3636f0c03251ed369b610bc0799aaf0a962b361349df",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8f4d00311cb9ac14ec224a4d0cd477b70db2783321d403b77a805e3fcf7cc09d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:0cf91f85f705b7ee3c3a6bc12c9cf31ec71a75c53b836eee6d9e0d599886825d",
@@ -1625,7 +1625,7 @@
       ]
     }
   },
-  "source_commit_sha": "e695c53ee7db8f97aa36a0dc4ed916d2da200c6f",
+  "source_commit_sha": "61cfe39819050c8411635cb33a9557e9e3515290",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
