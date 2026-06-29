@@ -40,7 +40,7 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T18:41:32.950074+00:00",
+  "generated_at": "2026-06-29T18:44:49.700163+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:90a17645943e5c7b379fd67cc6e5c90e4febafafad430cff90ab27dbad59dbc6",
@@ -55,7 +55,7 @@
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:cc6f76930e2491b855f8ad3508caf614ec493d0aab6b89811cccdac7cd3159cb",
     "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:ba61abae73a013c889a2d7c4431d419be9f92619341f6a6216a762c7d5a19ba3",
-    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:4abd46aedb71e1f25de80c3af744ab973bbe8803e82431df57b2e6cafc6f1c15",
+    "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:6f9d359877d95eb1a8c24d5579eb0a4719b0d9d7d49377168dd844a4c3a8a05f",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "mutation_allowed": false,
@@ -333,6 +333,41 @@
         },
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 4,
+        "operator_intake_slots": [
+          {
+            "depends_on_count": 0,
+            "required": true,
+            "slot_id": "casf_pdbbind_subset_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 1,
+            "required": true,
+            "slot_id": "pose_coordinate_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 0,
+            "required": true,
+            "slot_id": "dud_e_lit_pcba_enrichment_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 2,
+            "required": true,
+            "slot_id": "vina_gnina_comparison_intake",
+            "status": "operator_input_required"
+          }
+        ],
+        "pose_validity_packet_summary": {
+          "check_count": 6,
+          "dry_run_pose_validity_ready": true,
+          "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+          "real_benchmark_case_count": 0,
+          "required_check_count": 6,
+          "status": "ready_for_dry_run",
+          "validator_schema_version": "public-benchmark-pose-validity-validation.v1"
+        },
         "public_benchmark_ready": false,
         "status": "seed_ready_materialization_blocked",
         "subset_manifest_summary": {
@@ -354,8 +389,73 @@
           "external_receipts_attached"
         ],
         "tier_beta_failed_criterion_count": 7,
+        "tier_beta_gate_criteria": [
+          {
+            "blocker_count": 3,
+            "criterion_id": "casf_pdbbind_subset_materialized",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "real_pose_validity_packet_materialized",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "symmetry_rmsd_scorecard_real_cases",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "posebusters_style_validity_real_ligands",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "dud_e_lit_pcba_enrichment_ready",
+            "current": 0,
+            "pass": false,
+            "required": ">=1_ready_target_with_active_decoy_labels"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "vina_gnina_comparison_ready",
+            "current": 0,
+            "pass": false,
+            "required": ">=1_case_with_vina_and_gnina_engine_runs"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "external_receipts_attached",
+            "current": 0,
+            "pass": false,
+            "required": "source_license_or_accession_and_provenance_receipts_for_all_materialized_rows"
+          }
+        ],
         "tier_beta_gate_status": "blocked",
-        "tier_beta_ready": false
+        "tier_beta_ready": false,
+        "vina_gnina_comparison_adapter_summary": {
+          "blockers": [
+            "vina_gnina_comparison_cases_missing",
+            "vina_gnina_engine_runs_missing",
+            "vina_gnina_external_receipts_missing"
+          ],
+          "public_benchmark_engine_comparison_ready": false,
+          "real_comparison_case_count": 0,
+          "status": "operator_evidence_required",
+          "supported_engines": [
+            "vina",
+            "gnina"
+          ]
+        }
       }
     },
     {
@@ -534,7 +634,7 @@
       ]
     }
   },
-  "source_commit_sha": "54edc61eacd66172f9ec2a3be2664edca1bdc645",
+  "source_commit_sha": "619e50065a814ec9e1a44b8377a1b3bbb24a5c73",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
