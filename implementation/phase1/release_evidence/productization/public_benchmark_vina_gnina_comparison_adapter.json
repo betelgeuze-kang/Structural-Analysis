@@ -24,10 +24,10 @@
     }
   ],
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T18:08:37.115663+00:00",
+  "generated_at": "2026-06-29T19:00:37.660264+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ef02271482a5d93eab992420a4bb660b1ba4c56b6adf869d7ad2ed57ad29fcc6",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:0ae8a4abb2d5bb347c4651a3189c9a7bbd34efc4b45dffc91d461c6db7adef0a",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:8efafea19055ca7e272b3094b40dc25ecfedacf0752a2a4c67c2066664e3720f",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -106,7 +106,7 @@
   "reuse_policy": "public_benchmark_vina_gnina_comparison_adapter_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-vina-gnina-comparison-adapter.v1",
-  "source_commit_sha": "ef9e53ccb8e51e7207902ce84db55c4c30b1cc36",
+  "source_commit_sha": "7ae180e1e0e0ab8b2a1e196820a3552c06984915",
   "status": "operator_evidence_required",
   "summary": {
     "blocker_count": 3,
