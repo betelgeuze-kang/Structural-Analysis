@@ -25,6 +25,57 @@ def _text(path: Path, content: str = "manual\n") -> Path:
     return path
 
 
+def _science_action_hints(family: str) -> dict[str, object]:
+    return {
+        "h_bond": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "h_bond_backmap_operator_intake_packet.json"
+            ),
+            "operator_intake_route": "/product/capabilities",
+            "next_actions": [
+                "fill_h_bond_backmap_operator_intake_packet",
+                "attach_h_bond_backmap_operator_receipts",
+                "materialize_h_bond_backmap_evidence_rows",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+                "regenerate_pm_release_gate_report",
+            ],
+        },
+        "gpcr": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_operator_intake_packet.json"
+            ),
+            "operator_intake_route": (
+                "/product/gpcr-hard-decoy-suite-report/operator-intake"
+            ),
+            "next_actions": [
+                "fill_gpcr_hard_decoy_operator_intake_packet",
+                "fill_drd2_htr2a_oprm1_operator_template_values",
+                "run_gpcr_hard_decoy_materializer",
+                "refresh_gpcr_hard_decoy_product_report",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+            ],
+        },
+        "pocketmd_lite": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "pocketmd_lite_operator_intake_packet.json"
+            ),
+            "operator_intake_route": "/product/pocketmd-lite/operator-intake",
+            "next_actions": [
+                "fill_pocketmd_lite_operator_intake_packet",
+                "attach_top_k_candidate_refinement_rows",
+                "run_pocketmd_lite_topk_survival_materializer",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+            ],
+        },
+    }[family]
+
+
 def _runtime_inputs(tmp_path: Path) -> dict[str, Path]:
     return {
         "ndtha_long_profile": _write(
@@ -1037,6 +1088,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "root_cause_tags": [],
             "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
             "artifact": str(base_kwargs["evidence_surface_dir"]),
+            **_science_action_hints("h_bond"),
         },
         {
             "action_id": "resolve_gpcr_evidence_surface",
@@ -1050,6 +1102,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
             ),
             "artifact": "gpcr_hard_decoy_surface",
+            **_science_action_hints("gpcr"),
         },
         {
             "action_id": "resolve_pocketmd_lite_science_product_surface",
@@ -1063,6 +1116,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "bottleneck=pocketmd_lite_science_product_surface_missing"
             ),
             "artifact": str(base_kwargs["evidence_surface_dir"]),
+            **_science_action_hints("pocketmd_lite"),
         },
     ]
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
@@ -1343,6 +1397,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
             "root_cause_tags": [],
             "reason": "h_bond evidence surface is missing; bottleneck=h_bond_evidence_surface_missing",
             "artifact": str(base_kwargs["evidence_surface_dir"]),
+            **_science_action_hints("h_bond"),
         },
         {
             "action_id": "resolve_gpcr_evidence_surface",
@@ -1356,6 +1411,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
             ),
             "artifact": "gpcr_hard_decoy_surface",
+            **_science_action_hints("gpcr"),
         },
         {
             "action_id": "resolve_pocketmd_lite_science_product_surface",
@@ -1369,6 +1425,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "bottleneck=pocketmd_lite_science_product_surface_missing"
             ),
             "artifact": str(base_kwargs["evidence_surface_dir"]),
+            **_science_action_hints("pocketmd_lite"),
         },
     ]
 

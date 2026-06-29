@@ -435,6 +435,54 @@ def _science_surface_operator_actions(
     *,
     evidence_surface_dir: Path,
 ) -> list[dict[str, Any]]:
+    action_hints = {
+        "h_bond": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "h_bond_backmap_operator_intake_packet.json"
+            ),
+            "operator_intake_route": "/product/capabilities",
+            "next_actions": [
+                "fill_h_bond_backmap_operator_intake_packet",
+                "attach_h_bond_backmap_operator_receipts",
+                "materialize_h_bond_backmap_evidence_rows",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+                "regenerate_pm_release_gate_report",
+            ],
+        },
+        "gpcr": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "gpcr_hard_decoy_operator_intake_packet.json"
+            ),
+            "operator_intake_route": (
+                "/product/gpcr-hard-decoy-suite-report/operator-intake"
+            ),
+            "next_actions": [
+                "fill_gpcr_hard_decoy_operator_intake_packet",
+                "fill_drd2_htr2a_oprm1_operator_template_values",
+                "run_gpcr_hard_decoy_materializer",
+                "refresh_gpcr_hard_decoy_product_report",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+            ],
+        },
+        "pocketmd_lite": {
+            "operator_intake_artifact": (
+                "implementation/phase1/release_evidence/productization/"
+                "pocketmd_lite_operator_intake_packet.json"
+            ),
+            "operator_intake_route": "/product/pocketmd-lite/operator-intake",
+            "next_actions": [
+                "fill_pocketmd_lite_operator_intake_packet",
+                "attach_top_k_candidate_refinement_rows",
+                "run_pocketmd_lite_topk_survival_materializer",
+                "regenerate_product_capabilities_surface",
+                "regenerate_goal_bottleneck_roadmap_surface",
+            ],
+        },
+    }
     actions: list[dict[str, Any]] = []
     for family, status in science_evidence_surface_status.items():
         bottleneck = str(status.get("bottleneck") or "")
@@ -456,6 +504,7 @@ def _science_surface_operator_actions(
         if root_cause_tags:
             reason += f"; root_cause_tags={','.join(root_cause_tags)}"
         surface_ids = [str(row) for row in _as_list(status.get("surface_ids"))]
+        hint = action_hints.get(family, {})
         actions.append(
             {
                 "action_id": action_id,
@@ -466,6 +515,9 @@ def _science_surface_operator_actions(
                 "root_cause_tags": root_cause_tags,
                 "reason": reason,
                 "artifact": ", ".join(surface_ids) if surface_ids else str(evidence_surface_dir),
+                "operator_intake_artifact": str(hint.get("operator_intake_artifact") or ""),
+                "operator_intake_route": str(hint.get("operator_intake_route") or ""),
+                "next_actions": [str(row) for row in _as_list(hint.get("next_actions"))],
             }
         )
     return actions

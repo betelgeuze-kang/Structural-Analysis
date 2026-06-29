@@ -40,12 +40,12 @@
   "claim_boundary": "This read-only /goal surface aggregates existing PM release, freshness, public benchmark, GPCR, PocketMD, and product capability evidence. It does not close release, benchmark, GPCR, PocketMD, or broad MD/FEP claims.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T20:28:41.997584+00:00",
+  "generated_at": "2026-06-29T20:34:45.553714+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88a46a6021d48c75a09db6f337fcfe001a8bc07a11038c0e0275b67440bba91e",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:99861e1c79a0d07efc0050a1e5772ce895700e3c916ffbfaeb31fb935292e662",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:a12034b12c711da125fece8aa30f87242e5e29a9cd08a458e6709e7442b1e68b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:63f3890d16f6194cabbe21caf985311f19cc450bf90d5bc56744ee4ddaa11c29",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:5374dba26f3eba2d9717a59128e7fc03261eef4f63bd68315904d7416aafa303",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:18cfed4da22bf244dc0d3636f0c03251ed369b610bc0799aaf0a962b361349df",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:8f4d00311cb9ac14ec224a4d0cd477b70db2783321d403b77a805e3fcf7cc09d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:0cf91f85f705b7ee3c3a6bc12c9cf31ec71a75c53b836eee6d9e0d599886825d",
@@ -127,6 +127,16 @@
       "artifact": "h_bond_backmap_evidence_surface",
       "bottleneck": "h_bond_evidence_surface_locked",
       "first_blocked_target": "",
+      "next_actions": [
+        "fill_h_bond_backmap_operator_intake_packet",
+        "attach_h_bond_backmap_operator_receipts",
+        "materialize_h_bond_backmap_evidence_rows",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface",
+        "regenerate_pm_release_gate_report"
+      ],
+      "operator_intake_artifact": "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json",
+      "operator_intake_route": "/product/capabilities",
       "reason": "h_bond evidence surface is locked; bottleneck=h_bond_evidence_surface_locked",
       "root_cause_tags": [],
       "status": "science_evidence_required",
@@ -137,6 +147,16 @@
       "artifact": "gpcr_hard_decoy_evidence_surface",
       "bottleneck": "broad_gpcr_family_claim_locked",
       "first_blocked_target": "DRD2",
+      "next_actions": [
+        "fill_gpcr_hard_decoy_operator_intake_packet",
+        "fill_drd2_htr2a_oprm1_operator_template_values",
+        "run_gpcr_hard_decoy_materializer",
+        "refresh_gpcr_hard_decoy_product_report",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface"
+      ],
+      "operator_intake_artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+      "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
       "reason": "gpcr evidence surface is locked; bottleneck=broad_gpcr_family_claim_locked; first_blocked_target=DRD2; root_cause_tags=operator_values_required",
       "root_cause_tags": [
         "operator_values_required"
@@ -149,6 +169,15 @@
       "artifact": "pocketmd_lite_science_product_surface",
       "bottleneck": "pocketmd_lite_science_product_surface_locked",
       "first_blocked_target": "top_k_refinement_operator_intake",
+      "next_actions": [
+        "fill_pocketmd_lite_operator_intake_packet",
+        "attach_top_k_candidate_refinement_rows",
+        "run_pocketmd_lite_topk_survival_materializer",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface"
+      ],
+      "operator_intake_artifact": "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json",
+      "operator_intake_route": "/product/pocketmd-lite/operator-intake",
       "reason": "pocketmd_lite science product surface is locked; bottleneck=pocketmd_lite_science_product_surface_locked; first_blocked_target=top_k_refinement_operator_intake; root_cause_tags=operator_refinement_rows_required",
       "root_cause_tags": [
         "operator_refinement_rows_required"
@@ -1576,7 +1605,7 @@
       ]
     }
   },
-  "source_commit_sha": "7d4dc4cc98479c3a4a5ec0a8cd4d29d1c56ee6e9",
+  "source_commit_sha": "59f94c27cddc2f2a1edd9da374f172a25bbedd68",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
