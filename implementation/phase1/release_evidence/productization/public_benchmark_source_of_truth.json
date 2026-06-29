@@ -1,0 +1,70 @@
+{
+  "blockers": [
+    "casf_pdbbind_source_material_not_attached",
+    "public_benchmark_real_pose_predictions_missing",
+    "public_benchmark_external_receipts_missing"
+  ],
+  "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T14:11:14.724947+00:00",
+  "input_checksums": {
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:9eacd2ea506fe2ec55fe19a82ad91d4f8d30c7e1822566c8beecd05e78b6d96f",
+    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821"
+  },
+  "next_actions": [
+    "attach_checked_casf_pdbbind_subset_source_files",
+    "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+    "run_symmetry_aware_rmsd_on_real_subset",
+    "materialize_posebusters_style_validity_packet_for_real_ligands"
+  ],
+  "pose_validity_packet_summary": {
+    "check_count": 5,
+    "required_check_count": 5,
+    "status": "ready_for_dry_run"
+  },
+  "public_benchmark_ready": false,
+  "reuse_policy": "public_benchmark_contract_generated_from_repo_code",
+  "reused_evidence": false,
+  "schema_version": "public-benchmark-source-of-truth.v1",
+  "source_commit_sha": "1e75077752bf56854ee1c0203d0ce5e4d3199e33",
+  "source_families": [
+    {
+      "family_id": "casf_pdbbind",
+      "materialization_status": "source_material_required",
+      "role": "pose_success_and_affinity_context"
+    },
+    {
+      "family_id": "posebusters_style_validity",
+      "materialization_status": "dry_run_ready_real_ligands_required",
+      "role": "pose_sanity_packet"
+    },
+    {
+      "family_id": "dud_e_lit_pcba",
+      "materialization_status": "planned_later",
+      "role": "future_enrichment"
+    },
+    {
+      "family_id": "vina_gnina",
+      "materialization_status": "planned_later",
+      "role": "future_comparison_adapter"
+    }
+  ],
+  "status": "seed_ready_materialization_blocked",
+  "subset_manifest_summary": {
+    "blockers": [
+      "casf_pdbbind_source_material_not_attached",
+      "casf_pdbbind_case_checksums_missing",
+      "casf_pdbbind_ligand_symmetry_contracts_missing"
+    ],
+    "materialized_case_count": 0,
+    "target_subset_case_count": 12
+  },
+  "symmetry_rmsd_summary": {
+    "dry_run_case_count": 1,
+    "dry_run_pose_success": true,
+    "real_benchmark_case_count": 0,
+    "status": "ready"
+  },
+  "tier_beta_ready": false
+}

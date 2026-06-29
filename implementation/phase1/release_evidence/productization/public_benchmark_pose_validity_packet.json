@@ -1,0 +1,44 @@
+{
+  "checks": [
+    {
+      "check_id": "coordinate_finiteness",
+      "description": "reference and predicted ligand coordinates are finite 3D values",
+      "required": true
+    },
+    {
+      "check_id": "atom_count_and_order_contract",
+      "description": "reference/predicted ligand atoms share a declared atom-order contract",
+      "required": true
+    },
+    {
+      "check_id": "symmetry_aware_ligand_rmsd_angstrom",
+      "description": "pose success uses the best rigid-aligned RMSD over allowed symmetry permutations",
+      "required": true,
+      "threshold_angstrom": 2.0
+    },
+    {
+      "check_id": "minimum_interatomic_distance_guard",
+      "description": "predicted ligand coordinates must not contain impossible self-clashes",
+      "required": true
+    },
+    {
+      "check_id": "receptor_ligand_context_present",
+      "description": "protein structure, binding-site frame, and ligand provenance are present",
+      "required": true
+    }
+  ],
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T14:11:14.721099+00:00",
+  "input_checksums": {
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:9eacd2ea506fe2ec55fe19a82ad91d4f8d30c7e1822566c8beecd05e78b6d96f",
+    "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821"
+  },
+  "posebusters_style_boundary": "The packet defines PoseBusters-style sanity checks for a local harness. It does not vendor PoseBusters, infer chemistry, or replace toolkit-backed bond/order/protonation validation once real ligands are attached.",
+  "real_benchmark_case_count": 0,
+  "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
+  "reused_evidence": false,
+  "schema_version": "public-benchmark-pose-validity-packet.v1",
+  "source_commit_sha": "1e75077752bf56854ee1c0203d0ce5e4d3199e33",
+  "status": "ready_for_dry_run"
+}
