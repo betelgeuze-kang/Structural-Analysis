@@ -25,12 +25,231 @@
     "top20_hit_rate_min": 0.2
   },
   "first_blocked_target": "DRD2",
-  "generated_at": "2026-06-29T20:40:14.348053+00:00",
+  "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+  "first_operator_evidence_gap": {
+    "blocked_phase3_criteria": [
+      "ranking_pr_auc_ci_low_min",
+      "top20_hit_rate_min",
+      "decoys_above_positive_count_max",
+      "no_positive_out_anchored_by_top_decoys"
+    ],
+    "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+    "materialization_steps": [
+      "materialize_gpcr_hard_decoy_suite_report",
+      "refresh_gpcr_hard_decoy_product_report",
+      "refresh_product_capabilities_surface",
+      "refresh_goal_bottleneck_roadmap_surface"
+    ],
+    "minimum_evidence": {
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "required_operator_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "target_id": "DRD2",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    },
+    "phase3_blocked": true,
+    "slot_id": "drd2_hard_decoy_metrics",
+    "slot_priority": 1,
+    "status": "operator_input_required",
+    "target_id": "DRD2"
+  },
+  "generated_at": "2026-06-29T21:21:23.676026+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:ddfba6ae95d36ade05070f4d0c75d1b9bd48da70458d97784e50317b0e64b0c9",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:66126be653c213352f039110ede49531283745ca7c1a2a4491e663be44c53309"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:a076379fc363426d995c31c9919b4b3d6b694cf4da547f7b19547f4de1ff5984",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8aa214a5c7a627b8a9dc1fe401ae114ebc57a005368d0cb1a18079ac23a5cd01"
   },
   "locked": true,
+  "next_actions": [
+    "fill_gpcr_hard_decoy_operator_intake_packet",
+    "fill_drd2_htr2a_oprm1_operator_template_values",
+    "run_gpcr_hard_decoy_suite_materializer",
+    "refresh_gpcr_hard_decoy_product_report",
+    "regenerate_product_capabilities_surface",
+    "regenerate_goal_bottleneck_roadmap_surface"
+  ],
+  "operator_evidence_gap_count": 3,
+  "operator_evidence_gap_register": [
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_steps": [
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "DRD2",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "phase3_blocked": true,
+      "slot_id": "drd2_hard_decoy_metrics",
+      "slot_priority": 1,
+      "status": "operator_input_required",
+      "target_id": "DRD2"
+    },
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "first_next_action": "fill HTR2A hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_steps": [
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "HTR2A",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "phase3_blocked": true,
+      "slot_id": "htr2a_hard_decoy_metrics",
+      "slot_priority": 2,
+      "status": "operator_input_required",
+      "target_id": "HTR2A"
+    },
+    {
+      "blocked_phase3_criteria": [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys"
+      ],
+      "first_next_action": "fill OPRM1 hard-decoy metrics in the GPCR operator intake packet",
+      "materialization_steps": [
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface"
+      ],
+      "minimum_evidence": {
+        "criterion_by_field": {
+          "decoys_above_positive_count": "decoys_above_positive_count_max",
+          "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+          "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+          "top20_hit_rate": "top20_hit_rate_min"
+        },
+        "required_operator_fields": [
+          "target_id",
+          "ranking_pr_auc_ci_low",
+          "top20_hit_rate",
+          "decoys_above_positive_count",
+          "positive_out_anchored_by_top_decoys"
+        ],
+        "target_id": "OPRM1",
+        "thresholds": {
+          "decoys_above_positive_count": "<=0",
+          "positive_out_anchored_by_top_decoys": false,
+          "ranking_pr_auc_ci_low": ">=0.45",
+          "top20_hit_rate": ">=0.2"
+        }
+      },
+      "phase3_blocked": true,
+      "slot_id": "oprm1_hard_decoy_metrics",
+      "slot_priority": 3,
+      "status": "operator_input_required",
+      "target_id": "OPRM1"
+    }
+  ],
+  "operator_handoff_summary": {
+    "artifact": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json",
+    "blocked_operator_slot_count": 3,
+    "first_blocked_target": "DRD2",
+    "first_blocker": "DRD2:ranking_pr_auc_ci_low_required",
+    "first_next_action": "fill DRD2 hard-decoy metrics in the GPCR operator intake packet",
+    "materialization_steps": [
+      "materialize_gpcr_hard_decoy_suite_report",
+      "refresh_gpcr_hard_decoy_product_report",
+      "refresh_product_capabilities_surface",
+      "refresh_goal_bottleneck_roadmap_surface"
+    ],
+    "minimum_evidence": {
+      "criterion_by_field": {
+        "decoys_above_positive_count": "decoys_above_positive_count_max",
+        "positive_out_anchored_by_top_decoys": "no_positive_out_anchored_by_top_decoys",
+        "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate": "top20_hit_rate_min"
+      },
+      "required_operator_fields": [
+        "target_id",
+        "ranking_pr_auc_ci_low",
+        "top20_hit_rate",
+        "decoys_above_positive_count",
+        "positive_out_anchored_by_top_decoys"
+      ],
+      "target_id": "DRD2",
+      "thresholds": {
+        "decoys_above_positive_count": "<=0",
+        "positive_out_anchored_by_top_decoys": false,
+        "ranking_pr_auc_ci_low": ">=0.45",
+        "top20_hit_rate": ">=0.2"
+      }
+    },
+    "required_slot_count": 3,
+    "route": "/product/gpcr-hard-decoy-suite-report/operator-intake"
+  },
+  "operator_intake_required_slot_count": 3,
+  "operator_intake_route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
   "phase3_exit_gate": {
     "claim": "broad_gpcr_hard_decoy_closure",
     "criteria": [
@@ -135,7 +354,7 @@
   ],
   "schema_version": "gpcr-hard-decoy-evidence-surface.v1",
   "science_surface_family": "gpcr",
-  "source_commit_sha": "e956f47bb5ee90d67c328690bd3fca6c92a9b9ce",
+  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
   "status": "locked",
   "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
   "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",

@@ -24,10 +24,10 @@
     "top20_hit_rate_min": 0.2
   },
   "first_blocked_target": "DRD2",
-  "generated_at": "2026-06-29T20:40:14.345880+00:00",
+  "generated_at": "2026-06-29T21:21:23.668779+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
-    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:66126be653c213352f039110ede49531283745ca7c1a2a4491e663be44c53309"
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:8aa214a5c7a627b8a9dc1fe401ae114ebc57a005368d0cb1a18079ac23a5cd01"
   },
   "phase3_exit_gate": {
     "claim": "broad_gpcr_hard_decoy_closure",
@@ -131,7 +131,7 @@
     "operator_values_required"
   ],
   "schema_version": "gpcr-hard-decoy-suite-report.v1",
-  "source_commit_sha": "e956f47bb5ee90d67c328690bd3fca6c92a9b9ce",
+  "source_commit_sha": "c5329b7c2214312cf9048addfbb1f3cf8cae9a43",
   "status": "locked",
   "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",
   "target_count": 3,
