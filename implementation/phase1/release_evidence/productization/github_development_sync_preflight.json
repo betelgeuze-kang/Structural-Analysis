@@ -19,7 +19,7 @@
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
   "contract_pass": false,
-  "generated_at": "2026-06-29T22:08:22.977546+00:00",
+  "generated_at": "2026-06-29T22:17:18.095194+00:00",
   "pending_remote_updates": [
     {
       "action": "push current HEAD to feature",
@@ -47,15 +47,15 @@
   "schema_version": "github-development-sync-preflight.v1",
   "state": {
     "branch": "main",
-    "feature_ahead_count": 259,
+    "feature_ahead_count": 262,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "2cd235d55af12bdde88c0475c34730912a1a6452",
+    "local_head_sha": "ca236884e4fbc27b8fcb8bbe619cc4fbd3d4080a",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
     "remote_feature_sha": "d22c5fe0d20c0be531a3357d1d8d72dafd58dc2e",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "2cd235d55af12bdde88c0475c34730912a1a6452",
+    "remote_main_sha": "ca236884e4fbc27b8fcb8bbe619cc4fbd3d4080a",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
