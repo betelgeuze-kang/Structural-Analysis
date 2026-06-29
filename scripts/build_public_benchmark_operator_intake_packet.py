@@ -58,6 +58,7 @@ DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 SCHEMA_VERSION = "public-benchmark-operator-intake-packet.v1"
 PUBLIC_BENCHMARK_ROUTE = "/product/public-benchmark"
 PUBLIC_BENCHMARK_OPERATOR_INTAKE_ROUTE = "/product/public-benchmark/operator-intake"
+TIER_BETA_MINIMUM_SUBSET_CASE_COUNT = 12
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -213,6 +214,9 @@ def _slot(
     depends_on: list[str] | None = None,
     local_source_file_fields: list[str] | None = None,
     owner_actions: list[str] | None = None,
+    unblocks_tier_beta_criteria: list[str] | None = None,
+    minimum_evidence: dict[str, Any] | None = None,
+    materialization_steps: list[str] | None = None,
 ) -> dict[str, Any]:
     return {
         "slot_id": slot_id,
@@ -225,9 +229,26 @@ def _slot(
         "local_source_file_fields": local_source_file_fields or [],
         "template": template,
         "owner_actions": owner_actions or [],
+        "unblocks_tier_beta_criteria": unblocks_tier_beta_criteria or [],
+        "minimum_evidence": minimum_evidence or {},
+        "materialization_steps": materialization_steps or [],
         "validation_command": validation_command,
         "materialization_command": materialization_command,
     }
+
+
+def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "slot_id": str(slot["slot_id"]),
+            "title": str(slot["title"]),
+            "status": str(slot["status"]),
+            "unblocks_tier_beta_criteria": list(slot["unblocks_tier_beta_criteria"]),
+            "minimum_evidence": dict(slot["minimum_evidence"]),
+            "materialization_steps": list(slot["materialization_steps"]),
+        }
+        for slot in slots
+    ]
 
 
 def build_public_benchmark_operator_intake_packet(
@@ -302,7 +323,7 @@ def build_public_benchmark_operator_intake_packet(
             required_fields=list(REQUIRED_CASE_FIELDS),
             local_source_file_fields=[str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
             template={
-                "target_subset_case_count": 12,
+                "target_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
                 "cases": [_subset_case_template()],
             },
             owner_actions=[
@@ -317,6 +338,17 @@ def build_public_benchmark_operator_intake_packet(
                 f"--manifest {DEFAULT_SUBSET_MANIFEST} --fail-blocked"
             ),
             materialization_command=subset_materialization,
+            unblocks_tier_beta_criteria=[
+                "casf_pdbbind_subset_materialized",
+                "external_receipts_attached",
+            ],
+            minimum_evidence={
+                "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+                "source_family": "CASF/PDBBind",
+                "local_source_file_fields": [str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
+                "receipt_fields": ["source_license_or_accession", "source_checksum"],
+            },
+            materialization_steps=["materialize_subset_manifest"],
         ),
         _slot(
             slot_id="pose_coordinate_intake",
@@ -338,6 +370,23 @@ def build_public_benchmark_operator_intake_packet(
                 f"--input {DEFAULT_POSE_VALIDITY_INPUT} --fail-blocked"
             ),
             materialization_command=pose_input_materialization,
+            unblocks_tier_beta_criteria=[
+                "real_pose_validity_packet_materialized",
+                "symmetry_rmsd_scorecard_real_cases",
+                "posebusters_style_validity_real_ligands",
+            ],
+            minimum_evidence={
+                "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+                "case_id_source": str(DEFAULT_SUBSET_MANIFEST),
+                "coordinate_contract": (
+                    "reference_atoms and predicted_atoms in the declared ligand atom order"
+                ),
+            },
+            materialization_steps=[
+                "materialize_pose_validity_input",
+                "materialize_posebusters_validity_packet",
+                "materialize_symmetry_rmsd_scorecard",
+            ],
         ),
         _slot(
             slot_id="dud_e_lit_pcba_enrichment_intake",
@@ -354,6 +403,21 @@ def build_public_benchmark_operator_intake_packet(
                 "run the enrichment materializer with --fail-blocked",
             ],
             materialization_command=enrichment_materialization,
+            unblocks_tier_beta_criteria=[
+                "dud_e_lit_pcba_enrichment_ready",
+                "external_receipts_attached",
+            ],
+            minimum_evidence={
+                "ready_target_count": 1,
+                "supported_families": list(SUPPORTED_FAMILIES),
+                "required_molecule_fields": list(REQUIRED_MOLECULE_FIELDS),
+                "receipt_fields": [
+                    "source_license_or_accession",
+                    "source_checksum",
+                    "provenance_ref",
+                ],
+            },
+            materialization_steps=["materialize_enrichment_scorecard"],
         ),
         _slot(
             slot_id="vina_gnina_comparison_intake",
@@ -371,8 +435,24 @@ def build_public_benchmark_operator_intake_packet(
                 "run the Vina/GNINA comparison materializer with --fail-blocked",
             ],
             materialization_command=vina_gnina_materialization,
+            unblocks_tier_beta_criteria=[
+                "vina_gnina_comparison_ready",
+                "external_receipts_attached",
+            ],
+            minimum_evidence={
+                "comparison_case_count": 1,
+                "required_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
+                "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
+                "receipt_fields": [
+                    "source_license_or_accession",
+                    "source_checksum",
+                    "provenance_ref",
+                ],
+            },
+            materialization_steps=["materialize_vina_gnina_comparison_adapter"],
         ),
     ]
+    gate_unblock_plan = _gate_unblock_plan(slots)
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -402,6 +482,9 @@ def build_public_benchmark_operator_intake_packet(
         "source_of_truth_next_actions": source_next_actions,
         "input_slots": slots,
         "required_slot_count": len([slot for slot in slots if slot["required"]]),
+        "gate_unblock_plan": gate_unblock_plan,
+        "gate_unblock_plan_count": len(gate_unblock_plan),
+        "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
         "materialization_sequence": [
             {
                 "step_id": "materialize_subset_manifest",
@@ -481,6 +564,8 @@ def build_public_benchmark_operator_intake_packet(
         ],
         "summary": {
             "required_slot_count": len([slot for slot in slots if slot["required"]]),
+            "gate_unblock_plan_count": len(gate_unblock_plan),
+            "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "source_of_truth_blocker_count": len(source_blockers),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),
             "public_benchmark_ready": False,
@@ -516,6 +601,12 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{slot['slot_id']}` | `{slot['status']}` | `{slot['intake_artifact']}` |"
         )
+    lines.extend(["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"])
+    lines.append("|---|---|---|")
+    for row in payload["gate_unblock_plan"]:
+        criteria = ", ".join(f"`{criterion}`" for criterion in row["unblocks_tier_beta_criteria"])
+        minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
+        lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:
         lines.append(f"- `{step['step_id']}`: `{step['command']}`")

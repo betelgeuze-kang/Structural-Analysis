@@ -196,6 +196,23 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
         for row in _as_list(operator_intake.get("input_slots"))
         if isinstance(row, dict)
     ]
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "unblocks_tier_beta_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_tier_beta_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(
+            operator_intake.get("gate_unblock_plan")
+            or source_operator_summary.get("gate_unblock_plan")
+        )
+        if isinstance(row, dict)
+    ]
     tier_beta_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -246,6 +263,16 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
                 or source_operator_summary.get("required_slot_count")
                 or 0
             ),
+            "gate_unblock_plan_count": int(
+                operator_intake.get("gate_unblock_plan_count")
+                or source_operator_summary.get("gate_unblock_plan_count")
+                or len(gate_unblock_plan)
+            ),
+            "minimum_subset_case_count": int(
+                operator_intake.get("minimum_subset_case_count")
+                or source_operator_summary.get("minimum_subset_case_count")
+                or 0
+            ),
             "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
             "operator_intake_markdown_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD),
             "tier_beta_gate_status": str(tier_beta_gate.get("status") or ""),
@@ -257,6 +284,7 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             ],
             "tier_beta_gate_criteria": tier_beta_criteria,
             "operator_intake_slots": operator_slots,
+            "gate_unblock_plan": gate_unblock_plan,
             "subset_manifest_summary": _as_dict(payload.get("subset_manifest_summary")),
             "pose_validity_packet_summary": _as_dict(
                 payload.get("pose_validity_packet_summary")

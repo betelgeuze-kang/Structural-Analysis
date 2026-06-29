@@ -287,6 +287,24 @@ def _public_benchmark_row(
         for row in _as_list(public_benchmark_operator_intake.get("input_slots"))
         if isinstance(row, dict)
     ]
+    source_operator_summary = _as_dict(public_benchmark.get("operator_intake_packet"))
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "unblocks_tier_beta_criteria": [
+                str(item) for item in _as_list(row.get("unblocks_tier_beta_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(
+            public_benchmark_operator_intake.get("gate_unblock_plan")
+            or source_operator_summary.get("gate_unblock_plan")
+        )
+        if isinstance(row, dict)
+    ]
     tier_beta_criteria = [
         {
             "criterion_id": str(row.get("criterion_id") or ""),
@@ -339,6 +357,15 @@ def _public_benchmark_row(
             "operator_intake_required_slot_count": _as_int(
                 public_benchmark_operator_intake.get("required_slot_count")
             ),
+            "gate_unblock_plan_count": _as_int(
+                public_benchmark_operator_intake.get("gate_unblock_plan_count")
+                or source_operator_summary.get("gate_unblock_plan_count")
+                or len(gate_unblock_plan)
+            ),
+            "minimum_subset_case_count": _as_int(
+                public_benchmark_operator_intake.get("minimum_subset_case_count")
+                or source_operator_summary.get("minimum_subset_case_count")
+            ),
             "tier_beta_gate_status": str(tier_beta_gate.get("status") or ""),
             "tier_beta_failed_criterion_count": _as_int(
                 tier_beta_gate.get("failed_criterion_count")
@@ -348,6 +375,7 @@ def _public_benchmark_row(
             ],
             "tier_beta_gate_criteria": tier_beta_criteria,
             "operator_intake_slots": operator_slots,
+            "gate_unblock_plan": gate_unblock_plan,
             "subset_manifest_summary": _as_dict(public_benchmark.get("subset_manifest_summary")),
             "pose_validity_packet_summary": _as_dict(
                 public_benchmark.get("pose_validity_packet_summary")

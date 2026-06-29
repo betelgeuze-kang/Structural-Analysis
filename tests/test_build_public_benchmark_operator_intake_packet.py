@@ -129,6 +129,32 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ]
     assert packet["supported_comparison_engines"] == ["vina", "gnina"]
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
+    assert packet["gate_unblock_plan_count"] == 4
+    assert packet["minimum_subset_case_count"] == 12
+    gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
+    assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "case_count"
+    ] == 12
+    assert gate_plan["pose_coordinate_intake"]["unblocks_tier_beta_criteria"] == [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+    ]
+    assert gate_plan["pose_coordinate_intake"]["materialization_steps"] == [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard",
+    ]
+    assert gate_plan["dud_e_lit_pcba_enrichment_intake"]["minimum_evidence"][
+        "supported_families"
+    ] == ["DUD-E", "LIT-PCBA"]
+    assert gate_plan["vina_gnina_comparison_intake"]["minimum_evidence"][
+        "required_engines"
+    ] == ["vina", "gnina"]
 
 
 def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> None:

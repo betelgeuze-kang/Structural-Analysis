@@ -7,10 +7,10 @@
   "claim_boundary": "This seed defines the DUD-E/LIT-PCBA enrichment scorecard shape and materializer command. With zero operator-attached target rows it is intentionally blocked and cannot support an enrichment claim.",
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T19:37:29.148077+00:00",
+  "generated_at": "2026-06-29T19:45:09.493681+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9b5253296810ac5a3b31d7214af645aa8d67826448d6aa92ff45b88ac25a8737",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:fc0a9bb93e9a9c478908818b56c4e1e3673d6f207edce1107dd6a9c2fd05bc06",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:037281420277035a34d380de5a6b045b8751a28278d361a8c49867d313af3e1f",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:008b02f146354243efc97684eb1af6e0dda4083916349ae1f1ecbde4e44c9ff5",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -47,7 +47,7 @@
   "reuse_policy": "public_benchmark_enrichment_scorecard_seed_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-enrichment-scorecard.v1",
-  "source_commit_sha": "b0a274a7a98bb38e0d98bf09b90bcf598040705f",
+  "source_commit_sha": "cb4aa9c2bded6f78acc459bde3379db9d6e443c8",
   "status": "operator_evidence_required",
   "summary": {
     "active_count": 0,

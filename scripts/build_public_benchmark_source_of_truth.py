@@ -784,6 +784,9 @@ def build_source_of_truth(
             },
             "required_slot_count": operator_intake_packet["required_slot_count"],
             "input_slot_ids": [row["slot_id"] for row in operator_intake_packet["input_slots"]],
+            "gate_unblock_plan_count": operator_intake_packet["gate_unblock_plan_count"],
+            "minimum_subset_case_count": operator_intake_packet["minimum_subset_case_count"],
+            "gate_unblock_plan": operator_intake_packet["gate_unblock_plan"],
             "acceptance_criteria": operator_intake_packet["acceptance_criteria"],
             "materialization_sequence": [
                 {
@@ -795,6 +798,7 @@ def build_source_of_truth(
             ],
             "claim_boundary": operator_intake_packet["claim_boundary"],
         },
+        "operator_gate_unblock_plan": operator_intake_packet["gate_unblock_plan"],
         "subset_manifest_validation": validate_subset_manifest(subset_manifest),
         "subset_materializer": {
             "schema_version": MATERIALIZER_SCHEMA_VERSION,

@@ -25,10 +25,10 @@
     "real_enrichment_target_count": 0,
     "status": "operator_evidence_required"
   },
-  "generated_at": "2026-06-29T19:37:29.154401+00:00",
+  "generated_at": "2026-06-29T19:45:09.499936+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9b5253296810ac5a3b31d7214af645aa8d67826448d6aa92ff45b88ac25a8737",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:fc0a9bb93e9a9c478908818b56c4e1e3673d6f207edce1107dd6a9c2fd05bc06",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:037281420277035a34d380de5a6b045b8751a28278d361a8c49867d313af3e1f",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:008b02f146354243efc97684eb1af6e0dda4083916349ae1f1ecbde4e44c9ff5",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -54,6 +54,115 @@
     "attach_vina_gnina_comparison_intake",
     "run_public_benchmark_vina_gnina_comparison_materializer"
   ],
+  "operator_gate_unblock_plan": [
+    {
+      "materialization_steps": [
+        "materialize_subset_manifest"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "source_family": "CASF/PDBBind"
+      },
+      "slot_id": "casf_pdbbind_subset_intake",
+      "status": "operator_input_required",
+      "title": "CASF/PDBBind subset source files and case descriptors",
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
+      },
+      "slot_id": "pose_coordinate_intake",
+      "status": "operator_input_required",
+      "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
+      "unblocks_tier_beta_criteria": [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_enrichment_scorecard"
+      ],
+      "minimum_evidence": {
+        "ready_target_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_molecule_fields": [
+          "molecule_id",
+          "is_active",
+          "score"
+        ],
+        "supported_families": [
+          "DUD-E",
+          "LIT-PCBA"
+        ]
+      },
+      "slot_id": "dud_e_lit_pcba_enrichment_intake",
+      "status": "operator_input_required",
+      "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
+      "unblocks_tier_beta_criteria": [
+        "dud_e_lit_pcba_enrichment_ready",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "comparison_case_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "required_engines": [
+          "vina",
+          "gnina"
+        ]
+      },
+      "slot_id": "vina_gnina_comparison_intake",
+      "status": "operator_input_required",
+      "title": "Vina/GNINA docking engine comparison rows",
+      "unblocks_tier_beta_criteria": [
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached"
+      ]
+    }
+  ],
   "operator_intake_packet": {
     "acceptance_criteria": [
       "public_benchmark_subset_manifest.materialized_case_count >= 12",
@@ -67,6 +176,116 @@
     ],
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
     "claim_boundary": "This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.",
+    "gate_unblock_plan": [
+      {
+        "materialization_steps": [
+          "materialize_subset_manifest"
+        ],
+        "minimum_evidence": {
+          "case_count": 12,
+          "local_source_file_fields": [
+            "protein_structure_path",
+            "reference_ligand_path",
+            "predicted_ligand_path_or_docking_run_id"
+          ],
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum"
+          ],
+          "source_family": "CASF/PDBBind"
+        },
+        "slot_id": "casf_pdbbind_subset_intake",
+        "status": "operator_input_required",
+        "title": "CASF/PDBBind subset source files and case descriptors",
+        "unblocks_tier_beta_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "external_receipts_attached"
+        ]
+      },
+      {
+        "materialization_steps": [
+          "materialize_pose_validity_input",
+          "materialize_posebusters_validity_packet",
+          "materialize_symmetry_rmsd_scorecard"
+        ],
+        "minimum_evidence": {
+          "case_count": 12,
+          "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+          "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
+        },
+        "slot_id": "pose_coordinate_intake",
+        "status": "operator_input_required",
+        "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
+        "unblocks_tier_beta_criteria": [
+          "real_pose_validity_packet_materialized",
+          "symmetry_rmsd_scorecard_real_cases",
+          "posebusters_style_validity_real_ligands"
+        ]
+      },
+      {
+        "materialization_steps": [
+          "materialize_enrichment_scorecard"
+        ],
+        "minimum_evidence": {
+          "ready_target_count": 1,
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_molecule_fields": [
+            "molecule_id",
+            "is_active",
+            "score"
+          ],
+          "supported_families": [
+            "DUD-E",
+            "LIT-PCBA"
+          ]
+        },
+        "slot_id": "dud_e_lit_pcba_enrichment_intake",
+        "status": "operator_input_required",
+        "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
+        "unblocks_tier_beta_criteria": [
+          "dud_e_lit_pcba_enrichment_ready",
+          "external_receipts_attached"
+        ]
+      },
+      {
+        "materialization_steps": [
+          "materialize_vina_gnina_comparison_adapter"
+        ],
+        "minimum_evidence": {
+          "comparison_case_count": 1,
+          "receipt_fields": [
+            "source_license_or_accession",
+            "source_checksum",
+            "provenance_ref"
+          ],
+          "required_engine_run_fields": [
+            "engine_id",
+            "docking_run_id",
+            "predicted_ligand_path_or_pose_ref",
+            "symmetry_aware_rmsd_angstrom",
+            "pose_success",
+            "score",
+            "score_direction"
+          ],
+          "required_engines": [
+            "vina",
+            "gnina"
+          ]
+        },
+        "slot_id": "vina_gnina_comparison_intake",
+        "status": "operator_input_required",
+        "title": "Vina/GNINA docking engine comparison rows",
+        "unblocks_tier_beta_criteria": [
+          "vina_gnina_comparison_ready",
+          "external_receipts_attached"
+        ]
+      }
+    ],
+    "gate_unblock_plan_count": 4,
     "input_slot_ids": [
       "casf_pdbbind_subset_intake",
       "pose_coordinate_intake",
@@ -111,6 +330,7 @@
         "step_id": "refresh_public_benchmark_source_of_truth"
       }
     ],
+    "minimum_subset_case_count": 12,
     "read_model": {
       "alternate_routes": [
         "/product/public-benchmark",
@@ -178,7 +398,7 @@
   },
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "b0a274a7a98bb38e0d98bf09b90bcf598040705f",
+  "source_commit_sha": "cb4aa9c2bded6f78acc459bde3379db9d6e443c8",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

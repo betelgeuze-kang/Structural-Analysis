@@ -12,10 +12,120 @@
   "claim_boundary": "This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T19:37:29.152408+00:00",
+  "gate_unblock_plan": [
+    {
+      "materialization_steps": [
+        "materialize_subset_manifest"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "source_family": "CASF/PDBBind"
+      },
+      "slot_id": "casf_pdbbind_subset_intake",
+      "status": "operator_input_required",
+      "title": "CASF/PDBBind subset source files and case descriptors",
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
+      },
+      "slot_id": "pose_coordinate_intake",
+      "status": "operator_input_required",
+      "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
+      "unblocks_tier_beta_criteria": [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_enrichment_scorecard"
+      ],
+      "minimum_evidence": {
+        "ready_target_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_molecule_fields": [
+          "molecule_id",
+          "is_active",
+          "score"
+        ],
+        "supported_families": [
+          "DUD-E",
+          "LIT-PCBA"
+        ]
+      },
+      "slot_id": "dud_e_lit_pcba_enrichment_intake",
+      "status": "operator_input_required",
+      "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
+      "unblocks_tier_beta_criteria": [
+        "dud_e_lit_pcba_enrichment_ready",
+        "external_receipts_attached"
+      ]
+    },
+    {
+      "materialization_steps": [
+        "materialize_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "comparison_case_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "required_engines": [
+          "vina",
+          "gnina"
+        ]
+      },
+      "slot_id": "vina_gnina_comparison_intake",
+      "status": "operator_input_required",
+      "title": "Vina/GNINA docking engine comparison rows",
+      "unblocks_tier_beta_criteria": [
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached"
+      ]
+    }
+  ],
+  "gate_unblock_plan_count": 4,
+  "generated_at": "2026-06-29T19:45:09.498052+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:8e3744b6f7a4ba5c3ab20ce1a2475f506a5857c63d2bd89e7487b6a480c81999",
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:9b5253296810ac5a3b31d7214af645aa8d67826448d6aa92ff45b88ac25a8737",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:1e5ae92f634f14c3bf00cd144984502fe76c9f9ca46175dea97b30706a2ee379",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:037281420277035a34d380de5a6b045b8751a28278d361a8c49867d313af3e1f",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -35,6 +145,22 @@
         "predicted_ligand_path_or_docking_run_id"
       ],
       "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+      "materialization_steps": [
+        "materialize_subset_manifest"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "source_family": "CASF/PDBBind"
+      },
       "owner_actions": [
         "attach at least 12 local CASF/PDBBind case descriptors",
         "attach protein, reference ligand, and predicted pose or docking-run files",
@@ -82,6 +208,10 @@
         "target_subset_case_count": 12
       },
       "title": "CASF/PDBBind subset source files and case descriptors",
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ],
       "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
     },
     {
@@ -91,6 +221,16 @@
       "intake_artifact": "<operator-pose-coordinate-intake.json>",
       "local_source_file_fields": [],
       "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
+      "materialization_steps": [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard"
+      ],
+      "minimum_evidence": {
+        "case_count": 12,
+        "case_id_source": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "coordinate_contract": "reference_atoms and predicted_atoms in the declared ligand atom order"
+      },
       "owner_actions": [
         "use case_id values from the materialized CASF/PDBBind subset manifest",
         "attach reference and predicted ligand atom coordinates in the declared atom order",
@@ -165,6 +305,11 @@
         ]
       },
       "title": "Pose coordinate intake for PoseBusters-style validity and RMSD",
+      "unblocks_tier_beta_criteria": [
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands"
+      ],
       "validation_command": "python3 scripts/validate_public_benchmark_pose_validity.py --input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --fail-blocked"
     },
     {
@@ -172,6 +317,26 @@
       "intake_artifact": "<operator-dud-e-lit-pcba-enrichment-intake.json>",
       "local_source_file_fields": [],
       "materialization_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
+      "materialization_steps": [
+        "materialize_enrichment_scorecard"
+      ],
+      "minimum_evidence": {
+        "ready_target_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_molecule_fields": [
+          "molecule_id",
+          "is_active",
+          "score"
+        ],
+        "supported_families": [
+          "DUD-E",
+          "LIT-PCBA"
+        ]
+      },
       "owner_actions": [
         "attach at least one DUD-E or LIT-PCBA target with active and decoy labels",
         "preserve score direction and source accession or license references",
@@ -215,6 +380,10 @@
         ]
       },
       "title": "DUD-E/LIT-PCBA scored molecule enrichment rows",
+      "unblocks_tier_beta_criteria": [
+        "dud_e_lit_pcba_enrichment_ready",
+        "external_receipts_attached"
+      ],
       "validation_command": ""
     },
     {
@@ -225,6 +394,30 @@
       "intake_artifact": "<operator-vina-gnina-comparison-intake.json>",
       "local_source_file_fields": [],
       "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
+      "materialization_steps": [
+        "materialize_vina_gnina_comparison_adapter"
+      ],
+      "minimum_evidence": {
+        "comparison_case_count": 1,
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum",
+          "provenance_ref"
+        ],
+        "required_engine_run_fields": [
+          "engine_id",
+          "docking_run_id",
+          "predicted_ligand_path_or_pose_ref",
+          "symmetry_aware_rmsd_angstrom",
+          "pose_success",
+          "score",
+          "score_direction"
+        ],
+        "required_engines": [
+          "vina",
+          "gnina"
+        ]
+      },
       "owner_actions": [
         "attach Vina and GNINA run rows for the same materialized benchmark cases",
         "include symmetry-aware RMSD and pose_success values for every engine run",
@@ -278,6 +471,10 @@
         ]
       },
       "title": "Vina/GNINA docking engine comparison rows",
+      "unblocks_tier_beta_criteria": [
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached"
+      ],
       "validation_command": ""
     }
   ],
@@ -334,6 +531,7 @@
       "step_id": "refresh_public_benchmark_source_of_truth"
     }
   ],
+  "minimum_subset_case_count": 12,
   "next_actions": [
     "fill_public_benchmark_operator_intake_packet",
     "run_public_benchmark_subset_materializer",
@@ -377,7 +575,7 @@
   "reused_evidence": true,
   "route": "/product/public-benchmark/operator-intake",
   "schema_version": "public-benchmark-operator-intake-packet.v1",
-  "source_commit_sha": "b0a274a7a98bb38e0d98bf09b90bcf598040705f",
+  "source_commit_sha": "cb4aa9c2bded6f78acc459bde3379db9d6e443c8",
   "source_of_truth_blockers": [
     "casf_pdbbind_source_material_not_attached",
     "public_benchmark_real_pose_predictions_missing",
@@ -403,6 +601,8 @@
   "source_of_truth_status": "seed_ready_materialization_blocked",
   "status": "ready_for_operator_input",
   "summary": {
+    "gate_unblock_plan_count": 4,
+    "minimum_subset_case_count": 12,
     "public_benchmark_ready": false,
     "required_slot_count": 4,
     "source_of_truth_blocker_count": 5,

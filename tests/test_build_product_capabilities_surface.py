@@ -78,6 +78,8 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "ready_for_operator_input"
     )
     assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 4
+    assert public_benchmark["summary"]["gate_unblock_plan_count"] == 4
+    assert public_benchmark["summary"]["minimum_subset_case_count"] == 12
     assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
     assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 7
     assert [
@@ -101,6 +103,22 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
         "vina_gnina_comparison_intake": "operator_input_required",
     }
+    gate_plan = {
+        row["slot_id"]: row
+        for row in public_benchmark["summary"]["gate_unblock_plan"]
+    }
+    assert gate_plan["casf_pdbbind_subset_intake"][
+        "unblocks_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
+        "case_count"
+    ] == 12
+    assert gate_plan["dud_e_lit_pcba_enrichment_intake"][
+        "materialization_steps"
+    ] == ["materialize_enrichment_scorecard"]
     assert public_benchmark["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
         "dry_run_case_count": 1,

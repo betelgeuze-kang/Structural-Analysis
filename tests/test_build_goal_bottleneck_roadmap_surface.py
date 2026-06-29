@@ -122,6 +122,8 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     assert phase_2["summary"]["operator_intake_route"] == (
         "/product/public-benchmark/operator-intake"
     )
+    assert phase_2["summary"]["gate_unblock_plan_count"] == 4
+    assert phase_2["summary"]["minimum_subset_case_count"] == 12
     assert phase_2["summary"]["tier_beta_gate_status"] == "blocked"
     assert phase_2["summary"]["tier_beta_failed_criterion_count"] == 7
     assert phase_2["summary"]["tier_beta_failed_criteria"] == [
@@ -156,6 +158,21 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
         "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
         "vina_gnina_comparison_intake": "operator_input_required",
     }
+    gate_plan = {
+        row["slot_id"]: row
+        for row in phase_2["summary"]["gate_unblock_plan"]
+    }
+    assert gate_plan["casf_pdbbind_subset_intake"][
+        "unblocks_tier_beta_criteria"
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached",
+    ]
+    assert gate_plan["pose_coordinate_intake"]["materialization_steps"] == [
+        "materialize_pose_validity_input",
+        "materialize_posebusters_validity_packet",
+        "materialize_symmetry_rmsd_scorecard",
+    ]
     assert phase_2["summary"]["pose_validity_packet_summary"]["real_benchmark_case_count"] == 0
     assert phase_2["summary"]["symmetry_rmsd_scorecard_summary"] == {
         "status": "ready",
