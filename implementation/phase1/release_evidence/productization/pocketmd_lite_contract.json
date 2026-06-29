@@ -1,0 +1,101 @@
+{
+  "blocked_claims": [
+    "broad_all_atom_md_claim",
+    "free_energy_perturbation_claim",
+    "long_timescale_md_claim",
+    "de_novo_binding_mode_claim"
+  ],
+  "claim_boundary": "PocketMD Lite is a bounded top-k refinement surface. It reports local-min survival, contact persistence, H-bond persistence, clash relief, and uncertainty for already-ranked candidates only. It does not claim broad all-atom MD, FEP, long-timescale dynamics, or autonomous docking accuracy.",
+  "contract_pass": true,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T15:41:16.378095+00:00",
+  "input_checksums": {
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:542edf56c2f0be90fad3226adc2d328c0ede8ac01493d6dbeb048dfe4be6d707"
+  },
+  "operator_intake_schema": {
+    "case_key": "cases",
+    "required_case_fields": [
+      "case_id",
+      "source_family",
+      "top_k_rank",
+      "candidate_id",
+      "pre_refinement_energy_proxy",
+      "post_refinement_energy_proxy",
+      "local_min_survived",
+      "contact_persistence_rate",
+      "h_bond_persistence_rate",
+      "clash_count_before",
+      "clash_count_after",
+      "uncertainty_interval",
+      "provenance_ref",
+      "source_checksum"
+    ],
+    "template": {
+      "candidate_id": "",
+      "case_id": "pocketmd_lite_case_001",
+      "clash_count_after": null,
+      "clash_count_before": null,
+      "contact_persistence_rate": null,
+      "h_bond_persistence_rate": null,
+      "local_min_survived": null,
+      "post_refinement_energy_proxy": null,
+      "pre_refinement_energy_proxy": null,
+      "provenance_ref": "",
+      "source_checksum": "",
+      "source_family": "CASF/PDBBind or GPCR operator intake",
+      "top_k_rank": 1,
+      "uncertainty_interval": {
+        "high": null,
+        "low": null,
+        "unit": "energy_proxy_delta"
+      }
+    },
+    "top_k_only_policy": "Only candidates selected in the upstream top-k pose or design ranking may be included. Broad all-atom rescoring, long MD, FEP, and de novo docking claims remain out of scope."
+  },
+  "product_capability_id": "pocketmd_lite_top_k_refinement",
+  "product_surface_ready": false,
+  "reported_metrics": [
+    {
+      "description": "fraction of top-k candidates that remain in a local minimum after Lite refinement",
+      "direction": "higher_is_better",
+      "metric_id": "local_min_survival_rate",
+      "required": true
+    },
+    {
+      "description": "fraction of declared receptor-ligand contacts retained after Lite refinement",
+      "direction": "higher_is_better",
+      "metric_id": "contact_persistence_rate",
+      "required": true
+    },
+    {
+      "description": "fraction of declared H-bond contacts retained after Lite refinement",
+      "direction": "higher_is_better",
+      "metric_id": "h_bond_persistence_rate",
+      "required": true
+    },
+    {
+      "description": "fraction of candidates with reduced severe-clash count after Lite refinement",
+      "direction": "higher_is_better",
+      "metric_id": "clash_relief_rate",
+      "required": true
+    },
+    {
+      "description": "median uncertainty interval width for candidate-level Lite refinement deltas",
+      "direction": "lower_is_better",
+      "metric_id": "uncertainty_width_median",
+      "required": true
+    }
+  ],
+  "reuse_policy": "pocketmd_lite_contract_generated_from_goal_contract",
+  "reused_evidence": false,
+  "schema_version": "pocketmd-lite-contract.v1",
+  "scope": "top_k_lite_refinement_only",
+  "source_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+  "status": "contract_ready_operator_evidence_required",
+  "top_k_policy": {
+    "candidate_scope": "top_k_candidates_only",
+    "default_top_k": 5,
+    "max_top_k": 20,
+    "requires_upstream_ranked_candidates": true
+  }
+}

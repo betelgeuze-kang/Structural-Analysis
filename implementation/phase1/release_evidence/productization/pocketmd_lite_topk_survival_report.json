@@ -1,0 +1,48 @@
+{
+  "blockers": [
+    "pocketmd_lite_topk_candidate_rows_missing",
+    "pocketmd_lite_local_min_survival_rows_missing",
+    "pocketmd_lite_contact_hbond_persistence_rows_missing",
+    "pocketmd_lite_uncertainty_rows_missing"
+  ],
+  "claim_boundary": "This report is a seed shape for PocketMD Lite evidence. With zero real refinement rows it is intentionally blocked and cannot support a product claim.",
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T15:41:16.379878+00:00",
+  "input_checksums": {
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:542edf56c2f0be90fad3226adc2d328c0ede8ac01493d6dbeb048dfe4be6d707"
+  },
+  "next_actions": [
+    "attach_top_k_candidate_refinement_rows",
+    "compute_local_min_survival_report",
+    "compute_contact_and_h_bond_persistence",
+    "compute_clash_relief_and_uncertainty_summary",
+    "regenerate_pocketmd_lite_science_product_surface"
+  ],
+  "product_surface_ready": false,
+  "real_refinement_case_count": 0,
+  "required_metrics": [
+    "local_min_survival_rate",
+    "contact_persistence_rate",
+    "h_bond_persistence_rate",
+    "clash_relief_rate",
+    "uncertainty_width_median"
+  ],
+  "reuse_policy": "pocketmd_lite_survival_report_seed_from_contract",
+  "reused_evidence": false,
+  "rows": [],
+  "schema_version": "pocketmd-lite-topk-survival-report.v1",
+  "source_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+  "status": "operator_evidence_required",
+  "summary": {
+    "blocker_count": 4,
+    "clash_relief_rate": null,
+    "contact_persistence_rate_median": null,
+    "h_bond_persistence_rate_median": null,
+    "local_min_survival_rate": null,
+    "real_refinement_case_count": 0,
+    "top_k_candidate_count": 0,
+    "uncertainty_width_median": null
+  },
+  "top_k_candidate_count": 0
+}

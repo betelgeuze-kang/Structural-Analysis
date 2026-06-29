@@ -1,0 +1,72 @@
+{
+  "blockers": [
+    "pocketmd_lite_topk_refinement_rows_required",
+    "pocketmd_lite_survival_report_blocked",
+    "pocketmd_lite_broad_all_atom_fep_claim_locked"
+  ],
+  "claim_boundary": "PocketMD Lite is exposed as a bounded science product surface for top-k local refinement evidence only. Broad all-atom MD, FEP, long-timescale dynamics, and de novo binding claims remain locked.",
+  "claim_locked": true,
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "first_blocked_target": "top_k_refinement_operator_intake",
+  "generated_at": "2026-06-29T15:41:16.385029+00:00",
+  "goal_roadmap_linkage": {
+    "bottleneck": "pocketmd_lite_science_product_surface_locked",
+    "next_goal_actions": [
+      "run_pocketmd_lite_topk_survival_materializer",
+      "publish_pocketmd_lite_readonly_api",
+      "regenerate_product_capabilities_surface",
+      "regenerate_goal_bottleneck_action_board"
+    ],
+    "phase": "Phase 4",
+    "roadmap_item": "PocketMD Lite science product surface"
+  },
+  "input_checksums": {
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:542edf56c2f0be90fad3226adc2d328c0ede8ac01493d6dbeb048dfe4be6d707"
+  },
+  "linked_artifacts": {
+    "contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
+    "delivery_handoff": "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json",
+    "readonly_api": "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json",
+    "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
+  },
+  "locked": true,
+  "next_actions": [
+    "attach_top_k_candidate_refinement_rows",
+    "run_pocketmd_lite_topk_survival_materializer",
+    "regenerate_pocketmd_lite_science_product_surface",
+    "regenerate_pm_release_gate_report"
+  ],
+  "product_capability_id": "pocketmd_lite_top_k_refinement",
+  "product_surface_ready": false,
+  "readiness_summary": {
+    "blocked_claim_count": 4,
+    "contract_ready": true,
+    "handoff_ready": true,
+    "readonly_api_ready": true,
+    "real_refinement_case_count": 0,
+    "top_k_candidate_count": 0
+  },
+  "reason_code": "ERR_POCKETMD_LITE_PRODUCT_SURFACE_LOCKED",
+  "required_receipts": [
+    "top_k_candidate_refinement_rows",
+    "local_min_survival_report",
+    "contact_persistence_report",
+    "h_bond_persistence_report",
+    "clash_relief_report",
+    "uncertainty_summary"
+  ],
+  "reuse_policy": "pocketmd_lite_science_product_surface_from_contract_seed",
+  "reused_evidence": false,
+  "root_cause_tags": [
+    "operator_refinement_rows_required"
+  ],
+  "schema_version": "pocketmd-lite-science-product-surface.v1",
+  "science_surface_family": "pocketmd_lite",
+  "source_commit_sha": "bc1c088666829ac112be83fb19cf2e1fbb082006",
+  "status": "locked",
+  "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
+  "surface_id": "pocketmd_lite_science_product_surface",
+  "surface_kind": "science_product_surface",
+  "surface_scope": "pocketmd_lite_top_k_refinement"
+}
