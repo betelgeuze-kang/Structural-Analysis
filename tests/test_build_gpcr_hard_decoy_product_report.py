@@ -46,7 +46,31 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert report["target_count"] == 3
     assert report["target_pass_count"] == 0
     assert report["first_blocked_target"] == "DRD2"
+    assert report["first_blocker"] == "DRD2:ranking_pr_auc_ci_low_required"
     assert report["root_cause_tags"] == ["operator_values_required"]
+    assert report["operator_intake_route"] == (
+        "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    )
+    assert report["operator_intake_required_slot_count"] == 3
+    assert report["operator_evidence_gap_count"] == 3
+    assert report["operator_handoff_summary"]["first_blocked_target"] == "DRD2"
+    assert report["operator_handoff_summary"]["first_blocker"] == (
+        "DRD2:ranking_pr_auc_ci_low_required"
+    )
+    assert report["operator_handoff_summary"]["first_next_action"] == (
+        "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
+    )
+    assert report["operator_handoff_summary"]["required_slot_count"] == 3
+    assert report["operator_handoff_summary"]["blocked_operator_slot_count"] == 3
+    assert report["operator_handoff_summary"]["minimum_evidence"]["target_id"] == (
+        "DRD2"
+    )
+    assert report["operator_handoff_summary"]["materialization_steps"] == [
+        "materialize_gpcr_hard_decoy_suite_report",
+        "refresh_gpcr_hard_decoy_product_report",
+        "refresh_product_capabilities_surface",
+        "refresh_goal_bottleneck_roadmap_surface",
+    ]
     assert report["phase3_exit_gate"]["status"] == "blocked"
     assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
     assert report["phase3_exit_gate"]["failed_criteria"] == [

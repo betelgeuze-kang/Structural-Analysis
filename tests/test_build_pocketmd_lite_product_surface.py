@@ -238,7 +238,76 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["locked"] is True
     assert surface["claim_locked"] is True
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert surface["first_blocker"] == "pocketmd_lite_topk_candidate_rows_missing"
     assert surface["root_cause_tags"] == ["operator_refinement_rows_required"]
+    assert surface["operator_intake_route"] == "/product/pocketmd-lite/operator-intake"
+    assert surface["operator_intake_required_slot_count"] == 1
+    assert surface["operator_evidence_gap_count"] == 1
+    assert surface["first_operator_evidence_gap"]["slot_id"] == (
+        "top_k_refinement_rows"
+    )
+    assert surface["first_operator_evidence_gap"]["blocked_phase4_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert surface["first_operator_evidence_gap"]["preserves_phase4_criteria"] == [
+        "broad_all_atom_fep_claims_locked"
+    ]
+    assert surface["operator_handoff_summary"] == {
+        "route": "/product/pocketmd-lite/operator-intake",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_operator_intake_packet.json"
+        ),
+        "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
+        "first_blocked_target": "top_k_refinement_operator_intake",
+        "first_next_action": "attach top-k candidate refinement rows",
+        "required_slot_count": 1,
+        "blocked_operator_slot_count": 1,
+        "minimum_evidence": {
+            "real_refinement_case_count": 1,
+            "top_k_candidate_count": 1,
+            "candidate_scope": "upstream_ranked_top_k_candidates_only",
+            "required_case_fields": [
+                "case_id",
+                "source_family",
+                "top_k_rank",
+                "candidate_id",
+                "pre_refinement_energy_proxy",
+                "post_refinement_energy_proxy",
+                "local_min_survived",
+                "contact_persistence_rate",
+                "h_bond_persistence_rate",
+                "clash_count_before",
+                "clash_count_after",
+                "uncertainty_interval",
+                "provenance_ref",
+                "source_checksum",
+            ],
+            "receipt_fields": ["provenance_ref", "source_checksum"],
+        },
+        "materialization_steps": [
+            "materialize_pocketmd_lite_topk_survival_report",
+            "refresh_product_capabilities_surface",
+            "refresh_goal_bottleneck_roadmap_surface",
+        ],
+        "materialization_command": (
+            "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py "
+            "--intake <operator-pocketmd-lite-intake.json> "
+            "--contract implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_contract.json "
+            "--out-report implementation/phase1/release_evidence/productization/"
+            "pocketmd_lite_topk_survival_report.json "
+            "--out-surface implementation/phase1/release_evidence/surface/"
+            "pocketmd_lite_science_product_surface.json "
+            "--fail-blocked"
+        ),
+    }
     assert surface["phase4_exit_gate"]["status"] == "blocked"
     assert surface["phase4_exit_gate"]["failed_criteria"] == [
         "top_k_refinement_rows_present",

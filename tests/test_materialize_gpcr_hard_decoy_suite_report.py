@@ -147,6 +147,74 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert surface["surface_id"] == "gpcr_hard_decoy_evidence_surface"
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "DRD2"
+    assert surface["first_blocker"] == "DRD2:operator_metrics_required"
     assert surface["root_cause_tags"] == ["operator_values_required"]
     assert surface["phase3_exit_gate"]["status"] == "blocked"
     assert surface["phase3_exit_gate"]["failed_criterion_count"] == 4
+    assert surface["operator_intake_route"] == (
+        "/product/gpcr-hard-decoy-suite-report/operator-intake"
+    )
+    assert surface["operator_intake_required_slot_count"] == 3
+    assert surface["operator_evidence_gap_count"] == 3
+    assert surface["first_operator_evidence_gap"]["slot_id"] == (
+        "drd2_hard_decoy_metrics"
+    )
+    assert surface["first_operator_evidence_gap"]["target_id"] == "DRD2"
+    assert surface["first_operator_evidence_gap"]["blocked_phase3_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert surface["operator_handoff_summary"] == {
+        "route": "/product/gpcr-hard-decoy-suite-report/operator-intake",
+        "artifact": (
+            "implementation/phase1/release_evidence/productization/"
+            "gpcr_hard_decoy_operator_intake_packet.json"
+        ),
+        "first_blocker": "DRD2:operator_metrics_required",
+        "first_blocked_target": "DRD2",
+        "first_next_action": (
+            "fill DRD2 hard-decoy metrics in the GPCR operator intake packet"
+        ),
+        "required_slot_count": 3,
+        "blocked_operator_slot_count": 3,
+        "minimum_evidence": {
+            "target_id": "DRD2",
+            "required_operator_fields": [
+                "target_id",
+                "ranking_pr_auc_ci_low",
+                "top20_hit_rate",
+                "decoys_above_positive_count",
+                "positive_out_anchored_by_top_decoys",
+            ],
+            "thresholds": {
+                "ranking_pr_auc_ci_low": ">=0.45",
+                "top20_hit_rate": ">=0.2",
+                "decoys_above_positive_count": "<=0",
+                "positive_out_anchored_by_top_decoys": False,
+            },
+            "criterion_by_field": {
+                "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+                "top20_hit_rate": "top20_hit_rate_min",
+                "decoys_above_positive_count": "decoys_above_positive_count_max",
+                "positive_out_anchored_by_top_decoys": (
+                    "no_positive_out_anchored_by_top_decoys"
+                ),
+            },
+        },
+        "materialization_steps": [
+            "materialize_gpcr_hard_decoy_suite_report",
+            "refresh_gpcr_hard_decoy_product_report",
+            "refresh_product_capabilities_surface",
+            "refresh_goal_bottleneck_roadmap_surface",
+        ],
+    }
+    assert surface["next_actions"] == [
+        "fill_gpcr_hard_decoy_operator_intake_packet",
+        "fill_drd2_htr2a_oprm1_operator_template_values",
+        "run_gpcr_hard_decoy_suite_materializer",
+        "refresh_gpcr_hard_decoy_product_report",
+        "regenerate_product_capabilities_surface",
+        "regenerate_goal_bottleneck_roadmap_surface",
+    ]

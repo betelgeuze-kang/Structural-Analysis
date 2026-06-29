@@ -633,6 +633,47 @@ def build_surface(
             product_surface_ready=False,
             first_blocked_target="top_k_refinement_operator_intake",
         )
+    operator_schema = contract.get("operator_intake_schema", {})
+    required_case_fields = list(operator_schema.get("required_case_fields", []))
+    gate_unblock_plan = _operator_gate_unblock_plan(
+        required_case_fields=required_case_fields,
+        materializer_command=_materializer_contract()["command"],
+    )
+    first_gate = gate_unblock_plan[0] if gate_unblock_plan else {}
+    first_operator_evidence_gap = {
+        "slot_priority": 1,
+        "slot_id": str(first_gate.get("slot_id") or "top_k_refinement_rows"),
+        "status": str(first_gate.get("status") or "operator_input_required"),
+        "phase4_blocked": True,
+        "blocked_phase4_criteria": [
+            str(row) for row in first_gate.get("unblocks_phase4_criteria", [])
+        ],
+        "preserves_phase4_criteria": [
+            str(row) for row in first_gate.get("preserves_phase4_criteria", [])
+        ],
+        "first_next_action": "attach top-k candidate refinement rows",
+        "minimum_evidence": dict(first_gate.get("minimum_evidence") or {}),
+        "materialization_steps": [
+            str(row) for row in first_gate.get("materialization_steps", [])
+        ],
+        "materialization_command": str(first_gate.get("materialization_command") or ""),
+    }
+    operator_handoff_summary = {
+        "route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_OUT),
+        "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
+        "first_blocked_target": "top_k_refinement_operator_intake",
+        "first_next_action": first_operator_evidence_gap["first_next_action"],
+        "required_slot_count": 1,
+        "blocked_operator_slot_count": 1,
+        "minimum_evidence": dict(first_operator_evidence_gap["minimum_evidence"]),
+        "materialization_steps": list(
+            first_operator_evidence_gap["materialization_steps"]
+        ),
+        "materialization_command": first_operator_evidence_gap[
+            "materialization_command"
+        ],
+    }
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
         **_metadata(
@@ -652,9 +693,17 @@ def build_surface(
         "claim_locked": True,
         "product_surface_ready": False,
         "first_blocked_target": "top_k_refinement_operator_intake",
+        "first_blocker": "pocketmd_lite_topk_candidate_rows_missing",
         "root_cause_tags": ["operator_refinement_rows_required"],
         "blockers": blockers,
         "phase4_exit_gate": phase4_exit_gate,
+        "operator_intake_route": POCKETMD_LITE_OPERATOR_INTAKE_ROUTE,
+        "operator_intake_required_slot_count": 1,
+        "operator_evidence_gap_count": 1,
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+        "operator_evidence_gap_register": [first_operator_evidence_gap],
+        "operator_gate_unblock_plan": gate_unblock_plan,
+        "operator_handoff_summary": operator_handoff_summary,
         "required_receipts": [
             "top_k_candidate_refinement_rows",
             "local_min_survival_report",

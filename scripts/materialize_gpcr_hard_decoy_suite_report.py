@@ -20,12 +20,103 @@ from release_evidence_metadata import release_evidence_metadata  # noqa: E402
 SCHEMA_VERSION = "gpcr-hard-decoy-suite-report.v1"
 SURFACE_SCHEMA_VERSION = "gpcr-hard-decoy-evidence-surface.v1"
 REQUIRED_TARGETS = ("DRD2", "HTR2A", "OPRM1")
+GPCR_PRODUCT_REPORT_ROUTE = "/product/gpcr-hard-decoy-suite-report"
+GPCR_OPERATOR_INTAKE_ROUTE = "/product/gpcr-hard-decoy-suite-report/operator-intake"
+DEFAULT_OPERATOR_INTAKE_PACKET = Path(
+    "implementation/phase1/release_evidence/productization/"
+    "gpcr_hard_decoy_operator_intake_packet.json"
+)
 EXIT_CRITERIA = {
     "ranking_pr_auc_ci_low_min": 0.45,
     "top20_hit_rate_min": 0.20,
     "decoys_above_positive_count_max": 0,
     "positive_out_anchored_by_top_decoys_allowed": False,
 }
+PHASE3_MATERIALIZATION_STEPS = [
+    "materialize_gpcr_hard_decoy_suite_report",
+    "refresh_gpcr_hard_decoy_product_report",
+    "refresh_product_capabilities_surface",
+    "refresh_goal_bottleneck_roadmap_surface",
+]
+
+
+def _slot_id_for_target(target_id: str) -> str:
+    return f"{target_id.lower()}_hard_decoy_metrics"
+
+
+def _phase3_minimum_evidence(target_id: str) -> dict[str, Any]:
+    return {
+        "target_id": target_id,
+        "required_operator_fields": [
+            "target_id",
+            "ranking_pr_auc_ci_low",
+            "top20_hit_rate",
+            "decoys_above_positive_count",
+            "positive_out_anchored_by_top_decoys",
+        ],
+        "thresholds": {
+            "ranking_pr_auc_ci_low": ">=0.45",
+            "top20_hit_rate": ">=0.2",
+            "decoys_above_positive_count": "<=0",
+            "positive_out_anchored_by_top_decoys": False,
+        },
+        "criterion_by_field": {
+            "ranking_pr_auc_ci_low": "ranking_pr_auc_ci_low_min",
+            "top20_hit_rate": "top20_hit_rate_min",
+            "decoys_above_positive_count": "decoys_above_positive_count_max",
+            "positive_out_anchored_by_top_decoys": (
+                "no_positive_out_anchored_by_top_decoys"
+            ),
+        },
+    }
+
+
+def _operator_evidence_gap_register(report: dict[str, Any]) -> list[dict[str, Any]]:
+    criteria = [
+        row
+        for row in _as_list(_as_dict(report.get("phase3_exit_gate")).get("criteria"))
+        if isinstance(row, dict)
+    ]
+    target_rows = [
+        row for row in _as_list(report.get("target_rows")) if isinstance(row, dict)
+    ]
+    rows: list[dict[str, Any]] = []
+    for index, target_id in enumerate(REQUIRED_TARGETS, start=1):
+        target_row = next(
+            (row for row in target_rows if str(row.get("target_id") or "") == target_id),
+            {},
+        )
+        if target_row and target_row.get("status") == "pass":
+            continue
+        blocked_criteria = [
+            str(row.get("criterion_id") or "")
+            for row in criteria
+            if target_id in [str(item) for item in _as_list(row.get("failed_targets"))]
+        ]
+        if not blocked_criteria:
+            blocked_criteria = [
+                "ranking_pr_auc_ci_low_min",
+                "top20_hit_rate_min",
+                "decoys_above_positive_count_max",
+                "no_positive_out_anchored_by_top_decoys",
+            ]
+        rows.append(
+            {
+                "slot_priority": index,
+                "slot_id": _slot_id_for_target(target_id),
+                "target_id": target_id,
+                "status": "operator_input_required",
+                "phase3_blocked": True,
+                "blocked_phase3_criteria": blocked_criteria,
+                "first_next_action": (
+                    f"fill {target_id} hard-decoy metrics in the GPCR operator "
+                    "intake packet"
+                ),
+                "minimum_evidence": _phase3_minimum_evidence(target_id),
+                "materialization_steps": list(PHASE3_MATERIALIZATION_STEPS),
+            }
+        )
+    return rows
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -369,6 +460,42 @@ def build_gpcr_evidence_surface(
 ) -> dict[str, Any]:
     contract_pass = bool(report.get("broad_gpcr_family_claim_safe"))
     status = "ready" if contract_pass else "locked"
+    operator_evidence_gap_register = _operator_evidence_gap_register(report)
+    first_operator_evidence_gap = (
+        operator_evidence_gap_register[0] if operator_evidence_gap_register else {}
+    )
+    blockers = _as_list(report.get("blockers"))
+    first_blocker = str(blockers[0]) if blockers else ""
+    next_actions = (
+        ["review_gpcr_hard_decoy_suite_report"]
+        if contract_pass
+        else [
+            "fill_gpcr_hard_decoy_operator_intake_packet",
+            "fill_drd2_htr2a_oprm1_operator_template_values",
+            "run_gpcr_hard_decoy_suite_materializer",
+            "refresh_gpcr_hard_decoy_product_report",
+            "regenerate_product_capabilities_surface",
+            "regenerate_goal_bottleneck_roadmap_surface",
+        ]
+    )
+    operator_handoff_summary = {
+        "route": GPCR_OPERATOR_INTAKE_ROUTE,
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+        "first_blocker": first_blocker,
+        "first_blocked_target": str(report.get("first_blocked_target") or ""),
+        "first_next_action": str(
+            first_operator_evidence_gap.get("first_next_action") or ""
+        ),
+        "required_slot_count": len(REQUIRED_TARGETS),
+        "blocked_operator_slot_count": len(operator_evidence_gap_register),
+        "minimum_evidence": dict(
+            first_operator_evidence_gap.get("minimum_evidence") or {}
+        ),
+        "materialization_steps": [
+            str(row)
+            for row in _as_list(first_operator_evidence_gap.get("materialization_steps"))
+        ],
+    }
     input_paths = [
         Path("scripts/materialize_gpcr_hard_decoy_suite_report.py"),
     ]
@@ -395,9 +522,17 @@ def build_gpcr_evidence_surface(
         "exit_criteria": EXIT_CRITERIA,
         "phase3_exit_gate": _as_dict(report.get("phase3_exit_gate")),
         "first_blocked_target": str(report.get("first_blocked_target") or ""),
+        "first_blocker": first_blocker,
         "root_cause_tags": _as_list(report.get("root_cause_tags")),
         "suite_report": str(report_path) if report_path is not None else "",
-        "blockers": _as_list(report.get("blockers")),
+        "blockers": blockers,
+        "operator_intake_route": GPCR_OPERATOR_INTAKE_ROUTE,
+        "operator_intake_required_slot_count": len(REQUIRED_TARGETS),
+        "operator_evidence_gap_count": len(operator_evidence_gap_register),
+        "first_operator_evidence_gap": first_operator_evidence_gap,
+        "operator_evidence_gap_register": operator_evidence_gap_register,
+        "operator_handoff_summary": operator_handoff_summary,
+        "next_actions": next_actions,
         "summary_line": str(report.get("summary_line") or ""),
         "claim_boundary": (
             "This GPCR evidence surface mirrors the hard-decoy suite report for PM "

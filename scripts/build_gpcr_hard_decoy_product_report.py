@@ -103,6 +103,56 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
     phase3_exit_gate = _as_dict(
         suite.get("phase3_exit_gate") or surface.get("phase3_exit_gate")
     )
+    gate_unblock_plan = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "unblocks_phase3_criteria": [
+                str(item)
+                for item in _as_list(row.get("unblocks_phase3_criteria"))
+            ],
+            "minimum_evidence": _as_dict(row.get("minimum_evidence")),
+            "materialization_steps": [
+                str(item) for item in _as_list(row.get("materialization_steps"))
+            ],
+        }
+        for row in _as_list(operator_intake.get("gate_unblock_plan"))
+        if isinstance(row, dict)
+    ]
+    first_blocked_target = str(
+        suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
+    )
+    first_gate = next(
+        (
+            row
+            for row in gate_unblock_plan
+            if str(row.get("target_id") or "") == first_blocked_target
+        ),
+        gate_unblock_plan[0] if gate_unblock_plan else {},
+    )
+    science_blocker = science_blockers[0] if science_blockers else ""
+    operator_handoff_summary = {
+        "route": str(operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE),
+        "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET),
+        "first_blocker": science_blocker,
+        "first_blocked_target": first_blocked_target,
+        "first_next_action": (
+            f"fill {first_blocked_target} hard-decoy metrics in the GPCR operator "
+            "intake packet"
+            if first_blocked_target
+            else ""
+        ),
+        "required_slot_count": int(operator_intake.get("required_slot_count") or 0),
+        "blocked_operator_slot_count": int(
+            surface.get("operator_evidence_gap_count")
+            or operator_intake.get("required_slot_count")
+            or 0
+        ),
+        "minimum_evidence": _as_dict(first_gate.get("minimum_evidence")),
+        "materialization_steps": [
+            str(row) for row in _as_list(first_gate.get("materialization_steps"))
+        ],
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -129,9 +179,8 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         "science_claim_status": "ready" if broad_safe else "blocked",
         "target_count": target_count,
         "target_pass_count": target_pass_count,
-        "first_blocked_target": str(
-            suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
-        ),
+        "first_blocked_target": first_blocked_target,
+        "first_blocker": science_blocker,
         "root_cause_tags": [
             str(row)
             for row in _as_list(suite.get("root_cause_tags") or surface.get("root_cause_tags"))
@@ -143,6 +192,18 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
         ],
         "required_operator_fields": _required_fields_from_template(template),
         "science_blockers": science_blockers,
+        "operator_intake_route": str(
+            operator_intake.get("route") or GPCR_OPERATOR_INTAKE_ROUTE
+        ),
+        "operator_intake_required_slot_count": int(
+            operator_intake.get("required_slot_count") or 0
+        ),
+        "operator_evidence_gap_count": int(
+            surface.get("operator_evidence_gap_count")
+            or operator_intake.get("required_slot_count")
+            or 0
+        ),
+        "operator_handoff_summary": operator_handoff_summary,
         "linked_artifacts": {
             "operator_intake_packet": str(DEFAULT_OPERATOR_INTAKE_PACKET),
             "operator_intake_packet_markdown": str(DEFAULT_OPERATOR_INTAKE_PACKET_MD),
@@ -174,22 +235,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "minimum_metric_field_count_per_target": int(
                 operator_intake.get("minimum_metric_field_count_per_target") or 0
             ),
-            "gate_unblock_plan": [
-                {
-                    "slot_id": str(row.get("slot_id") or ""),
-                    "target_id": str(row.get("target_id") or ""),
-                    "unblocks_phase3_criteria": [
-                        str(item)
-                        for item in _as_list(row.get("unblocks_phase3_criteria"))
-                    ],
-                    "minimum_evidence": _as_dict(row.get("minimum_evidence")),
-                    "materialization_steps": [
-                        str(item) for item in _as_list(row.get("materialization_steps"))
-                    ],
-                }
-                for row in _as_list(operator_intake.get("gate_unblock_plan"))
-                if isinstance(row, dict)
-            ],
+            "gate_unblock_plan": gate_unblock_plan,
         },
         "endpoints": [
             {
