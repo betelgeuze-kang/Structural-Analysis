@@ -43,6 +43,30 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "artifact": "implementation/phase1/release_evidence/productization/goal_bottleneck_roadmap_surface.json",
         "mutation_allowed": False,
     }
+    assert surface["source_of_truth_gap_summary"] == {
+        "candidate_count": 5,
+        "fixed_count": 2,
+        "aggregator_review_count": 3,
+    }
+    classification = {
+        row["candidate"]: row
+        for row in surface["source_of_truth_gap_classification"]
+    }
+    assert set(classification) == {
+        "accuracy_parity_scorecard",
+        "product_production_ai_checkpoint_readiness",
+        "goal_readiness_rollup",
+        "product_goal_completion_audit",
+        "goal_operator_action_board",
+    }
+    assert classification["accuracy_parity_scorecard"]["classification"] == "fixed"
+    assert classification["accuracy_parity_scorecard"]["freshness_label"] == (
+        "accuracy_parity_scorecard"
+    )
+    assert classification["goal_operator_action_board"]["classification"] == (
+        "aggregator-review"
+    )
+    assert classification["goal_operator_action_board"]["freshness_label"] == ""
 
     kpis = surface["release_decision_kpis"]
     assert kpis == {
@@ -71,6 +95,14 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     rows = _row_by_phase(surface)
 
     assert rows["phase_0_source_of_truth_hardening"]["state"] == "ready"
+    assert rows["phase_0_source_of_truth_hardening"]["summary"][
+        "classification_rows"
+    ][0] == {
+        "candidate": "accuracy_parity_scorecard",
+        "classification": "fixed",
+        "freshness_policy": "direct_leaf_row",
+        "freshness_label": "accuracy_parity_scorecard",
+    }
     assert rows["phase_1_goal_release_cockpit"]["state"] == "ready"
     assert rows["phase_1_goal_release_cockpit"]["first_blocker"] == (
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"

@@ -162,6 +162,11 @@ def _roadmap_row(
 
 def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(freshness.get("summary"))
+    classification_rows = [
+        row
+        for row in _as_list(freshness.get("source_of_truth_gap_classification"))
+        if isinstance(row, dict)
+    ]
     candidate_count = _as_int(summary.get("source_of_truth_gap_candidate_count"))
     fixed_count = _as_int(summary.get("source_of_truth_gap_fixed_count"))
     aggregator_count = _as_int(summary.get("source_of_truth_gap_aggregator_review_count"))
@@ -188,6 +193,15 @@ def _source_of_truth_row(freshness: dict[str, Any]) -> dict[str, Any]:
             "fixed_count": fixed_count,
             "aggregator_review_count": aggregator_count,
             "freshness_blocker_count": blocker_count,
+            "classification_rows": [
+                {
+                    "candidate": str(row.get("candidate") or ""),
+                    "classification": str(row.get("classification") or ""),
+                    "freshness_policy": str(row.get("freshness_policy") or ""),
+                    "freshness_label": str(row.get("freshness_label") or ""),
+                }
+                for row in classification_rows
+            ],
         },
     )
 
@@ -557,6 +571,31 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     science_bottlenecks = [
         str(row) for row in _as_list(decision.get("science_evidence_surface_bottlenecks"))
     ]
+    source_of_truth_gap_classification = [
+        {
+            "candidate": str(row.get("candidate") or ""),
+            "classification": str(row.get("classification") or ""),
+            "freshness_policy": str(row.get("freshness_policy") or ""),
+            "freshness_label": str(row.get("freshness_label") or ""),
+            "current_repo_match": str(row.get("current_repo_match") or ""),
+            "decision": str(row.get("decision") or ""),
+        }
+        for row in _as_list(freshness.get("source_of_truth_gap_classification"))
+        if isinstance(row, dict)
+    ]
+    source_of_truth_gap_summary = {
+        "candidate_count": _as_int(
+            _as_dict(freshness.get("summary")).get("source_of_truth_gap_candidate_count")
+        ),
+        "fixed_count": _as_int(
+            _as_dict(freshness.get("summary")).get("source_of_truth_gap_fixed_count")
+        ),
+        "aggregator_review_count": _as_int(
+            _as_dict(freshness.get("summary")).get(
+                "source_of_truth_gap_aggregator_review_count"
+            )
+        ),
+    }
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -586,6 +625,8 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
             "mutation_allowed": False,
         },
         "release_decision_kpis": release_decision_kpis,
+        "source_of_truth_gap_summary": source_of_truth_gap_summary,
+        "source_of_truth_gap_classification": source_of_truth_gap_classification,
         "science_evidence_surface_bottlenecks": science_bottlenecks,
         "science_evidence_surface_status": _as_dict(decision.get("science_evidence_surface_status")),
         "capability_summary_rows": _capability_summary_rows(product_capabilities),
