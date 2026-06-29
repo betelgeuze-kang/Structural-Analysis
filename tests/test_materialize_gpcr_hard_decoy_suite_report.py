@@ -41,6 +41,18 @@ def test_gpcr_hard_decoy_suite_passes_required_targets() -> None:
     assert report["target_pass_count"] == 3
     assert report["first_blocked_target"] == ""
     assert report["blockers"] == []
+    assert report["phase3_exit_gate"]["status"] == "ready"
+    assert report["phase3_exit_gate"]["failed_criterion_count"] == 0
+    assert report["phase3_exit_gate"]["failed_criteria"] == []
+    assert {
+        row["criterion_id"]: row["pass"]
+        for row in report["phase3_exit_gate"]["criteria"]
+    } == {
+        "ranking_pr_auc_ci_low_min": True,
+        "top20_hit_rate_min": True,
+        "decoys_above_positive_count_max": True,
+        "no_positive_out_anchored_by_top_decoys": True,
+    }
 
 
 def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
@@ -52,6 +64,17 @@ def test_gpcr_hard_decoy_suite_blocks_missing_operator_values() -> None:
     assert report["root_cause_tags"] == ["operator_values_required"]
     assert "DRD2:ranking_pr_auc_ci_low_required" in report["blockers"]
     assert "OPRM1:positive_out_anchored_by_top_decoys_required" in report["blockers"]
+    assert report["phase3_exit_gate"]["status"] == "blocked"
+    assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    ranking_gate = report["phase3_exit_gate"]["criteria"][0]
+    assert ranking_gate["failed_targets"] == ["DRD2", "HTR2A", "OPRM1"]
+    assert ranking_gate["required"] == ">=0.45"
 
 
 def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
@@ -87,6 +110,13 @@ def test_gpcr_hard_decoy_suite_reports_threshold_root_causes() -> None:
         "DRD2:decoys_above_positive_count_above_limit",
         "DRD2:positive_out_anchored_by_top_decoys",
     ]
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert report["phase3_exit_gate"]["criteria"][0]["failed_targets"] == ["DRD2"]
 
 
 def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> None:
@@ -118,3 +148,5 @@ def test_gpcr_hard_decoy_suite_cli_writes_report_and_surface(tmp_path: Path) -> 
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "DRD2"
     assert surface["root_cause_tags"] == ["operator_values_required"]
+    assert surface["phase3_exit_gate"]["status"] == "blocked"
+    assert surface["phase3_exit_gate"]["failed_criterion_count"] == 4

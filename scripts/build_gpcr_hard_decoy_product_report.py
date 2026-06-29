@@ -98,6 +98,9 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
     target_count = int(suite.get("target_count") or len(target_rows) or 0)
     target_pass_count = int(suite.get("target_pass_count") or 0)
     science_blockers = [str(row) for row in _as_list(suite.get("blockers"))]
+    phase3_exit_gate = _as_dict(
+        suite.get("phase3_exit_gate") or surface.get("phase3_exit_gate")
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -126,6 +129,7 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             for row in _as_list(suite.get("root_cause_tags") or surface.get("root_cause_tags"))
         ],
         "exit_criteria": _as_dict(suite.get("exit_criteria") or surface.get("exit_criteria")),
+        "phase3_exit_gate": phase3_exit_gate,
         "required_targets": [
             str(row) for row in _as_list(template.get("required_targets") or surface.get("target_families"))
         ],
@@ -201,6 +205,13 @@ def build_gpcr_hard_decoy_product_report(*, repo_root: Path = ROOT) -> dict[str,
             "first_blocked_target": str(
                 suite.get("first_blocked_target") or surface.get("first_blocked_target") or ""
             ),
+            "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+            "phase3_failed_criterion_count": int(
+                phase3_exit_gate.get("failed_criterion_count") or 0
+            ),
+            "phase3_failed_criteria": [
+                str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
+            ],
         },
         "summary_line": (
             "GPCR hard-decoy product report: READY | science_claim=ready"

@@ -106,6 +106,14 @@ def test_goal_bottleneck_roadmap_surface_links_phase_bottlenecks() -> None:
     )
     assert phase_3["summary"]["operator_intake_packet_status"] == "ready_for_operator_input"
     assert phase_3["summary"]["operator_intake_required_slot_count"] == 3
+    assert phase_3["summary"]["phase3_exit_gate_status"] == "blocked"
+    assert phase_3["summary"]["phase3_failed_criterion_count"] == 4
+    assert phase_3["summary"]["phase3_failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
     assert "fill_gpcr_hard_decoy_operator_intake_packet" in phase_3["next_actions"]
 
     phase_4 = rows["phase_4_pocketmd_lite"]

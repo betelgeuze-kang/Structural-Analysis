@@ -36,6 +36,10 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _target_key(value: Any) -> str:
     return str(value or "").strip().upper()
 
@@ -150,6 +154,143 @@ def _target_result(target_id: str, row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _field_blockers(row: dict[str, Any], field_name: str) -> list[str]:
+    return [
+        str(blocker)
+        for blocker in _as_list(row.get("blockers"))
+        if str(blocker).split(":", 1)[-1].startswith(field_name)
+    ]
+
+
+def _numeric_min_gate(
+    *,
+    target_rows: list[dict[str, Any]],
+    criterion_id: str,
+    field_name: str,
+    required: float,
+) -> dict[str, Any]:
+    failed_targets: list[str] = []
+    blockers: list[str] = []
+    current_by_target: dict[str, float | None] = {}
+    for row in target_rows:
+        target_id = str(row.get("target_id") or "")
+        value = _number(row.get(field_name))
+        current_by_target[target_id] = value
+        if value is None or value < required:
+            failed_targets.append(target_id)
+            blockers.extend(_field_blockers(row, field_name))
+    return {
+        "criterion_id": criterion_id,
+        "pass": not failed_targets,
+        "current_by_target": current_by_target,
+        "required": f">={required:g}",
+        "failed_targets": failed_targets,
+        "blockers": blockers,
+    }
+
+
+def _integer_max_gate(
+    *,
+    target_rows: list[dict[str, Any]],
+    criterion_id: str,
+    field_name: str,
+    required: int,
+) -> dict[str, Any]:
+    failed_targets: list[str] = []
+    blockers: list[str] = []
+    current_by_target: dict[str, int | None] = {}
+    for row in target_rows:
+        target_id = str(row.get("target_id") or "")
+        value = _integer(row.get(field_name))
+        current_by_target[target_id] = value
+        if value is None or value > required:
+            failed_targets.append(target_id)
+            blockers.extend(_field_blockers(row, field_name))
+    return {
+        "criterion_id": criterion_id,
+        "pass": not failed_targets,
+        "current_by_target": current_by_target,
+        "required": f"<={required}",
+        "failed_targets": failed_targets,
+        "blockers": blockers,
+    }
+
+
+def _boolean_gate(
+    *,
+    target_rows: list[dict[str, Any]],
+    criterion_id: str,
+    field_name: str,
+    required: bool,
+) -> dict[str, Any]:
+    failed_targets: list[str] = []
+    blockers: list[str] = []
+    current_by_target: dict[str, bool | None] = {}
+    for row in target_rows:
+        target_id = str(row.get("target_id") or "")
+        value = _boolean(row.get(field_name))
+        current_by_target[target_id] = value
+        if value is not required:
+            failed_targets.append(target_id)
+            blockers.extend(_field_blockers(row, field_name))
+    return {
+        "criterion_id": criterion_id,
+        "pass": not failed_targets,
+        "current_by_target": current_by_target,
+        "required": required,
+        "failed_targets": failed_targets,
+        "blockers": blockers,
+    }
+
+
+def _phase3_exit_gate(
+    *,
+    target_rows: list[dict[str, Any]],
+    target_pass_count: int,
+    broad_safe: bool,
+    first_blocked_target: str,
+) -> dict[str, Any]:
+    criteria = [
+        _numeric_min_gate(
+            target_rows=target_rows,
+            criterion_id="ranking_pr_auc_ci_low_min",
+            field_name="ranking_pr_auc_ci_low",
+            required=float(EXIT_CRITERIA["ranking_pr_auc_ci_low_min"]),
+        ),
+        _numeric_min_gate(
+            target_rows=target_rows,
+            criterion_id="top20_hit_rate_min",
+            field_name="top20_hit_rate",
+            required=float(EXIT_CRITERIA["top20_hit_rate_min"]),
+        ),
+        _integer_max_gate(
+            target_rows=target_rows,
+            criterion_id="decoys_above_positive_count_max",
+            field_name="decoys_above_positive_count",
+            required=int(EXIT_CRITERIA["decoys_above_positive_count_max"]),
+        ),
+        _boolean_gate(
+            target_rows=target_rows,
+            criterion_id="no_positive_out_anchored_by_top_decoys",
+            field_name="positive_out_anchored_by_top_decoys",
+            required=bool(EXIT_CRITERIA["positive_out_anchored_by_top_decoys_allowed"]),
+        ),
+    ]
+    failed_criteria = [
+        str(row["criterion_id"]) for row in criteria if not bool(row["pass"])
+    ]
+    return {
+        "status": "ready" if broad_safe else "blocked",
+        "claim": "broad_gpcr_hard_decoy_closure",
+        "target_count": len(REQUIRED_TARGETS),
+        "target_pass_count": target_pass_count,
+        "first_blocked_target": first_blocked_target,
+        "criteria": criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "failed_criteria": failed_criteria,
+    }
+
+
 def materialize_gpcr_hard_decoy_suite_report(
     intake: dict[str, Any],
     *,
@@ -173,6 +314,12 @@ def materialize_gpcr_hard_decoy_suite_report(
     )
     target_pass_count = sum(1 for row in target_rows if row["contract_pass"])
     broad_safe = bool(target_pass_count == len(REQUIRED_TARGETS) and not blockers)
+    phase3_exit_gate = _phase3_exit_gate(
+        target_rows=target_rows,
+        target_pass_count=target_pass_count,
+        broad_safe=broad_safe,
+        first_blocked_target=first_blocked_target,
+    )
     input_paths = [Path("scripts/materialize_gpcr_hard_decoy_suite_report.py")]
     if intake_path is not None:
         input_paths.append(intake_path)
@@ -193,6 +340,7 @@ def materialize_gpcr_hard_decoy_suite_report(
         "first_blocked_target": first_blocked_target,
         "root_cause_tags": root_cause_tags,
         "exit_criteria": EXIT_CRITERIA,
+        "phase3_exit_gate": phase3_exit_gate,
         "target_rows": target_rows,
         "blockers": blockers,
         "summary_line": (
@@ -245,6 +393,7 @@ def build_gpcr_evidence_surface(
         "broad_gpcr_family_claim_safe": contract_pass,
         "target_families": list(REQUIRED_TARGETS),
         "exit_criteria": EXIT_CRITERIA,
+        "phase3_exit_gate": _as_dict(report.get("phase3_exit_gate")),
         "first_blocked_target": str(report.get("first_blocked_target") or ""),
         "root_cause_tags": _as_list(report.get("root_cause_tags")),
         "suite_report": str(report_path) if report_path is not None else "",

@@ -324,6 +324,10 @@ def _gpcr_row(
             or gpcr_surface.get("root_cause_tags")
         )
     ]
+    phase3_exit_gate = _as_dict(
+        gpcr_product_report.get("phase3_exit_gate")
+        or gpcr_surface.get("phase3_exit_gate")
+    )
     return _roadmap_row(
         phase_id="phase_3_gpcr_hard_decoy_closure",
         phase_label="Phase 3",
@@ -354,6 +358,13 @@ def _gpcr_row(
             "operator_intake_required_slot_count": _as_int(
                 gpcr_operator_intake.get("required_slot_count")
             ),
+            "phase3_exit_gate_status": str(phase3_exit_gate.get("status") or ""),
+            "phase3_failed_criterion_count": _as_int(
+                phase3_exit_gate.get("failed_criterion_count")
+            ),
+            "phase3_failed_criteria": [
+                str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
+            ],
         },
     )
 

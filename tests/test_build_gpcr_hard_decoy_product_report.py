@@ -35,6 +35,14 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
     assert report["target_pass_count"] == 0
     assert report["first_blocked_target"] == "DRD2"
     assert report["root_cause_tags"] == ["operator_values_required"]
+    assert report["phase3_exit_gate"]["status"] == "blocked"
+    assert report["phase3_exit_gate"]["failed_criterion_count"] == 4
+    assert report["phase3_exit_gate"]["failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
     assert report["required_targets"] == ["DRD2", "HTR2A", "OPRM1"]
     assert report["required_operator_fields"] == [
         "target_id",
@@ -68,6 +76,14 @@ def test_gpcr_hard_decoy_product_report_is_readonly_and_science_blocked() -> Non
         "ready_for_operator_input"
     )
     assert report["summary"]["operator_intake_required_slot_count"] == 3
+    assert report["summary"]["phase3_exit_gate_status"] == "blocked"
+    assert report["summary"]["phase3_failed_criterion_count"] == 4
+    assert report["summary"]["phase3_failed_criteria"] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
 
 
 def test_gpcr_hard_decoy_product_report_cli_writes_contract(tmp_path: Path) -> None:
