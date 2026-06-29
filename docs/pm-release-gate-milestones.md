@@ -133,7 +133,7 @@ npm run ai:preflight
 ## 현재 판정
 
 현재 PM milestone gate는 `paid_pilot_candidate=true`, `limited_commercial_milestone_ready=true`, `limited_commercial_ready=false`, `ga_enterprise_ready=false`다.
-다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `12/16` green이다.
+다만 전체 PM release-area gate는 `release_area_gate_ready=false`, `full_release_gate_ready=false`이며 release area는 `13/16` green이다.
 
 합격한 마일스톤:
 
@@ -158,7 +158,7 @@ npm run ai:preflight
 `pm_release_blocker_action_register.json`은 위 blocker와 GA/Enterprise blocker를 owner action, acceptance criteria, 재현 command로 다시 묶는다. 이 register는 blocker를 해제하지 않으며, missing evidence를 release pass로 바꾸지 않는다.
 현재 action register open blocker는 총 `14`개다. Release-area blocker는 CI/UX/Security/GitHub-sync `10`개이며 external owner/R4 input이 필요한 상태로 분류된다. GA/Enterprise handoff에는 독립 V&V, family validation manual signoff, customer audit/failure-bundle/SLA, completed-project customer shadow `4`개 external owner blocker가 추가로 노출된다. 이는 intake packet, acceptance criteria, reproduction/verification command가 준비됐다는 뜻이며, 실제 CI streak, human UX observation, product/legal license approval, explicit GitHub remote-mutation approval, external signoff, customer-retained shadow metadata를 대체하지 않는다.
 `pm_release_blocker_closure_board.json`은 open blocker를 `external_owner_input_ready`, `local_remediation_ready`, `handoff_incomplete` closure state로 다시 묶는 PM daily board다. 이 board도 blocker를 해제하지 않으며, action register의 open blocker count와 handoff readiness가 support bundle에서 바로 확인되는지를 고정한다.
-`pm_release_gate_completion_audit.json`은 PM release-area 16개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `12/16` pass, Basic CI/UX/Security/GitHub sync 4개 top-level row가 external owner 또는 R4 input ready 상태로 blocked임을 기록한다.
+`pm_release_gate_completion_audit.json`은 PM release-area 16개와 M1-M5 세부 요구사항을 requirement-level row로 펼친다. 현재 audit는 milestone 세부 요구사항은 모두 pass, release-area 요구사항은 `13/16` pass, Basic CI/UX/Security 3개 top-level row가 external owner input ready 상태로 blocked임을 기록한다. GitHub sync row는 현재 synced다.
 `pm_release_gate_reviewer_handoff.json`은 open blocker별 owner, closure state, reproduction/verification command, verdict-change condition을 reviewer package로 묶는다. 이 handoff는 reviewer가 어떤 evidence가 들어오면 판정이 바뀌는지 확인하는 산출물이며, CI streak, human UX observation, product/legal license approval evidence를 대체하지 않는다.
 `pm_owner_evidence_request_packet.json`은 같은 open blocker를 owner별로 다시 묶어 owner가 제출해야 할 intake artifact, acceptance criteria, reproduction/verification command를 한 곳에 고정한다. 이 packet도 external evidence를 생성하거나 blocker를 해제하지 않는다.
 `ci_streak_intake_packet.json`은 PR/nightly 30회 연속 PASS blocker를 닫기 위해 필요한 현재 streak, 부족 회수, GitHub Actions evidence 경로, 검증 command를 failure bundle에 고정한다.

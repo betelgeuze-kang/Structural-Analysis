@@ -44,7 +44,7 @@ Commercial v1 separate-validation exclusions (must stay visible):
 | Support bundle | ready |
 | Viewer workflow packaging | ready: evidence ingest, solver receipt, commercial-tool crosswalk, lineage drilldown, SVG sheet/revision/callout deep-link package, static performance budget manifest, local browser performance probe, 11-case render-mode/core/advanced workflow-state visual regression baseline |
 | Workstation delivery service | local gate: hardware profile, service budget, delivery package manifest, client input validation, package restore/checksum smoke |
-| PM release-area gate | blocked: `12/16` green; CI streak, human UX observation, license status, GitHub sync remote approval/sync remain open |
+| PM release-area gate | blocked: `13/16` green; CI streak, human UX observation, and license status remain open; GitHub sync is currently synced |
 | Release evidence freshness | pass: `11/11` artifacts include generated_at/source commit/engine version/input checksum/reuse marker and producer mtime recency; customer shadow intake/status/full-validation/residual/G1/Evidence Console freshness does not close the `0/3` shadow-case, `0/8` fresh-receipt, G1 full-mesh nonlinear-equilibrium, Evidence Console launch, or GA breadth blockers |
 | Fresh full-validation lanes | blocked: lane contracts `8/8`, fresh receipts `0/8`; hydrated CPU-required release evidence does not replace Level 3 fresh validation receipts |
 | Real-project corpus measured status | pass for initial metadata/value gate: KR measured rows `10/10`, formats `2/2`, PEER metric-bearing values `5/5`; official PEER reference-truth groups `1`, measured-run bridge groups `3` |

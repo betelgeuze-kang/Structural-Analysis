@@ -12,7 +12,9 @@ for candidate in (REPO_ROOT / "scripts", REPO_ROOT / "src"):
     if str(candidate) not in sys.path:
         sys.path.insert(0, str(candidate))
 
-spec = importlib.util.spec_from_file_location("build_public_benchmark_source_of_truth", SCRIPT_PATH)
+spec = importlib.util.spec_from_file_location(
+    "build_public_benchmark_source_of_truth", SCRIPT_PATH
+)
 assert spec is not None
 module = importlib.util.module_from_spec(spec)
 assert spec.loader is not None
@@ -52,6 +54,19 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["first_blocker"] == "casf_pdbbind_source_material_not_attached"
     assert source["first_blocked_target"] == "casf_pdbbind_subset_intake"
     assert source["first_required_operator_slot"] == "casf_pdbbind_subset_intake"
+    assert source["first_manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
+    assert (
+        source["casf_pdbbind_subset_manifest_contract"]["target_subset_case_count"]
+        == 12
+    )
+    assert (
+        source["casf_pdbbind_subset_manifest_contract"]["checksum_policy"][
+            "required_manifest_field"
+        ]
+        == "source_file_checksums"
+    )
     assert source["required_slot_count"] == 4
     assert source["blocked_operator_slot_count"] == 4
     assert source["root_cause_tags"] == [
@@ -66,6 +81,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         ),
         "first_blocker": "casf_pdbbind_source_material_not_attached",
         "first_blocked_target": "casf_pdbbind_subset_intake",
+        "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
         "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
         "required_slot_count": 4,
         "blocked_operator_slot_count": 4,
@@ -110,8 +126,7 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "external_receipts_attached",
     ]
     assert {
-        row["criterion_id"]: row["pass"]
-        for row in source["tier_beta_gate"]["criteria"]
+        row["criterion_id"]: row["pass"] for row in source["tier_beta_gate"]["criteria"]
     } == {
         "casf_pdbbind_subset_materialized": False,
         "real_pose_validity_packet_materialized": False,
@@ -238,7 +253,9 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
             "public-benchmark-posebusters-style-validity-packet-materialization.v1"
         ),
         "status": "ready_for_pose_validity_input",
-        "materialization_command": pose_packet["materializer"]["materialization_command"],
+        "materialization_command": pose_packet["materializer"][
+            "materialization_command"
+        ],
         "claim_boundary": (
             "The PoseBusters-style packet materializer consumes validated "
             "pose-coordinate input and emits per-case sanity-check rows for real "
@@ -248,7 +265,9 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["enrichment_scorecard_materializer"] == {
         "schema_version": "public-benchmark-enrichment-materialization.v1",
         "status": "ready_for_operator_intake",
-        "materialization_command": enrichment["materializer"]["materialization_command"],
+        "materialization_command": enrichment["materializer"][
+            "materialization_command"
+        ],
         "claim_boundary": (
             "The enrichment materializer consumes DUD-E/LIT-PCBA scored molecule "
             "rows and reports EF@1%, EF@5%, and ROC-AUC per target. It does not "
@@ -258,7 +277,9 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["vina_gnina_comparison_materializer"] == {
         "schema_version": "public-benchmark-vina-gnina-comparison-materialization.v1",
         "status": "ready_for_operator_intake",
-        "materialization_command": vina_gnina["materializer"]["materialization_command"],
+        "materialization_command": vina_gnina["materializer"][
+            "materialization_command"
+        ],
         "claim_boundary": (
             "The Vina/GNINA adapter materializer consumes operator-attached engine "
             "comparison rows and reports per-engine pose-success summaries. It does "
@@ -266,10 +287,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         ),
     }
     assert {
-        row["family_id"]: row["materialization_status"] for row in source["source_families"]
+        row["family_id"]: row["materialization_status"]
+        for row in source["source_families"]
     }["dud_e_lit_pcba"] == "operator_intake_required"
     assert {
-        row["family_id"]: row["materialization_status"] for row in source["source_families"]
+        row["family_id"]: row["materialization_status"]
+        for row in source["source_families"]
     }["vina_gnina"] == "operator_intake_required"
     assert source["operator_intake_packet"]["schema_version"] == (
         "public-benchmark-operator-intake-packet.v1"
@@ -294,6 +317,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert source["operator_intake_packet"]["required_slot_count"] == 4
     assert source["operator_intake_packet"]["gate_unblock_plan_count"] == 4
     assert source["operator_intake_packet"]["minimum_subset_case_count"] == 12
+    assert source["operator_intake_packet"]["manifest_contract_count"] == 1
+    assert source["operator_intake_packet"]["first_manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
+    assert source["operator_intake_packet"]["first_manifest_contract"]["produces"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_manifest.json"
+    )
     assert source["operator_intake_packet"]["first_blocked_target"] == (
         "casf_pdbbind_subset_intake"
     )
@@ -302,9 +333,10 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "operator_receipts_required",
     ]
     assert source["operator_intake_packet"]["operator_evidence_gap_count"] == 4
-    assert source["operator_intake_packet"]["first_operator_evidence_gap"][
-        "slot_id"
-    ] == "casf_pdbbind_subset_intake"
+    assert (
+        source["operator_intake_packet"]["first_operator_evidence_gap"]["slot_id"]
+        == "casf_pdbbind_subset_intake"
+    )
     assert source["operator_intake_packet"]["input_slot_ids"] == [
         "casf_pdbbind_subset_intake",
         "pose_coordinate_intake",
@@ -315,12 +347,16 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         row["slot_id"]: row
         for row in source["operator_intake_packet"]["gate_unblock_plan"]
     }
-    assert source["operator_gate_unblock_plan"] == source["operator_intake_packet"][
-        "gate_unblock_plan"
-    ]
+    assert (
+        source["operator_gate_unblock_plan"]
+        == source["operator_intake_packet"]["gate_unblock_plan"]
+    )
     assert source["operator_evidence_gap_count"] == 4
     assert source["first_operator_evidence_gap"]["slot_id"] == (
         "casf_pdbbind_subset_intake"
+    )
+    assert source["first_operator_evidence_gap"]["manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
     )
     assert source["first_operator_evidence_gap"]["blocked_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",
@@ -332,6 +368,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     evidence_gap_register = {
         row["slot_id"]: row for row in source["operator_evidence_gap_register"]
     }
+    assert (
+        evidence_gap_register["casf_pdbbind_subset_intake"]["manifest_contract"][
+            "nested_contracts"
+        ][1]["field"]
+        == "symmetry_permutation_contract"
+    )
     assert evidence_gap_register["pose_coordinate_intake"][
         "blocked_tier_beta_criteria"
     ] == [
@@ -345,9 +387,12 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert evidence_gap_register["vina_gnina_comparison_intake"][
         "materialization_steps"
     ] == ["materialize_vina_gnina_comparison_adapter"]
-    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
-        "case_count"
-    ] == 12
+    assert (
+        gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"]["case_count"] == 12
+    )
+    assert gate_plan["casf_pdbbind_subset_intake"]["manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
     assert gate_plan["pose_coordinate_intake"]["unblocks_tier_beta_criteria"] == [
         "real_pose_validity_packet_materialized",
         "symmetry_rmsd_scorecard_real_cases",
@@ -395,21 +440,27 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "source_checksum",
     ]
     assert subset["case_row_schema"]["template"]["source_family"] == "CASF/PDBBind"
-    assert "validate_public_benchmark_subset_manifest.py" in subset["case_row_schema"][
-        "validation_command"
-    ]
-    assert "materialize_public_benchmark_subset_manifest.py" in subset["case_row_schema"][
-        "materialization_command"
-    ]
-    assert "scripts/materialize_public_benchmark_subset_manifest.py" in subset[
-        "input_checksums"
-    ]
+    assert (
+        "validate_public_benchmark_subset_manifest.py"
+        in subset["case_row_schema"]["validation_command"]
+    )
+    assert (
+        "materialize_public_benchmark_subset_manifest.py"
+        in subset["case_row_schema"]["materialization_command"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_subset_manifest.py"
+        in subset["input_checksums"]
+    )
     assert {row["slot_id"] for row in subset["slots"]} == {
         "casf_pdbbind_pose_success_seed",
         "casf_pdbbind_affinity_control_seed",
     }
     assert all(row["status"] == "source_material_required" for row in subset["slots"])
-    assert all("symmetry_permutation_contract" in row["required_fields"] for row in subset["slots"])
+    assert all(
+        "symmetry_permutation_contract" in row["required_fields"]
+        for row in subset["slots"]
+    )
 
     assert pose_packet["schema_version"] == "public-benchmark-pose-validity-packet.v1"
     check_ids = {row["check_id"] for row in pose_packet["checks"]}
@@ -431,21 +482,25 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
         "protein_structure_path",
         "receptor_context",
     ]
-    assert "materialize_public_benchmark_pose_validity_input.py" in pose_packet[
-        "validator"
-    ]["materialization_command"]
+    assert (
+        "materialize_public_benchmark_pose_validity_input.py"
+        in pose_packet["validator"]["materialization_command"]
+    )
     assert pose_packet["materializer"]["schema_version"] == (
         "public-benchmark-posebusters-style-validity-packet-materialization.v1"
     )
-    assert "materialize_public_benchmark_posebusters_validity_packet.py" in pose_packet[
-        "materializer"
-    ]["materialization_command"]
-    assert "scripts/materialize_public_benchmark_pose_validity_input.py" in pose_packet[
-        "input_checksums"
-    ]
-    assert "scripts/materialize_public_benchmark_posebusters_validity_packet.py" in pose_packet[
-        "input_checksums"
-    ]
+    assert (
+        "materialize_public_benchmark_posebusters_validity_packet.py"
+        in pose_packet["materializer"]["materialization_command"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_pose_validity_input.py"
+        in pose_packet["input_checksums"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_posebusters_validity_packet.py"
+        in pose_packet["input_checksums"]
+    )
     assert pose_packet["dry_run_validation"]["pose_validity_ready"] is True
     assert pose_packet["dry_run_validation"]["dry_run_case_count"] == 1
     assert pose_packet["dry_run_validation"]["real_benchmark_case_count"] == 0
@@ -457,12 +512,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert rmsd["materializer"]["schema_version"] == (
         "public-benchmark-rmsd-scorecard-materialization.v1"
     )
-    assert "materialize_public_benchmark_rmsd_scorecard.py" in rmsd["materializer"][
-        "materialization_command"
-    ]
-    assert "scripts/materialize_public_benchmark_rmsd_scorecard.py" in rmsd[
-        "input_checksums"
-    ]
+    assert (
+        "materialize_public_benchmark_rmsd_scorecard.py"
+        in rmsd["materializer"]["materialization_command"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_rmsd_scorecard.py"
+        in rmsd["input_checksums"]
+    )
     score = rmsd["rows"][0]["score"]
     assert score["best_permutation"] == [0, 2, 1, 3]
     assert score["pose_success"] is True
@@ -477,12 +534,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert enrichment["materializer"]["schema_version"] == (
         "public-benchmark-enrichment-materialization.v1"
     )
-    assert "materialize_public_benchmark_enrichment_scorecard.py" in enrichment[
-        "materializer"
-    ]["materialization_command"]
-    assert "scripts/materialize_public_benchmark_enrichment_scorecard.py" in enrichment[
-        "input_checksums"
-    ]
+    assert (
+        "materialize_public_benchmark_enrichment_scorecard.py"
+        in enrichment["materializer"]["materialization_command"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_enrichment_scorecard.py"
+        in enrichment["input_checksums"]
+    )
 
     assert vina_gnina["schema_version"] == (
         "public-benchmark-vina-gnina-comparison-adapter.v1"
@@ -495,12 +554,14 @@ def test_public_benchmark_source_of_truth_keeps_beta_claim_blocked() -> None:
     assert vina_gnina["materializer"]["schema_version"] == (
         "public-benchmark-vina-gnina-comparison-materialization.v1"
     )
-    assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in vina_gnina[
-        "materializer"
-    ]["materialization_command"]
-    assert "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py" in vina_gnina[
-        "input_checksums"
-    ]
+    assert (
+        "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        in vina_gnina["materializer"]["materialization_command"]
+    )
+    assert (
+        "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        in vina_gnina["input_checksums"]
+    )
 
 
 def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
@@ -533,19 +594,33 @@ def test_public_benchmark_builder_writes_all_artifacts(tmp_path: Path) -> None:
     assert vina_gnina_out.exists()
     assert operator_out.exists()
     assert operator_md_out.exists()
-    assert json.loads(source_out.read_text(encoding="utf-8")) == artifacts["source_of_truth"]
-    assert json.loads(subset_out.read_text(encoding="utf-8")) == artifacts["subset_manifest"]
-    assert json.loads(pose_out.read_text(encoding="utf-8")) == artifacts["pose_validity_packet"]
-    assert json.loads(rmsd_out.read_text(encoding="utf-8")) == artifacts["rmsd_scorecard"]
-    assert json.loads(enrichment_out.read_text(encoding="utf-8")) == artifacts[
-        "enrichment_scorecard"
-    ]
-    assert json.loads(vina_gnina_out.read_text(encoding="utf-8")) == artifacts[
-        "vina_gnina_comparison_adapter"
-    ]
-    assert json.loads(operator_out.read_text(encoding="utf-8")) == artifacts[
-        "operator_intake_packet"
-    ]
+    assert (
+        json.loads(source_out.read_text(encoding="utf-8"))
+        == artifacts["source_of_truth"]
+    )
+    assert (
+        json.loads(subset_out.read_text(encoding="utf-8"))
+        == artifacts["subset_manifest"]
+    )
+    assert (
+        json.loads(pose_out.read_text(encoding="utf-8"))
+        == artifacts["pose_validity_packet"]
+    )
+    assert (
+        json.loads(rmsd_out.read_text(encoding="utf-8")) == artifacts["rmsd_scorecard"]
+    )
+    assert (
+        json.loads(enrichment_out.read_text(encoding="utf-8"))
+        == artifacts["enrichment_scorecard"]
+    )
+    assert (
+        json.loads(vina_gnina_out.read_text(encoding="utf-8"))
+        == artifacts["vina_gnina_comparison_adapter"]
+    )
+    assert (
+        json.loads(operator_out.read_text(encoding="utf-8"))
+        == artifacts["operator_intake_packet"]
+    )
     assert "# Public Benchmark Operator Intake Packet" in operator_md_out.read_text(
         encoding="utf-8"
     )

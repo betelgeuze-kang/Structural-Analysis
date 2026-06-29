@@ -59,13 +59,21 @@ from build_public_benchmark_operator_intake_packet import (  # noqa: E402
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_SOURCE_OF_TRUTH_OUT = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
 DEFAULT_SUBSET_MANIFEST_OUT = PRODUCTIZATION / "public_benchmark_subset_manifest.json"
-DEFAULT_POSE_VALIDITY_PACKET_OUT = PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
-DEFAULT_RMSD_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
-DEFAULT_ENRICHMENT_SCORECARD_OUT = PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+DEFAULT_POSE_VALIDITY_PACKET_OUT = (
+    PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
+)
+DEFAULT_RMSD_SCORECARD_OUT = (
+    PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
+)
+DEFAULT_ENRICHMENT_SCORECARD_OUT = (
+    PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+)
 DEFAULT_VINA_GNINA_ADAPTER_OUT = (
     PRODUCTIZATION / "public_benchmark_vina_gnina_comparison_adapter.json"
 )
-DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT = DEFAULT_OPERATOR_INTAKE_PACKET_OUT.with_suffix(".md")
+DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT = DEFAULT_OPERATOR_INTAKE_PACKET_OUT.with_suffix(
+    ".md"
+)
 SCHEMA_VERSION = "public-benchmark-source-of-truth.v1"
 SUBSET_SCHEMA_VERSION = "public-benchmark-subset-manifest.v1"
 POSE_PACKET_SCHEMA_VERSION = "public-benchmark-pose-validity-packet.v1"
@@ -323,7 +331,9 @@ def build_rmsd_scorecard(*, repo_root: Path = ROOT) -> dict[str, Any]:
 
 
 def build_pose_validity_packet(*, repo_root: Path = ROOT) -> dict[str, Any]:
-    dry_run_validation = validate_pose_validity_payload({"cases": [_dry_run_pose_case()]})
+    dry_run_validation = validate_pose_validity_payload(
+        {"cases": [_dry_run_pose_case()]}
+    )
     return {
         "schema_version": POSE_PACKET_SCHEMA_VERSION,
         **release_evidence_metadata(
@@ -603,7 +613,9 @@ def _operator_evidence_gap_register(
         if isinstance(row, dict)
     }
     rows: list[dict[str, Any]] = []
-    for index, slot in enumerate(operator_intake_packet.get("input_slots", []), start=1):
+    for index, slot in enumerate(
+        operator_intake_packet.get("input_slots", []), start=1
+    ):
         if not isinstance(slot, dict):
             continue
         slot_id = str(slot.get("slot_id") or "")
@@ -628,11 +640,16 @@ def _operator_evidence_gap_register(
         owner_actions = [
             str(action) for action in slot.get("owner_actions", []) if str(action)
         ]
+        manifest_contract = slot.get("manifest_contract")
+        if not isinstance(manifest_contract, dict):
+            manifest_contract = {}
         rows.append(
             {
                 "slot_priority": index,
                 "slot_id": slot_id,
                 "status": str(slot.get("status") or ""),
+                "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
+                "manifest_contract": manifest_contract,
                 "tier_beta_blocked": bool(blocked_criteria),
                 "blocked_tier_beta_criteria": blocked_criteria,
                 "criterion_gates": criterion_gates,
@@ -647,7 +664,9 @@ def _operator_evidence_gap_register(
                     for step in plan.get("materialization_steps", [])
                     if str(step)
                 ],
-                "materialization_command": str(slot.get("materialization_command") or ""),
+                "materialization_command": str(
+                    slot.get("materialization_command") or ""
+                ),
                 "validation_command": str(slot.get("validation_command") or ""),
             }
         )
@@ -745,21 +764,30 @@ def build_source_of_truth(
         "status": rmsd_scorecard["status"],
         "dry_run_case_count": rmsd_scorecard["dry_run_case_count"],
         "real_benchmark_case_count": rmsd_scorecard["real_benchmark_case_count"],
-        "dry_run_pose_success": bool(rmsd_scorecard["rows"][0]["score"]["pose_success"]),
+        "dry_run_pose_success": bool(
+            rmsd_scorecard["rows"][0]["score"]["pose_success"]
+        ),
     }
     operator_evidence_gap_register = _operator_evidence_gap_register(
         tier_beta_gate=tier_beta_gate,
         operator_intake_packet=operator_intake_packet,
     )
     first_operator_evidence_gap = next(
-        (
-            row
-            for row in operator_evidence_gap_register
-            if row["tier_beta_blocked"]
-        ),
+        (row for row in operator_evidence_gap_register if row["tier_beta_blocked"]),
         {},
     )
     first_blocked_target = str(first_operator_evidence_gap.get("slot_id") or "")
+    first_manifest_contract: dict[str, Any] = {}
+    for slot in operator_intake_packet.get("input_slots", []):
+        if not isinstance(slot, dict):
+            continue
+        if str(slot.get("slot_id") or "") != first_blocked_target:
+            continue
+        candidate = slot.get("manifest_contract")
+        if isinstance(candidate, dict):
+            first_manifest_contract = candidate
+        break
+    first_manifest_contract_id = str(first_manifest_contract.get("contract_id") or "")
     root_cause_tags = [
         "operator_source_material_required",
         "operator_receipts_required",
@@ -779,6 +807,7 @@ def build_source_of_truth(
         "artifact": str(DEFAULT_OPERATOR_INTAKE_PACKET_OUT),
         "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,
+        "manifest_contract_id": first_manifest_contract_id,
         "first_next_action": str(
             first_operator_evidence_gap.get("first_next_action") or ""
         ),
@@ -822,6 +851,9 @@ def build_source_of_truth(
         "first_blocker": blockers[0] if blockers else "",
         "first_blocked_target": first_blocked_target,
         "first_required_operator_slot": first_blocked_target,
+        "first_manifest_contract_id": first_manifest_contract_id,
+        "first_manifest_contract": first_manifest_contract,
+        "casf_pdbbind_subset_manifest_contract": first_manifest_contract,
         "required_slot_count": int(operator_intake_packet["required_slot_count"]),
         "blocked_operator_slot_count": blocked_operator_slot_count,
         "root_cause_tags": root_cause_tags,
@@ -857,8 +889,12 @@ def build_source_of_truth(
         "pose_validity_packet_summary": {
             "status": pose_validity_packet["status"],
             "check_count": len(pose_validity_packet["checks"]),
-            "required_check_count": sum(1 for row in pose_validity_packet["checks"] if row["required"]),
-            "validator_schema_version": pose_validity_packet["validator"]["schema_version"],
+            "required_check_count": sum(
+                1 for row in pose_validity_packet["checks"] if row["required"]
+            ),
+            "validator_schema_version": pose_validity_packet["validator"][
+                "schema_version"
+            ],
             "materializer_schema_version": pose_validity_packet["materializer"][
                 "schema_version"
             ],
@@ -905,11 +941,34 @@ def build_source_of_truth(
                 "mutation_allowed": False,
             },
             "required_slot_count": operator_intake_packet["required_slot_count"],
-            "input_slot_ids": [row["slot_id"] for row in operator_intake_packet["input_slots"]],
-            "gate_unblock_plan_count": operator_intake_packet["gate_unblock_plan_count"],
-            "minimum_subset_case_count": operator_intake_packet["minimum_subset_case_count"],
+            "input_slot_ids": [
+                row["slot_id"] for row in operator_intake_packet["input_slots"]
+            ],
+            "manifest_contract_count": int(
+                operator_intake_packet.get("manifest_contract_count") or 0
+            ),
+            "manifest_contracts": [
+                row
+                for row in operator_intake_packet.get("manifest_contracts", [])
+                if isinstance(row, dict)
+            ],
+            "first_manifest_contract_id": str(
+                operator_intake_packet.get("first_manifest_contract_id")
+                or first_manifest_contract_id
+            ),
+            "first_manifest_contract": dict(
+                operator_intake_packet.get("first_manifest_contract")
+                or first_manifest_contract
+            ),
+            "gate_unblock_plan_count": operator_intake_packet[
+                "gate_unblock_plan_count"
+            ],
+            "minimum_subset_case_count": operator_intake_packet[
+                "minimum_subset_case_count"
+            ],
             "first_blocked_target": str(
-                operator_intake_packet.get("first_blocked_target") or first_blocked_target
+                operator_intake_packet.get("first_blocked_target")
+                or first_blocked_target
             ),
             "root_cause_tags": [
                 str(row)
@@ -1049,13 +1108,19 @@ def build_source_of_truth(
     }
 
 
-def build_public_benchmark_artifacts(*, repo_root: Path = ROOT) -> dict[str, dict[str, Any]]:
+def build_public_benchmark_artifacts(
+    *, repo_root: Path = ROOT
+) -> dict[str, dict[str, Any]]:
     subset_manifest = build_subset_manifest(repo_root=repo_root)
     pose_validity_packet = build_pose_validity_packet(repo_root=repo_root)
     rmsd_scorecard = build_rmsd_scorecard(repo_root=repo_root)
     enrichment_scorecard = build_enrichment_scorecard(repo_root=repo_root)
-    vina_gnina_comparison_adapter = build_vina_gnina_comparison_adapter(repo_root=repo_root)
-    operator_intake_packet = build_public_benchmark_operator_intake_packet(repo_root=repo_root)
+    vina_gnina_comparison_adapter = build_vina_gnina_comparison_adapter(
+        repo_root=repo_root
+    )
+    operator_intake_packet = build_public_benchmark_operator_intake_packet(
+        repo_root=repo_root
+    )
     source_of_truth = build_source_of_truth(
         subset_manifest=subset_manifest,
         pose_validity_packet=pose_validity_packet,
@@ -1130,18 +1195,40 @@ def write_public_benchmark_artifacts(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source-of-truth-out", type=Path, default=DEFAULT_SOURCE_OF_TRUTH_OUT)
-    parser.add_argument("--subset-manifest-out", type=Path, default=DEFAULT_SUBSET_MANIFEST_OUT)
-    parser.add_argument("--pose-validity-packet-out", type=Path, default=DEFAULT_POSE_VALIDITY_PACKET_OUT)
-    parser.add_argument("--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT)
-    parser.add_argument("--enrichment-scorecard-out", type=Path, default=DEFAULT_ENRICHMENT_SCORECARD_OUT)
+    parser.add_argument(
+        "--source-of-truth-out", type=Path, default=DEFAULT_SOURCE_OF_TRUTH_OUT
+    )
+    parser.add_argument(
+        "--subset-manifest-out", type=Path, default=DEFAULT_SUBSET_MANIFEST_OUT
+    )
+    parser.add_argument(
+        "--pose-validity-packet-out",
+        type=Path,
+        default=DEFAULT_POSE_VALIDITY_PACKET_OUT,
+    )
+    parser.add_argument(
+        "--rmsd-scorecard-out", type=Path, default=DEFAULT_RMSD_SCORECARD_OUT
+    )
+    parser.add_argument(
+        "--enrichment-scorecard-out",
+        type=Path,
+        default=DEFAULT_ENRICHMENT_SCORECARD_OUT,
+    )
     parser.add_argument(
         "--vina-gnina-comparison-adapter-out",
         type=Path,
         default=DEFAULT_VINA_GNINA_ADAPTER_OUT,
     )
-    parser.add_argument("--operator-intake-packet-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_OUT)
-    parser.add_argument("--operator-intake-packet-md-out", type=Path, default=DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT)
+    parser.add_argument(
+        "--operator-intake-packet-out",
+        type=Path,
+        default=DEFAULT_OPERATOR_INTAKE_PACKET_OUT,
+    )
+    parser.add_argument(
+        "--operator-intake-packet-md-out",
+        type=Path,
+        default=DEFAULT_OPERATOR_INTAKE_PACKET_MD_OUT,
+    )
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 

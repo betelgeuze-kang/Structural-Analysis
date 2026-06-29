@@ -8,6 +8,74 @@
     "vina_gnina_comparison_rows_missing",
     "public_benchmark_external_receipts_missing"
   ],
+  "casf_pdbbind_subset_manifest_contract": {
+    "checksum_policy": {
+      "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+      "required_manifest_field": "source_file_checksums",
+      "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+      "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+    },
+    "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+    "contract_id": "casf_pdbbind_subset_manifest_contract",
+    "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+    "intake_case_key": "cases",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+    "nested_contracts": [
+      {
+        "field": "ligand_atom_order_contract",
+        "required_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
+        "validation_rules": [
+          "atom_count > 0",
+          "len(atom_ids) == atom_count",
+          "atom_ids are unique within each case"
+        ]
+      },
+      {
+        "field": "symmetry_permutation_contract",
+        "required_fields": [
+          "permutations"
+        ],
+        "validation_rules": [
+          "permutations is non-empty",
+          "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+          "sorted(permutation) == list(range(atom_count))"
+        ]
+      }
+    ],
+    "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+    "receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum"
+    ],
+    "required_case_fields": [
+      "case_id",
+      "source_family",
+      "complex_id",
+      "protein_structure_path",
+      "reference_ligand_path",
+      "predicted_ligand_path_or_docking_run_id",
+      "ligand_atom_order_contract",
+      "symmetry_permutation_contract",
+      "source_license_or_accession",
+      "source_checksum"
+    ],
+    "required_local_source_file_fields": [
+      "protein_structure_path",
+      "reference_ligand_path",
+      "predicted_ligand_path_or_docking_run_id"
+    ],
+    "source_family": "CASF/PDBBind",
+    "status": "operator_input_required",
+    "target_subset_case_count": 12,
+    "unblocks_tier_beta_criteria": [
+      "casf_pdbbind_subset_materialized",
+      "external_receipts_attached"
+    ],
+    "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+  },
   "claim_boundary": "This is the Phase 2 public benchmark harness seed. It closes source-of-truth shape, subset contract, RMSD scorer dry-run, and pose-validity packet shape. It does not close Tier beta, public benchmark results, Vina/GNINA comparison, or DUD-E/LIT-PCBA enrichment results.",
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
@@ -29,6 +97,75 @@
   },
   "first_blocked_target": "casf_pdbbind_subset_intake",
   "first_blocker": "casf_pdbbind_source_material_not_attached",
+  "first_manifest_contract": {
+    "checksum_policy": {
+      "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+      "required_manifest_field": "source_file_checksums",
+      "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+      "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+    },
+    "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+    "contract_id": "casf_pdbbind_subset_manifest_contract",
+    "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+    "intake_case_key": "cases",
+    "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+    "nested_contracts": [
+      {
+        "field": "ligand_atom_order_contract",
+        "required_fields": [
+          "atom_count",
+          "atom_ids"
+        ],
+        "validation_rules": [
+          "atom_count > 0",
+          "len(atom_ids) == atom_count",
+          "atom_ids are unique within each case"
+        ]
+      },
+      {
+        "field": "symmetry_permutation_contract",
+        "required_fields": [
+          "permutations"
+        ],
+        "validation_rules": [
+          "permutations is non-empty",
+          "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+          "sorted(permutation) == list(range(atom_count))"
+        ]
+      }
+    ],
+    "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+    "receipt_fields": [
+      "source_license_or_accession",
+      "source_checksum"
+    ],
+    "required_case_fields": [
+      "case_id",
+      "source_family",
+      "complex_id",
+      "protein_structure_path",
+      "reference_ligand_path",
+      "predicted_ligand_path_or_docking_run_id",
+      "ligand_atom_order_contract",
+      "symmetry_permutation_contract",
+      "source_license_or_accession",
+      "source_checksum"
+    ],
+    "required_local_source_file_fields": [
+      "protein_structure_path",
+      "reference_ligand_path",
+      "predicted_ligand_path_or_docking_run_id"
+    ],
+    "source_family": "CASF/PDBBind",
+    "status": "operator_input_required",
+    "target_subset_case_count": 12,
+    "unblocks_tier_beta_criteria": [
+      "casf_pdbbind_subset_materialized",
+      "external_receipts_attached"
+    ],
+    "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+  },
+  "first_manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
   "first_operator_evidence_gap": {
     "blocked_tier_beta_criteria": [
       "casf_pdbbind_subset_materialized",
@@ -58,6 +195,75 @@
     ],
     "depends_on": [],
     "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+    "manifest_contract": {
+      "checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_manifest_field": "source_file_checksums",
+        "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+        "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+      },
+      "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+      "contract_id": "casf_pdbbind_subset_manifest_contract",
+      "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+      "intake_case_key": "cases",
+      "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+      "nested_contracts": [
+        {
+          "field": "ligand_atom_order_contract",
+          "required_fields": [
+            "atom_count",
+            "atom_ids"
+          ],
+          "validation_rules": [
+            "atom_count > 0",
+            "len(atom_ids) == atom_count",
+            "atom_ids are unique within each case"
+          ]
+        },
+        {
+          "field": "symmetry_permutation_contract",
+          "required_fields": [
+            "permutations"
+          ],
+          "validation_rules": [
+            "permutations is non-empty",
+            "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+            "sorted(permutation) == list(range(atom_count))"
+          ]
+        }
+      ],
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum"
+      ],
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum"
+      ],
+      "required_local_source_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id"
+      ],
+      "source_family": "CASF/PDBBind",
+      "status": "operator_input_required",
+      "target_subset_case_count": 12,
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ],
+      "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+    },
+    "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
     "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
     "materialization_steps": [
       "materialize_subset_manifest"
@@ -99,10 +305,10 @@
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
   "first_required_operator_slot": "casf_pdbbind_subset_intake",
-  "generated_at": "2026-06-29T22:13:14.610560+00:00",
+  "generated_at": "2026-06-29T23:28:35.607991+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:6068f4bbce1ee22936366533b067b4112e1f56f73aa721ca99cfd592a7ca9bf6",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:a65b3c41d1189e78285c4e4e5168f52b6c4e2c8b2ef509bcfb6eb0005d047b6d",
+    "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:4600de5f1b388fa029a187b9fde64fe4b316214234798266ac535b9a00d257ff",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:77994bb128626449fbe5d87782ec12eab933e8d6e219e34c33f6ffb84aa60b57",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -159,6 +365,75 @@
       ],
       "depends_on": [],
       "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+      "manifest_contract": {
+        "checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_manifest_field": "source_file_checksums",
+          "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+          "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+        },
+        "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+        "contract_id": "casf_pdbbind_subset_manifest_contract",
+        "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+        "intake_case_key": "cases",
+        "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+        "nested_contracts": [
+          {
+            "field": "ligand_atom_order_contract",
+            "required_fields": [
+              "atom_count",
+              "atom_ids"
+            ],
+            "validation_rules": [
+              "atom_count > 0",
+              "len(atom_ids) == atom_count",
+              "atom_ids are unique within each case"
+            ]
+          },
+          {
+            "field": "symmetry_permutation_contract",
+            "required_fields": [
+              "permutations"
+            ],
+            "validation_rules": [
+              "permutations is non-empty",
+              "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+              "sorted(permutation) == list(range(atom_count))"
+            ]
+          }
+        ],
+        "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "complex_id",
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id",
+          "ligand_atom_order_contract",
+          "symmetry_permutation_contract",
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "required_local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "source_family": "CASF/PDBBind",
+        "status": "operator_input_required",
+        "target_subset_case_count": 12,
+        "unblocks_tier_beta_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "external_receipts_attached"
+        ],
+        "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+      },
+      "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
       "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_subset_manifest"
@@ -238,6 +513,8 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
       ],
       "first_next_action": "use case_id values from the materialized CASF/PDBBind subset manifest",
+      "manifest_contract": {},
+      "manifest_contract_id": "",
       "materialization_command": "python3 scripts/materialize_public_benchmark_pose_validity_input.py --subset-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --pose-intake <operator-pose-coordinate-intake.json> --out-input implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_input.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_pose_validity_materialization_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_pose_validity_input",
@@ -290,6 +567,8 @@
       ],
       "depends_on": [],
       "first_next_action": "attach at least one DUD-E or LIT-PCBA target with active and decoy labels",
+      "manifest_contract": {},
+      "manifest_contract_id": "",
       "materialization_command": "python3 scripts/materialize_public_benchmark_enrichment_scorecard.py --intake <operator-dud-e-lit-pcba-enrichment-intake.json> --out-scorecard implementation/phase1/release_evidence/productization/public_benchmark_enrichment_scorecard.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_enrichment_materialization_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_enrichment_scorecard"
@@ -355,6 +634,8 @@
         "implementation/phase1/release_evidence/productization/public_benchmark_symmetry_rmsd_scorecard.json"
       ],
       "first_next_action": "attach Vina and GNINA run rows for the same materialized benchmark cases",
+      "manifest_contract": {},
+      "manifest_contract_id": "",
       "materialization_command": "python3 scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py --intake <operator-vina-gnina-comparison-intake.json> --out-adapter implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_comparison_adapter.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_vina_gnina_materialization_report.json --fail-blocked",
       "materialization_steps": [
         "materialize_vina_gnina_comparison_adapter"
@@ -395,6 +676,7 @@
   ],
   "operator_gate_unblock_plan": [
     {
+      "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
       "materialization_steps": [
         "materialize_subset_manifest"
       ],
@@ -430,6 +712,7 @@
       ]
     },
     {
+      "manifest_contract_id": "",
       "materialization_steps": [
         "materialize_pose_validity_input",
         "materialize_posebusters_validity_packet",
@@ -450,6 +733,7 @@
       ]
     },
     {
+      "manifest_contract_id": "",
       "materialization_steps": [
         "materialize_enrichment_scorecard"
       ],
@@ -479,6 +763,7 @@
       ]
     },
     {
+      "manifest_contract_id": "",
       "materialization_steps": [
         "materialize_vina_gnina_comparison_adapter"
       ],
@@ -518,6 +803,7 @@
     "first_blocked_target": "casf_pdbbind_subset_intake",
     "first_blocker": "casf_pdbbind_source_material_not_attached",
     "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+    "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
     "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
     "minimum_evidence": {
       "case_count": 12,
@@ -560,12 +846,82 @@
     "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json",
     "claim_boundary": "This packet is an owner-facing intake contract for public benchmark evidence. It does not attach CASF/PDBBind, DUD-E, or LIT-PCBA source files, does not redistribute benchmark data, does not infer ligand chemistry, and does not close Tier beta without materialized real benchmark rows.",
     "first_blocked_target": "casf_pdbbind_subset_intake",
+    "first_manifest_contract": {
+      "checksum_policy": {
+        "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+        "required_manifest_field": "source_file_checksums",
+        "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+        "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+      },
+      "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+      "contract_id": "casf_pdbbind_subset_manifest_contract",
+      "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+      "intake_case_key": "cases",
+      "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+      "nested_contracts": [
+        {
+          "field": "ligand_atom_order_contract",
+          "required_fields": [
+            "atom_count",
+            "atom_ids"
+          ],
+          "validation_rules": [
+            "atom_count > 0",
+            "len(atom_ids) == atom_count",
+            "atom_ids are unique within each case"
+          ]
+        },
+        {
+          "field": "symmetry_permutation_contract",
+          "required_fields": [
+            "permutations"
+          ],
+          "validation_rules": [
+            "permutations is non-empty",
+            "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+            "sorted(permutation) == list(range(atom_count))"
+          ]
+        }
+      ],
+      "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+      "receipt_fields": [
+        "source_license_or_accession",
+        "source_checksum"
+      ],
+      "required_case_fields": [
+        "case_id",
+        "source_family",
+        "complex_id",
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id",
+        "ligand_atom_order_contract",
+        "symmetry_permutation_contract",
+        "source_license_or_accession",
+        "source_checksum"
+      ],
+      "required_local_source_file_fields": [
+        "protein_structure_path",
+        "reference_ligand_path",
+        "predicted_ligand_path_or_docking_run_id"
+      ],
+      "source_family": "CASF/PDBBind",
+      "status": "operator_input_required",
+      "target_subset_case_count": 12,
+      "unblocks_tier_beta_criteria": [
+        "casf_pdbbind_subset_materialized",
+        "external_receipts_attached"
+      ],
+      "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+    },
+    "first_manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
     "first_operator_evidence_gap": {
       "blocked_tier_beta_criteria": [
         "casf_pdbbind_subset_materialized",
         "external_receipts_attached"
       ],
       "first_next_action": "attach at least 12 local CASF/PDBBind case descriptors",
+      "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
       "materialization_steps": [
         "materialize_subset_manifest"
       ],
@@ -599,6 +955,7 @@
     },
     "gate_unblock_plan": [
       {
+        "manifest_contract_id": "casf_pdbbind_subset_manifest_contract",
         "materialization_steps": [
           "materialize_subset_manifest"
         ],
@@ -634,6 +991,7 @@
         ]
       },
       {
+        "manifest_contract_id": "",
         "materialization_steps": [
           "materialize_pose_validity_input",
           "materialize_posebusters_validity_packet",
@@ -654,6 +1012,7 @@
         ]
       },
       {
+        "manifest_contract_id": "",
         "materialization_steps": [
           "materialize_enrichment_scorecard"
         ],
@@ -683,6 +1042,7 @@
         ]
       },
       {
+        "manifest_contract_id": "",
         "materialization_steps": [
           "materialize_vina_gnina_comparison_adapter"
         ],
@@ -722,6 +1082,77 @@
       "pose_coordinate_intake",
       "dud_e_lit_pcba_enrichment_intake",
       "vina_gnina_comparison_intake"
+    ],
+    "manifest_contract_count": 1,
+    "manifest_contracts": [
+      {
+        "checksum_policy": {
+          "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+          "required_manifest_field": "source_file_checksums",
+          "source_checksum": "Operator may provide a source bundle checksum; otherwise the materializer derives a stable checksum from computed local source-file checksums.",
+          "source_file_checksums": "Materializer computes one checksum per local protein/reference-ligand/predicted-pose file and writes them to each manifest case row."
+        },
+        "claim_boundary": "This contract describes the local operator intake needed to materialize the CASF/PDBBind subset manifest. It does not fetch, redistribute, or license public benchmark data.",
+        "contract_id": "casf_pdbbind_subset_manifest_contract",
+        "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+        "intake_case_key": "cases",
+        "materialization_command": "python3 scripts/materialize_public_benchmark_subset_manifest.py --intake <operator-casf-pdbbind-intake.json> --out-manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --out-report implementation/phase1/release_evidence/productization/public_benchmark_subset_materialization_report.json --fail-blocked",
+        "nested_contracts": [
+          {
+            "field": "ligand_atom_order_contract",
+            "required_fields": [
+              "atom_count",
+              "atom_ids"
+            ],
+            "validation_rules": [
+              "atom_count > 0",
+              "len(atom_ids) == atom_count",
+              "atom_ids are unique within each case"
+            ]
+          },
+          {
+            "field": "symmetry_permutation_contract",
+            "required_fields": [
+              "permutations"
+            ],
+            "validation_rules": [
+              "permutations is non-empty",
+              "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+              "sorted(permutation) == list(range(atom_count))"
+            ]
+          }
+        ],
+        "produces": "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json",
+        "receipt_fields": [
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "required_case_fields": [
+          "case_id",
+          "source_family",
+          "complex_id",
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id",
+          "ligand_atom_order_contract",
+          "symmetry_permutation_contract",
+          "source_license_or_accession",
+          "source_checksum"
+        ],
+        "required_local_source_file_fields": [
+          "protein_structure_path",
+          "reference_ligand_path",
+          "predicted_ligand_path_or_docking_run_id"
+        ],
+        "source_family": "CASF/PDBBind",
+        "status": "operator_input_required",
+        "target_subset_case_count": 12,
+        "unblocks_tier_beta_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "external_receipts_attached"
+        ],
+        "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
+      }
     ],
     "markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
     "materialization_sequence": [
@@ -839,7 +1270,7 @@
   ],
   "route": "/product/public-benchmark",
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "4f289c801e8fe8a3e06cdc73833ed668df7a69e4",
+  "source_commit_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
   "source_families": [
     {
       "family_id": "casf_pdbbind",

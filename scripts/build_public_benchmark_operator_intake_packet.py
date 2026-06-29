@@ -48,10 +48,18 @@ from materialize_public_benchmark_vina_gnina_comparison_adapter import (  # noqa
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_SOURCE_OF_TRUTH = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
 DEFAULT_SUBSET_MANIFEST = PRODUCTIZATION / "public_benchmark_subset_manifest.json"
-DEFAULT_POSE_VALIDITY_INPUT = PRODUCTIZATION / "public_benchmark_pose_validity_input.json"
-DEFAULT_POSE_VALIDITY_PACKET = PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
-DEFAULT_RMSD_SCORECARD = PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
-DEFAULT_ENRICHMENT_SCORECARD = PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+DEFAULT_POSE_VALIDITY_INPUT = (
+    PRODUCTIZATION / "public_benchmark_pose_validity_input.json"
+)
+DEFAULT_POSE_VALIDITY_PACKET = (
+    PRODUCTIZATION / "public_benchmark_pose_validity_packet.json"
+)
+DEFAULT_RMSD_SCORECARD = (
+    PRODUCTIZATION / "public_benchmark_symmetry_rmsd_scorecard.json"
+)
+DEFAULT_ENRICHMENT_SCORECARD = (
+    PRODUCTIZATION / "public_benchmark_enrichment_scorecard.json"
+)
 DEFAULT_OUT = PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
 DEFAULT_OUT_MD = DEFAULT_OUT.with_suffix(".md")
 
@@ -200,6 +208,70 @@ def _vina_gnina_case_template() -> dict[str, Any]:
     }
 
 
+def _casf_pdbbind_subset_manifest_contract(
+    *,
+    materialization_command: str,
+    validation_command: str,
+) -> dict[str, Any]:
+    return {
+        "contract_id": "casf_pdbbind_subset_manifest_contract",
+        "status": "operator_input_required",
+        "source_family": "CASF/PDBBind",
+        "intake_artifact": "<operator-casf-pdbbind-intake.json>",
+        "intake_case_key": "cases",
+        "produces": str(DEFAULT_SUBSET_MANIFEST),
+        "target_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
+        "required_case_fields": list(REQUIRED_CASE_FIELDS),
+        "required_local_source_file_fields": [
+            str(row) for row in LOCAL_SOURCE_FILE_FIELDS
+        ],
+        "nested_contracts": [
+            {
+                "field": "ligand_atom_order_contract",
+                "required_fields": ["atom_count", "atom_ids"],
+                "validation_rules": [
+                    "atom_count > 0",
+                    "len(atom_ids) == atom_count",
+                    "atom_ids are unique within each case",
+                ],
+            },
+            {
+                "field": "symmetry_permutation_contract",
+                "required_fields": ["permutations"],
+                "validation_rules": [
+                    "permutations is non-empty",
+                    "each permutation is zero-based over ligand_atom_order_contract.atom_ids",
+                    "sorted(permutation) == list(range(atom_count))",
+                ],
+            },
+        ],
+        "receipt_fields": ["source_license_or_accession", "source_checksum"],
+        "checksum_policy": {
+            "accepted_checksum_format": "sha256:<64 lowercase or uppercase hex characters>",
+            "source_checksum": (
+                "Operator may provide a source bundle checksum; otherwise the materializer "
+                "derives a stable checksum from computed local source-file checksums."
+            ),
+            "source_file_checksums": (
+                "Materializer computes one checksum per local protein/reference-ligand/"
+                "predicted-pose file and writes them to each manifest case row."
+            ),
+            "required_manifest_field": "source_file_checksums",
+        },
+        "unblocks_tier_beta_criteria": [
+            "casf_pdbbind_subset_materialized",
+            "external_receipts_attached",
+        ],
+        "materialization_command": materialization_command,
+        "validation_command": validation_command,
+        "claim_boundary": (
+            "This contract describes the local operator intake needed to materialize the "
+            "CASF/PDBBind subset manifest. It does not fetch, redistribute, or license "
+            "public benchmark data."
+        ),
+    }
+
+
 def _slot(
     *,
     slot_id: str,
@@ -217,6 +289,7 @@ def _slot(
     unblocks_tier_beta_criteria: list[str] | None = None,
     minimum_evidence: dict[str, Any] | None = None,
     materialization_steps: list[str] | None = None,
+    manifest_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "slot_id": slot_id,
@@ -232,37 +305,49 @@ def _slot(
         "unblocks_tier_beta_criteria": unblocks_tier_beta_criteria or [],
         "minimum_evidence": minimum_evidence or {},
         "materialization_steps": materialization_steps or [],
+        "manifest_contract": manifest_contract or {},
         "validation_command": validation_command,
         "materialization_command": materialization_command,
     }
 
 
 def _gate_unblock_plan(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [
-        {
-            "slot_id": str(slot["slot_id"]),
-            "title": str(slot["title"]),
-            "status": str(slot["status"]),
-            "unblocks_tier_beta_criteria": list(slot["unblocks_tier_beta_criteria"]),
-            "minimum_evidence": dict(slot["minimum_evidence"]),
-            "materialization_steps": list(slot["materialization_steps"]),
-        }
-        for slot in slots
-    ]
+    rows: list[dict[str, Any]] = []
+    for slot in slots:
+        manifest_contract = _as_dict(slot.get("manifest_contract"))
+        rows.append(
+            {
+                "slot_id": str(slot["slot_id"]),
+                "title": str(slot["title"]),
+                "status": str(slot["status"]),
+                "unblocks_tier_beta_criteria": list(
+                    slot["unblocks_tier_beta_criteria"]
+                ),
+                "minimum_evidence": dict(slot["minimum_evidence"]),
+                "materialization_steps": list(slot["materialization_steps"]),
+                "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
+            }
+        )
+    return rows
 
 
-def _operator_evidence_gap_register(slots: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _operator_evidence_gap_register(
+    slots: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for index, slot in enumerate(slots, start=1):
         owner_actions = [str(action) for action in _as_list(slot.get("owner_actions"))]
+        manifest_contract = _as_dict(slot.get("manifest_contract"))
         rows.append(
             {
                 "slot_priority": index,
                 "slot_id": str(slot.get("slot_id") or ""),
                 "status": str(slot.get("status") or ""),
+                "manifest_contract_id": str(manifest_contract.get("contract_id") or ""),
                 "tier_beta_blocked": True,
                 "blocked_tier_beta_criteria": [
-                    str(row) for row in _as_list(slot.get("unblocks_tier_beta_criteria"))
+                    str(row)
+                    for row in _as_list(slot.get("unblocks_tier_beta_criteria"))
                 ],
                 "first_next_action": owner_actions[0] if owner_actions else "",
                 "minimum_evidence": _as_dict(slot.get("minimum_evidence")),
@@ -281,7 +366,9 @@ def build_public_benchmark_operator_intake_packet(
 ) -> dict[str, Any]:
     source_of_truth = _load_json(repo_root, source_of_truth_path)
     source_blockers = [str(row) for row in _as_list(source_of_truth.get("blockers"))]
-    source_next_actions = [str(row) for row in _as_list(source_of_truth.get("next_actions"))]
+    source_next_actions = [
+        str(row) for row in _as_list(source_of_truth.get("next_actions"))
+    ]
 
     subset_materialization = (
         "python3 scripts/materialize_public_benchmark_subset_manifest.py "
@@ -289,6 +376,10 @@ def build_public_benchmark_operator_intake_packet(
         f"--out-manifest {DEFAULT_SUBSET_MANIFEST} "
         f"--out-report {PRODUCTIZATION / 'public_benchmark_subset_materialization_report.json'} "
         "--fail-blocked"
+    )
+    subset_validation = (
+        "python3 scripts/validate_public_benchmark_subset_manifest.py "
+        f"--manifest {DEFAULT_SUBSET_MANIFEST} --fail-blocked"
     )
     pose_input_materialization = (
         "python3 scripts/materialize_public_benchmark_pose_validity_input.py "
@@ -335,6 +426,10 @@ def build_public_benchmark_operator_intake_packet(
         f"--enrichment-scorecard-out {DEFAULT_ENRICHMENT_SCORECARD} "
         f"--vina-gnina-comparison-adapter-out {DEFAULT_VINA_GNINA_COMPARISON_ADAPTER}"
     )
+    casf_pdbbind_manifest_contract = _casf_pdbbind_subset_manifest_contract(
+        materialization_command=subset_materialization,
+        validation_command=subset_validation,
+    )
 
     slots = [
         _slot(
@@ -361,10 +456,7 @@ def build_public_benchmark_operator_intake_packet(
                 "declare ligand atom order and symmetry permutations for every case",
                 "run the subset materializer with --fail-blocked",
             ],
-            validation_command=(
-                "python3 scripts/validate_public_benchmark_subset_manifest.py "
-                f"--manifest {DEFAULT_SUBSET_MANIFEST} --fail-blocked"
-            ),
+            validation_command=subset_validation,
             materialization_command=subset_materialization,
             unblocks_tier_beta_criteria=[
                 "casf_pdbbind_subset_materialized",
@@ -373,13 +465,16 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
                 "source_family": "CASF/PDBBind",
-                "local_source_file_fields": [str(row) for row in LOCAL_SOURCE_FILE_FIELDS],
+                "local_source_file_fields": [
+                    str(row) for row in LOCAL_SOURCE_FILE_FIELDS
+                ],
                 "ligand_atom_order_contract_fields": ["atom_count", "atom_ids"],
                 "symmetry_permutation_contract_fields": ["permutations"],
                 "materialized_manifest_fields": ["source_file_checksums"],
                 "receipt_fields": ["source_license_or_accession", "source_checksum"],
             },
             materialization_steps=["materialize_subset_manifest"],
+            manifest_contract=casf_pdbbind_manifest_contract,
         ),
         _slot(
             slot_id="pose_coordinate_intake",
@@ -473,7 +568,9 @@ def build_public_benchmark_operator_intake_packet(
             minimum_evidence={
                 "comparison_case_count": 1,
                 "required_engines": list(VINA_GNINA_SUPPORTED_ENGINES),
-                "required_engine_run_fields": list(VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS),
+                "required_engine_run_fields": list(
+                    VINA_GNINA_REQUIRED_ENGINE_RUN_FIELDS
+                ),
                 "receipt_fields": [
                     "source_license_or_accession",
                     "source_checksum",
@@ -486,6 +583,7 @@ def build_public_benchmark_operator_intake_packet(
     gate_unblock_plan = _gate_unblock_plan(slots)
     operator_evidence_gap_register = _operator_evidence_gap_register(slots)
     first_operator_evidence_gap = operator_evidence_gap_register[0]
+    manifest_contracts = [casf_pdbbind_manifest_contract]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -515,6 +613,10 @@ def build_public_benchmark_operator_intake_packet(
         "source_of_truth_next_actions": source_next_actions,
         "input_slots": slots,
         "required_slot_count": len([slot for slot in slots if slot["required"]]),
+        "manifest_contracts": manifest_contracts,
+        "manifest_contract_count": len(manifest_contracts),
+        "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
+        "first_manifest_contract": casf_pdbbind_manifest_contract,
         "gate_unblock_plan": gate_unblock_plan,
         "gate_unblock_plan_count": len(gate_unblock_plan),
         "first_blocked_target": first_operator_evidence_gap["slot_id"],
@@ -613,6 +715,7 @@ def build_public_benchmark_operator_intake_packet(
             ],
             "operator_evidence_gap_count": len(operator_evidence_gap_register),
             "first_operator_evidence_gap": first_operator_evidence_gap,
+            "first_manifest_contract_id": casf_pdbbind_manifest_contract["contract_id"],
             "minimum_subset_case_count": TIER_BETA_MINIMUM_SUBSET_CASE_COUNT,
             "source_of_truth_blocker_count": len(source_blockers),
             "source_of_truth_status": str(source_of_truth.get("status") or ""),
@@ -649,11 +752,17 @@ def _markdown(payload: dict[str, Any]) -> str:
         lines.append(
             f"| `{slot['slot_id']}` | `{slot['status']}` | `{slot['intake_artifact']}` |"
         )
-    lines.extend(["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"])
+    lines.extend(
+        ["", "## Gate Unblock Plan", "", "| Slot | Criteria | Minimum Evidence |"]
+    )
     lines.append("|---|---|---|")
     for row in payload["gate_unblock_plan"]:
-        criteria = ", ".join(f"`{criterion}`" for criterion in row["unblocks_tier_beta_criteria"])
-        minimum = json.dumps(row["minimum_evidence"], ensure_ascii=False, sort_keys=True)
+        criteria = ", ".join(
+            f"`{criterion}`" for criterion in row["unblocks_tier_beta_criteria"]
+        )
+        minimum = json.dumps(
+            row["minimum_evidence"], ensure_ascii=False, sort_keys=True
+        )
         lines.append(f"| `{row['slot_id']}` | {criteria} | `{minimum}` |")
     lines.extend(["", "## Materialization Sequence", ""])
     for step in payload["materialization_sequence"]:

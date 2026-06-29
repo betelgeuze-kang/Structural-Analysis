@@ -70,6 +70,19 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "vina_gnina_comparison_rows_missing",
         "public_benchmark_external_receipts_missing",
     ]
+    assert packet["manifest_contract_count"] == 1
+    assert packet["first_manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
+    assert packet["first_manifest_contract"]["produces"] == (
+        "implementation/phase1/release_evidence/productization/"
+        "public_benchmark_subset_manifest.json"
+    )
+    assert packet["first_manifest_contract"]["target_subset_case_count"] == 12
+    assert (
+        packet["first_manifest_contract"]["checksum_policy"]["required_manifest_field"]
+        == "source_file_checksums"
+    )
     assert set(slots) == {
         "casf_pdbbind_subset_intake",
         "pose_coordinate_intake",
@@ -99,14 +112,29 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "reference_ligand_path",
         "predicted_ligand_path_or_docking_run_id",
     ]
-    assert "materialize_public_benchmark_subset_manifest.py" in subset["materialization_command"]
+    assert subset["manifest_contract"]["contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
+    assert subset["manifest_contract"]["nested_contracts"][0]["field"] == (
+        "ligand_atom_order_contract"
+    )
+    assert subset["manifest_contract"]["nested_contracts"][1]["field"] == (
+        "symmetry_permutation_contract"
+    )
+    assert (
+        "materialize_public_benchmark_subset_manifest.py"
+        in subset["materialization_command"]
+    )
 
     pose = slots["pose_coordinate_intake"]
     assert pose["depends_on"] == [
         "implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json"
     ]
     assert "reference_atoms" in pose["required_fields"]
-    assert "materialize_public_benchmark_pose_validity_input.py" in pose["materialization_command"]
+    assert (
+        "materialize_public_benchmark_pose_validity_input.py"
+        in pose["materialization_command"]
+    )
 
     enrichment = slots["dud_e_lit_pcba_enrichment_intake"]
     assert enrichment["required_fields"] == [
@@ -136,23 +164,30 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
         "source_checksum",
         "provenance_ref",
     ]
-    assert "materialize_public_benchmark_vina_gnina_comparison_adapter.py" in comparison[
-        "materialization_command"
-    ]
+    assert (
+        "materialize_public_benchmark_vina_gnina_comparison_adapter.py"
+        in comparison["materialization_command"]
+    )
     assert packet["supported_comparison_engines"] == ["vina", "gnina"]
     assert "symmetry_aware_rmsd_angstrom" in packet["required_engine_run_fields"]
     assert packet["gate_unblock_plan_count"] == 4
     assert packet["minimum_subset_case_count"] == 12
     assert packet["summary"]["first_blocked_target"] == "casf_pdbbind_subset_intake"
     assert packet["summary"]["operator_evidence_gap_count"] == 4
+    assert packet["summary"]["first_manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
     gate_plan = {row["slot_id"]: row for row in packet["gate_unblock_plan"]}
     assert gate_plan["casf_pdbbind_subset_intake"]["unblocks_tier_beta_criteria"] == [
         "casf_pdbbind_subset_materialized",
         "external_receipts_attached",
     ]
-    assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
-        "case_count"
-    ] == 12
+    assert gate_plan["casf_pdbbind_subset_intake"]["manifest_contract_id"] == (
+        "casf_pdbbind_subset_manifest_contract"
+    )
+    assert (
+        gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"]["case_count"] == 12
+    )
     assert gate_plan["casf_pdbbind_subset_intake"]["minimum_evidence"][
         "ligand_atom_order_contract_fields"
     ] == ["atom_count", "atom_ids"]
@@ -180,7 +215,9 @@ def test_public_benchmark_operator_intake_packet_exposes_all_required_slots() ->
     ] == ["vina", "gnina"]
 
 
-def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> None:
+def test_public_benchmark_operator_intake_packet_materialization_sequence_is_ordered() -> (
+    None
+):
     packet = module.build_public_benchmark_operator_intake_packet(repo_root=REPO_ROOT)
     steps = packet["materialization_sequence"]
 
@@ -209,7 +246,12 @@ def test_public_benchmark_operator_intake_packet_cli_writes_json_and_markdown(
     out = tmp_path / "public_benchmark_operator_intake_packet.json"
     out_md = tmp_path / "public_benchmark_operator_intake_packet.md"
 
-    assert module.main(["--repo-root", str(REPO_ROOT), "--out", str(out), "--out-md", str(out_md)]) == 0
+    assert (
+        module.main(
+            ["--repo-root", str(REPO_ROOT), "--out", str(out), "--out-md", str(out_md)]
+        )
+        == 0
+    )
 
     payload = json.loads(out.read_text(encoding="utf-8"))
     markdown = out_md.read_text(encoding="utf-8")

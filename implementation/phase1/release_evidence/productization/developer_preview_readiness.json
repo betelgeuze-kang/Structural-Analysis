@@ -20,7 +20,7 @@
     },
     "future commercial": {
       "blocked": true,
-      "blocker_count": 33,
+      "blocker_count": 29,
       "blockers": [
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -49,10 +49,6 @@
         "license_server::operation_readiness_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-        "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
-        "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
-        "pm_release::github_sync::github_sync_preflight_not_synced",
-        "pm_release::github_sync::github_sync_remote_sync_pending",
         "pm_release::security::license_status_not_configured",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ]
@@ -86,7 +82,7 @@
   },
   "developer_preview_ready": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "future_commercial_blocker_count": 33,
+  "future_commercial_blocker_count": 29,
   "future_commercial_blockers": [
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
     "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
@@ -115,10 +111,6 @@
     "license_server::operation_readiness_missing",
     "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
     "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
-    "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
-    "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
-    "pm_release::github_sync::github_sync_preflight_not_synced",
-    "pm_release::github_sync::github_sync_remote_sync_pending",
     "pm_release::security::license_status_not_configured",
     "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
   ],
@@ -196,7 +188,7 @@
     "source_full_gap_ledger_ready": false,
     "source_status": "ready"
   },
-  "generated_at": "2026-06-29T23:19:06.733206+00:00",
+  "generated_at": "2026-06-29T23:25:11.049630+00:00",
   "input_artifacts": {
     "dataset_license_manifest": {
       "input_checksum": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
@@ -215,11 +207,11 @@
       "status": "ready"
     },
     "product_readiness_snapshot": {
-      "input_checksum": "sha256:4b3626e3571754fac76088656b9b6f4910b0324148d0ec9099b49cd502eb230d",
+      "input_checksum": "sha256:efd02e86684e2f58d0bc57b6cf8ead64e48c367fd60a010fbcd32493466aa8e0",
       "path": "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
       "present": true,
       "schema_version": "product-readiness-snapshot.v1",
-      "source_commit_sha": "7d7de07ced59a32035d2d5184c8807d490296fb9",
+      "source_commit_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
       "status": "blocked"
     }
   },
@@ -227,7 +219,7 @@
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:2c31f4252e9d58e8b56eb4432227c518ddfcf4e2471bd048c980f9878ddec77c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1ea348cdd46a1052c5c2b61473118afaf1cbf35744315110e2e2250d296dd496",
-    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:4b3626e3571754fac76088656b9b6f4910b0324148d0ec9099b49cd502eb230d"
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json": "sha256:efd02e86684e2f58d0bc57b6cf8ead64e48c367fd60a010fbcd32493466aa8e0"
   },
   "product_snapshot_schema_version": "product-readiness-snapshot.v1",
   "product_snapshot_status": "blocked",
@@ -1838,14 +1830,9 @@
         ]
       },
       "release freshness/sync": {
-        "blocked": true,
-        "blocker_count": 4,
-        "blockers": [
-          "pm_release::github_sync::github_sync_preflight::remote_mutation_approval_required",
-          "pm_release::github_sync::github_sync_preflight::worktree_not_clean",
-          "pm_release::github_sync::github_sync_preflight_not_synced",
-          "pm_release::github_sync::github_sync_remote_sync_pending"
-        ]
+        "blocked": false,
+        "blocker_count": 0,
+        "blockers": []
       }
     }
   },
@@ -2041,6 +2028,6 @@
       }
     }
   },
-  "source_commit_sha": "7d7de07ced59a32035d2d5184c8807d490296fb9",
+  "source_commit_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
   "status": "blocked"
 }
