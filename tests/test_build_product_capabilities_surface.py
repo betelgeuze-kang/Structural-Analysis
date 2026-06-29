@@ -71,6 +71,29 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "ready_for_operator_input"
     )
     assert public_benchmark["summary"]["operator_intake_required_slot_count"] == 4
+    assert public_benchmark["summary"]["tier_beta_gate_status"] == "blocked"
+    assert public_benchmark["summary"]["tier_beta_failed_criterion_count"] == 7
+    assert [
+        row["criterion_id"]
+        for row in public_benchmark["summary"]["tier_beta_gate_criteria"]
+    ] == [
+        "casf_pdbbind_subset_materialized",
+        "real_pose_validity_packet_materialized",
+        "symmetry_rmsd_scorecard_real_cases",
+        "posebusters_style_validity_real_ligands",
+        "dud_e_lit_pcba_enrichment_ready",
+        "vina_gnina_comparison_ready",
+        "external_receipts_attached",
+    ]
+    assert {
+        row["slot_id"]: row["status"]
+        for row in public_benchmark["summary"]["operator_intake_slots"]
+    } == {
+        "casf_pdbbind_subset_intake": "operator_input_required",
+        "pose_coordinate_intake": "operator_input_required",
+        "dud_e_lit_pcba_enrichment_intake": "operator_input_required",
+        "vina_gnina_comparison_intake": "operator_input_required",
+    }
     assert (
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_operator_intake_packet.json"
@@ -118,6 +141,22 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "uncertainty_summary_materialized",
         "report_blockers_resolved",
     ]
+    assert [
+        row["criterion_id"] for row in pocketmd["summary"]["phase4_exit_gate_criteria"]
+    ] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+        "broad_all_atom_fep_claims_locked",
+    ]
+    assert {
+        row["slot_id"]: row["status"]
+        for row in pocketmd["summary"]["operator_intake_slots"]
+    } == {"top_k_refinement_rows": "operator_input_required"}
     assert (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_operator_intake_packet.json"
@@ -140,6 +179,25 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "decoys_above_positive_count_max",
         "no_positive_out_anchored_by_top_decoys",
     ]
+    assert [
+        row["criterion_id"] for row in gpcr["summary"]["phase3_exit_gate_criteria"]
+    ] == [
+        "ranking_pr_auc_ci_low_min",
+        "top20_hit_rate_min",
+        "decoys_above_positive_count_max",
+        "no_positive_out_anchored_by_top_decoys",
+    ]
+    assert gpcr["summary"]["phase3_exit_gate_criteria"][0][
+        "current_by_target"
+    ] == {"DRD2": None, "HTR2A": None, "OPRM1": None}
+    assert {
+        row["target_id"]: row["status"]
+        for row in gpcr["summary"]["operator_target_slots"]
+    } == {
+        "DRD2": "operator_input_required",
+        "HTR2A": "operator_input_required",
+        "OPRM1": "operator_input_required",
+    }
     assert (
         "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json"
         in gpcr["evidence_artifacts"]

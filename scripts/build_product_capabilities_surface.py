@@ -183,6 +183,28 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK)
     operator_intake = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE)
     source_operator_summary = _as_dict(payload.get("operator_intake_packet"))
+    tier_beta_gate = _as_dict(payload.get("tier_beta_gate"))
+    operator_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": bool(row.get("required")),
+            "depends_on_count": len(_as_list(row.get("depends_on"))),
+        }
+        for row in _as_list(operator_intake.get("input_slots"))
+        if isinstance(row, dict)
+    ]
+    tier_beta_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": bool(row.get("pass")),
+            "current": row.get("current"),
+            "required": row.get("required"),
+            "blocker_count": len(_as_list(row.get("blockers"))),
+        }
+        for row in _as_list(tier_beta_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
     ready = bool(payload.get("public_benchmark_ready"))
     return _capability_row(
         capability_id="public_benchmark_harness",
@@ -211,8 +233,23 @@ def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
             ),
             "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
             "operator_intake_markdown_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD),
+            "tier_beta_gate_status": str(tier_beta_gate.get("status") or ""),
+            "tier_beta_failed_criterion_count": int(
+                tier_beta_gate.get("failed_criterion_count") or 0
+            ),
+            "tier_beta_failed_criteria": [
+                str(row) for row in _as_list(tier_beta_gate.get("failed_criteria"))
+            ],
+            "tier_beta_gate_criteria": tier_beta_criteria,
+            "operator_intake_slots": operator_slots,
             "subset_manifest_summary": _as_dict(payload.get("subset_manifest_summary")),
+            "pose_validity_packet_summary": _as_dict(
+                payload.get("pose_validity_packet_summary")
+            ),
             "enrichment_scorecard_summary": _as_dict(payload.get("enrichment_scorecard_summary")),
+            "vina_gnina_comparison_adapter_summary": _as_dict(
+                payload.get("vina_gnina_comparison_adapter_summary")
+            ),
         },
     )
 
@@ -239,6 +276,27 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             ),
             blocked_claims=[str(row) for row in _as_list(contract.get("blocked_claims"))],
         )
+    phase4_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": bool(row.get("pass")),
+            "current": row.get("current"),
+            "required": row.get("required"),
+            "blocker_count": len(_as_list(row.get("blockers"))),
+        }
+        for row in _as_list(phase4_exit_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
+    operator_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": bool(row.get("required")),
+            "required_field_count": len(_as_list(row.get("required_case_fields"))),
+        }
+        for row in _as_list(operator_intake.get("input_slots"))
+        if isinstance(row, dict)
+    ]
     ready = bool(surface.get("product_surface_ready") and surface.get("contract_pass"))
     return _capability_row(
         capability_id="pocketmd_lite_top_k_refinement",
@@ -272,6 +330,8 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             "phase4_failed_criteria": [
                 str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
             ],
+            "phase4_exit_gate_criteria": phase4_criteria,
+            "operator_intake_slots": operator_slots,
         },
     )
 
@@ -348,6 +408,31 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
     phase3_exit_gate = _as_dict(
         product_report.get("phase3_exit_gate") or surface.get("phase3_exit_gate")
     )
+    phase3_gate_criteria = [
+        {
+            "criterion_id": str(row.get("criterion_id") or ""),
+            "pass": bool(row.get("pass")),
+            "required": row.get("required"),
+            "current_by_target": _as_dict(row.get("current_by_target")),
+            "failed_targets": [
+                str(target) for target in _as_list(row.get("failed_targets"))
+            ],
+            "blocker_count": len(_as_list(row.get("blockers"))),
+        }
+        for row in _as_list(phase3_exit_gate.get("criteria"))
+        if isinstance(row, dict)
+    ]
+    operator_target_slots = [
+        {
+            "slot_id": str(row.get("slot_id") or ""),
+            "target_id": str(row.get("target_id") or ""),
+            "status": str(row.get("status") or ""),
+            "required": bool(row.get("required")),
+            "required_field_count": len(_as_list(row.get("required_fields"))),
+        }
+        for row in _as_list(operator_intake.get("target_slots"))
+        if isinstance(row, dict)
+    ]
     state = _state(surface)
     return _capability_row(
         capability_id="gpcr_hard_decoy_evidence",
@@ -387,6 +472,8 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
             "phase3_failed_criteria": [
                 str(row) for row in _as_list(phase3_exit_gate.get("failed_criteria"))
             ],
+            "phase3_exit_gate_criteria": phase3_gate_criteria,
+            "operator_target_slots": operator_target_slots,
         },
     )
 
