@@ -1,5 +1,7 @@
 {
-  "blockers": [],
+  "blockers": [
+    "worktree_not_clean"
+  ],
   "checks": {
     "explicit_remote_mutation_approval": false,
     "feature_fast_forward_possible": true,
@@ -8,7 +10,7 @@
     "main_synced_to_head": true,
     "remote_fetch_ok": true,
     "remote_safety_ok": true,
-    "worktree_clean": true
+    "worktree_clean": false
   },
   "claim_boundary": "This preflight is read-only. It does not push, merge, publish, or mutate GitHub. A remote update still requires explicit human R4 approval.",
   "commands": {
@@ -16,10 +18,10 @@
     "main_fast_forward_push": "git push origin HEAD:main",
     "post_push_verify": "git fetch origin && git rev-parse HEAD origin/codex/create-architecture-definition-document-for-hybrid-ai origin/main"
   },
-  "contract_pass": true,
-  "generated_at": "2026-06-29T23:42:07.550851+00:00",
+  "contract_pass": false,
+  "generated_at": "2026-06-29T23:44:56.532370+00:00",
   "pending_remote_updates": [],
-  "preflight_pass": true,
+  "preflight_pass": false,
   "r4_disclosure": {
     "action": "no remote mutation required",
     "impact": "No GitHub ref update is needed; feature and main already match local HEAD.",
@@ -28,7 +30,7 @@
     "target": [],
     "verification": "fetch origin and compare remote feature/main refs with local HEAD after push"
   },
-  "reason_code": "PASS",
+  "reason_code": "ERR_GITHUB_SYNC_NOT_COMPLETE",
   "remote_fetch_attempted": true,
   "remote_fetch_ok": true,
   "remote_mutation_approved": false,
@@ -38,13 +40,13 @@
     "branch": "main",
     "feature_ahead_count": 0,
     "feature_fast_forward_possible": true,
-    "local_head_sha": "d20ca82ca2db471f84cd4e157a9a0aa717384784",
+    "local_head_sha": "5dca21418de7a3e168e2061ce7e8d991fa534c5d",
     "main_ahead_count": 0,
     "main_fast_forward_possible": true,
     "remote_feature_ref": "origin/codex/create-architecture-definition-document-for-hybrid-ai",
-    "remote_feature_sha": "d20ca82ca2db471f84cd4e157a9a0aa717384784",
+    "remote_feature_sha": "5dca21418de7a3e168e2061ce7e8d991fa534c5d",
     "remote_main_ref": "origin/main",
-    "remote_main_sha": "d20ca82ca2db471f84cd4e157a9a0aa717384784",
+    "remote_main_sha": "5dca21418de7a3e168e2061ce7e8d991fa534c5d",
     "remote_safety": {
       "errors": [],
       "expected_slug": "betelgeuze-kang/Structural-Analysis",
@@ -58,7 +60,7 @@
         ]
       }
     },
-    "worktree_status_short": ""
+    "worktree_status_short": "M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json"
   },
-  "status": "synced"
+  "status": "blocked"
 }
