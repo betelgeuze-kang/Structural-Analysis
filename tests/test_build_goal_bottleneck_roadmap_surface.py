@@ -78,7 +78,7 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
         "locked_evidence_surface_count": 3,
         "missing_evidence_surface_count": 0,
-        "operator_action_count": 15,
+        "operator_action_count": 16,
         "pocketmd_lite_product_surface_ready": False,
         "public_benchmark_ready": False,
         "release_allowed": False,
