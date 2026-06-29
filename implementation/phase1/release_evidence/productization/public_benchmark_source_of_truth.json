@@ -25,10 +25,10 @@
     "real_enrichment_target_count": 0,
     "status": "operator_evidence_required"
   },
-  "generated_at": "2026-06-29T17:34:18.056007+00:00",
+  "generated_at": "2026-06-29T18:08:37.119518+00:00",
   "input_checksums": {
     "scripts/build_public_benchmark_operator_intake_packet.py": "sha256:ef02271482a5d93eab992420a4bb660b1ba4c56b6adf869d7ad2ed57ad29fcc6",
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:bc0f910c6ff1f6df72d7af08b336796c0993a0226271089cc2f440505e891f6d",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:0ae8a4abb2d5bb347c4651a3189c9a7bbd34efc4b45dffc91d461c6db7adef0a",
     "scripts/materialize_public_benchmark_enrichment_scorecard.py": "sha256:4ad7aee5c6b86be2d949bc67e5985847882abe4db8ce49814dbb60444a821e3c",
     "scripts/materialize_public_benchmark_pose_validity_input.py": "sha256:d7aaba80cab64e91255af672c973184a7bb4deb9e7d51dd67c6bcde690ab44e2",
     "scripts/materialize_public_benchmark_posebusters_validity_packet.py": "sha256:4f01219c11868317313fb458a4d4df8915fc1f8cddf921f5d1fb2cc698a31b5b",
@@ -156,7 +156,7 @@
     "status": "ready_for_pose_validity_input"
   },
   "schema_version": "public-benchmark-source-of-truth.v1",
-  "source_commit_sha": "aedfaf4da15ce3591dafc6714eb0102c3f9b0df4",
+  "source_commit_sha": "ef9e53ccb8e51e7207902ce84db55c4c30b1cc36",
   "source_families": [
     {
       "family_id": "casf_pdbbind",
@@ -243,6 +243,92 @@
     "dry_run_pose_success": true,
     "real_benchmark_case_count": 0,
     "status": "ready"
+  },
+  "tier_beta_gate": {
+    "claim": "tier_beta_public_benchmark_harness",
+    "criteria": [
+      {
+        "blockers": [
+          "casf_pdbbind_source_material_not_attached",
+          "casf_pdbbind_case_checksums_missing",
+          "casf_pdbbind_ligand_symmetry_contracts_missing"
+        ],
+        "criterion_id": "casf_pdbbind_subset_materialized",
+        "current": 0,
+        "pass": false,
+        "required": 12
+      },
+      {
+        "blockers": [
+          "public_benchmark_real_pose_predictions_missing"
+        ],
+        "criterion_id": "real_pose_validity_packet_materialized",
+        "current": 0,
+        "pass": false,
+        "required": 12
+      },
+      {
+        "blockers": [
+          "public_benchmark_real_rmsd_rows_missing"
+        ],
+        "criterion_id": "symmetry_rmsd_scorecard_real_cases",
+        "current": 0,
+        "pass": false,
+        "required": 12
+      },
+      {
+        "blockers": [
+          "public_benchmark_real_pose_validity_rows_missing"
+        ],
+        "criterion_id": "posebusters_style_validity_real_ligands",
+        "current": 0,
+        "pass": false,
+        "required": 12
+      },
+      {
+        "blockers": [
+          "dud_e_lit_pcba_enrichment_targets_missing",
+          "dud_e_lit_pcba_scored_molecules_missing",
+          "dud_e_lit_pcba_active_decoy_labels_missing"
+        ],
+        "criterion_id": "dud_e_lit_pcba_enrichment_ready",
+        "current": 0,
+        "pass": false,
+        "required": ">=1_ready_target_with_active_decoy_labels"
+      },
+      {
+        "blockers": [
+          "vina_gnina_comparison_cases_missing",
+          "vina_gnina_engine_runs_missing",
+          "vina_gnina_external_receipts_missing"
+        ],
+        "criterion_id": "vina_gnina_comparison_ready",
+        "current": 0,
+        "pass": false,
+        "required": ">=1_case_with_vina_and_gnina_engine_runs"
+      },
+      {
+        "blockers": [
+          "public_benchmark_external_receipts_missing"
+        ],
+        "criterion_id": "external_receipts_attached",
+        "current": 0,
+        "pass": false,
+        "required": "source_license_or_accession_and_provenance_receipts_for_all_materialized_rows"
+      }
+    ],
+    "failed_criteria": [
+      "casf_pdbbind_subset_materialized",
+      "real_pose_validity_packet_materialized",
+      "symmetry_rmsd_scorecard_real_cases",
+      "posebusters_style_validity_real_ligands",
+      "dud_e_lit_pcba_enrichment_ready",
+      "vina_gnina_comparison_ready",
+      "external_receipts_attached"
+    ],
+    "failed_criterion_count": 7,
+    "minimum_subset_case_count": 12,
+    "status": "blocked"
   },
   "tier_beta_ready": false,
   "vina_gnina_comparison_adapter_summary": {
