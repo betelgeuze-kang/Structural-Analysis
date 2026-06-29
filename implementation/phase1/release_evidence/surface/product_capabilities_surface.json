@@ -70,6 +70,41 @@
         "operator_intake_markdown_artifact": "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.md",
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 4,
+        "operator_intake_slots": [
+          {
+            "depends_on_count": 0,
+            "required": true,
+            "slot_id": "casf_pdbbind_subset_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 1,
+            "required": true,
+            "slot_id": "pose_coordinate_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 0,
+            "required": true,
+            "slot_id": "dud_e_lit_pcba_enrichment_intake",
+            "status": "operator_input_required"
+          },
+          {
+            "depends_on_count": 2,
+            "required": true,
+            "slot_id": "vina_gnina_comparison_intake",
+            "status": "operator_input_required"
+          }
+        ],
+        "pose_validity_packet_summary": {
+          "check_count": 6,
+          "dry_run_pose_validity_ready": true,
+          "materializer_schema_version": "public-benchmark-posebusters-style-validity-packet-materialization.v1",
+          "real_benchmark_case_count": 0,
+          "required_check_count": 6,
+          "status": "ready_for_dry_run",
+          "validator_schema_version": "public-benchmark-pose-validity-validation.v1"
+        },
         "public_benchmark_ready": false,
         "status": "seed_ready_materialization_blocked",
         "subset_manifest_summary": {
@@ -81,7 +116,83 @@
           "materialized_case_count": 0,
           "target_subset_case_count": 12
         },
-        "tier_beta_ready": false
+        "tier_beta_failed_criteria": [
+          "casf_pdbbind_subset_materialized",
+          "real_pose_validity_packet_materialized",
+          "symmetry_rmsd_scorecard_real_cases",
+          "posebusters_style_validity_real_ligands",
+          "dud_e_lit_pcba_enrichment_ready",
+          "vina_gnina_comparison_ready",
+          "external_receipts_attached"
+        ],
+        "tier_beta_failed_criterion_count": 7,
+        "tier_beta_gate_criteria": [
+          {
+            "blocker_count": 3,
+            "criterion_id": "casf_pdbbind_subset_materialized",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "real_pose_validity_packet_materialized",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "symmetry_rmsd_scorecard_real_cases",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "posebusters_style_validity_real_ligands",
+            "current": 0,
+            "pass": false,
+            "required": 12
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "dud_e_lit_pcba_enrichment_ready",
+            "current": 0,
+            "pass": false,
+            "required": ">=1_ready_target_with_active_decoy_labels"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "vina_gnina_comparison_ready",
+            "current": 0,
+            "pass": false,
+            "required": ">=1_case_with_vina_and_gnina_engine_runs"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "external_receipts_attached",
+            "current": 0,
+            "pass": false,
+            "required": "source_license_or_accession_and_provenance_receipts_for_all_materialized_rows"
+          }
+        ],
+        "tier_beta_gate_status": "blocked",
+        "tier_beta_ready": false,
+        "vina_gnina_comparison_adapter_summary": {
+          "blockers": [
+            "vina_gnina_comparison_cases_missing",
+            "vina_gnina_engine_runs_missing",
+            "vina_gnina_external_receipts_missing"
+          ],
+          "public_benchmark_engine_comparison_ready": false,
+          "real_comparison_case_count": 0,
+          "status": "operator_evidence_required",
+          "supported_engines": [
+            "vina",
+            "gnina"
+          ]
+        }
       },
       "title": "Public benchmark harness"
     },
@@ -146,6 +257,95 @@
         "first_blocked_target": "DRD2",
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 3,
+        "operator_target_slots": [
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "drd2_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "DRD2"
+          },
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "htr2a_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "HTR2A"
+          },
+          {
+            "required": true,
+            "required_field_count": 5,
+            "slot_id": "oprm1_hard_decoy_metrics",
+            "status": "operator_input_required",
+            "target_id": "OPRM1"
+          }
+        ],
+        "phase3_exit_gate_criteria": [
+          {
+            "blocker_count": 3,
+            "criterion_id": "ranking_pr_auc_ci_low_min",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": ">=0.45"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "top20_hit_rate_min",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": ">=0.2"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "decoys_above_positive_count_max",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": "<=0"
+          },
+          {
+            "blocker_count": 3,
+            "criterion_id": "no_positive_out_anchored_by_top_decoys",
+            "current_by_target": {
+              "DRD2": null,
+              "HTR2A": null,
+              "OPRM1": null
+            },
+            "failed_targets": [
+              "DRD2",
+              "HTR2A",
+              "OPRM1"
+            ],
+            "pass": false,
+            "required": false
+          }
+        ],
         "phase3_exit_gate_status": "blocked",
         "phase3_failed_criteria": [
           "ranking_pr_auc_ci_low_min",
@@ -189,6 +389,72 @@
       "summary": {
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 1,
+        "operator_intake_slots": [
+          {
+            "required": true,
+            "required_field_count": 14,
+            "slot_id": "top_k_refinement_rows",
+            "status": "operator_input_required"
+          }
+        ],
+        "phase4_exit_gate_criteria": [
+          {
+            "blocker_count": 1,
+            "criterion_id": "top_k_refinement_rows_present",
+            "current": 0,
+            "pass": false,
+            "required": ">=1"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "local_min_survival_materialized",
+            "current": null,
+            "pass": false,
+            "required": "present"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "contact_persistence_materialized",
+            "current": null,
+            "pass": false,
+            "required": "present"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "h_bond_persistence_materialized",
+            "current": null,
+            "pass": false,
+            "required": "present"
+          },
+          {
+            "blocker_count": 0,
+            "criterion_id": "clash_relief_materialized",
+            "current": null,
+            "pass": false,
+            "required": "present"
+          },
+          {
+            "blocker_count": 1,
+            "criterion_id": "uncertainty_summary_materialized",
+            "current": null,
+            "pass": false,
+            "required": "present"
+          },
+          {
+            "blocker_count": 4,
+            "criterion_id": "report_blockers_resolved",
+            "current": false,
+            "pass": false,
+            "required": true
+          },
+          {
+            "blocker_count": 0,
+            "criterion_id": "broad_all_atom_fep_claims_locked",
+            "current": true,
+            "pass": true,
+            "required": true
+          }
+        ],
         "phase4_exit_gate_status": "blocked",
         "phase4_failed_criteria": [
           "top_k_refinement_rows_present",
@@ -214,7 +480,7 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T18:31:19.450180+00:00",
+  "generated_at": "2026-06-29T18:52:13.067402+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:b976038d1e2ed14629b1a3d41ad08755fe59ae15243084fdc7798a95986cac2d",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:adcfe96ee079586804973cd96eca558a42449cd063bac6cfd46a395c5600c2a9",
@@ -239,7 +505,7 @@
     "implementation/phase1/release_evidence/surface/steel_composite_constitutive_gate_report.json": "sha256:062596b524d83b2f13c6e2408f2a15b35d46899f4ae201d879bf63e08b449a70",
     "implementation/phase1/release_evidence/surface/structural_contact_gate_report.json": "sha256:98b11c3b40f5c2f569e4fe9b3e0f7ee2e65c9679b78448ed3e481952912e1199",
     "implementation/phase1/release_evidence/surface/surface_interaction_benchmark_gate_report.json": "sha256:4cbbd2e884bdc2eaac8a9a9c9b65061d79c1679967945a2b368403991fe0af6c",
-    "scripts/build_product_capabilities_surface.py": "sha256:4cd69fa31fa171de4d36712c1118e0e47deb75a079486467bc909e1c31f45db1",
+    "scripts/build_product_capabilities_surface.py": "sha256:027bde71feefec1fca79c7b6fc9cadc03fb0563e8a203031055001ebfb3c9f59",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "locked": false,
@@ -260,7 +526,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "1ce0ec04f26bfd9e5a99b3bebfdb46127d6d5206",
+  "source_commit_sha": "d6955d9286040feae0f7e51f50885abe4883c746",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
