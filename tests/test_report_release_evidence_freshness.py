@@ -183,12 +183,85 @@ def test_release_evidence_freshness_default_artifacts_include_real_project_and_c
     assert "developer_preview_rc_status" in labels
     assert "accuracy_parity_scorecard" in labels
     assert "product_production_ai_checkpoint_readiness" in labels
+    assert "goal_readiness_rollup" not in labels
+    assert "product_goal_completion_audit" not in labels
+    assert "goal_operator_action_board" not in labels
     assert len(artifacts) == 14
 
     for label, artifact_path, producer_path in artifacts:
         assert isinstance(artifact_path, Path)
         assert isinstance(producer_path, Path)
         assert str(artifact_path).endswith(".json"), label
+
+
+def test_source_of_truth_gap_classification_keeps_rollups_out_of_leaf_freshness() -> None:
+    labels = {label for label, _artifact, _producer in freshness.DEFAULT_ARTIFACTS}
+    rows = {
+        row["candidate"]: row
+        for row in freshness.SOURCE_OF_TRUTH_GAP_CLASSIFICATION
+    }
+
+    assert set(rows) == {
+        "accuracy_parity_scorecard",
+        "product_production_ai_checkpoint_readiness",
+        "goal_readiness_rollup",
+        "product_goal_completion_audit",
+        "goal_operator_action_board",
+    }
+
+    for candidate in (
+        "accuracy_parity_scorecard",
+        "product_production_ai_checkpoint_readiness",
+    ):
+        row = rows[candidate]
+        assert row["classification"] == "fixed"
+        assert row["freshness_policy"] == "direct_leaf_row"
+        assert row["freshness_label"] in labels
+
+    for candidate in (
+        "goal_readiness_rollup",
+        "product_goal_completion_audit",
+        "goal_operator_action_board",
+    ):
+        row = rows[candidate]
+        assert row["classification"] == "aggregator-review"
+        assert row["freshness_policy"] == "aggregator_source_tracking_only"
+        assert row["freshness_label"] == ""
+        assert candidate not in labels
+
+
+def test_release_evidence_freshness_report_exposes_gap_classification_summary(
+    tmp_path: Path,
+) -> None:
+    freshness._git_head = lambda _repo_root: "abcdef1234567890"
+    producer = tmp_path / "producer.py"
+    producer.write_text("print('producer')\n", encoding="utf-8")
+    artifact = _write_json(
+        tmp_path / "evidence.json",
+        {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "source_commit_sha": "abcdef123456",
+            "engine_version": "engine-v1",
+            "input_checksums": {"fixture": "sha256:123"},
+            "reused_evidence": False,
+        },
+    )
+    os.utime(producer, (artifact.stat().st_mtime - 5, artifact.stat().st_mtime - 5))
+
+    payload = freshness.build_report(
+        repo_root=tmp_path,
+        artifacts=(("evidence", artifact, producer),),
+        max_age_days=30,
+    )
+
+    assert payload["summary"]["source_of_truth_gap_candidate_count"] == 5
+    assert payload["summary"]["source_of_truth_gap_fixed_count"] == 2
+    assert payload["summary"]["source_of_truth_gap_aggregator_review_count"] == 3
+    candidates = {
+        row["candidate"] for row in payload["source_of_truth_gap_classification"]
+    }
+    assert "accuracy_parity_scorecard" in candidates
+    assert "goal_operator_action_board" in candidates
 
 
 def test_release_evidence_freshness_audits_residual_level3_status(tmp_path: Path) -> None:

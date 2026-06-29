@@ -117,6 +117,63 @@ DEFAULT_ARTIFACTS = (
     ),
 )
 
+SOURCE_OF_TRUTH_GAP_CLASSIFICATION: tuple[dict[str, str], ...] = (
+    {
+        "candidate": "accuracy_parity_scorecard",
+        "classification": "fixed",
+        "freshness_policy": "direct_leaf_row",
+        "freshness_label": "accuracy_parity_scorecard",
+        "current_repo_match": "implementation/phase1/real_accuracy_validation_report.json",
+        "decision": "Direct validation receipt with source tracking in freshness audit.",
+    },
+    {
+        "candidate": "product_production_ai_checkpoint_readiness",
+        "classification": "fixed",
+        "freshness_policy": "direct_leaf_row",
+        "freshness_label": "product_production_ai_checkpoint_readiness",
+        "current_repo_match": (
+            "implementation/phase1/release_evidence/productization/"
+            "ai_engine_productization_contracts.json"
+        ),
+        "decision": "Direct productization receipt with checkpoint source tracking in freshness audit.",
+    },
+    {
+        "candidate": "goal_readiness_rollup",
+        "classification": "aggregator-review",
+        "freshness_policy": "aggregator_source_tracking_only",
+        "freshness_label": "",
+        "current_repo_match": (
+            "implementation/phase1/release_evidence/productization/"
+            "product_readiness_snapshot.json"
+        ),
+        "decision": "Keep snapshot-level upstream stale/inconsistent policy instead of a leaf row.",
+    },
+    {
+        "candidate": "product_goal_completion_audit",
+        "classification": "aggregator-review",
+        "freshness_policy": "aggregator_source_tracking_only",
+        "freshness_label": "",
+        "current_repo_match": (
+            "implementation/phase1/release_evidence/productization/"
+            "pm_release_gate_completion_audit.json"
+        ),
+        "decision": "Track PM report and closure-board inputs rather than treating the audit as heavy evidence.",
+    },
+    {
+        "candidate": "goal_operator_action_board",
+        "classification": "aggregator-review",
+        "freshness_policy": "aggregator_source_tracking_only",
+        "freshness_label": "",
+        "current_repo_match": (
+            "implementation/phase1/release_evidence/productization/"
+            "pm_release_blocker_action_register.json; "
+            "implementation/phase1/release_evidence/productization/"
+            "pm_release_blocker_closure_board.json"
+        ),
+        "decision": "Keep operator boards as sourced rollups of PM/freshness inputs, not closure evidence.",
+    },
+)
+
 
 def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
@@ -160,6 +217,14 @@ def _report_input_checksums(repo_root: Path, rows: list[dict[str, Any]]) -> dict
                 f"sha256:{_sha256(path)}" if path.exists() else "missing"
             )
     return checksums
+
+
+def _classification_count(classification: str) -> int:
+    return sum(
+        1
+        for row in SOURCE_OF_TRUTH_GAP_CLASSIFICATION
+        if row["classification"] == classification
+    )
 
 
 def _parse_iso(value: Any) -> datetime | None:
@@ -517,6 +582,13 @@ def build_report(
             "artifact_count": len(rows),
             "pass_count": sum(1 for row in rows if row["ok"]),
             "blocker_count": len(blockers),
+            "source_of_truth_gap_candidate_count": len(
+                SOURCE_OF_TRUTH_GAP_CLASSIFICATION
+            ),
+            "source_of_truth_gap_fixed_count": _classification_count("fixed"),
+            "source_of_truth_gap_aggregator_review_count": _classification_count(
+                "aggregator-review"
+            ),
             "source_commit_match_count": sum(
                 1 for row in rows if row["source_commit_match"]
             ),
@@ -535,6 +607,9 @@ def build_report(
         },
         "blockers": blockers,
         "rows": rows,
+        "source_of_truth_gap_classification": [
+            dict(row) for row in SOURCE_OF_TRUTH_GAP_CLASSIFICATION
+        ],
         "claim_boundary": (
             "Freshness audit records whether release evidence exposes source commit, engine version, "
             "input checksum, reuse marker, generated_at, producer dependency mtime, and declared "
