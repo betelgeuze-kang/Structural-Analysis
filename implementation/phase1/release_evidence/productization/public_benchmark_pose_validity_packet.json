@@ -28,11 +28,72 @@
     }
   ],
   "contract_pass": true,
+  "dry_run_validation": {
+    "blocker_count": 0,
+    "blockers": [],
+    "case_count": 1,
+    "claim_boundary": "This validator performs local coordinate, atom-order, symmetry permutation, minimum-distance, receptor-context, and RMSD sanity checks. It does not infer bond orders, protonation, tautomer equivalence, docking protocol validity, or public benchmark performance.",
+    "contract_pass": true,
+    "dry_run_case_count": 1,
+    "pose_validity_ready": true,
+    "real_benchmark_case_count": 0,
+    "rows": [
+      {
+        "atom_count": 4,
+        "blockers": [],
+        "case_id": "dry_run_symmetry_swap_pose",
+        "min_interatomic_distance_threshold_angstrom": 0.35,
+        "minimum_interatomic_distance_angstrom": 1.0,
+        "pass": true,
+        "rmsd_score": {
+          "atom_count": 4,
+          "best_permutation": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "best_rmsd_angstrom": 6.6973807122470445e-16,
+          "claim_boundary": "The scorer only evaluates rigid-alignment RMSD over manifest-supplied atom permutations. It does not infer chemical equivalence, protonation state, tautomer identity, or receptor preparation correctness.",
+          "permutation_rows": [
+            {
+              "pass": true,
+              "permutation": [
+                0,
+                1,
+                2,
+                3
+              ],
+              "rmsd_angstrom": 0.9097209139125618
+            },
+            {
+              "pass": true,
+              "permutation": [
+                0,
+                2,
+                1,
+                3
+              ],
+              "rmsd_angstrom": 6.6973807122470445e-16
+            }
+          ],
+          "pose_success": true,
+          "schema_version": "symmetry-aware-ligand-rmsd.v1",
+          "symmetry_permutation_count": 2,
+          "threshold_angstrom": 2.0
+        },
+        "status": "pass"
+      }
+    ],
+    "schema_version": "public-benchmark-pose-validity-validation.v1",
+    "status": "pass"
+  },
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T14:19:25.308118+00:00",
+  "generated_at": "2026-06-29T14:25:26.672275+00:00",
   "input_checksums": {
-    "scripts/build_public_benchmark_source_of_truth.py": "sha256:62ba2bca4ac52250c846ec74eee6971a5b8d4a8dbe07f3a9ef5bec1871eeb821",
+    "scripts/build_public_benchmark_source_of_truth.py": "sha256:f37a3ddd57a1dd9e0b55b3737ddeac01c15e60c877d833cd469308f2af55be55",
     "scripts/score_symmetry_aware_ligand_rmsd.py": "sha256:153367f8a69992d3f419f81f896bfa4ebeb1a9a945a993d3351d419ae3834821",
+    "scripts/validate_public_benchmark_pose_validity.py": "sha256:50018e509497cb13450feaecc769d47944b38f92c5594a149503c1cbcfdfc1c4",
     "scripts/validate_public_benchmark_subset_manifest.py": "sha256:b4577e4d510aa1cc6e7c3f8cb9b5620ee8edc05f01f5c787f6af7216ff99145e"
   },
   "posebusters_style_boundary": "The packet defines PoseBusters-style sanity checks for a local harness. It does not vendor PoseBusters, infer chemistry, or replace toolkit-backed bond/order/protonation validation once real ligands are attached.",
@@ -40,6 +101,19 @@
   "reuse_policy": "pose_validity_packet_generated_from_repo_contract",
   "reused_evidence": false,
   "schema_version": "public-benchmark-pose-validity-packet.v1",
-  "source_commit_sha": "02f5738c707d4f56425ca17184b8d560077cabd4",
-  "status": "ready_for_dry_run"
+  "source_commit_sha": "c8ff0a6d7dfe12e52d907ce20ffed4dccfd29675",
+  "status": "ready_for_dry_run",
+  "validator": {
+    "required_pose_fields": [
+      "case_id",
+      "reference_atoms",
+      "predicted_atoms",
+      "ligand_atom_order_contract",
+      "symmetry_permutation_contract",
+      "protein_structure_path",
+      "receptor_context"
+    ],
+    "schema_version": "public-benchmark-pose-validity-validation.v1",
+    "validation_command": "python3 scripts/validate_public_benchmark_pose_validity.py --input <pose-validity-input.json> --fail-blocked"
+  }
 }
