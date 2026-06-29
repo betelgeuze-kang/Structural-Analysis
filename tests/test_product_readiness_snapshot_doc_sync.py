@@ -244,7 +244,7 @@ def test_docs_pm_release_area_and_handoff_counts_match_register() -> None:
     open_count = int(summary["open_blocker_count"])
     release_area_count = int(summary["release_area_blocker_count"])
     fresh_count = int(summary["local_remediation_ready_count"])
-    external_customer_count = open_count - release_area_count - fresh_count
+    external_customer_count = int(summary["external_input_required_count"])
     expected_fragments = [
         f"{green}/{total}",
         f"`{open_count}`",

@@ -627,6 +627,18 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         "release_area_matrix": [{"ok": True} for _ in range(16)],
         "release_area_blockers": [],
         "full_release_blockers": [],
+        "release_decision": {
+            "release_allowed": True,
+            "blocked_release_count": 0,
+            "first_blocker": "",
+            "operator_action_count": 0,
+            "approval_token_count": 0,
+            "stale_artifact_count": 0,
+            "evidence_surface_count": 2,
+            "locked_evidence_surface_count": 0,
+            "public_benchmark_ready": True,
+            "broad_gpcr_family_claim_safe": False,
+        },
     })
     _write_json(tmp_path / "pm_release_blocker_action_register.json", {
         "schema_version": "pm-release-blocker-action-register.v1",
@@ -783,6 +795,18 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         "release_area_matrix": [{"ok": True} for _ in range(16)],
         "release_area_blockers": [],
         "full_release_blockers": [],
+        "release_decision": {
+            "release_allowed": True,
+            "blocked_release_count": 0,
+            "first_blocker": "",
+            "operator_action_count": 0,
+            "approval_token_count": 0,
+            "stale_artifact_count": 0,
+            "evidence_surface_count": 2,
+            "locked_evidence_surface_count": 0,
+            "public_benchmark_ready": True,
+            "broad_gpcr_family_claim_safe": False,
+        },
     })
     _write_json(tmp_path / "pm_release_blocker_action_register.json", {
         "schema_version": "pm-release-blocker-action-register.v1",
@@ -852,6 +876,10 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["independent_product_ready"] is True
     assert payload["ga_enterprise_ready"] is True
     assert payload["release_ready"] is True
+    assert payload["release_decision"]["release_allowed"] is True
+    assert payload["release_decision"]["evidence_surface_count"] == 2
+    assert payload["release_decision"]["broad_gpcr_family_claim_safe"] is False
+    assert payload["components"]["pm_release"]["release_decision"] == payload["release_decision"]
     metadata_by_artifact = {
         row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }

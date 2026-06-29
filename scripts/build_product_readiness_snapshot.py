@@ -1497,6 +1497,7 @@ def build_snapshot(
         and pm_report.get("release_area_gate_ready")
         and pm_report.get("full_release_gate_ready")
     )
+    pm_release_decision = _as_dict(pm_report.get("release_decision"))
     pm_full_blockers = [str(item) for item in _as_list(pm_report.get("full_release_blockers"))]
     release_area_blockers = [str(item) for item in _as_list(pm_report.get("release_area_blockers"))]
     original_pm_blockers = pm_full_blockers or release_area_blockers
@@ -1980,6 +1981,7 @@ def build_snapshot(
         "independent_product_ready": independent_product_ready,
         "ga_enterprise_ready": ga_enterprise_ready,
         "release_ready": release_ready,
+        "release_decision": pm_release_decision,
         "status": status,
         "reason_code": "PASS" if release_ready else status.upper(),
         "blocker_count": len(blockers),
@@ -2035,6 +2037,7 @@ def build_snapshot(
                 "release_area_total_count": release_area_total,
                 "release_area_blocker_count": len(release_area_blockers),
                 "full_release_blocker_count": len(pm_full_blockers),
+                "release_decision": pm_release_decision,
                 "suppressed_duplicate_blocker_count": len(
                     suppressed_pm_release_duplicate_blockers
                 ),

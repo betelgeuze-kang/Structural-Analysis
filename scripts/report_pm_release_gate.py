@@ -42,6 +42,10 @@ DEFAULT_ZERO_COPY_STRICT = Path("implementation/phase1/zero_copy_real_probe_repo
 DEFAULT_MEASURED_BREADTH = Path(
     "implementation/phase1/release_evidence/productization/measured_benchmark_breadth_report.json"
 )
+DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS = Path(
+    "implementation/phase1/release/external_benchmark_submission_readiness.json"
+)
+DEFAULT_EVIDENCE_SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 DEFAULT_WORST_CASE_REPORT = Path("implementation/phase1/release_evidence/productization/worst_case_report.json")
 DEFAULT_WORKFLOW_PRODUCTIZATION = Path("implementation/phase1/workflow_productization_gate_report.json")
 DEFAULT_RELEASE_REGISTRY = Path("implementation/phase1/release/release_registry.json")
@@ -226,6 +230,220 @@ def _truthy_contract(payload: dict[str, Any]) -> bool:
         or payload.get("pass", False)
         or str(payload.get("status", "")).strip().lower() == "ready"
     )
+
+
+def _evidence_surface_json_paths(evidence_surface_dir: Path) -> list[Path]:
+    if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
+        return []
+    return sorted(path for path in evidence_surface_dir.glob("*.json") if path.is_file())
+
+
+def _surface_signal_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    signals = {
+        "status": payload.get("status"),
+        "reason_code": payload.get("reason_code"),
+        "reason": payload.get("reason"),
+        "blockers": payload.get("blockers"),
+        "claim_boundary": payload.get("claim_boundary"),
+        "claim_status": payload.get("claim_status"),
+        "claim_locked": payload.get("claim_locked"),
+        "locked": payload.get("locked"),
+        "missing": payload.get("missing"),
+    }
+    return {
+        key: value
+        for key, value in signals.items()
+        if value not in (None, False, "", [], {})
+    }
+
+
+def _contains_locked_signal(payload: dict[str, Any]) -> bool:
+    if payload.get("locked") is True or payload.get("claim_locked") is True:
+        return True
+    try:
+        text = json.dumps(_surface_signal_payload(payload), ensure_ascii=False, sort_keys=True).lower()
+    except Exception:
+        text = str(payload).lower()
+    return "locked" in text or "claim_lock" in text
+
+
+def _contains_missing_signal(payload: dict[str, Any]) -> bool:
+    if payload.get("missing") is True:
+        return True
+    try:
+        text = json.dumps(_surface_signal_payload(payload), ensure_ascii=False, sort_keys=True).lower()
+    except Exception:
+        text = str(payload).lower()
+    return "missing" in text or "not_found" in text
+
+
+def _evidence_surface_rows(evidence_surface_dir: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for path in _evidence_surface_json_paths(evidence_surface_dir):
+        payload = _load_json(path)
+        summary = _summary(payload)
+        status = str(payload.get("status") or payload.get("reason_code") or "").strip()
+        if not status:
+            status = "ready" if _truthy_contract(payload) else "blocked"
+        surface_id = path.stem
+        rows.append(
+            {
+                "surface_id": surface_id,
+                "path": str(path),
+                "present": bool(payload),
+                "contract_pass": _truthy_contract(payload),
+                "status": status,
+                "reason_code": str(payload.get("reason_code", "")),
+                "blocker_count": len(_as_list(payload.get("blockers"))),
+                "locked": _contains_locked_signal(payload),
+                "missing": not payload or _contains_missing_signal(payload),
+                "summary_line": str(payload.get("summary_line") or summary.get("summary_line") or ""),
+            }
+        )
+    return rows
+
+
+def _operator_action_count(pm_blocker_register: dict[str, Any]) -> int:
+    rows = _rows(pm_blocker_register)
+    if rows:
+        return len(rows)
+    summary = _summary(pm_blocker_register)
+    for key in ("operator_action_count", "open_blocker_count", "owner_input_required_count"):
+        if key in summary:
+            return _as_int(summary.get(key), 0)
+    return 0
+
+
+def _approval_token_count(
+    *,
+    full_release_blockers: list[str],
+    pm_blocker_register: dict[str, Any],
+) -> int:
+    approval_tokens: set[str] = {
+        item for item in full_release_blockers if "approval" in item.lower()
+    }
+    for row in _rows(pm_blocker_register):
+        signals = [
+            str(row.get(key, ""))
+            for key in (
+                "blocker_id",
+                "blocker_code",
+                "owner_action",
+                "next_action",
+                "resolution_type",
+                "claim_boundary",
+            )
+        ]
+        if any("approval" in item.lower() for item in signals):
+            approval_tokens.add(str(row.get("blocker_id") or row.get("blocker_code") or len(approval_tokens)))
+    return len(approval_tokens)
+
+
+def _stale_artifact_count(release_evidence_freshness_payload: dict[str, Any]) -> int:
+    summary = _summary(release_evidence_freshness_payload)
+    if "stale_artifact_count" in summary:
+        return _as_int(summary.get("stale_artifact_count"), 0)
+    return _as_int(summary.get("blocker_count"), 0)
+
+
+def _public_benchmark_ready(
+    measured_benchmark_breadth_payload: dict[str, Any],
+    external_benchmark_submission_readiness_payload: dict[str, Any],
+) -> bool:
+    external_summary = _summary(external_benchmark_submission_readiness_payload)
+    external_ready = bool(
+        external_summary.get("ready_to_start_full_submission_now")
+        or external_summary.get("ready_to_start_now")
+        or external_summary.get("ready_to_submit")
+    )
+    return bool(
+        _truthy_contract(measured_benchmark_breadth_payload)
+        and _truthy_contract(external_benchmark_submission_readiness_payload)
+        and external_ready
+    )
+
+
+def _release_decision(
+    *,
+    release_allowed: bool,
+    blockers: list[str],
+    release_area_blockers: list[str],
+    measured_benchmark_breadth_payload: dict[str, Any],
+    external_benchmark_submission_readiness_payload: dict[str, Any],
+    release_evidence_freshness_payload: dict[str, Any],
+    pm_blocker_register: dict[str, Any],
+    evidence_surface_dir: Path,
+) -> dict[str, Any]:
+    full_release_blockers = [*blockers, *release_area_blockers]
+    evidence_surfaces = _evidence_surface_rows(evidence_surface_dir)
+    missing_surface_count = sum(1 for row in evidence_surfaces if row["missing"])
+    if not evidence_surface_dir.exists() or not evidence_surface_dir.is_dir():
+        missing_surface_count += 1
+    locked_surface_count = sum(1 for row in evidence_surfaces if row["locked"])
+    gpcr_surfaces = [
+        row
+        for row in evidence_surfaces
+        if "gpcr" in row["surface_id"].lower()
+    ]
+    h_bond_surfaces = [
+        row
+        for row in evidence_surfaces
+        if "h_bond" in row["surface_id"].lower() or "hbond" in row["surface_id"].lower()
+    ]
+    broad_gpcr_family_claim_safe = bool(
+        gpcr_surfaces
+        and all(bool(row["contract_pass"]) for row in gpcr_surfaces)
+        and not any(bool(row["locked"]) for row in gpcr_surfaces)
+    )
+    stale_count = _stale_artifact_count(release_evidence_freshness_payload)
+    operator_actions: list[dict[str, str]] = []
+    if stale_count:
+        operator_actions.append(
+            {
+                "action_id": "refresh_release_evidence_freshness",
+                "status": "refresh_required",
+                "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
+                "artifact": "release_evidence_freshness_report",
+            }
+        )
+    if missing_surface_count:
+        operator_actions.append(
+            {
+                "action_id": "attach_missing_evidence_surfaces",
+                "status": "evidence_required",
+                "reason": "one or more expected evidence surface inputs are missing",
+                "artifact": str(evidence_surface_dir),
+            }
+        )
+    return {
+        "release_allowed": bool(release_allowed),
+        "blocked_release_count": len(full_release_blockers),
+        "first_blocker": full_release_blockers[0] if full_release_blockers else "",
+        "operator_action_count": max(_operator_action_count(pm_blocker_register), len(full_release_blockers)),
+        "approval_token_count": _approval_token_count(
+            full_release_blockers=full_release_blockers,
+            pm_blocker_register=pm_blocker_register,
+        ),
+        "stale_artifact_count": stale_count,
+        "stale_artifact_refresh_required": bool(stale_count),
+        "evidence_surface_count": len(evidence_surfaces),
+        "missing_evidence_surface_count": missing_surface_count,
+        "locked_evidence_surface_count": locked_surface_count,
+        "public_benchmark_ready": _public_benchmark_ready(
+            measured_benchmark_breadth_payload,
+            external_benchmark_submission_readiness_payload,
+        ),
+        "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
+        "h_bond_evidence_surface_present": bool(h_bond_surfaces),
+        "gpcr_evidence_surface_present": bool(gpcr_surfaces),
+        "evidence_surface_dir": str(evidence_surface_dir),
+        "evidence_surfaces": evidence_surfaces,
+        "operator_actions": operator_actions,
+        "claim_boundary": (
+            "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family "
+            "claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked."
+        ),
+    }
 
 
 def _handoff_ready_pass(payload: dict[str, Any]) -> bool:
@@ -2576,6 +2794,8 @@ def build_report(
     ci_require_hip: Path = DEFAULT_CI_REQUIRE_HIP,
     zero_copy_strict: Path = DEFAULT_ZERO_COPY_STRICT,
     measured_benchmark_breadth: Path = DEFAULT_MEASURED_BREADTH,
+    external_benchmark_submission_readiness: Path = DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    evidence_surface_dir: Path = DEFAULT_EVIDENCE_SURFACE_DIR,
     worst_case_report: Path = DEFAULT_WORST_CASE_REPORT,
     workflow_productization: Path = DEFAULT_WORKFLOW_PRODUCTIZATION,
     release_registry: Path = DEFAULT_RELEASE_REGISTRY,
@@ -2743,6 +2963,20 @@ def build_report(
     release_area_blockers = _release_area_blockers(release_area_matrix)
     release_area_ready = all(bool(row["ok"]) for row in release_area_matrix)
     full_release_gate_ready = bool(limited_ready and release_area_ready)
+    measured_benchmark_breadth_payload = _load_json(measured_benchmark_breadth)
+    external_benchmark_submission_readiness_payload = _load_json(external_benchmark_submission_readiness)
+    release_evidence_freshness_payload = _load_json(release_evidence_freshness)
+    pm_blocker_register_payload = _load_json(pm_release_blocker_action_register)
+    release_decision = _release_decision(
+        release_allowed=full_release_gate_ready,
+        blockers=blockers,
+        release_area_blockers=release_area_blockers,
+        measured_benchmark_breadth_payload=measured_benchmark_breadth_payload,
+        external_benchmark_submission_readiness_payload=external_benchmark_submission_readiness_payload,
+        release_evidence_freshness_payload=release_evidence_freshness_payload,
+        pm_blocker_register=pm_blocker_register_payload,
+        evidence_surface_dir=evidence_surface_dir,
+    )
     ga_readiness = _load_json(ga_enterprise_readiness)
     customer_shadow = _load_json(customer_shadow_evidence_status)
     customer_shadow_summary = _summary(customer_shadow)
@@ -2825,6 +3059,8 @@ def build_report(
             ga_enterprise_signoff_intake,
             paid_pilot_scope_guard,
             customer_shadow_evidence_status,
+            external_benchmark_submission_readiness,
+            *_evidence_surface_json_paths(evidence_surface_dir),
         ]
     )
 
@@ -2859,6 +3095,7 @@ def build_report(
         "release_area_matrix": release_area_matrix,
         "release_area_blockers": release_area_blockers,
         "full_release_blockers": [*blockers, *release_area_blockers],
+        "release_decision": release_decision,
         "implementation_orchestration": {
             "cursor_opencode_worker_preflight_pass": _reason_pass(ai_orchestration),
             "artifacts": {"ai_orchestration_preflight": str(ai_orchestration_preflight)},
@@ -2967,6 +3204,7 @@ def build_report(
 
 
 def _markdown(payload: dict[str, Any]) -> str:
+    release_decision = _as_dict(payload.get("release_decision"))
     lines = [
         "# PM Release Gate",
         "",
@@ -2985,6 +3223,15 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"- `commercial_gap_status`: `{payload['gap_ledger_status']['commercial_gap_status']}`",
         f"- `commercial_solver_gap_ready`: `{payload['gap_ledger_status']['commercial_solver_gap_ready']}`",
         f"- `ai_engine_gap_ready`: `{payload['gap_ledger_status']['ai_engine_gap_ready']}`",
+        f"- `release_allowed`: `{release_decision.get('release_allowed', False)}`",
+        f"- `blocked_release_count`: `{release_decision.get('blocked_release_count', 0)}`",
+        f"- `first_blocker`: `{release_decision.get('first_blocker', '') or 'none'}`",
+        f"- `operator_action_count`: `{release_decision.get('operator_action_count', 0)}`",
+        f"- `stale_artifact_count`: `{release_decision.get('stale_artifact_count', 0)}`",
+        f"- `evidence_surface_count`: `{release_decision.get('evidence_surface_count', 0)}`",
+        f"- `locked_evidence_surface_count`: `{release_decision.get('locked_evidence_surface_count', 0)}`",
+        f"- `public_benchmark_ready`: `{release_decision.get('public_benchmark_ready', False)}`",
+        f"- `broad_gpcr_family_claim_safe`: `{release_decision.get('broad_gpcr_family_claim_safe', False)}`",
         f"- `next_locally_closable_gaps`: "
         f"`{', '.join(payload['gap_ledger_status'].get('next_locally_closable_gaps', [])) or 'none'}`",
         "",
@@ -3023,6 +3270,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--ci-require-hip", type=Path, default=DEFAULT_CI_REQUIRE_HIP)
     parser.add_argument("--zero-copy-strict", type=Path, default=DEFAULT_ZERO_COPY_STRICT)
     parser.add_argument("--measured-benchmark-breadth", type=Path, default=DEFAULT_MEASURED_BREADTH)
+    parser.add_argument(
+        "--external-benchmark-submission-readiness",
+        type=Path,
+        default=DEFAULT_EXTERNAL_BENCHMARK_SUBMISSION_READINESS,
+    )
+    parser.add_argument("--evidence-surface-dir", type=Path, default=DEFAULT_EVIDENCE_SURFACE_DIR)
     parser.add_argument("--worst-case-report", type=Path, default=DEFAULT_WORST_CASE_REPORT)
     parser.add_argument("--workflow-productization", type=Path, default=DEFAULT_WORKFLOW_PRODUCTIZATION)
     parser.add_argument("--release-registry", type=Path, default=DEFAULT_RELEASE_REGISTRY)
@@ -3128,6 +3381,8 @@ def main(argv: list[str] | None = None) -> int:
         ci_require_hip=args.ci_require_hip,
         zero_copy_strict=args.zero_copy_strict,
         measured_benchmark_breadth=args.measured_benchmark_breadth,
+        external_benchmark_submission_readiness=args.external_benchmark_submission_readiness,
+        evidence_surface_dir=args.evidence_surface_dir,
         worst_case_report=args.worst_case_report,
         workflow_productization=args.workflow_productization,
         release_registry=args.release_registry,

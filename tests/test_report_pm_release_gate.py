@@ -637,11 +637,53 @@ def _release_area_inputs(tmp_path: Path) -> dict[str, Path]:
     }
 
 
+def _release_decision_inputs(tmp_path: Path) -> dict[str, Path]:
+    evidence_surface_dir = tmp_path / "evidence_surfaces"
+    _write(
+        evidence_surface_dir / "structural_contact_surface.json",
+        {
+            "contract_pass": True,
+            "status": "ready",
+            "reason_code": "PASS",
+            "summary_line": "Structural contact surface: PASS",
+            "blockers": [],
+        },
+    )
+    _write(
+        evidence_surface_dir / "gpcr_hard_decoy_surface.json",
+        {
+            "contract_pass": False,
+            "status": "locked",
+            "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
+            "summary_line": "GPCR hard decoy surface: LOCKED",
+            "blockers": ["broad_gpcr_family_claim_locked"],
+        },
+    )
+    return {
+        "external_benchmark_submission_readiness": _write(
+            tmp_path / "external_benchmark_submission_readiness.json",
+            {
+                "contract_pass": True,
+                "reason_code": "PASS_START_NOW_FULL",
+                "summary": {
+                    "ready_to_start_now": True,
+                    "ready_to_start_full_submission_now": True,
+                    "submission_queue_ready_count": 4,
+                    "submission_queue_blocked_count": 0,
+                },
+                "blockers": [],
+            },
+        ),
+        "evidence_surface_dir": evidence_surface_dir,
+    }
+
+
 def _base_kwargs(tmp_path: Path) -> dict[str, Path]:
     kwargs = {}
     kwargs.update(_runtime_inputs(tmp_path))
     kwargs.update(_packaging_inputs(tmp_path))
     kwargs.update(_release_area_inputs(tmp_path))
+    kwargs.update(_release_decision_inputs(tmp_path))
     return kwargs
 
 
@@ -830,8 +872,29 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert payload["input_checksums"][str(base_kwargs["release_evidence_freshness"])].startswith(
         "sha256:"
     )
+    assert payload["input_checksums"][str(base_kwargs["external_benchmark_submission_readiness"])].startswith(
+        "sha256:"
+    )
     assert payload["release_area_gate_ready"] is True
     assert payload["full_release_gate_ready"] is True
+    decision = payload["release_decision"]
+    assert decision["release_allowed"] is True
+    assert decision["blocked_release_count"] == 0
+    assert decision["first_blocker"] == ""
+    assert decision["operator_action_count"] == 16
+    assert decision["approval_token_count"] == 0
+    assert decision["stale_artifact_count"] == 0
+    assert decision["stale_artifact_refresh_required"] is False
+    assert decision["evidence_surface_count"] == 2
+    assert decision["missing_evidence_surface_count"] == 0
+    assert decision["locked_evidence_surface_count"] == 1
+    assert decision["public_benchmark_ready"] is True
+    assert decision["gpcr_evidence_surface_present"] is True
+    assert decision["broad_gpcr_family_claim_safe"] is False
+    assert decision["operator_actions"] == []
+    surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
+    assert surface_paths["structural_contact_surface"]["contract_pass"] is True
+    assert surface_paths["gpcr_hard_decoy_surface"]["locked"] is True
     assert payload["implementation_orchestration"]["cursor_opencode_worker_preflight_pass"] is True
     assert (
         payload["implementation_orchestration"]["summary"]["opencode_configured_model"]
@@ -1065,6 +1128,36 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         in payload_missing_freshness["release_area_blockers"]
     )
     assert payload_missing_freshness["release_area_gate_ready"] is False
+
+    stale_freshness_kwargs = dict(base_kwargs)
+    stale_freshness_kwargs["release_evidence_freshness"] = _write(
+        tmp_path / "stale_release_evidence_freshness_report.json",
+        {
+            "contract_pass": False,
+            "reason_code": "ERR_STALE_SOURCE_OF_TRUTH",
+            "summary": {"artifact_count": 3, "pass_count": 1, "blocker_count": 2},
+            "blockers": ["accuracy_parity_scorecard_stale", "goal_readiness_rollup_missing_source_tracking"],
+        },
+    )
+    payload_stale_freshness = report_pm_release_gate.build_report(
+        ndtha_residual=ndtha,
+        element_material_breadth=element,
+        measured_benchmark_breadth=breadth,
+        worst_case_report=worst,
+        **stale_freshness_kwargs,
+    )
+    stale_decision = payload_stale_freshness["release_decision"]
+    assert stale_decision["release_allowed"] is False
+    assert stale_decision["stale_artifact_count"] == 2
+    assert stale_decision["stale_artifact_refresh_required"] is True
+    assert stale_decision["operator_actions"] == [
+        {
+            "action_id": "refresh_release_evidence_freshness",
+            "status": "refresh_required",
+            "reason": "release_evidence_freshness_report has stale or incomplete source-of-truth blockers",
+            "artifact": "release_evidence_freshness_report",
+        }
+    ]
 
     ci_gap_kwargs = dict(base_kwargs)
     ci_gap_kwargs["ci_pr"] = _write(
