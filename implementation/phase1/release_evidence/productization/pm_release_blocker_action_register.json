@@ -27,9 +27,9 @@
   },
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:25:42.939210+00:00",
+  "generated_at": "2026-06-29T15:33:57.145665+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d46f30ea580fcceca095247c43d39d635bbb8526760ccb8e1b12eb850cdc1d00",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:1c840f746a6ae06895add5b0002300a4e41a5276e882dcd86a2dd2dd3f97b4fa",
     "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:2e49451bf32f86b091a82f8ed7f337805a1c5f9a891dae0331ed77af9158b31d",
     "scripts/build_pm_release_blocker_action_register.py": "sha256:8edefc7deb75acb52ac8c656e160bfd789510e6d4b2d7adcbaa4239464044b88"
   },
@@ -72,6 +72,29 @@
       ],
       "status": "science_evidence_required",
       "surface_family": "gpcr"
+    },
+    {
+      "action_id": "materialize_public_benchmark_source_of_truth",
+      "artifact": "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json",
+      "blockers": [
+        "casf_pdbbind_source_material_not_attached",
+        "public_benchmark_real_pose_predictions_missing",
+        "public_benchmark_external_receipts_missing"
+      ],
+      "bottleneck": "public_benchmark_source_of_truth_not_ready",
+      "first_blocker": "casf_pdbbind_source_material_not_attached",
+      "next_actions": [
+        "attach_checked_casf_pdbbind_subset_source_files",
+        "run_public_benchmark_subset_materializer",
+        "fill_ligand_atom_order_and_symmetry_permutation_contracts",
+        "attach_public_benchmark_pose_coordinate_intake",
+        "run_public_benchmark_pose_validity_materializer",
+        "run_symmetry_aware_rmsd_on_real_subset",
+        "run_public_benchmark_rmsd_scorecard_materializer",
+        "materialize_posebusters_style_validity_packet_for_real_ligands"
+      ],
+      "reason": "public benchmark source-of-truth is seed_ready_materialization_blocked; first_blocker=casf_pdbbind_source_material_not_attached; next_action=attach_checked_casf_pdbbind_subset_source_files",
+      "status": "public_benchmark_evidence_required"
     }
   ],
   "reuse_policy": "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions",
@@ -550,7 +573,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -562,7 +585,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 2,
         "main_fast_forward_possible": true,
@@ -627,7 +650,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -639,7 +662,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 2,
         "main_fast_forward_possible": true,
@@ -704,7 +727,7 @@
         "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
       },
       "evidence_snapshot": {
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "main_ahead_count": 2,
         "pending_remote_update_count": 2,
         "r4_risk": "Main CI and external reviewers immediately see the current commits.",
@@ -716,7 +739,7 @@
       },
       "evidence_status": {
         "approval_phrase": "feature push + main fast-forward 승인",
-        "feature_ahead_count": 132,
+        "feature_ahead_count": 135,
         "feature_fast_forward_possible": true,
         "main_ahead_count": 2,
         "main_fast_forward_possible": true,
@@ -1009,7 +1032,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
-  "source_commit_sha": "0c0eabb1099031877da975d4ec10ddb5aea9f0f0",
+  "source_commit_sha": "5729182b5d74022af1859f29590ab69bcdbde3e3",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 12,
@@ -1030,6 +1053,6 @@
     "release_area_gate_ready": false,
     "release_area_green_count": 12,
     "release_area_total_count": 16,
-    "release_decision_operator_action_count": 2
+    "release_decision_operator_action_count": 3
   }
 }
