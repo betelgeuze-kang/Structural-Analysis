@@ -112,3 +112,12 @@ def test_pm_user_facing_artifacts_have_no_stale_12_of_16_claims() -> None:
         text = path.read_text(encoding="utf-8")
         assert "12/16" not in text, path
         assert "release_areas_green=12/16" not in text, path
+
+    for path in PM_TEXT_ARTIFACTS:
+        text = path.read_text(encoding="utf-8")
+        assert "pass: `11/11` artifacts" not in text, path
+        assert "11개 release evidence" not in text, path
+        assert "fresh receipts `0/8`" not in text, path
+        assert "fresh receipt는 `1/8`" not in text, path
+        assert "GitHub sync remote approval/sync" not in text, path
+        assert "GitHub development sync remote approval/sync evidence" not in text, path

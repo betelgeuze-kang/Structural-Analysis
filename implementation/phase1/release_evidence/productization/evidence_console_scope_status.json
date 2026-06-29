@@ -137,9 +137,9 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-29T23:25:09.853000+00:00",
+  "generated_at": "2026-06-29T23:31:52.508583+00:00",
   "input_checksums": {
-    "README.md": "sha256:2a7e9f1a3b7e9a06b82e919c97c23e6f9fc4ac1bd167f14edbb5886a5044e640",
+    "README.md": "sha256:516cdae79ebe74272b7200ce37e4db351bdd76abbfdb71fcb6311c454e1e3e0f",
     "docs/commercialization-gap-current-state.md": "sha256:95ca6037982bfaf87e4b5a41796a2aff643d030ec85f4bbde2ff45ca0101dd17",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:cfec5b55b44a55e4f103623775208908e5b28d371ff4216568a718220a076632",
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
+  "source_commit_sha": "75b425c4b9fb5cdb9c48f059f6313e9622fd6b11",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [

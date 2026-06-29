@@ -98,25 +98,25 @@
     "target_id": "",
     "validation_command": "python3 scripts/validate_public_benchmark_subset_manifest.py --manifest implementation/phase1/release_evidence/productization/public_benchmark_subset_manifest.json --fail-blocked"
   },
-  "generated_at": "2026-06-29T23:29:34.886650+00:00",
+  "generated_at": "2026-06-29T23:33:45.074092+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:d5942eb227dd2a51d1c112ed214e97fe8a77b717b275b5334e88737656e0fd93",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:980c53289be422ab1e7b1e40916cc439871914d33ed65194dd438f5f773083aa",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:aa194b0b22f86a1a1e09ef1919d65cb2fd7f8029e0ee77920def715c3c44d5db",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:08726c75859ce05c93370dcf87ede73c52abd700223e67bcbc0a00e184bb5428",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:769fb5b0786bcab6241d5a5f5375e4db8f3edef333049654e910245dad5a0d71",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:d42d0e5b98bb61711a8c24a6704a917411e0721b06cf6d83e77bb8091d1d621c",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.json": "sha256:0ca6210093648d9b44686d021580272a51eb20fb3b01438dc6bab1aee09e5b91",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_operator_intake_packet.md": "sha256:0cf91f85f705b7ee3c3a6bc12c9cf31ec71a75c53b836eee6d9e0d599886825d",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_readonly_api.json": "sha256:9ccdea722130644ee172e09f0de9377d782554e13ba43c3b587ac996af6754af",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json": "sha256:b04a28a51e38bbcba7889146d7f2c52350e65edc16e2b1595e84b502e3b00dec",
-    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:f6ad619f42b508ad3cab5bfea561970101b10ad9d3d9dc9851a65b5f3ccc69ad",
-    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:ecc74d6e13655f3ac897f2ec5993c9186c8ff1c19e6f4d947d7c99a8103dc8af",
-    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:d42cb96632674befe760ae79b7aefdc4d0e7ceb9d1ab1c700e2196c0b5e1be88",
+    "implementation/phase1/release_evidence/productization/public_benchmark_operator_intake_packet.json": "sha256:bdbb91408972568d9dd487d71ffb61f8d25b9abd4d2da47dae7486f0dc328202",
+    "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:45a73a4da6afd9c30fd4a86ce8584aa01a34dab8711f8dc8305ffe4bf56ede3a",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:9caf2467266f5a18ac5a18165cc6287983ba8c65f579eec3564533948515e3e2",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:999d2a7b33f2124c6c6bd241e64a776fe3d5b74364ebb0fe67b373be23dd4df8",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:247d77c02dc8bfd72ae76bebf3ad52c4cfc1dd2f746ad8653c058182b06edc37",
     "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:0fe0ec4fcdeadb00069fbdc52ee42eae4892d6cd04f6ab05bf6795093fbec6a5",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:3eaf5b6c9c478b51b50c82f772301872c3f103e9413c7983081c1f7c68d39d79",
-    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:5136e84a5a00cf3b4ddccc8b88033e03fd4d59fb91aaab8b74ecb2b1cf060def",
+    "implementation/phase1/release_evidence/surface/product_capabilities_surface.json": "sha256:12aae4f9edf68131e48f60c12966f3ba276c7e534c2dc88889ad761fc9f9b267",
     "scripts/build_goal_bottleneck_roadmap_surface.py": "sha256:6a4c78543c41663b8532dfcd01b4faff9a24bbf7cd2aa5454381955bdbebf033",
     "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
@@ -681,14 +681,14 @@
   "read_model_ready": true,
   "reason_code": "PASS_READ_MODEL_RELEASE_BLOCKED",
   "release_decision_kpis": {
-    "approval_token_count": 4,
+    "approval_token_count": 8,
     "blocked_release_count": 5,
     "broad_gpcr_family_claim_safe": false,
     "evidence_surface_count": 12,
     "first_blocker": "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
     "locked_evidence_surface_count": 3,
     "missing_evidence_surface_count": 0,
-    "operator_action_count": 13,
+    "operator_action_count": 17,
     "pocketmd_lite_product_surface_ready": false,
     "public_benchmark_ready": false,
     "release_allowed": false,
@@ -914,7 +914,7 @@
       "state": "ready",
       "summary": {
         "action_register_contract_pass": false,
-        "approval_token_count": 4,
+        "approval_token_count": 8,
         "blocked_capability_count": 4,
         "blocked_release_count": 5,
         "first_locked_science_evidence_surface": {
@@ -941,7 +941,7 @@
             "h_bond_backmap_evidence_surface"
           ]
         },
-        "operator_action_count": 13,
+        "operator_action_count": 17,
         "product_capability_count": 5,
         "release_allowed": false,
         "science_evidence_surface_bottlenecks": [
@@ -2373,7 +2373,7 @@
       ]
     }
   },
-  "source_commit_sha": "c4149c5ac6722d0823fb9bdffa40c6f7dc8686de",
+  "source_commit_sha": "75b425c4b9fb5cdb9c48f059f6313e9622fd6b11",
   "source_of_truth_gap_classification": [
     {
       "candidate": "accuracy_parity_scorecard",
