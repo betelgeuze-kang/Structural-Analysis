@@ -967,7 +967,7 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["release_allowed"] is True
     assert decision["blocked_release_count"] == 0
     assert decision["first_blocker"] == ""
-    assert decision["operator_action_count"] == 18
+    assert decision["operator_action_count"] == 19
     assert decision["approval_token_count"] == 0
     assert decision["stale_artifact_count"] == 0
     assert decision["stale_artifact_refresh_required"] is False
@@ -980,10 +980,13 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
     assert decision["public_benchmark_source_of_truth_blockers"] == []
     assert decision["h_bond_evidence_surface_present"] is False
     assert decision["gpcr_evidence_surface_present"] is True
+    assert decision["pocketmd_lite_science_product_surface_present"] is False
     assert decision["broad_gpcr_family_claim_safe"] is False
+    assert decision["pocketmd_lite_product_surface_ready"] is False
     assert decision["science_evidence_surface_bottlenecks"] == [
         "h_bond_evidence_surface_missing",
         "broad_gpcr_family_claim_locked",
+        "pocketmd_lite_science_product_surface_missing",
     ]
     science_surface_status = decision["science_evidence_surface_status"]
     assert science_surface_status["h_bond"] == {
@@ -1011,6 +1014,19 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
         "bottleneck": "broad_gpcr_family_claim_locked",
         "broad_family_claim_safe": False,
     }
+    assert science_surface_status["pocketmd_lite"] == {
+        "surface_family": "pocketmd_lite",
+        "present": False,
+        "status": "missing",
+        "surface_count": 0,
+        "contract_pass_count": 0,
+        "locked_count": 0,
+        "surface_ids": [],
+        "first_blocked_target": "",
+        "root_cause_tags": [],
+        "bottleneck": "pocketmd_lite_science_product_surface_missing",
+        "product_surface_ready": False,
+    }
     assert decision["operator_actions"] == [
         {
             "action_id": "resolve_h_bond_evidence_surface",
@@ -1034,6 +1050,19 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
             ),
             "artifact": "gpcr_hard_decoy_surface",
+        },
+        {
+            "action_id": "resolve_pocketmd_lite_science_product_surface",
+            "status": "science_product_surface_required",
+            "surface_family": "pocketmd_lite",
+            "bottleneck": "pocketmd_lite_science_product_surface_missing",
+            "first_blocked_target": "",
+            "root_cause_tags": [],
+            "reason": (
+                "pocketmd_lite science product surface is missing; "
+                "bottleneck=pocketmd_lite_science_product_surface_missing"
+            ),
+            "artifact": str(base_kwargs["evidence_surface_dir"]),
         },
     ]
     surface_paths = {row["surface_id"]: row for row in decision["evidence_surfaces"]}
@@ -1327,6 +1356,19 @@ def test_pm_release_gate_passes_limited_when_all_milestone_evidence_is_explicit(
                 "first_blocked_target=DRD2; root_cause_tags=operator_values_required"
             ),
             "artifact": "gpcr_hard_decoy_surface",
+        },
+        {
+            "action_id": "resolve_pocketmd_lite_science_product_surface",
+            "status": "science_product_surface_required",
+            "surface_family": "pocketmd_lite",
+            "bottleneck": "pocketmd_lite_science_product_surface_missing",
+            "first_blocked_target": "",
+            "root_cause_tags": [],
+            "reason": (
+                "pocketmd_lite science product surface is missing; "
+                "bottleneck=pocketmd_lite_science_product_surface_missing"
+            ),
+            "artifact": str(base_kwargs["evidence_surface_dir"]),
         },
     ]
 

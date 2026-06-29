@@ -442,7 +442,15 @@ def _science_surface_operator_actions(
             continue
         first_blocked_target = str(status.get("first_blocked_target") or "")
         root_cause_tags = [str(row) for row in _as_list(status.get("root_cause_tags"))]
-        reason = f"{family} evidence surface is {status.get('status')}; bottleneck={bottleneck}"
+        if family == "pocketmd_lite":
+            action_id = "resolve_pocketmd_lite_science_product_surface"
+            action_status = "science_product_surface_required"
+            surface_label = "science product surface"
+        else:
+            action_id = f"resolve_{family}_evidence_surface"
+            action_status = "science_evidence_required"
+            surface_label = "evidence surface"
+        reason = f"{family} {surface_label} is {status.get('status')}; bottleneck={bottleneck}"
         if first_blocked_target:
             reason += f"; first_blocked_target={first_blocked_target}"
         if root_cause_tags:
@@ -450,8 +458,8 @@ def _science_surface_operator_actions(
         surface_ids = [str(row) for row in _as_list(status.get("surface_ids"))]
         actions.append(
             {
-                "action_id": f"resolve_{family}_evidence_surface",
-                "status": "science_evidence_required",
+                "action_id": action_id,
+                "status": action_status,
                 "surface_family": family,
                 "bottleneck": bottleneck,
                 "first_blocked_target": first_blocked_target,
@@ -541,10 +549,20 @@ def _release_decision(
         for row in evidence_surfaces
         if "h_bond" in row["surface_id"].lower() or "hbond" in row["surface_id"].lower()
     ]
+    pocketmd_lite_surfaces = [
+        row
+        for row in evidence_surfaces
+        if "pocketmd" in row["surface_id"].lower()
+    ]
     broad_gpcr_family_claim_safe = bool(
         gpcr_surfaces
         and all(bool(row["contract_pass"]) for row in gpcr_surfaces)
         and not any(bool(row["locked"]) for row in gpcr_surfaces)
+    )
+    pocketmd_lite_product_surface_ready = bool(
+        pocketmd_lite_surfaces
+        and all(bool(row["contract_pass"]) for row in pocketmd_lite_surfaces)
+        and not any(bool(row["locked"]) for row in pocketmd_lite_surfaces)
     )
     science_evidence_surface_status = {
         "h_bond": _science_surface_status(
@@ -561,10 +579,20 @@ def _release_decision(
             locked_bottleneck="broad_gpcr_family_claim_locked",
             contract_bottleneck="gpcr_evidence_surface_contract_not_passing",
         ),
+        "pocketmd_lite": _science_surface_status(
+            surface_family="pocketmd_lite",
+            surfaces=pocketmd_lite_surfaces,
+            missing_bottleneck="pocketmd_lite_science_product_surface_missing",
+            locked_bottleneck="pocketmd_lite_science_product_surface_locked",
+            contract_bottleneck="pocketmd_lite_science_product_surface_contract_not_passing",
+        ),
     }
     science_evidence_surface_status["gpcr"][
         "broad_family_claim_safe"
     ] = broad_gpcr_family_claim_safe
+    science_evidence_surface_status["pocketmd_lite"][
+        "product_surface_ready"
+    ] = pocketmd_lite_product_surface_ready
     science_surface_bottlenecks = [
         str(row["bottleneck"])
         for row in science_evidence_surface_status.values()
@@ -635,8 +663,10 @@ def _release_decision(
             str(row) for row in _as_list(public_benchmark_source_of_truth_payload.get("blockers"))
         ],
         "broad_gpcr_family_claim_safe": broad_gpcr_family_claim_safe,
+        "pocketmd_lite_product_surface_ready": pocketmd_lite_product_surface_ready,
         "h_bond_evidence_surface_present": bool(h_bond_surfaces),
         "gpcr_evidence_surface_present": bool(gpcr_surfaces),
+        "pocketmd_lite_science_product_surface_present": bool(pocketmd_lite_surfaces),
         "science_evidence_surface_status": science_evidence_surface_status,
         "science_evidence_surface_bottlenecks": science_surface_bottlenecks,
         "evidence_surface_dir": str(evidence_surface_dir),
@@ -644,7 +674,9 @@ def _release_decision(
         "operator_actions": operator_actions,
         "claim_boundary": (
             "Evidence surface counts reflect local JSON files under evidence_surface_dir. Broad GPCR family "
-            "claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked."
+            "claims remain unsafe unless GPCR evidence surfaces are present, contract-passing, and unlocked. "
+            "PocketMD Lite is a bounded top-k science product surface; broad all-atom MD and FEP claims "
+            "remain locked unless separately evidenced."
         ),
     }
 
@@ -3447,6 +3479,10 @@ def _markdown(payload: dict[str, Any]) -> str:
         f"`{release_decision.get('h_bond_evidence_surface_present', False)}`",
         f"- `gpcr_evidence_surface_present`: "
         f"`{release_decision.get('gpcr_evidence_surface_present', False)}`",
+        f"- `pocketmd_lite_science_product_surface_present`: "
+        f"`{release_decision.get('pocketmd_lite_science_product_surface_present', False)}`",
+        f"- `pocketmd_lite_product_surface_ready`: "
+        f"`{release_decision.get('pocketmd_lite_product_surface_ready', False)}`",
         f"- `public_benchmark_ready`: `{release_decision.get('public_benchmark_ready', False)}`",
         f"- `public_benchmark_source_of_truth_ready`: "
         f"`{release_decision.get('public_benchmark_source_of_truth_ready', False)}`",
