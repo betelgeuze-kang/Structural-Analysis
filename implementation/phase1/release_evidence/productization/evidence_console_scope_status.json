@@ -137,10 +137,10 @@
       "present": true
     }
   ],
-  "generated_at": "2026-06-29T13:52:19.693137+00:00",
+  "generated_at": "2026-06-29T13:53:48.490678+00:00",
   "input_checksums": {
-    "README.md": "sha256:f9df74ed8f66bf60f4b3a11e6883f27bd807ff5e42d1e05deb75f235ac8da0f3",
-    "docs/commercialization-gap-current-state.md": "sha256:b43da370b270704b16a96ae981122c0d52cb5783113d4f52cbe02ff638be3c94",
+    "README.md": "sha256:8f7aefc13823eb4384afd35aec4945e5bd16a59095d900e479d034ec7b5c658b",
+    "docs/commercialization-gap-current-state.md": "sha256:0793a44d767cc51c7c80508ed01c707791e0d6000dd20bace5947269a0cc3c77",
     "docs/structure-viewer-product-workspace.md": "sha256:3926d782160f245fddb0da10266f3090b5fe63094d4e975b800caf05e9413455",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:2f43fd00991caec483ac14c902e8bfdea7ec09babd222fd5c0e382604b8648e4",
     "implementation/phase1/real_project_corpus_measured_status.json": "sha256:b2cb16d090bf7eafb3db1ce14dca338f96d07f60e27b95b8659a8b65bb6f2be3",
@@ -228,7 +228,7 @@
   "reused_evidence": true,
   "schema_version": "evidence-console-scope-status.v1",
   "scope_contract_pass": true,
-  "source_commit_sha": "ab8ff19c23f5e5d6f6e67b93864a11dde789d4f5",
+  "source_commit_sha": "534fcc0b7e86eb88c61fbed115ad93b8af05cf62",
   "status": "blocked",
   "summary": {
     "claim_boundary_docs": [

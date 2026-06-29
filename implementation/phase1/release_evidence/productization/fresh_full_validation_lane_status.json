@@ -49,10 +49,10 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "fresh_full_validation_ready": true,
-  "generated_at": "2026-06-29T13:52:19.590801+00:00",
+  "generated_at": "2026-06-29T13:53:48.399030+00:00",
   "input_checksums": {
     "/home/betelgeuze/건축구조분석/implementation/phase1/fresh_validation_receipt.schema.json": "sha256:9d90d216af33096c6a14aa8208482abf0ff5e03b17b2004f79086037d7aab047",
-    "docs/commercialization-gap-current-state.md": "sha256:b43da370b270704b16a96ae981122c0d52cb5783113d4f52cbe02ff638be3c94",
+    "docs/commercialization-gap-current-state.md": "sha256:0793a44d767cc51c7c80508ed01c707791e0d6000dd20bace5947269a0cc3c77",
     "docs/release-publication-runbook.md": "sha256:e531952925d22c141e57757c58b428c23330cef11dee71017c162d312fe8ddfb",
     "implementation/phase1/release_evidence/commercial/commercial_readiness_report.json": "sha256:df8a39ee7ecdff234d494c9d8a008b8eca525d524300d2da4ce253432872bdc5",
     "implementation/phase1/release_evidence/full_validation": "dir-sha256:77721f570649bc209f28ad7891b0e9c75059c810fd670d453638fe1b87882ebe",
@@ -355,7 +355,7 @@
     }
   ],
   "schema_version": "fresh-full-validation-lane-status.v1",
-  "source_commit_sha": "ab8ff19c23f5e5d6f6e67b93864a11dde789d4f5",
+  "source_commit_sha": "534fcc0b7e86eb88c61fbed115ad93b8af05cf62",
   "status": "ready",
   "summary": {
     "blocker_count": 0,
