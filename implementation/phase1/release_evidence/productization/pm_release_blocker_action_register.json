@@ -1,4 +1,13 @@
 {
+  "aggregator_freshness_policy": {
+    "claim_boundary": "This operator action aggregator does not close blockers. It exposes source commit and input checksums for its direct upstream PM/freshness artifacts so stale action boards can be detected.",
+    "mode": "direct_aggregator_source_tracking",
+    "source_artifacts": [
+      "scripts/build_pm_release_blocker_action_register.py",
+      "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+      "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+    ]
+  },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
     "release_area_blocker_count": 10,
@@ -19,7 +28,13 @@
     "release_area_total_count": 16
   },
   "contract_pass": false,
-  "generated_at": "2026-06-24T19:22:35.934519+00:00",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T13:00:23.533555+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8994bc845f83e86ca3af738041f9d02b1b025c439c3bb1c93d7cbc1130cf5f50",
+    "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json": "sha256:ceb18619c05a9f47e1c44e5dbfa2e212b77766b5913d486c324f5180c2647d34",
+    "scripts/build_pm_release_blocker_action_register.py": "sha256:c48b2389548a5f69291e4360f832e41bb5857c512084fe43e9afbc761d8193e7"
+  },
   "next_actions": [
     "Resolve the pr GitHub Actions job-start blocker shown in github_actions_ci_streak_evidence.json, rerun the workflow, and then collect 30 additional consecutive successful CI run(s) before release signoff.",
     "Collect 30 additional consecutive successful nightly CI run(s); keep the scheduled/nightly lane green and refresh github_actions_ci_streak_evidence before release signoff.",
@@ -39,6 +54,8 @@
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+  "reuse_policy": "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions",
+  "reused_evidence": true,
   "rows": [
     {
       "acceptance_criteria": [
@@ -1126,6 +1143,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-action-register.v1",
+  "source_commit_sha": "9cfa5ce0d6d1e1360d57614695ea8f4462c097dd",
   "summary": {
     "all_open_blockers_have_handoff": true,
     "external_input_required_count": 14,

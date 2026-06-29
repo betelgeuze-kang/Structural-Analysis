@@ -1,4 +1,13 @@
 {
+  "aggregator_freshness_policy": {
+    "claim_boundary": "This operator closure board aggregates action-register and PM report state. It must carry source commit and input checksums so stale operator boards are visible.",
+    "mode": "direct_aggregator_source_tracking",
+    "source_artifacts": [
+      "scripts/build_pm_release_blocker_closure_board.py",
+      "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+    ]
+  },
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
     "release_area_blocker_count": 10,
@@ -20,11 +29,19 @@
   },
   "claim_boundary": "This closure board is an owner-handoff and daily closure artifact. It does not convert missing CI streak, human UX observation, license, or other external evidence into a release pass.",
   "contract_pass": false,
-  "generated_at": "2026-06-24T19:22:35.965119+00:00",
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "generated_at": "2026-06-29T13:00:30.989903+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:98777f08697c21353051a3a271a5c8f30fe352edce553fedf1cc6f173ab8580c",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:8994bc845f83e86ca3af738041f9d02b1b025c439c3bb1c93d7cbc1130cf5f50",
+    "scripts/build_pm_release_blocker_closure_board.py": "sha256:c1d51c93e91a69095fab5303dfe3d4331003c783b636386a2b9f26fa03b1d8e0"
+  },
   "pm_release_blocker_action_register": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
   "pm_release_gate_report": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
   "pm_summary_line": "PM release gate: LIMITED_MILESTONE_READY | release_areas=BLOCKED | paid_pilot_candidate=True | milestones=5/5 | release_areas_green=12/16 | measured_cases=304",
   "reason_code": "ERR_PM_RELEASE_BLOCKERS_OPEN",
+  "reuse_policy": "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report",
+  "reused_evidence": true,
   "rows": [
     {
       "acceptance_criteria": [
@@ -531,6 +548,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
+  "source_commit_sha": "9cfa5ce0d6d1e1360d57614695ea8f4462c097dd",
   "summary": {
     "action_register_loaded": true,
     "action_register_matches_pm_report": true,
