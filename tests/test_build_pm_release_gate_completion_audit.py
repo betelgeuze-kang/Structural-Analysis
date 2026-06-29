@@ -131,6 +131,16 @@ def test_build_audit_expands_release_areas_and_milestone_requirements(tmp_path: 
     rows = {row["requirement_id"]: row for row in payload["rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert (
+        payload["reuse_policy"]
+        == "pm_release_gate_completion_audit_aggregates_pm_report_and_closure_board"
+    )
+    assert pm_report.as_posix() in payload["input_checksums"]
+    assert closure_board.as_posix() in payload["input_checksums"]
+    assert payload["aggregator_freshness_policy"]["mode"] == "direct_aggregator_source_tracking"
     assert payload["reason_code"] == "ERR_PM_REQUIREMENTS_BLOCKED"
     assert payload["summary"]["release_area_requirement_count"] == len(
         build_audit_module.RELEASE_AREA_REQUIREMENTS

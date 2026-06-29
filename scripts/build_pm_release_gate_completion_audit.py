@@ -5,12 +5,17 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
+import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "pm-release-gate-completion-audit.v1"
+ROOT = Path(__file__).resolve().parents[1]
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+AGGREGATOR_REUSE_POLICY = "pm_release_gate_completion_audit_aggregates_pm_report_and_closure_board"
 DEFAULT_PM_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_CLOSURE_BOARD = Path(
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json"
@@ -116,6 +121,54 @@ def _load_json(path: Path) -> dict[str, Any]:
     except Exception:
         return {}
     return payload if isinstance(payload, dict) else {}
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _path_key(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _sha256_or_missing(path: Path) -> str:
+    resolved = path if path.is_absolute() else ROOT / path
+    if not resolved.exists() or not resolved.is_file():
+        return "missing"
+    digest = hashlib.sha256()
+    with resolved.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _source_tracking_metadata(source_paths: list[Path]) -> dict[str, Any]:
+    return {
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": {_path_key(path): _sha256_or_missing(path) for path in source_paths},
+        "reused_evidence": True,
+        "reuse_policy": AGGREGATOR_REUSE_POLICY,
+        "aggregator_freshness_policy": {
+            "mode": "direct_aggregator_source_tracking",
+            "source_artifacts": [_path_key(path) for path in source_paths],
+            "claim_boundary": (
+                "This aggregator does not rerun upstream PM release checks. It must expose source "
+                "commit and input checksums for its direct upstream artifacts so stale rollups can be detected."
+            ),
+        },
+    }
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
@@ -429,6 +482,13 @@ def build_audit(
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        **_source_tracking_metadata(
+            [
+                Path("scripts/build_pm_release_gate_completion_audit.py"),
+                pm_report,
+                closure_board,
+            ]
+        ),
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_PM_REQUIREMENTS_BLOCKED",
         "pm_release_gate_report": str(pm_report),

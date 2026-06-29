@@ -827,6 +827,12 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
 
     assert payload["schema_valid"] is True
     assert payload["reused_evidence"] is False
+    assert (
+        payload["reuse_policy"]
+        == "product_readiness_snapshot_aggregates_release_readiness_inputs"
+    )
+    assert payload["input_checksums"]["README.md"].startswith("sha256:")
+    assert "pm_release_gate_report.json" in payload["input_checksums"]
     assert payload["evidence_fresh"] is True
     assert {
         "workstation_delivery_ready",

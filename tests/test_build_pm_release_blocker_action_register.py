@@ -86,6 +86,19 @@ def test_build_register_surfaces_owner_actions_and_acceptance(tmp_path: Path) ->
     rows = {row["blocker_id"]: row for row in payload["rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert (
+        payload["reuse_policy"]
+        == "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions"
+    )
+    assert report.as_posix() in payload["input_checksums"]
+    assert (
+        "implementation/phase1/release_evidence/productization/release_evidence_freshness_report.json"
+        in payload["input_checksums"]
+    )
+    assert payload["aggregator_freshness_policy"]["mode"] == "direct_aggregator_source_tracking"
     assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
     assert payload["summary"]["open_blocker_count"] == 2
     assert payload["summary"]["owner_input_required_count"] == 2

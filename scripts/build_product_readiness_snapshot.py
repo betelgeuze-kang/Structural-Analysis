@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -24,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "product_readiness_snapshot.json"
 SCHEMA_VERSION = "product-readiness-snapshot.v1"
+AGGREGATOR_REUSE_POLICY = "product_readiness_snapshot_aggregates_release_readiness_inputs"
 PM_RELEASE_UX_DUPLICATE_WRAPPERS = {
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
@@ -185,6 +187,46 @@ def _path_key_for_repo_path(repo_root: Path, path: Path) -> str:
         except ValueError:
             return path.as_posix()
     return path.as_posix()
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _sha256_path(repo_root: Path, path: Path) -> str:
+    resolved = _resolve(repo_root, path)
+    if not resolved.exists():
+        return "missing"
+    if resolved.is_file():
+        return f"sha256:{_sha256_file(resolved)}"
+    if resolved.is_dir():
+        digest = hashlib.sha256()
+        for child in sorted(item for item in resolved.rglob("*") if item.is_file()):
+            key = _path_key_for_repo_path(repo_root, child)
+            digest.update(key.encode("utf-8"))
+            digest.update(b"\0")
+            digest.update(_sha256_file(child).encode("ascii"))
+            digest.update(b"\0")
+        return f"sha256-dir:{digest.hexdigest()}"
+    return "unsupported"
+
+
+def _snapshot_input_checksums(
+    repo_root: Path,
+    paths: SnapshotInputPaths,
+) -> dict[str, str]:
+    source_paths = [
+        Path("scripts/build_product_readiness_snapshot.py"),
+        *[getattr(paths, field) for field in paths.__dataclass_fields__],
+    ]
+    return {
+        _path_key_for_repo_path(repo_root, path): _sha256_path(repo_root, path)
+        for path in source_paths
+    }
 
 
 def _receipt_commit_allowed_paths(
@@ -1920,7 +1962,12 @@ def build_snapshot(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "source_commit_sha": current_commit,
         "engine_version": _engine_version_from_identity(identity),
+        "input_checksums": _snapshot_input_checksums(
+            repo_root,
+            paths,
+        ),
         "reused_evidence": False,
+        "reuse_policy": AGGREGATOR_REUSE_POLICY,
         "schema_valid": schema_valid,
         "evidence_fresh": evidence_fresh,
         "snapshot_source_state_consistent": snapshot_source_state_consistent,

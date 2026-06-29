@@ -93,6 +93,16 @@ def test_build_board_groups_open_blockers_by_closure_state(tmp_path: Path) -> No
     rows = {row["blocker_id"]: row for row in payload["rows"]}
 
     assert payload["contract_pass"] is False
+    assert payload["source_commit_sha"]
+    assert payload["engine_version"] == "structural-optimization-workbench@1.0.0"
+    assert payload["reused_evidence"] is True
+    assert (
+        payload["reuse_policy"]
+        == "pm_release_blocker_closure_board_aggregates_action_register_and_pm_report"
+    )
+    assert action_register.as_posix() in payload["input_checksums"]
+    assert pm_report.as_posix() in payload["input_checksums"]
+    assert payload["aggregator_freshness_policy"]["mode"] == "direct_aggregator_source_tracking"
     assert payload["reason_code"] == "ERR_PM_RELEASE_BLOCKERS_OPEN"
     assert payload["summary"]["open_blocker_count"] == 2
     assert payload["summary"]["register_open_blocker_count"] == 2

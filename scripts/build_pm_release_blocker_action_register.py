@@ -5,13 +5,18 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 from typing import Any
 
 
 SCHEMA_VERSION = "pm-release-blocker-action-register.v1"
+ROOT = Path(__file__).resolve().parents[1]
+ENGINE_VERSION = "structural-optimization-workbench@1.0.0"
+AGGREGATOR_REUSE_POLICY = "pm_release_blocker_action_register_aggregates_pm_report_and_freshness_actions"
 DEFAULT_PM_REPORT = Path("implementation/phase1/release_evidence/productization/pm_release_gate_report.json")
 DEFAULT_OUT = Path("implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json")
 DEFAULT_OUT_MD = Path("implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.md")
@@ -72,6 +77,55 @@ def _load_json(path: Path) -> dict[str, Any]:
         return {}
     payload = json.loads(path.read_text(encoding="utf-8"))
     return payload if isinstance(payload, dict) else {}
+
+
+def _git_head() -> str:
+    try:
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return ""
+
+
+def _path_key(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
+def _sha256_or_missing(path: Path) -> str:
+    resolved = path if path.is_absolute() else ROOT / path
+    if not resolved.exists() or not resolved.is_file():
+        return "missing"
+    digest = hashlib.sha256()
+    with resolved.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return f"sha256:{digest.hexdigest()}"
+
+
+def _source_tracking_metadata(source_paths: list[Path]) -> dict[str, Any]:
+    return {
+        "source_commit_sha": _git_head(),
+        "engine_version": ENGINE_VERSION,
+        "input_checksums": {_path_key(path): _sha256_or_missing(path) for path in source_paths},
+        "reused_evidence": True,
+        "reuse_policy": AGGREGATOR_REUSE_POLICY,
+        "aggregator_freshness_policy": {
+            "mode": "direct_aggregator_source_tracking",
+            "source_artifacts": [_path_key(path) for path in source_paths],
+            "claim_boundary": (
+                "This operator action aggregator does not close blockers. It exposes source commit "
+                "and input checksums for its direct upstream PM/freshness artifacts so stale action "
+                "boards can be detected."
+            ),
+        },
+    }
 
 
 def _as_list(value: Any) -> list[Any]:
@@ -898,6 +952,13 @@ def build_register(pm_report: Path = DEFAULT_PM_REPORT) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
+        **_source_tracking_metadata(
+            [
+                Path("scripts/build_pm_release_blocker_action_register.py"),
+                pm_report,
+                DEFAULT_RELEASE_EVIDENCE_FRESHNESS_REPORT,
+            ]
+        ),
         "pm_release_gate_report": str(pm_report),
         "pm_summary_line": str(report.get("summary_line", "")),
         "canonical_release_area_evidence": canonical_release_area_evidence,
