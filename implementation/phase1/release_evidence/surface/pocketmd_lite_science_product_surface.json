@@ -9,7 +9,7 @@
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "top_k_refinement_operator_intake",
-  "generated_at": "2026-06-29T17:24:01.098623+00:00",
+  "generated_at": "2026-06-29T18:30:49.592384+00:00",
   "goal_roadmap_linkage": {
     "bottleneck": "pocketmd_lite_science_product_surface_locked",
     "next_goal_actions": [
@@ -23,8 +23,8 @@
     "roadmap_item": "PocketMD Lite science product surface"
   },
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:b3930a7a7c65fd57e97d4507223dee0dabfea5d65e7e8762c9290035c4baeb87",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:89b57eff81e97beb0018ecce3ce5e433d50b909c3bef6267688259a6d62b7b2b"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:bd077cb410cddb0ba9ca8f39be70094746d30033a0ab0ef6dc09cca5a013d823",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "linked_artifacts": {
     "contract": "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json",
@@ -54,12 +54,118 @@
     "regenerate_pocketmd_lite_science_product_surface",
     "regenerate_pm_release_gate_report"
   ],
+  "phase4_exit_gate": {
+    "claim": "pocketmd_lite_top_k_refinement",
+    "criteria": [
+      {
+        "blockers": [
+          "pocketmd_lite_topk_candidate_rows_missing"
+        ],
+        "criterion_id": "top_k_refinement_rows_present",
+        "current": 0,
+        "pass": false,
+        "required": ">=1"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_local_min_survival_rows_missing"
+        ],
+        "criterion_id": "local_min_survival_materialized",
+        "current": null,
+        "metric_key": "local_min_survival_rate",
+        "pass": false,
+        "required": "present"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+        ],
+        "criterion_id": "contact_persistence_materialized",
+        "current": null,
+        "metric_key": "contact_persistence_rate_median",
+        "pass": false,
+        "required": "present"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_contact_hbond_persistence_rows_missing"
+        ],
+        "criterion_id": "h_bond_persistence_materialized",
+        "current": null,
+        "metric_key": "h_bond_persistence_rate_median",
+        "pass": false,
+        "required": "present"
+      },
+      {
+        "blockers": [],
+        "criterion_id": "clash_relief_materialized",
+        "current": null,
+        "metric_key": "clash_relief_rate",
+        "pass": false,
+        "required": "present"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_uncertainty_rows_missing"
+        ],
+        "criterion_id": "uncertainty_summary_materialized",
+        "current": null,
+        "metric_key": "uncertainty_width_median",
+        "pass": false,
+        "required": "present"
+      },
+      {
+        "blockers": [
+          "pocketmd_lite_topk_candidate_rows_missing",
+          "pocketmd_lite_local_min_survival_rows_missing",
+          "pocketmd_lite_contact_hbond_persistence_rows_missing",
+          "pocketmd_lite_uncertainty_rows_missing"
+        ],
+        "criterion_id": "report_blockers_resolved",
+        "current": false,
+        "pass": false,
+        "required": true
+      },
+      {
+        "blockers": [],
+        "criterion_id": "broad_all_atom_fep_claims_locked",
+        "current": true,
+        "pass": true,
+        "required": true
+      }
+    ],
+    "failed_criteria": [
+      "top_k_refinement_rows_present",
+      "local_min_survival_materialized",
+      "contact_persistence_materialized",
+      "h_bond_persistence_materialized",
+      "clash_relief_materialized",
+      "uncertainty_summary_materialized",
+      "report_blockers_resolved"
+    ],
+    "failed_criterion_count": 7,
+    "first_blocked_target": "top_k_refinement_operator_intake",
+    "real_refinement_case_count": 0,
+    "status": "blocked",
+    "top_k_candidate_count": 0
+  },
   "product_capability_id": "pocketmd_lite_top_k_refinement",
   "product_surface_ready": false,
   "readiness_summary": {
     "blocked_claim_count": 4,
     "contract_ready": true,
     "handoff_ready": true,
+    "phase4_exit_gate_status": "blocked",
+    "phase4_failed_criteria": [
+      "top_k_refinement_rows_present",
+      "local_min_survival_materialized",
+      "contact_persistence_materialized",
+      "h_bond_persistence_materialized",
+      "clash_relief_materialized",
+      "uncertainty_summary_materialized",
+      "report_blockers_resolved"
+    ],
+    "phase4_failed_criterion_count": 7,
     "readonly_api_ready": true,
     "real_refinement_case_count": 0,
     "top_k_candidate_count": 0
@@ -80,7 +186,7 @@
   ],
   "schema_version": "pocketmd-lite-science-product-surface.v1",
   "science_surface_family": "pocketmd_lite",
-  "source_commit_sha": "d9f65c72c1989dda68e9c1c1e6d76db79b439b5a",
+  "source_commit_sha": "aba7de270e2e2d4c6b442e78983407303e6630b8",
   "status": "locked",
   "summary_line": "PocketMD Lite science product surface: LOCKED | top-k refinement operator rows required",
   "surface_id": "pocketmd_lite_science_product_surface",

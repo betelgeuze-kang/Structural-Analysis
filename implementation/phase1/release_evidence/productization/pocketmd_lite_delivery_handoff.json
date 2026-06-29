@@ -2,6 +2,7 @@
   "acceptance_criteria": [
     "topk_survival_report.real_refinement_case_count > 0",
     "topk_survival_report.blockers == []",
+    "topk_survival_report.phase4_exit_gate.status == ready",
     "science_product_surface.contract_pass == true",
     "science_product_surface.locked == false",
     "broad_all_atom_md_claim remains locked unless separately evidenced"
@@ -17,10 +18,10 @@
     "science_product_surface": "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json",
     "topk_survival_report": "implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json"
   },
-  "generated_at": "2026-06-29T17:24:01.096928+00:00",
+  "generated_at": "2026-06-29T18:30:49.590730+00:00",
   "input_checksums": {
-    "scripts/build_pocketmd_lite_product_surface.py": "sha256:b3930a7a7c65fd57e97d4507223dee0dabfea5d65e7e8762c9290035c4baeb87",
-    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:89b57eff81e97beb0018ecce3ce5e433d50b909c3bef6267688259a6d62b7b2b"
+    "scripts/build_pocketmd_lite_product_surface.py": "sha256:bd077cb410cddb0ba9ca8f39be70094746d30033a0ab0ef6dc09cca5a013d823",
+    "scripts/materialize_pocketmd_lite_topk_survival_report.py": "sha256:cad0efbe67d7ce67f12af76b522a96ebace1f13ebf1a063acc229757529b3c27"
   },
   "materializer": {
     "command": "python3 scripts/materialize_pocketmd_lite_topk_survival_report.py --intake <operator-pocketmd-lite-intake.json> --contract implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json --out-report implementation/phase1/release_evidence/productization/pocketmd_lite_topk_survival_report.json --out-surface implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json --fail-blocked",
@@ -46,6 +47,6 @@
   "reuse_policy": "pocketmd_lite_delivery_handoff_generated_from_goal_contract",
   "reused_evidence": false,
   "schema_version": "pocketmd-lite-delivery-handoff.v1",
-  "source_commit_sha": "d9f65c72c1989dda68e9c1c1e6d76db79b439b5a",
+  "source_commit_sha": "aba7de270e2e2d4c6b442e78983407303e6630b8",
   "status": "handoff_ready_operator_evidence_required"
 }

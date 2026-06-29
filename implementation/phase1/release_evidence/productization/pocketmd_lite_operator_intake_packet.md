@@ -21,6 +21,7 @@
 
 - `pocketmd_lite_topk_survival_report.real_refinement_case_count > 0`
 - `pocketmd_lite_topk_survival_report.blockers == []`
+- `pocketmd_lite_topk_survival_report.phase4_exit_gate.status == ready`
 - `pocketmd_lite_topk_survival_report.product_surface_ready == true`
 - `pocketmd_lite_science_product_surface.locked == false`
 - `broad_all_atom_md_claim and free_energy_perturbation_claim remain locked unless separately evidenced`
