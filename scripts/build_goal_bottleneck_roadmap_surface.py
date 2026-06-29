@@ -1085,10 +1085,68 @@ def _human_ux_release_gate_briefing(
     }
 
 
+def _release_area_owner_handoffs(
+    *,
+    release_area_blockers: list[str],
+    action_register: dict[str, Any],
+) -> list[dict[str, Any]]:
+    rows_by_blocker = {
+        str(row.get("blocker_id") or ""): row
+        for row in _as_list(action_register.get("rows"))
+        if isinstance(row, dict)
+    }
+    handoffs: list[dict[str, Any]] = []
+    for blocker_id in release_area_blockers:
+        row = _as_dict(rows_by_blocker.get(blocker_id))
+        if not row:
+            handoffs.append(
+                {
+                    "blocker_id": blocker_id,
+                    "namespace": blocker_id.split("::", 1)[0],
+                    "title": "",
+                    "owner": "",
+                    "handoff_state": "action_register_row_missing",
+                    "external_input_required": False,
+                    "owner_action": "",
+                    "evidence_state": "",
+                    "acceptance_criteria_count": 0,
+                    "acceptance_criteria": [],
+                    "evidence_artifact_keys": [],
+                }
+            )
+            continue
+        evidence_status = _as_dict(row.get("evidence_status"))
+        evidence_artifacts = _as_dict(row.get("evidence_artifacts"))
+        acceptance_criteria = [
+            str(item) for item in _as_list(row.get("acceptance_criteria"))
+        ]
+        handoffs.append(
+            {
+                "blocker_id": blocker_id,
+                "namespace": str(row.get("namespace") or blocker_id.split("::", 1)[0]),
+                "title": str(row.get("title") or ""),
+                "owner": str(row.get("owner") or ""),
+                "handoff_state": str(row.get("handoff_state") or ""),
+                "external_input_required": _as_bool(row.get("external_input_required")),
+                "owner_action": str(
+                    row.get("owner_action") or row.get("next_action") or ""
+                ),
+                "evidence_state": str(evidence_status.get("state") or ""),
+                "acceptance_criteria_count": len(acceptance_criteria),
+                "acceptance_criteria": acceptance_criteria,
+                "evidence_artifact_keys": sorted(
+                    str(key) for key in evidence_artifacts.keys()
+                ),
+            }
+        )
+    return handoffs
+
+
 def _non_expert_release_briefing(
     *,
     release_decision_kpis: dict[str, Any],
     pm_report: dict[str, Any],
+    action_register: dict[str, Any],
     roadmap_rows: list[dict[str, Any]],
     operator_evidence_handoff_queue: list[dict[str, Any]],
     primary_bottleneck_row: dict[str, Any],
@@ -1101,6 +1159,10 @@ def _non_expert_release_briefing(
     human_ux_blockers = [
         blocker for blocker in release_area_blockers if blocker.startswith("ux::")
     ]
+    release_area_owner_handoffs = _release_area_owner_handoffs(
+        release_area_blockers=release_area_blockers,
+        action_register=action_register,
+    )
     human_ux_release_gate = _human_ux_release_gate_briefing(
         human_ux_blockers=human_ux_blockers,
         ux_observation_report=ux_observation_report,
@@ -1128,6 +1190,8 @@ def _non_expert_release_briefing(
             release_decision_kpis.get("first_blocker") or ""
         ),
         "release_area_blocker_count": len(release_area_blockers),
+        "release_area_owner_handoff_count": len(release_area_owner_handoffs),
+        "release_area_owner_handoffs": release_area_owner_handoffs,
         "human_ux_blockers": human_ux_blockers,
         "human_ux_owner_action": (
             "attach a passing human new-user observation record before claiming "
@@ -1293,6 +1357,7 @@ def build_goal_bottleneck_roadmap_surface(*, repo_root: Path = ROOT) -> dict[str
     non_expert_release_briefing = _non_expert_release_briefing(
         release_decision_kpis=release_decision_kpis,
         pm_report=pm_report,
+        action_register=action_register,
         roadmap_rows=roadmap_rows,
         operator_evidence_handoff_queue=operator_evidence_handoff_queue,
         primary_bottleneck_row=primary_bottleneck_row,

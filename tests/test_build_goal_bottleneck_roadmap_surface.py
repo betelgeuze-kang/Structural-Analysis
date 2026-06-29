@@ -96,6 +96,50 @@ def test_goal_bottleneck_roadmap_surface_exposes_goal_release_kpis() -> None:
         "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
     )
     assert briefing["release_area_blocker_count"] == 9
+    assert briefing["release_area_owner_handoff_count"] == 9
+    release_area_handoffs = {
+        row["blocker_id"]: row
+        for row in briefing["release_area_owner_handoffs"]
+    }
+    assert set(release_area_handoffs) == {
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
+        "ux::human_new_user_observation_missing_or_failed",
+        "ux::human_new_user_30min_sample_evidence_missing",
+        "security::license_status_not_configured",
+        "github_sync::github_sync_preflight::worktree_not_clean",
+        "github_sync::github_sync_preflight::remote_mutation_approval_required",
+        "github_sync::github_sync_remote_sync_pending",
+        "github_sync::github_sync_preflight_not_synced",
+    }
+    ci_handoff = release_area_handoffs[
+        "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+    ]
+    assert ci_handoff["owner"] == "release_ci_owner"
+    assert ci_handoff["handoff_state"] == "external_owner_input_ready"
+    assert ci_handoff["external_input_required"] is True
+    assert ci_handoff["evidence_state"] == "github_actions_job_start_blocked"
+    assert ci_handoff["acceptance_criteria_count"] == 4
+    assert "ci_streak_intake_packet" in ci_handoff["evidence_artifact_keys"]
+    ux_handoff = release_area_handoffs[
+        "ux::human_new_user_observation_missing_or_failed"
+    ]
+    assert ux_handoff["owner"] == "ux_research_owner"
+    assert ux_handoff["evidence_state"] == "missing_human_new_user_observation"
+    assert "ux_new_user_observation_intake_packet" in ux_handoff[
+        "evidence_artifact_keys"
+    ]
+    security_handoff = release_area_handoffs[
+        "security::license_status_not_configured"
+    ]
+    assert security_handoff["owner"] == "product_legal_owner"
+    assert security_handoff["evidence_state"] == "not_configured"
+    github_handoff = release_area_handoffs[
+        "github_sync::github_sync_preflight_not_synced"
+    ]
+    assert github_handoff["owner"] == "release_owner"
+    assert github_handoff["evidence_state"] == "blocked"
+    assert github_handoff["handoff_state"] == "external_owner_input_ready"
     assert briefing["human_ux_blockers"] == [
         "ux::human_new_user_observation_missing_or_failed",
         "ux::human_new_user_30min_sample_evidence_missing",
