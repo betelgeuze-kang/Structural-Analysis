@@ -291,6 +291,145 @@ def _summary(rows: list[dict[str, Any]], blockers: list[str]) -> dict[str, Any]:
     }
 
 
+def _matching_blockers(blockers: list[str], *needles: str) -> list[str]:
+    return [
+        blocker
+        for blocker in blockers
+        if any(needle in blocker for needle in needles)
+    ]
+
+
+def _count_min_gate(
+    *,
+    criterion_id: str,
+    current: int,
+    required: int,
+    blockers: list[str],
+) -> dict[str, Any]:
+    passed = current >= required
+    return {
+        "criterion_id": criterion_id,
+        "pass": passed,
+        "current": current,
+        "required": f">={required}",
+        "blockers": [] if passed else blockers,
+    }
+
+
+def _metric_present_gate(
+    *,
+    criterion_id: str,
+    metric_key: str,
+    summary: dict[str, Any],
+    blockers: list[str],
+) -> dict[str, Any]:
+    current = summary.get(metric_key)
+    passed = current is not None
+    return {
+        "criterion_id": criterion_id,
+        "pass": passed,
+        "metric_key": metric_key,
+        "current": current,
+        "required": "present",
+        "blockers": [] if passed else blockers,
+    }
+
+
+def _boolean_gate(
+    *,
+    criterion_id: str,
+    current: bool,
+    required: bool,
+    blockers: list[str],
+) -> dict[str, Any]:
+    passed = current is required
+    return {
+        "criterion_id": criterion_id,
+        "pass": passed,
+        "current": current,
+        "required": required,
+        "blockers": [] if passed else blockers,
+    }
+
+
+def build_phase4_exit_gate(
+    *,
+    summary: dict[str, Any],
+    blockers: list[str],
+    product_surface_ready: bool,
+    first_blocked_target: str,
+    blocked_claims: list[str] | None = None,
+) -> dict[str, Any]:
+    claims = blocked_claims if blocked_claims is not None else list(BLOCKED_CLAIMS)
+    broad_claims_locked = all(
+        claim in claims
+        for claim in ("broad_all_atom_md_claim", "free_energy_perturbation_claim")
+    )
+    criteria = [
+        _count_min_gate(
+            criterion_id="top_k_refinement_rows_present",
+            current=int(summary.get("top_k_candidate_count") or 0),
+            required=1,
+            blockers=_matching_blockers(blockers, "topk_candidate", "candidate_rows"),
+        ),
+        _metric_present_gate(
+            criterion_id="local_min_survival_materialized",
+            metric_key="local_min_survival_rate",
+            summary=summary,
+            blockers=_matching_blockers(blockers, "local_min"),
+        ),
+        _metric_present_gate(
+            criterion_id="contact_persistence_materialized",
+            metric_key="contact_persistence_rate_median",
+            summary=summary,
+            blockers=_matching_blockers(blockers, "contact", "contact_hbond"),
+        ),
+        _metric_present_gate(
+            criterion_id="h_bond_persistence_materialized",
+            metric_key="h_bond_persistence_rate_median",
+            summary=summary,
+            blockers=_matching_blockers(blockers, "h_bond", "contact_hbond"),
+        ),
+        _metric_present_gate(
+            criterion_id="clash_relief_materialized",
+            metric_key="clash_relief_rate",
+            summary=summary,
+            blockers=_matching_blockers(blockers, "clash"),
+        ),
+        _metric_present_gate(
+            criterion_id="uncertainty_summary_materialized",
+            metric_key="uncertainty_width_median",
+            summary=summary,
+            blockers=_matching_blockers(blockers, "uncertainty"),
+        ),
+        _boolean_gate(
+            criterion_id="report_blockers_resolved",
+            current=not blockers,
+            required=True,
+            blockers=blockers,
+        ),
+        _boolean_gate(
+            criterion_id="broad_all_atom_fep_claims_locked",
+            current=broad_claims_locked,
+            required=True,
+            blockers=[],
+        ),
+    ]
+    failed_criteria = [
+        str(row["criterion_id"]) for row in criteria if not bool(row["pass"])
+    ]
+    return {
+        "status": "ready" if product_surface_ready and not failed_criteria else "blocked",
+        "claim": "pocketmd_lite_top_k_refinement",
+        "real_refinement_case_count": int(summary.get("real_refinement_case_count") or 0),
+        "top_k_candidate_count": int(summary.get("top_k_candidate_count") or 0),
+        "first_blocked_target": first_blocked_target,
+        "criteria": criteria,
+        "failed_criterion_count": len(failed_criteria),
+        "failed_criteria": failed_criteria,
+    }
+
+
 def _input_paths(
     *,
     intake_path: Path | None,
@@ -339,6 +478,13 @@ def materialize_pocketmd_lite_topk_survival_report(
         ),
         "top_k_refinement_operator_intake" if blockers else "",
     )
+    phase4_exit_gate = build_phase4_exit_gate(
+        summary=summary,
+        blockers=blockers,
+        product_surface_ready=product_surface_ready,
+        first_blocked_target=first_blocked_target,
+        blocked_claims=list(BLOCKED_CLAIMS),
+    )
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -363,6 +509,7 @@ def materialize_pocketmd_lite_topk_survival_report(
         "root_cause_tags": list(dict.fromkeys(root_cause_tags)),
         "blockers": blockers,
         "blocked_claims": list(BLOCKED_CLAIMS),
+        "phase4_exit_gate": phase4_exit_gate,
         "next_actions": (
             [
                 "review_pocketmd_lite_topk_survival_report",
@@ -385,6 +532,8 @@ def materialize_pocketmd_lite_topk_survival_report(
             "metric_complete": metrics_complete,
             "blocker_count": len(blockers),
             "product_surface_ready": product_surface_ready,
+            "phase4_exit_gate_status": phase4_exit_gate["status"],
+            "phase4_failed_criterion_count": phase4_exit_gate["failed_criterion_count"],
         },
         "summary_line": (
             "PocketMD Lite top-k survival report: PASS | "
@@ -421,6 +570,15 @@ def build_pocketmd_lite_science_product_surface(
     first_blocked_target = _string(report.get("first_blocked_target"))
     if not product_surface_ready and not first_blocked_target:
         first_blocked_target = "top_k_refinement_operator_intake"
+    phase4_exit_gate = report.get("phase4_exit_gate")
+    if not isinstance(phase4_exit_gate, dict):
+        phase4_exit_gate = build_phase4_exit_gate(
+            summary=report.get("summary", {}) if isinstance(report.get("summary"), dict) else {},
+            blockers=[str(row) for row in blockers],
+            product_surface_ready=product_surface_ready,
+            first_blocked_target=first_blocked_target,
+            blocked_claims=[str(row) for row in _as_list(report.get("blocked_claims"))],
+        )
 
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
@@ -445,6 +603,7 @@ def build_pocketmd_lite_science_product_surface(
         "root_cause_tags": [] if product_surface_ready else root_cause_tags,
         "blockers": [] if product_surface_ready else blockers,
         "blocked_claims": list(BLOCKED_CLAIMS),
+        "phase4_exit_gate": phase4_exit_gate,
         "required_receipts": [
             "top_k_candidate_refinement_rows",
             "local_min_survival_report",
@@ -467,6 +626,13 @@ def build_pocketmd_lite_science_product_surface(
             "top_k_candidate_count": int(report.get("top_k_candidate_count") or 0),
             "blocked_claim_count": len(BLOCKED_CLAIMS),
             "summary": report.get("summary", {}),
+            "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
+            "phase4_failed_criterion_count": int(
+                phase4_exit_gate.get("failed_criterion_count") or 0
+            ),
+            "phase4_failed_criteria": [
+                str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
+            ],
         },
         "materializer": {
             "schema_version": MATERIALIZATION_SCHEMA_VERSION,

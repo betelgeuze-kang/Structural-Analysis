@@ -88,6 +88,17 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert "pocketmd_lite_topk_candidate_rows_missing" in survival["blockers"]
     assert "uncertainty_width_median" in survival["required_metrics"]
     assert survival["materializer"]["status"] == "ready_for_operator_intake"
+    assert survival["phase4_exit_gate"]["status"] == "blocked"
+    assert survival["phase4_exit_gate"]["failed_criterion_count"] == 7
+    assert survival["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
 
     assert api["schema_version"] == "pocketmd-lite-readonly-api.v1"
     assert api["contract_pass"] is True
@@ -101,6 +112,9 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
         "pocketmd_lite_operator_intake_packet.json"
     )
     assert "topk_survival_report.real_refinement_case_count > 0" in handoff[
+        "acceptance_criteria"
+    ]
+    assert "topk_survival_report.phase4_exit_gate.status == ready" in handoff[
         "acceptance_criteria"
     ]
 
@@ -128,6 +142,18 @@ def test_pocketmd_lite_contract_keeps_broad_md_and_fep_locked() -> None:
     assert surface["claim_locked"] is True
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert surface["root_cause_tags"] == ["operator_refinement_rows_required"]
+    assert surface["phase4_exit_gate"]["status"] == "blocked"
+    assert surface["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
+    assert surface["readiness_summary"]["phase4_exit_gate_status"] == "blocked"
+    assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 7
     assert surface["goal_roadmap_linkage"] == {
         "phase": "Phase 4",
         "roadmap_item": "PocketMD Lite science product surface",

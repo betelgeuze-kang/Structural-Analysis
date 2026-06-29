@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from materialize_pocketmd_lite_topk_survival_report import build_phase4_exit_gate  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -201,6 +202,22 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "pocketmd_lite_contact_hbond_persistence_rows_missing",
         "pocketmd_lite_uncertainty_rows_missing",
     ]
+    summary = {
+        "local_min_survival_rate": None,
+        "contact_persistence_rate_median": None,
+        "h_bond_persistence_rate_median": None,
+        "clash_relief_rate": None,
+        "uncertainty_width_median": None,
+        "top_k_candidate_count": 0,
+        "real_refinement_case_count": 0,
+        "blocker_count": len(blockers),
+    }
+    phase4_exit_gate = build_phase4_exit_gate(
+        summary=summary,
+        blockers=blockers,
+        product_surface_ready=False,
+        first_blocked_target="top_k_refinement_operator_intake",
+    )
     return {
         "schema_version": SURVIVAL_REPORT_SCHEMA_VERSION,
         **_metadata(
@@ -214,18 +231,10 @@ def build_topk_survival_report(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "real_refinement_case_count": 0,
         "top_k_candidate_count": 0,
         "rows": [],
-        "summary": {
-            "local_min_survival_rate": None,
-            "contact_persistence_rate_median": None,
-            "h_bond_persistence_rate_median": None,
-            "clash_relief_rate": None,
-            "uncertainty_width_median": None,
-            "top_k_candidate_count": 0,
-            "real_refinement_case_count": 0,
-            "blocker_count": len(blockers),
-        },
+        "summary": summary,
         "materializer": _materializer_contract(),
         "required_metrics": [row["metric_id"] for row in _metric_contracts()],
+        "phase4_exit_gate": phase4_exit_gate,
         "blockers": blockers,
         "next_actions": [
             "attach_top_k_candidate_refinement_rows",
@@ -324,6 +333,7 @@ def build_delivery_handoff(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "acceptance_criteria": [
             "topk_survival_report.real_refinement_case_count > 0",
             "topk_survival_report.blockers == []",
+            "topk_survival_report.phase4_exit_gate.status == ready",
             "science_product_surface.contract_pass == true",
             "science_product_surface.locked == false",
             "broad_all_atom_md_claim remains locked unless separately evidenced",
@@ -443,6 +453,7 @@ def build_operator_intake_packet(
         "acceptance_criteria": [
             "pocketmd_lite_topk_survival_report.real_refinement_case_count > 0",
             "pocketmd_lite_topk_survival_report.blockers == []",
+            "pocketmd_lite_topk_survival_report.phase4_exit_gate.status == ready",
             "pocketmd_lite_topk_survival_report.product_surface_ready == true",
             "pocketmd_lite_science_product_surface.locked == false",
             "broad_all_atom_md_claim and free_energy_perturbation_claim remain locked unless separately evidenced",
@@ -495,6 +506,15 @@ def build_surface(
         "pocketmd_lite_survival_report_blocked",
         "pocketmd_lite_broad_all_atom_fep_claim_locked",
     ]
+    phase4_exit_gate = topk_survival_report.get("phase4_exit_gate")
+    if not isinstance(phase4_exit_gate, dict):
+        report_summary = topk_survival_report.get("summary")
+        phase4_exit_gate = build_phase4_exit_gate(
+            summary=report_summary if isinstance(report_summary, dict) else {},
+            blockers=[str(row) for row in topk_survival_report.get("blockers", [])],
+            product_surface_ready=False,
+            first_blocked_target="top_k_refinement_operator_intake",
+        )
     return {
         "schema_version": SURFACE_SCHEMA_VERSION,
         **_metadata(
@@ -516,6 +536,7 @@ def build_surface(
         "first_blocked_target": "top_k_refinement_operator_intake",
         "root_cause_tags": ["operator_refinement_rows_required"],
         "blockers": blockers,
+        "phase4_exit_gate": phase4_exit_gate,
         "required_receipts": [
             "top_k_candidate_refinement_rows",
             "local_min_survival_report",
@@ -542,6 +563,13 @@ def build_surface(
             ),
             "top_k_candidate_count": int(topk_survival_report.get("top_k_candidate_count") or 0),
             "blocked_claim_count": len(contract.get("blocked_claims", [])),
+            "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
+            "phase4_failed_criterion_count": int(
+                phase4_exit_gate.get("failed_criterion_count") or 0
+            ),
+            "phase4_failed_criteria": [
+                str(row) for row in phase4_exit_gate.get("failed_criteria", [])
+            ],
         },
         "goal_roadmap_linkage": {
             "phase": "Phase 4",

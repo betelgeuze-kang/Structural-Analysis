@@ -15,6 +15,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from release_evidence_metadata import release_evidence_metadata  # noqa: E402
+from materialize_pocketmd_lite_topk_survival_report import build_phase4_exit_gate  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -221,6 +222,23 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
     contract = _load_json(repo_root, DEFAULT_POCKETMD_CONTRACT)
     topk_report = _load_json(repo_root, DEFAULT_POCKETMD_TOPK_REPORT)
     operator_intake = _load_json(repo_root, DEFAULT_POCKETMD_OPERATOR_INTAKE_PACKET)
+    phase4_exit_gate = _as_dict(
+        surface.get("phase4_exit_gate") or topk_report.get("phase4_exit_gate")
+    )
+    if not phase4_exit_gate:
+        phase4_exit_gate = build_phase4_exit_gate(
+            summary=_as_dict(topk_report.get("summary")),
+            blockers=[str(row) for row in _as_list(topk_report.get("blockers"))],
+            product_surface_ready=bool(
+                topk_report.get("product_surface_ready") and topk_report.get("contract_pass")
+            ),
+            first_blocked_target=str(
+                topk_report.get("first_blocked_target")
+                or surface.get("first_blocked_target")
+                or "top_k_refinement_operator_intake"
+            ),
+            blocked_claims=[str(row) for row in _as_list(contract.get("blocked_claims"))],
+        )
     ready = bool(surface.get("product_surface_ready") and surface.get("contract_pass"))
     return _capability_row(
         capability_id="pocketmd_lite_top_k_refinement",
@@ -247,6 +265,13 @@ def _pocketmd_capability(repo_root: Path) -> dict[str, Any]:
             "operator_intake_required_slot_count": int(
                 operator_intake.get("required_slot_count") or 0
             ),
+            "phase4_exit_gate_status": str(phase4_exit_gate.get("status") or ""),
+            "phase4_failed_criterion_count": int(
+                phase4_exit_gate.get("failed_criterion_count") or 0
+            ),
+            "phase4_failed_criteria": [
+                str(row) for row in _as_list(phase4_exit_gate.get("failed_criteria"))
+            ],
         },
     )
 
@@ -369,6 +394,7 @@ def _gpcr_capability(repo_root: Path) -> dict[str, Any]:
 def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_product_capabilities_surface.py"),
+        Path("scripts/materialize_pocketmd_lite_topk_survival_report.py"),
         DEFAULT_PUBLIC_BENCHMARK,
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
         DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,

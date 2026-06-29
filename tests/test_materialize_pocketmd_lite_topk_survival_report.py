@@ -127,6 +127,9 @@ def test_pocketmd_lite_materializer_computes_topk_survival_summary() -> None:
         "top_k_candidate_count": 3,
         "uncertainty_width_median": 0.4,
     }
+    assert report["phase4_exit_gate"]["status"] == "ready"
+    assert report["phase4_exit_gate"]["failed_criterion_count"] == 0
+    assert report["phase4_exit_gate"]["failed_criteria"] == []
     assert "free_energy_perturbation_claim" in report["blocked_claims"]
 
 
@@ -153,6 +156,9 @@ def test_pocketmd_lite_materializer_surface_unlocks_only_bounded_claim() -> None
     assert surface["claim_locked"] is False
     assert surface["blockers"] == []
     assert "broad_all_atom_md_claim" in surface["blocked_claims"]
+    assert surface["phase4_exit_gate"]["status"] == "ready"
+    assert surface["readiness_summary"]["phase4_exit_gate_status"] == "ready"
+    assert surface["readiness_summary"]["phase4_failed_criterion_count"] == 0
     assert surface["goal_roadmap_linkage"]["bottleneck"] == (
         "pocketmd_lite_science_product_surface_ready"
     )
@@ -171,9 +177,20 @@ def test_pocketmd_lite_materializer_blocks_empty_intake() -> None:
     assert report["first_blocked_target"] == "top_k_refinement_operator_intake"
     assert report["root_cause_tags"] == ["operator_refinement_rows_required"]
     assert "pocketmd_lite_topk_candidate_rows_missing" in report["blockers"]
+    assert report["phase4_exit_gate"]["status"] == "blocked"
+    assert report["phase4_exit_gate"]["failed_criterion_count"] == 7
     assert surface["status"] == "locked"
     assert surface["locked"] is True
     assert surface["first_blocked_target"] == "top_k_refinement_operator_intake"
+    assert surface["phase4_exit_gate"]["failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
 
 
 def test_pocketmd_lite_materializer_cli_writes_report_and_surface(tmp_path: Path) -> None:

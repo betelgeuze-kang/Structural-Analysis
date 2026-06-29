@@ -107,6 +107,17 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
         "ready_for_operator_input"
     )
     assert pocketmd["summary"]["operator_intake_required_slot_count"] == 1
+    assert pocketmd["summary"]["phase4_exit_gate_status"] == "blocked"
+    assert pocketmd["summary"]["phase4_failed_criterion_count"] == 7
+    assert pocketmd["summary"]["phase4_failed_criteria"] == [
+        "top_k_refinement_rows_present",
+        "local_min_survival_materialized",
+        "contact_persistence_materialized",
+        "h_bond_persistence_materialized",
+        "clash_relief_materialized",
+        "uncertainty_summary_materialized",
+        "report_blockers_resolved",
+    ]
     assert (
         "implementation/phase1/release_evidence/productization/"
         "pocketmd_lite_operator_intake_packet.json"
