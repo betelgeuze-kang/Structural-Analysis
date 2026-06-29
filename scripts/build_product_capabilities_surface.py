@@ -22,6 +22,12 @@ SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
 
 DEFAULT_OUT = SURFACE_DIR / "product_capabilities_surface.json"
 DEFAULT_PUBLIC_BENCHMARK = PRODUCTIZATION / "public_benchmark_source_of_truth.json"
+DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE = (
+    PRODUCTIZATION / "public_benchmark_operator_intake_packet.json"
+)
+DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD = (
+    PRODUCTIZATION / "public_benchmark_operator_intake_packet.md"
+)
 DEFAULT_POCKETMD_SURFACE = SURFACE_DIR / "pocketmd_lite_science_product_surface.json"
 DEFAULT_POCKETMD_CONTRACT = PRODUCTIZATION / "pocketmd_lite_contract.json"
 DEFAULT_POCKETMD_TOPK_REPORT = PRODUCTIZATION / "pocketmd_lite_topk_survival_report.json"
@@ -97,6 +103,16 @@ def _blockers(payload: dict[str, Any]) -> list[str]:
     return [str(row) for row in _as_list(payload.get("blockers"))]
 
 
+def _dedupe(values: list[str]) -> list[str]:
+    seen: set[str] = set()
+    deduped: list[str] = []
+    for value in values:
+        if value and value not in seen:
+            seen.add(value)
+            deduped.append(value)
+    return deduped
+
+
 def _surface_summary(payload: dict[str, Any]) -> dict[str, Any]:
     summary = _as_dict(payload.get("summary"))
     return summary if summary else _as_dict(payload.get("readiness_summary"))
@@ -150,20 +166,36 @@ def _structural_solver_capability(repo_root: Path) -> dict[str, Any]:
 
 def _public_benchmark_capability(repo_root: Path) -> dict[str, Any]:
     payload = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK)
+    operator_intake = _load_json(repo_root, DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE)
+    source_operator_summary = _as_dict(payload.get("operator_intake_packet"))
     ready = bool(payload.get("public_benchmark_ready"))
     return _capability_row(
         capability_id="public_benchmark_harness",
         title="Public benchmark harness",
         capability_kind="external_science_evidence",
         state=_state(payload, ready_flag=ready),
-        evidence_artifacts=[DEFAULT_PUBLIC_BENCHMARK],
+        evidence_artifacts=[
+            DEFAULT_PUBLIC_BENCHMARK,
+            DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
+            DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
+        ],
         contract_pass=bool(_truthy_contract(payload) and ready),
         blocker_count=len(_blockers(payload)),
-        next_actions=_next_actions(payload),
+        next_actions=_dedupe(_next_actions(payload) + _next_actions(operator_intake)),
         summary={
             "status": str(payload.get("status") or ""),
             "tier_beta_ready": bool(payload.get("tier_beta_ready")),
             "public_benchmark_ready": ready,
+            "operator_intake_packet_status": str(
+                operator_intake.get("status") or source_operator_summary.get("status") or ""
+            ),
+            "operator_intake_required_slot_count": int(
+                operator_intake.get("required_slot_count")
+                or source_operator_summary.get("required_slot_count")
+                or 0
+            ),
+            "operator_intake_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE),
+            "operator_intake_markdown_artifact": str(DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD),
             "subset_manifest_summary": _as_dict(payload.get("subset_manifest_summary")),
             "enrichment_scorecard_summary": _as_dict(payload.get("enrichment_scorecard_summary")),
         },
@@ -256,6 +288,8 @@ def _input_paths() -> list[Path]:
     return [
         Path("scripts/build_product_capabilities_surface.py"),
         DEFAULT_PUBLIC_BENCHMARK,
+        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE,
+        DEFAULT_PUBLIC_BENCHMARK_OPERATOR_INTAKE_MD,
         DEFAULT_POCKETMD_CONTRACT,
         DEFAULT_POCKETMD_TOPK_REPORT,
         DEFAULT_POCKETMD_SURFACE,
