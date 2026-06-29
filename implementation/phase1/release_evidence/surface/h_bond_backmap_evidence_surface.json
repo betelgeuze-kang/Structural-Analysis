@@ -7,15 +7,101 @@
   "claim_locked": true,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-06-29T15:11:41.373816+00:00",
+  "first_blocked_target": "operator_attached_h_bond_backmap_cases",
+  "first_operator_evidence_gap": {
+    "blocked_h_bond_criteria": [
+      "authoritative_h_bond_backmap_cases_attached",
+      "source_receipts_attached"
+    ],
+    "first_next_action": "attach authoritative H-bond BackMap case rows",
+    "h_bond_surface_blocked": true,
+    "minimum_evidence": {
+      "required_fields": [
+        "case_id",
+        "receptor_id",
+        "ligand_id",
+        "source_system_ref",
+        "donor_acceptor_map_ref",
+        "provenance_ref",
+        "source_checksum"
+      ]
+    },
+    "slot_id": "operator_attached_h_bond_backmap_cases",
+    "slot_priority": 1,
+    "status": "operator_input_required"
+  },
+  "generated_at": "2026-06-29T20:42:35.445952+00:00",
   "input_checksums": {
-    "scripts/build_science_evidence_surface_seeds.py": "sha256:6dbb5a919d0d86c412c59b63af167cf5408bbf3a56e87f68b69962f17dbabddb"
+    "scripts/build_science_evidence_surface_seeds.py": "sha256:290c20f31c273bad23bf1313478df054b730b7dc0dc11c852547242ccedb3344"
   },
   "locked": true,
   "next_actions": [
     "attach_h_bond_backmap_operator_receipts",
     "materialize_h_bond_backmap_evidence_rows",
     "regenerate_pm_release_gate_report"
+  ],
+  "operator_evidence_gap_count": 3,
+  "operator_evidence_gap_register": [
+    {
+      "blocked_h_bond_criteria": [
+        "authoritative_h_bond_backmap_cases_attached",
+        "source_receipts_attached"
+      ],
+      "first_next_action": "attach authoritative H-bond BackMap case rows",
+      "h_bond_surface_blocked": true,
+      "minimum_evidence": {
+        "required_fields": [
+          "case_id",
+          "receptor_id",
+          "ligand_id",
+          "source_system_ref",
+          "donor_acceptor_map_ref",
+          "provenance_ref",
+          "source_checksum"
+        ]
+      },
+      "slot_id": "operator_attached_h_bond_backmap_cases",
+      "slot_priority": 1,
+      "status": "operator_input_required"
+    },
+    {
+      "blocked_h_bond_criteria": [
+        "contact_persistence_or_backmap_accuracy_rows_attached"
+      ],
+      "first_next_action": "attach measured contact persistence or BackMap accuracy rows",
+      "h_bond_surface_blocked": true,
+      "minimum_evidence": {
+        "required_fields": [
+          "case_id",
+          "contact_persistence_rate",
+          "backmap_accuracy_rate",
+          "h_bond_distance_error_angstrom_median",
+          "h_bond_angle_error_degree_median",
+          "source_checksum"
+        ]
+      },
+      "slot_id": "contact_persistence_or_backmap_accuracy_rows",
+      "slot_priority": 2,
+      "status": "operator_input_required"
+    },
+    {
+      "blocked_h_bond_criteria": [
+        "reviewer_reproduction_command_attached"
+      ],
+      "first_next_action": "attach a reviewer reproduction command",
+      "h_bond_surface_blocked": true,
+      "minimum_evidence": {
+        "required_fields": [
+          "command",
+          "expected_outputs",
+          "environment_ref",
+          "source_checksum"
+        ]
+      },
+      "slot_id": "reviewer_reproduction_command",
+      "slot_priority": 3,
+      "status": "operator_input_required"
+    }
   ],
   "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
   "required_receipts": [
@@ -25,9 +111,13 @@
   ],
   "reuse_policy": "locked_science_evidence_surface_seed_from_goal_contract",
   "reused_evidence": false,
+  "root_cause_tags": [
+    "operator_receipts_required",
+    "operator_handoff_required"
+  ],
   "schema_version": "science-evidence-surface-seed.v1",
   "science_surface_family": "h_bond",
-  "source_commit_sha": "fc19614c10cd3124f317684be8288f30c3acf5dc",
+  "source_commit_sha": "e956f47bb5ee90d67c328690bd3fca6c92a9b9ce",
   "status": "locked",
   "summary_line": "H-Bond BackMap evidence surface: LOCKED | authoritative receipts required",
   "surface_id": "h_bond_backmap_evidence_surface",

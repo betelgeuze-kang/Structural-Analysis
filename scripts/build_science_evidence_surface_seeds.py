@@ -22,6 +22,7 @@ from materialize_gpcr_hard_decoy_suite_report import (  # noqa: E402
 
 SCHEMA_VERSION = "science-evidence-surface-seed.v1"
 DEFAULT_SURFACE_DIR = Path("implementation/phase1/release_evidence/surface")
+FAMILY_CHOICES = ("all", "h_bond_backmap", "gpcr_hard_decoy")
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -70,6 +71,73 @@ def build_h_bond_backmap_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "h_bond_backmap_authoritative_receipts_required",
         "h_bond_backmap_operator_handoff_not_attached",
     ]
+    required_receipts = [
+        "operator_attached_h_bond_backmap_cases",
+        "contact_persistence_or_backmap_accuracy_rows",
+        "reviewer_reproduction_command",
+    ]
+    operator_evidence_gap_register = [
+        {
+            "slot_priority": 1,
+            "slot_id": "operator_attached_h_bond_backmap_cases",
+            "status": "operator_input_required",
+            "h_bond_surface_blocked": True,
+            "blocked_h_bond_criteria": [
+                "authoritative_h_bond_backmap_cases_attached",
+                "source_receipts_attached",
+            ],
+            "first_next_action": "attach authoritative H-bond BackMap case rows",
+            "minimum_evidence": {
+                "required_fields": [
+                    "case_id",
+                    "receptor_id",
+                    "ligand_id",
+                    "source_system_ref",
+                    "donor_acceptor_map_ref",
+                    "provenance_ref",
+                    "source_checksum",
+                ],
+            },
+        },
+        {
+            "slot_priority": 2,
+            "slot_id": "contact_persistence_or_backmap_accuracy_rows",
+            "status": "operator_input_required",
+            "h_bond_surface_blocked": True,
+            "blocked_h_bond_criteria": [
+                "contact_persistence_or_backmap_accuracy_rows_attached",
+            ],
+            "first_next_action": (
+                "attach measured contact persistence or BackMap accuracy rows"
+            ),
+            "minimum_evidence": {
+                "required_fields": [
+                    "case_id",
+                    "contact_persistence_rate",
+                    "backmap_accuracy_rate",
+                    "h_bond_distance_error_angstrom_median",
+                    "h_bond_angle_error_degree_median",
+                    "source_checksum",
+                ],
+            },
+        },
+        {
+            "slot_priority": 3,
+            "slot_id": "reviewer_reproduction_command",
+            "status": "operator_input_required",
+            "h_bond_surface_blocked": True,
+            "blocked_h_bond_criteria": ["reviewer_reproduction_command_attached"],
+            "first_next_action": "attach a reviewer reproduction command",
+            "minimum_evidence": {
+                "required_fields": [
+                    "command",
+                    "expected_outputs",
+                    "environment_ref",
+                    "source_checksum",
+                ],
+            },
+        },
+    ]
     return {
         **_base_surface(
             surface_id="h_bond_backmap_evidence_surface",
@@ -81,11 +149,15 @@ def build_h_bond_backmap_surface(*, repo_root: Path = ROOT) -> dict[str, Any]:
         ),
         "science_surface_family": "h_bond",
         "surface_scope": "h_bond_backmap",
-        "required_receipts": [
-            "operator_attached_h_bond_backmap_cases",
-            "contact_persistence_or_backmap_accuracy_rows",
-            "reviewer_reproduction_command",
+        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
+        "root_cause_tags": [
+            "operator_receipts_required",
+            "operator_handoff_required",
         ],
+        "required_receipts": required_receipts,
+        "operator_evidence_gap_count": len(operator_evidence_gap_register),
+        "first_operator_evidence_gap": operator_evidence_gap_register[0],
+        "operator_evidence_gap_register": operator_evidence_gap_register,
         "next_actions": [
             "attach_h_bond_backmap_operator_receipts",
             "materialize_h_bond_backmap_evidence_rows",
@@ -166,13 +238,19 @@ def write_science_evidence_surface_seeds(
     *,
     repo_root: Path = ROOT,
     surface_dir: Path = DEFAULT_SURFACE_DIR,
+    family: str = "all",
 ) -> dict[str, dict[str, Any]]:
     surfaces = build_science_evidence_surface_seeds(repo_root=repo_root)
+    if family != "all":
+        if family not in surfaces:
+            raise ValueError(f"Unknown science evidence surface family: {family}")
+        surfaces = {family: surfaces[family]}
     outputs = {
         "h_bond_backmap": surface_dir / "h_bond_backmap_evidence_surface.json",
         "gpcr_hard_decoy": surface_dir / "gpcr_hard_decoy_evidence_surface.json",
     }
-    for key, raw_path in outputs.items():
+    for key in surfaces:
+        raw_path = outputs[key]
         path = raw_path if raw_path.is_absolute() else repo_root / raw_path
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(_json_text(surfaces[key]), encoding="utf-8")
@@ -183,6 +261,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--surface-dir", type=Path, default=DEFAULT_SURFACE_DIR)
     parser.add_argument("--repo-root", type=Path, default=ROOT)
+    parser.add_argument(
+        "--family",
+        choices=FAMILY_CHOICES,
+        default="all",
+        help="Limit writes to one science surface family; default writes all seed surfaces.",
+    )
     parser.add_argument("--json", action="store_true")
     return parser
 
@@ -192,6 +276,7 @@ def main(argv: list[str] | None = None) -> int:
     surfaces = write_science_evidence_surface_seeds(
         repo_root=args.repo_root,
         surface_dir=args.surface_dir,
+        family=args.family,
     )
     if args.json:
         print(_json_text({"surfaces": surfaces}), end="")
@@ -199,7 +284,7 @@ def main(argv: list[str] | None = None) -> int:
         print(
             "science-evidence-surface-seeds: "
             f"locked_surfaces={len(surfaces)} | "
-            "families=h_bond,gpcr"
+            f"families={','.join(surfaces)}"
         )
     return 0
 

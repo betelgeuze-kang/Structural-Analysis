@@ -52,6 +52,10 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
 
 
+def _as_dict(value: Any) -> dict[str, Any]:
+    return value if isinstance(value, dict) else {}
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = path if path.is_absolute() else repo_root / path
     if not resolved.exists():
@@ -178,9 +182,19 @@ def build_h_bond_backmap_operator_intake_packet(*, repo_root: Path = ROOT) -> di
             "claim_locked": bool(surface.get("claim_locked", True)),
             "contract_pass": bool(surface.get("contract_pass")),
             "reason_code": str(surface.get("reason_code") or ""),
+            "first_blocked_target": str(surface.get("first_blocked_target") or ""),
+            "root_cause_tags": [
+                str(row) for row in _as_list(surface.get("root_cause_tags"))
+            ],
             "blocker_count": len(blockers),
             "blockers": blockers,
             "required_receipts": required_receipts,
+            "operator_evidence_gap_count": int(
+                surface.get("operator_evidence_gap_count") or 0
+            ),
+            "first_operator_evidence_gap": _as_dict(
+                surface.get("first_operator_evidence_gap")
+            ),
         },
         "handoff_sequence": [
             {

@@ -163,6 +163,13 @@ def test_product_capabilities_surface_exposes_science_and_benchmark_rows() -> No
     )
     assert h_bond["summary"]["operator_intake_required_slot_count"] == 3
     assert h_bond["summary"]["claim_locked"] is True
+    assert h_bond["summary"]["first_blocked_target"] == (
+        "operator_attached_h_bond_backmap_cases"
+    )
+    assert h_bond["summary"]["root_cause_tags"] == [
+        "operator_receipts_required",
+        "operator_handoff_required",
+    ]
     assert (
         "implementation/phase1/release_evidence/productization/"
         "h_bond_backmap_operator_intake_packet.json"

@@ -36,6 +36,19 @@ def test_science_evidence_surface_seeds_are_locked_not_passing() -> None:
     assert h_bond["contract_pass"] is False
     assert h_bond["claim_locked"] is True
     assert "h_bond_backmap_authoritative_receipts_required" in h_bond["blockers"]
+    assert h_bond["first_blocked_target"] == "operator_attached_h_bond_backmap_cases"
+    assert h_bond["root_cause_tags"] == [
+        "operator_receipts_required",
+        "operator_handoff_required",
+    ]
+    assert h_bond["operator_evidence_gap_count"] == 3
+    assert h_bond["first_operator_evidence_gap"]["slot_id"] == (
+        "operator_attached_h_bond_backmap_cases"
+    )
+    assert h_bond["first_operator_evidence_gap"]["blocked_h_bond_criteria"] == [
+        "authoritative_h_bond_backmap_cases_attached",
+        "source_receipts_attached",
+    ]
     assert gpcr["surface_id"] == "gpcr_hard_decoy_evidence_surface"
     assert gpcr["contract_pass"] is False
     assert gpcr["reason_code"] == "ERR_BROAD_GPCR_CLAIM_LOCKED"
@@ -89,4 +102,40 @@ def test_science_evidence_surface_seed_cli_writes_pm_visible_surfaces(
     assert rows_by_id["h_bond_backmap_evidence_surface"]["locked"] is True
     assert rows_by_id["gpcr_hard_decoy_evidence_surface"]["locked"] is True
     assert rows_by_id["h_bond_backmap_evidence_surface"]["contract_pass"] is False
+    assert rows_by_id["h_bond_backmap_evidence_surface"]["first_blocked_target"] == (
+        "operator_attached_h_bond_backmap_cases"
+    )
+    assert rows_by_id["h_bond_backmap_evidence_surface"]["root_cause_tags"] == [
+        "operator_receipts_required",
+        "operator_handoff_required",
+    ]
     assert rows_by_id["gpcr_hard_decoy_evidence_surface"]["contract_pass"] is False
+
+
+def test_science_evidence_surface_seed_cli_can_write_only_h_bond(
+    tmp_path: Path,
+) -> None:
+    surface_dir = tmp_path / "surface"
+
+    assert (
+        module.main(
+            [
+                "--surface-dir",
+                str(surface_dir),
+                "--repo-root",
+                str(REPO_ROOT),
+                "--family",
+                "h_bond_backmap",
+            ]
+        )
+        == 0
+    )
+
+    h_bond_path = surface_dir / "h_bond_backmap_evidence_surface.json"
+    gpcr_path = surface_dir / "gpcr_hard_decoy_evidence_surface.json"
+    assert h_bond_path.exists()
+    assert not gpcr_path.exists()
+    h_bond_payload = json.loads(h_bond_path.read_text(encoding="utf-8"))
+    assert h_bond_payload["first_blocked_target"] == (
+        "operator_attached_h_bond_backmap_cases"
+    )

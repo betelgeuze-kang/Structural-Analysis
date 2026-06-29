@@ -39,6 +39,17 @@ def test_h_bond_backmap_operator_intake_packet_exposes_required_slots() -> None:
     assert packet["current_surface_status"]["status"] == "locked"
     assert packet["current_surface_status"]["locked"] is True
     assert packet["current_surface_status"]["blocker_count"] == 2
+    assert packet["current_surface_status"]["first_blocked_target"] == (
+        "operator_attached_h_bond_backmap_cases"
+    )
+    assert packet["current_surface_status"]["root_cause_tags"] == [
+        "operator_receipts_required",
+        "operator_handoff_required",
+    ]
+    assert packet["current_surface_status"]["operator_evidence_gap_count"] == 3
+    assert packet["current_surface_status"]["first_operator_evidence_gap"][
+        "slot_id"
+    ] == "operator_attached_h_bond_backmap_cases"
     assert packet["current_surface_status"]["required_receipts"] == [
         "operator_attached_h_bond_backmap_cases",
         "contact_persistence_or_backmap_accuracy_rows",

@@ -506,7 +506,7 @@
       "state": "blocked",
       "summary": {
         "claim_locked": true,
-        "first_blocked_target": "",
+        "first_blocked_target": "operator_attached_h_bond_backmap_cases",
         "operator_intake_packet_status": "ready_for_operator_input",
         "operator_intake_required_slot_count": 3,
         "reason_code": "ERR_H_BOND_BACKMAP_EVIDENCE_LOCKED",
@@ -515,7 +515,10 @@
           "contact_persistence_or_backmap_accuracy_rows",
           "reviewer_reproduction_command"
         ],
-        "root_cause_tags": [],
+        "root_cause_tags": [
+          "operator_receipts_required",
+          "operator_handoff_required"
+        ],
         "status": "locked"
       },
       "title": "H-bond backmap evidence"
@@ -949,12 +952,12 @@
   "contract_pass": true,
   "engine_version": "structural-optimization-workbench@1.0.0",
   "first_blocked_target": "",
-  "generated_at": "2026-06-29T20:16:16.451958+00:00",
+  "generated_at": "2026-06-29T20:42:44.252974+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.json": "sha256:6b7cd2c11db33687827b0cbef22e48c051f7edf552c45e433648ac11f1a2513e",
     "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_intake_packet.md": "sha256:beb648a879262dbf52294fb7a9df05ffe59f20aa9c5d32d2a4ae0d06511dc496",
-    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:88a46a6021d48c75a09db6f337fcfe001a8bc07a11038c0e0275b67440bba91e",
-    "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:f9768ba7b15f029e3e917c55755f3c79432cd31b9c651b315ee8ce29ae4f193a",
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_product_report.json": "sha256:7d47093ce052cf344fccdfddd90991c75b1d85456d0bce355a0fdb25698d2c9e",
+    "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.json": "sha256:9621d05ff0cf781897321f8b5000cd4620c88972b98c7c852f795ab171abeb3b",
     "implementation/phase1/release_evidence/productization/h_bond_backmap_operator_intake_packet.md": "sha256:4e8a44624068cda8110c2986014663a2bddb61333cc5e81d90e77d8477d0401e",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_contract.json": "sha256:67ffef9e9778c2a26e5cf956f7e05870eced73a62b85f4335f458baecf2f474c",
     "implementation/phase1/release_evidence/productization/pocketmd_lite_delivery_handoff.json": "sha256:18cfed4da22bf244dc0d3636f0c03251ed369b610bc0799aaf0a962b361349df",
@@ -967,8 +970,8 @@
     "implementation/phase1/release_evidence/productization/public_benchmark_source_of_truth.json": "sha256:1ec0c43726a583e4f1b18d5cb2395bcb457f95f1f2e67f32ff15d320925697af",
     "implementation/phase1/release_evidence/surface/element_material_breadth_gate_report.json": "sha256:3ad291964704d37308ee6c26a12850ec1ae553508ebff9400b86feade77adaae",
     "implementation/phase1/release_evidence/surface/general_fe_contact_benchmark_gate_report.json": "sha256:293224d97f31456adcf5595e5eaff4d67d4efd1e199f445417af4833e51deb59",
-    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:bc17d66d0ce6cc29849ea242d05ea1bef4d4ff8e3a19655d6db3587becd41a79",
-    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:81fd5c2bfb26d3809f1bc74ff13a518df61ab94a44fbb6dbdea4c5d408d4ce33",
+    "implementation/phase1/release_evidence/surface/gpcr_hard_decoy_evidence_surface.json": "sha256:9bb6aff82fe10766365742354fd3075a1863f7622a08ebbdfef2bbe0393e3b00",
+    "implementation/phase1/release_evidence/surface/h_bond_backmap_evidence_surface.json": "sha256:0d57c89df5c33d8fba0557d7f8cf421c301ed4bfe754a95b892df3abecaca0ed",
     "implementation/phase1/release_evidence/surface/material_constitutive_gate_report.json": "sha256:d7fe932f9a712a36629b82fad7a0b55ed49d4375a844072f16ee9e506dbdafbf",
     "implementation/phase1/release_evidence/surface/pocketmd_lite_science_product_surface.json": "sha256:01c4c36291834cb367a652a4bfcadb8417441fc7d4462e227bc8c7951dbc9676",
     "implementation/phase1/release_evidence/surface/solver_breadth_report.json": "sha256:93be1f36f2cf58a89268bb4122e0b8fee805ccdb55a583731fd87fffca778910",
@@ -997,7 +1000,7 @@
   "reused_evidence": false,
   "root_cause_tags": [],
   "schema_version": "product-capabilities-surface.v1",
-  "source_commit_sha": "e3c761aaff68420f16976b09a44cdf88c8a26fd8",
+  "source_commit_sha": "e956f47bb5ee90d67c328690bd3fca6c92a9b9ce",
   "status": "ready",
   "summary_line": "Product capabilities surface: READY | capabilities=5 | ready=1 | blocked=4",
   "surface_id": "product_capabilities_surface",
