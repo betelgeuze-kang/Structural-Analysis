@@ -1,10 +1,20 @@
 {
   "blockers": [
-    "drd2_htr2a_oprm1_operator_values_required",
-    "gpcr_hard_decoy_materializer_not_run_on_real_values",
-    "broad_gpcr_family_claim_locked"
+    "DRD2:ranking_pr_auc_ci_low_required",
+    "DRD2:top20_hit_rate_required",
+    "DRD2:decoys_above_positive_count_required",
+    "DRD2:positive_out_anchored_by_top_decoys_required",
+    "HTR2A:ranking_pr_auc_ci_low_required",
+    "HTR2A:top20_hit_rate_required",
+    "HTR2A:decoys_above_positive_count_required",
+    "HTR2A:positive_out_anchored_by_top_decoys_required",
+    "OPRM1:ranking_pr_auc_ci_low_required",
+    "OPRM1:top20_hit_rate_required",
+    "OPRM1:decoys_above_positive_count_required",
+    "OPRM1:positive_out_anchored_by_top_decoys_required"
   ],
-  "claim_boundary": "This is a release-cockpit science evidence surface seed. It makes the blocked science claim visible to PM routing, but it does not attach authoritative experimental receipts or promote a release claim.",
+  "broad_gpcr_family_claim_safe": false,
+  "claim_boundary": "This GPCR evidence surface mirrors the hard-decoy suite report for PM routing. Broad GPCR claims stay locked until every required target row passes the numeric exit criteria.",
   "claim_locked": true,
   "contract_pass": false,
   "engine_version": "structural-optimization-workbench@1.0.0",
@@ -14,25 +24,25 @@
     "ranking_pr_auc_ci_low_min": 0.45,
     "top20_hit_rate_min": 0.2
   },
-  "generated_at": "2026-06-29T15:11:41.375761+00:00",
+  "first_blocked_target": "DRD2",
+  "generated_at": "2026-06-29T15:19:36.278968+00:00",
   "input_checksums": {
-    "scripts/build_science_evidence_surface_seeds.py": "sha256:6dbb5a919d0d86c412c59b63af167cf5408bbf3a56e87f68b69962f17dbabddb"
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json": "sha256:0b12c0a0f0ba8b0138b4d295427e651f43e53a4d7d97b888120bd23bdf350287",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:5a4335894ed448e419027bf8646d2fc3ae542f46b7ed8016d538974d98360b05"
   },
   "locked": true,
-  "next_actions": [
-    "fill_drd2_htr2a_oprm1_operator_template_values",
-    "run_gpcr_hard_decoy_materializer",
-    "regenerate_product_gpcr_hard_decoy_suite_report",
-    "regenerate_pm_release_gate_report"
-  ],
   "reason_code": "ERR_BROAD_GPCR_CLAIM_LOCKED",
-  "reuse_policy": "locked_science_evidence_surface_seed_from_goal_contract",
+  "reuse_policy": "gpcr_hard_decoy_evidence_surface_from_suite_report",
   "reused_evidence": false,
-  "schema_version": "science-evidence-surface-seed.v1",
+  "root_cause_tags": [
+    "operator_values_required"
+  ],
+  "schema_version": "gpcr-hard-decoy-evidence-surface.v1",
   "science_surface_family": "gpcr",
-  "source_commit_sha": "fc19614c10cd3124f317684be8288f30c3acf5dc",
+  "source_commit_sha": "c808ffd2168aff637dd09378a93f5f0e876aef36",
   "status": "locked",
-  "summary_line": "GPCR hard-decoy evidence surface: LOCKED | DRD2/HTR2A/OPRM1 numeric criteria missing",
+  "suite_report": "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_suite_report.json",
+  "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",
   "surface_id": "gpcr_hard_decoy_evidence_surface",
   "surface_scope": "broad_gpcr_hard_decoy",
   "target_families": [

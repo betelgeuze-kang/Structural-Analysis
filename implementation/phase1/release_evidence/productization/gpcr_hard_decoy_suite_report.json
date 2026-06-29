@@ -1,0 +1,117 @@
+{
+  "blockers": [
+    "DRD2:ranking_pr_auc_ci_low_required",
+    "DRD2:top20_hit_rate_required",
+    "DRD2:decoys_above_positive_count_required",
+    "DRD2:positive_out_anchored_by_top_decoys_required",
+    "HTR2A:ranking_pr_auc_ci_low_required",
+    "HTR2A:top20_hit_rate_required",
+    "HTR2A:decoys_above_positive_count_required",
+    "HTR2A:positive_out_anchored_by_top_decoys_required",
+    "OPRM1:ranking_pr_auc_ci_low_required",
+    "OPRM1:top20_hit_rate_required",
+    "OPRM1:decoys_above_positive_count_required",
+    "OPRM1:positive_out_anchored_by_top_decoys_required"
+  ],
+  "broad_gpcr_family_claim_safe": false,
+  "claim_boundary": "This report evaluates operator-attached DRD2/HTR2A/OPRM1 hard-decoy metrics against the Phase 3 exit criteria. It does not infer target activity, generate docking results, or unlock broad GPCR claims without all required numeric receipts.",
+  "contract_pass": false,
+  "engine_version": "structural-optimization-workbench@1.0.0",
+  "exit_criteria": {
+    "decoys_above_positive_count_max": 0,
+    "positive_out_anchored_by_top_decoys_allowed": false,
+    "ranking_pr_auc_ci_low_min": 0.45,
+    "top20_hit_rate_min": 0.2
+  },
+  "first_blocked_target": "DRD2",
+  "generated_at": "2026-06-29T15:19:36.276728+00:00",
+  "input_checksums": {
+    "implementation/phase1/release_evidence/productization/gpcr_hard_decoy_operator_template.json": "sha256:1d1cf9fbbeac7a55ea0ab43180eef1291cc254a2c9ffbca44bb3dc08a4e48144",
+    "scripts/materialize_gpcr_hard_decoy_suite_report.py": "sha256:5a4335894ed448e419027bf8646d2fc3ae542f46b7ed8016d538974d98360b05"
+  },
+  "reuse_policy": "gpcr_hard_decoy_suite_report_materialized_from_operator_metrics",
+  "reused_evidence": false,
+  "root_cause_tags": [
+    "operator_values_required"
+  ],
+  "schema_version": "gpcr-hard-decoy-suite-report.v1",
+  "source_commit_sha": "c808ffd2168aff637dd09378a93f5f0e876aef36",
+  "status": "locked",
+  "summary_line": "GPCR hard-decoy suite: LOCKED | first_blocked_target=DRD2 | root_cause=operator_values_required",
+  "target_count": 3,
+  "target_pass_count": 0,
+  "target_rows": [
+    {
+      "blockers": [
+        "DRD2:ranking_pr_auc_ci_low_required",
+        "DRD2:top20_hit_rate_required",
+        "DRD2:decoys_above_positive_count_required",
+        "DRD2:positive_out_anchored_by_top_decoys_required"
+      ],
+      "contract_pass": false,
+      "criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "status": "blocked",
+      "target_id": "DRD2",
+      "top20_hit_rate": null
+    },
+    {
+      "blockers": [
+        "HTR2A:ranking_pr_auc_ci_low_required",
+        "HTR2A:top20_hit_rate_required",
+        "HTR2A:decoys_above_positive_count_required",
+        "HTR2A:positive_out_anchored_by_top_decoys_required"
+      ],
+      "contract_pass": false,
+      "criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "status": "blocked",
+      "target_id": "HTR2A",
+      "top20_hit_rate": null
+    },
+    {
+      "blockers": [
+        "OPRM1:ranking_pr_auc_ci_low_required",
+        "OPRM1:top20_hit_rate_required",
+        "OPRM1:decoys_above_positive_count_required",
+        "OPRM1:positive_out_anchored_by_top_decoys_required"
+      ],
+      "contract_pass": false,
+      "criteria": {
+        "decoys_above_positive_count_max": 0,
+        "positive_out_anchored_by_top_decoys_allowed": false,
+        "ranking_pr_auc_ci_low_min": 0.45,
+        "top20_hit_rate_min": 0.2
+      },
+      "decoys_above_positive_count": null,
+      "positive_out_anchored_by_top_decoys": null,
+      "ranking_pr_auc_ci_low": null,
+      "root_cause_tags": [
+        "operator_values_required"
+      ],
+      "status": "blocked",
+      "target_id": "OPRM1",
+      "top20_hit_rate": null
+    }
+  ]
+}
